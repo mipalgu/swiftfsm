@@ -17,9 +17,14 @@
 public protocol Transition {
     
     /**
+     *  The state which we are transitioning from.
+     */
+    var sourceState: State { get }
+    
+    /**
      *  The state which we are transitioning to.
      */
-    var state: State { get }
+    var targetState: State { get }
     
     /**
      *  Do we meet all of the conditions to transition?
