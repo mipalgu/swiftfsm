@@ -8,7 +8,7 @@
 
 public class PongState: EmptyState {
     
-    public func onEntry() {
+    public override func onEntry() {
         print("pong\n")
     }
     

@@ -8,7 +8,7 @@
 
 public class PingState: EmptyState {
     
-    public func onEntry() {
+    public override func onEntry() {
         print("ping\n")
     }
     
