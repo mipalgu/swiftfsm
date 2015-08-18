@@ -20,28 +20,12 @@ public class FSM: FSMType {
         self.ringlet = ringlet
     }
     
-    /*private let states: [State: [Transition]]
-    
-    public init(
-        initialState: State,
-        ringlet: Ringlet,
-        states: [State: [Transition]]
-    ) {
-        self.currentState = initialState
-        self.initialState = initialState
-        self.ringlet = ringlet
-        self.states = states
-    }*/
-    
     public func exit() {
         self.currentState = ExitState(name: "_exit")
     }
     
     public func next() {
-        /*self.currentState = self.ringlet.execute(
-            self.currentState,
-            self.states[self.currentState]
-        )*/
+        self.currentState = self.ringlet.execute(self.currentState)
     }
     
     public func restart() {
