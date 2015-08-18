@@ -12,13 +12,19 @@
 public class EmptyState: State {
     
     private var _name: String
+    private var _transitions: [Transition]
     
     public var name: String {
         return self._name
     }
     
-    public init(name: String) {
+    public var transitions: [Transition] {
+        return self._transitions
+    }
+    
+    public init(name: String, transitions: [Transition] = []) {
         self._name = name
+        self._transitions = transitions
     }
     
     public func onEntry() -> Void {}

@@ -24,6 +24,11 @@ public protocol State {
     var name: String { get }
     
     /**
+     *  All transitions that are possible for the state.
+     */
+    var transitions: [Transition] { get }
+    
+    /**
      *  This method is called when the state is first transitioned into.
      */
     func onEntry() -> Void
