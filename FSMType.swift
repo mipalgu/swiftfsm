@@ -23,6 +23,11 @@ public protocol FSMType {
     func restart() -> Void
     
     /**
+     *  Resume the finite state machine after it has been suspended.
+     */
+    func resume() -> Void
+    
+    /**
      *  Suspend the finite state machine.
      */
     func suspend() -> Void
