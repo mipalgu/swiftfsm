@@ -8,18 +8,16 @@
 
 public class Scheduler {
     
-    private static let _scheduler: Scheduler = Scheduler()
-    
-    private var machines: [FSMType] = []
+    private static var machines: [FSMType] = []
     
     public func addMachine(machine: FSMType) -> Void {
-        Scheduler._scheduler.machines.append(machine)
+        Scheduler.machines.append(machine)
     }
     
     public func run() -> Void {
-        for var i: Int = 0; i < Scheduler._scheduler.machines.count; i++ {
-            Scheduler._scheduler.machines[i].next()
-            if (i >= Scheduler._scheduler.machines.count - 1) {
+        for var i: Int = 0; i < Scheduler.machines.count; i++ {
+            Scheduler.machines[i].next()
+            if (i >= Scheduler.machines.count - 1) {
                 i = -1
             }
         }
