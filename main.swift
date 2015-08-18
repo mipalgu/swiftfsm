@@ -25,7 +25,7 @@ states[1].attachTransition(transitions[1])
 
 var fsm: FSMType = FSM(
     initialState: states[0],
-    ringlet: StandardRinglet(),
+    ringlet: StandardRinglet()
 )
 
 let scheduler: Scheduler = Scheduler()
