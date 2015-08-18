@@ -14,6 +14,8 @@ public class FSM: FSMType {
     
     private let ringlet: Ringlet
     
+    private var suspendedState: State?
+    
     public init(initialState: State, ringlet: Ringlet) {
         self.initialState = initialState
         self.currentState = initialState
@@ -25,6 +27,9 @@ public class FSM: FSMType {
     }
     
     public func next() {
+        if (self.suspendedState != nil) {
+            return
+        }
         self.currentState = self.ringlet.execute(self.currentState)
     }
     
@@ -32,7 +37,16 @@ public class FSM: FSMType {
         self.currentState = self.initialState
     }
     
+    public func resume() {
+        if (self.suspendedState != nil) {
+            return
+        }
+        self.currentState = self.suspendedState!
+        self.suspendedState = nil
+    }
+    
     public func suspend() {
+        self.suspendedState = self.currentState
         self.currentState = SuspendState(name: "_suspend")
     }
     
