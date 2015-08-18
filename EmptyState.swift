@@ -27,6 +27,10 @@ public class EmptyState: State {
         self._transitions = transitions
     }
     
+    public func attachTransition(transition: Transition) {
+        self._transitions.append(transition)
+    }
+    
     public func onEntry() -> Void {}
     public func main() -> Void {}
     public func onExit() -> Void {}
