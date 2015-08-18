@@ -26,7 +26,7 @@ public class StandardRinglet: Ringlet {
      *
      *  Returns a state representing the next state to execute.
      */
-    public func execute(state: State, transitions: [Transition]) -> State {
+    public func execute(state: State) -> State {
         // Call onEntry if the state has just been transitioned into.
         if (false == self.isOldState(state)) {
             state.onEntry()
@@ -34,7 +34,7 @@ public class StandardRinglet: Ringlet {
         // Remember that we have already executed this state.
         self.oldState = state
         // Can we transition to another state?
-        let s: State? = self.transition(transitions)
+        let s: State? = self.transition(state.transitions)
         if (s != nil) {
             // Yes - Exit state and return the new state.
             state.onExit()
