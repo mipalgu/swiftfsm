@@ -38,7 +38,7 @@ public class FSM: FSMType {
     }
     
     public func resume() {
-        if (self.suspendedState != nil) {
+        if (self.suspendedState == nil) {
             return
         }
         self.currentState = self.suspendedState!
