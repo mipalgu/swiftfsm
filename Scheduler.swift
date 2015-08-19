@@ -18,6 +18,8 @@ public class Scheduler {
         }
     }
     
+    public init() {}
+    
     public func addMachine(machine: FSMType) -> Void {
         self.machines.append(machine)
     }

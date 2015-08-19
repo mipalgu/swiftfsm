@@ -21,6 +21,8 @@ public class StandardRinglet: Ringlet {
      */
     private var oldState: State?
     
+    public init() {}
+    
     /**
      *  Execute the ringlet.
      *

@@ -7,6 +7,7 @@
 //
 
 import Darwin
+import Swift_FSM
 
 print("Hello, when I grow up, I will be a full-blown state machine scheduler!")
     
@@ -23,11 +24,11 @@ var transitions: [Transition] = [
 states[0].attachTransition(transitions[0])
 states[1].attachTransition(transitions[1])
     
-var fsm: FSMType = FSM(
+let fsm: FSMType = FSM(
     initialState: states[0],
     ringlet: StandardRinglet()
 )
-    
+
 let scheduler: Scheduler = Scheduler()
 scheduler.addMachine(fsm)
 scheduler.run()
