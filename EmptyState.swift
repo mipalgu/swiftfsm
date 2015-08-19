@@ -11,24 +11,17 @@
  */
 public class EmptyState: State {
     
-    private var _name: String
-    private var _transitions: [Transition]
+    public private(set) var name: String
     
-    public var name: String {
-        return self._name
-    }
-    
-    public var transitions: [Transition] {
-        return self._transitions
-    }
+    public private(set) var transitions: [Transition]
     
     public init(name: String, transitions: [Transition] = []) {
-        self._name = name
-        self._transitions = transitions
+        self.name = name
+        self.transitions = transitions
     }
     
     public func attachTransition(transition: Transition) {
-        self._transitions.append(transition)
+        self.transitions.append(transition)
     }
     
     public func onEntry() -> Void {}
