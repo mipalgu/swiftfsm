@@ -8,20 +8,13 @@
 
 public class PersistentTransition: Transition {
     
-    private let _sourceState: State
-    private let _targetState: State
+    public private(set) var sourceState: State
     
-    public var sourceState: State {
-        return _sourceState
-    }
-    
-    public var targetState: State {
-        return _targetState
-    }
+    public private(set) var targetState: State
     
     public init(sourceState: State, targetState: State) {
-        self._sourceState = sourceState
-        self._targetState = targetState
+        self.sourceState = sourceState
+        self.targetState = targetState
     }
     
     public func canTransition() -> Bool {
