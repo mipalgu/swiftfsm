@@ -10,14 +10,22 @@ public class Scheduler {
     
     private static var machines: [FSMType] = []
     
+    private(set) var machines: [FSMType] {
+        get {
+            return Scheduler.machines
+        } set {
+            Scheduler.machines = newValue
+        }
+    }
+    
     public func addMachine(machine: FSMType) -> Void {
-        Scheduler.machines.append(machine)
+        self.machines.append(machine)
     }
     
     public func run() -> Void {
-        for var i: Int = 0; i < Scheduler.machines.count; i++ {
-            Scheduler.machines[i].next()
-            if (i >= Scheduler.machines.count - 1) {
+        for var i: Int = 0; i < self.machines.count; i++ {
+            self.machines[i].next()
+            if (i >= self.machines.count - 1) {
                 i = -1
             }
         }
