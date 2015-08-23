@@ -8,6 +8,9 @@
 
 public protocol StateExecuter {
     
-    mutating func next() -> State
+    /**
+     *  Execute the next state.
+     */
+    mutating func next()
     
 }

@@ -26,6 +26,10 @@ public class FSM: FiniteStateMachine {
         self.currentState = ExitState(name: "_exit")
     }
     
+    public func isSuspended() -> Bool {
+        return self.suspendedState == nil
+    }
+    
     public func next() {
         if (self.suspendedState != nil) {
             return
