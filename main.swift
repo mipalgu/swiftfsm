@@ -7,7 +7,7 @@
 //
 
 import Darwin
-import SwiftFSM
+import Swift_FSM
 
 print("Hello, when I grow up, I will be a full-blown state machine scheduler!")
     
@@ -17,8 +17,8 @@ var states: [State] = [
 ]
     
 var transitions: [Transition] = [
-    PersistentTransition(sourceState: states[0], targetState: states[1]),
-    PersistentTransition(sourceState: states[1], targetState: states[0])
+    EmptyTransition(sourceState: states[0], targetState: states[1]),
+    EmptyTransition(sourceState: states[1], targetState: states[0])
 ]
     
 states[0].attachTransition(transitions[0])

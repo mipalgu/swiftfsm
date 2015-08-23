@@ -6,6 +6,8 @@
 //  Copyright © 2015 MiPal. All rights reserved.
 //
 
+import Swift_FSM
+
 public class PingState: EmptyState {
     
     public override func onEntry() {

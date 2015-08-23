@@ -6,7 +6,8 @@
 //  Copyright © 2015 MiPal. All rights reserved.
 //
 
-import SwiftFSM
+import Darwin
+import Swift_FSM
 
 protocol MachineLoader {
     
