@@ -8,7 +8,7 @@
 
 public protocol Transitionable {
     
-    var transitions: [Transition] { get }
+    var transitions: [Transition] { get set }
     
     mutating func addTransition(transition: Transition) -> Void
     

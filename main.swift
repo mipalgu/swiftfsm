@@ -17,12 +17,12 @@ var states: [State] = [
 ]
     
 var transitions: [Transition] = [
-    EmptyTransition(sourceState: states[0], targetState: states[1]),
-    EmptyTransition(sourceState: states[1], targetState: states[0])
+    EmptyTransition(source: states[0], target: states[1]),
+    EmptyTransition(source: states[1], target: states[0])
 ]
     
-states[0].attachTransition(transitions[0])
-states[1].attachTransition(transitions[1])
+states[0].addTransition(transitions[0])
+states[1].addTransition(transitions[1])
     
 let fsm: FSMType = FSM(
     initialState: states[0],

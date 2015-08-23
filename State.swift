@@ -16,12 +16,14 @@
  *  are presented below are each executed independently within the ringlet.  See
  *  StandardRinglet for the standard order that these methods are executed in.
  */
-public protocol State: Transitionable {
+public protocol State {
     
     /**
      *  A label in plain english for the state - must be unique per state.
      */
     var name: String { get }
+    
+    var transitions: [Transition] { get }
     
     /**
      *  This method is called when the state is first transitioned into.
