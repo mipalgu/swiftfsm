@@ -10,4 +10,9 @@
  *  A common interface for the operations that finite state machines can
  *  execute.
  */
-public protocol FiniteStateMachine: Restartable, StateExecuter, Suspendable {}
+public protocol FiniteStateMachine:
+    Exitable,
+    Restartable,
+    StateExecuter,
+    Suspendable
+{}

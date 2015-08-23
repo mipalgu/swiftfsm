@@ -22,8 +22,13 @@ public class FSM: FiniteStateMachine {
         self.ringlet = ringlet
     }
     
+    public func hasFinished() -> Bool {
+        return !self.isSuspended() && 0 == self.currentState.transitions.count
+    }
+    
     public func exit() {
         self.currentState = EmptyState(name: "_exit")
+        self.suspendedState = nil
     }
     
     public func isSuspended() -> Bool {
