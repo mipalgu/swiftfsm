@@ -70,7 +70,7 @@ public class StandardRinglet: Ringlet {
                 continue
             }
             // Found transition
-            return t.targetState
+            return t.target
         }
         // No transitions possible
         return nil

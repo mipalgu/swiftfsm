@@ -8,13 +8,13 @@
 
 public class EmptyTransition: Transition {
     
-    public private(set) var sourceState: State
+    public let source: State
     
-    public private(set) var targetState: State
+    public let target: State
     
-    public init(sourceState: State, targetState: State) {
-        self.sourceState = sourceState
-        self.targetState = targetState
+    public init(source: State, target: State) {
+        self.source = source
+        self.target = target
     }
     
     public func canTransition() -> Bool {
