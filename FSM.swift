@@ -23,7 +23,7 @@ public class FSM: FiniteStateMachine {
     }
     
     public func exit() {
-        self.currentState = ExitState(name: "_exit")
+        self.currentState = EmptyState(name: "_exit")
     }
     
     public func isSuspended() -> Bool {
@@ -51,7 +51,7 @@ public class FSM: FiniteStateMachine {
     
     public func suspend() {
         self.suspendedState = self.currentState
-        self.currentState = SuspendState(name: "_suspend")
+        self.currentState = EmptyState(name: "_suspend")
     }
     
 }
