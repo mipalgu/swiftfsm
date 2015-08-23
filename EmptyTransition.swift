@@ -6,7 +6,7 @@
 //  Copyright © 2015 MiPal. All rights reserved.
 //
 
-public class PersistentTransition: Transition {
+public class EmptyTransition: Transition {
     
     public private(set) var sourceState: State
     

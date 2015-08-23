@@ -7,7 +7,7 @@
 //
 
 import Darwin
-import Swift_FSM
+import SwiftFSM
 
 print("Hello, when I grow up, I will be a full-blown state machine scheduler!")
     

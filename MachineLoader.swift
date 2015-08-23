@@ -6,7 +6,7 @@
 //  Copyright © 2015 MiPal. All rights reserved.
 //
 
-import Swift_FSM
+import SwiftFSM
 
 protocol MachineLoader {
     
