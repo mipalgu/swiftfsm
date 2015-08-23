@@ -12,8 +12,8 @@ import Swift_FSM
 print("Hello, when I grow up, I will be a full-blown state machine scheduler!")
     
 var states: [State] = [
-    PingState(name: "ping"),
-    PongState(name: "pong")
+    CallbackState(name: "ping", onEntry: {print("ping")}),
+    CallbackState(name: "pong", onEntry: {print("pong")})
 ]
     
 var transitions: [Transition] = [

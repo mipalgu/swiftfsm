@@ -6,7 +6,7 @@
 //  Copyright © 2015 MiPal. All rights reserved.
 //
 
-public struct CallbackState: State {
+public class CallbackState: State {
     
     public private(set) var name: String
     
@@ -30,7 +30,7 @@ public struct CallbackState: State {
         self._onExit = onExit
     }
     
-    public mutating func addTransition(transition: Transition) {
+    public func addTransition(transition: Transition) {
         self.transitions.append(transition)
     }
     
