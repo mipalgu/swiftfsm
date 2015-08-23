@@ -39,6 +39,7 @@ public class FSM: FiniteStateMachine {
     
     public func restart() {
         self.currentState = self.initialState
+        self.suspendedState = nil
     }
     
     public func resume() {
