@@ -27,7 +27,7 @@ public class FSM: FiniteStateMachine {
     }
     
     public func isSuspended() -> Bool {
-        return self.suspendedState == nil
+        return self.suspendedState != nil
     }
     
     public func next() {
