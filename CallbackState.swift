@@ -10,7 +10,7 @@ public struct CallbackState: State {
     
     public private(set) var name: String
     
-    public private(set) var transitions: [Transition]
+    public var transitions: [Transition]
     
     public let _onEntry: () -> Void
     public let _main: () -> Void

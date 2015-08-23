@@ -10,7 +10,7 @@
  *  A common interface for the operations that finite state machines can
  *  execute.
  */
-public protocol FSMType {
+public protocol FiniteStateMachine {
     
     /**
      *  Execute the next state.

@@ -8,9 +8,9 @@
 
 public class Scheduler {
     
-    private static var machines: [FSMType] = []
+    private static var machines: [FiniteStateMachine] = []
     
-    private(set) var machines: [FSMType] {
+    private(set) var machines: [FiniteStateMachine] {
         get {
             return Scheduler.machines
         } set {
@@ -20,7 +20,7 @@ public class Scheduler {
     
     public init() {}
     
-    public func addMachine(machine: FSMType) -> Void {
+    public func addMachine(machine: FiniteStateMachine) -> Void {
         self.machines.append(machine)
     }
     

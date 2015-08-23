@@ -6,7 +6,7 @@
 //  Copyright © 2015 MiPal. All rights reserved.
 //
 
-public class FSM: FSMType {
+public class FSM: FiniteStateMachine {
     
     private let initialState: State
     

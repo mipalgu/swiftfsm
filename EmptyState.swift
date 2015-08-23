@@ -13,7 +13,7 @@ public class EmptyState: State {
     
     public private(set) var name: String
     
-    public private(set) var transitions: [Transition]
+    public var transitions: [Transition]
     
     public init(name: String, transitions: [Transition] = []) {
         self.name = name

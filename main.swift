@@ -24,7 +24,7 @@ var transitions: [Transition] = [
 states[0].addTransition(transitions[0])
 states[1].addTransition(transitions[1])
     
-let fsm: FSMType = FSM(
+let fsm: FiniteStateMachine = FSM(
     initialState: states[0],
     ringlet: StandardRinglet()
 )
