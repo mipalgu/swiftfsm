@@ -10,6 +10,6 @@ public protocol Transitionable {
     
     var transitions: [Transition] { get }
     
-    func attachTransition(transition: Transition) -> Void
+    mutating func addTransition(transition: Transition) -> Void
     
 }

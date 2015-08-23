@@ -24,13 +24,6 @@ public protocol State: Transitionable {
     var name: String { get }
     
     /**
-     *  All transitions that are possible for the state.
-     */
-    var transitions: [Transition] { get }
-    
-    func attachTransition(transition: Transition) -> Void
-    
-    /**
      *  This method is called when the state is first transitioned into.
      */
     func onEntry() -> Void

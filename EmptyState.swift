@@ -20,7 +20,7 @@ public class EmptyState: State {
         self.transitions = transitions
     }
     
-    public func attachTransition(transition: Transition) {
+    public func addTransition(transition: Transition) {
         self.transitions.append(transition)
     }
     
