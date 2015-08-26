@@ -6,7 +6,7 @@
 //  Copyright © 2015 MiPal. All rights reserved.
 //
 
-public class DLMachineLoader: MachineLoader {
+public class LibraryMachineLoader: MachineLoader {
     
     public func load(name: String) -> FiniteStateMachine? {
         return nil
