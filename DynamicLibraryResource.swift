@@ -8,12 +8,9 @@
 
 public class DynamicLibraryResource: LibraryResource {
     
-    public let path: String
-    
     private let handler: UnsafeMutablePointer<Void>
     
-    public init(path: String, handler: UnsafeMutablePointer<Void>) {
-        self.path = path
+    public init(handler: UnsafeMutablePointer<Void>) {
         self.handler = handler
     }
     
