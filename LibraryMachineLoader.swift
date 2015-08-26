@@ -6,6 +6,8 @@
 //  Copyright © 2015 MiPal. All rights reserved.
 //
 
+import Swift_FSM
+
 public class LibraryMachineLoader: MachineLoader {
     
     public func load(name: String) -> FiniteStateMachine? {
