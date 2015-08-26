@@ -10,8 +10,25 @@ import Swift_FSM
 
 public class LibraryMachineLoader: MachineLoader {
     
-    public func load(name: String) -> FiniteStateMachine? {
-        return nil
+    private let manager: LibraryManager
+    
+    public init(manager: LibraryManager) {
+        self.manager = manager
+    }
+    
+    public func load(path: String) -> FiniteStateMachine? {
+        let lib: LibraryResource? = self.manager.open(path)
+        if lib == nil {
+            return nil
+        }
+        let result: (UnsafeMutablePointer<Void>, String?) =
+            lib!.getSymbolPointer("start")
+        if (result.1 != nil) {
+            print(result.1)
+            return nil
+        }
+        let f: () -> FiniteStateMachine = result.0.memory as () -> FiniteStateMachine
+        return f()
     }
     
 }

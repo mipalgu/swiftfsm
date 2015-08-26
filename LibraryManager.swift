@@ -8,7 +8,7 @@
 
 public protocol LibraryManager {
     
-    func open(path: String) -> LibraryResource
+    func open(path: String) -> LibraryResource?
     func close(resource: LibraryResource)
     
 }
