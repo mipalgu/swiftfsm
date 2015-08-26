@@ -8,8 +8,9 @@
 
 public protocol LibraryResource {
     
-    func getSymbolPointer(symbol: String) -> UnsafeMutablePointer<Void>
-    func hasError() -> Bool
-    func getError() -> String?
+    func getSymbolPointer(symbol: String) -> (
+        UnsafeMutablePointer<Void>,
+        error: String?
+    )
 
 }
