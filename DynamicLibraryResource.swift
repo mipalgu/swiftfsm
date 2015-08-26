@@ -25,4 +25,12 @@ public class DynamicLibraryResource: LibraryResource {
         return (symbol, error: String.fromCString(dlerror()))
     }
     
+    public func close() -> (successful: Bool, error: String?) {
+        let result: CInt = dlclose(self.handler)
+        if (result == 0) {
+            return (successful: true, error: nil)
+        }
+        return (successful: false, error: String.fromCString(dlerror()))
+    }
+    
 }

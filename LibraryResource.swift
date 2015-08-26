@@ -13,6 +13,6 @@ public protocol LibraryResource {
         error: String?
     )
     
-    func close()
+    func close() -> (successful: Bool, error: String?)
 
 }
