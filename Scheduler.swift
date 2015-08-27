@@ -25,11 +25,13 @@ public class Scheduler {
     }
     
     public func run() -> Void {
-        for var i: Int = 0; i < self.machines.count; i++ {
+        // Just keep running and loop around when we reach the end of the array
+        for (
+            var i: Int = 0;
+            i < self.machines.count;
+            i = (i + 1) % self.machines.count
+        ) {
             self.machines[i].next()
-            if (i >= self.machines.count - 1) {
-                i = -1
-            }
         }
     }
     
