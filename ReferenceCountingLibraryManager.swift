@@ -8,13 +8,13 @@
 
 public class ReferenceCountingLibraryManager: LibraryCreator {
     
-    private static var libraries[String: UInt] = [:]
+    private static var libraries: [String: UInt] = [:]
     
-    private var libraries {
+    private var libraries: [String: UInt] {
         get {
-            return LibraryManager.libraries
+            return ReferenceCountingLibraryManager.libraries
         } set {
-            LibraryManager.libraries = newValue
+            ReferenceCountingLibraryManager.libraries = newValue
         }
     }
     
