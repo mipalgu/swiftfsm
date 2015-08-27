@@ -21,14 +21,15 @@ public class LibraryMachineLoader: MachineLoader {
         if lib == nil {
             return nil
         }
-        let result: (UnsafeMutablePointer<Void>, String?) =
+        let result: (symbol: UnsafeMutablePointer<Void>, error: String?) =
             lib!.getSymbolPointer("start")
-        if (result.1 != nil) {
-            print(result.1)
+        if (result.error != nil) {
+            print(result.error)
             return nil
         }
-        let f: () -> FiniteStateMachine = result.0.memory as () -> FiniteStateMachine
-        return f()
+        let f: UnsafeMutablePointer<() -> FiniteStateMachine> =
+            UnsafeMutablePointer<() -> FiniteStateMachine>(result.symbol)
+        return f.memory()
     }
     
 }
