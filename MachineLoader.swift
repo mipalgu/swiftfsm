@@ -9,7 +9,7 @@
 import Darwin
 import Swift_FSM
 
-protocol MachineLoader {
+public protocol MachineLoader {
     
     func load(path: String) -> [FiniteStateMachine]
     
