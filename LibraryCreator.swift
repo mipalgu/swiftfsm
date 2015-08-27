@@ -6,9 +6,8 @@
 //  Copyright © 2015 MiPal. All rights reserved.
 //
 
-public protocol LibraryManager {
+public protocol LibraryCreator {
     
     func open(path: String) -> LibraryResource?
-    func close(resource: LibraryResource)
     
 }
