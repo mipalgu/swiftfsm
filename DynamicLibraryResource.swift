@@ -9,9 +9,12 @@
 public class DynamicLibraryResource: LibraryResource {
     
     private let handler: UnsafeMutablePointer<Void>
+    public let path: String
     
-    public init(handler: UnsafeMutablePointer<Void>) {
+    
+    public init(handler: UnsafeMutablePointer<Void>, path: String) {
         self.handler = handler
+        self.path = path
     }
     
     public func getSymbolPointer(symbol: String) -> (

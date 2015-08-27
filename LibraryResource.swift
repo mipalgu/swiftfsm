@@ -7,6 +7,8 @@
 //
 
 public protocol LibraryResource {
+
+    var path: String { get }
     
     func getSymbolPointer(symbol: String) -> (
         UnsafeMutablePointer<Void>,
