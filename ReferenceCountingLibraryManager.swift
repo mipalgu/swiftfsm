@@ -37,7 +37,12 @@ public class ReferenceCountingLibraryManager: LibraryCreator {
     }
     
     public func close(library: LibraryResource) {
-        library.close()
+        let result = library.close()
+        if (false == result.successful) {
+            if (result.error != nil) {
+                print(result.error)
+            }
+        }
         if (self.libraries[library.path] == nil) {
             self.libraries[library.path] = 0
             return
