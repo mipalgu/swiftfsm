@@ -37,12 +37,15 @@ public class ReferenceCountingLibraryManager: LibraryCreator {
     }
     
     public func close(library: LibraryResource) {
+        // This should never happen.
         if (self.libraries[library.path] == nil) {
-            self.libraries[library.path] = 1
+            self.libraries[library.path] = 0
         }
+        // Decrement reference count.
         if (self.libraries[library.path]! > 0) {
             self.libraries[library.path]!--
         }
+        // Close if reference count reaches 0
         if (self.libraries[library.path] == 0) {
             self.closeLibrary(library)
         }
@@ -50,11 +53,13 @@ public class ReferenceCountingLibraryManager: LibraryCreator {
     
     private func closeLibrary(library: LibraryResource) {
         let result = library.close()
-        if (false == result.successful) {
-            if (result.error != nil) {
-                print(result.error)
-            }
+        if (result.successful) {
+            return
         }
+        if (result.error == nil) {
+            return
+        }
+        print(result.error)
     }
     
 }
