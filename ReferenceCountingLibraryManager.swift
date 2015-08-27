@@ -6,7 +6,7 @@
 //  Copyright © 2015 MiPal. All rights reserved.
 //
 
-public class LibraryManager: LibraryCreator {
+public class ReferenceCountingLibraryManager: LibraryCreator {
     
     private static var libraries[String: UInt] = [:]
     
