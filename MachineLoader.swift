@@ -11,6 +11,6 @@ import Swift_FSM
 
 protocol MachineLoader {
     
-    func load(path: String) -> FiniteStateMachine?
+    func load(path: String) -> [FiniteStateMachine]
     
 }

@@ -16,19 +16,19 @@ public class LibraryMachineLoader: MachineLoader {
         self.manager = manager
     }
     
-    public func load(path: String) -> FiniteStateMachine? {
+    public func load(path: String) -> [FiniteStateMachine] {
         let lib: LibraryResource? = self.manager.open(path)
         if lib == nil {
-            return nil
+            return []
         }
         let result: (symbol: UnsafeMutablePointer<Void>, error: String?) =
             lib!.getSymbolPointer("start")
         if (result.error != nil) {
             print(result.error)
-            return nil
+            return []
         }
-        let f: UnsafeMutablePointer<() -> FiniteStateMachine> =
-            UnsafeMutablePointer<() -> FiniteStateMachine>(result.symbol)
+        let f: UnsafeMutablePointer<() -> [FiniteStateMachine]> =
+            UnsafeMutablePointer<() -> [FiniteStateMachine]>(result.symbol)
         return f.memory()
     }
     
