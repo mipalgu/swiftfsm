@@ -18,14 +18,14 @@ public class DynamicLibraryResource: LibraryResource {
     }
     
     public func getSymbolPointer(symbol: String) -> (
-        UnsafeMutablePointer<Void>,
+        symbol: UnsafeMutablePointer<Void>,
         error: String?
     ) {
         let symbol: UnsafeMutablePointer<Void> = dlsym(self.handler, symbol)
         if (symbol != nil) {
             return (symbol, error: nil)
         }
-        return (symbol, error: String.fromCString(dlerror()))
+        return (symbol: symbol, error: String.fromCString(dlerror()))
     }
     
     public func close() -> (successful: Bool, error: String?) {
