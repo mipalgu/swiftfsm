@@ -67,19 +67,75 @@ public class LibraryMachineLoader: MachineLoader {
     }
     
     public func load(path: String) -> [FiniteStateMachine] {
+        if (path.characters.count < 1) {
+            return []
+        }
         let lib: LibraryResource? = self.creator.open(path)
         if lib == nil {
             return []
         }
+        let name: String = self.getDylibName(path)
         let result: (symbol: UnsafeMutablePointer<Void>, error: String?) =
-            lib!.getSymbolPointer("start")
+            lib!.getSymbolPointer(
+                "_TF\(name.characters.count)\(name)5startFT_GSaP9Swift_FSM18FiniteStateMachine__"
+            )
         if (result.error != nil) {
             print(result.error!)
             return []
         }
         let f: UnsafeMutablePointer<() -> [FiniteStateMachine]> =
             UnsafeMutablePointer<() -> [FiniteStateMachine]>(result.symbol)
+        if (f == nil) {
+            return []
+        }
+        print("memory: \(f.memory)")
         return f.memory()
+    }
+    
+    private func getDylibName(path: String) -> String {
+        let name: String = path.substringWithRange(
+            Range(
+                start: self.getIndexOfCharacterAfterLastOccurenceOfLib(path),
+                end: self.getIndexOfFirstCharacterBeforeExtension(path)
+            )
+        )
+        return name
+    }
+    
+    private func getIndexOfFirstCharacterBeforeExtension(
+        path: String
+    ) -> String.CharacterView.Index {
+        var occurence: String.CharacterView.Index = path.characters.endIndex
+        for index in path.characters.indices {
+            if (path[index] == ".") {
+                occurence = index
+            }
+        }
+        return occurence
+    }
+    
+    private func getIndexOfCharacterAfterLastOccurenceOfLib(
+        path: String
+    ) -> String.CharacterView.Index {
+        var i: Int = 0
+        var position: String.CharacterView.Index = path.characters.startIndex
+        let ext: String.CharacterView.Index = self.getIndexOfFirstCharacterBeforeExtension(path)
+        for index in path.characters.indices {
+            if (path.characters.count - i < 3 || index >= ext) {
+                return position
+            }
+            if ("lib" == path.substringWithRange(
+                    Range(
+                        start: index,
+                        end: index.successor().successor().successor()
+                    )
+                )
+            ) {
+                position = index.successor().successor().successor()
+            }
+            i++
+        }
+        return position
     }
     
 }
