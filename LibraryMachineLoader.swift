@@ -74,7 +74,7 @@ public class LibraryMachineLoader: MachineLoader {
         let result: (symbol: UnsafeMutablePointer<Void>, error: String?) =
             lib!.getSymbolPointer("start")
         if (result.error != nil) {
-            print(result.error)
+            print(result.error!)
             return []
         }
         let f: UnsafeMutablePointer<() -> [FiniteStateMachine]> =
