@@ -60,14 +60,14 @@ import Swift_FSM
 
 public class LibraryMachineLoader: MachineLoader {
     
-    public let manager: LibraryManager
+    public let creator: LibraryCreator
     
-    public init(manager: LibraryManager) {
-        self.manager = manager
+    public init(creator: LibraryCreator) {
+        self.creator = creator
     }
     
     public func load(path: String) -> [FiniteStateMachine] {
-        let lib: LibraryResource? = self.manager.open(path)
+        let lib: LibraryResource? = self.creator.open(path)
         if lib == nil {
             return []
         }

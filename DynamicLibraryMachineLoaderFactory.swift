@@ -60,9 +60,7 @@ public class DynamicLibraryMachineLoaderFactory: MachineLoaderFactory {
     
     public func make() -> MachineLoader {
         return LibraryMachineLoader(
-            manager: ReferenceCountingLibraryManager(
-                creator: DynamicLibraryCreator()
-            )
+            creator: DynamicLibraryCreator()
         )
     }
     
