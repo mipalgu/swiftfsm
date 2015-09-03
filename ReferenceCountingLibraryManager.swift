@@ -68,7 +68,7 @@ public class ReferenceCountingLibraryManager: LibraryManager {
         }
     }
     
-    private let creator: LibraryCreator
+    public let creator: LibraryCreator
     
     public init(creator: LibraryCreator) {
         self.creator = creator

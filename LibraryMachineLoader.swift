@@ -60,7 +60,7 @@ import Swift_FSM
 
 public class LibraryMachineLoader: MachineLoader {
     
-    private let manager: LibraryManager
+    public let manager: LibraryManager
     
     public init(manager: LibraryManager) {
         self.manager = manager
