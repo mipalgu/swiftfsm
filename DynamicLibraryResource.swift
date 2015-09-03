@@ -71,11 +71,11 @@ public class DynamicLibraryResource: LibraryResource {
         symbol: UnsafeMutablePointer<Void>,
         error: String?
     ) {
-        let symbol: UnsafeMutablePointer<Void> = dlsym(self.handler, symbol)
-        if (symbol != nil) {
-            return (symbol, error: nil)
+        let sym: UnsafeMutablePointer<Void> = dlsym(self.handler, symbol)
+        if (sym != nil) {
+            return (sym, error: nil)
         }
-        return (symbol: symbol, error: String.fromCString(dlerror()))
+        return (symbol: sym, error: String.fromCString(dlerror()))
     }
     
     public func close() -> (successful: Bool, error: String?) {
