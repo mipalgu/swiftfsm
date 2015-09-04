@@ -67,29 +67,44 @@ public class LibraryMachineLoader: MachineLoader {
     }
     
     public func load(path: String) -> [FiniteStateMachine] {
+        // Ignore empty paths
         if (path.characters.count < 1) {
             return []
         }
+        // Create the library resource.
         let lib: LibraryResource? = self.creator.open(path)
         if lib == nil {
             return []
         }
-        let name: String = self.getDylibName(path)
+        // Get the function pointer and call it
+        let f: (() -> [FiniteStateMachine])? = self.getFunctionPointer(
+            lib!,
+            name: self.getDylibName(path)
+        )
+        if (f == nil) {
+            return []
+        }
+        return f!()
+    }
+    
+    private func getFunctionPointer(
+        library: LibraryResource,
+        name: String
+    ) -> (() -> [FiniteStateMachine])? {
         let result: (symbol: UnsafeMutablePointer<Void>, error: String?) =
-            lib!.getSymbolPointer(
+            library.getSymbolPointer(
                 "_TF\(name.characters.count)\(name)5startFT_GSaP9Swift_FSM18FiniteStateMachine__"
             )
         if (result.error != nil) {
             print(result.error!)
-            return []
+            return nil
         }
         let f: UnsafeMutablePointer<() -> [FiniteStateMachine]> =
             UnsafeMutablePointer<() -> [FiniteStateMachine]>(result.symbol)
         if (f == nil) {
-            return []
+            return nil
         }
-        print("memory: \(f.memory)")
-        return f.memory()
+        return f.memory
     }
     
     private func getDylibName(path: String) -> String {
