@@ -76,35 +76,30 @@ public class LibraryMachineLoader: MachineLoader {
         if lib == nil {
             return []
         }
-        // Get the function pointer and call it
-        let f: (() -> [FiniteStateMachine])? = self.getFunctionPointer(
-            lib!,
-            name: self.getDylibName(path)
-        )
-        if (f == nil) {
-            return []
-        }
-        return f!()
+        // Load the machines
+        let machines: [FiniteStateMachine] = self.getMachines(lib!, name: self.getDylibName(path))
+        print("machines: \(machines.count)")
+        return machines
     }
     
-    private func getFunctionPointer(
+    private func getMachines(
         library: LibraryResource,
         name: String
-    ) -> (() -> [FiniteStateMachine])? {
+    ) -> [FiniteStateMachine] {
         let result: (symbol: UnsafeMutablePointer<Void>, error: String?) =
             library.getSymbolPointer(
-                "_TF\(name.characters.count)\(name)5startFT_GSaP9Swift_FSM18FiniteStateMachine__"
+                "_TF8PingPong8machinesFT_C9Swift_FSM3FSM"
             )
         if (result.error != nil) {
             print(result.error!)
-            return nil
+            return []
         }
-        let f: UnsafeMutablePointer<() -> [FiniteStateMachine]> =
-            UnsafeMutablePointer<() -> [FiniteStateMachine]>(result.symbol)
-        if (f == nil) {
-            return nil
+        let op: COpaquePointer = COpaquePointer(result.symbol)
+        let p: UnsafeMutablePointer<() -> Swift_FSM.FSM> = UnsafeMutablePointer<() -> Swift_FSM.FSM>(op)
+        if (p == nil) {
+            return []
         }
-        return f.memory
+        return [p.memory()]
     }
     
     private func getDylibName(path: String) -> String {
