@@ -59,10 +59,17 @@
 public class DynamicLibraryCreator: LibraryCreator {
     
     public func open(path: String) -> LibraryResource? {
-        let handler: UnsafeMutablePointer<Void> = dlopen(path, RTLD_NOW)
+        // Can the dylib be opened?
+        if (false == dlopen_preflight(path)) {
+            print(dlerror())
+            return nil
+        }
+        // Attempt to open the library.
+        let handler: UnsafeMutablePointer<Void> = dlopen(path, RTLD_NOW | RTLD_LOCAL)
         if (handler == nil) {
             return nil
         }
+        // Create the resource.
         return DynamicLibraryResource(handler: handler, path: path)
     }
     
