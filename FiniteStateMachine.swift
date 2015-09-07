@@ -119,4 +119,10 @@ public extension _FiniteStateMachine where Self: StateExecuter {
     
 }
 
-public protocol FiniteStateMachine: _FiniteStateMachine, Exitable, Restartable, StateExecuter, Suspendable {}
+public protocol FiniteStateMachine:
+    _FiniteStateMachine,
+    Exitable,
+    Restartable,
+    StateExecuter,
+    Suspendable
+{}
