@@ -58,56 +58,18 @@
 
 public class FSM: FiniteStateMachine {
     
-    private let initialState: State
+    public let initialState: State
     
-    private var currentState: State
+    public var currentState: State
     
-    private let ringlet: Ringlet
+    public let ringlet: Ringlet
     
-    private var suspendedState: State?
+    public var suspendedState: State?
     
     public init(initialState: State, ringlet: Ringlet) {
         self.initialState = initialState
         self.currentState = initialState
         self.ringlet = ringlet
-    }
-    
-    public func hasFinished() -> Bool {
-        return !self.isSuspended() && 0 == self.currentState.transitions.count
-    }
-    
-    public func exit() {
-        self.currentState = EmptyState(name: "_exit")
-        self.suspendedState = nil
-    }
-    
-    public func isSuspended() -> Bool {
-        return self.suspendedState != nil
-    }
-    
-    public func next() {
-        if (self.suspendedState != nil) {
-            return
-        }
-        self.currentState = self.ringlet.execute(self.currentState)
-    }
-    
-    public func restart() {
-        self.currentState = self.initialState
-        self.suspendedState = nil
-    }
-    
-    public func resume() {
-        if (self.suspendedState == nil) {
-            return
-        }
-        self.currentState = self.suspendedState!
-        self.suspendedState = nil
-    }
-    
-    public func suspend() {
-        self.suspendedState = self.currentState
-        self.currentState = EmptyState(name: "_suspend")
     }
     
 }

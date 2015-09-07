@@ -60,9 +60,62 @@
  *  A common interface for the operations that finite state machines can
  *  execute.
  */
-public protocol FiniteStateMachine:
-    Exitable,
-    Restartable,
-    StateExecuter,
-    Suspendable
-{}
+public protocol FiniteStateMachine {
+    
+    var currentState: State { get set }
+    var initialState: State { get }
+    var ringlet: Ringlet { get }
+    var suspendedState: State? { get set }
+    
+}
+
+extension FiniteStateMachine where Self: Exitable, Self: Suspendable {
+    
+    func isSuspended() -> Bool {
+        return self.suspendedState != nil
+    }
+    
+    mutating func exit() -> Void {
+        self.currentState = EmptyState(name: "_exit")
+        self.suspendedState = nil
+    }
+    
+    func hasFinished() -> Bool {
+        return !self.isSuspended() && 0 == self.currentState.transitions.count
+    }
+    
+    mutating func resume() -> Void {
+        if (self.suspendedState == nil) {
+            return
+        }
+        self.currentState = self.suspendedState!
+        self.suspendedState = nil
+    }
+    
+    mutating func suspend() -> Void {
+        self.suspendedState = self.currentState
+        self.currentState = EmptyState(name: "_suspend")
+    }
+    
+}
+
+extension FiniteStateMachine where Self: Restartable {
+    
+    mutating func restart() -> Void {
+        self.currentState = self.initialState
+        self.suspendedState = nil
+    }
+    
+}
+
+extension FiniteStateMachine where Self: StateExecuter {
+    
+    mutating func next() {
+        if (self.suspendedState != nil) {
+            return
+        }
+        self.currentState = self.ringlet.execute(self.currentState)
+    }
+    
+}
+
