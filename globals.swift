@@ -56,6 +56,11 @@
  *
  */
 
+public func addMachine(machine: FiniteStateMachine) {
+    let s: Scheduler = Scheduler()
+    s.addMachine(machine)
+}
+
 public func addMachines(machines: [FiniteStateMachine]) {
     let s: Scheduler = Scheduler()
     for m: FiniteStateMachine in machines {
