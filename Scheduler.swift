@@ -75,7 +75,6 @@ public class Scheduler {
     }
     
     public func run() -> Void {
-        print(self.machines.count)
         // Just keep running and loop around when we reach the end of the array
         for (
             var i: Int = 0;
