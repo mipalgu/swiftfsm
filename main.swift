@@ -61,13 +61,14 @@ import Swift_FSM
 
 print("Hello, when I grow up, I will be a full-blown state machine scheduler!")
 
-let scheduler: Scheduler = Scheduler()
-
+// Load the machines from dylibs.
 let loader: MachineLoader = DynamicLibraryMachineLoaderFactory().make()
 for (var i: Int = 1; i < Process.arguments.count; i++) {
     loader.load(Process.arguments[i])
 }
 
+// Run the scheduler.
+let scheduler: Scheduler = Scheduler()
 if (scheduler.machines.count < 1) {
     print("No Machines Running!")
 } else {
