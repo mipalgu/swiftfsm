@@ -61,16 +61,15 @@ import Swift_FSM
 
 print("Hello, when I grow up, I will be a full-blown state machine scheduler!")
 
-let loader: MachineLoader = DynamicLibraryMachineLoaderFactory().make()
-var machines: [FiniteStateMachine] = []
-for (var i: Int = 1; i < Process.arguments.count; i++) {
-    machines += loader.load(Process.arguments[i])
-}
-if (machines.count < 1) {
-    print("No Machines Running!")
-}
 let scheduler: Scheduler = Scheduler()
-for fsm: FiniteStateMachine in machines {
-    scheduler.addMachine(fsm)
+
+let loader: MachineLoader = DynamicLibraryMachineLoaderFactory().make()
+for (var i: Int = 1; i < Process.arguments.count; i++) {
+    loader.load(Process.arguments[i])
 }
-scheduler.run()
+
+if (scheduler.machines.count < 1) {
+    print("No Machines Running!")
+} else {
+    scheduler.run()
+}

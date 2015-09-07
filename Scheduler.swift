@@ -60,7 +60,7 @@ public class Scheduler {
     
     private static var machines: [FiniteStateMachine] = []
     
-    private(set) var machines: [FiniteStateMachine] {
+    public private(set) var machines: [FiniteStateMachine] {
         get {
             return Scheduler.machines
         } set {
@@ -75,15 +75,14 @@ public class Scheduler {
     }
     
     public func run() -> Void {
-        if (self.machines.count < 1) {
-            return
-        }
+        print(self.machines.count)
         // Just keep running and loop around when we reach the end of the array
         for (
             var i: Int = 0;
             i < self.machines.count;
             i = (i + 1) % self.machines.count
         ) {
+            print("running machine: \(i)")
             self.machines[i].next()
         }
     }

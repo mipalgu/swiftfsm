@@ -68,44 +68,29 @@ public class LibraryMachineLoader: MachineLoader {
         self.creator = creator
     }
     
-    public func load(path: String) -> [FiniteStateMachine] {
+    public func load(path: String) {
         print(path)
         // Ignore empty paths
         if (path.characters.count < 1) {
-            return []
+            return
         }
         // Create the library resource.
         let lib: LibraryResource? = self.creator.open(path)
         if lib == nil {
-            return []
+            return
         }
         // Load the machines
-        let machines: [FiniteStateMachine] = self.getMachines(lib!, name: self.getDylibName(path))
-        print("machines: \(machines.count)")
-        return machines
+        self.loadMachines(lib!)
     }
     
-    private func getMachines(
-        library: LibraryResource,
-        name: String
-    ) -> [FiniteStateMachine] {
+    private func loadMachines(library: LibraryResource) {
         let result: (symbol: UnsafeMutablePointer<Void>, error: String?) =
-            library.getSymbolPointer(
-                "main"
-            )
+            library.getSymbolPointer("main")
         if (result.error != nil) {
             print(result.error!)
-            return []
+            return
         }
-        let op: COpaquePointer = COpaquePointer(result.symbol)
-        let p: UnsafeMutablePointer<CMainFunction> = UnsafeMutablePointer<CMainFunction>(op)
-        if (p == nil) {
-            return []
-        }
-        //let args: UnsafeMutablePointer<UnsafeMutablePointer<CChar>> = UnsafeMutablePointer<UnsafeMutablePointer<CChar>>(nilLiteral: ())
-        //let mem: CMainFunction = p.memory
         invoke_fun(result.symbol)
-        return []
     }
     
     private func getDylibName(path: String) -> String {
