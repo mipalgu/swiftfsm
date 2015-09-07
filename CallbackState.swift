@@ -56,11 +56,7 @@
  *
  */
 
-public class CallbackState: State {
-    
-    public private(set) var name: String
-    
-    public var transitions: [Transition]
+public class CallbackState: EmptyState {
     
     public let _onEntry: () -> Void
     public let _main: () -> Void
@@ -73,15 +69,10 @@ public class CallbackState: State {
         main: () -> Void = {},
         onExit: () -> Void = {}
     ) {
-        self.name = name
-        self.transitions = transitions
         self._onEntry = onEntry
         self._main = main
         self._onExit = onExit
-    }
-    
-    public func addTransition(transition: Transition) {
-        self.transitions.append(transition)
+        super.init(name: name, transitions: transitions)
     }
     
     public func onEntry() -> Void {

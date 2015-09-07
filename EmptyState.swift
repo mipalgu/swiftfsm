@@ -70,12 +70,4 @@ public class EmptyState: State {
         self.transitions = transitions
     }
     
-    public func addTransition(transition: Transition) {
-        self.transitions.append(transition)
-    }
-    
-    public func onEntry() -> Void {}
-    public func main() -> Void {}
-    public func onExit() -> Void {}
-    
 }

@@ -66,12 +66,18 @@
  *  are presented below are each executed independently within the ringlet.  See
  *  StandardRinglet for the standard order that these methods are executed in.
  */
-public protocol State: Transitionable {
+public protocol _State {
     
     /**
      *  A label in plain english for the state - must be unique per state.
      */
     var name: String { get }
+    
+    /**
+     *  All possible transitions that the state can use to move to another
+     *  state.
+     */
+    var transitions: [Transition] { get set }
     
     /**
      *  This method is called when the state is first transitioned into.
@@ -97,14 +103,23 @@ public protocol State: Transitionable {
 }
 
 /**
- *  Use a states names hashValue by default for Hashability.
- *
- *  This is required for using states as keys in dictionaries.
+ *  Default implemenation of onEntry, main and onExit.
  */
-extension State where Self: Hashable {
+extension _State {
+
+    public func onEntry() {}
+    public func main() {}
+    public func onExit() {}
+
+}
+
+/**
+ *  Default implementation for adding transitions to a state.
+ */
+extension _State where Self: Transitionable {
     
-    var hashValue: Int {
-        return name.hashValue
+    public mutating func addTransition(transition: Transition) {
+        self.transitions.append(transition)
     }
     
 }
@@ -112,14 +127,14 @@ extension State where Self: Hashable {
 /**
  *  Compare states names for equality by default.
  */
-public func ==(lhs: State, rhs: State) -> Bool {
+public func ==(lhs: _State, rhs: _State) -> Bool {
     return lhs.name == rhs.name
 }
 
 /**
  *  Make states printable and debug printable by default.
  */
-extension State where
+extension _State where
     Self: CustomStringConvertible,
     Self: CustomDebugStringConvertible
 {
@@ -133,3 +148,10 @@ extension State where
     }
     
 }
+
+public protocol State:
+    _State,
+    CustomStringConvertible,
+    CustomDebugStringConvertible,
+    Transitionable
+{}
