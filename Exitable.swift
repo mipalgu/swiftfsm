@@ -58,7 +58,7 @@
 
 public protocol Exitable {
     
-    func exit() -> Void
+    mutating func exit() -> Void
     
     func hasFinished() -> Bool
     

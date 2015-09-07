@@ -58,6 +58,6 @@
 
 public protocol Restartable {
     
-    func restart() -> Void
+    mutating func restart() -> Void
     
 }

@@ -60,7 +60,7 @@
  *  A common interface for the operations that finite state machines can
  *  execute.
  */
-public protocol FiniteStateMachine {
+public protocol _FiniteStateMachine {
     
     var currentState: State { get set }
     var initialState: State { get }
@@ -69,22 +69,22 @@ public protocol FiniteStateMachine {
     
 }
 
-extension FiniteStateMachine where Self: Exitable, Self: Suspendable {
+public extension _FiniteStateMachine where Self: Exitable, Self: Suspendable {
     
-    func isSuspended() -> Bool {
+    public func isSuspended() -> Bool {
         return self.suspendedState != nil
     }
     
-    mutating func exit() -> Void {
+    public mutating func exit() -> Void {
         self.currentState = EmptyState(name: "_exit")
         self.suspendedState = nil
     }
     
-    func hasFinished() -> Bool {
+    public func hasFinished() -> Bool {
         return !self.isSuspended() && 0 == self.currentState.transitions.count
     }
     
-    mutating func resume() -> Void {
+    public mutating func resume() -> Void {
         if (self.suspendedState == nil) {
             return
         }
@@ -92,25 +92,25 @@ extension FiniteStateMachine where Self: Exitable, Self: Suspendable {
         self.suspendedState = nil
     }
     
-    mutating func suspend() -> Void {
+    public mutating func suspend() -> Void {
         self.suspendedState = self.currentState
         self.currentState = EmptyState(name: "_suspend")
     }
     
 }
 
-extension FiniteStateMachine where Self: Restartable {
+public extension _FiniteStateMachine where Self: Restartable {
     
-    mutating func restart() -> Void {
+    public mutating func restart() -> Void {
         self.currentState = self.initialState
         self.suspendedState = nil
     }
     
 }
 
-extension FiniteStateMachine where Self: StateExecuter {
+public extension _FiniteStateMachine where Self: StateExecuter {
     
-    mutating func next() {
+    public mutating func next() {
         if (self.suspendedState != nil) {
             return
         }
@@ -119,3 +119,4 @@ extension FiniteStateMachine where Self: StateExecuter {
     
 }
 
+public protocol FiniteStateMachine: _FiniteStateMachine, Exitable, Restartable, StateExecuter, Suspendable {}
