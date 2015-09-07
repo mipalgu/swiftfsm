@@ -69,7 +69,6 @@ public class LibraryMachineLoader: MachineLoader {
     }
     
     public func load(path: String) {
-        print(path)
         // Ignore empty paths
         if (path.characters.count < 1) {
             return
@@ -91,52 +90,6 @@ public class LibraryMachineLoader: MachineLoader {
             return
         }
         invoke_fun(result.symbol)
-    }
-    
-    private func getDylibName(path: String) -> String {
-        let name: String = path.substringWithRange(
-            Range(
-                start: self.getIndexOfCharacterAfterLastOccurenceOfLib(path),
-                end: self.getIndexOfFirstCharacterBeforeExtension(path)
-            )
-        )
-        return name
-    }
-    
-    private func getIndexOfFirstCharacterBeforeExtension(
-        path: String
-    ) -> String.CharacterView.Index {
-        var occurence: String.CharacterView.Index = path.characters.endIndex
-        for index in path.characters.indices {
-            if (path[index] == ".") {
-                occurence = index
-            }
-        }
-        return occurence
-    }
-    
-    private func getIndexOfCharacterAfterLastOccurenceOfLib(
-        path: String
-    ) -> String.CharacterView.Index {
-        var i: Int = 0
-        var position: String.CharacterView.Index = path.characters.startIndex
-        let ext: String.CharacterView.Index = self.getIndexOfFirstCharacterBeforeExtension(path)
-        for index in path.characters.indices {
-            if (path.characters.count - i < 3 || index >= ext) {
-                return position
-            }
-            if ("lib" == path.substringWithRange(
-                    Range(
-                        start: index,
-                        end: index.successor().successor().successor()
-                    )
-                )
-            ) {
-                position = index.successor().successor().successor()
-            }
-            i++
-        }
-        return position
     }
     
 }
