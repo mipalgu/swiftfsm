@@ -125,13 +125,6 @@ extension _State where Self: Transitionable {
 }
 
 /**
- *  Compare states names for equality by default.
- */
-public func ==(lhs: _State, rhs: _State) -> Bool {
-    return lhs.name == rhs.name
-}
-
-/**
  *  Make states printable and debug printable by default.
  */
 extension _State where
@@ -147,6 +140,13 @@ extension _State where
         return description
     }
     
+}
+
+/**
+ *  Compare states names for equality by default.
+ */
+public func ==(lhs: _State, rhs: _State) -> Bool {
+    return lhs.name == rhs.name
 }
 
 public protocol State:
