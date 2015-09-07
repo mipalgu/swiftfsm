@@ -60,8 +60,6 @@ import Swift_FSM
 
 public class LibraryMachineLoader: MachineLoader {
     
-    typealias CMainFunction = (@convention(c) () -> CInt)!
-    
     public let creator: LibraryCreator
     
     public init(creator: LibraryCreator) {
