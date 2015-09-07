@@ -57,3 +57,4 @@
  */
 
 #include <dlfcn.h>
+#include "invoke_func.h"

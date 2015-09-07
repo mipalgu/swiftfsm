@@ -56,8 +56,6 @@
  *
  */
 
-import Swift_FSM
-
 public class Scheduler {
     
     private static var machines: [FiniteStateMachine] = []
@@ -77,6 +75,13 @@ public class Scheduler {
     }
     
     public func run() -> Void {
+        if (self.machines.count < 1) {
+            return
+        }
+        print(self.machines.count)
+        print(self.machines[0].currentState)
+        self.machines[0].next()
+        print(self.machines[0].currentState)
         // Just keep running and loop around when we reach the end of the array
         for (
             var i: Int = 0;

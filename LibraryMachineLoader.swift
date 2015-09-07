@@ -60,6 +60,8 @@ import Swift_FSM
 
 public class LibraryMachineLoader: MachineLoader {
     
+    typealias CMainFunction = (@convention(c) () -> CInt)!
+    
     public let creator: LibraryCreator
     
     public init(creator: LibraryCreator) {
@@ -67,6 +69,7 @@ public class LibraryMachineLoader: MachineLoader {
     }
     
     public func load(path: String) -> [FiniteStateMachine] {
+        print(path)
         // Ignore empty paths
         if (path.characters.count < 1) {
             return []
@@ -88,18 +91,21 @@ public class LibraryMachineLoader: MachineLoader {
     ) -> [FiniteStateMachine] {
         let result: (symbol: UnsafeMutablePointer<Void>, error: String?) =
             library.getSymbolPointer(
-                "_TF8PingPong8machinesFT_C9Swift_FSM3FSM"
+                "main"
             )
         if (result.error != nil) {
             print(result.error!)
             return []
         }
         let op: COpaquePointer = COpaquePointer(result.symbol)
-        let p: UnsafeMutablePointer<() -> Swift_FSM.FSM> = UnsafeMutablePointer<() -> Swift_FSM.FSM>(op)
+        let p: UnsafeMutablePointer<CMainFunction> = UnsafeMutablePointer<CMainFunction>(op)
         if (p == nil) {
             return []
         }
-        return [p.memory()]
+        //let args: UnsafeMutablePointer<UnsafeMutablePointer<CChar>> = UnsafeMutablePointer<UnsafeMutablePointer<CChar>>(nilLiteral: ())
+        //let mem: CMainFunction = p.memory
+        invoke_fun(result.symbol)
+        return []
     }
     
     private func getDylibName(path: String) -> String {
