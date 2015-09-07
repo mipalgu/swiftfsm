@@ -70,4 +70,10 @@ public class EmptyState: State {
         self.transitions = transitions
     }
     
+    public func onEntry() {}
+    
+    public func main() {}
+    
+    public func onExit() {}
+    
 }

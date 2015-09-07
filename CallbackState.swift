@@ -75,15 +75,15 @@ public class CallbackState: EmptyState {
         super.init(name: name, transitions: transitions)
     }
     
-    public func onEntry() -> Void {
+    public override func onEntry() -> Void {
         return self._onEntry()
     }
     
-    public func main() -> Void {
+    public override func main() -> Void {
         return self._main()
     }
     
-    public func onExit() -> Void {
+    public override func onExit() -> Void {
         return self._onExit()
     }
     

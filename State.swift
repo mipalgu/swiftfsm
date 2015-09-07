@@ -103,17 +103,6 @@ public protocol _State {
 }
 
 /**
- *  Default implemenation of onEntry, main and onExit.
- */
-extension _State {
-
-    public func onEntry() {}
-    public func main() {}
-    public func onExit() {}
-
-}
-
-/**
  *  Default implementation for adding transitions to a state.
  */
 extension _State where Self: Transitionable {
