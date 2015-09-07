@@ -82,7 +82,6 @@ public class Scheduler {
             i < self.machines.count;
             i = (i + 1) % self.machines.count
         ) {
-            print("running machine: \(i)")
             self.machines[i].next()
         }
     }
