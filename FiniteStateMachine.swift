@@ -72,8 +72,8 @@ public protocol _FiniteStateMachine {
 public extension _FiniteStateMachine where Self: Exitable, Self: Suspendable {
     
     public mutating func exit() -> Void {
+        self.resume()
         self.currentState = EmptyState(name: "_exit")
-        self.suspendedState = nil
     }
     
     public func hasFinished() -> Bool {
@@ -105,8 +105,8 @@ public extension _FiniteStateMachine where Self: Suspendable {
 public extension _FiniteStateMachine where Self: Restartable, Self: Suspendable {
     
     public mutating func restart() -> Void {
+        self.resume()
         self.currentState = self.initialState
-        self.suspendedState = nil
     }
     
 }
