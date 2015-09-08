@@ -56,19 +56,16 @@
  *
  */
 
-public struct CallbackTransition: Transition {
+public class CallbackTransition: EmptyTransition {
     
-    public let source: State
-    public let target: State
-    private let _canTransition: () -> Bool
+    public var _canTransition: () -> Bool
     
     public init(source: State, target: State, canTransition: () -> Bool = { return true }) {
-        self.source = source
-        self.target = target
         self._canTransition = canTransition
+        super.init(source: source, target: target)
     }
     
-    public func canTransition() -> Bool {
+    public final override func canTransition() -> Bool {
         return self._canTransition()
     }
     
