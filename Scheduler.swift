@@ -74,6 +74,10 @@ public class Scheduler {
         self.machines.append(machine)
     }
     
+    public func clear() {
+        self.machines = []
+    }
+    
     public func run() -> Void {
         // Just keep running and loop around when we reach the end of the array
         for (
