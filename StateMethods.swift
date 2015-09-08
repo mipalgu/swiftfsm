@@ -1,8 +1,8 @@
 /*
- * State.swift
+ * StateMethods.swift
  * swiftfsm
  *
- * Created by Callum McColl on 11/08/2015.
+ * Created by Callum McColl on 9/09/2015.
  * Copyright © 2015 Callum McColl. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -56,73 +56,10 @@
  *
  */
 
-/**
- *  A simple state.
- *
- *  Implement this protocol for any states that you wish to create within your
- *  machines.
- *
- *  The state executes in what is known as a Ringlet.  The three methods that
- *  are presented below are each executed independently within the ringlet.  See
- *  StandardRinglet for the standard order that these methods are executed in.
- */
-public protocol _State {
+public protocol StateMethods {
     
-    /**
-     *  A label in plain english for the state - must be unique per state.
-     */
-    var name: String { get }
-    
-    /**
-     *  All possible transitions that the state can use to move to another
-     *  state.
-     */
-    var transitions: [Transition] { get set }
+    func onEntry() -> Void
+    func main() -> Void
+    func onExit() -> Void
     
 }
-
-/**
- *  Default implementation for adding transitions to a state.
- */
-extension _State where Self: Transitionable {
-    
-    public mutating func addTransition(transition: Transition) {
-        self.transitions.append(transition)
-    }
-    
-}
-
-/**
- *  Make states printable and debug printable by default.
- */
-extension _State where
-    Self: CustomStringConvertible,
-    Self: CustomDebugStringConvertible
-{
-    
-    public var description: String {
-        return name
-    }
-    
-    public var debugDescription: String {
-        return description
-    }
-    
-}
-
-/**
- *  Compare states names for equality by default.
- */
-public func ==(lhs: _State, rhs: _State) -> Bool {
-    return lhs.name == rhs.name
-}
-
-public protocol State:
-    _State,
-    CustomStringConvertible,
-    CustomDebugStringConvertible,
-    StateMethods,
-    Transitionable
-{}
-
-public protocol MutableState: State, MutableStateMethods {}
