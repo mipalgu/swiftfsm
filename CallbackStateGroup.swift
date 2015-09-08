@@ -56,7 +56,7 @@
  *
  */
 
-public class CallbackStateGroup: StateGroup {
+public class CallbackStateGroup: StateGroup, MutableState {
     
     public var _onEntry: () -> Void
     public var _main: () -> Void
@@ -73,18 +73,6 @@ public class CallbackStateGroup: StateGroup {
         self._main = main
         self._onExit = onExit
         super.init(name: name, transitions: transitions)
-    }
-    
-    public final override func onEntry() -> Void {
-        return self._onEntry()
-    }
-    
-    public final override func main() -> Void {
-        return self._main()
-    }
-    
-    public final override func onExit() -> Void {
-        return self._onExit()
     }
     
 }
