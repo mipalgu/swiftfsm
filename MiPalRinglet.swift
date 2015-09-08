@@ -1,5 +1,5 @@
 /*
- * StandardRinglet.swift
+ * MiPalRinglet.swift
  * swiftfsm
  *
  * Created by Callum McColl on 12/08/2015.
@@ -64,7 +64,7 @@
  *  state is returned.  If no transitions are possible then the main method is
  *  called and the state is returned.
  */
-public class StandardRinglet: Ringlet {
+public class MiPalRinglet: Ringlet {
     
     /**
      *  Set as the last state that was executed.
