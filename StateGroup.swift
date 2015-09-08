@@ -58,16 +58,15 @@
 
 public class StateGroup: EmptyState {
     
-    private var children: [State] = []
+    private var children: [CallbackState] = []
     
-    public func addChild(inout child: State) {
-        child = CallbackState(
-            name: child.name,
-            transitions: child.transitions,
-            onEntry: {self.onEntry(); child.onEntry()},
-            main: {self.main(); child.main()},
-            onExit: {self.onExit(); child.onExit()}
-        )
+    public func addChild(inout child: CallbackState) {
+        let onEntry: () -> Void = child._onEntry
+        let main: () -> Void = child._main
+        let onExit: () -> Void = child._onExit
+        child._onEntry = {self.onEntry(); onEntry()}
+        child._main = {self.main(); main()}
+        child._onExit = {self.onExit(); onExit()}
     }
     
 }

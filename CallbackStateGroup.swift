@@ -58,9 +58,9 @@
 
 public class CallbackStateGroup: StateGroup {
     
-    public let _onEntry: () -> Void
-    public let _main: () -> Void
-    public let _onExit: () -> Void
+    public var _onEntry: () -> Void
+    public var _main: () -> Void
+    public var _onExit: () -> Void
     
     public init(
         name: String,
@@ -75,15 +75,15 @@ public class CallbackStateGroup: StateGroup {
         super.init(name: name, transitions: transitions)
     }
     
-    public override func onEntry() -> Void {
+    public final override func onEntry() -> Void {
         return self._onEntry()
     }
     
-    public override func main() -> Void {
+    public final override func main() -> Void {
         return self._main()
     }
     
-    public override func onExit() -> Void {
+    public final override func onExit() -> Void {
         return self._onExit()
     }
     
