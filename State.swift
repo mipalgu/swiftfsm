@@ -144,5 +144,3 @@ public protocol State:
     CustomDebugStringConvertible,
     Transitionable
 {}
-
-public protocol MutableState: State, MutableStateMethods {}
