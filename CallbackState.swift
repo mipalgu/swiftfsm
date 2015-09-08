@@ -56,7 +56,7 @@
  *
  */
 
-public class CallbackState: EmptyState {
+public class CallbackState: EmptyState, MutableState {
     
     public var _onEntry: () -> Void
     public var _main: () -> Void

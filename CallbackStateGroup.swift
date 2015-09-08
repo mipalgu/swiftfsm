@@ -56,7 +56,7 @@
  *
  */
 
-public class CallbackStateGroup: StateGroup {
+public class CallbackStateGroup: StateGroup, MutableState {
     
     public var _onEntry: () -> Void
     public var _main: () -> Void

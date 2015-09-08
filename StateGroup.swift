@@ -58,9 +58,9 @@
 
 public class StateGroup: EmptyState {
     
-    private var children: [CallbackState] = []
+    private var children: [MutableState] = []
     
-    public func addChild(inout child: CallbackState) {
+    public func addChild(inout child: MutableState) {
         let onEntry: () -> Void = child._onEntry
         let main: () -> Void = child._main
         let onExit: () -> Void = child._onExit
