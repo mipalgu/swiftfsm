@@ -2,7 +2,7 @@
  * globals.swift
  * swiftfsm
  *
- * Created by Callum McColl on 08/09/2015.
+ * Created by Callum McColl on 8/09/2015.
  * Copyright © 2015 Callum McColl. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
