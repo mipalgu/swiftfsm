@@ -83,8 +83,12 @@ public class Scheduler {
         for (
             var i: Int = 0;
             i < self.machines.count;
-            i = (i + 1) % self.machines.count
+            i = (i + 1) % (0 == self.machines.count ? 1 : self.machines.count)
         ) {
+            if (self.machines[i].hasFinished()) {
+                self.machines.removeAtIndex(i--)
+                continue
+            }
             self.machines[i].next()
         }
     }

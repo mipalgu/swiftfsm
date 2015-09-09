@@ -78,7 +78,9 @@ public extension _FiniteStateMachine where Self: Exitable, Self: Suspendable {
     }
     
     public func hasFinished() -> Bool {
-        return !self.isSuspended() && 0 == self.currentState.transitions.count
+        return  false == self.isSuspended() &&
+            0 == self.currentState.transitions.count &&
+            self.currentState == self.previousState
     }
     
 }
