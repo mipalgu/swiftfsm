@@ -66,7 +66,7 @@ public protocol _FiniteStateMachine {
     var initialState: State { get }
     var previousState: State { get set }
     var ringlet: Ringlet { get }
-    var suspendedState: State { get set }
+    var suspendedState: State { get }
     
 }
 
@@ -75,6 +75,7 @@ public extension _FiniteStateMachine where Self: Exitable, Self: Suspendable {
     public mutating func exit() -> Void {
         self.resume()
         self.currentState = EmptyState(name: "_exit")
+        self.previousState = self.currentState
     }
     
     public func hasFinished() -> Bool {

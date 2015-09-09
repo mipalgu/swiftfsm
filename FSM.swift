@@ -66,7 +66,7 @@ public class FSM: FiniteStateMachine {
     
     public let ringlet: Ringlet
     
-    public var suspendedState: State
+    public let suspendedState: State
     
     public init(
         initialState: State,
