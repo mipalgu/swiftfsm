@@ -62,13 +62,21 @@ public class FSM: FiniteStateMachine {
     
     public var currentState: State
     
+    public var previousState: State
+    
     public let ringlet: Ringlet
     
-    public var suspendedState: State?
+    public var suspendedState: State
     
-    public init(initialState: State, ringlet: Ringlet) {
+    public init(
+        initialState: State,
+        ringlet: Ringlet,
+        suspendedState: State = EmptyState(name: "_suspend")
+    ) {
         self.initialState = initialState
         self.currentState = initialState
+        self.previousState = initialState
+        self.suspendedState = suspendedState
         self.ringlet = ringlet
     }
     
