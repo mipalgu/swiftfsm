@@ -108,10 +108,9 @@ public class MiPalRinglet: Ringlet {
     }
     
     /*
-     *  Check all transitions and return the state that we can transition to.
+     *  Check all transitions and return the transition that is possible.
      *
-     *  Returns the state that can be transitioned into or nil if no transitions
-     *  can be found.
+     *  Returns the valid transition or nil if no transitions can be found.
      */
     private func getTransition(transitions: [Transition]) -> Transition? {
         // Check all transitions
