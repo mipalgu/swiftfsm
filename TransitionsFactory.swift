@@ -64,14 +64,13 @@ public class TransitionsFactory {
         inout source: T,
         target: U,
         canTransition: CanTransition
-    ) -> Transition {
+    ) {
         let t: CallbackTransition = CallbackTransition(
             source: source,
             target: target,
             canTransition: canTransition
         )
         source.addTransition(t)
-        return t
     }
     
     public func makeUrgentTransition<T: State, U: State>(
@@ -79,7 +78,7 @@ public class TransitionsFactory {
         target: U,
         ringlet: Ringlet,
         canTransition: CanTransition
-    ) -> Transition {
+    ) {
         let t: CallbackUrgentTransition = CallbackUrgentTransition(
             source: source,
             target: target,
@@ -87,7 +86,6 @@ public class TransitionsFactory {
             canTransition: canTransition
         )
         source.addTransition(t)
-        return t
     }
     
     
