@@ -60,7 +60,7 @@ public class StateGroup: EmptyState {
     
     private var children: [MutableState] = []
     
-    public func addChild(inout child: MutableState) {
+    public func addChild<T: MutableState>(inout child: T) {
         let onEntry: () -> Void = child._onEntry
         let main: () -> Void = child._main
         let onExit: () -> Void = child._onExit
