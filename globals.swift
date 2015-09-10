@@ -67,3 +67,31 @@ public func addMachines(machines: [FiniteStateMachine]) {
         s.addMachine(m)
     }
 }
+
+public func addTransition<T: State, U: State>(
+    inout source: T,
+    target: U,
+    canTransition: () -> Bool = {true}
+) {
+    let t: CallbackTransition = CallbackTransition(
+        source: source,
+        target: target,
+        canTransition: canTransition
+    )
+    source.addTransition(t)
+}
+
+public func addUrgentTransition<T: State, U: State>(
+    inout source: T,
+    target: U,
+    ringlet: Ringlet,
+    canTransition: () -> Bool = {true}
+) {
+    let t: CallbackUrgentTransition = CallbackUrgentTransition(
+        source: source,
+        target: target,
+        ringlet: ringlet,
+        canTransition: canTransition
+    )
+    source.addTransition(t)
+}
