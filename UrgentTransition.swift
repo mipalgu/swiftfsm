@@ -74,7 +74,6 @@ public class UrgentTransition: Transition {
         self.ringlet = ringlet
         self.source = source
         self._target = target
-        self.source.addTransition(self)
     }
     
     public func canTransition() -> Bool {

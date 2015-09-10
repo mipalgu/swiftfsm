@@ -65,7 +65,6 @@ public class EmptyTransition: Transition {
     public init(source: State, target: State) {
         self.source = source
         self.target = target
-        self.source.addTransition(self)
     }
     
     public func canTransition() -> Bool {
