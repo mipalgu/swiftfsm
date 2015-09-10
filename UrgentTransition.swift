@@ -1,8 +1,8 @@
 /*
- * Scheduler.swift
+ * UrgentTransition.swift
  * swiftfsm
  *
- * Created by Callum McColl on 18/08/2015.
+ * Created by Callum McColl on 10/09/2015.
  * Copyright © 2015 Callum McColl. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -56,43 +56,30 @@
  *
  */
 
-public class Scheduler {
+public class UrgentTransition: Transition {
     
-    private static var machines: [FiniteStateMachine] = []
+    public let ringlet: Ringlet
     
-    public private(set) var machines: [FiniteStateMachine] {
+    private let _target: State
+    
+    public let source: State
+    
+    public var target: State {
         get {
-            return Scheduler.machines
-        } set {
-            Scheduler.machines = newValue
+            return self.ringlet.execute(self._target)
         }
     }
     
-    public init() {}
-    
-    public func addMachine(machine: FiniteStateMachine) -> Void {
-        self.machines.append(machine)
+    public init(source: State, target: State, ringlet: Ringlet) {
+        self.ringlet = ringlet
+        self.source = source
+        self._target = target
+        self.source.addTransition(self)
     }
     
-    public func clear() {
-        self.machines = []
-    }
-    
-    public func run() -> Void {
-        // Just keep running and loop around when we reach the end of the array
-        var count: UInt = 0
-        for (
-            var i: Int = 0;
-            i < self.machines.count;
-            i = (i + 1) % (0 == self.machines.count ? 1 : self.machines.count)
-        ) {
-            print("scheduler: \(count++)")
-            if (self.machines[i].hasFinished()) {
-                self.machines.removeAtIndex(i--)
-                continue
-            }
-            self.machines[i].next()
-        }
+    public func canTransition() -> Bool {
+        return true
     }
     
 }
+

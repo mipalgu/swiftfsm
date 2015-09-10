@@ -86,11 +86,11 @@ public class MiPalRinglet: Ringlet {
         // Remember that we have already executed this state.
         self.oldState = state
         // Can we transition to another state?
-        let s: State? = self.transition(state.transitions)
-        if (s != nil) {
+        let t: Transition? = self.getTransition(state.transitions)
+        if (t != nil) {
             // Yes - Exit state and return the new state.
             state.onExit()
-            return s!
+            return t!.target
         }
         // No - Execute main method and return state.
         state.main()
@@ -113,14 +113,14 @@ public class MiPalRinglet: Ringlet {
      *  Returns the state that can be transitioned into or nil if no transitions
      *  can be found.
      */
-    private func transition(transitions: [Transition]) -> State? {
+    private func getTransition(transitions: [Transition]) -> Transition? {
         // Check all transitions
         for t: Transition in transitions {
             if (false == t.canTransition()) {
                 continue
             }
             // Found transition
-            return t.target
+            return t
         }
         // No transitions possible
         return nil
