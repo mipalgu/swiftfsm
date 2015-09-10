@@ -60,10 +60,12 @@ public class TransitionsFactory {
     
     public typealias CanTransition = () -> Bool
     
+    public init() {}
+    
     public func makeTransition<T: State, U: State>(
         inout source: T,
         target: U,
-        canTransition: CanTransition
+        canTransition: CanTransition = {true}
     ) {
         let t: CallbackTransition = CallbackTransition(
             source: source,
@@ -77,7 +79,7 @@ public class TransitionsFactory {
         inout source: T,
         target: U,
         ringlet: Ringlet,
-        canTransition: CanTransition
+        canTransition: CanTransition = {true}
     ) {
         let t: CallbackUrgentTransition = CallbackUrgentTransition(
             source: source,
