@@ -58,14 +58,42 @@
 
 import Swift_FSM
 
+/**
+ *  Load a machine from a library.
+ *
+ *  This class conforms to MachineLoader.
+ */
 public class LibraryMachineLoader: MachineLoader {
     
+    /**
+     *  Used to create the libraries.
+     *
+     *  - Note: It would be a good idea for the LibraryCreator to leverage the
+     *      strategy pattern as it would then be able to decide which library
+     *      creator to use from the path.  This is not yet implemented, but
+     *      would allow multiple types of paths to be used instead of just file
+     *      paths.  For instance it could allow the loading of a library from a
+     *      url or a network stream.
+     */
     public let creator: LibraryCreator
     
     public init(creator: LibraryCreator) {
         self.creator = creator
     }
     
+    /**
+     *  Load the machines from the library specified from the path.
+     *
+     *  In order to load the machines the main method is called on all of the 
+     *  loaded libraries.  The individual libraries are responsible for loading
+     *  themselves into the scheduler.
+     *
+     *  - Note: This should change as it would be better to call a method which
+     *      returns an array of machines to load and do the actual loading into
+     *      the scheduler within this method.  This would ensure that the
+     *      libraries would not need to know how to add machines to the
+     *      scheduler.
+     */
     public func load(path: String) {
         // Ignore empty paths
         if (path.characters.count < 1) {
