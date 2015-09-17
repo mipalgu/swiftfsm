@@ -56,8 +56,19 @@
  *
  */
 
+/**
+ *  Creates A MachineLoader that is capable of loading machines from dynamic
+ *  libraries.
+ *
+ *  The machine loader leverages the DynamicLibraryCreator class.
+ */
 public class DynamicLibraryMachineLoaderFactory: MachineLoaderFactory {
     
+    /**
+     *  Create the MachineLoader.
+     *
+     *  Returns a new instance of MachineLoader.
+     */
     public func make() -> MachineLoader {
         return LibraryMachineLoader(
             creator: DynamicLibraryCreator()
