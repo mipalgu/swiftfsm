@@ -57,8 +57,9 @@
  */
 
 /**
- *  A common interface for the operations that finite state machines can
- *  execute.
+ *  This contains implementation details for Finite State Machines.  Do not use
+ *  this protocol directyl.  If you want to create your own implementation of a
+ *  Finite State Machine then instead use `FiniteStateMachine`.
  */
 public protocol _FiniteStateMachine {
     
@@ -70,6 +71,9 @@ public protocol _FiniteStateMachine {
     
 }
 
+/**
+ *  Make finite state machines exitable by default.
+ */
 public extension _FiniteStateMachine where Self: Exitable, Self: Suspendable {
     
     public mutating func exit() -> Void {
@@ -86,6 +90,9 @@ public extension _FiniteStateMachine where Self: Exitable, Self: Suspendable {
     
 }
 
+/**
+ *  Make finite state machines suspendable by default.
+ */
 public extension _FiniteStateMachine where Self: Suspendable {
     
     public func isSuspended() -> Bool {
@@ -105,6 +112,10 @@ public extension _FiniteStateMachine where Self: Suspendable {
     }
     
 }
+
+/**
+ *  Make finite state machines restartable by default.
+ */
 public extension _FiniteStateMachine where Self: Restartable, Self: Suspendable {
     
     public mutating func restart() -> Void {
@@ -115,6 +126,9 @@ public extension _FiniteStateMachine where Self: Restartable, Self: Suspendable 
     
 }
 
+/**
+ *  Make finite state machines state executers by default.
+ */
 public extension _FiniteStateMachine where Self: StateExecuter, Self: Suspendable {
     
     public mutating func next() {
@@ -127,6 +141,9 @@ public extension _FiniteStateMachine where Self: StateExecuter, Self: Suspendabl
     
 }
 
+/**
+ *  A common interface for finite state machines.
+ */
 public protocol FiniteStateMachine:
     _FiniteStateMachine,
     Exitable,
