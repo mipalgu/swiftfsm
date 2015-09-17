@@ -56,15 +56,45 @@
  *
  */
 
+/**
+ *  A resource that can be used to perform operations on a library.
+ *
+ *  The best way to use resources is to create a LibraryCreator which will be
+ *  responsible for creating the resource as most LibraryResource will have
+ *  different ways of creating them.
+ */
 public protocol LibraryResource {
 
+    /**
+     *  The path to the library.
+     */
     var path: String { get }
     
+    /**
+     *  Attempt to retrieve a symbol from the resource.
+     *
+     *  If the operation is successful then the symbol property is set to an
+     *  opaque pointer to the symbol and the error porperty is set to nil,
+     *  otherwise the symbol property is set to a nil pointer and the error is
+     *  set to an error message.
+     */
     func getSymbolPointer(symbol: String) -> (
         symbol: UnsafeMutablePointer<Void>,
         error: String?
     )
     
+    /**
+     *  Close the library resource.
+     *
+     *  This protocol does not ensure that reference counting is used so please
+     *  ensure that you know when to call this method for the specific resource
+     *  that you are using.
+     *
+     *  If the library was closed successfully then the successful property is
+     *  set to true and the error set to nil.  Otherwise the successful property
+     *  is set to false and an error message is stored within the error
+     *  property.
+     */
     func close() -> (successful: Bool, error: String?)
 
 }
