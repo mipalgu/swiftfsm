@@ -124,5 +124,3 @@ public protocol State:
     StateMethods,
     Transitionable
 {}
-
-public protocol MutableState: State, MutableStateMethods {}

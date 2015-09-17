@@ -1,8 +1,8 @@
 /*
- * MutableStateMethods.swift
+ * CallbackableState.swift
  * swiftfsm
  *
- * Created by Callum McColl on 9/09/2015.
+ * Created by Callum McColl on 17/09/2015.
  * Copyright © 2015 Callum McColl. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -56,26 +56,10 @@
  *
  */
 
-public protocol MutableStateMethods {
+public protocol CallbackableState {
     
-    var _onEntry: () -> Void { get set }
-    var _main: () -> Void { get set }
-    var _onExit: () -> Void { get set }
-    
-}
-
-extension MutableStateMethods where Self: State {
-    
-    public final func onEntry() {
-        self._onEntry()
-    }
-    
-    public final func main() {
-        self._main()
-    }
-    
-    public final func onExit() {
-        self._onExit()
-    }
+    var _onEntry: () -> Void { get }
+    var _main: () -> Void { get }
+    var _onExit: () -> Void { get }
     
 }

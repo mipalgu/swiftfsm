@@ -56,11 +56,11 @@
  *
  */
 
-public class CallbackState: EmptyState, MutableState {
+public class CallbackState: EmptyState, CallbackableState {
     
-    public var _onEntry: () -> Void
-    public var _main: () -> Void
-    public var _onExit: () -> Void
+    public let _onEntry: () -> Void
+    public let _main: () -> Void
+    public let _onExit: () -> Void
     
     public init(
         name: String,
@@ -75,16 +75,16 @@ public class CallbackState: EmptyState, MutableState {
         super.init(name: name, transitions: transitions)
     }
     
-    public final override func onEntry() -> Void {
-        return self._onEntry()
+    public final override func onEntry() {
+        self._onEntry()
     }
     
-    public final override func main() -> Void {
-        return self._main()
+    public final override func main() {
+        self._main()
     }
     
-    public final override func onExit() -> Void {
-        return self._onExit()
+    public final override func onExit() {
+        self._onExit()
     }
     
 }
