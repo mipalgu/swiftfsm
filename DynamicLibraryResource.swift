@@ -56,33 +56,81 @@
  *
  */
 
+/**
+ *  A library resource for a dynamic library.
+ *
+ *  This class is used to interact with dynamic libraries.  This class should
+ *  not be created directly.  Instead you should use a the DynamicLibraryCreator
+ *  class to create this resource.
+ */
 public class DynamicLibraryResource: LibraryResource {
     
+    /**
+     *  A void pointer to the dynamic library that was loaded using dlopen.
+     */
     private let handler: UnsafeMutablePointer<Void>
+    
+    /**
+     *  The path on the file system to the dynamic library.
+     */
     public let path: String
     
-    
+    /**
+     *  Create the resource.
+     *
+     *  Do not create this resource directly.  Instead use
+     *  DynamicLibraryCreator.
+     */
     public init(handler: UnsafeMutablePointer<Void>, path: String) {
         self.handler = handler
         self.path = path
     }
     
+    /**
+     *  Return a void pointer to a symbol within the dynamic library.
+     *
+     *  If this method works successfully then error will be set to nil and the
+     *  void pointer will be returned.
+     *
+     *  If this method is unable to find the symbol or there is an error when
+     *  attempting to retrieve the symbol then the symbol variable within the
+     *  tuple will be a null pointer and the error variable will be set with an
+     *  error message.
+     */
     public func getSymbolPointer(symbol: String) -> (
         symbol: UnsafeMutablePointer<Void>,
         error: String?
     ) {
+        // Attempt to get the symbol
         let sym: UnsafeMutablePointer<Void> = dlsym(self.handler, symbol)
         if (sym != nil) {
+            // Successful retrieval of symbol
             return (sym, error: nil)
         }
+        // Unable to retrieve symbol - retrieve the error
         return (symbol: sym, error: String.fromCString(dlerror()))
     }
     
+    /**
+     *  Attemp to close the dynamic library resource.
+     *
+     *  dlopen and dlclose leverage reference counting which means that every
+     *  time you call dlopen or use DynamicLibraryCreator.open then you must
+     *  call this close method.
+     *
+     *  If there is an error with closing the resource then the successful
+     *  property will be set to false and the error property set to an error
+     *  message String.  If the close was successful then the successful
+     *  property will be set to true and the error property set to nil.
+     */
     public func close() -> (successful: Bool, error: String?) {
+        // Attempt to close the library.
         let result: CInt = dlclose(self.handler)
         if (result == 0) {
+            // Succesfully closed library.
             return (successful: true, error: nil)
         }
+        // Error
         return (successful: false, error: String.fromCString(dlerror()))
     }
     
