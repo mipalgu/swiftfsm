@@ -56,8 +56,19 @@
  *
  */
 
+/**
+ *  Responsible for creating a LibraryResource.
+ *
+ *  This class can only create LibraryResources from dynamic libraries.
+ *  Therefore this class can only create DynamicLibraryResources.
+ */
 public class DynamicLibraryCreator: LibraryCreator {
     
+    /**
+     *  Create the LibraryResource from the dynamic library.
+     *
+     *  Returns nil if the resource could not be created.
+     */
     public func open(path: String) -> LibraryResource? {
         // Can the dylib be opened?
         if (false == dlopen_preflight(path)) {
