@@ -59,8 +59,14 @@
 import Darwin
 import Swift_FSM
 
+/**
+ *  Conforming types are capable of loading machines from a resource path.
+ */
 public protocol MachineLoader {
     
+    /**
+     *  Load machines from a resource path.
+     */
     func load(path: String)
     
 }
