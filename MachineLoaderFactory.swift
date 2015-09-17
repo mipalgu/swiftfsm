@@ -56,8 +56,14 @@
  *
  */
 
+/**
+ * Responsible for creating instances of MachineLoader.
+ */
 public protocol MachineLoaderFactory {
     
+    /**
+     *  Create an instance of MachineLoader.
+     */
     func make() -> MachineLoader
     
 }
