@@ -56,8 +56,15 @@
  *
  */
 
+/**
+ *  Members conform to this protocol are capable of opening libraries a path.
+ */
 public protocol LibraryCreator {
     
+    /**
+     *  Open the library and return an associated LibraryResource representing
+     *  the library that was opened..
+     */
     func open(path: String) -> LibraryResource?
     
 }
