@@ -1,8 +1,8 @@
 /*
- * FiniteStateMachine.swift
+ * Resumeable.swift
  * swiftfsm
  *
- * Created by Callum McColl on 12/08/2015.
+ * Created by Callum McColl on 18/09/2015.
  * Copyright © 2015 Callum McColl. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -56,98 +56,8 @@
  *
  */
 
-/**
- *  This contains implementation details for Finite State Machines.  Do not use
- *  this protocol directyl.  If you want to create your own implementation of a
- *  Finite State Machine then instead use `FiniteStateMachine`.
- */
-public protocol _FiniteStateMachine {
+public protocol Resumeable: Suspendable {
     
-    var currentState: State { get set }
-    var initialState: State { get }
-    var previousState: State { get set }
-    var ringlet: Ringlet { get }
-    var suspendedState: State { get }
+    mutating func resume() -> Void
     
 }
-
-/**
- *  Make finite state machines exitable by default.
- */
-public extension _FiniteStateMachine where Self: Exitable, Self: Resumeable {
-    
-    public mutating func exit() -> Void {
-        self.resume()
-        self.currentState = EmptyState(name: "_exit")
-        self.previousState = self.currentState
-    }
-    
-    public func hasFinished() -> Bool {
-        return  false == self.isSuspended() &&
-            0 == self.currentState.transitions.count &&
-            self.currentState == self.previousState
-    }
-    
-}
-
-/**
- *  Make finite state machines suspendable by default.
- */
-public extension _FiniteStateMachine where Self: Suspendable {
-    
-    public func isSuspended() -> Bool {
-        return self.suspendedState == self.currentState
-    }
-    
-    public mutating func resume() -> Void {
-        if (false == self.isSuspended()) {
-            return
-        }
-        self.currentState = self.previousState
-    }
-    
-    public mutating func suspend() -> Void {
-        self.previousState = self.currentState
-        self.currentState = self.suspendedState
-    }
-    
-}
-
-/**
- *  Make finite state machines restartable by default.
- */
-public extension _FiniteStateMachine where Self: Restartable, Self: Suspendable {
-    
-    public mutating func restart() -> Void {
-        self.resume()
-        self.previousState = self.currentState
-        self.currentState = self.initialState
-    }
-    
-}
-
-/**
- *  Make finite state machines state executers by default.
- */
-public extension _FiniteStateMachine where Self: StateExecuter, Self: Suspendable {
-    
-    public mutating func next() {
-        if (self.isSuspended()) {
-            return
-        }
-        self.previousState = self.currentState
-        self.currentState = self.ringlet.execute(self.currentState)
-    }
-    
-}
-
-/**
- *  A common interface for finite state machines.
- */
-public protocol FiniteStateMachine:
-    _FiniteStateMachine,
-    Exitable,
-    Restartable,
-    StateExecuter,
-    Resumeable
-{}

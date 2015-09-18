@@ -60,8 +60,6 @@ public protocol Suspendable {
     
     func isSuspended() -> Bool
     
-    mutating func resume() -> Void
-    
     mutating func suspend() -> Void
     
 }
