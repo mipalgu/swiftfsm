@@ -56,10 +56,21 @@
  *
  */
 
+/**
+ *  Responsible for the execution of machines.
+ *
+ *  This class follows the monostate pattern therefore adding or removing
+ *  machines from a single instance will be reflected in all other instances of
+ *  this class.
+ */
 public class Scheduler {
     
+    // The actual property that the machines are stored in.
     private static var machines: [FiniteStateMachine] = []
     
+    /**
+     *  An array of `FiniteStateMachine`s that are to be executed.
+     */
     public private(set) var machines: [FiniteStateMachine] {
         get {
             return Scheduler.machines
@@ -70,14 +81,24 @@ public class Scheduler {
     
     public init() {}
     
+    /**
+     *  Add a machine to the machines array.
+     */
     public func addMachine(machine: FiniteStateMachine) -> Void {
         self.machines.append(machine)
     }
     
+    /**
+     *  Clear the machines array therefore stopping the execution of all
+     *  machines.
+     */
     public func clear() {
         self.machines = []
     }
     
+    /**
+     *  Start executing all machines.
+     */
     public func run() -> Void {
         // Just keep running and loop around when we reach the end of the array
         var count: UInt = 0
