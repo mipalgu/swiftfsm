@@ -56,10 +56,26 @@
  *
  */
 
+/**
+ *  Provides a way for developers to pass in the onEntry, main and onExit
+ *  methods when initializing a state so that they can more easily create simple
+ *  states.
+ */
 public class CallbackState: EmptyState, CallbackableState {
     
+    /**
+     *  The actual onEntry implementation.
+     */
     public let _onEntry: () -> Void
+    
+    /**
+     *  The actual main implementation.
+     */
     public let _main: () -> Void
+    
+    /**
+     *  The actual onExit implementation.
+     */
     public let _onExit: () -> Void
     
     public init(
@@ -75,14 +91,32 @@ public class CallbackState: EmptyState, CallbackableState {
         super.init(name: name, transitions: transitions)
     }
     
+    /**
+     *  This method simply calles _onEntry.
+     *
+     *  This method cannot be overrided as all `CallbackState`s must use the 
+     *  _onEntry property instead.
+     */
     public final override func onEntry() {
         self._onEntry()
     }
     
+    /**
+     *  This method simply calles _main.
+     *
+     *  This method cannot be overrided as all `CallbackState`s must use the
+     *  _main property instead.
+     */
     public final override func main() {
         self._main()
     }
     
+    /**
+     *  This method simply calles _onExit.
+     *
+     *  This method cannot be overrided as all `CallbackState`s must use the
+     *  _onExit property instead.
+     */
     public final override func onExit() {
         self._onExit()
     }
