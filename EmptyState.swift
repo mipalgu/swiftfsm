@@ -58,11 +58,22 @@
 
 /**
  *  A state that does nothing.
+ *
+ *  This class provides a tempalte for all other states to inherit.
  */
 public class EmptyState: State {
     
+    /**
+     *  The name of the state.
+     *
+     *  - Requires: Must be unique for each state.
+     */
     public private(set) var name: String
     
+    /**
+     *  An array of transitions that this state may use to move to another
+     *  state.
+     */
     public var transitions: [Transition]
     
     public init(name: String, transitions: [Transition] = []) {
