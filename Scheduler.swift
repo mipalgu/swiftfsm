@@ -56,6 +56,8 @@
  *
  */
 
+import Swift_FSM
+
 /**
  *  Responsible for the execution of machines.
  *
@@ -66,25 +68,16 @@
 public class Scheduler {
     
     // The actual property that the machines are stored in.
-    private static var machines: [FiniteStateMachine] = []
+    public private(set) var machines: [Machine]
     
-    /**
-     *  An array of `FiniteStateMachine`s that are to be executed.
-     */
-    public private(set) var machines: [FiniteStateMachine] {
-        get {
-            return Scheduler.machines
-        } set {
-            Scheduler.machines = newValue
-        }
+    public init(machines: [Machine] = []) {
+        self.machines = machines
     }
-    
-    public init() {}
     
     /**
      *  Add a machine to the machines array.
      */
-    public func addMachine(machine: FiniteStateMachine) -> Void {
+    public func addMachine(machine: Machine) -> Void {
         self.machines.append(machine)
     }
     
@@ -108,11 +101,11 @@ public class Scheduler {
             i = (i + 1) % (0 == self.machines.count ? 1 : self.machines.count)
         ) {
             print("scheduler: \(count++)")
-            if (self.machines[i].hasFinished()) {
+            if (self.machines[i].machine.hasFinished()) {
                 self.machines.removeAtIndex(i--)
                 continue
             }
-            self.machines[i].next()
+            self.machines[i].machine.next()
         }
     }
     
