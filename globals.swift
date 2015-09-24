@@ -88,3 +88,7 @@ public func addUrgentTransition<T: State, U: State>(
     )
     source.addTransition(t)
 }
+
+public func getLastFactory() -> Factories.FiniteStateMachineFactory? {
+    return Factories().getLast()
+}
