@@ -60,10 +60,6 @@ import Swift_FSM
 
 /**
  *  Responsible for the execution of machines.
- *
- *  This class follows the monostate pattern therefore adding or removing
- *  machines from a single instance will be reflected in all other instances of
- *  this class.
  */
 public class Scheduler {
     
