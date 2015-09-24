@@ -67,6 +67,6 @@ public protocol MachineLoader {
     /**
      *  Load machines from a resource path.
      */
-    func load(path: String)
+    func load(path: String) -> FiniteStateMachine?
     
 }
