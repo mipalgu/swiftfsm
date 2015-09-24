@@ -56,6 +56,8 @@
  *
  */
 
+import Swift_FSM
+
 public class Machine {
     
     public let name: String
