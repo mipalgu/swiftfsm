@@ -70,8 +70,14 @@ public class Factories {
         }
     }
     
+    public init() {}
+    
     public func addFactory(f: FiniteStateMachineFactory) {
         self.factories.append(f)
+    }
+    
+    public func clear() {
+        self.factories = []
     }
     
     public func getLast() -> FiniteStateMachineFactory? {
