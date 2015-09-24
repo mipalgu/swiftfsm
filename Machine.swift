@@ -62,7 +62,7 @@ public class Machine {
     
     public let name: String
     
-    public let machine: FiniteStateMachine
+    public var machine: FiniteStateMachine
     
     public init(name: String, machine: FiniteStateMachine) {
         self.name = name
