@@ -64,7 +64,7 @@ public class Factories {
     
     public private(set) var factories: [FiniteStateMachineFactory] {
         get {
-            return self.factories
+            return Factories.factories
         } set {
             Factories.factories = newValue
         }
