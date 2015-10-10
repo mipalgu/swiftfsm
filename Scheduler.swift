@@ -1,8 +1,8 @@
 /*
- * StandardScheduler.swift
+ * Scheduler.swift
  * swiftfsm
  *
- * Created by Callum McColl on 18/08/2015.
+ * Created by Callum McColl on 10/10/2015.
  * Copyright © 2015 Callum McColl. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -59,50 +59,13 @@
 import Swift_FSM
 
 /**
- *  Responsible for the execution of machines.
+ *  A common interfaces for scheduler who are responsible for the execution of
+ *  finite state machines.
  */
-public class LoopingScheduler: Scheduler {
+public protocol Scheduler {
     
-    // The actual property that the machines are stored in.
-    public private(set) var machines: [Machine]
+    func addMachine(machine: Machine) -> Void
     
-    public init(machines: [Machine] = []) {
-        self.machines = machines
-    }
-    
-    /**
-     *  Add a machine to the machines array.
-     */
-    public func addMachine(machine: Machine) -> Void {
-        self.machines.append(machine)
-    }
-    
-    /**
-     *  Clear the machines array therefore stopping the execution of all
-     *  machines.
-     */
-    public func clear() {
-        self.machines = []
-    }
-    
-    /**
-     *  Start executing all machines.
-     */
-    public func run() -> Void {
-        // Just keep running and loop around when we reach the end of the array
-        var count: UInt = 0
-        for (
-            var i: Int = 0;
-            i < self.machines.count;
-            i = (i + 1) % (0 == self.machines.count ? 1 : self.machines.count)
-        ) {
-            print("scheduler: \(count++)")
-            if (self.machines[i].machine.hasFinished()) {
-                self.machines.removeAtIndex(i--)
-                continue
-            }
-            self.machines[i].machine.next()
-        }
-    }
+    func run() -> Void
     
 }
