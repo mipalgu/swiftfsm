@@ -1,5 +1,5 @@
 /*
- * Scheduler.swift
+ * StandardScheduler.swift
  * swiftfsm
  *
  * Created by Callum McColl on 18/08/2015.
@@ -61,7 +61,7 @@ import Swift_FSM
 /**
  *  Responsible for the execution of machines.
  */
-public class Scheduler {
+public class LoopingScheduler {
     
     // The actual property that the machines are stored in.
     public private(set) var machines: [Machine]
