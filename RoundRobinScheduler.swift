@@ -63,7 +63,7 @@ import Swift_FSM
  */
 public class RoundRobinScheduler: Scheduler {
     
-    // The actual property that the machines are stored in.
+    // All the machines that will be executed.
     public private(set) var machines: [Machine]
     
     public init(machines: [Machine] = []) {
