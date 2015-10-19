@@ -86,22 +86,27 @@ public class FSM: FiniteStateMachine {
     public let ringlet: Ringlet
     
     /**
+     *  The state that was about to be executed when the machine was suspended.
+     */
+    public var suspendedState: State? = nil
+    
+    /**
      *  The state which is responsible for suspending the machine.
      *
      *  If this state is set as the current state then the machine is determined
      *  to be suspended.
      */
-    public let suspendedState: State
+    public let suspendState: State
     
     public init(
         initialState: State,
         ringlet: Ringlet,
-        suspendedState: State = EmptyState(name: "_suspend")
+        suspendState: State = EmptyState(name: "_suspend")
     ) {
         self.initialState = initialState
         self.currentState = initialState
         self.previousState = initialState
-        self.suspendedState = suspendedState
+        self.suspendState = suspendState
         self.ringlet = ringlet
     }
     

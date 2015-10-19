@@ -67,7 +67,8 @@ public protocol _FiniteStateMachine {
     var initialState: State { get }
     var previousState: State { get set }
     var ringlet: Ringlet { get }
-    var suspendedState: State { get }
+    var suspendedState: State? { get set }
+    var suspendState: State { get }
     
 }
 
@@ -96,19 +97,19 @@ public extension _FiniteStateMachine where Self: Exitable, Self: Resumeable {
 public extension _FiniteStateMachine where Self: Suspendable {
     
     public func isSuspended() -> Bool {
-        return self.suspendedState == self.currentState
+        return self.suspendState == self.currentState
     }
     
     public mutating func resume() -> Void {
-        if (false == self.isSuspended()) {
+        if (nil == self.suspendedState) {
             return
         }
-        self.currentState = self.previousState
+        self.currentState = self.suspendedState!
     }
     
     public mutating func suspend() -> Void {
-        self.previousState = self.currentState
-        self.currentState = self.suspendedState
+        self.suspendedState = self.currentState
+        self.currentState = self.suspendState
     }
     
 }
