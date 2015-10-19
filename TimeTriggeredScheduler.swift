@@ -58,6 +58,21 @@
 
 import Swift_FSM
 
-public class TimeTriggeredScheduler {
+public class TimeTriggeredScheduler: Scheduler {
+    
+    // All the machines that will be executed.
+    public private(set) var machines: [Machine]
+    
+    public init(machines: [Machine] = []) {
+        self.machines = machines
+    }
+    
+    public func addMachine(machine: Machine) {
+        machines.append(machine)
+    }
+    
+    public func run() {
+        
+    }
     
 }
