@@ -105,6 +105,7 @@ public extension _FiniteStateMachine where Self: Suspendable {
             return
         }
         self.currentState = self.suspendedState!
+        self.suspendedState = nil
     }
     
     public mutating func suspend() -> Void {
