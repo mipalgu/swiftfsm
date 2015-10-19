@@ -1,5 +1,5 @@
 /*
- * StandardScheduler.swift
+ * RoundRobinScheduler.swift
  * swiftfsm
  *
  * Created by Callum McColl on 18/08/2015.
@@ -61,7 +61,7 @@ import Swift_FSM
 /**
  *  Responsible for the execution of machines.
  */
-public class LoopingScheduler: Scheduler {
+public class RoundRobinScheduler: Scheduler {
     
     // The actual property that the machines are stored in.
     public private(set) var machines: [Machine]
