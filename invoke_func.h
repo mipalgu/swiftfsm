@@ -60,10 +60,13 @@
 #define invoke_func_h
 
 #include <stdio.h>
+#include <sys/time.h>
 
 /**
  *  Call the main method from an opaque pointer that points to it.
  */
 int invoke_fun(void * p);
+
+long microseconds();
 
 #endif /* invoke_func_h */

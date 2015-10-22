@@ -63,3 +63,10 @@ int invoke_fun(void * p) {
     char * args[0];
     return f(0, args);
 }
+
+long microseconds() {
+    struct timeval time;
+    gettimeofday(&time, NULL);
+    long microsec = ((unsigned long long)time.tv_sec * 1000000) + time.tv_usec;
+    return microsec;
+}
