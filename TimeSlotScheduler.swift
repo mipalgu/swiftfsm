@@ -75,7 +75,21 @@ public class TimeSlotScheduler: Scheduler {
     }
     
     public func run() {
-        
+        for (
+            var i: Int = 0;
+            i < self.machines.count;
+            i = i++
+        ) {
+            if (false == self.machines[i].machine.hasFinished()) {
+                self.machines[i].machine.next()
+                continue
+            }
+            self.machines.removeAtIndex(i--)
+            if (self.machines.count < 0) {
+                return
+            }
+            
+        }
     }
     
 }
