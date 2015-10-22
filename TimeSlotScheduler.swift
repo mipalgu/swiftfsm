@@ -1,5 +1,5 @@
 /*
- * TimeTriggeredScheduler.swift
+ * TimeSlotScheduler.swift
  * swiftfsm
  *
  * Created by Callum McColl on 10/10/2015.
@@ -56,15 +56,18 @@
  *
  */
 
+import Darwin
 import Swift_FSM
 
-public class TimeTriggeredScheduler: Scheduler {
+public class TimeSlotScheduler: Scheduler {
     
     // All the machines that will be executed.
     public private(set) var machines: [Machine]
+    private let time: UInt8
     
-    public init(machines: [Machine] = []) {
+    public init(machines: [Machine] = [], time: UInt8 = 15) {
         self.machines = machines
+        self.time = time
     }
     
     public func addMachine(machine: Machine) {
