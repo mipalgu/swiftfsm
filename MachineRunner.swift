@@ -64,8 +64,6 @@ public class MachineRunner: CommandQuerier {
     private let executer: ThreadExecuter
     private let machine: Machine
     private let runSem: UnsafeMutablePointer<sem_t>
-    private var totalRunTime: UInt = 0
-    private var totalTimesRun: UInt = 0
     
     public private(set) var averageRunTime: UInt = 0
     
@@ -83,6 +81,8 @@ public class MachineRunner: CommandQuerier {
     }
     
     public private(set) var lastRunTime: UInt = 0
+    public private(set) var totalRunTime: UInt = 0
+    public private(set) var totalTimesRun: UInt = 0
     
     public init(machine: Machine, executer: ThreadExecuter) {
         self.executer = executer

@@ -64,7 +64,7 @@
 public protocol CommandQuerier: Command {
     
     /**
-     *  The average time it takes to run the command.
+     *  The average time in microseconds it takes to run the command.
      *
      *  The run command must have been called at least once before calling
      *  this method.
@@ -80,4 +80,16 @@ public protocol CommandQuerier: Command {
      *  The last run time in microseconds.
      */
     var lastRunTime: UInt { get }
+    
+    /**
+     *  The total amount of time in microseconds that the command has run.
+     *
+     *  This value is increased across multiple runs.
+     */
+    var totalRunTime: UInt { get }
+    
+    /**
+     *  The total number of times the command has been run.
+     */
+    var totalTimesRun: UInt { get }
 }
