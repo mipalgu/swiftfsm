@@ -64,20 +64,20 @@
 public protocol CommandQuerier: Command {
     
     /**
-     *  Returns the average time it takes to run the command.
+     *  The average time it takes to run the command.
      *
      *  The run command must have been called at least once before calling
      *  this method.
      */
-    func averageRunTime() -> UInt
+    var averageRunTime: UInt { get }
     
     /**
      *  Is the command currently running?
      */
-    func currentlyRunning() -> Bool
+    var currentlyRunning: Bool { get }
     
     /**
-     *  How long did the last run take in microseconds?
+     *  The last run time in microseconds.
      */
-    func lastRunTime() -> UInt
+    var lastRunTime: UInt { get }
 }
