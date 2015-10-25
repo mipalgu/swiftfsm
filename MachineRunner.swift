@@ -61,7 +61,7 @@ import Swift_FSM
 public class MachineRunner: CommandQuerier {
     
     private let runSem: UnsafeMutablePointer<sem_t>
-    private let thread: UnsafeMutablePointer<pthread_t> = nil
+    private var thread: UnsafeMutablePointer<pthread_t>
     
     private var _currentlyRunning: Bool = false
     private var totalRunTime: UInt = 0
@@ -93,6 +93,7 @@ public class MachineRunner: CommandQuerier {
             0,
             1
         )
+        self.thread = UnsafeMutablePointer<pthread_t>.alloc(1)
     }
     
     private func execute(f: () -> Void) {
@@ -104,11 +105,12 @@ public class MachineRunner: CommandQuerier {
             self.thread,
             nil,
             {(v: UnsafeMutablePointer<Void>) -> UnsafeMutablePointer<Void> in
+                
                 let p: UnsafeMutablePointer<() -> Void> =
                     UnsafeMutablePointer<() -> Void>(v)
                 let f: () -> Void = p.memory
                 f()
-                p.dealloc(1	)
+                p.dealloc(1)
                 return nil
             },
             v
@@ -127,6 +129,7 @@ public class MachineRunner: CommandQuerier {
         if (self.totalTimesRun > 0) {
             pthread_join(self.thread.memory, nil)
         }
+        self.thread.dealloc(1)
         sem_close(self.runSem)
     }
     
