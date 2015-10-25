@@ -60,13 +60,12 @@ import Swift_FSM
 
 public class MachineRunner: CommandQuerier {
     
-    private let runSem: UnsafeMutablePointer<sem_t>
-    private var thread: UnsafeMutablePointer<pthread_t>
-    
     private var _currentlyRunning: Bool = false
+    private let executer: ThreadExecuter
+    private let machine: Machine
+    private let runSem: UnsafeMutablePointer<sem_t>
     private var totalRunTime: UInt = 0
     private var totalTimesRun: UInt = 0
-    private let machine: Machine
     
     public private(set) var averageRunTime: UInt = 0
     
@@ -85,7 +84,8 @@ public class MachineRunner: CommandQuerier {
     
     public private(set) var lastRunTime: UInt = 0
     
-    public init(machine: Machine) {
+    public init(machine: Machine, executer: ThreadExecuter) {
+        self.executer = executer
         self.machine = machine
         self.runSem = sem_open(
             "machine_runner_runSem_" + machine.name,
@@ -93,43 +93,21 @@ public class MachineRunner: CommandQuerier {
             0,
             1
         )
-        self.thread = UnsafeMutablePointer<pthread_t>.alloc(1)
-    }
-    
-    private func execute(f: () -> Void) {
-        let p: UnsafeMutablePointer<() -> Void> =
-            UnsafeMutablePointer<() -> Void>.alloc(1)
-        p.initialize(f)
-        let v: UnsafeMutablePointer<Void> = UnsafeMutablePointer<Void>(p)
-        pthread_create(
-            self.thread,
-            nil,
-            {(v: UnsafeMutablePointer<Void>) -> UnsafeMutablePointer<Void> in
-                
-                let p: UnsafeMutablePointer<() -> Void> =
-                    UnsafeMutablePointer<() -> Void>(v)
-                let f: () -> Void = p.memory
-                f()
-                p.dealloc(1)
-                return nil
-            },
-            v
-        )
     }
     
     public func run() {
         self.currentlyRunning = true
-        self.execute({
+        self.executer.execute({
+            let timestamp: Int = microseconds()
             self.machine.machine.next()
+            self.lastRunTime = UInt(microseconds() - timestamp)
+            self.totalRunTime = self.totalRunTime + self.lastRunTime
+            self.averageRunTime = self.totalRunTime / (++self.totalTimesRun)
             self.currentlyRunning = false
         })
     }
     
     deinit {
-        if (self.totalTimesRun > 0) {
-            pthread_join(self.thread.memory, nil)
-        }
-        self.thread.dealloc(1)
         sem_close(self.runSem)
     }
     
