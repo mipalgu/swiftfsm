@@ -61,23 +61,28 @@ public class MachineRunner: CommandQuerier {
     private var totalRunTime: UInt = 0
     private var totalTimesRun: UInt = 0
     private let machine: Machine
+    private let runSem: UnsafeMutablePointer<sem_t>
     
-    public var averageRunTime: UInt {
-        return self.totalRunTime / self.totalTimesRun
-    }
-    
-    public var currentlyRunning: Bool {
-        return true
-    }
-    
-    public var lastRunTime: UInt = 0
+    public private(set) var averageRunTime: UInt = 0
+    public private(set) var currentlyRunning: Bool = false
+    public private(set) var lastRunTime: UInt = 0
     
     public init(machine: Machine) {
         self.machine = machine
+        self.runSem = sem_open(
+            "machine_runner_runSem_" + machine.name,
+            O_CREAT,
+            0,
+            1
+        )
     }
     
     public func run() {
         self.machine.machine.next()
+    }
+    
+    deinit {
+        sem_close(self.runSem)
     }
     
 }
