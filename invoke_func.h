@@ -61,6 +61,7 @@
 
 #include <stdio.h>
 #include <sys/time.h>
+#include <time.h>
 
 /**
  *  Call the main method from an opaque pointer that points to it.
@@ -68,5 +69,7 @@
 int invoke_fun(void * p);
 
 long microseconds();
+
+void microsleep(uint microseconds);
 
 #endif /* invoke_func_h */

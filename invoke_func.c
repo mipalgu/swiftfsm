@@ -70,3 +70,10 @@ long microseconds() {
     long microsec = ((unsigned long long)time.tv_sec * 1000000) + time.tv_usec;
     return microsec;
 }
+
+void microsleep(uint microseconds) {
+    struct timespec tim, tim2;
+    tim.tv_sec = 0;
+    tim.tv_nsec = microseconds * 1000;
+    nanosleep(&tim, &tim2);
+}
