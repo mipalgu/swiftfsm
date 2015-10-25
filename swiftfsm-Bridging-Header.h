@@ -58,7 +58,8 @@
 
 #include <dlfcn.h>
 #include <fcntl.h>           /* For O_* constants */
+#include <pthread.h>         /* For threads */
 #include <sys/stat.h>        /* For mode constants */
-#include <semaphore.h>
+#include <semaphore.h>       /* For semaphores */
 
 #include "invoke_func.h"
