@@ -1,8 +1,8 @@
 /*
- * swiftfsm-Bridging-Header.h
+ * CommandQuerier.swift
  * swiftfsm
  *
- * Created by Callum McColl on 11/08/2015.
+ * Created by Callum McColl on 25/10/2015.
  * Copyright © 2015 Callum McColl. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -56,9 +56,28 @@
  *
  */
 
-#include <dlfcn.h>
-#include <fcntl.h>           /* For O_* constants */
-#include <sys/stat.h>        /* For mode constants */
-#include <semaphore.h>
-
-#include "invoke_func.h"
+/**
+ *  An interface which allows the querying of meta data from the command.
+ *
+ *  Things like run timeor if the command is still running can be queried.
+ */
+public protocol CommandQuerier: Command {
+    
+    /**
+     *  The average time it takes to run the command.
+     *
+     *  The run command must have been called at least once before calling
+     *  this method.
+     */
+    var averageRunTime: UInt { get }
+    
+    /**
+     *  Is the command currently running?
+     */
+    var currentlyRunning: Bool { get }
+    
+    /**
+     *  The last run time in microseconds.
+     */
+    var lastRunTime: UInt { get }
+}

@@ -1,8 +1,8 @@
 /*
- * swiftfsm-Bridging-Header.h
+ * Command.swift
  * swiftfsm
  *
- * Created by Callum McColl on 11/08/2015.
+ * Created by Callum McColl on 25/10/2015.
  * Copyright © 2015 Callum McColl. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -56,9 +56,14 @@
  *
  */
 
-#include <dlfcn.h>
-#include <fcntl.h>           /* For O_* constants */
-#include <sys/stat.h>        /* For mode constants */
-#include <semaphore.h>
-
-#include "invoke_func.h"
+/**
+ *  Provides a common interface for the execution of a specific task or command.
+ */
+public protocol Command {
+    
+    /**
+     *  Execute the command.
+     */
+    func run() -> Void
+    
+}

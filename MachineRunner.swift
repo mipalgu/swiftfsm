@@ -1,8 +1,8 @@
 /*
- * swiftfsm-Bridging-Header.h
+ * MachineRunner.swift
  * swiftfsm
  *
- * Created by Callum McColl on 11/08/2015.
+ * Created by Callum McColl on 25/10/2015.
  * Copyright © 2015 Callum McColl. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -56,9 +56,49 @@
  *
  */
 
-#include <dlfcn.h>
-#include <fcntl.h>           /* For O_* constants */
-#include <sys/stat.h>        /* For mode constants */
-#include <semaphore.h>
-
-#include "invoke_func.h"
+public class MachineRunner: CommandQuerier {
+    
+    private var _currentlyRunning: Bool = false
+    private var totalRunTime: UInt = 0
+    private var totalTimesRun: UInt = 0
+    private let machine: Machine
+    private let runSem: UnsafeMutablePointer<sem_t>
+    
+    public private(set) var averageRunTime: UInt = 0
+    
+    public private(set) var currentlyRunning: Bool {
+        get {
+            sem_wait(self.runSem)
+            let temp: Bool = self._currentlyRunning
+            sem_post(self.runSem)
+            return temp
+        } set {
+            sem_wait(self.runSem)
+            self._currentlyRunning = newValue
+            sem_post(self.runSem)
+        }
+    }
+    
+    public private(set) var lastRunTime: UInt = 0
+    
+    public init(machine: Machine) {
+        self.machine = machine
+        self.runSem = sem_open(
+            "machine_runner_runSem_" + machine.name,
+            O_CREAT,
+            0,
+            1
+        )
+    }
+    
+    public func run() {
+        self.currentlyRunning = true
+        self.machine.machine.next()
+        self.currentlyRunning = false
+    }
+    
+    deinit {
+        sem_close(self.runSem)
+    }
+    
+}
