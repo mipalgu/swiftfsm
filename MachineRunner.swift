@@ -95,20 +95,20 @@ public class MachineRunner: CommandQuerier {
         )
     }
     
-    private func executeMachine(machine: FiniteStateMachine) {
-        let p: UnsafeMutablePointer<FiniteStateMachine> =
-            UnsafeMutablePointer<FiniteStateMachine>.alloc(1)
-        p.initialize(machine)
+    private func execute(f: () -> Void) {
+        let p: UnsafeMutablePointer<() -> Void> =
+            UnsafeMutablePointer<() -> Void>.alloc(1)
+        p.initialize(f)
         let v: UnsafeMutablePointer<Void> = UnsafeMutablePointer<Void>(p)
         pthread_create(
             self.thread,
             nil,
             {(v: UnsafeMutablePointer<Void>) -> UnsafeMutablePointer<Void> in
-                let p: UnsafeMutablePointer<FiniteStateMachine> =
-                    UnsafeMutablePointer<FiniteStateMachine>(v)
-                var fsm: FiniteStateMachine = p.memory
-                fsm.next()
-                p.dealloc(1)
+                let p: UnsafeMutablePointer<() -> Void> =
+                    UnsafeMutablePointer<() -> Void>(v)
+                let f: () -> Void = p.memory
+                f()
+                p.dealloc(1	)
                 return nil
             },
             v
@@ -117,8 +117,10 @@ public class MachineRunner: CommandQuerier {
     
     public func run() {
         self.currentlyRunning = true
-        self.executeMachine(self.machine.machine)
-        self.currentlyRunning = false
+        self.execute({
+            self.machine.machine.next()
+            self.currentlyRunning = false
+        })
     }
     
     deinit {
