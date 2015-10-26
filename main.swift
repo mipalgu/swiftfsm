@@ -76,6 +76,7 @@ for (var i: Int = 1; i < Process.arguments.count; i++) {
         continue
     }
     items.append(factory.make("Ping Pong", machine: machine!, time: 15000))
+    items.append(factory.make("Ping Pong2", machine: machine!, time: 15000))
 }
 
 let scheduler: Scheduler = DispatchTableScheduler(
