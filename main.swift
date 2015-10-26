@@ -61,10 +61,10 @@ import Swift_FSM
 
 print("Hello, when I grow up, I will be a full-blown state machine scheduler!")
 
-// Dynamic Time Slots
+// Dynamic Time Slots - task may get more than one timeslot if it is needed.
 //let factory: DynamicTimeSlotFactory = DynamicTimeSlotFactory()
 
-// Static Time Slots
+// Static Time Slots - each task gets one time slot
 let factory: StaticTimeSlotFactory = StaticTimeSlotFactory()
 
 // Load the machines from dylibs.
@@ -79,10 +79,10 @@ for (var i: Int = 1; i < Process.arguments.count; i++) {
     items.append(factory.make("Ping Pong2", machine: machine!, time: 15000))
 }
 
-// Least Laxity Dispatch Table
+// Least Laxity Dispatch Table - reorganize the dispatch table every run through
 let dispatchTable: DispatchTable = LeastLaxityDispatchTable(items: items)
 
-// Static Dispatch Table - order of items does not change
+// Static Dispatch Table - order of items never changes
 //let dispatchTable: DispatchTable = StaticDispatchTable(items: items)
 
 let scheduler: Scheduler = DispatchTableScheduler(
