@@ -77,7 +77,7 @@ public class TimeSlotScheduler: Scheduler {
     ) {
         self.machines = machines
         self.finished = sem_open(
-            "TimeSlotScheduler" + String(microseconds()),
+            "TSS_finished_" + String(microseconds()),
             O_CREAT,
             0,
             0
@@ -103,6 +103,7 @@ public class TimeSlotScheduler: Scheduler {
     
     private func handleTimeslot() {
         if (true == self.machines[index].currentlyRunning) {
+            self.timer.stop()
             print("Error: Machine did not finish in time")
             return
         }
