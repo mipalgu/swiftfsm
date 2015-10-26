@@ -70,7 +70,7 @@ for (var i: Int = 1; i < Process.arguments.count; i++) {
     if (nil == machine) {
         continue
     }
-    scheduler.addMachine(Machine(name: "ping_pong", machine: machine!))
+    scheduler.addMachine(SimpleMachine(name: "ping_pong", machine: machine!))
 }
 
 // Run the scheduler.

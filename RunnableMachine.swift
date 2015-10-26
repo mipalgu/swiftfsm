@@ -106,5 +106,8 @@ public class RunnableMachine: CommandQuerier, Machine {
         return self.runner.run(callback)
     }
     
+    public func stop() {
+        return self.runner.stop()
+    }
     
 }
