@@ -1,5 +1,5 @@
 /*
- * StaticDispatchTable.swift
+ * TimeSlotDispatchTable.swift
  * swiftfsm
  *
  * Created by Callum McColl on 27/10/2015.
@@ -56,10 +56,10 @@
  *
  */
 
-public class StaticDispatchTable: DispatchTable {
+public class TimeSlotDispatchTable: DispatchTable {
     
     private var index: Int = 0
-    public private(set) var items: [Dispatchable]
+    private var items: [Dispatchable]
     
     public init(items: [Dispatchable] = []) {
         self.items = items
@@ -69,10 +69,37 @@ public class StaticDispatchTable: DispatchTable {
         self.items.append(item)
     }
     
+    public func advance() {
+        self.index = ++self.index % self.items.count
+    }
+    
+    public func count() -> UInt {
+        return UInt(self.items.count)
+    }
+    
+    public func empty() -> Bool {
+        return 0 == self.count()
+    }
+    
+    public func get() -> Dispatchable {
+        return self.get(self.index)
+    }
+    
+    public func get(index: Int) -> Dispatchable {
+        return self.items[index]
+    }
+    
     public func next() -> Dispatchable {
-        let d: Dispatchable = self.items[self.index++]
-        self.index = self.index % self.items.count
-        return d
+        self.advance()
+        return self.items[self.index]
+    }
+    
+    public func remove() {
+        self.remove(self.index)
+    }
+    
+    public func remove(index: Int) {
+        self.items.removeAtIndex(index)
     }
     
 }

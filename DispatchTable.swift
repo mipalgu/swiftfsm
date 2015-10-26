@@ -58,8 +58,23 @@
 
 public protocol DispatchTable {
     
+    
     func addItem(item: Dispatchable)
     
+    func advance()
+    
+    func count() -> UInt
+    
+    func empty() -> Bool
+    
+    func get() -> Dispatchable
+    
+    func get(index: Int) -> Dispatchable
+    
     func next() -> Dispatchable
+    
+    func remove()
+    
+    func remove(index: Int)
     
 }
