@@ -79,8 +79,14 @@ for (var i: Int = 1; i < Process.arguments.count; i++) {
     items.append(factory.make("Ping Pong2", machine: machine!, time: 15000))
 }
 
+// Least Laxity Dispatch Table
+let dispatchTable: DispatchTable = LeastLaxityDispatchTable(items: items)
+
+// Static Dispatch Table - order of items does not change
+//let dispatchTable: DispatchTable = StaticDispatchTable(items: items)
+
 let scheduler: Scheduler = DispatchTableScheduler(
-    dispatchTable: LeastLaxityDispatchTable(items: items),
+    dispatchTable: dispatchTable,
     timer: Timer(executer: ThreadExecuter())
 )
 
