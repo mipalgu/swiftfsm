@@ -97,11 +97,11 @@ public class TimeSlotScheduler: Scheduler {
         }
         self.index = 0
         self.machines[self.index].execute()
-        self.timer.delay(self.time, callback: handleTimeslot)
+        self.timer.delay(self.time, callback: handleTimeSlot)
         sem_wait(self.finished)
     }
     
-    private func handleTimeslot() {
+    private func handleTimeSlot() {
         if (true == self.machines[index].currentlyRunning) {
             self.timer.stop()
             print("Error: Machine did not finish in time")
@@ -117,7 +117,7 @@ public class TimeSlotScheduler: Scheduler {
         }
         self.index = ++self.index % self.machines.count
         self.machines[index].execute()
-        self.timer.delay(self.time, callback: self.handleTimeslot)
+        self.timer.delay(self.time, callback: self.handleTimeSlot)
     }
     
     deinit {
