@@ -61,21 +61,35 @@ import Swift_FSM
 
 print("Hello, when I grow up, I will be a full-blown state machine scheduler!")
 
-let scheduler: TimeSlotScheduler = TimeSlotScheduler(factory: RunnableMachineFactory(runnerFactory: MachineRunnerFactory()), timer: Timer(executer: ThreadExecuter()))
-
 // Load the machines from dylibs.
 let loader: MachineLoader = DynamicLibraryMachineLoaderFactory().make()
+var items: [Dispatchable] = []
 for (var i: Int = 1; i < Process.arguments.count; i++) {
     let machine: FiniteStateMachine? = loader.load(Process.arguments[i])
     if (nil == machine) {
         continue
     }
-    scheduler.addMachine(SimpleMachine(name: "ping_pong", machine: machine!))
+    items.append(
+        DynamicTimeSlotDispatchableItem(
+            item: RunnableMachine(
+                runner: MachineRunner(
+                    machine: SimpleMachine(
+                        name: "ping_pong",
+                        machine: machine!
+                    ),
+                    executer: ThreadExecuter()
+                )
+            ),
+            timeslot: 15000
+        )
+    )
+    
 }
 
+let scheduler: Scheduler = DispatchTableScheduler(
+    dispatchTable: TimeSlotDispatchTable(items: items),
+    timer: Timer(executer: ThreadExecuter())
+)
+
 // Run the scheduler.
-if (scheduler.machines.count < 1) {
-    print("No Machines Running!")
-} else {
-    scheduler.run()
-}
+scheduler.run()
