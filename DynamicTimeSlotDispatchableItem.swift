@@ -1,5 +1,5 @@
 /*
- * StaticDispatchTable.swift
+ * DynamicTimeSlotDispatchableItem.swift
  * swiftfsm
  *
  * Created by Callum McColl on 27/10/2015.
@@ -56,23 +56,17 @@
  *
  */
 
-public class StaticDispatchTable: DispatchTable {
-    
-    private var index: Int = 0
-    public private(set) var items: [Dispatchable]
-    
-    public init(items: [Dispatchable] = []) {
-        self.items = items
+public class DynamicTimeSlotDispatchableItem: Dispatchable {
+
+    public let item: CommandQuerier
+    public var timeout: UInt {
+        return (self.timeslot / item.worstCaseExecutionTime + 1) * self.timeslot
     }
+    private let timeslot: UInt
     
-    public func addItem(item: Dispatchable) {
-        self.items.append(item)
-    }
-    
-    public func next() -> Dispatchable {
-        let d: Dispatchable = self.items[self.index++]
-        self.index = self.index % self.items.count
-        return d
+    public init(item: CommandQuerier, timeslot: UInt) {
+        self.item = item
+        self.timeslot = timeslot
     }
     
 }
