@@ -1,8 +1,8 @@
 /*
- * Machine.swift
+ * RunnableMachine.swift
  * swiftfsm
  *
- * Created by Callum McColl on 24/09/2015.
+ * Created by Callum McColl on 26/10/2015.
  * Copyright © 2015 Callum McColl. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -58,10 +58,15 @@
 
 import Swift_FSM
 
-public protocol Machine {
+public class SimpleMachine: Machine {
     
-    var name: String { get }
+    public let name: String
     
-    var machine: FiniteStateMachine { get }
+    public var machine: FiniteStateMachine
+    
+    public init(name: String, machine: FiniteStateMachine) {
+        self.name = name
+        self.machine = machine
+    }
     
 }
