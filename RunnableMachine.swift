@@ -1,5 +1,5 @@
 /*
- * MachineRunnerFactory.swift
+ * RunnableMachine.swift
  * swiftfsm
  *
  * Created by Callum McColl on 26/10/2015.
@@ -58,7 +58,7 @@
 
 import Swift_FSM
 
-public class RunnableMachine: CommandQuerier {
+public class RunnableMachine: CommandQuerier, Machine {
     
     private let runner: MachineRunner
     

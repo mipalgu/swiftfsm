@@ -2,7 +2,7 @@
  * MachineRunnerFactory.swift
  * swiftfsm
  *
- * Created by Callum McColl on 25/10/2015.
+ * Created by Callum McColl on 26/10/2015.
  * Copyright © 2015 Callum McColl. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
