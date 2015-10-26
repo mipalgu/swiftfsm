@@ -65,7 +65,8 @@ public class MachineRunner: CommandQuerier {
     private let runSem: UnsafeMutablePointer<sem_t>
     private var timestamp: Int = 0
     
-    public private(set) var averageRunTime: UInt = 0
+    public private(set) var averageExecutionTime: UInt = 0
+    public private(set) var bestCaseExecutionTime: UInt = 0
     
     public private(set) var currentlyRunning: Bool {
         get {
@@ -80,10 +81,11 @@ public class MachineRunner: CommandQuerier {
         }
     }
     
-    public private(set) var lastRunTime: UInt = 0
+    public private(set) var lastExecutionTime: UInt = 0
     public var machine: Machine
-    public private(set) var totalRunTime: UInt = 0
-    public private(set) var totalTimesRun: UInt = 0
+    public private(set) var totalExecutionTime: UInt = 0
+    public private(set) var totalExecutions: UInt = 0
+    public private(set) var worstCaseExecutionTime: UInt = 0
     
     public init(machine: Machine, executer: ThreadExecuter) {
         self.executer = executer
@@ -97,27 +99,33 @@ public class MachineRunner: CommandQuerier {
     }
     
     private func calculateMetaData() {
-        self.lastRunTime = UInt(microseconds() - self.timestamp)
-        self.totalRunTime = self.totalRunTime + self.lastRunTime
-        self.averageRunTime = self.totalRunTime / (++self.totalTimesRun)
+        self.lastExecutionTime = UInt(microseconds() - self.timestamp)
+        self.totalExecutionTime = self.totalExecutionTime + self.lastExecutionTime
+        self.averageExecutionTime = self.totalExecutionTime / (++self.totalExecutions)
+        if (self.lastExecutionTime < self.bestCaseExecutionTime) {
+            self.bestCaseExecutionTime = self.lastExecutionTime
+        }
+        if (self.lastExecutionTime > self.worstCaseExecutionTime) {
+            self.worstCaseExecutionTime = self.lastExecutionTime
+        }
     }
     
-    private func _run() {
+    private func _execute() {
         self.timestamp = microseconds()
         self.machine.machine.next()
         self.calculateMetaData()
         self.currentlyRunning = false
     }
     
-    public func run() {
+    public func execute() {
         self.currentlyRunning = true
-        self.executer.execute(self._run)
+        self.executer.execute(self._execute)
     }
     
-    public func run(callback: () -> Void) {
+    public func execute(callback: () -> Void) {
         self.currentlyRunning = true
         self.executer.execute({
-            self._run()
+            self._execute()
             callback()
         })
     }
