@@ -63,7 +63,7 @@ public class StaticTimeSlotFactory {
     public func make(
         name: String,
         machine: FiniteStateMachine,
-        time: UInt32
+        time: UInt
     ) -> Dispatchable {
         return StaticTimeSlotDispatchableItem(
             item: RunnableMachine(

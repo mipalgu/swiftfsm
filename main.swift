@@ -79,7 +79,7 @@ for (var i: Int = 1; i < Process.arguments.count; i++) {
 }
 
 let scheduler: Scheduler = DispatchTableScheduler(
-    dispatchTable: StaticDispatchTable(items: items),
+    dispatchTable: LeastLaxityDispatchTable(items: items),
     timer: Timer(executer: ThreadExecuter())
 )
 

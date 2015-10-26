@@ -64,9 +64,9 @@ public class Timer {
         self.executer = executer
     }
     
-    public func delay(time: UInt32, callback: () -> Void) {
+    public func delay(time: UInt, callback: () -> Void) {
         self.executer.execute({
-            microsleep(time)
+            microsleep(UInt32(time))
             callback()
         })
     }
