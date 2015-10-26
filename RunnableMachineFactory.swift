@@ -1,5 +1,5 @@
 /*
- * RunnableMachine.swift
+ * RunnableMachineFactory.swift
  * swiftfsm
  *
  * Created by Callum McColl on 26/10/2015.
@@ -56,55 +56,16 @@
  *
  */
 
-import Swift_FSM
-
-public class RunnableMachine: CommandQuerier, Machine {
+public class RunnableMachineFactory {
     
-    private let runner: MachineRunner
+    private let runnerFactory: MachineRunnerFactory
     
-    public var averageRunTime: UInt {
-        return self.runner.averageRunTime
+    public init(runnerFactory: MachineRunnerFactory) {
+        self.runnerFactory = runnerFactory
     }
     
-    public var currentlyRunning: Bool {
-        return self.runner.currentlyRunning
+    public func make(machine: Machine) -> RunnableMachine {
+        return RunnableMachine(runner: self.runnerFactory.make(machine))
     }
-    
-    public var lastRunTime: UInt {
-        return self.runner.lastRunTime
-    }
-    
-    public var machine: FiniteStateMachine {
-        get {
-            return self.runner.machine.machine
-        } set {
-            self.runner.machine.machine = newValue
-        }
-    }
-    
-    public var name: String {
-        return self.runner.machine.name
-    }
-    
-    public var totalRunTime: UInt {
-        return self.runner.totalRunTime
-    }
-    
-    public var totalTimesRun: UInt {
-        return self.runner.totalTimesRun
-    }
-    
-    public init(runner: MachineRunner) {
-        self.runner = runner
-    }
-    
-    public func run() {
-        return self.runner.run()
-    }
-    
-    public func run(callback: () -> Void) {
-        return self.runner.run(callback)
-    }
-    
     
 }
