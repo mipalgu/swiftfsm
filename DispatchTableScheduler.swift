@@ -1,5 +1,5 @@
 /*
- * TimeSlotScheduler.swift
+ * DispatchTableScheduler.swift
  * swiftfsm
  *
  * Created by Callum McColl on 10/10/2015.
@@ -59,26 +59,21 @@
 import Darwin
 import Swift_FSM
 
-public class TimeSlotScheduler: Scheduler {
+public class DispatchTableScheduler: Scheduler {
     
-    private let dispatchTable: DispatchTable
-    private let factory: RunnableMachineFactory
+    public let dispatchTable: DispatchTable
     private var finished: UnsafeMutablePointer<sem_t>
     private let timer: Timer
     
-    public init(
-        dispatchTable: DispatchTable,
-        factory: RunnableMachineFactory,
-        timer: Timer
-    ) {
+    public init(dispatchTable: DispatchTable, timer: Timer) {
+        self.dispatchTable = dispatchTable
+        self.timer = timer
         self.finished = sem_open(
             "TSS_finished_" + String(microseconds()),
             O_CREAT,
             0,
             0
         )
-        self.timer = timer
-        self.factory = factory
     }
     
     public func run() {
