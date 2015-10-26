@@ -56,12 +56,12 @@
  *
  */
 
-public class StaticTimeSlotDispatchableItem {
+public class StaticTimeSlotDispatchableItem: Dispatchable {
     
     public let item: RunnableMachine
-    public let timeout: UInt
+    public let timeout: UInt32
     
-    public init(item: RunnableMachine, timeout: UInt) {
+    public init(item: RunnableMachine, timeout: UInt32) {
         self.item = item
         self.timeout = timeout
     }
