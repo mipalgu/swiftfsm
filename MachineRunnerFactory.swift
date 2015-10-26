@@ -58,6 +58,8 @@
 
 public class MachineRunnerFactory {
     
-    public func make(machine: Machine) -> MachineRunner
+    public func make(machine: Machine) -> MachineRunner {
+        return MachineRunner(machine: machine, executer: ThreadExecuter())
+    }
     
 }
