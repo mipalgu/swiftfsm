@@ -1,5 +1,5 @@
 /*
- * DynamicTimeSlotDispatchableRunnableMachineFactory.swift
+ * StaticTimeSlotFactory.swift
  * swiftfsm
  *
  * Created by Callum McColl on 27/10/2015.
@@ -58,23 +58,23 @@
 
 import Swift_FSM
 
-public class DynamicTimeSlotDispatchableRunnableMachineFactory {
+public class StaticTimeSlotFactory {
     
     public func make(
         name: String,
         machine: FiniteStateMachine,
-        time: UInt
+        time: UInt32
     ) -> Dispatchable {
-        return DynamicTimeSlotDispatchableItem(
+        return StaticTimeSlotDispatchableItem(
             item: RunnableMachine(
                 runner: MachineRunner(
                     machine: SimpleMachine(name: name, machine: machine),
                     executer: ThreadExecuter()
                 )
             ),
-            timeslot: time
+            timeout: time
         )
-            
+        
     }
     
 }
