@@ -62,16 +62,24 @@ public class RunnableMachine: CommandQuerier, Machine {
     
     private let runner: MachineRunner
     
-    public var averageRunTime: UInt {
-        return self.runner.averageRunTime
+    public var averageExecutionTime: UInt {
+        return self.runner.averageExecutionTime
+    }
+    
+    public var bestCaseExecutionTime: UInt {
+        return self.runner.bestCaseExecutionTime
     }
     
     public var currentlyRunning: Bool {
         return self.runner.currentlyRunning
     }
     
-    public var lastRunTime: UInt {
-        return self.runner.lastRunTime
+    public var lastExecutionTime: UInt {
+        return self.runner.lastExecutionTime
+    }
+    
+    public var worstCaseExecutionTime: UInt {
+        return self.runner.worstCaseExecutionTime
     }
     
     public var machine: FiniteStateMachine {
@@ -86,24 +94,24 @@ public class RunnableMachine: CommandQuerier, Machine {
         return self.runner.machine.name
     }
     
-    public var totalRunTime: UInt {
-        return self.runner.totalRunTime
+    public var totalExecutionTime: UInt {
+        return self.runner.totalExecutionTime
     }
     
-    public var totalTimesRun: UInt {
-        return self.runner.totalTimesRun
+    public var totalExecutions: UInt {
+        return self.runner.totalExecutions
     }
     
     public init(runner: MachineRunner) {
         self.runner = runner
     }
     
-    public func run() {
-        return self.runner.run()
+    public func execute() {
+        return self.runner.execute()
     }
     
-    public func run(callback: () -> Void) {
-        return self.runner.run(callback)
+    public func execute(callback: () -> Void) {
+        return self.runner.execute(callback)
     }
     
     public func stop() {
