@@ -94,10 +94,6 @@ public class RunnableMachine: CommandQuerier, Machine {
         return self.runner.lastExecutionTime
     }
     
-    public var worstCaseExecutionTime: UInt {
-        return self.runner.worstCaseExecutionTime
-    }
-    
     public var machine: FiniteStateMachine {
         get {
             return self.runner.machine.machine
@@ -116,6 +112,10 @@ public class RunnableMachine: CommandQuerier, Machine {
     
     public var totalExecutions: UInt {
         return self.runner.totalExecutions
+    }
+    
+    public var worstCaseExecutionTime: UInt {
+        return self.runner.worstCaseExecutionTime
     }
     
     public init(runner: MachineRunner) {
