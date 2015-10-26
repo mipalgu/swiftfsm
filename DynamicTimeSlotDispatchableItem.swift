@@ -60,6 +60,10 @@ public class DynamicTimeSlotDispatchableItem: Dispatchable {
 
     public let item: RunnableMachine
     public var timeout: UInt32 {
+        let wcet: UInt = self.item.worstCaseExecutionTime
+        if (0 == wcet) {
+            return UInt32(self.timeslot)
+        }
         return UInt32(
             (self.timeslot / item.worstCaseExecutionTime + 1) * self.timeslot
         )
