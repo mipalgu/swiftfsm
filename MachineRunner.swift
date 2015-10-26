@@ -112,7 +112,7 @@ public class MachineRunner: CommandQuerier {
     public func run(callback: () -> Void) {
         self.currentlyRunning = true
         self.executer.execute({
-            self.executer.executeAndWait(self._run)
+            self._run()
             callback()
         })
     }
