@@ -56,6 +56,7 @@
  *
  */
 
+#include <errno.h>
 #include <dlfcn.h>
 #include <fcntl.h>           /* For O_* constants */
 #include <pthread.h>         /* For threads */
