@@ -66,4 +66,9 @@ public protocol Command {
      */
     func run() -> Void
     
+    /**
+     *  Execute the command and call callback when finished.
+     */
+    func run(callback: () -> Void) -> Void
+    
 }

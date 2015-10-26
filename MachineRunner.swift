@@ -95,15 +95,25 @@ public class MachineRunner: CommandQuerier {
         )
     }
     
+    private func _run() {
+        let timestamp: Int = microseconds()
+        self.machine.machine.next()
+        self.lastRunTime = UInt(microseconds() - timestamp)
+        self.totalRunTime = self.totalRunTime + self.lastRunTime
+        self.averageRunTime = self.totalRunTime / (++self.totalTimesRun)
+        self.currentlyRunning = false
+    }
+    
     public func run() {
         self.currentlyRunning = true
+        self.executer.execute(self._run)
+    }
+    
+    public func run(callback: () -> Void) {
+        self.currentlyRunning = true
         self.executer.execute({
-            let timestamp: Int = microseconds()
-            self.machine.machine.next()
-            self.lastRunTime = UInt(microseconds() - timestamp)
-            self.totalRunTime = self.totalRunTime + self.lastRunTime
-            self.averageRunTime = self.totalRunTime / (++self.totalTimesRun)
-            self.currentlyRunning = false
+            self.executer.executeAndWait(self._run)
+            callback()
         })
     }
     
