@@ -71,4 +71,8 @@ public class Timer {
         })
     }
     
+    public func stop() {
+        self.executer.stop()
+    }
+    
 }
