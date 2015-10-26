@@ -70,8 +70,8 @@ import Swift_FSM
  *  `MachineRunner.machine.machine.isFinished()` thus giving you direct access
  *  to the FiniteStateMachine instance.
  *
- *  This class also provides top level access to the Machine class properties by
- *  allowing you to access them directly, eg: by performing
+ *  This class also provides top level access to the other Machine class
+ *  properties by allowing you to access them directly, eg: by performing
  *  `RunnableMachine.name` instead of `MachineRunner.machine.name`.
  */
 public class RunnableMachine: CommandQuerier, Machine {
