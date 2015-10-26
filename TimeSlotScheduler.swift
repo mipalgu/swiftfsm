@@ -75,12 +75,17 @@ public class TimeSlotScheduler: Scheduler {
         if (true == self.dispatchTable.empty()) {
             return
         }
-        let d: Dispatchable = self.dispatchTable.next()
-        let timestamp: Int = microseconds()
-        d.item.execute()
-        let now: Int = microseconds()
-        if (UInt(now - timestamp) > d.timeout) {
-            
+        while(false == self.dispatchTable.empty()) {
+            let item: Dispatchable = self.dispatchTable.next()
+            let timestamp: UInt = microseconds()
+            item.item.execute()
+            let now: UInt = microseconds()
+            let runTime: UInt = UInt(now - timestamp)
+            if (runTime > item.timeout) {
+                self.onOvertime(item: item)
+                return
+            }
+            microsleep(item.timeout - runTime)
         }
     }
     
