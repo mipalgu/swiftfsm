@@ -61,63 +61,54 @@ import Swift_FSM
 
 public class TimeSlotScheduler: Scheduler {
     
+    private let dispatchTable: DispatchTable
     private let factory: RunnableMachineFactory
     private var finished: UnsafeMutablePointer<sem_t>
-    private var index: Int = 0
-    // All the machines that will be executed.
-    public private(set) var machines: [RunnableMachine]
-    private let time: UInt32
     private let timer: Timer
     
     public init(
-        machines: [RunnableMachine] = [],
-        time: UInt32 = 15000,
+        dispatchTable: DispatchTable,
         factory: RunnableMachineFactory,
         timer: Timer
     ) {
-        self.machines = machines
         self.finished = sem_open(
             "TSS_finished_" + String(microseconds()),
             O_CREAT,
             0,
             0
         )
-        self.time = time
         self.timer = timer
         self.factory = factory
     }
     
-    public func addMachine(machine: Machine) {
-        machines.append(factory.make(machine))
-    }
-    
     public func run() {
-        if (self.machines.count < 1) {
+        if (true == self.dispatchTable.empty()) {
             return
         }
-        self.index = 0
-        self.machines[self.index].execute()
-        self.timer.delay(self.time, callback: handleTimeSlot)
+        let d: Dispatchable = self.dispatchTable.get()
+        d.item.execute()
+        self.timer.delay(d.timeout, callback: handleTimeSlot)
         sem_wait(self.finished)
     }
     
     private func handleTimeSlot() {
-        if (true == self.machines[index].currentlyRunning) {
+        let d: Dispatchable = self.dispatchTable.get()
+        if (true == d.item.currentlyRunning) {
             self.timer.stop()
             print("Error: Machine did not finish in time")
             sem_post(self.finished)
             return
         }
-        if (true == self.machines[index].machine.hasFinished()) {
-            self.machines.removeAtIndex(index--)
-            if (self.machines.count < 1) {
+        if (true == d.item.machine.hasFinished()) {
+            self.dispatchTable.remove()
+            if (true == self.dispatchTable.empty()) {
                 sem_post(self.finished)
                 return
             }
         }
-        self.index = ++self.index % self.machines.count
-        self.machines[index].execute()
-        self.timer.delay(self.time, callback: self.handleTimeSlot)
+        let d2: Dispatchable = self.dispatchTable.next()
+        d2.item.execute()
+        self.timer.delay(d2.timeout, callback: self.handleTimeSlot)
     }
     
     deinit {
