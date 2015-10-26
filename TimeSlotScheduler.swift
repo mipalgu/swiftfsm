@@ -105,6 +105,7 @@ public class TimeSlotScheduler: Scheduler {
         if (true == self.machines[index].currentlyRunning) {
             self.timer.stop()
             print("Error: Machine did not finish in time")
+            sem_post(self.finished)
             return
         }
         if (true == self.machines[index].machine.hasFinished()) {
