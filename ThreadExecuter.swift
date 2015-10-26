@@ -89,6 +89,10 @@ public class ThreadExecuter {
         return false
     }
     
+    public func stop() {
+        pthread_cancel(self.thread.memory)
+    }
+    
     deinit {
         self.thread.dealloc(1)
     }
