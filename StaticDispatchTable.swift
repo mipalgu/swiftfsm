@@ -1,5 +1,5 @@
 /*
- * DispatchTable.swift
+ * StaticDispatchTable.swift
  * swiftfsm
  *
  * Created by Callum McColl on 27/10/2015.
@@ -56,10 +56,25 @@
  *
  */
 
-public protocol DispatchTable {
+public class StaticDispatchTable: DispatchTable {
     
-    func addItem(item: Dispatchable)
+    private var index: Int = 0
+    public private(set) var items: [Dispatchable]
+    public let time: UInt
     
-    func next() -> Dispatchable
+    public init(items: [Dispatchable] = [], time: UInt = 15000) {
+        self.items = items
+        self.time = time
+    }
+    
+    public func addItem(item: Dispatchable) {
+        self.items.append(item)
+    }
+    
+    public func next() -> Dispatchable {
+        let d: Dispatchable = self.items[self.index++]
+        self.index = self.index % self.items.count
+        return d
+    }
     
 }
