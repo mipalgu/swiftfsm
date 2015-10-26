@@ -71,4 +71,9 @@ public protocol Command {
      */
     func run(callback: () -> Void) -> Void
     
+    /**
+     *  Stop the execution of the current running command.
+     */
+    func stop() -> Void
+    
 }
