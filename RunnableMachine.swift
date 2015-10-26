@@ -58,6 +58,22 @@
 
 import Swift_FSM
 
+/**
+ *  Provides a simple interface to access common information from a
+ *  MachineRunner.
+ *
+ *  If directly using a MachineRunner it becomes tedious to access information
+ *  related to a Machine.  This class provides that information at the top level
+ *  so that you don't have to use the MachineRunner.machine class property.
+ *  This therefore allows you to check whether the Machine is finished by
+ *  performing `RunnableMachine.machine.isFinished()` instead of performing
+ *  `MachineRunner.machine.machine.isFinished()` thus giving you direct access
+ *  to the FiniteStateMachine instance.
+ *
+ *  This class also provides top level access to the Machine class properties by
+ *  allowing you to access them directly, eg: by performing
+ *  `RunnableMachine.name` instead of `MachineRunner.machine.name`.
+ */
 public class RunnableMachine: CommandQuerier, Machine {
     
     private let runner: MachineRunner
