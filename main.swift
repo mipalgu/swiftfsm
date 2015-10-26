@@ -62,10 +62,10 @@ import Swift_FSM
 print("Hello, when I grow up, I will be a full-blown state machine scheduler!")
 
 // Dynamic Time Slots
-let factory = DynamicTimeSlotFactory()
+//let factory: DynamicTimeSlotFactory = DynamicTimeSlotFactory()
 
 // Static Time Slots
-//let factory = StaticTimeSlotFactory()
+let factory: StaticTimeSlotFactory = StaticTimeSlotFactory()
 
 // Load the machines from dylibs.
 let loader: MachineLoader = DynamicLibraryMachineLoaderFactory().make()
