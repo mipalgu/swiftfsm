@@ -62,8 +62,8 @@ public class MachineRunner: CommandQuerier {
     
     private var _currentlyRunning: Bool = false
     private let executer: ThreadExecuter
-    public var machine: Machine
     private let runSem: UnsafeMutablePointer<sem_t>
+    private var timestamp: Int = 0
     
     public private(set) var averageRunTime: UInt = 0
     
@@ -81,6 +81,7 @@ public class MachineRunner: CommandQuerier {
     }
     
     public private(set) var lastRunTime: UInt = 0
+    public var machine: Machine
     public private(set) var totalRunTime: UInt = 0
     public private(set) var totalTimesRun: UInt = 0
     
@@ -95,12 +96,16 @@ public class MachineRunner: CommandQuerier {
         )
     }
     
-    private func _run() {
-        let timestamp: Int = microseconds()
-        self.machine.machine.next()
-        self.lastRunTime = UInt(microseconds() - timestamp)
+    private func calculateMetaData() {
+        self.lastRunTime = UInt(microseconds() - self.timestamp)
         self.totalRunTime = self.totalRunTime + self.lastRunTime
         self.averageRunTime = self.totalRunTime / (++self.totalTimesRun)
+    }
+    
+    private func _run() {
+        self.timestamp = microseconds()
+        self.machine.machine.next()
+        self.calculateMetaData()
         self.currentlyRunning = false
     }
     
@@ -115,6 +120,16 @@ public class MachineRunner: CommandQuerier {
             self._run()
             callback()
         })
+    }
+    
+    public func stop() {
+        sem_wait(self.runSem)
+        if (true == self._currentlyRunning) {
+            self.executer.stop()
+            self.calculateMetaData()
+            self._currentlyRunning = false
+        }
+        sem_post(self.runSem)
     }
     
     deinit {
