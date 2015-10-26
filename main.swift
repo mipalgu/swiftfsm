@@ -61,7 +61,7 @@ import Swift_FSM
 
 print("Hello, when I grow up, I will be a full-blown state machine scheduler!")
 
-let scheduler: RoundRobinScheduler = RoundRobinScheduler()
+let scheduler: TimeSlotScheduler = TimeSlotScheduler(factory: RunnableMachineFactory(runnerFactory: MachineRunnerFactory()), timer: Timer(executer: ThreadExecuter()))
 
 // Load the machines from dylibs.
 let loader: MachineLoader = DynamicLibraryMachineLoaderFactory().make()
