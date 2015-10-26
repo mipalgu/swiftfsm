@@ -58,13 +58,15 @@
 
 public class DynamicTimeSlotDispatchableItem: Dispatchable {
 
-    public let item: CommandQuerier
-    public var timeout: UInt {
-        return (self.timeslot / item.worstCaseExecutionTime + 1) * self.timeslot
+    public let item: RunnableMachine
+    public var timeout: UInt32 {
+        return UInt32(
+            (self.timeslot / item.worstCaseExecutionTime + 1) * self.timeslot
+        )
     }
     private let timeslot: UInt
     
-    public init(item: CommandQuerier, timeslot: UInt) {
+    public init(item: RunnableMachine, timeslot: UInt) {
         self.item = item
         self.timeslot = timeslot
     }

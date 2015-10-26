@@ -58,7 +58,7 @@
 
 public protocol Dispatchable {
     
-    var item: CommandQuerier { get }
-    var timeout: UInt { get }
+    var item: RunnableMachine { get }
+    var timeout: UInt32 { get }
     
 }

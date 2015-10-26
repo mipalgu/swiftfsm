@@ -58,10 +58,10 @@
 
 public class StaticTimeSlotDispatchableItem {
     
-    public let item: CommandQuerier
+    public let item: RunnableMachine
     public let timeout: UInt
     
-    public init(item: CommandQuerier, timeout: UInt) {
+    public init(item: RunnableMachine, timeout: UInt) {
         self.item = item
         self.timeout = timeout
     }
