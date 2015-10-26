@@ -89,19 +89,26 @@ public class RoundRobinScheduler: Scheduler {
      *  Start executing all machines.
      */
     public func run() -> Void {
+        if (self.machines.count < 1) {
+            return
+        }
         // Just keep running and loop around when we reach the end of the array
         var count: UInt = 0
         for (
             var i: Int = 0;
             i < self.machines.count;
-            i = (i + 1) % (0 == self.machines.count ? 1 : self.machines.count)
+            i = ++i % self.machines.count
         ) {
             print("scheduler: \(count++)")
-            if (self.machines[i].machine.hasFinished()) {
-                self.machines.removeAtIndex(i--)
+            if (false == self.machines[i].machine.hasFinished()) {
+                self.machines[i].machine.next()
                 continue
             }
-            self.machines[i].machine.next()
+            self.machines.removeAtIndex(i--)
+            if (self.machines.count < 1) {
+                return
+            }
+            
         }
     }
     
