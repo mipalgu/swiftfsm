@@ -63,7 +63,7 @@ public class MachineRunner: CommandQuerier {
     private var _currentlyRunning: Bool = false
     private let executer: ThreadExecuter
     private let runSem: UnsafeMutablePointer<sem_t>
-    private var timestamp: Int = 0
+    private var timestamp: UInt = 0
     
     public private(set) var averageExecutionTime: UInt = 0
     public private(set) var bestCaseExecutionTime: UInt = 0

@@ -69,8 +69,8 @@
  */
 int invoke_fun(void * p);
 
-long microseconds();
+unsigned long microseconds();
 
-void microsleep(uint microseconds);
+void microsleep(unsigned long microseconds);
 
 #endif /* invoke_func_h */

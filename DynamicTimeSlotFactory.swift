@@ -74,7 +74,6 @@ public class DynamicTimeSlotFactory {
             ),
             timeslot: time
         )
-            
     }
     
 }
