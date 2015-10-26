@@ -59,6 +59,6 @@
 public protocol Dispatchable {
     
     var item: RunnableMachine { get }
-    var timeout: UInt32 { get }
+    var timeout: UInt { get }
     
 }
