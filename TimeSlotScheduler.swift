@@ -96,7 +96,7 @@ public class TimeSlotScheduler: Scheduler {
             return
         }
         self.index = 0
-        self.machines[self.index].run()
+        self.machines[self.index].execute()
         self.timer.delay(self.time, callback: handleTimeslot)
         sem_wait(self.finished)
     }
@@ -116,7 +116,7 @@ public class TimeSlotScheduler: Scheduler {
             }
         }
         self.index = ++self.index % self.machines.count
-        self.machines[index].run()
+        self.machines[index].execute()
         self.timer.delay(self.time, callback: self.handleTimeslot)
     }
     
