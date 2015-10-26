@@ -64,8 +64,6 @@ import Swift_FSM
  */
 public protocol Scheduler {
     
-    func addMachine(machine: Machine) -> Void
-    
     func run() -> Void
     
 }
