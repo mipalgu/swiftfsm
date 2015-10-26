@@ -1,5 +1,5 @@
 /*
- * TimeSlotDispatchTable.swift
+ * StaticDispatchTable.swift
  * swiftfsm
  *
  * Created by Callum McColl on 27/10/2015.
@@ -56,7 +56,7 @@
  *
  */
 
-public class TimeSlotDispatchTable: DispatchTable {
+public class StaticDispatchTable: DispatchTable {
     
     private var index: Int = 0
     private var items: [Dispatchable]
