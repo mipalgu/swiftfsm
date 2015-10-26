@@ -64,12 +64,12 @@ public protocol Command {
     /**
      *  Execute the command.
      */
-    func run() -> Void
+    func execute() -> Void
     
     /**
      *  Execute the command and call callback when finished.
      */
-    func run(callback: () -> Void) -> Void
+    func execute(callback: () -> Void) -> Void
     
     /**
      *  Stop the execution of the current running command.
