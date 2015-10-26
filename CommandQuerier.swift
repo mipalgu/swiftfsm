@@ -69,7 +69,12 @@ public protocol CommandQuerier: Command {
      *  The run command must have been called at least once before calling
      *  this method.
      */
-    var averageRunTime: UInt { get }
+    var averageExecutionTime: UInt { get }
+    
+    /**
+     *  The smallest execution time that the command has ever had.
+     */
+    var bestCaseExecutionTime: UInt { get }
     
     /**
      *  Is the command currently running?
@@ -79,17 +84,22 @@ public protocol CommandQuerier: Command {
     /**
      *  The last run time in microseconds.
      */
-    var lastRunTime: UInt { get }
+    var lastExecutionTime: UInt { get }
     
     /**
      *  The total amount of time in microseconds that the command has run.
      *
      *  This value is increased across multiple runs.
      */
-    var totalRunTime: UInt { get }
+    var totalExecutionTime: UInt { get }
     
     /**
      *  The total number of times the command has been run.
      */
-    var totalTimesRun: UInt { get }
+    var totalExecutions: UInt { get }
+    
+    /**
+     *  The longest time the command has ever taken to run.
+     */
+    var worstCaseExecutionTime: UInt { get }
 }
