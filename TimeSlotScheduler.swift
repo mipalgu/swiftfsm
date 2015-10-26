@@ -61,17 +61,23 @@ import Swift_FSM
 
 public class TimeSlotScheduler: Scheduler {
     
+    private let factory: MachineRunnerFactory
     // All the machines that will be executed.
-    public private(set) var machines: [Machine]
+    public private(set) var machines: [MachineRunner]
     private let time: UInt8
     
-    public init(machines: [Machine] = [], time: UInt8 = 15) {
+    public init(
+        machines: [MachineRunner] = [],
+        time: UInt8 = 15,
+        factory: MachineRunnerFactory
+    ) {
         self.machines = machines
         self.time = time
+        self.factory = factory
     }
     
     public func addMachine(machine: Machine) {
-        machines.append(machine)
+        machines.append(factory.make(machine))
     }
     
     public func run() {
@@ -80,8 +86,8 @@ public class TimeSlotScheduler: Scheduler {
             i < self.machines.count;
             i = i++
         ) {
-            if (false == self.machines[i].machine.hasFinished()) {
-                self.machines[i].machine.next()
+            if (false == self.machines[i].machine.machine.hasFinished()) {
+                self.machines[i].machine.machine.next()
                 continue
             }
             self.machines.removeAtIndex(i--)

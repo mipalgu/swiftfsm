@@ -1,5 +1,5 @@
 /*
- * MachineRunner.swift
+ * MachineRunnerFactory.swift
  * swiftfsm
  *
  * Created by Callum McColl on 25/10/2015.
@@ -56,69 +56,8 @@
  *
  */
 
-import Swift_FSM
-
-public class MachineRunner: CommandQuerier {
+public class MachineRunnerFactory {
     
-    private var _currentlyRunning: Bool = false
-    private let executer: ThreadExecuter
-    public let machine: Machine
-    private let runSem: UnsafeMutablePointer<sem_t>
-    
-    public private(set) var averageRunTime: UInt = 0
-    
-    public private(set) var currentlyRunning: Bool {
-        get {
-            sem_wait(self.runSem)
-            let temp: Bool = self._currentlyRunning
-            sem_post(self.runSem)
-            return temp
-        } set {
-            sem_wait(self.runSem)
-            self._currentlyRunning = newValue
-            sem_post(self.runSem)
-        }
-    }
-    
-    public private(set) var lastRunTime: UInt = 0
-    public private(set) var totalRunTime: UInt = 0
-    public private(set) var totalTimesRun: UInt = 0
-    
-    public init(machine: Machine, executer: ThreadExecuter) {
-        self.executer = executer
-        self.machine = machine
-        self.runSem = sem_open(
-            "machine_runner_runSem_" + machine.name,
-            O_CREAT,
-            0,
-            1
-        )
-    }
-    
-    private func _run() {
-        let timestamp: Int = microseconds()
-        self.machine.machine.next()
-        self.lastRunTime = UInt(microseconds() - timestamp)
-        self.totalRunTime = self.totalRunTime + self.lastRunTime
-        self.averageRunTime = self.totalRunTime / (++self.totalTimesRun)
-        self.currentlyRunning = false
-    }
-    
-    public func run() {
-        self.currentlyRunning = true
-        self.executer.execute(self._run)
-    }
-    
-    public func run(callback: () -> Void) {
-        self.currentlyRunning = true
-        self.executer.execute({
-            self._run()
-            callback()
-        })
-    }
-    
-    deinit {
-        sem_close(self.runSem)
-    }
+    public func make(machine: Machine) -> MachineRunner
     
 }
