@@ -74,10 +74,10 @@ public class LeastLaxityDispatchTable: DispatchTable {
     }
     
     public func advance() {
-        if (0 == ++self.index) {
+        self.index = ++self.index % self.items.count
+        if (0 == self.index) {
             self.reorganize()
         }
-        self.index = self.index % self.items.count
     }
     
     public func count() -> UInt {
