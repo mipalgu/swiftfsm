@@ -59,11 +59,17 @@
 public class DynamicTimeSlotScheduler: Scheduler {
     
     private let factory: RunnableMachineFactory
-    private var machines: [RunnableMachine]
+    public var machines: [RunnableMachine]
+    private let timer: Timer
     
-    public init(machines: [RunnableMachine] = [], factory: RunnableMachineFactory) {
+    public init(
+        machines: [RunnableMachine] = [],
+        factory: RunnableMachineFactory,
+        timer: Timer
+    ) {
         self.factory = factory
         self.machines = machines
+        self.timer = timer
     }
     
     public func addMachine(machine: Machine) {
@@ -71,7 +77,10 @@ public class DynamicTimeSlotScheduler: Scheduler {
     }
     
     public func run() {
-        <#code#>
+        if (self.machines.count < 1) {
+            return
+        }
+        
     }
     
 }
