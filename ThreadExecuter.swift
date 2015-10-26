@@ -64,9 +64,7 @@ public class ThreadExecuter {
     public func execute(f: () -> Void) -> Bool {
         // Only allow execution of one thread at a time.  Want to use multiple
         // threads?  Use multiple Thread Executers.
-        if (nil != self.thread) {
-            pthread_join(self.thread.memory, nil)
-        }
+        pthread_join(self.thread.memory, nil)
         // Convert f to args void pointer.
         let p: UnsafeMutablePointer<() -> Void> =
             UnsafeMutablePointer<() -> Void>.alloc(1)
