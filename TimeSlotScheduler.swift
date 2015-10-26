@@ -62,17 +62,28 @@ import Swift_FSM
 public class TimeSlotScheduler: Scheduler {
     
     private let factory: RunnableMachineFactory
+    private var finished: UnsafeMutablePointer<sem_t>
+    private var index: Int = 0
     // All the machines that will be executed.
     public private(set) var machines: [RunnableMachine]
-    private let time: UInt
+    private let time: UInt32
+    private let timer: Timer
     
     public init(
         machines: [RunnableMachine] = [],
-        time: UInt = 15000,
-        factory: RunnableMachineFactory
+        time: UInt32 = 15000,
+        factory: RunnableMachineFactory,
+        timer: Timer
     ) {
         self.machines = machines
+        self.finished = sem_open(
+            "TimeSlotScheduler" + String(microseconds()),
+            O_CREAT,
+            0,
+            0
+        )
         self.time = time
+        self.timer = timer
         self.factory = factory
     }
     
@@ -81,21 +92,34 @@ public class TimeSlotScheduler: Scheduler {
     }
     
     public func run() {
-        for (
-            var i: Int = 0;
-            i < self.machines.count;
-            i = i++
-        ) {
-            if (false == self.machines[i].machine.hasFinished()) {
-                self.machines[i].machine.next()
-                continue
-            }
-            self.machines.removeAtIndex(i--)
-            if (self.machines.count < 0) {
+        if (self.machines.count < 1) {
+            return
+        }
+        self.index = 0
+        self.machines[self.index].run()
+        self.timer.delay(self.time, callback: handleTimeslot)
+        sem_wait(self.finished)
+    }
+    
+    private func handleTimeslot() {
+        if (true == self.machines[index].currentlyRunning) {
+            print("Error: Machine did not finish in time")
+            return
+        }
+        if (true == self.machines[index].machine.hasFinished()) {
+            self.machines.removeAtIndex(index--)
+            if (self.machines.count < 1) {
+                sem_post(self.finished)
                 return
             }
-            
         }
+        self.index = ++self.index % self.machines.count
+        self.machines[index].run()
+        self.timer.delay(self.time, callback: self.handleTimeslot)
+    }
+    
+    deinit {
+        sem_close(self.finished)
     }
     
 }
