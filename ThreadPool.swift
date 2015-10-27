@@ -62,9 +62,9 @@ public class ThreadPool: Thread {
     
     private let factory: SingleThreadFactory
     
-    private index: UInt = 0
+    private var index: UInt = 0
     
-    private numberOfThreads: UInt
+    private let numberOfThreads: UInt
     
     private var threads: [SingleThread] {
         get {
