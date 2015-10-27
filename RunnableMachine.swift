@@ -62,7 +62,7 @@ public class RunnableMachine: QuerierableMachine {
     
     public let machine: FiniteStateMachine
     public let name: String
-    private let runner: MachineRunner
+    private let runner: MachineRunnerQuerier
     
     public var averageExecutionTime: UInt {
         return self.runner.averageExecutionTime
@@ -95,7 +95,7 @@ public class RunnableMachine: QuerierableMachine {
     public init(
         machine: FiniteStateMachine,
         name: String,
-        runner: MachineRunner
+        runner: MachineRunnerQuerier
     ) {
         self.machine = machine
         self.name = name

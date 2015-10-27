@@ -56,4 +56,4 @@
  *
  */
 
-public protocol QuerierableMachine: CommandQuerier, Machine {}
+public protocol QuerierableMachine: MachineRunnerQuerier, Machine {}

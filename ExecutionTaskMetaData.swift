@@ -1,8 +1,8 @@
 /*
- * MachineRunnerQuerier.swift
+ * ExecutionTaskMetaData.swift
  * swiftfsm
  *
- * Created by Callum McColl on 25/10/2015.
+ * Created by Callum McColl on 27/10/2015.
  * Copyright © 2015 Callum McColl. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -56,12 +56,41 @@
  *
  */
 
-/**
- *  An interface which allows the querying of meta data from the command.
- *
- *  Things like run timeor if the command is still running can be queried.
- */
-public protocol MachineRunnerQuerier: MachineRunner, ExecutionTaskMetaData {
+public protocol ExecutionTaskMetaData {
     
+    /**
+     *  The average time in microseconds it takes to run the command.
+     *
+     *  The run command must have been called at least once before calling
+     *  this method.
+     */
+    var averageExecutionTime: UInt { get }
+    
+    /**
+     *  The smallest execution time that the command has ever had.
+     */
+    var bestCaseExecutionTime: UInt { get }
+    
+    /**
+     *  The last run time in microseconds.
+     */
+    var lastExecutionTime: UInt { get }
+    
+    /**
+     *  The total amount of time in microseconds that the command has run.
+     *
+     *  This value is increased across multiple runs.
+     */
+    var totalExecutionTime: UInt { get }
+    
+    /**
+     *  The total number of times the command has been run.
+     */
+    var totalExecutions: UInt { get }
+    
+    /**
+     *  The longest time the command has ever taken to run.
+     */
+    var worstCaseExecutionTime: UInt { get }
     
 }
