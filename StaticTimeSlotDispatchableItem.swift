@@ -59,10 +59,12 @@
 public class StaticTimeSlotDispatchableItem: Dispatchable {
     
     public let item: QuerierableMachine
+    public let startTime: UInt
     public let timeout: UInt
     
-    public init(item: QuerierableMachine, timeout: UInt) {
+    public init(item: QuerierableMachine, startTime: UInt, timeout: UInt) {
         self.item = item
+        self.startTime = startTime
         self.timeout = timeout
     }
     

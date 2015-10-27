@@ -58,6 +58,7 @@
 
 public protocol Dispatchable {
     
+    var startTime: UInt { get }
     var item: QuerierableMachine { get }
     var timeout: UInt { get }
     
