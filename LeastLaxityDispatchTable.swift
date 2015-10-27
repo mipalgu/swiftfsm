@@ -112,9 +112,7 @@ public class LeastLaxityDispatchTable: DispatchTable {
     }
     
     private func reorganize() {
-        self.items.sortInPlace { (lhs: Dispatchable, rhs: Dispatchable) -> Bool in
-            return self.calculateLaxity(lhs) < self.calculateLaxity(rhs)
-        }
+        self.items.sortInPlace { calculateLaxity($0) < calculateLaxity($1) }
     }
     
     
