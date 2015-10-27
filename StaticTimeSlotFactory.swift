@@ -67,10 +67,9 @@ public class StaticTimeSlotFactory {
     ) -> Dispatchable {
         return StaticTimeSlotDispatchableItem(
             item: RunnableMachine(
-                runner: MachineRunner(
-                    machine: SimpleMachine(name: name, machine: machine),
-                    executer: ThreadExecuter()
-                )
+                machine: machine,
+                name: name,
+                runner: SingleThreadedMachineRunner()
             ),
             timeout: time
         )
