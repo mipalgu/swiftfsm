@@ -58,21 +58,21 @@
 
 public class Timer {
     
-    private let executer: Thread
+    private let thread: Thread
     
-    public init(executer: Thread) {
-        self.executer = executer
+    public init(thread: Thread) {
+        self.thread = thread
     }
     
     public func delay(time: UInt, callback: () -> Void) {
-        self.executer.execute({
+        self.thread.execute({
             microsleep(time)
             callback()
         })
     }
     
     public func stop() {
-        self.executer.stop()
+        self.thread.stop()
     }
     
 }
