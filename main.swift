@@ -80,10 +80,10 @@ for (var i: Int = 1; i < Process.arguments.count; i++) {
 }
 
 // Least Laxity Dispatch Table - reorganize the dispatch table every run through
-let dispatchTable: DispatchTable = LeastLaxityDispatchTable(items: items)
+//let dispatchTable: DispatchTable = LeastLaxityDispatchTable(items: items)
 
 // Static Dispatch Table - order of items never changes
-//let dispatchTable: DispatchTable = StaticDispatchTable(items: items)
+let dispatchTable: DispatchTable = StaticDispatchTable(items: items)
 
 let scheduler: Scheduler = DispatchTableScheduler(dispatchTable: dispatchTable)
 
