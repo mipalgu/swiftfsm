@@ -68,11 +68,13 @@ public class DispatchScheduler: Scheduler {
     
     public func run() {
         var lastTime: UInt = 0
+        var lastTask: Dispatchable? = nil
         while(false == self.dispatchTable.empty()) {
             let d: Dispatchable = self.dispatchTable.get()
             if (false == d.item.machine.hasFinished()) {
-                lastTime = self.runTask(lastTime, d: d)
+                lastTime = self.runTask(lastTime, lastTask: lastTask, d: d)
                 self.dispatchTable.advance()
+                lastTask = d
                 continue
             }
             self.dispatchTable.remove()
@@ -83,11 +85,19 @@ public class DispatchScheduler: Scheduler {
         }
     }
     
-    private func runTask(lastTime: UInt, d: Dispatchable) -> UInt {
+    private func runTask(
+        lastTime: UInt,
+        lastTask: Dispatchable?,
+        d: Dispatchable
+    ) -> UInt {
         let taskStartTime: UInt = d.startTime
+        var sleepTime: UInt = 0
         if (taskStartTime > lastTime) {
-            microsleep(taskStartTime - lastTime)
+            sleepTime = taskStartTime - lastTime
+        } else if (lastTask != nil) {
+            sleepTime = lastTask!.timeout
         }
+        microsleep(sleepTime)
         self.dispatcher.run(d)
         return taskStartTime
     }
