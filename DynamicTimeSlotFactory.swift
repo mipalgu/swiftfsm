@@ -63,6 +63,7 @@ public class DynamicTimeSlotFactory {
     public func make(
         name: String,
         machine: FiniteStateMachine,
+        startTime: UInt,
         time: UInt
     ) -> Dispatchable {
         return DynamicTimeSlotDispatchableItem(
@@ -71,6 +72,7 @@ public class DynamicTimeSlotFactory {
                 name: name,
                 runner: SingleThreadedMachineRunner()
             ),
+            startTime: startTime,
             timeslot: time
         )
     }
