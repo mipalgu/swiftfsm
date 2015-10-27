@@ -62,7 +62,12 @@ public class ThreadDispatcher {
     private let thread: Thread
     private let timer: Timer
     
-    public init(thread: Thread, timer: Timer, onOvertime: (Dispatchable) -> Void) {
+    public init(
+        thread: Thread,
+        timer: Timer,
+        onOvertime: (Dispatchable) -> Void  = {(item: Dispatchable) in
+            print("Error: Machine missed its deadline.")
+        }) {
         self.onOvertime = onOvertime
         self.thread = thread
         self.timer = timer
