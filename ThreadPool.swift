@@ -56,6 +56,27 @@
  *
  */
 
-public class ThreadPool {
+public class ThreadPool: Thread {
+    
+    private static var threads: [SingleThread] = []
+    
+    private let factory: SingleThreadFactory
+    
+    private index: UInt = 0
+    
+    private numberOfThreads: UInt
+    
+    private var threads: [SingleThread] {
+        get {
+            return ThreadPool.threads
+        } set {
+            ThreadPool.threads = newValue
+        }
+    }
+    
+    public init(numberOfThreads: UInt, factory: SingleThreadFactory) {
+        self.factory = factory
+        self.numberOfThreads = numberOfThreads
+    }
     
 }
