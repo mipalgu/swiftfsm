@@ -93,7 +93,7 @@ public class ThreadPool: Thread {
         }
     }
     
-    public func execute(f: () -> Void) -> Bool {
+    public func execute(f: () -> Void) -> (Bool, ExecutingThread?) {
         return self.next().execute(f)
     }
     
