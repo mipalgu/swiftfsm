@@ -58,31 +58,30 @@
 
 public class DispatchScheduler: Scheduler {
     
+    private let dispatcher: Dispatcher
     private let dispatchTable: DispatchTable
-    private let onOvertime: (item: Dispatchable) -> Void
     
     public init(
-        dispatchTable: DispatchTable,
-        onOvertime: (item: Dispatchable) -> Void = {(item: Dispatchable) in
-            print("Error: Machine missed its deadline.")
-        }
+        dispatcher: Dispatcher,
+        dispatchTable: DispatchTable
     ) {
+        self.dispatcher = dispatcher
         self.dispatchTable = dispatchTable
-        self.onOvertime = onOvertime
     }
     
     public func run() {
         while(false == self.dispatchTable.empty()) {
-            let item: Dispatchable = self.dispatchTable.next()
-            let timestamp: UInt = microseconds()
-            item.item.execute()
-            let now: UInt = microseconds()
-            let runTime: UInt = UInt(now - timestamp)
-            if (runTime > item.timeout) {
-                self.onOvertime(item: item)
+            let d: Dispatchable = self.dispatchTable.get()
+            if (false == d.item.machine.hasFinished()) {
+                self.dispatcher.run(d)
+                self.dispatchTable.advance()
+                continue
+            }
+            self.dispatchTable.remove()
+            if (true == self.dispatchTable.empty()) {
                 return
             }
-            microsleep(item.timeout - runTime)
+            self.dispatchTable.advance()
         }
     }
     
