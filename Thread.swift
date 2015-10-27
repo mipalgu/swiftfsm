@@ -58,8 +58,7 @@
 
 public protocol Thread {
     
-    func execute(f: () -> Void) -> Bool
+    func execute(f: () -> Void) -> (Bool, ExecutingThread?)
     func executeAndWait(f: () -> Void) -> Bool
-    func stop() -> Void
     
 }

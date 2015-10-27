@@ -56,22 +56,25 @@
  *
  */
 
-public class SingleThread {
+public class SingleThread: Thread, ExecutingThread {
+    
+    public private(set) var currentlyRunning: Bool = false
     
     private var thread: UnsafeMutablePointer<pthread_t> =
         UnsafeMutablePointer<pthread_t>.alloc(1)
     
-    public func execute(f: () -> Void) -> Bool {
+    public func execute(f: () -> Void) -> (Bool, ExecutingThread?) {
         // Only allow execution of one thread at a time.  Want to use multiple
         // threads?  Use multiple Thread Executers.
         pthread_join(self.thread.memory, nil)
         // Convert f to args void pointer.
         let p: UnsafeMutablePointer<() -> Void> =
             UnsafeMutablePointer<() -> Void>.alloc(1)
-        p.initialize(f)
+        p.initialize({f(); self.currentlyRunning = false})
         let args: UnsafeMutablePointer<Void> = UnsafeMutablePointer<Void>(p)
         // Create the thread.
-        return 0 == pthread_create(
+        self.currentlyRunning = true
+        let result: Bool =  0 == pthread_create(
             self.thread,
             nil,
             {(args: UnsafeMutablePointer<Void>) -> UnsafeMutablePointer<Void> in
@@ -86,18 +89,23 @@ public class SingleThread {
             },
             args
         )
+        if (false == result) {
+            return (false, nil)
+        }
+        return (true, self)
     }
     
     public func executeAndWait(f: () -> Void) -> Bool {
-        if (self.execute(f)) {
+        let result: (Bool, ExecutingThread?) = self.execute(f)
+        if (true == result.0) {
             pthread_join(self.thread.memory, nil)
-            return true
         }
-        return false
+        return result.0
     }
     
     public func stop() {
         pthread_cancel(self.thread.memory)
+        self.currentlyRunning = false
     }
     
     deinit {
