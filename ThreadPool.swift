@@ -101,18 +101,14 @@ public class ThreadPool: Thread {
         return self.next().executeAndWait(f)
     }
     
-    private func get() -> SingleThread {
+    private func get() -> Thread {
         return self.threads[self.index]
     }
     
-    private func next() -> SingleThread {
-        let t: SingleThread = self.get()
+    private func next() -> Thread {
+        let t: Thread = self.get()
         self.advance()
         return t
-    }
-    
-    public func stop() {
-        self.get().stop()
     }
     
 }
