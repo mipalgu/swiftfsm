@@ -58,7 +58,7 @@
 
 public class DynamicTimeSlotDispatchableItem: Dispatchable {
 
-    public let item: RunnableMachine
+    public let item: QuerierableMachine
     
     public var timeout: UInt {
         let wcet: UInt = self.item.worstCaseExecutionTime
@@ -70,7 +70,7 @@ public class DynamicTimeSlotDispatchableItem: Dispatchable {
     
     private let timeslot: UInt
     
-    public init(item: RunnableMachine, timeslot: UInt) {
+    public init(item: QuerierableMachine, timeslot: UInt) {
         self.item = item
         self.timeslot = timeslot
     }
