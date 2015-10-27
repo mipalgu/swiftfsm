@@ -56,4 +56,4 @@
  *
  */
 
-public protocol QuerierableMachine: ExecutionTaskMetaData, Machine {}
+public protocol QuerierableMachine: Command, ExecutionTaskMetaData, Machine {}
