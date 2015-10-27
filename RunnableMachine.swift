@@ -60,7 +60,7 @@ import Swift_FSM
 
 public class RunnableMachine: QuerierableMachine {
     
-    public let machine: FiniteStateMachine
+    public var machine: FiniteStateMachine
     public let name: String
     private let runner: MachineRunnerQuerier
     
@@ -70,10 +70,6 @@ public class RunnableMachine: QuerierableMachine {
     
     public var bestCaseExecutionTime: UInt {
         return self.runner.bestCaseExecutionTime
-    }
-    
-    public var currentlyRunning: Bool {
-        return self.runner.currentlyRunning
     }
     
     public var lastExecutionTime: UInt {
