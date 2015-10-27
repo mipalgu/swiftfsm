@@ -61,19 +61,17 @@ public class DispatchScheduler: Scheduler {
     private let dispatcher: Dispatcher
     private let dispatchTable: DispatchTable
     
-    public init(
-        dispatcher: Dispatcher,
-        dispatchTable: DispatchTable
-    ) {
+    public init(dispatcher: Dispatcher, dispatchTable: DispatchTable) {
         self.dispatcher = dispatcher
         self.dispatchTable = dispatchTable
     }
     
     public func run() {
+        var lastTime: UInt = 0
         while(false == self.dispatchTable.empty()) {
             let d: Dispatchable = self.dispatchTable.get()
             if (false == d.item.machine.hasFinished()) {
-                self.dispatcher.run(d)
+                lastTime = self.runTask(lastTime, d: d)
                 self.dispatchTable.advance()
                 continue
             }
@@ -83,6 +81,15 @@ public class DispatchScheduler: Scheduler {
             }
             self.dispatchTable.advance()
         }
+    }
+    
+    private func runTask(lastTime: UInt, d: Dispatchable) -> UInt {
+        let taskStartTime: UInt = d.startTime
+        if (taskStartTime > lastTime) {
+            microsleep(taskStartTime - lastTime)
+        }
+        self.dispatcher.run(d)
+        return taskStartTime
     }
     
 }
