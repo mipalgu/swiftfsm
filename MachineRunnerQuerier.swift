@@ -1,5 +1,5 @@
 /*
- * CommandQuerier.swift
+ * MachineRunnerQuerier.swift
  * swiftfsm
  *
  * Created by Callum McColl on 25/10/2015.
@@ -61,7 +61,7 @@
  *
  *  Things like run timeor if the command is still running can be queried.
  */
-public protocol CommandQuerier: Command {
+public protocol MachineRunnerQuerier: MachineRunner {
     
     /**
      *  The average time in microseconds it takes to run the command.
