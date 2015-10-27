@@ -58,29 +58,60 @@
 
 public class SingleThread: Thread, ExecutingThread {
     
-    public private(set) var currentlyRunning: Bool = false
+    public private(set) var currentlyRunning: Bool
     
-    private var thread: UnsafeMutablePointer<pthread_t> =
-        UnsafeMutablePointer<pthread_t>.alloc(1)
+    private var failures: Bool = true
     
-    public func execute(f: () -> Void) -> (Bool, ExecutingThread?) {
-        // Only allow execution of one thread at a time.  Want to use multiple
-        // threads?  Use multiple Thread Executers.
-        pthread_join(self.thread.memory, nil)
+    private var thread: UnsafeMutablePointer<pthread_t>
+    
+    private var f: () -> Void = {}
+    
+    private var f_sem: UnsafeMutablePointer<sem_t>
+    
+    private var run_sem: UnsafeMutablePointer<sem_t>
+    
+    public init(id: UInt = 0) {
+        self.currentlyRunning = false
+        self.f = {return}
+        self.thread = UnsafeMutablePointer<pthread_t>.alloc(1)
+        self.f_sem = sem_open(
+            "ST_f_" + String(id),
+            O_CREAT,
+            0,
+            1
+        )
+        self.run_sem = sem_open(
+            "ST_run_" + String(id),
+            O_CREAT,
+            0,
+            0
+        )
+        print("f_sem: \(SEM_FAILED == self.f_sem)")
+        print("run_sem: \(SEM_FAILED == self.run_sem)")
+        self.failures = false == self.createThread()
+            || SEM_FAILED == self.f_sem
+            || SEM_FAILED == self.run_sem
+    }
+    
+    private func createThread() -> Bool {
         // Convert f to args void pointer.
         let p: UnsafeMutablePointer<() -> Void> =
-            UnsafeMutablePointer<() -> Void>.alloc(1)
-        p.initialize({f(); self.currentlyRunning = false})
+        UnsafeMutablePointer<() -> Void>.alloc(1)
+        p.initialize({
+            sem_wait(self.run_sem)
+            self.f()
+            self.currentlyRunning = false
+            sem_post(self.f_sem)
+        })
         let args: UnsafeMutablePointer<Void> = UnsafeMutablePointer<Void>(p)
         // Create the thread.
-        self.currentlyRunning = true
-        let result: Bool =  0 == pthread_create(
+        return 0 == pthread_create(
             self.thread,
             nil,
             {(args: UnsafeMutablePointer<Void>) -> UnsafeMutablePointer<Void> in
                 // Convert args back to function f.
                 let p: UnsafeMutablePointer<() -> Void> =
-                    UnsafeMutablePointer<() -> Void>(args)
+                UnsafeMutablePointer<() -> Void>(args)
                 let f: () -> Void = p.memory
                 // Call the function.
                 f()
@@ -89,9 +120,17 @@ public class SingleThread: Thread, ExecutingThread {
             },
             args
         )
-        if (false == result) {
+    }
+    
+    public func execute(f: () -> Void) -> (Bool, ExecutingThread?) {
+        if (self.failures) {
+            print("Failures present")
             return (false, nil)
         }
+        sem_wait(self.f_sem)
+        self.f = f
+        self.currentlyRunning = true
+        sem_post(self.run_sem)
         return (true, self)
     }
     
