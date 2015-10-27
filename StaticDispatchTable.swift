@@ -58,8 +58,8 @@
 
 public class StaticDispatchTable: DispatchTable {
     
-    private var index: Int = 0
-    private var items: [Dispatchable]
+    internal var index: Int = 0
+    internal var items: [Dispatchable]
     
     public init(items: [Dispatchable] = []) {
         self.items = items
@@ -90,8 +90,9 @@ public class StaticDispatchTable: DispatchTable {
     }
     
     public func next() -> Dispatchable {
+        let i: Dispatchable = self.items[self.index]
         self.advance()
-        return self.items[self.index]
+        return i
     }
     
     public func remove() {

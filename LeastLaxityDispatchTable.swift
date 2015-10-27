@@ -56,65 +56,26 @@
  *
  */
 
-public class LeastLaxityDispatchTable: DispatchTable {
+public class LeastLaxityDispatchTable: StaticDispatchTable {
     
-    private var index: Int = 0
-    private var items: [Dispatchable]
-    
-    public init(items: [Dispatchable] = []) {
-        self.items = items
+    public override init(items: [Dispatchable] = []) {
+        super.init(items: items)
         self.reorganize()
     }
     
-    public func addItem(item: Dispatchable) {
-        self.items.append(item)
-    }
-    
-    public func advance() {
-        self.index = ++self.index % self.items.count
-        if (0 == self.index) {
+    public override func advance() {
+        super.advance()
+        if (0 == super.index) {
             self.reorganize()
         }
     }
     
-    public func count() -> UInt {
-        return UInt(self.items.count)
-    }
-    
-    public func empty() -> Bool {
-        return 0 == self.count()
-    }
-    
-    public func get() -> Dispatchable {
-        return self.get(self.index)
-    }
-    
-    public func get(index: Int) -> Dispatchable {
-        return self.items[index]
-    }
-    
-    public func next() -> Dispatchable {
-        let i: Dispatchable = self.items[self.index]
-        self.advance()
-        return i
-    }
-    
-    public func remove() {
-        self.remove(self.index)
-    }
-    
-    public func remove(index: Int) {
-        self.items.removeAtIndex(index)
-    }
-    
-    private func calculateLaxity(item: Dispatchable) -> Int {
-        return Int(item.timeout) - Int(item.item.worstCaseExecutionTime)
+    private func calculateLaxity(d: Dispatchable) -> Int {
+        return Int(d.timeout) - Int(d.item.worstCaseExecutionTime)
     }
     
     private func reorganize() {
-        self.items.sortInPlace { calculateLaxity($0) < calculateLaxity($1) }
+        super.items.sortInPlace { calculateLaxity($0) < calculateLaxity($1) }
     }
-    
-    
     
 }
