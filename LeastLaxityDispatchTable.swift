@@ -60,17 +60,14 @@ public class LeastLaxityDispatchTable: DispatchTable {
     
     private var index: Int = 0
     private var items: [Dispatchable]
-    private var laxities: [Int]
     
     public init(items: [Dispatchable] = []) {
         self.items = items
-        self.laxities = []
         self.reorganize()
     }
     
     public func addItem(item: Dispatchable) {
         self.items.append(item)
-        self.laxities.append(self.calculateLaxity(item))
     }
     
     public func advance() {
@@ -97,8 +94,9 @@ public class LeastLaxityDispatchTable: DispatchTable {
     }
     
     public func next() -> Dispatchable {
+        let i: Dispatchable = self.items[self.index]
         self.advance()
-        return self.items[self.index]
+        return i
     }
     
     public func remove() {
@@ -107,33 +105,15 @@ public class LeastLaxityDispatchTable: DispatchTable {
     
     public func remove(index: Int) {
         self.items.removeAtIndex(index)
-        self.laxities.removeAtIndex(index)
     }
     
     private func calculateLaxity(item: Dispatchable) -> Int {
         return Int(item.timeout) - Int(item.item.worstCaseExecutionTime)
     }
     
-    private func place(item: Dispatchable) {
-        let laxity: Int = self.calculateLaxity(item)
-        for (var i: Int = 0; i < self.laxities.count; i++) {
-            if (self.laxities[i] < laxity ) {
-                continue
-            }
-            self.laxities.insert(laxity, atIndex: i)
-            self.items.insert(item, atIndex: i)
-            return
-        }
-        self.items.append(item)
-        self.laxities.append(laxity)
-    }
-    
     private func reorganize() {
-        let temp = self.items
-        self.items = []
-        self.laxities = []
-        for d: Dispatchable in temp {
-            self.place(d)
+        self.items.sortInPlace { (lhs: Dispatchable, rhs: Dispatchable) -> Bool in
+            return self.calculateLaxity(lhs) < self.calculateLaxity(rhs)
         }
     }
     
