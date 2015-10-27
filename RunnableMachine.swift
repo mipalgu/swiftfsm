@@ -64,6 +64,34 @@ public class RunnableMachine: QuerierableMachine {
     public let name: String
     private let runner: MachineRunner
     
+    public var averageExecutionTime: UInt {
+        return self.runner.averageExecutionTime
+    }
+    
+    public var bestCaseExecutionTime: UInt {
+        return self.runner.bestCaseExecutionTime
+    }
+    
+    public var currentlyRunning: Bool {
+        return self.runner.currentlyRunning
+    }
+    
+    public var lastExecutionTime: UInt {
+        return self.runner.lastExecutionTime
+    }
+    
+    public var totalExecutionTime: UInt {
+        return self.runner.totalExecutionTime
+    }
+    
+    public var totalExecutions: UInt {
+        return self.runner.totalExecutions
+    }
+    
+    public var worstCaseExecutionTime: UInt {
+        return self.runner.worstCaseExecutionTime
+    }
+    
     public init(
         machine: FiniteStateMachine,
         name: String,
@@ -74,6 +102,13 @@ public class RunnableMachine: QuerierableMachine {
         self.runner = runner
     }
     
+    public func execute() {
+        self.runner.run(self)
+    }
     
+    public func execute(callback: () -> Void) {
+        self.runner.run(self)
+        callback()
+    }
     
 }
