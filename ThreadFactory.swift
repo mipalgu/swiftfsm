@@ -1,5 +1,5 @@
 /*
- * SingleThreadFactory.swift
+ * ThreadFactory.swift
  * swiftfsm
  *
  * Created by Callum McColl on 27/10/2015.
@@ -56,10 +56,8 @@
  *
  */
 
-public class SingleThreadFactory: ThreadFactory {
+public protocol ThreadFactory {
     
-    public func make() -> Thread {
-        return SingleThread()
-    }
+    func make() -> Thread
     
 }

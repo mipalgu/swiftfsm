@@ -58,15 +58,15 @@
 
 public class ThreadPool: Thread {
     
-    private static var threads: [SingleThread] = []
+    private static var threads: [Thread] = []
     
-    private let factory: SingleThreadFactory
+    private let factory: ThreadFactory
     
     private var index: Int = 0
     
     private let numberOfThreads: Int
     
-    private var threads: [SingleThread] {
+    private var threads: [Thread] {
         get {
             return ThreadPool.threads
         } set {
@@ -74,7 +74,7 @@ public class ThreadPool: Thread {
         }
     }
     
-    public init(numberOfThreads: Int, factory: SingleThreadFactory) {
+    public init(numberOfThreads: Int, factory: ThreadFactory) {
         self.factory = factory
         self.numberOfThreads = numberOfThreads
         self.fillThreads()
