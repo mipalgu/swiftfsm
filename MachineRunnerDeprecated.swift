@@ -58,7 +58,7 @@
 
 import Swift_FSM
 
-public class MachineRunner: CommandQuerier {
+public class MachineRunnerDeprecated: CommandQuerier {
     
     private var _currentlyRunning: Bool = false
     private let executer: ThreadExecuter
