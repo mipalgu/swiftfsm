@@ -85,7 +85,12 @@ for (var i: Int = 1; i < Process.arguments.count; i++) {
 // Static Dispatch Table - order of items never changes
 let dispatchTable: DispatchTable = StaticDispatchTable(items: items)
 
-let scheduler: Scheduler = DispatchTableScheduler(dispatchTable: dispatchTable)
+let dispatcher: Dispatcher = ThreadDispatcherFactory().make()
+
+let scheduler: Scheduler = DispatchScheduler(
+    dispatcher: dispatcher,
+    dispatchTable: dispatchTable
+)
 
 // Run the scheduler.
 scheduler.run()
