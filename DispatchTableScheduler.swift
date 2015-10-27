@@ -59,6 +59,7 @@
 import Darwin
 import Swift_FSM
 
+/*
 public class DispatchTableScheduler: Scheduler {
     
     public let dispatchTable: DispatchTable
@@ -110,4 +111,4 @@ public class DispatchTableScheduler: Scheduler {
         sem_close(self.finished)
     }
     
-}
+}*/
