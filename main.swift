@@ -85,10 +85,13 @@ let dispatchTable: DispatchTable = LeastLaxityDispatchTable(items: items)
 // Static Dispatch Table - order of items never changes
 //let dispatchTable: DispatchTable = StaticDispatchTable(items: items)
 
+/*
 let scheduler: Scheduler = DispatchTableScheduler(
     dispatchTable: dispatchTable,
     timer: Timer(executer: ThreadExecuter())
-)
+)*/
+
+let scheduler: Scheduler = TimeSlotScheduler(dispatchTable: dispatchTable)
 
 // Run the scheduler.
 scheduler.run()
