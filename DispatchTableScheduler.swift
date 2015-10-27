@@ -72,9 +72,6 @@ public class DispatchTableScheduler: Scheduler {
     }
     
     public func run() {
-        if (true == self.dispatchTable.empty()) {
-            return
-        }
         while(false == self.dispatchTable.empty()) {
             let item: Dispatchable = self.dispatchTable.next()
             let timestamp: UInt = microseconds()
