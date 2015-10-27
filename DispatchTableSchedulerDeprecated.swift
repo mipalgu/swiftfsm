@@ -1,5 +1,5 @@
 /*
- * DispatchTableScheduler.swift
+ * DispatchTableSchedulerDeprecated.swift
  * swiftfsm
  *
  * Created by Callum McColl on 10/10/2015.
