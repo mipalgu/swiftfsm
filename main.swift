@@ -75,8 +75,12 @@ for (var i: Int = 1; i < Process.arguments.count; i++) {
     if (nil == machine) {
         continue
     }
+    let machine2: FiniteStateMachine? = loader.load(Process.arguments[i])
+    if (nil == machine2) {
+        continue
+    }
     items.append(factory.make("Ping Pong", machine: machine!, startTime: 0, time: 15000))
-    items.append(factory.make("Ping Pong2", machine: machine!, startTime: 15000, time: 15000))
+    items.append(factory.make("Ping Pong2", machine: machine2!, startTime: 15000, time: 30000))
 }
 
 // Least Laxity Dispatch Table - reorganize the dispatch table every run through
