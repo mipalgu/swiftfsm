@@ -62,9 +62,9 @@ public class ThreadPool: Thread {
     
     private let factory: SingleThreadFactory
     
-    private var index: UInt = 0
+    private var index: Int = 0
     
-    private let numberOfThreads: UInt
+    private let numberOfThreads: Int
     
     private var threads: [SingleThread] {
         get {
@@ -74,7 +74,7 @@ public class ThreadPool: Thread {
         }
     }
     
-    public init(numberOfThreads: UInt, factory: SingleThreadFactory) {
+    public init(numberOfThreads: Int, factory: SingleThreadFactory) {
         self.factory = factory
         self.numberOfThreads = numberOfThreads
         self.fillThreads()
@@ -85,12 +85,34 @@ public class ThreadPool: Thread {
     }
     
     private func fillThreads() {
-        if (UInt(self.threads.count) >= self.numberOfThreads) {
+        if (self.threads.count >= self.numberOfThreads) {
             return
         }
-        for _ in UInt(self.threads.count) ... self.numberOfThreads {
+        for _ in self.threads.count ... self.numberOfThreads {
             self.threads.append(self.factory.make())
         }
+    }
+    
+    public func execute(f: () -> Void) -> Bool {
+        return self.next().execute(f)
+    }
+    
+    public func executeAndWait(f: () -> Void) -> Bool {
+        return self.next().executeAndWait(f)
+    }
+    
+    private func get() -> SingleThread {
+        return self.threads[self.index]
+    }
+    
+    private func next() -> SingleThread {
+        let t: SingleThread = self.get()
+        self.advance()
+        return t
+    }
+    
+    public func stop() {
+        self.get().stop()
     }
     
 }
