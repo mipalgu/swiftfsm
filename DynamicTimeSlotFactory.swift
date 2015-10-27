@@ -67,10 +67,9 @@ public class DynamicTimeSlotFactory {
     ) -> Dispatchable {
         return DynamicTimeSlotDispatchableItem(
             item: RunnableMachine(
-                runner: MachineRunner(
-                    machine: SimpleMachine(name: name, machine: machine),
-                    executer: ThreadExecuter()
-                )
+                machine: machine,
+                name: name,
+                runner: SingleThreadedMachineRunner()
             ),
             timeslot: time
         )
