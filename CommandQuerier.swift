@@ -77,11 +77,6 @@ public protocol CommandQuerier: Command {
     var bestCaseExecutionTime: UInt { get }
     
     /**
-     *  Is the command currently running?
-     */
-    var currentlyRunning: Bool { get }
-    
-    /**
      *  The last run time in microseconds.
      */
     var lastExecutionTime: UInt { get }
