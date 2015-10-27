@@ -56,39 +56,14 @@
  *
  */
 
-public class ThreadDispatcher: Dispatcher {
+public class ThreadDispatcherFactory {
     
-    private let onOvertime: (Dispatchable) -> Void
-    private let thread: Thread
-    private let timer: Timer
-    
-    public init(
-        thread: Thread,
-        timer: Timer,
-        onOvertime: (Dispatchable) -> Void  = {(item: Dispatchable) in
-            print("Error: Machine missed its deadline.")
-        }) {
-        self.onOvertime = onOvertime
-        self.thread = thread
-        self.timer = timer
-    }
-    
-    public func run(item: Dispatchable) {
-        let threadResult: (Bool, ExecutingThread?) = self.thread.execute(
-            item.item.execute
+    public func make() -> Dispatcher {
+        let factory: ThreadFactory = SingleThreadFactory()
+        return ThreadDispatcher(
+            thread: ThreadPool(numberOfThreads: 8, factory: factory),
+            timer: Timer(thread: factory.make())
         )
-        let success: Bool = threadResult.0
-        if (false == success) {
-            return
-        }
-        let task: ExecutingThread = threadResult.1!
-        self.timer.delay(item.timeout, callback: {
-            if (false == task.currentlyRunning) {
-                return
-            }
-            task.stop()
-            self.onOvertime(item)
-        })
     }
     
 }
