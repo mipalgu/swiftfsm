@@ -77,6 +77,20 @@ public class ThreadPool: Thread {
     public init(numberOfThreads: UInt, factory: SingleThreadFactory) {
         self.factory = factory
         self.numberOfThreads = numberOfThreads
+        self.fillThreads()
+    }
+    
+    private func advance() {
+        self.index = ++self.index % self.numberOfThreads
+    }
+    
+    private func fillThreads() {
+        if (UInt(self.threads.count) >= self.numberOfThreads) {
+            return
+        }
+        for _ in UInt(self.threads.count) ... self.numberOfThreads {
+            self.threads.append(self.factory.make())
+        }
     }
     
 }
