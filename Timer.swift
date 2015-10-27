@@ -58,9 +58,9 @@
 
 public class Timer {
     
-    private let executer: ThreadExecuter
+    private let executer: Thread
     
-    public init(executer: ThreadExecuter) {
+    public init(executer: Thread) {
         self.executer = executer
     }
     

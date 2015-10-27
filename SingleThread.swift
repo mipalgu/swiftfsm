@@ -1,5 +1,5 @@
 /*
- * ThreadExecuter.swift
+ * SingleThread.swift
  * swiftfsm
  *
  * Created by Callum McColl on 25/10/2015.
@@ -56,7 +56,7 @@
  *
  */
 
-public class ThreadExecuter {
+public class SingleThread {
     
     private var thread: UnsafeMutablePointer<pthread_t> =
         UnsafeMutablePointer<pthread_t>.alloc(1)
