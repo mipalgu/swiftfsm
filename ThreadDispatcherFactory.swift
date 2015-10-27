@@ -61,7 +61,7 @@ public class ThreadDispatcherFactory {
     public func make() -> Dispatcher {
         let factory: ThreadFactory = SingleThreadFactory()
         return ThreadDispatcher(
-            thread: ThreadPool(numberOfThreads: 8, factory: factory),
+            thread: ThreadPool(numberOfThreads: 6, factory: factory),
             timer: Timer(thread: factory.make())
         )
     }
