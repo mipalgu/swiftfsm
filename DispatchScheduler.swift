@@ -1,5 +1,5 @@
 /*
- * DispatchTableScheduler.swift
+ * DispatchScheduler.swift
  * swiftfsm
  *
  * Created by Callum McColl on 27/10/2015.
@@ -56,7 +56,7 @@
  *
  */
 
-public class DispatchTableScheduler: Scheduler {
+public class DispatchScheduler: Scheduler {
     
     private let dispatchTable: DispatchTable
     private let onOvertime: (item: Dispatchable) -> Void
