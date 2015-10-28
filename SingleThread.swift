@@ -74,6 +74,8 @@ public class SingleThread: Thread, ExecutingThread {
         self.currentlyRunning = false
         self.f = {return}
         self.thread = UnsafeMutablePointer<pthread_t>.alloc(1)
+        sem_unlink("ST_f_" + String(id))
+        sem_unlink("ST_run_" + String(id))
         self.f_sem = sem_open(
             "ST_f_" + String(id),
             O_CREAT,
@@ -83,11 +85,9 @@ public class SingleThread: Thread, ExecutingThread {
         self.run_sem = sem_open(
             "ST_run_" + String(id),
             O_CREAT,
-            0,
+            0777,
             0
         )
-        print("f_sem: \(SEM_FAILED == self.f_sem)")
-        print("run_sem: \(SEM_FAILED == self.run_sem)")
         self.failures = false == self.createThread()
             || SEM_FAILED == self.f_sem
             || SEM_FAILED == self.run_sem
@@ -123,7 +123,7 @@ public class SingleThread: Thread, ExecutingThread {
     }
     
     public func execute(f: () -> Void) -> (Bool, ExecutingThread?) {
-        if (self.failures) {
+        if (true == self.failures) {
             print("Failures present")
             return (false, nil)
         }
@@ -145,9 +145,12 @@ public class SingleThread: Thread, ExecutingThread {
     public func stop() {
         pthread_cancel(self.thread.memory)
         self.currentlyRunning = false
+        self.createThread()
     }
     
     deinit {
+        sem_close(self.run_sem)
+        sem_close(self.f_sem)
         self.thread.dealloc(1)
     }
     
