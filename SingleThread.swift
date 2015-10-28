@@ -60,26 +60,56 @@ public class SingleThread: Thread, ExecutingThread {
     
     public private(set) var currentlyRunning: Bool
     
-    private var failures: Bool = true
+    private var failures: Bool {
+        return false == threadCreated
+            || SEM_FAILED == self.sem_guard
+            || SEM_FAILED == self.f_sem
+            || SEM_FAILED == self.run_sem
+    }
+    
+    private let id: UInt
     
     private var thread: UnsafeMutablePointer<pthread_t>
     
+    private var threadCreated: Bool
+    
     private var f: () -> Void = {}
     
-    private var f_sem: UnsafeMutablePointer<sem_t>
+    private var sem_guard: UnsafeMutablePointer<sem_t>
     
-    private var run_sem: UnsafeMutablePointer<sem_t>
+    private var f_sem: UnsafeMutablePointer<sem_t>!
+    
+    private var run_sem: UnsafeMutablePointer<sem_t>!
     
     public init(id: UInt = 0) {
         self.currentlyRunning = false
         self.f = {return}
+        self.id = id
         self.thread = UnsafeMutablePointer<pthread_t>.alloc(1)
-        sem_unlink("ST_f_" + String(id))
-        sem_unlink("ST_run_" + String(id))
+        self.threadCreated = false
+        self.sem_guard = sem_open(
+            "ST_sem_guard_\(id)",
+            O_CREAT,
+            0777,
+            1
+        )
+        self.reset()
+    }
+    
+    private func reset() {
+        self.currentlyRunning = false
+        self.resetSemaphores()
+        self.threadCreated = self.createThread()
+    }
+    
+    private func resetSemaphores() {
+        sem_wait(self.sem_guard)
+        sem_unlink("ST_f_\(self.id)")
+        sem_unlink("ST_run_\(self.id)")
         self.f_sem = sem_open(
             "ST_f_" + String(id),
             O_CREAT,
-            0,
+            0777,
             1
         )
         self.run_sem = sem_open(
@@ -88,9 +118,7 @@ public class SingleThread: Thread, ExecutingThread {
             0777,
             0
         )
-        self.failures = false == self.createThread()
-            || SEM_FAILED == self.f_sem
-            || SEM_FAILED == self.run_sem
+        sem_post(self.sem_guard)
     }
     
     private func createThread() -> Bool {
@@ -146,8 +174,7 @@ public class SingleThread: Thread, ExecutingThread {
     
     public func stop() {
         pthread_cancel(self.thread.memory)
-        self.currentlyRunning = false
-        self.createThread()
+        self.reset()
     }
     
     deinit {
