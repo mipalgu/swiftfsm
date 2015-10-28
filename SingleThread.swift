@@ -98,10 +98,12 @@ public class SingleThread: Thread, ExecutingThread {
         let p: UnsafeMutablePointer<() -> Void> =
         UnsafeMutablePointer<() -> Void>.alloc(1)
         p.initialize({
-            sem_wait(self.run_sem)
-            self.f()
-            self.currentlyRunning = false
-            sem_post(self.f_sem)
+            while(true) {
+                sem_wait(self.run_sem)
+                self.f()
+                self.currentlyRunning = false
+                sem_post(self.f_sem)
+            }
         })
         let args: UnsafeMutablePointer<Void> = UnsafeMutablePointer<Void>(p)
         // Create the thread.
@@ -111,7 +113,7 @@ public class SingleThread: Thread, ExecutingThread {
             {(args: UnsafeMutablePointer<Void>) -> UnsafeMutablePointer<Void> in
                 // Convert args back to function f.
                 let p: UnsafeMutablePointer<() -> Void> =
-                UnsafeMutablePointer<() -> Void>(args)
+                    UnsafeMutablePointer<() -> Void>(args)
                 let f: () -> Void = p.memory
                 // Call the function.
                 f()
