@@ -96,31 +96,6 @@ public class SingleThread: Thread, ExecutingThread {
         self.reset()
     }
     
-    private func reset() {
-        self.currentlyRunning = false
-        self.resetSemaphores()
-        self.threadCreated = self.createThread()
-    }
-    
-    private func resetSemaphores() {
-        sem_wait(self.sem_guard)
-        sem_unlink("ST_f_\(self.id)")
-        sem_unlink("ST_run_\(self.id)")
-        self.f_sem = sem_open(
-            "ST_f_" + String(id),
-            O_CREAT,
-            0777,
-            1
-        )
-        self.run_sem = sem_open(
-            "ST_run_" + String(id),
-            O_CREAT,
-            0777,
-            0
-        )
-        sem_post(self.sem_guard)
-    }
-    
     private func createThread() -> Bool {
         // Convert f to args void pointer.
         let p: UnsafeMutablePointer<() -> Void> =
@@ -170,6 +145,31 @@ public class SingleThread: Thread, ExecutingThread {
             pthread_join(self.thread.memory, nil)
         }
         return result.0
+    }
+    
+    private func reset() {
+        self.currentlyRunning = false
+        self.resetSemaphores()
+        self.threadCreated = self.createThread()
+    }
+    
+    private func resetSemaphores() {
+        sem_wait(self.sem_guard)
+        sem_unlink("ST_f_\(self.id)")
+        sem_unlink("ST_run_\(self.id)")
+        self.f_sem = sem_open(
+            "ST_f_" + String(id),
+            O_CREAT,
+            0777,
+            1
+        )
+        self.run_sem = sem_open(
+            "ST_run_" + String(id),
+            O_CREAT,
+            0777,
+            0
+        )
+        sem_post(self.sem_guard)
     }
     
     public func stop() {
