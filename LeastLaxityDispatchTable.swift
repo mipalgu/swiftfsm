@@ -76,6 +76,9 @@ public class LeastLaxityDispatchTable: StaticDispatchTable {
     
     private func reorganize() {
         super.items.sortInPlace { calculateLaxity($0) < calculateLaxity($1) }
+        for (var i: Int = 1; i < super.items.count; i++) {
+            super.items[i].startTime = super.items[i - 1].startTime + super.items[i - 1].timeout
+        }
     }
     
 }
