@@ -71,16 +71,22 @@ let factory: StaticTimeSlotFactory = StaticTimeSlotFactory()
 let loader: MachineLoader = DynamicLibraryMachineLoaderFactory().make()
 var items: [Dispatchable] = []
 for (var i: Int = 1; i < Process.arguments.count; i++) {
-    let machine: FiniteStateMachine? = loader.load(Process.arguments[i])
-    if (nil == machine) {
-        continue
+    // Create three of the same machine
+    for j: UInt in 1 ... 3 {
+        // Load the machine from the path
+        let machine: FiniteStateMachine? = loader.load(Process.arguments[i])
+        if (nil == machine) {
+            continue
+        }
+        items.append(
+            factory.make(
+                "Ping Pong \(j)",
+                machine: machine!,
+                startTime: 15000 * (j - 1),
+                time: 15000 * j //15 ms * j
+            )
+        )
     }
-    let machine2: FiniteStateMachine? = loader.load(Process.arguments[i])
-    if (nil == machine2) {
-        continue
-    }
-    items.append(factory.make("Ping Pong", machine: machine!, startTime: 0, time: 15000))
-    items.append(factory.make("Ping Pong2", machine: machine2!, startTime: 15000, time: 30000))
 }
 
 // Least Laxity Dispatch Table - reorganize the dispatch table every run through
