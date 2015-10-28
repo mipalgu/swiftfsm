@@ -86,7 +86,6 @@ public class ThreadDispatcher: Dispatcher {
             if (false == task.currentlyRunning) {
                 return
             }
-            print("\(item.item.name) timed out")
             task.stop()
             self.onOvertime(item)
         })
