@@ -70,6 +70,7 @@ let factory: StaticTimeSlotFactory = StaticTimeSlotFactory()
 // Load the machines from dylibs.
 let loader: MachineLoader = DynamicLibraryMachineLoaderFactory().make()
 var items: [Dispatchable] = []
+let timeslot: UInt = 15000
 for (var i: Int = 1; i < Process.arguments.count; i++) {
     // Create three of the same machine
     for j: UInt in 1 ... 3 {
@@ -82,8 +83,8 @@ for (var i: Int = 1; i < Process.arguments.count; i++) {
             factory.make(
                 "Ping Pong \(j)",
                 machine: machine!,
-                startTime: 15000 * (j - 1),
-                time: 15000 * j //15 ms * j
+                startTime: timeslot * (j - 1),
+                time: timeslot * j //15 ms * j
             )
         )
     }
