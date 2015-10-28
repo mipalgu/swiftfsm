@@ -178,6 +178,7 @@ public class SingleThread: Thread, ExecutingThread {
     }
     
     deinit {
+        sem_close(self.sem_guard)
         sem_close(self.run_sem)
         sem_close(self.f_sem)
         pthread_cancel(self.thread.memory)
