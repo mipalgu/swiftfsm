@@ -1,5 +1,5 @@
 /*
- * MachineRunnerQuerier.swift
+ * QuerierableMachineRunner.swift
  * swiftfsm
  *
  * Created by Callum McColl on 25/10/2015.
@@ -61,7 +61,4 @@
  *
  *  Things like run timeor if the command is still running can be queried.
  */
-public protocol MachineRunnerQuerier: MachineRunner, ExecutionTaskMetaData {
-    
-    
-}
+public protocol QuerierableMachineRunner: MachineRunner, ExecutionTaskMetaData {}

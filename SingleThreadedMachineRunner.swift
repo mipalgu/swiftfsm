@@ -56,7 +56,7 @@
  *
  */
 
-public class SingleThreadedMachineRunner: MachineRunnerQuerier {
+public class SingleThreadedMachineRunner: QuerierableMachineRunner {
     
     public private(set) var averageExecutionTime: UInt = 0
     
