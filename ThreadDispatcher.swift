@@ -66,7 +66,7 @@ public class ThreadDispatcher: Dispatcher {
         thread: Thread,
         timer: Timer,
         onOvertime: (Dispatchable) -> Void  = {(item: Dispatchable) in
-            print("Error: Machine missed its deadline.")
+            print("Error: \(item.item.name) missed its deadline.")
         }) {
         self.onOvertime = onOvertime
         self.thread = thread
@@ -86,6 +86,7 @@ public class ThreadDispatcher: Dispatcher {
             if (false == task.currentlyRunning) {
                 return
             }
+            print("\(item.item.name) timed out")
             task.stop()
             self.onOvertime(item)
         })
