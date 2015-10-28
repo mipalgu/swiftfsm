@@ -62,7 +62,11 @@ public class ThreadDispatcherFactory {
         let factory: ThreadFactory = SingleThreadFactory()
         return ThreadDispatcher(
             thread: ThreadPool(numberOfThreads: 6, factory: factory),
-            timer: Timer(thread: factory.make())
+            timer: Timer(thread: factory.make()),
+            onOvertime: {(d: Dispatchable) in
+                print("\(d.item.name) missed its deadline")
+                exit(EXIT_FAILURE)
+            }
         )
     }
     
