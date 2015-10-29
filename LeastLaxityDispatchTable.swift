@@ -58,7 +58,15 @@
 
 public class LeastLaxityDispatchTable: StaticDispatchTable {
     
-    public override init(items: [Dispatchable] = []) {
+    private let concurrentItems: UInt
+    private var dispatchQueues: [Array<Dispatchable>]
+    
+    public init(items: [Dispatchable] = [], concurrentItems: UInt) {
+        self.concurrentItems = concurrentItems
+        self.dispatchQueues = []
+        for _ in 0 ... Int(concurrentItems) - 1 {
+            self.dispatchQueues.append([])
+        }
         super.init(items: items)
         self.reorganize()
     }
