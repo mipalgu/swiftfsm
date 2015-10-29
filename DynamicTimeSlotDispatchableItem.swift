@@ -62,12 +62,18 @@ public class DynamicTimeSlotDispatchableItem: Dispatchable {
     
     public var startTime: UInt
     
+    private var wcet: UInt = 0      // The worst case execution time.
+    
+    private var lastTimeout: UInt   // What was the last timeout used?
+    
     public var timeout: UInt {
         let wcet: UInt = self.item.worstCaseExecutionTime
-        if (0 == wcet) {
-            return self.timeslot
+        // Only Update lastTimeout and wcet if the items wcet has changed.
+        if (wcet != self.wcet) {
+            self.wcet = wcet
+            self.lastTimeout = (self.timeslot / wcet + 1) * self.timeslot
         }
-        return (self.timeslot / wcet + 1) * self.timeslot
+        return self.lastTimeout
     }
     
     private let timeslot: UInt
@@ -76,6 +82,7 @@ public class DynamicTimeSlotDispatchableItem: Dispatchable {
         self.item = item
         self.startTime = startTime
         self.timeslot = timeslot
+        self.lastTimeout = timeslot
     }
     
 }

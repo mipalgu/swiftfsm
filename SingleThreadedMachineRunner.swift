@@ -58,11 +58,19 @@
 
 public class SingleThreadedMachineRunner: QuerierableMachineRunner {
     
-    public private(set) var averageExecutionTime: UInt = 0
+    private var startTime: UInt!
     
-    public private(set) var bestCaseExecutionTime: UInt = 0
+    private var endTime: UInt!
     
-    public private(set) var lastExecutionTime: UInt = 0
+    public var averageExecutionTime: UInt {
+        return self.totalExecutionTime / self.totalExecutions
+    }
+    
+    public var bestCaseExecutionTime: UInt = 0
+    
+    public var lastExecutionTime: UInt {
+        return self.endTime - self.startTime
+    }
     
     public private(set) var totalExecutionTime: UInt = 0
     
@@ -71,16 +79,15 @@ public class SingleThreadedMachineRunner: QuerierableMachineRunner {
     public private(set) var worstCaseExecutionTime: UInt = 0
     
     public func run(var machine: Machine) {
-        let start: UInt = microseconds()
+        self.startTime = microseconds()
         machine.machine.next()
-        let end: UInt = microseconds()
-        self.updateMetaData(end - start)
+        self.endTime = microseconds()
+        self.updateMetaData()
     }
     
-    private func updateMetaData(time: UInt) {
-        self.lastExecutionTime = time
-        self.totalExecutionTime = self.totalExecutionTime + time
-        self.averageExecutionTime = self.totalExecutionTime / ++self.totalExecutions
+    private func updateMetaData() {
+        let time: UInt = self.endTime - self.startTime
+        ++self.totalExecutions
         if (self.bestCaseExecutionTime > time) {
             self.bestCaseExecutionTime = time
         }
