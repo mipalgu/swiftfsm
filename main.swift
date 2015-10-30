@@ -73,7 +73,7 @@ var items: [Dispatchable] = []
 let timeslot: UInt = 15000
 for (var i: Int = 1; i < Process.arguments.count; i++) {
     // Create three of the same machine
-    for j: UInt in 1 ... 3 {
+    for j: UInt in 1 ... 100 {
         // Load the machine from the path
         let machine: FiniteStateMachine? = loader.load(Process.arguments[i])
         if (nil == machine) {
@@ -83,18 +83,18 @@ for (var i: Int = 1; i < Process.arguments.count; i++) {
             factory.make(
                 "Ping Pong \(j)",
                 machine: machine!,
-                startTime: 0,
-                time: timeslot * j //15 ms * j
+                startTime: 5000,
+                time: timeslot //15 ms * j
             )
         )
     }
 }
 
 // Least Laxity Dispatch Table - reorganize the dispatch table every run through
-//let dispatchTable: DispatchTable = LeastLaxityDispatchTable(items: items)
+let dispatchTable: DispatchTable = LeastLaxityDispatchTable(items: items, concurrentItems: 7)
 
 // Static Dispatch Table - order of items never changes
-let dispatchTable: DispatchTable = StaticDispatchTable(items: items)
+//let dispatchTable: DispatchTable = StaticDispatchTable(items: items)
 
 let dispatcher: Dispatcher = ThreadDispatcherFactory().make()
 

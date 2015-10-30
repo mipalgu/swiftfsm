@@ -58,15 +58,19 @@
 
 public class LeastLaxityDispatchTable: StaticDispatchTable {
     
-    private let concurrentItems: UInt
+    private let concurrentItems: Int
     private var dispatchQueues: [Array<Dispatchable>]
+    private var indexes: [Int]
+    private var filled: Int
     
     public init(items: [Dispatchable] = [], concurrentItems: UInt) {
-        self.concurrentItems = concurrentItems
-        self.dispatchQueues = []
-        for _ in 0 ... Int(concurrentItems) - 1 {
-            self.dispatchQueues.append([])
-        }
+        self.concurrentItems = Int(concurrentItems)
+        self.dispatchQueues = Array<[Dispatchable]>(
+            count: self.concurrentItems,
+            repeatedValue: []
+        )
+        self.indexes = Array<Int>(count: self.concurrentItems, repeatedValue: 0)
+        self.filled = 0
         super.init(items: items)
         self.reorganize()
     }
@@ -78,6 +82,24 @@ public class LeastLaxityDispatchTable: StaticDispatchTable {
         }
     }
     
+    public override func next() -> Dispatchable {
+        let index: Int = self.index % self.filled
+        let d: Dispatchable = self.dispatchQueues[index][self.indexes[index]]
+        self.indexes[index] = (self.indexes[index] + 1) % self.dispatchQueues[index].count
+        self.advance()
+        return d
+    }
+    
+    public override func remove() {
+        super.remove()
+        self.reorganize()
+    }
+    
+    public override func remove(index: Int) {
+        super.remove(index)
+        self.reorganize()
+    }
+    
     private func calculateLaxity(d: Dispatchable) -> Int {
         return Int(d.timeout) - Int(d.item.worstCaseExecutionTime)
     }
@@ -87,11 +109,32 @@ public class LeastLaxityDispatchTable: StaticDispatchTable {
             return
         }
         super.items.sortInPlace { calculateLaxity($0) < calculateLaxity($1) }
-        super.items[0].startTime = 0
-        for (var i: Int = 1; i < super.items.count; i++) {
-            let lastItem: Dispatchable = super.items[i - 1]
-            super.items[i].startTime = lastItem.startTime + lastItem.timeout
+        self.clearDispatchQueues()
+        self.fillDispatchQueues()
+    }
+    
+    private func clearDispatchQueues() {
+        self.indexes = self.indexes.map({_ in 0})
+        self.dispatchQueues = self.dispatchQueues.map({_ in []})
+    }
+    
+    private func fillDispatchQueues() {
+        var j: Int = 0
+        for i: Int in 0 ... Int(self.count()) - 1 {
+            let qIndex: Int = self.indexes[j]++
+            self.dispatchQueues[j].append(self.items[i])
+            if (qIndex != 0) {
+                let lastItem: Dispatchable = self.dispatchQueues[j][qIndex - 1]
+                self.dispatchQueues[j][qIndex].startTime =
+                    lastItem.startTime + lastItem.timeout
+            } else {
+                self.dispatchQueues[j][qIndex].startTime = 0
+            }
+            j = (j + 1) % self.dispatchQueues.count
         }
+        self.filled = Int(self.count()) < self.concurrentItems ? Int(self.count()) : self.concurrentItems
+        self.indexes = self.indexes.map({_ in 0})
+        self.index = 0
     }
     
 }
