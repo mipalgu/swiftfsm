@@ -78,7 +78,7 @@ for (var i: Int = 1; i < Process.arguments.count; i++) {
     if (nil == machine) {
         continue
     }
-    for j: UInt in 1 ... 100000 {
+    for j: UInt in 1 ... 10000 {
         items.append(
             factory.make(
                 "Ping Pong \(j)",
