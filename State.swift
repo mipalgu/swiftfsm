@@ -110,6 +110,14 @@ extension _State where
     
 }
 
+extension _State where Self: CustomReflectable {
+    
+    public func customMirror() -> Mirror {
+        return Mirror(reflecting: self)
+    }
+    
+}
+
 /**
  *  Compare states names for equality by default.
  */
@@ -121,6 +129,7 @@ public protocol State:
     _State,
     CustomStringConvertible,
     CustomDebugStringConvertible,
+    CustomReflectable,
     StateMethods,
     Transitionable
 {}
