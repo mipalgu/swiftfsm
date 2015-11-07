@@ -87,7 +87,11 @@ public class SingleThreadedMachineRunner: QuerierableMachineRunner {
     
     private func updateMetaData() {
         let time: UInt = self.endTime - self.startTime
-        ++self.totalExecutions
+        if (self.totalExecutions++ < 1) {
+            self.bestCaseExecutionTime = time
+            self.worstCaseExecutionTime = time
+            return
+        }
         if (self.bestCaseExecutionTime > time) {
             self.bestCaseExecutionTime = time
         }
