@@ -60,9 +60,10 @@ public class SingleThread: Thread, ExecutingThread {
     
     public private(set) var currentlyRunning: Bool
     
+    public private(set) var executionTime: UInt = 0
+    
     private var failures: Bool {
         return false == threadCreated
-            || SEM_FAILED == self.sem_guard
             || SEM_FAILED == self.f_sem
             || SEM_FAILED == self.run_sem
     }
@@ -75,7 +76,18 @@ public class SingleThread: Thread, ExecutingThread {
     
     private var f: () -> Void = {}
     
-    private var sem_guard: UnsafeMutablePointer<sem_t>
+    private var _onFinish: (executionTime: UInt) -> Void = {_ in }
+    
+    public var onFinish: (executionTime: UInt) -> Void {
+        get {
+            return self._onFinish
+        } set {
+            self._onFinish = newValue
+            if (false == self.currentlyRunning) {
+                self.onFinish(executionTime: self.executionTime)
+            }
+        }
+    }
     
     private var f_sem: UnsafeMutablePointer<sem_t>!
     
@@ -87,12 +99,6 @@ public class SingleThread: Thread, ExecutingThread {
         self.id = id
         self.thread = UnsafeMutablePointer<pthread_t>.alloc(1)
         self.threadCreated = false
-        self.sem_guard = sem_open(
-            "ST_sem_guard_\(id)",
-            O_CREAT,
-            0777,
-            1
-        )
         self.reset()
     }
     
@@ -103,8 +109,11 @@ public class SingleThread: Thread, ExecutingThread {
         p.initialize({
             while(true) {
                 sem_wait(self.run_sem)
+                let startTime: UInt = microseconds()
                 self.f()
                 self.currentlyRunning = false
+                self.executionTime = microseconds() - startTime
+                self.onFinish(executionTime: self.executionTime)
                 sem_post(self.f_sem)
             }
         })
@@ -154,7 +163,6 @@ public class SingleThread: Thread, ExecutingThread {
     }
     
     private func resetSemaphores() {
-        sem_wait(self.sem_guard)
         sem_unlink("ST_f_\(self.id)")
         sem_unlink("ST_run_\(self.id)")
         self.f_sem = sem_open(
@@ -169,7 +177,6 @@ public class SingleThread: Thread, ExecutingThread {
             0777,
             0
         )
-        sem_post(self.sem_guard)
     }
     
     public func stop() {
@@ -178,7 +185,6 @@ public class SingleThread: Thread, ExecutingThread {
     }
     
     deinit {
-        sem_close(self.sem_guard)
         sem_close(self.run_sem)
         sem_close(self.f_sem)
         pthread_cancel(self.thread.memory)

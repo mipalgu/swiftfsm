@@ -67,7 +67,8 @@ public class ThreadDispatcher: Dispatcher {
         timer: Timer,
         onOvertime: (Dispatchable) -> Void  = {(item: Dispatchable) in
             print("Error: \(item.item.name) missed its deadline.")
-        }) {
+        }
+    ) {
         self.onOvertime = onOvertime
         self.thread = thread
         self.timer = timer
@@ -81,14 +82,38 @@ public class ThreadDispatcher: Dispatcher {
         if (false == success) {
             return
         }
-        let task: ExecutingThread = threadResult.1!
-        self.timer.delay(item.timeout, callback: {
-            if (false == task.currentlyRunning) {
+        var task: ExecutingThread = threadResult.1!
+        // Setup timer - this is how you preempt items running over their deadline.
+        //self.setupTimer(item, task: task)
+        // Handle task finishing.
+        task.onFinish = {(executionTime: UInt) in
+            // Ignore finished tasks.
+            if (executionTime <= item.timeout) {
                 return
             }
+            // Handle missing deadline.
             task.stop()
             self.onOvertime(item)
+        }
+    }
+    
+    private func setupTimer(
+        item: Dispatchable,
+        task: ExecutingThread
+    ) -> (Bool, ExecutingThread?) {
+        return self.timer.delay(item.timeout, callback: {
+            self.handleDeadline(item, task: task)
         })
+    }
+    
+    private func handleDeadline(item: Dispatchable, task: ExecutingThread) {
+        // Ignore finished tasks.
+        if (task.executionTime <= item.timeout) {
+            return
+        }
+        // Handle missing deadline.
+        task.stop()
+        self.onOvertime(item)
     }
     
 }

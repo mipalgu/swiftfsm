@@ -67,16 +67,22 @@ public class DispatchScheduler: Scheduler {
     }
     
     public func run() {
-        var lastTime: UInt = 0
-        var lastTask: Dispatchable? = nil
+        var startRunTime = microseconds()   // When did we start?
+        var i: UInt = 0                     // The index of the current machine.
         while(false == self.dispatchTable.empty()) {
             let d: Dispatchable = self.dispatchTable.get()
+            // Reset timers when we execute all items in the dispatch table.
+            if (self.dispatchTable.count() == i++) {
+                i = 1
+                startRunTime = microseconds()
+            }
+            // Execute the machine if it has not finished.
             if (false == d.item.machine.hasFinished()) {
-                lastTime = self.runTask(lastTime, lastTask: lastTask, d: d)
+                self.runTask(d, startRunTime: startRunTime)
                 self.dispatchTable.advance()
-                lastTask = d
                 continue
             }
+            // Remove the machine from the dispatch table if it has finished.
             self.dispatchTable.remove()
             if (true == self.dispatchTable.empty()) {
                 return
@@ -85,21 +91,16 @@ public class DispatchScheduler: Scheduler {
         }
     }
     
-    private func runTask(
-        lastTime: UInt,
-        lastTask: Dispatchable?,
-        d: Dispatchable
-    ) -> UInt {
+    private func runTask(d: Dispatchable, startRunTime: UInt) {
         let taskStartTime: UInt = d.startTime
-        var sleepTime: UInt = 0
-        if (taskStartTime > lastTime) {
-            sleepTime = taskStartTime - lastTime
-        } else if (lastTask != nil) {
-            sleepTime = lastTask!.timeout
+        let elapsedTime = microseconds() - startRunTime
+        // Only sleep if we have not reached the start time.
+        if (taskStartTime > elapsedTime) {
+            print("\(d.item.name) sleepTime: \(taskStartTime - elapsedTime)")
+            microsleep(taskStartTime - elapsedTime)
         }
-        microsleep(sleepTime)
         self.dispatcher.run(d)
-        return taskStartTime
+        return
     }
     
 }

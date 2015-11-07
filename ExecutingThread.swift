@@ -58,6 +58,10 @@
 
 public protocol ExecutingThread: MultiThreadedTaskStatus {
     
+    var executionTime: UInt { get }
+    
+    var onFinish: (executionTime: UInt) -> Void { get set }
+    
     func stop() -> Void
     
 }

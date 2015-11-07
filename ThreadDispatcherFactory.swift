@@ -58,14 +58,21 @@
 
 public class ThreadDispatcherFactory {
     
+    private let concurrentItems: UInt
+    
+    public init(concurrentItems: UInt) {
+        self.concurrentItems = concurrentItems
+    }
+    
     public func make() -> Dispatcher {
+        let factory: SingleThreadFactory = SingleThreadFactory()
         let threadPool: ThreadPool = ThreadPool(
-            numberOfThreads: 7,
-            factory: SingleThreadFactory()
+            numberOfThreads: Int(self.concurrentItems),
+            factory: factory
         )
         return ThreadDispatcher(
             thread: threadPool,
-            timer: Timer(thread: threadPool),
+            timer: Timer(thread: factory.make()),
             onOvertime: {(d: Dispatchable) in
                 print("\(d.item.name) missed its deadline of \(d.timeout)")
                 exit(EXIT_FAILURE)

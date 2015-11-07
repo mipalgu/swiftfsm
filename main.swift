@@ -61,6 +61,8 @@ import FSM
 
 print("Hello, when I grow up, I will be a full-blown state machine scheduler!")
 
+let concurrentItems: UInt = 7
+
 // Dynamic Time Slots - task may get more than one timeslot if it is needed.
 //let factory: DynamicTimeSlotFactory = DynamicTimeSlotFactory()
 
@@ -70,7 +72,7 @@ let factory: StaticTimeSlotFactory = StaticTimeSlotFactory()
 // Load the machines from dylibs.
 let loader: MachineLoader = DynamicLibraryMachineLoaderFactory().make()
 var items: [Dispatchable] = []
-let timeslot: UInt = 5000 //5 ms
+let timeslot: UInt = 15000 //15 ms
 let factories: Factories = Factories()
 for (var i: Int = 1; i < Process.arguments.count; i++) {
     // Load the machine from the path
@@ -84,7 +86,7 @@ for (var i: Int = 1; i < Process.arguments.count; i++) {
             factory.make(
                 "Ping Pong \(j)",
                 machine: factories.getLast()!(),
-                startTime: 0,
+                startTime: (j / concurrentItems) * timeslot,
                 time: timeslot
             )
         )
@@ -92,12 +94,12 @@ for (var i: Int = 1; i < Process.arguments.count; i++) {
 }
 
 // Least Laxity Dispatch Table - reorganize the dispatch table every run through
-let dispatchTable: DispatchTable = LeastLaxityDispatchTable(items: items, concurrentItems: 7)
+let dispatchTable: DispatchTable = LeastLaxityDispatchTable(items: items, concurrentItems: concurrentItems)
 
 // Static Dispatch Table - order of items never changes
 //let dispatchTable: DispatchTable = StaticDispatchTable(items: items)
 
-let dispatcher: Dispatcher = ThreadDispatcherFactory().make()
+let dispatcher: Dispatcher = ThreadDispatcherFactory(concurrentItems: concurrentItems).make()
 
 let scheduler: Scheduler = DispatchScheduler(
     dispatcher: dispatcher,
