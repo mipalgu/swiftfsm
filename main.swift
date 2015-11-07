@@ -57,7 +57,7 @@
  */
 
 import Darwin
-import Swift_FSM
+import FSM
 
 print("Hello, when I grow up, I will be a full-blown state machine scheduler!")
 
@@ -76,6 +76,7 @@ for (var i: Int = 1; i < Process.arguments.count; i++) {
     // Load the machine from the path
     let machine: FiniteStateMachine? = loader.load(Process.arguments[i])
     if (nil == machine) {
+        print("bad")
         continue
     }
     for j: UInt in 1 ... 10000 {

@@ -57,7 +57,7 @@
  */
 
 import Darwin
-import Swift_FSM
+import FSM
 
 /**
  *  Conforming types are capable of loading machines from a resource path.

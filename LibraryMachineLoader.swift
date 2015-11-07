@@ -56,7 +56,7 @@
  *
  */
 
-import Swift_FSM
+import FSM
 
 /**
  *  Load a machine from a library.

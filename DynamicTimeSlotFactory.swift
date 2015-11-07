@@ -56,7 +56,7 @@
  *
  */
 
-import Swift_FSM
+import FSM
 
 public class DynamicTimeSlotFactory {
     

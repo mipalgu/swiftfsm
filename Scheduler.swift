@@ -56,7 +56,7 @@
  *
  */
 
-import Swift_FSM
+import FSM
 
 /**
  *  A common interfaces for scheduler who are responsible for the execution of
