@@ -67,6 +67,19 @@ public struct FSMKripkeStructureGenerator: KripkeStructureGenerator {
     }
     
     public func generate() -> KripkeStructureType {
+        return KripkeStructure(
+            initialState: self.generateFromState(
+                self.fsm.initialState,
+                ringlet: self.fsm.ringlet
+            ),
+            fsm: self.fsm
+        )
+    }
+    
+    private func generateFromState(
+        state: State,
+        ringlet: Ringlet
+    ) -> KripkeStateType {
         
     }
     
