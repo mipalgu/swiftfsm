@@ -65,7 +65,7 @@ public protocol KripkeState {
     /**
      *  Describes the parts of the source state.
      */
-    var source: Mirror { get }
+    var properties: Mirror.Children { get }
     
     /**
      *  The state which we will transition to.
