@@ -58,7 +58,7 @@
 
 import FSM
 
-public class FSMKripkeState {
+public class FSMKripkeState: KripkeState {
     
     public let properties: Mirror.Children
     
