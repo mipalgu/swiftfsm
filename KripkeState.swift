@@ -70,6 +70,6 @@ public protocol KripkeState {
     /**
      *  The state which we will transition to.
      */
-    var target: KripkeState { get }
+    var target: KripkeState? { get }
     
 }
