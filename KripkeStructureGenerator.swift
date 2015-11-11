@@ -58,6 +58,6 @@
 
 public protocol KripkeStructureGenerator {
     
-    func generate() -> KripkeStructureGenerator
+    func generate() -> KripkeStructure
     
 }

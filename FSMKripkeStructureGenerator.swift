@@ -66,7 +66,7 @@ public struct FSMKripkeStructureGenerator: KripkeStructureGenerator {
         self.fsm = fsm
     }
     
-    public func generate() -> KripkeStructureGenerator {
+    public func generate() -> KripkeStructure {
         
     }
     
