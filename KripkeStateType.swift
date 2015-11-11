@@ -1,5 +1,5 @@
 /*
- * KripkeState.swift
+ * KripkeStateType.swift
  * swiftfsm
  *
  * Created by Callum McColl on 11/11/2015.
@@ -60,7 +60,7 @@
  *  Provides information on the State and the state which will be transitioned
  *  to.
  */
-public protocol KripkeState {
+public protocol KripkeStateType {
     
     /**
      *  Describes the parts of the source state.
@@ -70,6 +70,6 @@ public protocol KripkeState {
     /**
      *  The state which we will transition to.
      */
-    var target: KripkeState? { get }
+    var target: KripkeStateType? { get }
     
 }

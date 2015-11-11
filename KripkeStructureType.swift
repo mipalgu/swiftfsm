@@ -1,5 +1,5 @@
 /*
- * KripkeStructure.swift
+ * KripkeStructureType.swift
  * swiftfsm
  *
  * Created by Callum McColl on 11/11/2015.
@@ -61,9 +61,9 @@ import FSM
 /**
  *  A graph that contains all possible state permeutations.
  */
-public protocol KripkeStructure {
+public protocol KripkeStructureType {
     
-    var initialState: KripkeState { get }
+    var initialState: KripkeStateType { get }
     
     var fsm: FiniteStateMachine { get }
     

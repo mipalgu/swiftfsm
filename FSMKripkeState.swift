@@ -58,22 +58,14 @@
 
 import FSM
 
-public class FSMKripkeState: KripkeState {
+public class FSMKripkeState: KripkeStateType {
     
     public let properties: Mirror.Children
     
-    public let target: KripkeState?
+    public let target: KripkeStateType?
     
-    public init(state: State, target: KripkeState? = nil) {
-        // Get properties from state
-        let mirror: Mirror = Mirror(reflecting: state)
-        var children: [Mirror.Child] = Array(mirror.children)
-        var s: Mirror? = mirror.superclassMirror()
-        while (s != nil) {
-            children.appendContentsOf(s!.children)
-            s = s!.superclassMirror()
-        }
-        self.properties = Mirror.Children(children)
+    public init(properties: Mirror.Children, target: KripkeStateType? = nil) {
+        self.properties = properties
         self.target = target
     }
     
