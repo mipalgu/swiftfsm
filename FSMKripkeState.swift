@@ -64,7 +64,7 @@ public class FSMKripkeState {
     
     public let target: KripkeState?
     
-    public init(state: State, target: KripkeState?) {
+    public init(state: State, target: KripkeState? = nil) {
         // Get properties from state
         let mirror: Mirror = Mirror(reflecting: state)
         var children: [Mirror.Child] = Array(mirror.children)
