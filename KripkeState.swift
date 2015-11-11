@@ -1,5 +1,5 @@
 /*
- * FSMKripkeState.swift
+ * KripkeState.swift
  * swiftfsm
  *
  * Created by Callum McColl on 11/11/2015.
@@ -58,7 +58,7 @@
 
 import FSM
 
-public class FSMKripkeState: KripkeStateType {
+public class KripkeState: KripkeStateType {
     
     public let properties: Mirror.Children
     
