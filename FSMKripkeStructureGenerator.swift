@@ -80,7 +80,7 @@ public struct FSMKripkeStructureGenerator: KripkeStructureGenerator {
         state: State,
         ringlet: Ringlet
     ) -> KripkeStateType {
-        
+        return KripkeState(properties: AnyForwardCollection([]))
     }
     
 }
