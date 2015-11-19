@@ -61,9 +61,9 @@ import FSM
 /**
  *  A graph that contains all possible state permeutations.
  */
-public protocol KripkeStructureType {
+public protocol KripkeStructureType{
     
-    var initialState: KripkeStateType { get }
+    var initialState: KripkeState { get }
     
     var fsm: FiniteStateMachine { get }
     
