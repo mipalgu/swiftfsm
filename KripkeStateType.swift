@@ -60,16 +60,17 @@
  *  Provides information on the State and the state which will be transitioned
  *  to.
  */
-public protocol KripkeStateType {
+public protocol KripkeStateType: Equatable {
     
     /**
      *  Describes the parts of the source state.
      */
-    var properties: Mirror.Children { get }
+    var properties: [String: KripkeStateProperty] { get }
     
     /**
      *  The state which we will transition to.
      */
-    var target: KripkeStateType? { get }
+    var target: KripkeState? { get }
     
 }
+

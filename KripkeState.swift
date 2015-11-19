@@ -60,13 +60,37 @@ import FSM
 
 public class KripkeState: KripkeStateType {
     
-    public let properties: Mirror.Children
+    public let properties: [String: KripkeStateProperty]
     
-    public let target: KripkeStateType?
+    public let target: KripkeState?
     
-    public init(properties: Mirror.Children, target: KripkeStateType? = nil) {
+    public init(properties: [String: KripkeStateProperty], target: KripkeState? = nil) {
         self.properties = properties
         self.target = target
     }
     
+    public func equals(other: KripkeState) -> Bool {
+        // Check if the property counts are the same.
+        if (self.properties.count != other.properties.count) {
+            return false
+        }
+        // Check properties.
+        for key: String in self.properties.keys {
+            // Check if rhs has the property
+            if (nil == other.properties[key]) {
+                return false
+            }
+            let l: KripkeStateProperty = self.properties[key]!
+            let r: KripkeStateProperty = other.properties[key]!
+            if (false == (l == r)) {
+                return false
+            }
+        }
+        return true
+    }
+    
+}
+
+public func ==(lhs: KripkeState, rhs: KripkeState) -> Bool {
+    return lhs.equals(rhs)
 }
