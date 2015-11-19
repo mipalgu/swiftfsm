@@ -68,6 +68,11 @@ public protocol KripkeStateType: Equatable {
     var properties: [String: KripkeStateProperty] { get }
     
     /**
+     *  The state which transitioned to us.
+     */
+    var source: KripkeState? { get }
+    
+    /**
      *  The state which we will transition to.
      */
     var target: KripkeState? { get }

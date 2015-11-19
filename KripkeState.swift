@@ -62,10 +62,17 @@ public class KripkeState: KripkeStateType {
     
     public let properties: [String: KripkeStateProperty]
     
+    public let source: KripkeState?
+    
     public let target: KripkeState?
     
-    public init(properties: [String: KripkeStateProperty], target: KripkeState? = nil) {
+    public init(
+        properties: [String: KripkeStateProperty],
+        source: KripkeState? = nil,
+        target: KripkeState? = nil
+    ) {
         self.properties = properties
+        self.source = source
         self.target = target
     }
     

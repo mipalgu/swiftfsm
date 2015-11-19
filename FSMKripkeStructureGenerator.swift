@@ -79,8 +79,57 @@ public struct FSMKripkeStructureGenerator: KripkeStructureGenerator {
     private func generateFromState(
         state: State,
         ringlet: Ringlet
-    ) -> KripkeStateType {
-        return KripkeState(properties: AnyForwardCollection([]))
+    ) -> KripkeState {
+        return KripkeState(properties: ["count": convertValue(3)!])
+    }
+    
+    private func convertValue(value: Any) -> KripkeStateProperty? {
+        let type: KripkeStatePropertyTypes? = self.getKripkeStatePropertyType(
+            value
+        )
+        if (nil == type) {
+            return nil
+        }
+        return KripkeStateProperty(type: type!, value: value)
+    }
+    
+    private func getKripkeStatePropertyType(
+        value: Any
+    ) -> KripkeStatePropertyTypes? {
+        switch (value) {
+        case is Bool:
+            return .Bool
+        case is Int:
+            return .Int
+        case is Int8:
+            return .Int8
+        case is Int16:
+            return .Int16
+        case is Int32:
+            return .Int32
+        case is Int64:
+            return .Int64
+        case is UInt:
+            return .UInt
+        case is UInt8:
+            return .UInt8
+        case is UInt16:
+            return .UInt16
+        case is UInt32:
+            return .UInt32
+        case is UInt64:
+            return .UInt64
+        case is Float:
+            return .Float
+        case is Float80:
+            return .Float80
+        case is Double:
+            return .Double
+        case is String:
+            return .String
+        default:
+            return nil
+        }
     }
     
 }
