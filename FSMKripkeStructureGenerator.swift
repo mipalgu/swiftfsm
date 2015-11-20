@@ -76,30 +76,38 @@ public struct FSMKripkeStructureGenerator: KripkeStructureGenerator {
         )
     }
     
+    /*
+     *  Generate a kripke structure from the initial state of the finite state
+     *  machine.
+     */
     private func generateFromState(
         state: State,
         ringlet: Ringlet
     ) -> KripkeState {
-        return KripkeState(properties: [
-            "Bool": convertValue(true),
-            "Int": convertValue(Int(0)),
-            "Int8": convertValue(Int8(0)),
-            "Int16": convertValue(Int16(0)),
-            "Int32": convertValue(Int32(0)),
-            "Int64": convertValue(Int64(0)),
-            "UInt": convertValue(UInt(0)),
-            "UInt8": convertValue(UInt8(0)),
-            "UInt16": convertValue(UInt16(0)),
-            "UInt32": convertValue(UInt32(0)),
-            "UInt64": convertValue(UInt64(0)),
-            "Float": convertValue(Float(0)),
-            "Float80": convertValue(Float80(0)),
-            "Double": convertValue(Double(0)),
-            "String": convertValue("str"),
-            "Some": convertValue(EmptyState(name: "state"))
-        ])
+        let mirror: Mirror = Mirror(reflecting: state)
+        return KripkeState(properties: self.getPropertiesFromMirror(mirror))
     }
     
+    private func getPropertiesFromMirror(
+        mirror: Mirror,
+        var properties: [String: KripkeStateProperty] = [:]
+    ) -> [String: KripkeStateProperty] {
+        let parent: Mirror? = mirror.superclassMirror()
+        if (nil != parent) {
+            properties = self.getPropertiesFromMirror(parent!)
+        }
+        for child: Mirror.Child in mirror.children {
+            if (nil == child.label) {
+                continue
+            }
+            properties[child.label!] = self.convertValue(child.value)
+        }
+        return properties
+    }
+    
+    /*
+     *  Convert the value to a KripkeStateProperty.
+     */
     private func convertValue(value: Any) -> KripkeStateProperty {
         let type: KripkeStatePropertyTypes = self.getKripkeStatePropertyType(
             value
@@ -107,6 +115,9 @@ public struct FSMKripkeStructureGenerator: KripkeStructureGenerator {
         return KripkeStateProperty(type: type, value: value)
     }
     
+    /*
+     *  Derive the KripkeStatePropertyType associated with a value.
+     */
     private func getKripkeStatePropertyType(
         value: Any
     ) -> KripkeStatePropertyTypes {
