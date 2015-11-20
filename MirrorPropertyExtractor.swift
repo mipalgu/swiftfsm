@@ -94,14 +94,19 @@ public class MirrorPropertyExtractor: StatePropertyExtractor {
     /*
     *  Convert the value to a KripkeStateProperty.
     */
-    private func convertValue(value: Any) -> KripkeStateProperty {
+    private func convertValue(var value: Any) -> KripkeStateProperty {
         let type: KripkeStatePropertyTypes = self.getKripkeStatePropertyType(
             value
         )
         if (type == .Some) {
-            return KripkeStateProperty(type: type, value: self.encode(value))
+            value = self.encode(value)
         }
-        return KripkeStateProperty(type: type, value: value)
+        let p: UnsafeMutablePointer<Any> = UnsafeMutablePointer<Any>.alloc(1)
+        p.initialize(value)
+        return KripkeStateProperty(
+            type: type,
+            value: UnsafeMutablePointer<Void>(p)
+        )
     }
     
     /*
@@ -152,6 +157,9 @@ public class MirrorPropertyExtractor: StatePropertyExtractor {
      *  Encode a value as a string.
      */
     private func encode(value: Any) -> String {
+        if (value is String) {
+            return "" + (value as! String)
+        }
         var str: String = ""
         print(value, terminator: "", toStream: &str)
         return str
