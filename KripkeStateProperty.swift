@@ -116,8 +116,7 @@ public struct KripkeStateProperty: Equatable {
         case .String:
             return self.value as! String == other.value as! String
         case .Some:
-            // Ignore values that aren't supported
-            return true
+            return self.value as! String == other.value as! String
         }
     }
     

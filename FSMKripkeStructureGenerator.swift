@@ -112,7 +112,17 @@ public struct FSMKripkeStructureGenerator: KripkeStructureGenerator {
         let type: KripkeStatePropertyTypes = self.getKripkeStatePropertyType(
             value
         )
+        if (type == .Some) {
+            return KripkeStateProperty(type: type, value: self.encode(value))
+        }
         return KripkeStateProperty(type: type, value: value)
+    }
+    
+    private func encode(value: Any) -> String {
+        print("encode")
+        var str: String = ""
+        print(value, terminator: "", toStream: &str)
+        return str
     }
     
     /*
