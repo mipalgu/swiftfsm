@@ -80,7 +80,7 @@ public struct KripkeStateProperty: Equatable {
             return (nil == self.value) == (nil == other.value)
         }
         // Compare the values
-        return self.equals(other)
+        return self.equalValues(other)
     }
     
     private func equalValues(other: KripkeStateProperty) -> Bool {
