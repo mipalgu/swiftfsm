@@ -70,12 +70,12 @@ public protocol KripkeStateType: Equatable {
     /**
      *  The state which transitioned to us.
      */
-    var source: KripkeState? { get }
+    var source: KripkeState? { get set }
     
     /**
      *  The state which we will transition to.
      */
-    var target: KripkeState? { get }
+    var target: KripkeState? { get set }
     
 }
 
