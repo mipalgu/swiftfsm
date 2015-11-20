@@ -64,19 +64,27 @@ public class KripkeState: KripkeStateType {
     
     public var source: KripkeState?
     
+    public let state: State
+    
     public var target: KripkeState?
     
     public init(
+        state: State,
         properties: [String: KripkeStateProperty],
         source: KripkeState? = nil,
         target: KripkeState? = nil
     ) {
+        self.state = state
         self.properties = properties
         self.source = source
         self.target = target
     }
     
     public func equals(other: KripkeState) -> Bool {
+        // Check if the states are the same.
+        if (self.state != other.state) {
+            return false
+        }
         // Check if the property counts are the same.
         if (self.properties.count != other.properties.count) {
             return false

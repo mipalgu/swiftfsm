@@ -56,6 +56,8 @@
  *
  */
 
+import FSM
+
 /**
  *  Provides information on the State and the state which will be transitioned
  *  to.
@@ -71,6 +73,11 @@ public protocol KripkeStateType: Equatable {
      *  The state which transitioned to us.
      */
     var source: KripkeState? { get set }
+    
+    /**
+     *  The actual state within the finite state machine.
+     */
+    var state: State { get }
     
     /**
      *  The state which we will transition to.

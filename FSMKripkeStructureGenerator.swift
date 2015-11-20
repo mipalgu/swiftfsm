@@ -78,7 +78,10 @@ public class FSMKripkeStructureGenerator: KripkeStructureGenerator {
     }
     
     private func convertToKripkeState(state: State) -> KripkeState {
-        return KripkeState(properties: self.extractor.extract(state))
+        return KripkeState(
+            state: state,
+            properties: self.extractor.extract(state)
+        )
     }
     
     /*
