@@ -63,9 +63,12 @@ public struct KripkeStateProperty: Equatable {
     
     var type: KripkeStatePropertyTypes
     
-    var value: Any?
+    var value: UnsafeMutablePointer<Void>
     
-    public init(type: KripkeStatePropertyTypes, value: Any?) {
+    public init(
+        type: KripkeStatePropertyTypes,
+        value: UnsafeMutablePointer<Void>
+    ) {
         self.type = type
         self.value = value
     }
@@ -84,39 +87,56 @@ public struct KripkeStateProperty: Equatable {
     }
     
     private func equalValues(other: KripkeStateProperty) -> Bool {
+        // Cast the values to the correct type and perform the equality check.
         switch (self.type) {
         case .Bool:
-            return self.value as! Bool == other.value as! Bool
+            return UnsafeMutablePointer<Bool>(self.value).memory ==
+                UnsafeMutablePointer<Bool>(other.value).memory
         case .Int:
-            return self.value as! Int == other.value as! Int
+            return UnsafeMutablePointer<Int>(self.value).memory ==
+                UnsafeMutablePointer<Int>(other.value).memory
         case .Int8:
-            return self.value as! Int8 == other.value as! Int8
+            return UnsafeMutablePointer<Int8>(self.value).memory ==
+                UnsafeMutablePointer<Int8>(other.value).memory
         case .Int16:
-            return self.value as! Int16 == other.value as! Int16
+            return UnsafeMutablePointer<Int16>(self.value).memory ==
+                UnsafeMutablePointer<Int16>(other.value).memory
         case .Int32:
-            return self.value as! Int32 == other.value as! Int32
+            return UnsafeMutablePointer<Int32>(self.value).memory ==
+                UnsafeMutablePointer<Int32>(other.value).memory
         case .Int64:
-            return self.value as! Int64 == other.value as! Int64
+            return UnsafeMutablePointer<Int64>(self.value).memory ==
+                UnsafeMutablePointer<Int64>(other.value).memory
         case .UInt:
-            return self.value as! UInt == other.value as! UInt
+            return UnsafeMutablePointer<UInt>(self.value).memory ==
+                UnsafeMutablePointer<UInt>(other.value).memory
         case .UInt8:
-            return self.value as! UInt8 == other.value as! UInt8
+            return UnsafeMutablePointer<UInt8>(self.value).memory ==
+                UnsafeMutablePointer<UInt8>(other.value).memory
         case .UInt16:
-            return self.value as! UInt16 == other.value as! UInt16
+            return UnsafeMutablePointer<UInt16>(self.value).memory ==
+                UnsafeMutablePointer<UInt16>(other.value).memory
         case .UInt32:
-            return self.value as! UInt32 == other.value as! UInt32
+            return UnsafeMutablePointer<UInt32>(self.value).memory ==
+                UnsafeMutablePointer<UInt32>(other.value).memory
         case .UInt64:
-            return self.value as! UInt64 == other.value as! UInt64
+            return UnsafeMutablePointer<UInt64>(self.value).memory ==
+                UnsafeMutablePointer<UInt64>(other.value).memory
         case .Float:
-            return self.value as! Float == other.value as! Float
+            return UnsafeMutablePointer<Float>(self.value).memory ==
+                UnsafeMutablePointer<Float>(other.value).memory
         case .Float80:
-            return self.value as! Float80 == other.value as! Float80
+            return UnsafeMutablePointer<Float80>(self.value).memory ==
+                UnsafeMutablePointer<Float80>(other.value).memory
         case .Double:
-            return self.value as! Double == other.value as! Double
+            return UnsafeMutablePointer<Double>(self.value).memory ==
+                UnsafeMutablePointer<Double>(other.value).memory
         case .String:
-            return self.value as! String == other.value as! String
+            return UnsafeMutablePointer<String>(self.value).memory ==
+                UnsafeMutablePointer<String>(other.value).memory
         case .Some:
-            return self.value as! String == other.value as! String
+            return UnsafeMutablePointer<String>(self.value).memory ==
+                UnsafeMutablePointer<String>(other.value).memory
         }
     }
     
