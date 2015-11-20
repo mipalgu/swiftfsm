@@ -60,9 +60,12 @@ import FSM
 
 public struct FSMKripkeStructureGenerator: KripkeStructureGenerator {
     
+    private let extractor: StatePropertyExtractor
+    
     private let fsm: FiniteStateMachine
     
-    public init(fsm: FiniteStateMachine) {
+    public init(extractor: StatePropertyExtractor, fsm: FiniteStateMachine) {
+        self.extractor = extractor
         self.fsm = fsm
     }
     
@@ -84,90 +87,7 @@ public struct FSMKripkeStructureGenerator: KripkeStructureGenerator {
         state: State,
         ringlet: Ringlet
     ) -> KripkeState {
-        let mirror: Mirror = Mirror(reflecting: state)
-        return KripkeState(properties: self.getPropertiesFromMirror(mirror))
-    }
-    
-    private func getPropertiesFromMirror(
-        mirror: Mirror,
-        var properties: [String: KripkeStateProperty] = [:]
-    ) -> [String: KripkeStateProperty] {
-        let parent: Mirror? = mirror.superclassMirror()
-        if (nil != parent) {
-            properties = self.getPropertiesFromMirror(parent!)
-        }
-        for child: Mirror.Child in mirror.children {
-            if (nil == child.label) {
-                continue
-            }
-            properties[child.label!] = self.convertValue(child.value)
-        }
-        return properties
-    }
-    
-    /*
-     *  Convert the value to a KripkeStateProperty.
-     */
-    private func convertValue(value: Any) -> KripkeStateProperty {
-        let type: KripkeStatePropertyTypes = self.getKripkeStatePropertyType(
-            value
-        )
-        if (type == .Some) {
-            return KripkeStateProperty(type: type, value: self.encode(value))
-        }
-        return KripkeStateProperty(type: type, value: value)
-    }
-    
-    private func encode(value: Any) -> String {
-        print("encode")
-        var str: String = ""
-        print(value, terminator: "", toStream: &str)
-        return str
-    }
-    
-    /*
-     *  Derive the KripkeStatePropertyType associated with a value.
-     */
-    private func getKripkeStatePropertyType(
-        value: Any
-    ) -> KripkeStatePropertyTypes {
-        var type: String = ""
-        print(value.dynamicType, terminator: "", toStream: &type)
-        print(type)
-        switch (type) {
-        case "Bool":
-            return .Bool
-        case "Int":
-            return .Int
-        case "Int8":
-            return .Int8
-        case "Int16":
-            return .Int16
-        case "Int32":
-            return .Int32
-        case "Int64":
-            return .Int64
-        case "UInt":
-            return .UInt
-        case "UInt8":
-            return .UInt8
-        case "UInt16":
-            return .UInt16
-        case "UInt32":
-            return .UInt32
-        case "UInt64":
-            return .UInt64
-        case "Float":
-            return .Float
-        case "FLoat80":
-            return .Float80
-        case "Double":
-            return .Double
-        case "String":
-            return .String
-        default:
-            return .Some
-        }
+        return KripkeState(properties: self.extractor.extract(state))
     }
     
 }
