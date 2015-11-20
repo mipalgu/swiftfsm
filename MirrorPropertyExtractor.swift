@@ -77,18 +77,18 @@ public class MirrorPropertyExtractor: StatePropertyExtractor {
     private func getPropertiesFromMirror(
         mirror: Mirror,
         var properties: [String: KripkeStateProperty] = [:]
-        ) -> [String: KripkeStateProperty] {
-            let parent: Mirror? = mirror.superclassMirror()
-            if (nil != parent) {
-                properties = self.getPropertiesFromMirror(parent!)
+    ) -> [String: KripkeStateProperty] {
+        let parent: Mirror? = mirror.superclassMirror()
+        if (nil != parent) {
+            properties = self.getPropertiesFromMirror(parent!)
+        }
+        for child: Mirror.Child in mirror.children {
+            if (nil == child.label) {
+                continue
             }
-            for child: Mirror.Child in mirror.children {
-                if (nil == child.label) {
-                    continue
-                }
-                properties[child.label!] = self.convertValue(child.value)
-            }
-            return properties
+            properties[child.label!] = self.convertValue(child.value)
+        }
+        return properties
     }
     
     /*
