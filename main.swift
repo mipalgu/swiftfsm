@@ -93,6 +93,14 @@ for (var i: Int = 1; i < Process.arguments.count; i++) {
     }
 }
 
+let fsm: FiniteStateMachine = factories.getLast()!()
+
+let generator: FSMKripkeStructureGenerator = FSMKripkeStructureGenerator(fsm: fsm)
+
+let structure: KripkeStructureType = generator.generate()
+
+print(structure.initialState.properties)
+/*
 // Least Laxity Dispatch Table - reorganize the dispatch table every run through
 let dispatchTable: DispatchTable = LeastLaxityDispatchTable(items: items, concurrentItems: concurrentItems)
 
@@ -107,4 +115,4 @@ let scheduler: Scheduler = DispatchScheduler(
 )
 
 // Run the scheduler.
-scheduler.run()
+scheduler.run()*/
