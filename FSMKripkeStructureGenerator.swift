@@ -89,41 +89,41 @@ public class FSMKripkeStructureGenerator: KripkeStructureGenerator {
      *  machine.
      */
     private func generateFromFSM(fsm: FiniteStateMachine) -> KripkeState {
-        var path: [State] = []
-        while(false == fsm.hasFinished()) {
-            let temp: (path: [State], length: Int) = self.buildStatePath(fsm)
-            path.appendContentsOf(temp.path)
-            if (true == isCycle(temp.path, length: temp.length)) {
-                break
-            }
-        }
-        return self.buildKripkeStructure(path)
+        return self.buildKripkeStructure(self.buildStatePath(fsm))
     }
     
-    private func buildStatePath(var fsm: FiniteStateMachine) -> ([State], Int) {
-        var tortoise: State = fsm.currentState
+    private func buildStatePath(var fsm: FiniteStateMachine) -> [KripkeState] {
+        var tortoise: KripkeState = self.convertToKripkeState(fsm.currentState)
         fsm.next()
-        var hare: State = fsm.currentState
-        var history: [State] = [tortoise, hare]
+        var hare: KripkeState = self.convertToKripkeState(fsm.currentState)
+        var history: [KripkeState] = [tortoise, hare]
         var power: Int = 1
         var length: Int = 1
-        while (tortoise != hare && false == fsm.hasFinished()) {
-            if (power == length) {
-                tortoise = hare
-                power *= 2
-                length = 0
-            }
-            fsm.next()
-            hare = fsm.currentState
-            length++
-            history.append(hare)
+        if (true == fsm.hasFinished() || tortoise == hare) {
+            return history
         }
-        return (history, length)
+        repeat {
+            repeat {
+                if (power == length) {
+                    tortoise = hare
+                    power *= 2
+                    length = 0
+                }
+                fsm.next()
+                hare = self.convertToKripkeState(fsm.currentState)
+                length++
+                history.append(hare)
+                if (true == fsm.hasFinished()) {
+                    return history
+                }
+            } while(tortoise != hare)
+        } while (false == self.isCycle(history, length: length))
+        return history
     }
     
-    private func isCycle(history: [State], length: Int) -> Bool {
-        var tortoise: State = history[0]
-        var hare: State = history[length]
+    private func isCycle(history: [KripkeState], length: Int) -> Bool {
+        var tortoise: KripkeState = history[0]
+        var hare: KripkeState = history[length]
         var ti: Int = 0
         var hi: Int = length
         while (tortoise != hare) {
@@ -138,14 +138,14 @@ public class FSMKripkeStructureGenerator: KripkeStructureGenerator {
         return tortoise == hare
     }
     
-    private func buildKripkeStructure(path: [State]) -> KripkeState {
+    private func buildKripkeStructure(path: [KripkeState]) -> KripkeState {
         if (0 == path.count) {
             return self.convertToKripkeState(EmptyState(name: "_empty"))
         }
-        let initialState: KripkeState = self.convertToKripkeState(path[0])
+        let initialState: KripkeState = path[0]
         var last: KripkeState = initialState
         for i in 1 ... path.count - 2 {
-            let temp: KripkeState = self.convertToKripkeState(path[i])
+            let temp: KripkeState = path[i]
             last.target = temp
             temp.source = last
             last = temp
