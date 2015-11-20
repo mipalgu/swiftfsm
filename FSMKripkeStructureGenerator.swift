@@ -80,55 +80,72 @@ public struct FSMKripkeStructureGenerator: KripkeStructureGenerator {
         state: State,
         ringlet: Ringlet
     ) -> KripkeState {
-        return KripkeState(properties: ["count": convertValue(3)!])
+        return KripkeState(properties: [
+            "Bool": convertValue(true),
+            "Int": convertValue(Int(0)),
+            "Int8": convertValue(Int8(0)),
+            "Int16": convertValue(Int16(0)),
+            "Int32": convertValue(Int32(0)),
+            "Int64": convertValue(Int64(0)),
+            "UInt": convertValue(UInt(0)),
+            "UInt8": convertValue(UInt8(0)),
+            "UInt16": convertValue(UInt16(0)),
+            "UInt32": convertValue(UInt32(0)),
+            "UInt64": convertValue(UInt64(0)),
+            "Float": convertValue(Float(0)),
+            "Float80": convertValue(Float80(0)),
+            "Double": convertValue(Double(0)),
+            "String": convertValue("str"),
+            "Some": convertValue(EmptyState(name: "state"))
+        ])
     }
     
-    private func convertValue(value: Any) -> KripkeStateProperty? {
-        let type: KripkeStatePropertyTypes? = self.getKripkeStatePropertyType(
+    private func convertValue(value: Any) -> KripkeStateProperty {
+        let type: KripkeStatePropertyTypes = self.getKripkeStatePropertyType(
             value
         )
-        if (nil == type) {
-            return nil
-        }
-        return KripkeStateProperty(type: type!, value: value)
+        return KripkeStateProperty(type: type, value: value)
     }
     
     private func getKripkeStatePropertyType(
         value: Any
-    ) -> KripkeStatePropertyTypes? {
-        switch (value) {
-        case is Bool:
+    ) -> KripkeStatePropertyTypes {
+        var type: String = ""
+        print(value.dynamicType, terminator: "", toStream: &type)
+        print(type)
+        switch (type) {
+        case "Bool":
             return .Bool
-        case is Int:
+        case "Int":
             return .Int
-        case is Int8:
+        case "Int8":
             return .Int8
-        case is Int16:
+        case "Int16":
             return .Int16
-        case is Int32:
+        case "Int32":
             return .Int32
-        case is Int64:
+        case "Int64":
             return .Int64
-        case is UInt:
+        case "UInt":
             return .UInt
-        case is UInt8:
+        case "UInt8":
             return .UInt8
-        case is UInt16:
+        case "UInt16":
             return .UInt16
-        case is UInt32:
+        case "UInt32":
             return .UInt32
-        case is UInt64:
+        case "UInt64":
             return .UInt64
-        case is Float:
+        case "Float":
             return .Float
-        case is Float80:
+        case "FLoat80":
             return .Float80
-        case is Double:
+        case "Double":
             return .Double
-        case is String:
+        case "String":
             return .String
         default:
-            return nil
+            return .Some
         }
     }
     
