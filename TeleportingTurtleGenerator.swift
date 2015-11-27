@@ -1,8 +1,8 @@
 /*
- * FSMKripkeStructureGenerator.swift
+ * TeleportingTurtleGenerator.swift
  * swiftfsm
  *
- * Created by Callum McColl on 11/11/2015.
+ * Created by Callum McColl on 28/11/2015.
  * Copyright © 2015 Callum McColl. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -58,23 +58,20 @@
 
 import FSM
 
-public class FSMKripkeStructureGenerator: KripkeStructureGenerator {
+public class TeleportingTurtleGenerator: FSMKripkeStateGenerator {
     
     private let extractor: StatePropertyExtractor
     
-    private let fsm: FiniteStateMachine
-    
-    public init(extractor: StatePropertyExtractor, fsm: FiniteStateMachine) {
+    public init(extractor: StatePropertyExtractor) {
         self.extractor = extractor
-        self.fsm = fsm
     }
     
-    public func generate() -> KripkeStructureType {
-        // Generate the structure.
-        return KripkeStructure(
-            initialState: self.generateFromFSM(fsm),
-            fsm: self.fsm
-        )
+    /**
+     *  Generate a kripke structure from the initial state of the finite state
+     *  machine.
+     */
+    public func generateFromFSM(fsm: FiniteStateMachine) -> KripkeState {
+        return self.buildKripkeStructure(self.buildStatePath(fsm))
     }
     
     private func convertToKripkeState(state: State) -> KripkeState {
@@ -82,14 +79,6 @@ public class FSMKripkeStructureGenerator: KripkeStructureGenerator {
             state: state,
             properties: self.extractor.extract(state)
         )
-    }
-    
-    /*
-     *  Generate a kripke structure from the initial state of the finite state
-     *  machine.
-     */
-    private func generateFromFSM(fsm: FiniteStateMachine) -> KripkeState {
-        return self.buildKripkeStructure(self.buildStatePath(fsm))
     }
     
     private func buildStatePath(var fsm: FiniteStateMachine) -> [KripkeState] {
