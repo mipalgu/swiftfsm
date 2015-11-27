@@ -82,49 +82,49 @@ public class TeleportingTurtleGenerator: FSMKripkeStateGenerator {
     }
     
     private func buildStatePath(var fsm: FiniteStateMachine) -> [KripkeState] {
-        var tortoise: KripkeState = self.convertToKripkeState(fsm.currentState)
+        var turtle: KripkeState = self.convertToKripkeState(fsm.currentState)
         fsm.next()
-        var hare: KripkeState = self.convertToKripkeState(fsm.currentState)
-        var history: [KripkeState] = [tortoise, hare]
+        var rabbit: KripkeState = self.convertToKripkeState(fsm.currentState)
+        var history: [KripkeState] = [turtle, rabbit]
         var power: Int = 1
         var length: Int = 1
-        if (true == fsm.hasFinished() || tortoise == hare) {
+        if (true == fsm.hasFinished() || turtle == rabbit) {
             return history
         }
         repeat {
             repeat {
                 if (power == length) {
-                    tortoise = hare
+                    turtle = rabbit
                     power *= 2
                     length = 0
                 }
                 fsm.next()
-                hare = self.convertToKripkeState(fsm.currentState)
+                rabbit = self.convertToKripkeState(fsm.currentState)
                 length++
-                history.append(hare)
+                history.append(rabbit)
                 if (true == fsm.hasFinished()) {
                     return history
                 }
-            } while(tortoise != hare)
+            } while(turtle != rabbit)
         } while (false == self.isCycle(history, length: length))
         return history
     }
     
     private func isCycle(history: [KripkeState], length: Int) -> Bool {
-        var tortoise: KripkeState = history[0]
-        var hare: KripkeState = history[length]
+        var turtle: KripkeState = history[0]
+        var rabbit: KripkeState = history[length]
         var ti: Int = 0
         var hi: Int = length
-        while (tortoise != hare) {
-            tortoise = history[++ti]
-            hare = history[++hi]
+        while (turtle != rabbit) {
+            turtle = history[++ti]
+            rabbit = history[++hi]
         }
         var i: Int = 0
-        while (tortoise == hare && i++ < length && hi + 1 < history.count) {
-            tortoise = history[++ti]
-            hare = history[++hi]
+        while (turtle == rabbit && i++ < length && hi + 1 < history.count) {
+            turtle = history[++ti]
+            rabbit = history[++hi]
         }
-        return tortoise == hare
+        return turtle == rabbit
     }
     
     private func buildKripkeStructure(path: [KripkeState]) -> KripkeState {
