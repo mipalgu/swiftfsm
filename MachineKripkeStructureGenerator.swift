@@ -72,7 +72,7 @@ public class MachineKripkeStructureGenerator: KripkeStructureGenerator {
     public func generate() -> KripkeStructureType {
         // Generate the structure.
         return KripkeStructure(
-            initialState: self.generateFromFSM(self.machine.machine),
+            initialState: generator.generateFromFSM(self.machine.machine),
             machine: self.machine
         )
     }
