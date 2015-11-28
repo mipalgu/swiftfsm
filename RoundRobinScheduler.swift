@@ -100,8 +100,8 @@ public class RoundRobinScheduler: Scheduler {
             i = ++i % self.machines.count
         ) {
             print("scheduler: \(count++)")
-            if (false == self.machines[i].machine.hasFinished()) {
-                self.machines[i].machine.next()
+            if (false == self.machines[i].fsm.hasFinished()) {
+                self.machines[i].fsm.next()
                 continue
             }
             self.machines.removeAtIndex(i--)

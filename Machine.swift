@@ -62,6 +62,6 @@ public protocol Machine {
     
     var name: String { get }
     
-    var machine: FiniteStateMachine { get set }
+    var fsm: FiniteStateMachine { get set }
     
 }

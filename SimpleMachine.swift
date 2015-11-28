@@ -62,11 +62,11 @@ public class SimpleMachine: Machine {
     
     public let name: String
     
-    public var machine: FiniteStateMachine
+    public var fsm: FiniteStateMachine
     
-    public init(name: String, machine: FiniteStateMachine) {
+    public init(name: String, fsm: FiniteStateMachine) {
         self.name = name
-        self.machine = machine
+        self.fsm = fsm
     }
     
 }

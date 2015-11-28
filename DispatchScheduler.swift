@@ -77,7 +77,7 @@ public class DispatchScheduler: Scheduler {
                 startRunTime = microseconds()
             }
             // Execute the machine if it has not finished.
-            if (false == d.item.machine.hasFinished()) {
+            if (false == d.item.fsm.hasFinished()) {
                 self.runTask(d, startRunTime: startRunTime)
                 self.dispatchTable.advance()
                 continue

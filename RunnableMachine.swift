@@ -60,7 +60,7 @@ import FSM
 
 public class RunnableMachine: QuerierableMachine {
     
-    public var machine: FiniteStateMachine
+    public var fsm: FiniteStateMachine
     public let name: String
     private let runner: QuerierableMachineRunner
     
@@ -93,7 +93,7 @@ public class RunnableMachine: QuerierableMachine {
         name: String,
         runner: QuerierableMachineRunner
     ) {
-        self.machine = machine
+        self.fsm = machine
         self.name = name
         self.runner = runner
     }

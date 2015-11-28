@@ -100,7 +100,7 @@ let generator: MachineKripkeStructureGenerator =
         generator: TeleportingTurtleGenerator(
             extractor: MirrorPropertyExtractor()
         ),
-        machine: SimpleMachine(name: "kripke", machine: fsm)
+        machine: SimpleMachine(name: "kripke", fsm: fsm)
     )
 
 let structure: KripkeStructureType = generator.generate()

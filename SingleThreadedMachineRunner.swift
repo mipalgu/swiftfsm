@@ -80,7 +80,7 @@ public class SingleThreadedMachineRunner: QuerierableMachineRunner {
     
     public func run(var machine: Machine) {
         self.startTime = microseconds()
-        machine.machine.next()
+        machine.fsm.next()
         self.endTime = microseconds()
         self.updateMetaData()
     }
