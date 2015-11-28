@@ -59,7 +59,7 @@
 /**
  *  A property within a Kripke State.
  */
-public struct KripkeStateProperty: Equatable {
+public class KripkeStateProperty: Equatable {
     
     var type: KripkeStatePropertyTypes
     
@@ -131,12 +131,55 @@ public struct KripkeStateProperty: Equatable {
         case .Double:
             return UnsafeMutablePointer<Double>(self.value).memory ==
                 UnsafeMutablePointer<Double>(other.value).memory
+        case .String, .Some:
+            return UnsafeMutablePointer<String>(self.value).memory ==
+                UnsafeMutablePointer<String>(other.value).memory
+        }
+    }
+    
+    deinit {
+        let p: UnsafeMutablePointer<Any> = UnsafeMutablePointer<Any>(self.value)
+        p.dealloc(1)
+    }
+    
+}
+
+extension KripkeStateProperty: CustomStringConvertible {
+    
+    public var description: String {
+        switch (self.type) {
+        case .Bool:
+            return UnsafeMutablePointer<Bool>(self.value).memory.description
+        case .Int:
+            return UnsafeMutablePointer<Int>(self.value).memory.description
+        case .Int8:
+            return UnsafeMutablePointer<Int8>(self.value).memory.description
+        case .Int16:
+            return UnsafeMutablePointer<Int16>(self.value).memory.description
+        case .Int32:
+            return UnsafeMutablePointer<Int32>(self.value).memory.description
+        case .Int64:
+            return UnsafeMutablePointer<Int64>(self.value).memory.description
+        case .UInt:
+            return UnsafeMutablePointer<UInt>(self.value).memory.description
+        case .UInt8:
+            return UnsafeMutablePointer<UInt8>(self.value).memory.description
+        case .UInt16:
+            return UnsafeMutablePointer<UInt16>(self.value).memory.description
+        case .UInt32:
+            return UnsafeMutablePointer<UInt32>(self.value).memory.description
+        case .UInt64:
+            return UnsafeMutablePointer<UInt64>(self.value).memory.description
+        case .Float:
+            return UnsafeMutablePointer<Float>(self.value).memory.description
+        case .Float80:
+            return UnsafeMutablePointer<Float80>(self.value).memory.description
+        case .Double:
+            return UnsafeMutablePointer<Double>(self.value).memory.description
         case .String:
-            return UnsafeMutablePointer<String>(self.value).memory ==
-                UnsafeMutablePointer<String>(other.value).memory
+            return UnsafeMutablePointer<String>(self.value).memory
         case .Some:
-            return UnsafeMutablePointer<String>(self.value).memory ==
-                UnsafeMutablePointer<String>(other.value).memory
+            return "Some"
         }
     }
     
