@@ -70,11 +70,6 @@ public protocol KripkeStateType: Equatable {
     var properties: [String: KripkeStateProperty] { get }
     
     /**
-     *  The state which transitioned to us.
-     */
-    var source: KripkeState? { get set }
-    
-    /**
      *  The actual state within the finite state machine.
      */
     var state: State { get }

@@ -136,7 +136,6 @@ public class TeleportingTurtleGenerator: FSMKripkeStateGenerator {
         for i in 1 ... path.count - 2 {
             let temp: KripkeState = path[i]
             last.target = temp
-            temp.source = last
             last = temp
         }
         return initialState
