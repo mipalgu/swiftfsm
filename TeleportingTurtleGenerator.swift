@@ -69,6 +69,18 @@ public class TeleportingTurtleGenerator: FSMKripkeStateGenerator {
     /**
      *  Generate a kripke structure from the initial state of the finite state
      *  machine.
+     *
+     *  This uses Brents Teleporting Turtle algorithm to detect cycles within
+     *  the Kripke Structure.  Once the algorithm detects that there is a cycle
+     *  it starts at the inital state and loops until it finds the first
+     *  occurence of the cycle and from this you would normally trim the
+     *  remaining states off the end since they are just cyclying.  This
+     *  trimming does not happen so you may end up with a few states that end up
+     *  doing the same thing.
+     *
+     *  In other words the algorithm detects if a cycle has happend and stops
+     *  generating the structure, but, it does not bother to remove the cyclic
+     *  states from the end of the structure.
      */
     public func generateFromFSM(var fsm: FiniteStateMachine) -> KripkeState {
         var turtle: KripkeState = self.convertToKripkeState(fsm.currentState)
