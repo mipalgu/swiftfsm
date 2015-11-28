@@ -65,6 +65,6 @@ public protocol KripkeStructureType{
     
     var initialState: KripkeState { get }
     
-    var fsm: FiniteStateMachine { get }
+    var machine: Machine { get }
     
 }
