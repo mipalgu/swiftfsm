@@ -95,10 +95,13 @@ for (var i: Int = 1; i < Process.arguments.count; i++) {
 
 let fsm: FiniteStateMachine = factories.getLast()!()
 
-let generator: FSMKripkeStructureGenerator = FSMKripkeStructureGenerator(
-    extractor: MirrorPropertyExtractor(),
-    fsm: fsm
-)
+let generator: MachineKripkeStructureGenerator =
+    MachineKripkeStructureGenerator(
+        generator: TeleportingTurtleGenerator(
+            extractor: MirrorPropertyExtractor()
+        ),
+        machine: SimpleMachine(name: "kripke", machine: fsm)
+    )
 
 let structure: KripkeStructureType = generator.generate()
 /*
