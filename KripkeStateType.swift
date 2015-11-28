@@ -99,10 +99,21 @@ extension _KripkeStateType where Self: CustomStringConvertible {
 extension _KripkeStateType where Self: CustomDebugStringConvertible {
     
     public var debugDescription: String {
-        return ""
+        var str: String = "state = \(self.state.name)\n"
+        str += "target = \(self.target?.state.name)\n"
+        str += "properties = {\n"
+        str += self.properties.reduce("", combine: {
+            $0 + "\t \($1.1.type)" + $1.0 + " = \($1.1)\n"
+        })
+        str += "}"
+        return str
     }
     
 }
 
-public protocol KripkeStateType: _KripkeStateType, CustomStringConvertible {}
+public protocol KripkeStateType:
+    _KripkeStateType,
+    CustomStringConvertible,
+    CustomDebugStringConvertible
+{}
 
