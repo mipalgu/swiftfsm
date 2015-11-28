@@ -61,10 +61,33 @@ import FSM
 /**
  *  A graph that contains all possible state permeutations.
  */
-public protocol KripkeStructureType{
+public protocol _KripkeStructureType {
     
     var initialState: KripkeState { get }
     
     var machine: Machine { get }
     
 }
+
+extension _KripkeStructureType where Self: CustomStringConvertible {
+    
+    public var description: String {
+        var state: KripkeState = self.initialState
+        let border: String = Array<String>(
+            count: 80,
+            repeatedValue: "="
+        ).reduce("", combine: +)
+        var str: String = border + "\n"
+        while(state.target != nil) {
+            str += state.description + "\n" + border + "\n"
+            state = state.target!
+        }
+        return str
+    }
+    
+}
+
+public protocol KripkeStructureType:
+    _KripkeStructureType,
+    CustomStringConvertible
+{}
