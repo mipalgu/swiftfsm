@@ -62,7 +62,7 @@ import FSM
  *  Provides information on the State and the state which will be transitioned
  *  to.
  */
-public protocol KripkeStateType: Equatable {
+public protocol _KripkeStateType: Equatable {
     
     /**
      *  Describes the parts of the source state.
@@ -80,4 +80,29 @@ public protocol KripkeStateType: Equatable {
     var target: KripkeState? { get set }
     
 }
+
+extension _KripkeStateType where Self: CustomStringConvertible {
+    
+    public var description: String {
+        var str: String = "state = \(self.state.name)\n"
+        str += "target = \(self.target?.state.name)\n"
+        str += "properties = {\n"
+        str += self.properties.reduce("", combine: {
+            $0 + "\t" + $1.0 + " = \($1.1)\n"
+        })
+        str += "}"
+        return str
+    }
+    
+}
+
+extension _KripkeStateType where Self: CustomDebugStringConvertible {
+    
+    public var debugDescription: String {
+        return ""
+    }
+    
+}
+
+public protocol KripkeStateType: _KripkeStateType, CustomStringConvertible {}
 
