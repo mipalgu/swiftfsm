@@ -19,6 +19,7 @@ SWIFT_BRIDGING_HEADER=swiftfsm-Bridging-Header.h
 SWIFT_SRCS!=ls *.swift
 C_SRCSS!=ls *.c
 SWIFTCFLAGS=-Xlinker all_load -Xlinker FSM.a -I./
+LDFLAGS=-I./${BUILDDIR}
 
 pre-build:
 	cd ../FSM && make
@@ -37,3 +38,4 @@ pre-build:
         SWIFT_OBJS+=${BUILDDIR}/${src:.c=.o}
 .endfor
 OBJS=${SWIFT_OBJS}
+OBJS+=${BUILDDIR}/FSM.a
