@@ -115,38 +115,36 @@ public class MirrorPropertyExtractor: StatePropertyExtractor {
     private func getKripkeStatePropertyType(
         value: Any
     ) -> KripkeStatePropertyTypes {
-        var type: String = ""
-        print(value.dynamicType, terminator: "", toStream: &type)
-        switch (type) {
-        case "Bool":
+        switch (value) {
+        case is Bool:
             return .Bool
-        case "Int":
+        case is Int:
             return .Int
-        case "Int8":
+        case is Int8:
             return .Int8
-        case "Int16":
+        case is Int16:
             return .Int16
-        case "Int32":
+        case is Int32:
             return .Int32
-        case "Int64":
+        case is Int64:
             return .Int64
-        case "UInt":
+        case is UInt:
             return .UInt
-        case "UInt8":
+        case is UInt8:
             return .UInt8
-        case "UInt16":
+        case is UInt16:
             return .UInt16
-        case "UInt32":
+        case is UInt32:
             return .UInt32
-        case "UInt64":
+        case is UInt64:
             return .UInt64
-        case "Float":
+        case is Float:
             return .Float
-        case "FLoat80":
+        case is Float80:
             return .Float80
-        case "Double":
+        case is Double:
             return .Double
-        case "String":
+        case is String:
             return .String
         default:
             return .Some
