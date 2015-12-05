@@ -101,11 +101,11 @@ public class MirrorPropertyExtractor: StatePropertyExtractor {
         if (type == .Some) {
             value = self.encode(value)
         }
-        let p: UnsafeMutablePointer<Any> = UnsafeMutablePointer<Any>.alloc(1)
-        p.initialize(value)
+        //let p: UnsafeMutablePointer<Any> = UnsafeMutablePointer<Any>.alloc(1)
+        //p.initialize(value)
         return KripkeStateProperty(
             type: type,
-            value: UnsafeMutablePointer<Void>(p)
+            value: value
         )
     }
     

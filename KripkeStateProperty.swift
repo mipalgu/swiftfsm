@@ -63,12 +63,9 @@ public class KripkeStateProperty: Equatable {
     
     var type: KripkeStatePropertyTypes
     
-    var value: UnsafeMutablePointer<Void>
+    var value: Any
     
-    public init(
-        type: KripkeStatePropertyTypes,
-        value: UnsafeMutablePointer<Void>
-    ) {
+    public init(type: KripkeStatePropertyTypes, value: Any) {
         self.type = type
         self.value = value
     }
@@ -78,68 +75,47 @@ public class KripkeStateProperty: Equatable {
         if (self.type != other.type) {
             return false
         }
-        // Check for nils
-        if (nil == self.value || nil == other.value) {
-            return (nil == self.value) == (nil == other.value)
-        }
         // Compare the values
         return self.equalValues(other)
     }
     
     private func equalValues(other: KripkeStateProperty) -> Bool {
-        // Cast the values to the correct type and perform the equality check.
-        switch (self.type) {
-        case .Bool:
-            return UnsafeMutablePointer<Bool>(self.value).memory ==
-                UnsafeMutablePointer<Bool>(other.value).memory
-        case .Int:
-            return UnsafeMutablePointer<Int>(self.value).memory ==
-                UnsafeMutablePointer<Int>(other.value).memory
-        case .Int8:
-            return UnsafeMutablePointer<Int8>(self.value).memory ==
-                UnsafeMutablePointer<Int8>(other.value).memory
-        case .Int16:
-            return UnsafeMutablePointer<Int16>(self.value).memory ==
-                UnsafeMutablePointer<Int16>(other.value).memory
-        case .Int32:
-            return UnsafeMutablePointer<Int32>(self.value).memory ==
-                UnsafeMutablePointer<Int32>(other.value).memory
-        case .Int64:
-            return UnsafeMutablePointer<Int64>(self.value).memory ==
-                UnsafeMutablePointer<Int64>(other.value).memory
-        case .UInt:
-            return UnsafeMutablePointer<UInt>(self.value).memory ==
-                UnsafeMutablePointer<UInt>(other.value).memory
-        case .UInt8:
-            return UnsafeMutablePointer<UInt8>(self.value).memory ==
-                UnsafeMutablePointer<UInt8>(other.value).memory
-        case .UInt16:
-            return UnsafeMutablePointer<UInt16>(self.value).memory ==
-                UnsafeMutablePointer<UInt16>(other.value).memory
-        case .UInt32:
-            return UnsafeMutablePointer<UInt32>(self.value).memory ==
-                UnsafeMutablePointer<UInt32>(other.value).memory
-        case .UInt64:
-            return UnsafeMutablePointer<UInt64>(self.value).memory ==
-                UnsafeMutablePointer<UInt64>(other.value).memory
-        case .Float:
-            return UnsafeMutablePointer<Float>(self.value).memory ==
-                UnsafeMutablePointer<Float>(other.value).memory
-        case .Float80:
-            return UnsafeMutablePointer<Float80>(self.value).memory ==
-                UnsafeMutablePointer<Float80>(other.value).memory
-        case .Double:
-            return UnsafeMutablePointer<Double>(self.value).memory ==
-                UnsafeMutablePointer<Double>(other.value).memory
-        case .String, .Some:
-            return UnsafeMutablePointer<String>(self.value).memory ==
-                UnsafeMutablePointer<String>(other.value).memory
+        if (self.value.dynamicType != other.value.dynamicType) {
+            return false
         }
-    }
-    
-    deinit {
-        let p: UnsafeMutablePointer<Any> = UnsafeMutablePointer<Any>(self.value)
-        p.dealloc(1)
+        // Cast the values to the correct type and perform the equality check.
+        switch (self.value) {
+        case is UInt:
+            return self.value as? UInt == other.value as? UInt
+        case is UInt8:
+            return self.value as? UInt8 == other.value as? UInt8
+        case is UInt16:
+            return self.value as? UInt16 == other.value as? UInt16
+        case is UInt32:
+            return self.value as? UInt32 == other.value as? UInt32
+        case is UInt64:
+            return self.value as? UInt64 == other.value as? UInt64
+        case is Int:
+            return self.value as? Int == other.value as? Int
+        case is Int8:
+            return self.value as? Int8 == other.value as? Int8
+        case is Int16:
+            return self.value as? Int16 == other.value as? Int16
+        case is Int32:
+            return self.value as? Int32 == other.value as? Int32
+        case is Int64:
+            return self.value as? Int64 == other.value as? Int64
+        case is Float80:
+            return self.value as? Float80 == other.value as? Float80
+        case is Float:
+            return self.value as? Float == other.value as? Float
+        case is Double:
+            return self.value as? Double == other.value as? Double
+        case is String:
+            return self.value as? String == other.value as? String
+        default:
+            return true
+        }
     }
     
 }
@@ -147,7 +123,8 @@ public class KripkeStateProperty: Equatable {
 extension KripkeStateProperty: CustomStringConvertible {
     
     public var description: String {
-        switch (self.type) {
+        return ""
+        /*switch (self.type) {
         case .Bool:
             return UnsafeMutablePointer<Bool>(self.value).memory.description
         case .Int:
@@ -180,7 +157,7 @@ extension KripkeStateProperty: CustomStringConvertible {
             return UnsafeMutablePointer<String>(self.value).memory
         case .Some:
             return "Some"
-        }
+        }*/
     }
     
 }

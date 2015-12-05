@@ -93,6 +93,7 @@ public class KripkeState: KripkeStateType {
             }
             let l: KripkeStateProperty = self.properties[key]!
             let r: KripkeStateProperty = other.properties[key]!
+            print("Check \(key)")
             if (false == (l == r)) {
                 return false
             }
