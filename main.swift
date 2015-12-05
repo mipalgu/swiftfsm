@@ -61,6 +61,11 @@ import FSM
 
 print("Hello, when I grow up, I will be a full-blown state machine scheduler!")
 
+if (Process.arguments.count < 2) {
+    print("No Machines To Load")
+    exit(EXIT_SUCCESS)
+}
+
 let concurrentItems: UInt = 7
 
 // Dynamic Time Slots - task may get more than one timeslot if it is needed.
