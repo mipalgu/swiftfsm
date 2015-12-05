@@ -12,10 +12,13 @@ host:	pre-build
 
 SWIFT_BRIDGING_HEADER=swiftfsm-Bridging-Header.h
 
+HDRS=
+HDRS+=invoke_func
+
+
 SWIFT_SRCS!=ls *.swift
 #C_SRCS!=ls *.c
-#C_HDRS!=ls *.h
-SWIFTCFLAGS=-Xlinker all_load -Xlinker FSM.a -I./ -F./ -L./
+SWIFTCFLAGS=-Xlinker all_load -Xlinker FSM.a -I./
 
 pre-build:
 	cd ../FSM && make
