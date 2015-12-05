@@ -123,41 +123,38 @@ public class KripkeStateProperty: Equatable {
 extension KripkeStateProperty: CustomStringConvertible {
     
     public var description: String {
-        return ""
-        /*switch (self.type) {
-        case .Bool:
-            return UnsafeMutablePointer<Bool>(self.value).memory.description
-        case .Int:
-            return UnsafeMutablePointer<Int>(self.value).memory.description
-        case .Int8:
-            return UnsafeMutablePointer<Int8>(self.value).memory.description
-        case .Int16:
-            return UnsafeMutablePointer<Int16>(self.value).memory.description
-        case .Int32:
-            return UnsafeMutablePointer<Int32>(self.value).memory.description
-        case .Int64:
-            return UnsafeMutablePointer<Int64>(self.value).memory.description
-        case .UInt:
-            return UnsafeMutablePointer<UInt>(self.value).memory.description
-        case .UInt8:
-            return UnsafeMutablePointer<UInt8>(self.value).memory.description
-        case .UInt16:
-            return UnsafeMutablePointer<UInt16>(self.value).memory.description
-        case .UInt32:
-            return UnsafeMutablePointer<UInt32>(self.value).memory.description
-        case .UInt64:
-            return UnsafeMutablePointer<UInt64>(self.value).memory.description
-        case .Float:
-            return UnsafeMutablePointer<Float>(self.value).memory.description
-        case .Float80:
-            return UnsafeMutablePointer<Float80>(self.value).memory.description
-        case .Double:
-            return UnsafeMutablePointer<Double>(self.value).memory.description
-        case .String:
-            return UnsafeMutablePointer<String>(self.value).memory
-        case .Some:
+        switch (self.value) {
+        case is UInt:
+            return (self.value as! UInt).description
+        case is UInt8:
+            return (self.value as! UInt8).description
+        case is UInt16:
+            return (self.value as! UInt16).description
+        case is UInt32:
+            return (self.value as! UInt32).description
+        case is UInt64:
+            return (self.value as! UInt64).description
+        case is Int:
+            return (self.value as! Int).description
+        case is Int8:
+            return (self.value as! Int8).description
+        case is Int16:
+            return (self.value as! Int16).description
+        case is Int32:
+            return (self.value as! Int32).description
+        case is Int64:
+            return (self.value as! Int64).description
+        case is Float80:
+            return (self.value as! Float80).description
+        case is Float:
+            return (self.value as! Float).description
+        case is Double:
+            return (self.value as! Double).description
+        case is String:
+            return self.value as! String
+        default:
             return "Some"
-        }*/
+        }
     }
     
 }

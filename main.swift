@@ -109,6 +109,7 @@ let generator: MachineKripkeStructureGenerator =
     )
 
 let structure: KripkeStructureType = generator.generate()
+print(structure)
 /*
 // Least Laxity Dispatch Table - reorganize the dispatch table every run through
 let dispatchTable: DispatchTable = LeastLaxityDispatchTable(items: items, concurrentItems: concurrentItems)
