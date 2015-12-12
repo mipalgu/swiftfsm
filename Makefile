@@ -25,4 +25,7 @@ SWIFTCFLAGS=-Xlinker all_load -lFSM -L./ -I./ -lswiftXCTest
 .endif
 LDFLAGS=-I./${BUILDDIR} -lFSM -L./${BUILDDIR}
 
+#test:	test-executable
+
 .include "../swiftfsm.mk"
+.include "../../../mk/mipal.mk"
