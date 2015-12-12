@@ -14,6 +14,7 @@ C_SRCSS!=ls *.c
 SWIFTCFLAGS=-Xlinker all_load -lFSM -L./ -I./
 .else
 # test source files and build settings
+BIN=swiftfsm_tests
 SWIFT_SRCS!=grep -L "main" *.swift && ls tests/*.swift
 SWIFT_BRIDGING_HEADER=tests/swiftfsm_tests-Bridging-Header.h
 C_SRCSS!=ls *.c && ls tests/*.c
@@ -21,12 +22,11 @@ SWIFTCFLAGS=-Xlinker all_load -lFSM -L./ -I./ -lswiftXCTest
 .endif
 LDFLAGS=-I./${BUILDDIR} -lFSM -L./${BUILDDIR}
 
-all:	all-real
-
 host:	pre-build
 
 test:
 	make host TEST=TEST
+	cd build.host && ./swiftfsm_tests
 
 pre-build:
 	cd ../FSM && make
