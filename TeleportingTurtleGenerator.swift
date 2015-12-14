@@ -90,7 +90,7 @@ public class TeleportingTurtleGenerator: FSMKripkeStateGenerator {
         var power: Int = 1
         var length: Int = 1
         let initialState: KripkeState = turtle
-        while(turtle != rabbit) {
+        while(turtle != rabbit && false == fsm.hasFinished()) {
             if (power == length) {
                 turtle = rabbit
                 power *= 2
@@ -101,9 +101,6 @@ public class TeleportingTurtleGenerator: FSMKripkeStateGenerator {
             rabbit.target = temp
             rabbit = temp
             length++
-            if (true == fsm.hasFinished()) {
-                break
-            }
         }
         return initialState
     }
