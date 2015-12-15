@@ -62,7 +62,7 @@ public class MachineKripkeStructureGenerator: KripkeStructureGenerator {
     
     private let generator: FSMKripkeStateGenerator
     
-    private let machine: Machine
+    private var machine: Machine
     
     public init(generator: FSMKripkeStateGenerator, machine: Machine) {
         self.generator = generator
@@ -70,11 +70,14 @@ public class MachineKripkeStructureGenerator: KripkeStructureGenerator {
     }
     
     public func generate() -> KripkeStructureType {
+        self.machine.fsm.restart()
         // Generate the structure.
-        return KripkeStructure(
+        let structure: KripkeStructureType = KripkeStructure(
             initialState: generator.generateFromFSM(self.machine.fsm),
             machine: self.machine
         )
+        self.machine.fsm.restart()
+        return structure
     }
     
 }
