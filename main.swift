@@ -71,5 +71,41 @@ var args: [String] = Process.arguments
 args.removeFirst()
 
 
-let machines: [Task] = parser.parse(args)
-print(parser.helpText)
+let tasks: [Task] = parser.parse(args)
+let loader: MachineLoader = DynamicLibraryMachineLoaderFactory().make()
+var machines: [Machine] = []
+for t: Task in tasks {
+    if (true == t.printHelpText) {
+        print(parser.helpText)
+        break
+    }
+    if (nil == t.path) {
+        print("Unable to find path in command arguments.")
+        break
+    }
+    let fsm: FiniteStateMachine? = loader.load(t.path!)
+    if (nil == fsm) {
+        print("Unable to load machine.")
+        break
+    }
+    let m: Machine = SimpleMachine(
+        name: nil == t.name ? t.path! : t.name!,
+        fsm: fsm!
+    )
+    if (true == t.generateKripkeStructure) {
+        let generator: KripkeStructureGenerator =
+            MachineKripkeStructureGenerator(
+                generator: TeleportingTurtleGenerator(
+                    extractor: MirrorPropertyExtractor()
+                ),
+                machine: m
+            )
+        let structure: KripkeStructureType = generator.generate()
+        print(structure)
+    }
+    if (true == t.addToScheduler) {
+        machines.append(m)
+    }
+}
+let scheduler: RoundRobinScheduler = RoundRobinScheduler(machines: machines)
+scheduler.run()
