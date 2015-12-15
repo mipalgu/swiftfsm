@@ -163,6 +163,10 @@ public class SwiftfsmParser: HelpableParser {
     }
     
     private func handlePath(var t: Task, inout words: [String]) -> Task {
+        // Ignore empty strings
+        if (true == words.first!.isEmpty) {
+            return t
+        }
         t.path = words.first!
         return t
     }
