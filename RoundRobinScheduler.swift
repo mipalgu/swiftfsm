@@ -93,13 +93,11 @@ public class RoundRobinScheduler: Scheduler {
             return
         }
         // Just keep running and loop around when we reach the end of the array
-        var count: UInt = 0
         for (
             var i: Int = 0;
             i < self.machines.count;
             i = ++i % self.machines.count
         ) {
-            print("scheduler: \(count++)")
             if (false == self.machines[i].fsm.hasFinished()) {
                 self.machines[i].fsm.next()
                 continue
