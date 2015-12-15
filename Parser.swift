@@ -62,6 +62,6 @@
  */
 public protocol Parser {
     
-    func parse(words: [String]) -> [Machine]
+    func parse(inout words: [String]) -> [Machine]
     
 }

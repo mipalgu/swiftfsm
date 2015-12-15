@@ -70,6 +70,6 @@ var args: [String] = Process.arguments
 args.removeFirst()
 
 let parser: MultiOptionParser = MultiOptionParser(parsers: [:])
-let machines: [Machine] = parser.parse(args)
+let machines: [Machine] = parser.parse(&args)
 let scheduler: RoundRobinScheduler = RoundRobinScheduler(machines: machines)
 scheduler.run()

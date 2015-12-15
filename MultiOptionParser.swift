@@ -71,7 +71,7 @@ public class MultiOptionParser: HelpableParser {
         self.parsers = parsers
     }
     
-    public func parse(words: [String]) -> [Machine] {
+    public func parse(inout words: [String]) -> [Machine] {
         return []
     }
     
