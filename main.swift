@@ -77,14 +77,15 @@ if (true == tasks.isEmpty) {
     exit(EXIT_FAILURE)
 }
 
+if let t:Task = tasks.filter({ true == $0.printHelpText }).first {
+    print(parser.helpText)
+    exit(EXIT_SUCCESS)
+}
+
 let loader: MachineLoader = DynamicLibraryMachineLoaderFactory().make()
 var machines: [Machine] = []
 var i: Int = 1
 for t: Task in tasks {
-    if (true == t.printHelpText) {
-        print(parser.helpText)
-        exit(EXIT_SUCCESS)
-    }
     if (nil == t.path) {
         print("No path for \(nil == t.name ? "machine \(i)" : t.name!).")
         exit(EXIT_FAILURE)

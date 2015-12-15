@@ -77,18 +77,20 @@ public class SwiftfsmParser: HelpableParser {
     public func parse(var words: [String]) -> [Task] {
         var tasks: [Task] = []
         var t: Task = Task()
+        tasks.append(t)
         // Keep looping while we still have input
         while (false == words.isEmpty) {
-            t = self.handleNextFlag(t, words: &words)
+            tasks[tasks.count - 1] = self.handleNextFlag(
+                tasks[tasks.count - 1],
+                words: &words
+            )
             words.removeFirst()
-            if (true == t.printHelpText) {
-                return [t]
-            }
-            if (nil == t.path) {
+            if (nil == tasks[tasks.count - 1].path) {
                 continue
             }
-            tasks.append(t)
-            t = Task()
+            if (false == words.isEmpty) {
+                tasks.append(Task())
+            }
         }
         return tasks
     }
@@ -96,10 +98,7 @@ public class SwiftfsmParser: HelpableParser {
     private func handleNextFlag(var t: Task, inout words: [String]) -> Task {
         switch (words.first!) {
         case "-h", "--help":
-            t = Task()
-            t.addToScheduler = false
             t.printHelpText = true
-            return t
         case "-c", "--clfsm":
             t.isClfsmMachine = true
         case "-d", "--debug":
