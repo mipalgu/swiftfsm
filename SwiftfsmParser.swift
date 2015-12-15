@@ -87,6 +87,15 @@ public class SwiftfsmParser: HelpableParser {
                 t.enableDebugging = true
             case "-k", "--kripke":
                 t.generateKripkeStructure = true
+                t.addToScheduler = false
+                if (words.count < 2) {
+                    break
+                }
+                if ("-r" != words[1] && "--run" != words[1]) {
+                    break
+                }
+                t.addToScheduler = true
+                words.removeFirst()
             case "-n", "--name":
                 words.removeFirst()
                 if (true == words.isEmpty) {
