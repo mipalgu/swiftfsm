@@ -112,6 +112,7 @@ for t: Task in tasks {
     if (true == t.addToScheduler) {
         machines.append(m)
     }
+    i++
 }
 let scheduler: RoundRobinScheduler = RoundRobinScheduler(machines: machines)
 scheduler.run()
