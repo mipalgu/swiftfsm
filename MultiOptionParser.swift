@@ -72,7 +72,15 @@ public class MultiOptionParser: HelpableParser {
     }
     
     public func parse(inout words: [String]) -> [Machine] {
-        return []
+        var machines: [Machine] = []
+        while (words.count > 0) {
+            if let parser: HelpableParser = self.parsers[words.first!] {
+                machines.appendContentsOf(parser.parse(&words))
+            } else {
+                words.removeFirst()
+            }
+        }
+        return machines
     }
     
 }
