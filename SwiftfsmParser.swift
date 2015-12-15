@@ -95,8 +95,9 @@ public class SwiftfsmParser: HelpableParser {
     
     private func handleNextFlag(var t: Task, inout words: [String]) -> Task {
         switch (words.first!) {
-        case "-h, --help":
+        case "-h", "--help":
             t = Task()
+            t.addToScheduler = false
             t.printHelpText = true
             return t
         case "-c", "--clfsm":
