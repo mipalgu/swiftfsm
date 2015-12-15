@@ -64,6 +64,7 @@ public class SwiftfsmParser: HelpableParser {
         str += "OPTIONS:\n"
         str += "\t-c, --clfsm\tSpecifies that this is a machine that has been built using the CLFSM specification.\n"
         str += "\t-d, --debug\tEnables debugging.\n"
+        str += "\t-h, --help\tPrint this help message.\n"
         str += "\t-k, --kripke [-r|--run]\n"
         str += "\t\t\tGenerate the Kripke Structure for the machine.\n"
         str += "\t\t\tNote: Optionally specify -r or --run to schedule the machine to run as well as generate the kripke structure.\n"
@@ -78,41 +79,54 @@ public class SwiftfsmParser: HelpableParser {
         var t: Task = Task()
         // Keep looping while we still have input
         while (false == words.isEmpty) {
-            switch (words.first!) {
-            case "-h, --help":
-                t.printHelpText = true
-            case "-c", "--clfsm":
-                t.isClfsmMachine = true
-            case "-d", "--debug":
-                t.enableDebugging = true
-            case "-k", "--kripke":
-                t.generateKripkeStructure = true
-                t.addToScheduler = false
-                if (words.count < 2) {
-                    break
-                }
-                if ("-r" != words[1] && "--run" != words[1]) {
-                    break
-                }
-                t.addToScheduler = true
-                words.removeFirst()
-            case "-n", "--name":
-                words.removeFirst()
-                if (true == words.isEmpty) {
-                    continue
-                }
-                t.name = words.first!
-            default:
-                t.path = words.first!
-                if (nil == t.name) {
-                    t.name = t.path
-                }
-                tasks.append(t)
-                t = Task()
-            }
+            t = self.handleNextFlag(t, words: &words)
             words.removeFirst()
+            if (true == t.printHelpText) {
+                return [t]
+            }
+            if (nil == t.path) {
+                continue
+            }
+            tasks.append(t)
+            t = Task()
         }
         return tasks
+    }
+    
+    private func handleNextFlag(var t: Task, inout words: [String]) -> Task {
+        switch (words.first!) {
+        case "-h, --help":
+            t = Task()
+            t.printHelpText = true
+            return t
+        case "-c", "--clfsm":
+            t.isClfsmMachine = true
+        case "-d", "--debug":
+            t.enableDebugging = true
+        case "-k", "--kripke":
+            t.generateKripkeStructure = true
+            t.addToScheduler = false
+            if (words.count < 2) {
+                break
+            }
+            if ("-r" != words[1] && "--run" != words[1]) {
+                break
+            }
+            t.addToScheduler = true
+            words.removeFirst()
+        case "-n", "--name":
+            if (words.count < 2) {
+                break
+            }
+            words.removeFirst()
+            t.name = words.first!
+        default:
+            t.path = words.first!
+            if (nil == t.name) {
+                t.name = t.path
+            }
+        }
+        return t
     }
     
 }
