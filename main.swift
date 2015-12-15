@@ -96,7 +96,7 @@ for t: Task in tasks {
         exit(EXIT_FAILURE)
     }
     let m: Machine = SimpleMachine(
-        name: nil == t.name ? t.path! : t.name!,
+        name: nil == t.name ? "\(i)_t.path!" : t.name!,
         fsm: fsm!
     )
     if (true == t.generateKripkeStructure) {
