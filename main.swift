@@ -66,63 +66,10 @@ if (Process.arguments.count < 2) {
     exit(EXIT_SUCCESS)
 }
 
-let concurrentItems: UInt = 7
+var args: [String] = Process.arguments
+args.removeFirst()
 
-// Dynamic Time Slots - task may get more than one timeslot if it is needed.
-//let factory: DynamicTimeSlotFactory = DynamicTimeSlotFactory()
-
-// Static Time Slots - each task gets one time slot
-let factory: StaticTimeSlotFactory = StaticTimeSlotFactory()
-
-// Load the machines from dylibs.
-let loader: MachineLoader = DynamicLibraryMachineLoaderFactory().make()
-var items: [Dispatchable] = []
-let timeslot: UInt = 15000 //15 ms
-let factories: Factories = Factories()
-for (var i: Int = 1; i < Process.arguments.count; i++) {
-    // Load the machine from the path
-    let machine: FiniteStateMachine? = loader.load(Process.arguments[i])
-    if (nil == machine) {
-        print("bad")
-        continue
-    }
-    for j: UInt in 1 ... 10000 {
-        items.append(
-            factory.make(
-                "Ping Pong \(j)",
-                machine: factories.getLast()!(),
-                startTime: (j / concurrentItems) * timeslot,
-                time: timeslot
-            )
-        )
-    }
-}
-
-let fsm: FiniteStateMachine = factories.getLast()!()
-
-let generator: MachineKripkeStructureGenerator =
-    MachineKripkeStructureGenerator(
-        generator: TeleportingTurtleGenerator(
-            extractor: MirrorPropertyExtractor()
-        ),
-        machine: SimpleMachine(name: "kripke", fsm: fsm)
-    )
-
-let structure: KripkeStructureType = generator.generate()
-print(structure)
-/*
-// Least Laxity Dispatch Table - reorganize the dispatch table every run through
-let dispatchTable: DispatchTable = LeastLaxityDispatchTable(items: items, concurrentItems: concurrentItems)
-
-// Static Dispatch Table - order of items never changes
-//let dispatchTable: DispatchTable = StaticDispatchTable(items: items)
-
-let dispatcher: Dispatcher = ThreadDispatcherFactory(concurrentItems: concurrentItems).make()
-
-let scheduler: Scheduler = DispatchScheduler(
-    dispatcher: dispatcher,
-    dispatchTable: dispatchTable
-)
-
-// Run the scheduler.
-scheduler.run()*/
+let parser: MultiOptionParser = MultiOptionParser(parsers: [:])
+let machines: [Machine] = parser.parse(args)
+let scheduler: RoundRobinScheduler = RoundRobinScheduler(machines: machines)
+scheduler.run()
