@@ -72,21 +72,27 @@ args.removeFirst()
 
 
 let tasks: [Task] = parser.parse(args)
+if (true == tasks.isEmpty) {
+    print("Unable to find a path to any machines.  Did you specify one?")
+    exit(EXIT_FAILURE)
+}
+
 let loader: MachineLoader = DynamicLibraryMachineLoaderFactory().make()
 var machines: [Machine] = []
+var i: Int = 1
 for t: Task in tasks {
     if (true == t.printHelpText) {
         print(parser.helpText)
-        break
+        exit(EXIT_SUCCESS)
     }
     if (nil == t.path) {
-        print("Unable to find path in command arguments.")
-        break
+        print("No path for \(nil == t.name ? "machine \(i)" : t.name!).")
+        exit(EXIT_FAILURE)
     }
     let fsm: FiniteStateMachine? = loader.load(t.path!)
     if (nil == fsm) {
-        print("Unable to load machine.")
-        break
+        print("Unable to load \(nil == t.name ? "machine \(i)" : t.name!) at \(t.path!).")
+        exit(EXIT_FAILURE)
     }
     let m: Machine = SimpleMachine(
         name: nil == t.name ? t.path! : t.name!,
