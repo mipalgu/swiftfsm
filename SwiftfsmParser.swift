@@ -58,6 +58,18 @@
 
 public class SwiftfsmParser: HelpableParser {
     
+    public var helpText: String {
+        var str: String = "usage: swiftfsm [options ...] machine_path ...\n"
+        str += "\toptions:\n"
+        str += "\t\t-c, --clfsm\t\tSpecifies that this is a machine that has been built using the CLFSM specification.\n"
+        str += "\t\t-d, --debug\t\tEnables debugging.\n"
+        str += "\t\t-k, --kripke\t\tGenerate the Kripke Structure for the machine.\n"
+        str += "\t\t-n name, --name name\t\tSpecify a name for the machine.\n"
+        return str
+    }
     
+    public func parse(words: [String]) -> [Task] {
+        return []
+    }
     
 }
