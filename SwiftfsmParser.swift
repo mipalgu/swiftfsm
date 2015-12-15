@@ -84,45 +84,75 @@ public class SwiftfsmParser: HelpableParser {
                 tasks[tasks.count - 1],
                 words: &words
             )
+            // Remove words that we are finished with
             words.removeFirst()
-            if (nil == tasks[tasks.count - 1].path) {
+            // Only create a new task if we have found the path to the current
+            // task and we have more words to come.
+            if (nil == tasks[tasks.count - 1].path || true == words.isEmpty) {
                 continue
             }
-            if (false == words.isEmpty) {
-                tasks.append(Task())
-            }
+            tasks.append(Task())
         }
         return tasks
     }
     
-    private func handleNextFlag(var t: Task, inout words: [String]) -> Task {
+    private func handleNextFlag(let t: Task, inout words: [String]) -> Task {
         switch (words.first!) {
-        case "-h", "--help":
-            t.printHelpText = true
         case "-c", "--clfsm":
-            t.isClfsmMachine = true
+            return self.handleClfsmFlag(t, words: &words)
         case "-d", "--debug":
-            t.enableDebugging = true
+            return self.handleDebugFlag(t, words: &words)
+        case "-h", "--help":
+            return self.handleHelpFlag(t, words: &words)
         case "-k", "--kripke":
-            t.generateKripkeStructure = true
-            t.addToScheduler = false
-            if (words.count < 2) {
-                break
-            }
-            if ("-r" != words[1] && "--run" != words[1]) {
-                break
-            }
-            t.addToScheduler = true
-            words.removeFirst()
+            return self.handleKripkeFlag(t, words: &words)
         case "-n", "--name":
-            if (words.count < 2) {
-                break
-            }
-            words.removeFirst()
-            t.name = words.first!
+            return self.handleNameFlag(t, words: &words)
         default:
-            t.path = words.first!
+            return self.handlePath(t, words: &words)
         }
+    }
+    
+    private func handleClfsmFlag(var t: Task, inout words: [String]) -> Task {
+        t.isClfsmMachine = true
+        return t
+    }
+    
+    private func handleDebugFlag(var t: Task, inout words: [String]) -> Task {
+        t.enableDebugging = true
+        return t
+    }
+    
+    private func handleHelpFlag(var t: Task, inout words: [String]) -> Task {
+        t.printHelpText = true
+        return t
+    }
+    
+    private func handleKripkeFlag(var t: Task, inout words: [String]) -> Task {
+        t.generateKripkeStructure = true
+        t.addToScheduler = false
+        if (words.count < 2) {
+            return t
+        }
+        if ("-r" != words[1] && "--run" != words[1]) {
+            return t
+        }
+        t.addToScheduler = true
+        words.removeFirst()
+        return t
+    }
+    
+    private func handleNameFlag(var t: Task, inout words: [String]) -> Task {
+        if (words.count < 2) {
+            return t
+        }
+        words.removeFirst()
+        t.name = words.first!
+        return t
+    }
+    
+    private func handlePath(var t: Task, inout words: [String]) -> Task {
+        t.path = words.first!
         return t
     }
     
