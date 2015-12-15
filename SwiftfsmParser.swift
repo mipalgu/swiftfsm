@@ -68,8 +68,34 @@ public class SwiftfsmParser: HelpableParser {
         return str
     }
     
-    public func parse(words: [String]) -> [Task] {
-        return []
+    public func parse(var words: [String]) -> [Task] {
+        var tasks: [Task] = []
+        var t: Task = Task()
+        // Keep looping while we still have input
+        while (false == words.isEmpty) {
+            switch (words.first!) {
+            case "-h, --help":
+                t.printHelpText = true
+            case "-c", "--clfsm":
+                t.isClfsmMachine = true
+            case "-d", "--debug":
+                t.enableDebugging = true
+            case "-k", "--kripke":
+                t.generateKripkeStructure = true
+            case "-n", "--name":
+                words.removeFirst()
+                if (true == words.isEmpty) {
+                    continue
+                }
+                t.name = words.first!
+            default:
+                t.path = words.first!
+                tasks.append(t)
+                t = Task()
+            }
+            words.removeFirst()
+        }
+        return tasks
     }
     
 }
