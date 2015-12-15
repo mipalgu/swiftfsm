@@ -123,9 +123,6 @@ public class SwiftfsmParser: HelpableParser {
             t.name = words.first!
         default:
             t.path = words.first!
-            if (nil == t.name) {
-                t.name = t.path
-            }
         }
         return t
     }
