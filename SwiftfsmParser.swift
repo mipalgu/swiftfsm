@@ -146,6 +146,17 @@ public class SwiftfsmParser: HelpableParser {
         if (words.count < 2) {
             return t
         }
+        let n: String = words[1]
+        // Ignore empty strings as names
+        if (true == n.characters.isEmpty) {
+            words.removeFirst()
+            return t
+        }
+        // Ignore other flags if the user forgets to enter a name after the name
+        // flag.
+        if ("-" == n.characters.first!) {
+            return t
+        }
         words.removeFirst()
         t.name = words.first!
         return t
