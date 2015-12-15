@@ -1,5 +1,5 @@
 /*
- * Parser.swift
+ * Task.swift
  * swiftfsm
  *
  * Created by Callum McColl on 15/12/2015.
@@ -57,11 +57,26 @@
  */
 
 /**
- *  Conforming types are responsible for parsing an array of command line
- *  arguments and performing the specified tasks.
+ *  A data structure that represent all the possible tasks that swiftfsm can
+ *  perform.
  */
-public protocol Parser {
+public struct Task {
     
-    func parse(words: [String]) -> [Task]
+    var addToScheduler: Bool = true
+    
+    var enableDebugging: Bool = false
+    
+    var generateKripkeStructure: Bool = false
+    
+    var isClfsmMachine: Bool = false
+    
+    var name: String
+    
+    var path: String
+    
+    public init(path: String, name: String = path) {
+        self.path = path
+        self.name = name
+    }
     
 }
