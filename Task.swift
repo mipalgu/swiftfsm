@@ -70,13 +70,10 @@ public struct Task {
     
     var isClfsmMachine: Bool = false
     
-    var name: String
+    var name: String? = nil
     
-    var path: String
+    var path: String? = nil
     
-    public init(path: String, name: String? = nil) {
-        self.path = path
-        self.name = nil == name ? path : name!
-    }
+    var printHelpText: Bool = false
     
 }
