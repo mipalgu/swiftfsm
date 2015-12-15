@@ -60,16 +60,16 @@ import Darwin
 import FSM
 
 print("Hello, when I grow up, I will be a full-blown state machine scheduler!")
+let parser: SwiftfsmParser = SwiftfsmParser()
 
 if (Process.arguments.count < 2) {
-    print("No Machines To Load")
+    print(parser.helpText)
     exit(EXIT_SUCCESS)
 }
 
 var args: [String] = Process.arguments
 args.removeFirst()
 
-let parser: MultiOptionParser = MultiOptionParser(parsers: [:])
-let machines: [Machine] = parser.parse(&args)
-let scheduler: RoundRobinScheduler = RoundRobinScheduler(machines: machines)
-scheduler.run()
+
+let machines: [Task] = parser.parse(args)
+print(parser.helpText)
