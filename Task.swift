@@ -74,9 +74,9 @@ public struct Task {
     
     var path: String
     
-    public init(path: String, name: String = path) {
+    public init(path: String, name: String? = nil) {
         self.path = path
-        self.name = name
+        self.name = nil == name ? path : name!
     }
     
 }
