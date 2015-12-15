@@ -61,7 +61,7 @@ public class MultiOptionParser: HelpableParser {
     public var helpText: String {
         var str: String = "usage swiftfsm [options] machine_path ...\n"
         str += "\toptions:\n"
-        self.parsers.map {str += "\t" + $0.1.helpText + "\n"}
+        let _ = self.parsers.map {str += "\t" + $0.1.helpText + "\n"}
         return str
     }
     
@@ -71,7 +71,7 @@ public class MultiOptionParser: HelpableParser {
         self.parsers = parsers
     }
     
-    func parse(words: [String]) -> [Machine] {
+    public func parse(words: [String]) -> [Machine] {
         return []
     }
     
