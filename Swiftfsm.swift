@@ -100,7 +100,7 @@ public class Swiftfsm {
             self.handleMessage(parser.helpText)
         }
         // Run the tasks.
-        self.handleTasks(tasks)
+        self.runMachines(self.handleTasks(tasks))
     }
     
     private func generateKripkeStructure(machine: Machine) {
