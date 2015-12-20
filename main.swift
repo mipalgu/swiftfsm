@@ -71,6 +71,6 @@ Swiftfsm(
     schedulerFactory: RoundRobinSchedulerFactory(),
     view: CommandLinePrinter(
         errorStream: StderrOutputStream(),
-        standardStream: StdoutOutputStream()
+        messageStream: StdoutOutputStream()
     )
 ).run(Process.arguments)

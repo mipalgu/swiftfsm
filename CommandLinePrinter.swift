@@ -60,14 +60,14 @@ public class CommandLinePrinter<T: OutputStreamType, U:OutputStreamType>: View {
     
     private var errorStream: T
     
-    private var standardStream: U
+    private var messageStream: U
     
     public init(
         errorStream: T,
-        standardStream: U
+        messageStream: U
     ) {
         self.errorStream = errorStream
-        self.standardStream = standardStream
+        self.messageStream = messageStream
     }
     
     public func error(error: SwiftfsmErrors) {
@@ -90,7 +90,7 @@ public class CommandLinePrinter<T: OutputStreamType, U:OutputStreamType>: View {
     }
     
     public func message(message: String) {
-        print(message, terminator: "\n", toStream: &self.standardStream)
+        print(message, terminator: "\n", toStream: &self.messageStream)
     }
     
 }
