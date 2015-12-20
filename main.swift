@@ -66,6 +66,7 @@ Swiftfsm(
             extractor: MirrorPropertyExtractor()
         )
     ),
+    machineLoader: DynamicLibraryMachineLoaderFactory().make(),
     parser: SwiftfsmParser(),
     view: CommandLinePrinter()
 ).run(Process.arguments)

@@ -62,16 +62,20 @@ public class Swiftfsm {
     
     private let kripkeGeneratorFactory: MachineKripkeStructureGeneratorFactory
     
+    private let machineLoader: MachineLoader
+    
     private let parser: HelpableParser
     
     private let view: View
     
     public init(
         kripkeGeneratorFactory: MachineKripkeStructureGeneratorFactory,
+        machineLoader: MachineLoader,
         parser: HelpableParser,
         view: View
     ) {
         self.kripkeGeneratorFactory = kripkeGeneratorFactory
+        self.machineLoader = machineLoader
         self.parser = parser
         self.view = view
     }
@@ -113,7 +117,6 @@ public class Swiftfsm {
     }
     
     private func handleTasks(tasks: [Task]) -> [Machine] {
-        let loader: MachineLoader = DynamicLibraryMachineLoaderFactory().make()
         var machines: [Machine] = []
         var i: Int = 1
         for t: Task in tasks {
@@ -124,7 +127,7 @@ public class Swiftfsm {
                 self.handleError(SwiftfsmErrors.PathNotFound(machineName: name))
             }
             // Load the FSM.
-            let fsm: FiniteStateMachine? = loader.load(t.path!)
+            let fsm: FiniteStateMachine? = self.machineLoader.load(t.path!)
             if (nil == fsm) {
                 // Handle when we are unable to load the fsm.
                 self.handleError(
