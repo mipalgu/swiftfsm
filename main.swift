@@ -69,5 +69,8 @@ Swiftfsm(
     machineLoader: DynamicLibraryMachineLoaderFactory().make(),
     parser: SwiftfsmParser(),
     schedulerFactory: RoundRobinSchedulerFactory(),
-    view: CommandLinePrinter()
+    view: CommandLinePrinter(
+        errorStream: StderrOutputStream(),
+        standardStream: StdoutOutputStream()
+    )
 ).run(Process.arguments)
