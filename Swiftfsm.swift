@@ -71,11 +71,9 @@ public class Swiftfsm {
     
     public func run(var args: [String]) {
         if (args.count < 2) {
-            print(parser.helpText)
-            exit(EXIT_SUCCESS)
+            self.handleMessage(parser.helpText)
         }
         args.removeFirst()
-        
         let tasks: [Task] = self.parseArgs(args)
         if (true == tasks.isEmpty) {
             self.handleError(SwiftfsmErrors.NoPathsFound)
@@ -113,12 +111,16 @@ public class Swiftfsm {
         var machines: [Machine] = []
         var i: Int = 1
         for t: Task in tasks {
+            // Get/Generate Name of the Machine.
             let name: String = nil == t.name ? "machine \(i)" : t.name!
+            // Handle when there is no path in the Task.
             if (nil == t.path) {
                 self.handleError(SwiftfsmErrors.PathNotFound(machineName: name))
             }
+            // Load the FSM.
             let fsm: FiniteStateMachine? = loader.load(t.path!)
             if (nil == fsm) {
+                // Handle when we are unable to load the fsm.
                 self.handleError(
                     SwiftfsmErrors.UnableToLoad(
                         machineName: name,
@@ -126,10 +128,13 @@ public class Swiftfsm {
                     )
                 )
             }
+            // Create the Machine.
             let m: Machine = SimpleMachine(name: name, fsm: fsm!)
+            // Generate Kripke Structures.
             if (true == t.generateKripkeStructure) {
                 self.generateKripkeStructure(m)
             }
+            // Remember to add the machine to the scheduler if need be.
             if (true == t.addToScheduler) {
                 machines.append(m)
             }
