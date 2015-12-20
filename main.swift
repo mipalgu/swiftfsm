@@ -56,8 +56,11 @@
  *
  */
 
+#if os(Linux)
+import Glibc
+#else
 import Darwin
-import FSM
+#endif
 
 print("Hello, when I grow up, I will be a full-blown state machine scheduler!")
 Swiftfsm(
