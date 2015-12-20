@@ -58,6 +58,6 @@
 
 public enum ParserErrors: ErrorType {
     
-    case UnknownFlag(String)
+    case UnknownFlag(flag: String)
     
 }
