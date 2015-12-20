@@ -92,7 +92,7 @@ public class Swiftfsm {
         args.removeFirst()
         // Parse the args and get a bunch of tasks.
         let tasks: [Task] = self.parseArgs(args)
-        if (true == tasks.isEmpty) {
+        if (true == tasks.isEmpty || (1 == tasks.count && nil == tasks[0].path)) {
             self.handleError(SwiftfsmErrors.NoPathsFound)
         }
         // Do we have to print the help message?
