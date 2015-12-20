@@ -90,7 +90,7 @@ public class CommandLinePrinter<T: OutputStreamType, U:OutputStreamType>: View {
     }
     
     public func message(message: String) {
-        print(message, terminator: "\n", toStream: &self.errorStream)
+        print(message, terminator: "\n", toStream: &self.standardStream)
     }
     
 }
