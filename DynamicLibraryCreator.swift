@@ -72,7 +72,6 @@ public class DynamicLibraryCreator: LibraryCreator {
     public func open(path: String) -> LibraryResource? {
         // Can the dylib be opened?
         if (false == dlopen_preflight(path)) {
-            print(dlerror())
             return nil
         }
         // Attempt to open the library.
