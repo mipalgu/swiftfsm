@@ -62,6 +62,6 @@
  */
 public protocol Parser {
     
-    func parse(words: [String]) -> [Task]
+    func parse(words: [String]) throws -> [Task]
     
 }
