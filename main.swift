@@ -60,66 +60,6 @@ import Darwin
 import FSM
 
 print("Hello, when I grow up, I will be a full-blown state machine scheduler!")
-let parser: SwiftfsmParser = SwiftfsmParser()
-
-if (Process.arguments.count < 2) {
-    print(parser.helpText)
-    exit(EXIT_SUCCESS)
-}
-
-var args: [String] = Process.arguments
-args.removeFirst()
-
-let tasks: [Task]
-do {
-    tasks = try parser.parse(args)
-} catch(SwiftfsmErrors.UnknownFlag(let flag)) {
-    print("Unknown Flag \(flag)")
-    exit(EXIT_FAILURE)
-}
-
-if (true == tasks.isEmpty) {
-    print("Unable to find a path to any machines.  Did you specify one?")
-    exit(EXIT_FAILURE)
-}
-
-if let t:Task = tasks.filter({ true == $0.printHelpText }).first {
-    print(parser.helpText)
-    exit(EXIT_SUCCESS)
-}
-
-let loader: MachineLoader = DynamicLibraryMachineLoaderFactory().make()
-var machines: [Machine] = []
-var i: Int = 1
-for t: Task in tasks {
-    if (nil == t.path) {
-        print("No path for \(nil == t.name ? "machine \(i)" : t.name!).")
-        exit(EXIT_FAILURE)
-    }
-    let fsm: FiniteStateMachine? = loader.load(t.path!)
-    if (nil == fsm) {
-        print("Unable to load \(nil == t.name ? "machine \(i)" : t.name!) at \(t.path!).")
-        exit(EXIT_FAILURE)
-    }
-    let m: Machine = SimpleMachine(
-        name: nil == t.name ? "\(i)_t.path!" : t.name!,
-        fsm: fsm!
-    )
-    if (true == t.generateKripkeStructure) {
-        let generator: KripkeStructureGenerator =
-            MachineKripkeStructureGenerator(
-                generator: TeleportingTurtleGenerator(
-                    extractor: MirrorPropertyExtractor()
-                ),
-                machine: m
-            )
-        let structure: KripkeStructureType = generator.generate()
-        print(structure)
-    }
-    if (true == t.addToScheduler) {
-        machines.append(m)
-    }
-    i++
-}
-let scheduler: RoundRobinScheduler = RoundRobinScheduler(machines: machines)
-scheduler.run()
+Swiftfsm(parser: SwiftfsmParser(), view: CommandLinePrinter()).run(
+    Process.arguments
+)
