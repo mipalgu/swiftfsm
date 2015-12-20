@@ -56,15 +56,15 @@
  *
  */
 
-public class CommandLinePrinter: View {
+public class CommandLinePrinter<T: OutputStreamType, U:OutputStreamType>: View {
     
-    private var errorStream: OutputStreamType
+    private var errorStream: T
     
-    private var standardStream: OutputStreamType
+    private var standardStream: U
     
     public init(
-        errorStream: OutputStreamType,
-        standardStream: OutputStreamType
+        errorStream: T,
+        standardStream: U
     ) {
         self.errorStream = errorStream
         self.standardStream = standardStream
@@ -82,13 +82,15 @@ public class CommandLinePrinter: View {
         case .UnknownFlag(let flag):
             str = "Unknown Flag '\(flag)'"
         }
-        print("\u{001B}[1;31merror: \u{001B}[1;30m\(str)\u{001B}[0m")
-        //print(str, &self.errorStream)
+        print(
+            "\u{001B}[1;31merror: \u{001B}[1;30m\(str)\u{001B}[0m",
+            terminator: "\n",
+            toStream: &self.errorStream
+        )
     }
     
     public func message(message: String) {
-        print(message)
-        //print(message, &self.standardStream)
+        print(message, terminator: "\n", toStream: &self.errorStream)
     }
     
 }
