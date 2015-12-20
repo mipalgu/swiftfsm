@@ -60,6 +60,12 @@ import Darwin
 import FSM
 
 print("Hello, when I grow up, I will be a full-blown state machine scheduler!")
-Swiftfsm(parser: SwiftfsmParser(), view: CommandLinePrinter()).run(
-    Process.arguments
-)
+Swiftfsm(
+    kripkeGeneratorFactory: MachineKripkeStructureGeneratorFactory(
+        generator: TeleportingTurtleGenerator(
+            extractor: MirrorPropertyExtractor()
+        )
+    ),
+    parser: SwiftfsmParser(),
+    view: CommandLinePrinter()
+).run(Process.arguments)

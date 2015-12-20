@@ -60,11 +60,18 @@ import FSM
 
 public class Swiftfsm {
     
+    private let kripkeGeneratorFactory: MachineKripkeStructureGeneratorFactory
+    
     private let parser: HelpableParser
     
     private let view: View
     
-    public init(parser: HelpableParser, view: View) {
+    public init(
+        kripkeGeneratorFactory: MachineKripkeStructureGeneratorFactory,
+        parser: HelpableParser,
+        view: View
+    ) {
+        self.kripkeGeneratorFactory = kripkeGeneratorFactory
         self.parser = parser
         self.view = view
     }
@@ -90,12 +97,7 @@ public class Swiftfsm {
     
     private func generateKripkeStructure(machine: Machine) {
         let generator: KripkeStructureGenerator =
-            MachineKripkeStructureGenerator(
-                generator: TeleportingTurtleGenerator(
-                    extractor: MirrorPropertyExtractor()
-                ),
-                machine: machine
-            )
+            self.kripkeGeneratorFactory.make(machine)
         let structure: KripkeStructureType = generator.generate()
         self.view.message(structure.description)
     }
