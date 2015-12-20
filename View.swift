@@ -58,7 +58,7 @@
 
 public protocol View {
     
-    func error(message: String) -> Void
+    func error(error: SwiftfsmErrors) -> Void
     
     func message(message: String) -> Void
     
