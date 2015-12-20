@@ -56,8 +56,8 @@
  *
  */
 
-public enum ParserErrors {
+public enum ParserErrors: ErrorType {
     
-    case UnknownFlag
+    case UnknownFlag(String)
     
 }
