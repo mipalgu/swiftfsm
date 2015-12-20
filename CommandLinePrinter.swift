@@ -88,6 +88,7 @@ public class CommandLinePrinter: View {
     
     public func message(message: String) {
         print(message)
+        //print(message, &self.standardStream)
     }
     
 }
