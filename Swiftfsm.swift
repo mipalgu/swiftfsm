@@ -102,6 +102,7 @@ public class Swiftfsm {
         }
         // NoPathsFound when there is only one task and it does not have a path
         if (1 == tasks.count && nil == tasks[0].path) {
+            self.view.message(parser.helpText)
             self.handleError(SwiftfsmErrors.NoPathsFound)
         }
         // Run the tasks.
