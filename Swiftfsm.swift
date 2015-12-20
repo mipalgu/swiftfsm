@@ -170,8 +170,7 @@ public class Swiftfsm {
     }
     
     private func runMachines(machines: [Machine]) {
-        let scheduler: Scheduler = self.schedulerFactory.make(machines)
-        scheduler.run()
+        self.schedulerFactory.make(machines).run()
     }
     
 }
