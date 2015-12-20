@@ -58,8 +58,10 @@
 
 public struct StderrOutputStream: OutputStreamType {
     
+    private var stream: FileOutputStream = FileOutputStream(file: stderr)
+    
     public mutating func write(string: String) {
-        fputs(string, stderr)
+        return stream.write(string)
     }
     
 }

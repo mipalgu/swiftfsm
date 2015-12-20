@@ -58,8 +58,10 @@
 
 public struct StdoutOutputStream: OutputStreamType {
     
+    private var stream: FileOutputStream = FileOutputStream(file: stdout)
+    
     public mutating func write(string: String) {
-        fputs(string, stdout)
+        return stream.write(string)
     }
     
 }
