@@ -58,19 +58,32 @@
 
 public class CommandLinePrinter: View {
     
+    private var errorStream: OutputStreamType
+    
+    private var standardStream: OutputStreamType
+    
+    public init(
+        errorStream: OutputStreamType,
+        standardStream: OutputStreamType
+    ) {
+        self.errorStream = errorStream
+        self.standardStream = standardStream
+    }
+    
     public func error(error: SwiftfsmErrors) {
+        let str: String
         switch (error) {
         case .NoPathsFound:
-            print(
-                "Unable to find a path to any machines.  Did you specify one?"
-            )
+            str = "Unable to find a path to any machines.  Did you specify one?"
         case .PathNotFound(let machineName):
-            print("Unable to find a path for \(machineName)")
+            str = "Unable to find a path for \(machineName)"
         case .UnableToLoad(let machineName, let path):
-            print("Unable to load machine \(machineName) at \(path)")
+            str = "Unable to load machine \(machineName) at \(path)"
         case .UnknownFlag(let flag):
-            print("Unknown Flag: \(flag)")
+            str = "Unknown Flag: \(flag)"
         }
+        print(str)
+        //print(str, &self.errorStream)
     }
     
     public func message(message: String) {
