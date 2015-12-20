@@ -1,5 +1,5 @@
 /*
- * ParserErrors.swift
+ * SwiftfsmErrors.swift
  * swiftfsm
  *
  * Created by Callum McColl on 20/12/2015.
@@ -56,7 +56,7 @@
  *
  */
 
-public enum ParserErrors: ErrorType {
+public enum SwiftfsmErrors: ErrorType {
     
     case UnknownFlag(flag: String)
     

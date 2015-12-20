@@ -73,7 +73,7 @@ args.removeFirst()
 let tasks: [Task]
 do {
     tasks = try parser.parse(args)
-} catch(ParserErrors.UnknownFlag(let flag)) {
+} catch(SwiftfsmErrors.UnknownFlag(let flag)) {
     print("Unknown Flag \(flag)")
     exit(EXIT_FAILURE)
 }

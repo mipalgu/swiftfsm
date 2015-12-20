@@ -169,7 +169,7 @@ public class SwiftfsmParser: HelpableParser {
         }
         // Ignore unknown flags
         if ("-" == words.first!.characters.first) {
-            throw ParserErrors.UnknownFlag(flag: words.first!)
+            throw SwiftfsmErrors.UnknownFlag(flag: words.first!)
         }
         t.path = words.first!
         return t
