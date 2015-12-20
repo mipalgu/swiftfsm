@@ -71,21 +71,6 @@ public class RoundRobinScheduler: Scheduler {
     }
     
     /**
-     *  Add a machine to the machines array.
-     */
-    public func addMachine(machine: Machine) -> Void {
-        self.machines.append(machine)
-    }
-    
-    /**
-     *  Clear the machines array therefore stopping the execution of all
-     *  machines.
-     */
-    public func clear() {
-        self.machines = []
-    }
-    
-    /**
      *  Start executing all machines.
      */
     public func run() -> Void {
