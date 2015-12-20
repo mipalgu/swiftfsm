@@ -1,5 +1,5 @@
 /*
- * StdinOutputStream.swift
+ * StdoutOutputStream.swift
  * swiftfsm
  *
  * Created by Callum McColl on 20/12/2015.
@@ -56,10 +56,10 @@
  *
  */
 
-public struct StdinOutputStream: OutputStreamType {
+public struct StdoutOutputStream: OutputStreamType {
     
     public mutating func write(string: String) {
-        fputs(string, stdin)
+        fputs(string, stdout)
     }
     
 }
