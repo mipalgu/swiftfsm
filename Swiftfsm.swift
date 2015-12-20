@@ -92,12 +92,17 @@ public class Swiftfsm {
         args.removeFirst()
         // Parse the args and get a bunch of tasks.
         let tasks: [Task] = self.parseArgs(args)
-        if (true == tasks.isEmpty || (1 == tasks.count && nil == tasks[0].path)) {
-            self.handleError(SwiftfsmErrors.NoPathsFound)
+        // Show the help message when there are no tasks.
+        if (true == tasks.isEmpty) {
+            self.handleMessage(parser.helpText)
         }
-        // Do we have to print the help message?
+        // Has the user said to print the help message?
         if let _ = tasks.filter({ true == $0.printHelpText }).first {
             self.handleMessage(parser.helpText)
+        }
+        // NoPathsFound when there is only one task and it does not have a path
+        if (1 == tasks.count && nil == tasks[0].path) {
+            self.handleError(SwiftfsmErrors.NoPathsFound)
         }
         // Run the tasks.
         self.runMachines(self.handleTasks(tasks))
