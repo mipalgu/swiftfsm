@@ -83,50 +83,19 @@ public class Swiftfsm {
         if let _ = tasks.filter({ true == $0.printHelpText }).first {
             self.handleMessage(parser.helpText)
         }
-        let loader: MachineLoader = DynamicLibraryMachineLoaderFactory().make()
-        var machines: [Machine] = []
-        var i: Int = 1
-        for t: Task in tasks {
-            if (nil == t.path) {
-                self.handleError(
-                    SwiftfsmErrors.PathNotFound(
-                        machineName: nil == t.name ? "machine \(i)" : t.name!
-                    )
-                )
-            }
-            let fsm: FiniteStateMachine? = loader.load(t.path!)
-            if (nil == fsm) {
-                self.handleError(
-                    SwiftfsmErrors.UnableToLoad(
-                        machineName: nil == t.name ? "machine \(i)" : t.name!,
-                        path: t.path!
-                    )
-                )
-            }
-            let m: Machine = SimpleMachine(
-                name: nil == t.name ? "\(i)_t.path!" : t.name!,
-                fsm: fsm!
+        self.handleTasks(tasks)
+    }
+    
+    private func generateKripkeStructure(machine: Machine) {
+        let generator: KripkeStructureGenerator =
+            MachineKripkeStructureGenerator(
+                generator: TeleportingTurtleGenerator(
+                    extractor: MirrorPropertyExtractor()
+                ),
+                machine: machine
             )
-            if (true == t.generateKripkeStructure) {
-                let generator: KripkeStructureGenerator =
-                MachineKripkeStructureGenerator(
-                    generator: TeleportingTurtleGenerator(
-                        extractor: MirrorPropertyExtractor()
-                    ),
-                    machine: m
-                )
-                let structure: KripkeStructureType = generator.generate()
-                print(structure)
-            }
-            if (true == t.addToScheduler) {
-                machines.append(m)
-            }
-            i++
-        }
-        let scheduler: RoundRobinScheduler = RoundRobinScheduler(
-            machines: machines
-        )
-        scheduler.run()
+        let structure: KripkeStructureType = generator.generate()
+        self.view.message(structure.description)
     }
     
     private func handleError(error: SwiftfsmErrors) {
@@ -137,6 +106,36 @@ public class Swiftfsm {
     private func handleMessage(message: String) {
         self.view.message(message)
         exit(EXIT_SUCCESS)
+    }
+    
+    private func handleTasks(tasks: [Task]) -> [Machine] {
+        let loader: MachineLoader = DynamicLibraryMachineLoaderFactory().make()
+        var machines: [Machine] = []
+        var i: Int = 1
+        for t: Task in tasks {
+            let name: String = nil == t.name ? "machine \(i)" : t.name!
+            if (nil == t.path) {
+                self.handleError(SwiftfsmErrors.PathNotFound(machineName: name))
+            }
+            let fsm: FiniteStateMachine? = loader.load(t.path!)
+            if (nil == fsm) {
+                self.handleError(
+                    SwiftfsmErrors.UnableToLoad(
+                        machineName: name,
+                        path: t.path!
+                    )
+                )
+            }
+            let m: Machine = SimpleMachine(name: name, fsm: fsm!)
+            if (true == t.generateKripkeStructure) {
+                self.generateKripkeStructure(m)
+            }
+            if (true == t.addToScheduler) {
+                machines.append(m)
+            }
+            i++
+        }
+        return machines
     }
     
     private func parseArgs(args: [String]) -> [Task] {
@@ -150,6 +149,13 @@ public class Swiftfsm {
             exit(EXIT_FAILURE)
         }
         return tasks
+    }
+    
+    private func runMachines(machines: [Machine]) {
+        let scheduler: RoundRobinScheduler = RoundRobinScheduler(
+            machines: machines
+        )
+        scheduler.run()
     }
     
 }
