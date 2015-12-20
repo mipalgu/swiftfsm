@@ -76,13 +76,13 @@ public class CommandLinePrinter: View {
         case .NoPathsFound:
             str = "Unable to find a path to any machines.  Did you specify one?"
         case .PathNotFound(let machineName):
-            str = "Unable to find a path for \(machineName)"
+            str = "Unable to find a path for '\(machineName)'"
         case .UnableToLoad(let machineName, let path):
-            str = "Unable to load machine \(machineName) at \(path)"
+            str = "Unable to load '\(machineName)' at '\(path)'"
         case .UnknownFlag(let flag):
-            str = "Unknown Flag: \(flag)"
+            str = "Unknown Flag '\(flag)'"
         }
-        print(str)
+        print("\u{001B}[1;31merror: \u{001B}[1;30m\(str)\u{001B}[0m")
         //print(str, &self.errorStream)
     }
     
