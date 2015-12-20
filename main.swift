@@ -70,8 +70,14 @@ if (Process.arguments.count < 2) {
 var args: [String] = Process.arguments
 args.removeFirst()
 
+let tasks: [Task]
+do {
+    tasks = try parser.parse(args)
+} catch(ParserErrors.UnknownFlag(let flag)) {
+    print("Unknown Flag \(flag)")
+    exit(EXIT_FAILURE)
+}
 
-let tasks: [Task] = parser.parse(args)
 if (true == tasks.isEmpty) {
     print("Unable to find a path to any machines.  Did you specify one?")
     exit(EXIT_FAILURE)

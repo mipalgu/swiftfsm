@@ -74,13 +74,13 @@ public class SwiftfsmParser: HelpableParser {
         return str
     }
     
-    public func parse(var words: [String]) -> [Task] {
+    public func parse(var words: [String]) throws -> [Task] {
         var tasks: [Task] = []
         var t: Task = Task()
         tasks.append(t)
         // Keep looping while we still have input
         while (false == words.isEmpty) {
-            tasks[tasks.count - 1] = self.handleNextFlag(
+            tasks[tasks.count - 1] = try self.handleNextFlag(
                 tasks[tasks.count - 1],
                 words: &words
             )
@@ -96,7 +96,7 @@ public class SwiftfsmParser: HelpableParser {
         return tasks
     }
     
-    private func handleNextFlag(let t: Task, inout words: [String]) -> Task {
+    private func handleNextFlag(let t: Task, inout words: [String]) throws -> Task {
         switch (words.first!) {
         case "-c", "--clfsm":
             return self.handleClfsmFlag(t, words: &words)
@@ -109,7 +109,7 @@ public class SwiftfsmParser: HelpableParser {
         case "-n", "--name":
             return self.handleNameFlag(t, words: &words)
         default:
-            return self.handlePath(t, words: &words)
+            return try self.handlePath(t, words: &words)
         }
     }
     
@@ -162,14 +162,14 @@ public class SwiftfsmParser: HelpableParser {
         return t
     }
     
-    private func handlePath(var t: Task, inout words: [String]) -> Task {
+    private func handlePath(var t: Task, inout words: [String]) throws -> Task {
         // Ignore empty strings
         if (true == words.first!.isEmpty) {
             return t
         }
         // Ignore unknown flags
         if ("-" == words.first!.characters.first) {
-            return t
+            throw ParserErrors.UnknownFlag(flag: words.first!)
         }
         t.path = words.first!
         return t
