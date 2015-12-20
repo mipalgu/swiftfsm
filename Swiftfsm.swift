@@ -66,17 +66,21 @@ public class Swiftfsm {
     
     private let parser: HelpableParser
     
+    private let schedulerFactory: SchedulerFactory
+    
     private let view: View
     
     public init(
         kripkeGeneratorFactory: MachineKripkeStructureGeneratorFactory,
         machineLoader: MachineLoader,
         parser: HelpableParser,
+        schedulerFactory: SchedulerFactory,
         view: View
     ) {
         self.kripkeGeneratorFactory = kripkeGeneratorFactory
         self.machineLoader = machineLoader
         self.parser = parser
+        self.schedulerFactory = schedulerFactory
         self.view = view
     }
     
@@ -166,9 +170,7 @@ public class Swiftfsm {
     }
     
     private func runMachines(machines: [Machine]) {
-        let scheduler: RoundRobinScheduler = RoundRobinScheduler(
-            machines: machines
-        )
+        let scheduler: Scheduler = self.schedulerFactory.make(machines)
         scheduler.run()
     }
     
