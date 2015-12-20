@@ -167,6 +167,10 @@ public class SwiftfsmParser: HelpableParser {
         if (true == words.first!.isEmpty) {
             return t
         }
+        // Ignore unknown flags
+        if ("-" == words.first!.characters.first) {
+            return t
+        }
         t.path = words.first!
         return t
     }
