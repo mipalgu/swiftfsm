@@ -56,16 +56,13 @@
  *
  */
 
-public class CommandLinePrinter<T: OutputStreamType, U:OutputStreamType>: View {
+public class CommandLinePrinter<T: OutputStreamType, U: OutputStreamType>: View {
     
     private var errorStream: T
     
     private var messageStream: U
     
-    public init(
-        errorStream: T,
-        messageStream: U
-    ) {
+    public init(errorStream: T, messageStream: U) {
         self.errorStream = errorStream
         self.messageStream = messageStream
     }
