@@ -71,14 +71,17 @@ public class TeleportingTurtleGenerator: FSMKripkeStateGenerator {
      *  machine.
      *
      *  This uses Brents Teleporting Turtle algorithm to detect cycles within
-     *  the Kripke Structure.  Once the algorithm detects that there is a cycle
-     *  it starts at the inital state and loops until it finds the first
-     *  occurence of the cycle and from this you would normally trim the
-     *  remaining states off the end since they are just cyclying.  This
-     *  trimming does not happen so you may end up with a few states that end up
-     *  doing the same thing.
+     *  the Kripke Structure.  Once the algorithm detects a potential cycle it
+     *  checks every newly generated state with those that it has already seen
+     *  to make sure that it is equal to the corresponding state in the cycle.
+     *  If all newly generated states are equal to their corresponding states 
+     *  within the cycle for the entire cycle then a cycle has been detected and
+     *  the generation of the kripke state is stopped and the inital state of 
+     *  the structure is returned.  Normally the algorithm would trim the cyclic
+     *  states off the end but this does not happen so you may end up with a 
+     *  few states on the end that are doing the same thing.
      *
-     *  In other words the algorithm detects if a cycle has happend and stops
+     *  To summarize the algorithm detects if a cycle has happend and stops
      *  generating the structure, but, it does not bother to remove the cyclic
      *  states from the end of the structure.
      */
@@ -89,10 +92,10 @@ public class TeleportingTurtleGenerator: FSMKripkeStateGenerator {
         turtle.target = rabbit
         var power: Int = 1
         var length: Int = 1
-        var inCycle = false
-        var cycleLength = 0
-        var cycleState = turtle
         let initialState: KripkeState = turtle
+        var inCycle = false     // Are we checking a cycle?
+        var cycleLength = 0     // The current position in the cycle
+        var cycleState = turtle // The current state in the cycle
         while(false == fsm.hasFinished()) {
             if (true == inCycle) {
                 // Have we reached the end of the cycle?
@@ -106,8 +109,7 @@ public class TeleportingTurtleGenerator: FSMKripkeStateGenerator {
             }
             if (false == inCycle) {
                 // 'Teleport' the turtle to the rabbit when necessary.
-                self.adjust(&power, length: &length, turtle: &turtle, rabbit: rabbit)
-                length++
+                self.tp(&power, len: &length, turtle: &turtle, rabbit: rabbit)
             }
             generateNextRabbit(fsm, rabbit: &rabbit)
             // Have we found a new cycle?
@@ -119,20 +121,6 @@ public class TeleportingTurtleGenerator: FSMKripkeStateGenerator {
             }
         }
         return initialState
-    }
-
-    private func adjust(
-        inout power: Int,
-        inout length: Int,
-        inout turtle: KripkeState,
-        rabbit: KripkeState
-    ) {
-        if (power != length) {
-            return
-        }
-        turtle = rabbit
-        power *= 2
-        length = 0
     }
 
     private func convertToKripkeState(state: State) -> KripkeState {
@@ -151,5 +139,19 @@ public class TeleportingTurtleGenerator: FSMKripkeStateGenerator {
         rabbit.target = temp
         rabbit = temp
     } 
-    
+
+    private func tp(
+        inout power: Int,
+        inout len: Int,
+        inout turtle: KripkeState,
+        rabbit: KripkeState
+    ) {
+        if (power != len++) {
+            return
+        }
+        turtle = rabbit
+        power *= 2
+        len = 1
+    }
+
 }
