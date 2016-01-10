@@ -58,7 +58,7 @@
 
 #if os(Linux)
 import Glibc
-#else
+#elseif os(OSX)
 import Darwin
 #endif
 
