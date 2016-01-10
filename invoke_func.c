@@ -58,7 +58,7 @@
 
 #include "invoke_func.h"
 
-int invoke_fun(void * p) {
+int invoke_func(void * p) {
     int (*f)(int, char *[]) = p;
     char * args[0];
     return f(0, args);

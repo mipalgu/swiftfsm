@@ -62,6 +62,6 @@
 /**
  *  Call the main method from an opaque pointer that points to it.
  */
-int invoke_fun(void * p);
+int invoke_func(void * p);
 
 #endif /* invoke_func_h */

@@ -118,7 +118,7 @@ public class LibraryMachineLoader: MachineLoader {
             return nil
         }
         // Call the method
-        invoke_fun(result.symbol)
+        invoke_func(result.symbol)
         // Get the factory that was added
         let f: Factories.FiniteStateMachineFactory? = getLastFactory()
         if (f == nil) {
