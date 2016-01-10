@@ -80,7 +80,7 @@ public class CommandLinePrinter<T: OutputStreamType, U: OutputStreamType>: View 
             str = "Unknown Flag '\(flag)'"
         }
         print(
-            "\u{001B}[1;31merror: \u{001B}[1;30m\(str)\u{001B}[0m",
+            "\u{001B}[1;31merror: \u{001B}[0m\(str)",
             terminator: "\n",
             toStream: &self.errorStream
         )
