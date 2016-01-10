@@ -59,11 +59,14 @@
 #ifndef invoke_func_h
 #define invoke_func_h
 
+#ifndef _POSIX_C_SOURCE
+#define _POSIX_C_SOURCE 199309L
+#endif
+
 #include <stdio.h>
 #include <stdint.h>
 #include <sys/time.h>
 #include <time.h>
-
 /**
  *  Call the main method from an opaque pointer that points to it.
  */
