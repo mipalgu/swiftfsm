@@ -1,9 +1,9 @@
 /*
- * invoke_func.h
+ * timers.c
  * swiftfsm
  *
- * Created by Callum McColl on 8/09/2015.
- * Copyright © 2015 Callum McColl. All rights reserved.
+ * Created by Callum McColl on 10/01/2016.
+ * Copyright © 2016 Callum McColl. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -56,12 +56,18 @@
  *
  */
 
-#ifndef invoke_func_h
-#define invoke_func_h
+#include "timers.h"
 
-/**
- *  Call the main method from an opaque pointer that points to it.
- */
-int invoke_fun(void * p);
+unsigned long microseconds() {
+    struct timeval time;
+    gettimeofday(&time, NULL);
+    long microsec = ((unsigned long long)time.tv_sec * 1000000) + time.tv_usec;
+    return microsec;
+}
 
-#endif /* invoke_func_h */
+void microsleep(unsigned long microseconds) {
+    struct timespec tim, tim2;
+    tim.tv_sec = 0;
+    tim.tv_nsec = microseconds * 1000;
+    nanosleep(&tim, &tim2);
+}

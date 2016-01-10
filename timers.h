@@ -1,9 +1,9 @@
 /*
- * invoke_func.h
+ * timers.h
  * swiftfsm
  *
- * Created by Callum McColl on 8/09/2015.
- * Copyright © 2015 Callum McColl. All rights reserved.
+ * Created by Callum McColl on 10/01/2016.
+ * Copyright © 2016 Callum McColl. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -56,12 +56,21 @@
  *
  */
 
-#ifndef invoke_func_h
-#define invoke_func_h
+#ifndef timers_h
+#define timers_h
 
-/**
- *  Call the main method from an opaque pointer that points to it.
- */
-int invoke_fun(void * p);
+#if defined(__linux__)
+#ifndef _POSIX_C_SOURCE
+#define _POSIX_C_SOURCE 199309L
+#endif
+#endif
 
-#endif /* invoke_func_h */
+#include <stdint.h>
+#include <sys/time.h>
+#include <time.h>
+
+unsigned long microseconds(void);
+
+void microsleep(unsigned long microseconds);
+
+#endif /* timers_h */
