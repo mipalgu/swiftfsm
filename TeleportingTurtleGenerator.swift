@@ -95,32 +95,29 @@ public class TeleportingTurtleGenerator: FSMKripkeStateGenerator {
         let initialState: KripkeState = turtle
         while(false == fsm.hasFinished()) {
             if (true == inCycle) {
-                print("in cycle detection")
+                // Have we reached the end of the cycle?
                 if (cycleLength++ > length) {
-                    print("cycle detected")
                     return initialState
                 }
-                if (rabbit != cycleState) {
-                    print("false cycle detected")
-                    inCycle = false
-                }
+                // Is there a state that doesn't match the cycle?
+                inCycle = rabbit == cycleState
+                // Check the next state in the cycle
                 cycleState = cycleState.target!
             }
             if (false == inCycle) {
-                print("not in cycle")
+                // 'Teleport' the turtle to the rabbit when necessary.
                 self.adjust(&power, length: &length, turtle: &turtle, rabbit: rabbit)
+                length++
             }
             generateNextRabbit(fsm, rabbit: &rabbit)
-            if (false == inCycle) {
-                length++
-                if (rabbit == turtle) {
-                    inCycle = true
-                    cycleState = turtle
-                    cycleLength = 0
-                } 
+            // Have we found a new cycle?
+            if (false == inCycle && rabbit == turtle) {
+                // Start checking the cycle and reset the cycle variables
+                inCycle = true
+                cycleState = turtle
+                cycleLength = 0
             }
         }
-        print("finished")
         return initialState
     }
 
