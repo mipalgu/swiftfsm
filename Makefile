@@ -6,6 +6,7 @@
 ALL_TARGETS=host
 CI_WIP=yes
 
+B_D=./build.host
 DEPDIRS=../FSM
 DEPLIBS=FSM
 
