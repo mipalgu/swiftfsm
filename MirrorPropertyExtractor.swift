@@ -76,7 +76,7 @@ public class MirrorPropertyExtractor: StatePropertyExtractor {
      */
     private func getPropertiesFromMirror(
         mirror: Mirror,
-        var properties: [String: KripkeStateProperty] = [:]
+        properties: [String: KripkeStateProperty] = [:]
     ) -> [String: KripkeStateProperty] {
         let parent: Mirror? = mirror.superclassMirror()
         if (nil != parent) {
@@ -94,7 +94,7 @@ public class MirrorPropertyExtractor: StatePropertyExtractor {
     /*
     *  Convert the value to a KripkeStateProperty.
     */
-    private func convertValue(var value: Any) -> KripkeStateProperty {
+    private func convertValue(value: Any) -> KripkeStateProperty {
         let type: KripkeStatePropertyTypes = self.getKripkeStatePropertyType(
             value
         )

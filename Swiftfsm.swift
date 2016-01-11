@@ -84,7 +84,7 @@ public class Swiftfsm {
         self.view = view
     }
     
-    public func run(var args: [String]) {
+    public func run(args: [String]) {
         // Print help when we have no input.
         if (args.count < 2) {
             self.handleMessage(parser.helpText)
