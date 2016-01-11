@@ -74,7 +74,7 @@ public class SwiftfsmParser: HelpableParser {
         return str
     }
     
-    public func parse(words: [String]) throws -> [Task] {
+    public func parse(var words: [String]) throws -> [Task] {
         var tasks: [Task] = []
         var t: Task = Task()
         tasks.append(t)
@@ -96,7 +96,7 @@ public class SwiftfsmParser: HelpableParser {
         return tasks
     }
     
-    private func handleNextFlag(t: Task, inout words: [String]) throws -> Task {
+    private func handleNextFlag(let t: Task, inout words: [String]) throws -> Task {
         switch (words.first!) {
         case "-c", "--clfsm":
             return self.handleClfsmFlag(t, words: &words)
@@ -113,22 +113,22 @@ public class SwiftfsmParser: HelpableParser {
         }
     }
     
-    private func handleClfsmFlag(t: Task, inout words: [String]) -> Task {
+    private func handleClfsmFlag(var t: Task, inout words: [String]) -> Task {
         t.isClfsmMachine = true
         return t
     }
     
-    private func handleDebugFlag(t: Task, inout words: [String]) -> Task {
+    private func handleDebugFlag(var t: Task, inout words: [String]) -> Task {
         t.enableDebugging = true
         return t
     }
     
-    private func handleHelpFlag(t: Task, inout words: [String]) -> Task {
+    private func handleHelpFlag(var t: Task, inout words: [String]) -> Task {
         t.printHelpText = true
         return t
     }
     
-    private func handleKripkeFlag(t: Task, inout words: [String]) -> Task {
+    private func handleKripkeFlag(var t: Task, inout words: [String]) -> Task {
         t.generateKripkeStructure = true
         t.addToScheduler = false
         if (words.count < 2) {
@@ -142,7 +142,7 @@ public class SwiftfsmParser: HelpableParser {
         return t
     }
     
-    private func handleNameFlag(t: Task, inout words: [String]) -> Task {
+    private func handleNameFlag(var t: Task, inout words: [String]) -> Task {
         if (words.count < 2) {
             return t
         }
@@ -162,7 +162,7 @@ public class SwiftfsmParser: HelpableParser {
         return t
     }
     
-    private func handlePath(t: Task, inout words: [String]) throws -> Task {
+    private func handlePath(var t: Task, inout words: [String]) throws -> Task {
         // Ignore empty strings
         if (true == words.first!.isEmpty) {
             return t

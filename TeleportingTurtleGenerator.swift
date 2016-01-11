@@ -85,7 +85,7 @@ public class TeleportingTurtleGenerator: FSMKripkeStateGenerator {
      *  generating the structure, but, it does not bother to remove the cyclic
      *  states from the end of the structure.
      */
-    public func generateFromFSM(fsm: FiniteStateMachine) -> KripkeState {
+    public func generateFromFSM(var fsm: FiniteStateMachine) -> KripkeState {
         var turtle: KripkeState = self.convertToKripkeState(fsm.currentState)
         fsm.next()
         var rabbit: KripkeState = self.convertToKripkeState(fsm.currentState)
@@ -131,7 +131,7 @@ public class TeleportingTurtleGenerator: FSMKripkeStateGenerator {
     }
 
     private func generateNextRabbit(
-        fsm: FiniteStateMachine,
+        var fsm: FiniteStateMachine,
         inout rabbit: KripkeState
     ) {
         fsm.next()
