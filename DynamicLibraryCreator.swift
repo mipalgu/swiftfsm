@@ -70,10 +70,12 @@ public class DynamicLibraryCreator: LibraryCreator {
      *  Returns nil if the resource could not be created.
      */
     public func open(path: String) -> LibraryResource? {
+        #if os(OSX)
         // Can the dylib be opened?
         if (false == dlopen_preflight(path)) {
             return nil
         }
+        #endif
         // Attempt to open the library.
         let handler: UnsafeMutablePointer<Void> = dlopen(path, RTLD_NOW | RTLD_LOCAL)
         if (handler == nil) {
