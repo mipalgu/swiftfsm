@@ -10,14 +10,14 @@ DEPDIRS=../FSM
 DEPLIBS=FSM
 
 HOST_SWIFTC=swiftc
-
+CC=gcc
 .ifndef TEST
 # host source files and build settings
 SWIFT_SRCS!=ls *.swift
 SWIFT_BRIDGING_HEADER=swiftfsm-Bridging-Header.h
 C_SRCSS!=ls *.c
-C_FLAGS=-lrt
-SWIFTCFLAGS=-Xlinker all_load -lFSM -L./ -I./ -I${SRCDIR}/../.. -I${SRCDIR}/../../../Common
+C_FLAGS=-lrt -ldl 
+SWIFTCFLAGS=-Xlinker all_load -lFSM -ldl -L./ -I./ -I${SRCDIR}/../.. -I${SRCDIR}/../../../Common
 .else
 # test source files and build settings
 BIN=swiftfsm_tests
