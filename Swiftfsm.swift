@@ -56,6 +56,12 @@
  *
  */
 
+ #if os(OSX)
+ import Darwin
+ #elseif os(Linux)
+ import Glibc
+ #endif
+
 import FSM
 
 public class Swiftfsm {
