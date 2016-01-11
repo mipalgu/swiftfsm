@@ -56,6 +56,12 @@
  *
  */
 
+ #if os(OSX)
+ import Darwin
+ #elseif os(Linux)
+ import Glibc
+ #endif
+
 public struct FileOutputStream: OutputStreamType {
     
     private let file: UnsafeMutablePointer<FILE>
