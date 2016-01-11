@@ -56,6 +56,12 @@
  *
  */
 
+ #if os(OSX)
+ import Darwin
+ #elseif os(Linux)
+ import Glibc
+ #endif
+
 public struct StdoutOutputStream: OutputStreamType {
     
     private var stream: FileOutputStream = FileOutputStream(file: stdout)
