@@ -17,7 +17,7 @@ SWIFT_SRCS!=ls *.swift
 SWIFT_BRIDGING_HEADER=swiftfsm-Bridging-Header.h
 C_SRCSS!=ls *.c
 C_FLAGS=-lrt
-SWIFTCFLAGS=-Xlinker all_load -lFSM -L./ -I./
+SWIFTCFLAGS=-Xlinker all_load -lFSM -L./ -I./ -I${SRCDIR}/../.. -I${SRCDIR}/../../../Common
 .else
 # test source files and build settings
 BIN=swiftfsm_tests
@@ -25,7 +25,7 @@ SWIFT_SRCS!=grep -L "main" *.swift && ls tests/*.swift
 SWIFT_BRIDGING_HEADER=tests/swiftfsm_tests-Bridging-Header.h
 C_SRCSS!=ls *.c && ls tests/*.c
 C_FLAGS=-lrt
-SWIFTCFLAGS=-Xlinker all_load -lFSM -L./ -I./ -lswiftXCTest
+SWIFTCFLAGS=-Xlinker all_load -lFSM -L./ -I./ -I${SRCDIR}/../.. -I${SRCDIR}/../../../Common -lswiftXCTest
 .endif
 LDFLAGS=-I./${BUILDDIR} -lFSM -L./${BUILDDIR}
 
