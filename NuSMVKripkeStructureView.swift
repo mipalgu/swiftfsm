@@ -60,7 +60,7 @@ public class NuSMVKripkeStructureView<T: OutputStreamType>:
     KripkeStructureView
 {
 
-    var stream: T 
+    private var stream: T 
 
     public init(stream: T) {
         self.stream = stream
