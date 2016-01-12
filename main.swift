@@ -62,7 +62,6 @@ import Glibc
 import Darwin
 #endif
 
-print("Hello, when I grow up, I will be a full-blown state machine scheduler!")
 Swiftfsm(
     kripkeGeneratorFactory: MachineKripkeStructureGeneratorFactory(
         generator: TeleportingTurtleGenerator(

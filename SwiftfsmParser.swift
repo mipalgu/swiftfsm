@@ -59,7 +59,7 @@
 public class SwiftfsmParser: HelpableParser {
     
     public var helpText: String {
-        var str: String = "OVERVIEW: A Finite State Machine Scheduler Written in Swift\n\n"
+        var str: String = "OVERVIEW: A Finite State Machine Scheduler\n\n"
         str += "USAGE: swiftfsm [options] machine_path ...\n\n"
         str += "OPTIONS:\n"
         str += "\t-c, --clfsm\tSpecifies that this is a machine that has been built using the CLFSM specification.\n"
