@@ -58,18 +58,8 @@
 
 import FSM
 
-public class KripkeStructure: KripkeStructureType, CollectionType {
+public class KripkeStructure: KripkeStructureType {
     
-    public typealias Index = Int
-
-    public var startIndex: Int {
-        return 0
-    }
-
-    public var endIndex: Int {
-        return count
-    }
-
     public let initialState: KripkeState
     
     public let machine: Machine
@@ -77,14 +67,6 @@ public class KripkeStructure: KripkeStructureType, CollectionType {
     public init(initialState: KripkeState, machine: Machine) {
         self.initialState = initialState
         self.machine = machine
-    }
-
-    public subscript(i: Int) -> KripkeState {
-        var temp: KripkeState = self.initialState
-        for _ in 0 ... i {
-            temp = temp.target!
-        }
-        return temp
     }
     
 }
