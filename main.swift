@@ -68,7 +68,7 @@ Swiftfsm(
             extractor: MirrorPropertyExtractor()
         )
     ),
-    kripkeStructureView: NuSMVKripkeStructureView(),
+    kripkeStructureView: NuSMVKripkeStructureView(stream: StdoutOutputStream()),
     machineLoader: DynamicLibraryMachineLoaderFactory().make(),
     parser: SwiftfsmParser(),
     schedulerFactory: RoundRobinSchedulerFactory(),

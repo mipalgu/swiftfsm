@@ -56,10 +56,18 @@
  *
  */
 
-public class NuSMVKripkeStructureView: KripkeStructureView {
+public class NuSMVKripkeStructureView<T: OutputStreamType>:
+    KripkeStructureView
+{
+
+    var stream: T 
+
+    public init(stream: T) {
+        self.stream = stream
+    }
 
     public func make(structure: KripkeStructureType) {
-        print(structure.description)
+        print(structure.description, terminator: "", toStream: &self.stream)
     }
 
 }
