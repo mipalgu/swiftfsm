@@ -58,8 +58,8 @@
 
 public class NuSMVKripkeStructureView: KripkeStructureView {
 
-    func make(structure: KripkeStructure) {
-
+    public func make(structure: KripkeStructureType) {
+        print(structure.description)
     }
 
 }

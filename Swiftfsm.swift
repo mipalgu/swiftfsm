@@ -68,6 +68,8 @@ public class Swiftfsm {
     
     private let kripkeGeneratorFactory: MachineKripkeStructureGeneratorFactory
     
+    private let kripkeStructureView: KripkeStructureView
+
     private let machineLoader: MachineLoader
     
     private let parser: HelpableParser
@@ -78,12 +80,14 @@ public class Swiftfsm {
     
     public init(
         kripkeGeneratorFactory: MachineKripkeStructureGeneratorFactory,
+        kripkeStructureView: KripkeStructureView,
         machineLoader: MachineLoader,
         parser: HelpableParser,
         schedulerFactory: SchedulerFactory,
         view: View
     ) {
         self.kripkeGeneratorFactory = kripkeGeneratorFactory
+        self.kripkeStructureView = kripkeStructureView
         self.machineLoader = machineLoader
         self.parser = parser
         self.schedulerFactory = schedulerFactory
@@ -119,7 +123,7 @@ public class Swiftfsm {
         let generator: KripkeStructureGenerator =
             self.kripkeGeneratorFactory.make(machine)
         let structure: KripkeStructureType = generator.generate()
-        self.view.message(structure.description)
+        self.kripkeStructureView.make(structure)
     }
     
     private func handleError(error: SwiftfsmErrors) {

@@ -61,6 +61,6 @@
  */
 public protocol KripkeStructureView {
 
-    func make(structure: KripkeStructure) -> Void
+    func make(structure: KripkeStructureType) -> Void
 
 }
