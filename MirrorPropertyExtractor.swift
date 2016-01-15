@@ -58,13 +58,20 @@
 
 import FSM
 
-public class MirrorPropertyExtractor: StatePropertyExtractor {
+public class MirrorPropertyExtractor: 
+    FSMPropertyExtractor,
+    StatePropertyExtractor
+{
     
     /**
      *  Extract the properties of state using a the builtin swift Mirror type.
      */
     public func extract(state: State) -> [String : KripkeStateProperty] {
         return self.getPropertiesFromMirror(Mirror(reflecting: state))
+    }
+
+    public func extract(vars: FSMVariables) -> [String: KripkeStateProperty] {
+        return self.getPropertiesFromMirror(Mirror(reflecting: vars))
     }
     
     /*
