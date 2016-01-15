@@ -60,6 +60,8 @@ import FSM
 
 public class KripkeState: KripkeStateType {
     
+    public let fsmProperties: [String: KripkeStateProperty]
+
     public let properties: [String: KripkeStateProperty]
     
     public let state: State
@@ -69,10 +71,12 @@ public class KripkeState: KripkeStateType {
     public init(
         state: State,
         properties: [String: KripkeStateProperty],
+        fsmProperties: [String: KripkeStateProperty],
         target: KripkeState? = nil
     ) {
         self.state = state
         self.properties = properties
+        self.fsmProperties = fsmProperties
         self.target = target
     }
     
@@ -81,19 +85,28 @@ public class KripkeState: KripkeStateType {
         if (self.state != other.state) {
             return false
         }
-        // Check if the property counts are the same.
-        if (self.properties.count != other.properties.count) {
+        // Check if fsm properties are the same
+        if (false == self.checkProperties(self.fsmProperties, rhs: other.fsmProperties)) {
             return false
         }
-        // Check properties.
-        for key: String in self.properties.keys {
-            // Check if rhs has the property
-            if (nil == other.properties[key]) {
+        // Check if the property counts are the same.
+        return self.checkProperties(self.properties, rhs: other.properties)
+    }
+
+    private func checkProperties(
+        lhs: [String: KripkeStateProperty],
+        rhs: [String: KripkeStateProperty]
+    ) -> Bool {
+        // Check if they are the same size
+        if (lhs.count != rhs.count) {
+            return false
+        }
+        // Check values
+        for key: String in lhs.keys {
+            if (nil == rhs[key]) {
                 return false
             }
-            let l: KripkeStateProperty = self.properties[key]!
-            let r: KripkeStateProperty = other.properties[key]!
-            if (false == (l == r)) {
+            if (false == (lhs[key]! == rhs[key]!)) {
                 return false
             }
         }
