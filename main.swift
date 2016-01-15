@@ -65,7 +65,8 @@ import Darwin
 Swiftfsm(
     kripkeGeneratorFactory: MachineKripkeStructureGeneratorFactory(
         generator: TeleportingTurtleGenerator(
-            extractor: MirrorPropertyExtractor()
+            fsmExtractor: MirrorPropertyExtractor(),
+            stateExtractor: MirrorPropertyExtractor()
         )
     ),
     kripkeStructureView: NuSMVKripkeStructureView(stream: StdoutOutputStream()),

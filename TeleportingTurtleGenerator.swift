@@ -59,11 +59,17 @@
 import FSM
 
 public class TeleportingTurtleGenerator: FSMKripkeStateGenerator {
+
+    private let fsmExtractor: FSMPropertyExtractor
     
-    private let extractor: StatePropertyExtractor
+    private let stateExtractor: StatePropertyExtractor
     
-    public init(extractor: StatePropertyExtractor) {
-        self.extractor = extractor
+    public init(
+        fsmExtractor: FSMPropertyExtractor,
+        stateExtractor: StatePropertyExtractor
+    ) {
+        self.fsmExtractor = fsmExtractor
+        self.stateExtractor = stateExtractor
     }
     
     /**
@@ -86,9 +92,15 @@ public class TeleportingTurtleGenerator: FSMKripkeStateGenerator {
      *  states from the end of the structure.
      */
     public func generateFromFSM(var fsm: FiniteStateMachine) -> KripkeState {
-        var turtle: KripkeState = self.convertToKripkeState(fsm.currentState)
+        var turtle: KripkeState = self.convertToKripkeState(
+            fsm.currentState,
+            fsm: fsm
+        )
         fsm.next()
-        var rabbit: KripkeState = self.convertToKripkeState(fsm.currentState)
+        var rabbit: KripkeState = self.convertToKripkeState(
+            fsm.currentState,
+            fsm: fsm
+        )
         turtle.target = rabbit
         var power: Int = 1
         var length: Int = 1
@@ -97,10 +109,11 @@ public class TeleportingTurtleGenerator: FSMKripkeStateGenerator {
         var cycleLength = 0     // The current position in the cycle
         var cycleState = turtle // The current state in the cycle
         while(false == fsm.hasFinished()) {
+            // Are we checking a cycle?
             if (true == inCycle) {
                 // Have we reached the end of the cycle?
                 if (cycleLength++ > length) {
-                    return initialState
+                   break 
                 }
                 // Is there a state that doesn't match the cycle?
                 inCycle = rabbit == cycleState
@@ -111,7 +124,7 @@ public class TeleportingTurtleGenerator: FSMKripkeStateGenerator {
                 // 'Teleport' the turtle to the rabbit when necessary.
                 self.tp(&power, len: &length, turtle: &turtle, rabbit: rabbit)
             }
-            generateNextRabbit(fsm, rabbit: &rabbit)
+            self.generateNextRabbit(fsm, rabbit: &rabbit)
             // Have we found a new cycle?
             if (false == inCycle && rabbit == turtle) {
                 // Start checking the cycle and reset the cycle variables
@@ -123,10 +136,14 @@ public class TeleportingTurtleGenerator: FSMKripkeStateGenerator {
         return initialState
     }
 
-    private func convertToKripkeState(state: State) -> KripkeState {
+    private func convertToKripkeState(
+        state: State,
+        fsm: FiniteStateMachine
+    ) -> KripkeState {
         return KripkeState(
             state: state,
-            properties: self.extractor.extract(state)
+            properties: self.stateExtractor.extract(state),
+            fsmProperties: self.fsmExtractor.extract(fsm.vars)
         )
     }
 
@@ -135,7 +152,10 @@ public class TeleportingTurtleGenerator: FSMKripkeStateGenerator {
         inout rabbit: KripkeState
     ) {
         fsm.next()
-        let temp: KripkeState = self.convertToKripkeState(fsm.currentState)
+        let temp: KripkeState = self.convertToKripkeState(
+            fsm.currentState,
+            fsm: fsm
+        )
         rabbit.target = temp
         rabbit = temp
     } 
