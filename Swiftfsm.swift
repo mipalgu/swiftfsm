@@ -130,7 +130,7 @@ public class Swiftfsm {
         self.view.error(error)
         exit(EXIT_FAILURE)
     }
-    
+
     private func handleMessage(message: String) {
         self.view.message(message)
         exit(EXIT_SUCCESS)
@@ -157,19 +157,17 @@ public class Swiftfsm {
                     )
                 )
             }
-            for fsm: FiniteStateMachine in fsms {
-                // Create the Machine.
-                let m: Machine = SimpleMachine(name: name, fsm: fsm)
-                // Generate Kripke Structures.
-                if (true == t.generateKripkeStructure) {
-                    self.generateKripkeStructure(m)
-                }
-                // Remember to add the machine to the scheduler if need be.
-                if (true == t.addToScheduler) {
-                    machines.append(m)
-                }
-                i++
+            // Create the Machines
+            let temp: [Machine] = fsms.map {SimpleMachine(name: name, fsm: $0)}
+            // Generate Kripke Structures.
+            if (true == t.generateKripkeStructure) {
+                temp.map {self.generateKripkeStructure($0)}
             }
+            // Remember to add the machine to the scheduler if need be.
+            if (true == t.addToScheduler) {
+                machines.appendContentsOf(temp)
+            }
+            i++
         }
         return machines
     }
