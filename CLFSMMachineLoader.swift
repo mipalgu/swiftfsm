@@ -63,8 +63,8 @@ import FSM
  */
 public class CLFSMMachineLoader: MachineLoader {
     
-    public func load(path: String) -> FiniteStateMachine? {
-        return nil
+    public func load(path: String) -> [FiniteStateMachine] {
+        return [] 
     }
     
 }

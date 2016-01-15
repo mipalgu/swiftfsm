@@ -94,35 +94,35 @@ public class LibraryMachineLoader: MachineLoader {
      *      libraries would not need to know how to add machines to the
      *      scheduler.
      */
-    public func load(path: String) -> FiniteStateMachine? {
+    public func load(path: String) -> [FiniteStateMachine] {
         // Ignore empty paths
         if (path.characters.count < 1) {
-            return nil
+            return []
         }
         // Create the library resource.
         let lib: LibraryResource? = self.creator.open(path)
         if lib == nil {
-            return nil
+            return [] 
         }
         // Load the machines
         return self.loadMachine(lib!)
     }
     
-    private func loadMachine(library: LibraryResource) -> FiniteStateMachine? {
+    private func loadMachine(library: LibraryResource) -> [FiniteStateMachine] {
         // Get main method symbol
         let result: (symbol: UnsafeMutablePointer<Void>, error: String?) =
             library.getSymbolPointer("main")
         // Error with fetching symbol
         if (result.error != nil) {
             print(result.error!)
-            return nil
+            return [] 
         }
         // Call the method
         invoke_func(result.symbol)
         // Get the factory that was added
         let f: Factories.FiniteStateMachineFactory? = getLastFactory()
         if (f == nil) {
-            return nil
+            return []
         }
         // Call the factory
         return f!()
