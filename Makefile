@@ -11,7 +11,6 @@ DEPDIRS=../FSM
 DEPLIBS=FSM
 
 HOST_SWIFTC=swiftc
-CC=gcc
 .ifndef TEST
 # host source files and build settings
 SWIFT_SRCS!=ls *.swift
