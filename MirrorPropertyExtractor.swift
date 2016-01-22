@@ -60,8 +60,15 @@ import FSM
 
 public class MirrorPropertyExtractor: 
     FSMPropertyExtractor,
+    GlobalPropertyExtractor,
     StatePropertyExtractor
 {
+
+    public func extract<T: GlobalVariables>(
+        globals: T 
+    ) -> [String: KripkeStateProperty] {
+        return self.getPropertiesFromMirror(Mirror(reflecting: globals))
+    }
     
     /**
      *  Extract the properties of state using a the builtin swift Mirror type.
