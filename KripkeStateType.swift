@@ -65,9 +65,14 @@ import FSM
 public protocol _KripkeStateType: Equatable {
     
     /**
-     *  Describe the parts of the machine that is running the state.
+     *  Describes the parts of the machine that is running the state.
      */
     var fsmProperties: [String: KripkeStateProperty] { get }
+
+    /**
+     *  Describes the global properties that effect the running of the state.
+     */
+    var globalProperties: [String: KripkeStateProperty] { get }
 
     /**
      *  Describes the parts of the source state.
@@ -91,6 +96,11 @@ extension _KripkeStateType where Self: CustomStringConvertible {
     public var description: String {
         var str: String = "state = \(self.state.name)\n"
         str += "target = \(self.target?.state.name)\n"
+        str += "global properties: {\n"
+        str += self.globalProperties.reduce("", combine: {
+            $0 + "\t" + $1.0 + " = \($1.1)\n"
+        })
+        str += "}\n"
         str += "fsm properties: {\n"
         str += self.fsmProperties.reduce("", combine: {
             $0 + "\t" + $1.0 + " = \($1.1)\n"
