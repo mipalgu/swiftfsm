@@ -79,6 +79,7 @@ public class RoundRobinScheduler: Scheduler {
         while (false == self.machines.isEmpty) {
             i = ++i % self.machines.count
             if (false == self.machines[i].fsm.hasFinished()) {
+                DEBUG = self.machines[i].debug
                 self.machines[i].fsm.next()
                 continue
             }
