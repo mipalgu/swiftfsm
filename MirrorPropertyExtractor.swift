@@ -65,12 +65,12 @@ public class MirrorPropertyExtractor:
 {
 
     public func extract(ringlet: Ringlet) -> [String: KripkeStateProperty] {
-        let properties: [String: KripkeStateProperty] = 
-            self.getPropertiesFromMirror(Mirror(reflecting: ringlet))
-        guard let val = properties["val"] else {
+        let children: Mirror.Children = Mirror(reflecting: ringlet).children
+        let snapshots: [Mirror.Child] = children.filter {"snapshot" == $0.label}
+        guard let snapshot = snapshots.first?.value else {
             return [:]
         }
-        return self.getPropertiesFromMirror(Mirror(reflecting: val))
+        return self.getPropertiesFromMirror(Mirror(reflecting: snapshot))
     }
     
     /**
