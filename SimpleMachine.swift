@@ -60,13 +60,16 @@ import FSM
 
 public class SimpleMachine: Machine {
     
+    public let debug: Bool
+
+    public var fsm: FiniteStateMachine
+
     public let name: String
     
-    public var fsm: FiniteStateMachine
-    
-    public init(name: String, fsm: FiniteStateMachine) {
+    public init(name: String, fsm: FiniteStateMachine, debug: Bool) {
         self.name = name
         self.fsm = fsm
+        self.debug = debug
     }
     
 }

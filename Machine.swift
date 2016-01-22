@@ -60,6 +60,8 @@ import FSM
 
 public protocol Machine {
     
+    var debug: Bool { get }
+
     var name: String { get }
     
     var fsm: FiniteStateMachine { get set }

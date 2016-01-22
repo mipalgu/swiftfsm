@@ -106,6 +106,8 @@ public class Swiftfsm {
         if (true == tasks.isEmpty) {
             self.handleMessage(parser.helpText)
         }
+        // Has the user asked to turn on debugging?
+        DEBUG = false == tasks.filter { $0.enableDebugging }.isEmpty
         // Has the user said to print the help message?
         if let _ = tasks.filter({ true == $0.printHelpText }).first {
             self.handleMessage(parser.helpText)
@@ -160,7 +162,11 @@ public class Swiftfsm {
             // Create the Machines
             var i: Int = 0
             let temp: [Machine] = fsms.map {
-                let m: Machine = SimpleMachine(name: "\(name).\(i)", fsm: $0)
+                let m: Machine = SimpleMachine(
+                    name: "\(name).\(i)",
+                    fsm: $0,
+                    debug: t.enableDebugging
+                )
                 i = i + 1
                 return m
             }
