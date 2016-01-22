@@ -102,23 +102,24 @@ public class TeleportingTurtleGenerator: FSMKripkeStateGenerator {
             fsm: fsm
         )
         turtle.target = rabbit
-        var power: Int = 1
-        var length: Int = 1
         let initialState: KripkeState = turtle
-        var inCycle = false     // Are we checking a cycle?
-        var cycleLength = 0     // The current position in the cycle
-        var cycleState = turtle // The current state in the cycle
+        var power: Int = 1                      // How much distance the turtle and rabbit should have before bringing them together again.
+        var length: Int = 1                     // The current distance between the turtle and rabbit.
+        var inCycle: Bool = false               // Are we checking a cycle?
+        var cyclePos: Int = 0                   // The current position in the cycle
+        var cycleState: KripkeState = turtle    // The current state that is being checked in the cycle
         while(false == fsm.hasFinished()) {
             // Are we checking a cycle?
             if (true == inCycle) {
                 // Have we reached the end of the cycle?
-                if (cycleLength++ > length) {
+                if (cyclePos > length) {
                    break 
                 }
                 // Is there a state that doesn't match the cycle?
                 inCycle = rabbit == cycleState
                 // Check the next state in the cycle
                 cycleState = cycleState.target!
+                cyclePos += 1
             }
             if (false == inCycle) {
                 // 'Teleport' the turtle to the rabbit when necessary.
@@ -130,7 +131,7 @@ public class TeleportingTurtleGenerator: FSMKripkeStateGenerator {
                 // Start checking the cycle and reset the cycle variables
                 inCycle = true
                 cycleState = turtle
-                cycleLength = 0
+                cyclePos = 0
             }
         }
         return initialState
