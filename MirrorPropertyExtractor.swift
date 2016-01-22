@@ -64,10 +64,13 @@ public class MirrorPropertyExtractor:
     StatePropertyExtractor
 {
 
-    public func extract<T: GlobalVariables>(
-        globals: T 
-    ) -> [String: KripkeStateProperty] {
-        return self.getPropertiesFromMirror(Mirror(reflecting: globals))
+    public func extract(ringlet: Ringlet) -> [String: KripkeStateProperty] {
+        let properties: [String: KripkeStateProperty] = 
+            self.getPropertiesFromMirror(Mirror(reflecting: ringlet))
+        guard let val = properties["val"] else {
+            return [:]
+        }
+        return self.getPropertiesFromMirror(Mirror(reflecting: val))
     }
     
     /**

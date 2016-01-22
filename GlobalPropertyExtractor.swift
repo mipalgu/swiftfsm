@@ -60,8 +60,6 @@ import FSM
 
 public protocol GlobalPropertyExtractor {
 
-    func extract<T: GlobalVariables>(
-        globals: T
-    ) -> [String: KripkeStateProperty]
+    func extract(ringlet: Ringlet) -> [String: KripkeStateProperty]
 
 }
