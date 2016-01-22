@@ -148,7 +148,8 @@ public class TeleportingTurtleGenerator: FSMKripkeStateGenerator {
         return KripkeState(
             state: state,
             properties: self.stateExtractor.extract(state),
-            fsmProperties: self.fsmExtractor.extract(fsm.vars)
+            fsmProperties: self.fsmExtractor.extract(fsm.vars),
+            globalProperties: self.globalsExtractor.extract(fsm.ringlet) 
         )
     }
 
