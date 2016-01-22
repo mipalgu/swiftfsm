@@ -158,7 +158,12 @@ public class Swiftfsm {
                 )
             }
             // Create the Machines
-            let temp: [Machine] = fsms.map {SimpleMachine(name: name, fsm: $0)}
+            var i: Int = 0
+            let temp: [Machine] = fsms.map {
+                let m: Machine = SimpleMachine(name: "\(name).\(i)", fsm: $0)
+                i = i + 1
+                return m
+            }
             // Generate Kripke Structures.
             if (true == t.generateKripkeStructure) {
                 temp.map {self.generateKripkeStructure($0)}
