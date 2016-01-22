@@ -62,12 +62,16 @@ public class TeleportingTurtleGenerator: FSMKripkeStateGenerator {
 
     private let fsmExtractor: FSMPropertyExtractor
     
+    private let globalsExtractor: GlobalPropertyExtractor
+
     private let stateExtractor: StatePropertyExtractor
     
     public init(
+        globalsExtractor: GlobalPropertyExtractor,
         fsmExtractor: FSMPropertyExtractor,
         stateExtractor: StatePropertyExtractor
     ) {
+        self.globalsExtractor = globalsExtractor
         self.fsmExtractor = fsmExtractor
         self.stateExtractor = stateExtractor
     }
