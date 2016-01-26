@@ -67,7 +67,19 @@ import Darwin
 
 public class DynamicLibraryResourceTests: SwiftFSMTestCase {
     
-    private var path: String = "/usr/lib/system/libsystem_c.dylib"
+    public override var allTests: [(String, () -> Void)] {
+        return [
+            ("testGetSymbolReturnsPointerToExistingSymbol", testGetSymbolReturnsPointerToExistingSymbol),
+            ("testGetSymbolReturnsErrorsForNonExistingSymbol", testGetSymbolReturnsErrorsForNonExistingSymbol),
+            ("testCloseStopsOtherClosesFromWorking", testCloseStopsOtherClosesFromWorking)
+        ]
+    }
+    
+    #if os(OSX)
+    private var path: String = "../../build.host-local/libswiftfsm.dylib"
+    #elseif os(Linux)
+    private var path: String = "../../build.host-local/libswiftfsm.so"
+    #endif
     private var handler: UnsafeMutablePointer<Void>!
     private var resource: DynamicLibraryResource!
     
@@ -87,7 +99,7 @@ public class DynamicLibraryResourceTests: SwiftFSMTestCase {
     
     func testGetSymbolReturnsPointerToExistingSymbol() {
         let result: (symbol: UnsafeMutablePointer<Void>, error: String?) =
-            self.resource.getSymbolPointer("printf")
+            self.resource.getSymbolPointer("main")
         XCTAssert(result.symbol != nil)
         XCTAssert(result.error == nil)
     }
