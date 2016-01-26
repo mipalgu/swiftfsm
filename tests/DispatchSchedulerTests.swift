@@ -61,6 +61,13 @@ import FSM
 import XCTest
 
 public class DispatchSchedulerTests: SwiftFSMTestCase {
+
+    
+    public override var allTests: [(String, () -> Void)] {
+        return [
+            ("testSchedulerRunsInTime", testSchedulerRunsInTime)
+        ]
+    }
     
     private var scheduler: DispatchScheduler!
     

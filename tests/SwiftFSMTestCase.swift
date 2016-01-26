@@ -67,7 +67,9 @@ import Darwin
 
 public class SwiftFSMTestCase: XCTestCase {
 
-    public var allTests: [(String, () -> Void)] = []
+    public var allTests: [(String, () -> Void)] {
+        return []
+    }
     
     public var counter: UInt = 0
     
