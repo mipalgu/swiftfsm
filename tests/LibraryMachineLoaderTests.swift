@@ -61,17 +61,28 @@ import XCTest
 
 public class LibraryMachineLoaderTests: SwiftFSMTestCase {
     
-    private var machines: [FiniteStateMachine]?
+    private var machines: [[FiniteStateMachine]]?
     private var scheduler: RoundRobinScheduler {
         let f: Factories = Factories()
         if (0 == f.factories.count) {
             return RoundRobinScheduler()
         }
-        let s: RoundRobinScheduler = RoundRobinScheduler()
-        for (var i: Int = 0; i < f.factories.count; i++) {
-            s.addMachine(SimpleMachine(name: "\(i)", fsm: f.factories[i]()))
+        var i: Int = 0
+        var machines: [Machine] = f.factories.flatMap { (f: () -> [FiniteStateMachine]) -> [Machine] in
+            var j = 0
+            let ms: [Machine] = f().map { 
+                let m: Machine = SimpleMachine(
+                    name: "\(i).\(j)",
+                    fsm: $0,
+                    debug: true
+                )
+                j = j + 1
+                return m
+            }
+            i = i + 1
+            return ms
         }
-        return s
+        return RoundRobinScheduler(machines: machines)
     }
     
     public override func setUp() {
@@ -87,7 +98,7 @@ public class LibraryMachineLoaderTests: SwiftFSMTestCase {
     }
     
     func testLoadReturnsAnArrayOfMachines() {
-        self.machines = [getSlowPingPongMachine(), getSlowPingPongMachine()]
+        self.machines = [[getSlowPingPongMachine(), getSlowPingPongMachine()]]
         getLoader().load("test")
         XCTAssert(self.scheduler.machines.count == 2)
     }
@@ -104,7 +115,7 @@ public class LibraryMachineLoaderTests: SwiftFSMTestCase {
     }
     
     func testLoadReturnsEmptyArrayForEmptyString() {
-        self.machines = [getSlowPingPongMachine()]
+        self.machines = [[getSlowPingPongMachine()]]
         getLoader().load("")
         XCTAssert(self.scheduler.machines.count == 0)
     }

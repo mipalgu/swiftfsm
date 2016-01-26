@@ -9,7 +9,7 @@
 #ifndef swiftfsm_tests_Bridging_Header_h
 #define swiftfsm_tests_Bridging_Header_h
 
-#include "../swiftfsm-Bridging-Header.h"
+#include "swiftfsm-Bridging-Header.h"
 #include "to_opaque.h"
 
 #endif /* swiftfsm_tests_Bridging_Header_h */

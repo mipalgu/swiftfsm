@@ -60,9 +60,9 @@ import FSM
 
 public class MockedLibraryResourceCreator: LibraryCreator {
     
-    private let machines: [FiniteStateMachine]?
+    private let machines: [[FiniteStateMachine]]?
     
-    public init(machines: [FiniteStateMachine]? = nil) {
+    public init(machines: [[FiniteStateMachine]]? = nil) {
         self.machines = machines
     }
     

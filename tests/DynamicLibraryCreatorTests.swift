@@ -58,7 +58,7 @@
 
 import XCTest
 
-public class DynamicLibraryTests: XCTestCase {
+public class DynamicLibraryCreatorTests: SwiftFSMTestCase {
     
     private var creator: DynamicLibraryCreator!
     

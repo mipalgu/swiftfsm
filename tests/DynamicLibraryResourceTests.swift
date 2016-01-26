@@ -58,7 +58,13 @@
 
 import XCTest
 
-public class DynamicLibraryResourceTests: XCTestCase {
+#if os(Linux)
+import Glibc
+#elseif os(OSX)
+import Darwin
+#endif
+
+public class DynamicLibraryResourceTests: SwiftFSMTestCase {
     
     private var path: String = "/usr/lib/system/libsystem_c.dylib"
     private var handler: UnsafeMutablePointer<Void>!

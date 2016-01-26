@@ -64,9 +64,9 @@ public class MockedLibraryResource: LibraryResource {
     
     public let path: String = ""
     
-    public var machines: [FiniteStateMachine]?
+    public var machines: [[FiniteStateMachine]]?
     
-    public init(machines: [FiniteStateMachine]? = nil) {
+    public init(machines: [[FiniteStateMachine]]? = nil) {
         self.machines = machines
     }
     
@@ -80,8 +80,8 @@ public class MockedLibraryResource: LibraryResource {
                 error: "Unable To Load"
             )
         }
-        for m: FiniteStateMachine in self.machines! {
-            addFactory({m})
+        for fsms: [FiniteStateMachine] in self.machines! {
+            addFactory({ fsms })
         }
         let f: CMainMethod = {argc, argv in return CInt(0)}
         return (symbol: to_opaque(f), error: nil)

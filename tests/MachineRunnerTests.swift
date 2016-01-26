@@ -68,7 +68,8 @@ public class MachineRunnerTests: SwiftFSMTestCase {
         self.runner = SingleThreadedMachineRunner()
         self.machine = SimpleMachine(
             name: "pingPong",
-            fsm: super.getSlowPingPongMachine()
+            fsm: super.getSlowPingPongMachine(),
+            debug: true
         )
     }
     

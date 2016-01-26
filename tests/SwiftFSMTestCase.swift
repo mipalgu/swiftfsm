@@ -59,14 +59,24 @@
 import FSM
 import XCTest
 
+#if os(Linux)
+import Glibc
+#elseif os(OSX)
+import Darwin
+#endif
+
 public class SwiftFSMTestCase: XCTestCase {
+
+    public var allTests: [(String, () -> Void)] = []
     
     public var counter: UInt = 0
     
-    public override func setUp() {
+    public func setUp() {
         self.counter = 0
     }
     
+    public func tearDown() {}
+
     public func createPingPongMachine(
         end: Bool,
         slow: Bool
@@ -78,9 +88,9 @@ public class SwiftFSMTestCase: XCTestCase {
                 sleep(1)
             }
         }
-        var states: [State] = [
-            CallbackState(name: "ping", onEntry: {f("ping")}),
-            CallbackState(name: "pong", onEntry: {f("pong")})
+        var states: [CallbackState] = [
+            CallbackState("ping", onEntry: {f("ping")}),
+            CallbackState("pong", onEntry: {f("pong")})
         ]
         var transitions: [Transition] = [
             EmptyTransition(source: states[0], target: states[1]),
