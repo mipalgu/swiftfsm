@@ -67,6 +67,12 @@ import Darwin
 
 public class TimerTests: SwiftFSMTestCase {
     
+    public override var allTests: [(String, () -> Void)] {
+        return [
+            ("testDelayWorks", testDelayWorks)
+        ]
+    }
+    
     private var running: Bool = false
     private var timer: Timer!
     
