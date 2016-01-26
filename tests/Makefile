@@ -6,6 +6,7 @@
 ALL_TARGETS=host
 CI_WIP=yes
 BIN=swiftfsm_tests
+TESTFILE=1
 
 B_D=./build.host
 DEPDIRS=../
@@ -19,6 +20,11 @@ SWIFT_SRCS!=ls *.swift
 SWIFT_BRIDGING_HEADER=swiftfsm_tests-Bridging-Header.h
 C_SRCS!=ls *.c
 LDFLAGS=-lFSM -lswiftfsm
+
+all:	all-real
+
+pre-build:	generate-class
+	cd ../ && bmake host-local TEST=TEST	
 
 .include "../../swiftfsm.mk"
 .include "../../../../mk/mipal.mk"
