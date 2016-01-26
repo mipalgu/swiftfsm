@@ -61,6 +61,13 @@ import XCTest
 
 public class DynamicLibraryCreatorTests: SwiftFSMTestCase {
     
+    public override var allTests: [(String, () -> Void)] {
+        return [
+            ("testCreatorOpensExistingDylib", testCreatorOpensExistingDylib),
+            ("testCreatorDoesNotOpenNonExistingDylib", testCreatorDoesNotOpenNonExistingDylib)
+        ]
+    }
+
     private var creator: DynamicLibraryCreator!
     
     public override func setUp() {
@@ -69,9 +76,12 @@ public class DynamicLibraryCreatorTests: SwiftFSMTestCase {
     }
     
     func testCreatorOpensExistingDylib() {
-        let resource: LibraryResource? = self.creator.open(
-            "/usr/lib/system/libsystem_c.dylib"
-        )
+        #if os(OSX)
+        let path: String = "../../build.host-local/libswiftfsm.dylib"
+        #else
+        let path: String = "../../build.host-local/libswiftfsm.so"
+        #endif
+        let resource: LibraryResource? = self.creator.open(path)
         XCTAssert(resource != nil)
         if (resource == nil) {
             return
