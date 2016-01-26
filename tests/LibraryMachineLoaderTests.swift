@@ -62,6 +62,15 @@ import XCTest
 
 public class LibraryMachineLoaderTests: SwiftFSMTestCase {
     
+    public override var allTests: [(String, () -> Void)] {
+        return [
+            ("testLoadReturnsAnArrayOfMachines", testLoadReturnsAnArrayOfMachines),
+            ("testLoadReturnsEmptyArrayForUnableToGetSymbol", testLoadReturnsEmptyArrayForUnableToGetSymbol),
+            ("testLoadReturnsEmptyArrayForWhenTheSymbolFunctionReturnsNoMachines", testLoadReturnsEmptyArrayForWhenTheSymbolFunctionReturnsNoMachines),
+            ("testLoadReturnsEmptyArrayForEmptyString", testLoadReturnsEmptyArrayForEmptyString)
+        ]
+    }
+    
     private var machines: [[FiniteStateMachine]]?
     private var scheduler: RoundRobinScheduler {
         let f: Factories = Factories()
