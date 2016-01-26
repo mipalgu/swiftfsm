@@ -24,7 +24,7 @@ LDFLAGS=-lFSM -lswiftfsm
 all:	all-real
 
 pre-build:	generate-class
-	cd ../ && bmake host-local TEST=TEST	
+	cd ../ && bmake host-local TESTING=TESTING	
 
 .include "../../swiftfsm.mk"
 .include "../../../../mk/mipal.mk"
