@@ -60,6 +60,8 @@ public class SingleThreadFactory: ThreadFactory {
     
     private static var id: UInt = 0
     
+    public init() {}
+
     public func make() -> Thread {
         return SingleThread(id: SingleThreadFactory.id++)
     }

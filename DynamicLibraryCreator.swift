@@ -70,6 +70,8 @@ import Glibc
  */
 public class DynamicLibraryCreator: LibraryCreator {
     
+    public init() {}
+
     /**
      *  Create the LibraryResource from the dynamic library.
      *

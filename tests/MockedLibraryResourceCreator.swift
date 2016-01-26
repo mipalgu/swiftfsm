@@ -56,6 +56,7 @@
  *
  */
 
+@testable import swiftfsm
 import FSM
 
 public class MockedLibraryResourceCreator: LibraryCreator {

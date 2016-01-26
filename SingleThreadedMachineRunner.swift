@@ -78,6 +78,8 @@ public class SingleThreadedMachineRunner: QuerierableMachineRunner {
     
     public private(set) var worstCaseExecutionTime: UInt = 0
     
+    public init() {}
+
     public func run(var machine: Machine) {
         self.startTime = microseconds()
         machine.fsm.next()

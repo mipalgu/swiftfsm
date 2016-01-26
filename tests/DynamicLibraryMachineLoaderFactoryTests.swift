@@ -56,6 +56,7 @@
  *
  */
 
+@testable import swiftfsm
 import XCTest
 
 public class DynamicLibraryMachineLoaderFactoryTests: SwiftFSMTestCase {

@@ -56,7 +56,14 @@
  *
  */
 
+@testable import swiftfsm
 import FSM
+
+#if os(Linux)
+import Glibc
+#elseif os(OSX)
+import Darwin
+#endif
 
 public class MockedLibraryResource: LibraryResource {
     
