@@ -61,6 +61,12 @@ import FSM
 import XCTest
 
 public class MachineRunnerTests: SwiftFSMTestCase {
+
+    public override var allTests: [(String, () -> Void)] {
+        return [
+            ("testRunFinishes", testRunFinishes)
+        ]
+    }
     
     private var runner: QuerierableMachineRunner!
     private var machine: Machine!
