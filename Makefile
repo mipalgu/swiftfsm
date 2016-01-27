@@ -11,7 +11,7 @@ all:	all-real
 ALL_HDRS!=ls *.h
 HOST_SWIFTC=swiftc
 C_FLAGS=-lrt -ldl 
-SWIFTCFLAGS=-Xlinker all_load -lFSM -ldl -enable-testing -L./ -I./ -I${SRCDIR}/../.. -I${SRCDIR}/../../../Common
+SWIFTCFLAGS=-Xlinker all_load -lFSM -ldl -L./ -I./ -I${SRCDIR}/../.. -I${SRCDIR}/../../../Common
 SWIFT_SRCS!=ls *.swift
 SWIFT_BRIDGING_HEADER=swiftfsm-Bridging-Header.h
 C_SRCS!=ls *.c
