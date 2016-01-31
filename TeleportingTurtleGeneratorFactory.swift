@@ -82,8 +82,8 @@ public class TeleportingTurtleGeneratorFactory:
     ) -> SteppingKripkeStructureGenerator {
         return TeleportingTurtleGenerator(
             fsm: fsm,
-            fsmExtractor: self.fsmExtractor,
             globalsExtractor: self.globalsExtractor,
+            fsmExtractor: self.fsmExtractor,
             stateExtractor: self.stateExtractor
         )
     }

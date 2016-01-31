@@ -60,7 +60,7 @@ import FSM
 
 public class TeleportingTurtleGenerator: SteppingKripkeStructureGenerator {
 
-    private let fsm: FiniteStateMachine
+    private var fsm: FiniteStateMachine
 
     private let fsmExtractor: FSMPropertyExtractor
     
@@ -70,13 +70,13 @@ public class TeleportingTurtleGenerator: SteppingKripkeStructureGenerator {
 
     public private(set) var isFinished: Bool
 
-    private var turtle: KripkeState
-    private var rabbit: KripkeState
+    private var turtle: KripkeState!
+    private var rabbit: KripkeState!
     private var power: Int                  // How much distance the turtle and rabbit should have before bringing them together again.
     private var length: Int                 // The current distance between the turtle and rabbit.
     private var inCycle: Bool               // Are we checking a cycle?
     private var cyclePos: Int               // The current position in the cycle
-    private var cycleState: KripkeState     // The current state that is being checked in the cycle
+    private var cycleState: KripkeState!    // The current state that is being checked in the cycle
     
     public init(
         fsm: FiniteStateMachine,
@@ -89,14 +89,14 @@ public class TeleportingTurtleGenerator: SteppingKripkeStructureGenerator {
         self.fsmExtractor = fsmExtractor
         self.stateExtractor = stateExtractor
         self.isFinished = true
-        self.turtle = self.convertToKripkeState(self.fsm.currentState)
-        self.fsm.next()
-        self.rabbit = self.convertToKripkeState(self.fsm.currentState)
-        turtle.target = rabbit
         self.power = 1
         self.length = 1
         self.inCycle = false
         self.cyclePos = 0
+        self.turtle = self.convertToKripkeState(self.fsm.currentState)
+        self.fsm.next()
+        self.rabbit = self.convertToKripkeState(self.fsm.currentState)
+        turtle.target = rabbit
         self.cycleState = turtle
     }
     
@@ -169,12 +169,12 @@ public class TeleportingTurtleGenerator: SteppingKripkeStructureGenerator {
     } 
 
     private func tp() {
-        if (self.power != self.len++) {
+        if (self.power != self.length++) {
             return
         }
         self.turtle = self.rabbit
         self.power *= 2
-        self.len = 1
+        self.length = 1
     }
 
 }
