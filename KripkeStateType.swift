@@ -65,6 +65,11 @@ import FSM
 public protocol _KripkeStateType: Equatable {
     
     /**
+     *  The fsm that this state belongs to.
+     */
+    var fsm: FiniteStateMachine { get }
+
+    /**
      *  Describes the parts of the machine that is running the state.
      */
     var fsmProperties: [String: KripkeStateProperty] { get }

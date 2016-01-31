@@ -163,6 +163,7 @@ public class TeleportingTurtleGenerator: SteppingKripkeStructureGenerator {
         return KripkeState(
             state: state,
             properties: self.stateExtractor.extract(state),
+            fsm: self.fsm,
             fsmProperties: self.fsmExtractor.extract(self.fsm.vars),
             globalProperties: self.globalsExtractor.extract(fsm.ringlet) 
         )
