@@ -94,9 +94,7 @@ public class TeleportingTurtleGenerator: SteppingKripkeStructureGenerator {
         self.inCycle = false
         self.cyclePos = 0
         self.turtle = self.convertToKripkeState(self.fsm.currentState)
-        self.fsm.next()
-        self.rabbit = self.convertToKripkeState(self.fsm.currentState)
-        turtle.target = rabbit
+        self.rabbit = turtle 
         self.cycleState = turtle
     }
     
