@@ -58,15 +58,15 @@
 
 public class MachineKripkeStructureGeneratorFactory {
     
-    private let generator: FSMKripkeStateGenerator
+    private let generators: [SteppingKripkeStructureGenerator]
     
-    public init(generator: FSMKripkeStateGenerator) {
-        self.generator = generator
+    public init(generators: [SteppingKripkeStructureGenerator]) {
+        self.generators = generators
     }
     
     func make(machine: Machine) -> KripkeStructureGenerator {
         return MachineKripkeStructureGenerator(
-            generator: generator,
+            generators: generators,
             machine: machine
         )
     }
