@@ -73,12 +73,12 @@ public class MachineKripkeStructureGenerator: KripkeStructureGenerator {
     }
     
     public func generate() -> KripkeStructureType {
-        let _ = self.machine.fsms.map { $0.restart() }
+        self.resetMachines()
         var states: [KripkeState] = []
-        DEBUG = self.machines.debug
+        DEBUG = self.machine.debug
         var jobs: [SteppingKripkeStructureGenerator] = generators
-        while (false == jobs.isEmpty) {
-            jobs = jobs.flatMap { 
+        while (false == jobs.isEmpty){
+            jobs = jobs.flatMap {
                 states.append($0.next())
                 return true == $0.isFinished ? $0 : nil
             }
@@ -88,8 +88,15 @@ public class MachineKripkeStructureGenerator: KripkeStructureGenerator {
             states: states, 
             machine: self.machine
         )
-        let _ = self.machine.fsms.map { $0.restart() }
+        self.resetMachines()
         return structure
+    }
+
+    private func resetMachines() {
+        let _ = self.machine.fsms.map {
+            var fsm: FiniteStateMachine = $0
+            fsm.restart()
+        }
     }
     
 }
