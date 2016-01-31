@@ -80,7 +80,7 @@ public class MachineKripkeStructureGenerator: KripkeStructureGenerator {
         while (false == jobs.isEmpty){
             jobs = jobs.flatMap {
                 states.append($0.next())
-                return true == $0.isFinished ? $0 : nil
+                return false == $0.isFinished ? $0 : nil
             }
         }
         // Generate the structure.
