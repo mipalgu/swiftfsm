@@ -65,7 +65,7 @@ public class KripkeStructure: KripkeStructureType {
     public let machine: Machine
     
     public init(states: [KripkeState], machine: Machine) {
-        self.initialStates = initialStates
+        self.states = states 
         self.machine = machine
     }
     
