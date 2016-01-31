@@ -58,22 +58,49 @@
 
 import FSM
 
-public class TeleportingTurtleGenerator: FSMKripkeStateGenerator {
+public class TeleportingTurtleGenerator: SteppingKripkeStructureGenerator {
+
+    private let fsm: FiniteStateMachine
 
     private let fsmExtractor: FSMPropertyExtractor
     
     private let globalsExtractor: GlobalPropertyExtractor
 
     private let stateExtractor: StatePropertyExtractor
+
+    public private(set) var isFinished: Bool
+
+    private let initialState: KripkeState
+
+    private var turtle: KripkeState
+    private var rabbit: KripkeState
+    private var power: Int                  // How much distance the turtle and rabbit should have before bringing them together again.
+    private var length: Int                 // The current distance between the turtle and rabbit.
+    private var inCycle: Bool               // Are we checking a cycle?
+    private var cyclePos: Int               // The current position in the cycle
+    private var cycleState: KripkeState     // The current state that is being checked in the cycle
     
     public init(
+        fsm: FiniteStateMachine,
         globalsExtractor: GlobalPropertyExtractor,
         fsmExtractor: FSMPropertyExtractor,
         stateExtractor: StatePropertyExtractor
     ) {
+        self.fsm = fsm
         self.globalsExtractor = globalsExtractor
         self.fsmExtractor = fsmExtractor
         self.stateExtractor = stateExtractor
+        self.isFinished = true
+        self.turtle = self.convertToKripkeState(self.fsm.currentState)
+        self.fsm.next()
+        self.rabbit = self.convertToKripkeState(self.fsm.currentState)
+        turtle.target = rabbit
+        self.initialState = turtle
+        self.power = 1
+        self.length = 1
+        self.inCycle = false
+        self.cyclePos = 0
+        self.cycleState = turtle
     }
     
     /**
@@ -95,89 +122,61 @@ public class TeleportingTurtleGenerator: FSMKripkeStateGenerator {
      *  generating the structure, but, it does not bother to remove the cyclic
      *  states from the end of the structure.
      */
-    public func generateFromFSM(var fsm: FiniteStateMachine) -> KripkeState {
-        var turtle: KripkeState = self.convertToKripkeState(
-            fsm.currentState,
-            fsm: fsm
-        )
-        fsm.next()
-        var rabbit: KripkeState = self.convertToKripkeState(
-            fsm.currentState,
-            fsm: fsm
-        )
-        turtle.target = rabbit
-        let initialState: KripkeState = turtle
-        var power: Int = 1                      // How much distance the turtle and rabbit should have before bringing them together again.
-        var length: Int = 1                     // The current distance between the turtle and rabbit.
-        var inCycle: Bool = false               // Are we checking a cycle?
-        var cyclePos: Int = 0                   // The current position in the cycle
-        var cycleState: KripkeState = turtle    // The current state that is being checked in the cycle
-        while(false == fsm.hasFinished()) {
-            // Are we checking a cycle?
-            if (true == inCycle) {
-                // Have we reached the end of the cycle?
-                if (cyclePos > length) {
-                   break 
-                }
-                // Is there a state that doesn't match the cycle?
-                inCycle = rabbit == cycleState
-                // Check the next state in the cycle
-                cycleState = cycleState.target!
-                cyclePos += 1
-            }
-            if (false == inCycle) {
-                // 'Teleport' the turtle to the rabbit when necessary.
-                self.tp(&power, len: &length, turtle: &turtle, rabbit: rabbit)
-            }
-            self.generateNextRabbit(fsm, rabbit: &rabbit)
-            // Have we found a new cycle?
-            if (false == inCycle && rabbit == turtle) {
-                // Start checking the cycle and reset the cycle variables
-                inCycle = true
-                cycleState = turtle
-                cyclePos = 0
-            }
+    public func next() {
+        if (true == self.isFinished) {
+            return
         }
-        return initialState
+        // Are we checking a cycle?
+        if (true == inCycle) {
+            // Have we reached the end of the cycle?
+            if (self.cyclePos > self.length) {
+                self.isFinished = true
+                return
+            }
+            // Is there a state that doesn't match the cycle?
+            self.inCycle = self.rabbit == self.cycleState
+            // Check the next state in the cycle
+            self.cycleState = self.cycleState.target!
+            self.cyclePos += 1
+        }
+        if (false == self.inCycle) {
+            // 'Teleport' the turtle to the rabbit when necessary.
+            self.tp()
+        }
+        self.generateNextRabbit()
+        // Have we found a new cycle?
+        if (false == self.inCycle && self.rabbit == self.turtle) {
+            // Start checking the cycle and reset the cycle variables
+            self.inCycle = true
+            self.cycleState = self.turtle
+            self.cyclePos = 0
+        }
+        self.isFinished = self.fsm.hasFinished()
     }
 
-    private func convertToKripkeState(
-        state: State,
-        fsm: FiniteStateMachine
-    ) -> KripkeState {
+    private func convertToKripkeState(state: State) -> KripkeState {
         return KripkeState(
             state: state,
             properties: self.stateExtractor.extract(state),
-            fsmProperties: self.fsmExtractor.extract(fsm.vars),
+            fsmProperties: self.fsmExtractor.extract(self.fsm.vars),
             globalProperties: self.globalsExtractor.extract(fsm.ringlet) 
         )
     }
 
-    private func generateNextRabbit(
-        var fsm: FiniteStateMachine,
-        inout rabbit: KripkeState
-    ) {
-        fsm.next()
-        let temp: KripkeState = self.convertToKripkeState(
-            fsm.currentState,
-            fsm: fsm
-        )
-        rabbit.target = temp
-        rabbit = temp
+    private func generateNextRabbit() {
+        self.fsm.next()
+        let temp: KripkeState = self.convertToKripkeState(self.fsm.currentState)
+        self.rabbit.target = temp
+        self.rabbit = temp
     } 
 
-    private func tp(
-        inout power: Int,
-        inout len: Int,
-        inout turtle: KripkeState,
-        rabbit: KripkeState
-    ) {
-        if (power != len++) {
+    private func tp() {
+        if (self.power != self.len++) {
             return
         }
-        turtle = rabbit
-        power *= 2
-        len = 1
+        self.turtle = self.rabbit
+        self.power *= 2
+        self.len = 1
     }
 
 }
