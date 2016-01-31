@@ -60,11 +60,11 @@ import FSM
 
 public class KripkeStructure: KripkeStructureType {
     
-    public let initialStates: [KripkeState]
+    public let states: [KripkeState]
     
     public let machine: Machine
     
-    public init(initialStates: [KripkeState], machine: Machine) {
+    public init(states: [KripkeState], machine: Machine) {
         self.initialStates = initialStates
         self.machine = machine
     }

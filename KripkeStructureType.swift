@@ -63,7 +63,7 @@ import FSM
  */
 public protocol _KripkeStructureType {
     
-    var initialStates: [KripkeState] { get }
+    var states: [KripkeState] { get }
     
     var machine: Machine { get }
     
