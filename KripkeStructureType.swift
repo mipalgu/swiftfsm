@@ -63,7 +63,7 @@ import FSM
  */
 public protocol _KripkeStructureType {
     
-    var initialState: KripkeState { get }
+    var initialStates: [KripkeState] { get }
     
     var machine: Machine { get }
     
@@ -72,26 +72,29 @@ public protocol _KripkeStructureType {
 extension _KripkeStructureType where Self: CustomStringConvertible {
     
     public var description: String {
-        var state: KripkeState = self.initialState
-        // Total width of the printable area
-        let width: Int = 40
-        // The whitespace to the left of the arrows.
-        let gap: String = String(
-            count: width / 2 - 1,
-            repeatedValue: Character(" ")
-        )
-        // The symbol for the entry point of the structure
-        let start: String = gap + "-"
-        // The arrows.
-        let arrow: String = "\(gap)|\n\(gap)|\n\(gap)V\n"
-        // The border of the states.
-        let border: String = String(count: width, repeatedValue: Character("="))
-        // Create the states.
-        var str: String = start + "\n"
-        while(state.target != nil) {
-            str += arrow + border + "\n"
-            str += state.description + "\n" + border + "\n"
-            state = state.target!
+        var str: String = ""
+        let _ = self.initialStates.map {
+            var state: KripkeState = $0 
+            // Total width of the printable area
+            let width: Int = 40
+            // The whitespace to the left of the arrows.
+            let gap: String = String(
+                count: width / 2 - 1,
+                repeatedValue: Character(" ")
+            )
+            // The symbol for the entry point of the structure
+            let start: String = gap + "-"
+            // The arrows.
+            let arrow: String = "\(gap)|\n\(gap)|\n\(gap)V\n"
+            // The border of the states.
+            let border: String = String(count: width, repeatedValue: Character("="))
+            // Create the states.
+            str += start + "\n"
+            while(state.target != nil) {
+                str += arrow + border + "\n"
+                str += state.description + "\n" + border + "\n"
+                state = state.target!
+            }
         }
         return str
     }
