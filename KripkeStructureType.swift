@@ -87,11 +87,10 @@ extension _KripkeStructureType where Self: CustomStringConvertible {
         let border: String = String(count: width, repeatedValue: Character("="))
         // Create the states.
         var str: String = start + "\n"
-        let _ = self.states.map {
+        self.states.forEach {
             var state: KripkeState = $0 
             str += arrow + border + "\n"
             str += state.description + "\n" + border + "\n"
-            state = state.target!
         }
         return str
     }
