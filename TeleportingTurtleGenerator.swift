@@ -134,6 +134,7 @@ public class TeleportingTurtleGenerator: SteppingKripkeStructureGenerator {
             // Have we reached the end of the cycle?
             if (self.cyclePos > self.length) {
                 self.isFinished = true
+                self.generateNextRabbit()
                 return self.rabbit
             }
             // Is there a state that doesn't match the cycle?
