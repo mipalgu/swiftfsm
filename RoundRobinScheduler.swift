@@ -74,16 +74,27 @@ public class RoundRobinScheduler: Scheduler {
      *  Start executing all machines.
      */
     public func run() -> Void {
-        var i: Int = -1
+        var jobs: [Machine] = self.machines
         // Run until all machines are finished.
-        while (false == self.machines.isEmpty) {
-            i = ++i % self.machines.count
-            if (false == self.machines[i].fsm.hasFinished()) {
-                DEBUG = self.machines[i].debug
-                self.machines[i].fsm.next()
-                continue
+        while (false == jobs.isEmpty) {
+            var i: Int = 0
+            jobs.forEach {
+                DEBUG = jobs[i].debug
+                var j: Int = 0
+                $0.fsms.forEach {
+                    if (false == $0.hasFinished()) {
+                        jobs[i].fsms[j].next()
+                        j = j + 1
+                        return 
+                    }
+                    jobs[i].fsms.removeAtIndex(j)
+                }
+                if (true == jobs[i].fsms.isEmpty) {
+                    jobs.removeAtIndex(i)
+                    return 
+                }
+                i = i + 1
             }
-            self.machines.removeAtIndex(i--)
         }
     }
     
