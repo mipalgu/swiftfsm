@@ -149,7 +149,7 @@ public class Swiftfsm {
             if (nil == t.path) {
                 self.handleError(SwiftfsmErrors.PathNotFound(machineName: name))
             }
-            // Load the FSM.
+            // Load the FSMs.
             let fsms: [FiniteStateMachine] = self.machineLoader.load(t.path!)
             if (0 == fsms.count) {
                 // Handle when we are unable to load the fsm.
@@ -160,24 +160,19 @@ public class Swiftfsm {
                     )
                 )
             }
-            // Create the Machines
-            var i: Int = 0
-            let temp: [Machine] = fsms.map {
-                let m: Machine = SimpleMachine(
-                    name: "\(name).\(i)",
-                    fsm: $0,
-                    debug: t.enableDebugging
-                )
-                i = i + 1
-                return m
-            }
+            // Create the Machine
+            let temp: Machine = SimpleMachine(
+                name: name,
+                fsms: fsms,
+                debug: t.enableDebugging
+            )
             // Generate Kripke Structures.
             if (true == t.generateKripkeStructure) {
-                temp.map {self.generateKripkeStructure($0)}
+                self.generateKripkeStructure(temp)
             }
             // Remember to add the machine to the scheduler if need be.
             if (true == t.addToScheduler) {
-                machines.appendContentsOf(temp)
+                machines.append(temp)
             }
             i++
         }
