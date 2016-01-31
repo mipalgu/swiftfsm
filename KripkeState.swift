@@ -89,6 +89,10 @@ public class KripkeState: KripkeStateType {
     }
     
     public func equals(other: KripkeState) -> Bool {
+        // Check if the fsms are the same
+        if (self.fsm != other.fsm) {
+            return false
+        }
         // Check if the states are the same.
         if (self.state != other.state) {
             return false
