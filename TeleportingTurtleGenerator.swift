@@ -70,6 +70,7 @@ public class TeleportingTurtleGenerator: SteppingKripkeStructureGenerator {
 
     public private(set) var isFinished: Bool
 
+    private var started: Bool
     private var turtle: KripkeState!
     private var rabbit: KripkeState!
     private var power: Int                  // How much distance the turtle and rabbit should have before bringing them together again.
@@ -88,11 +89,12 @@ public class TeleportingTurtleGenerator: SteppingKripkeStructureGenerator {
         self.globalsExtractor = globalsExtractor
         self.fsmExtractor = fsmExtractor
         self.stateExtractor = stateExtractor
-        self.isFinished = true
+        self.isFinished = false 
         self.power = 1
         self.length = 1
         self.inCycle = false
         self.cyclePos = 0
+        self.started = false
         self.turtle = self.convertToKripkeState(self.fsm.currentState)
         self.rabbit = turtle 
         self.cycleState = turtle
@@ -118,6 +120,12 @@ public class TeleportingTurtleGenerator: SteppingKripkeStructureGenerator {
      *  states from the end of the structure.
      */
     public func next() -> KripkeState {
+        // Return the turtle on the first call to next
+        if (false == self.started) {
+            self.started = true
+            return turtle
+        }
+        // Don't bother generating any further if we have finished.
         if (true == self.isFinished) {
             return self.rabbit
         }
