@@ -101,12 +101,30 @@ public class NuSMVKripkeStructureView<T: OutputStreamType>:
     ) -> String {
         var str: String = start 
         var pre: Bool = false
-        state.fsmProperties.forEach {
+        let generate: (name: String, value: Any) -> Void = {
             if (true == pre) {
                str += " & " 
             }
-            str += "\(prep)\(state.fsm.name)$$\($0)\(app)=\($1.value)"
+            str += "\($0)=\($1)"
             pre = true
+        }
+        state.fsmProperties.forEach {
+            if ($1.type == .Some) {
+                return
+            }
+            generate(
+                name: "\(prep)\(state.fsm.name)$$\($0)\(app)",
+                value: $1.value
+            )
+        }
+        state.properties.forEach {
+            if ($1.type == .Some || $0 == "name") {
+                return
+            }
+            generate(
+                name: "\(prep)\(state.fsm.name)$$\(state.state.name)$$\($0)\(app)",
+                value: $1.value
+            )
         }
         str += 
             (true == pre ? " & " : "") + "\(prep)pc\(app)=\(pcName)\(terminator)\n"
