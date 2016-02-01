@@ -73,6 +73,14 @@ public class NuSMVKripkeStructureView<T: OutputStreamType>:
             return
         }
         var d: Data = Data(machine: structure.machine, states: structure.states)
+        var str: String = "MODULE main\n\n"
+        self.createTrans(&d)
+        self.createVars(&d)
+        str += d.vars + d.trans
+        print(str, terminator: "", toStream: &self.stream)
+    }
+
+    private func createTrans(inout d: Data) {
         var lastState: KripkeState = d.states[0]
         var lastPcName :String = getNextName(&d, state: lastState)
         d.states.removeFirst()
@@ -84,6 +92,9 @@ public class NuSMVKripkeStructureView<T: OutputStreamType>:
             lastPcName = pcName
         }
         d.trans += "esac\n"
+    }
+
+    private func createVars(inout d: Data) {
         d.properties.map {
             d.vars += "\($0) : {"
             var pre: Bool = false
@@ -98,8 +109,6 @@ public class NuSMVKripkeStructureView<T: OutputStreamType>:
         d.vars += "};\n\n"
         d.vars += "INIT\n"
         d.vars += "pc=\(d.pc[0])\n"
-        d.str += d.vars + d.trans
-        print(d.str ,terminator: "", toStream: &self.stream)
     }
 
     private func getTrans(
