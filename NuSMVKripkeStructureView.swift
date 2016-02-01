@@ -73,10 +73,18 @@ public class NuSMVKripkeStructureView<T: OutputStreamType>:
             return
         }
         var d: Data = Data(machine: structure.machine, states: structure.states)
-        let lastState = d.states[0]
-        let _ = getNextName(&d, state: lastState)
-        structure.states.map {
-            let pcName: String = getNextName(&d, state: $0)
+        var lastState: KripkeState = d.states[0]
+        d.states.removeFirst()
+        d.states.forEach {
+            let pcName: String = getNextName(&d, state: lastState)
+            let fsmName: String = d.machine.name + "$$" + lastState.fsm.name
+            d.trans += getTransition(
+                pcName,
+                fsmName: fsmName,
+                lastState: lastState,
+                currentState: $0
+            )
+            lastState = $0
         }
         d.trans += "esac\n"
         d.vars += "pc : {\n"
@@ -84,6 +92,25 @@ public class NuSMVKripkeStructureView<T: OutputStreamType>:
         d.vars += "};\n\n"
         d.str += d.vars + d.trans
         print(d.str ,terminator: "", toStream: &self.stream)
+    }
+
+    private func getTransition(
+        pcName: String,
+        fsmName: String,
+        lastState: KripkeState,
+        currentState: KripkeState
+    ) -> String {
+        var pre: Bool = false
+        var str: String = ""
+        lastState.fsmProperties.forEach { 
+            if (true == pre) {
+                str += " & "
+            }
+            str += "\(fsmName)$$\($0)=\($1.value)"
+            pre = true
+        }
+        str += (true == pre ? " & " : "") + "pc=\(pcName):\n"
+        return str
     }
 
     private func getNextName(inout d: Data, state: KripkeState) -> String {
@@ -102,6 +129,7 @@ public class NuSMVKripkeStructureView<T: OutputStreamType>:
 
 private class Data {
 
+    public var fsmProperties: [String: Any] = [:]
     public var states: [KripkeState]
     public let machine: Machine
     public var str: String = "MODULE main\n\n"
