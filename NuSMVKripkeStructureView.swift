@@ -69,7 +69,12 @@ public class NuSMVKripkeStructureView<T: OutputStreamType>:
     }
 
     public func make(structure: KripkeStructureType) {
-        var d: Data = Data(machine: structure.machine)
+        if (true == structure.states.isEmpty) {
+            return
+        }
+        var d: Data = Data(machine: structure.machine, states: structure.states)
+        let lastState = d.states[0]
+        let _ = getNextName(&d, state: lastState)
         structure.states.map {
             let pcName: String = getNextName(&d, state: $0)
         }
@@ -97,6 +102,7 @@ public class NuSMVKripkeStructureView<T: OutputStreamType>:
 
 private class Data {
 
+    public var states: [KripkeState]
     public let machine: Machine
     public var str: String = "MODULE main\n\n"
     public var vars: String = "VAR\n\n"
@@ -104,8 +110,9 @@ private class Data {
     public var ringlets: [String: Int] = [:]
     public var pc: [String] = []
 
-    public init(machine: Machine) {
+    public init(machine: Machine, states: [KripkeState]) {
         self.machine = machine
+        self.states = states
     }
 
 }
