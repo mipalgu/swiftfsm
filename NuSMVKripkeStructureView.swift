@@ -71,7 +71,9 @@ public class NuSMVKripkeStructureView<T: OutputStreamType>:
     public func make(structure: KripkeStructureType) {
         var d: Data = Data(machine: structure.machine)
         structure.states.map {
-            let pcName: String = getNextName(&d, state: $0)
+            let pcName: String = getNextPCName(&d, state: $0)
+            let fsmName: String = d.machine.name + "$$" + $0.fsm.name
+
         }
         d.trans += "esac\n"
         d.vars += "pc : {\n"
@@ -81,21 +83,28 @@ public class NuSMVKripkeStructureView<T: OutputStreamType>:
         print(d.str ,terminator: "", toStream: &self.stream)
     }
 
-    private func getNextName(inout d: Data, state: KripkeState) -> String {
-        var name: String = 
-            "\(d.machine.name)$$\(state.fsm.name)$$\(state.state.name)"
-        if (nil == d.ringlets[name]) {
-            d.ringlets[name] = -1
-        }
-        d.ringlets[name]! += 1
+    private func getNextPCName(inout d: Data, state: KripkeState) -> String {
+        var name: String = getRingletName(&d, state: state)
+        incrementPc(&d, name: name)
         name += "$$R\(d.ringlets[name]!)"
         d.pc.append(name)
         return name
     }
 
+    private func getRingletName(inout d: Data, state: KripkeState) -> String {
+        return "\(d.machine.name)$$\(state.fsm.name)$$\(state.state.name)"
+    }
+
+    private func incrementPc(inout d: Data, name: String) {
+        if (nil == d.ringlets[name]) {
+            d.ringlets[name] = -1
+        }
+        d.ringlets[name]! += 1
+    }
+
 }
 
-private class Data {
+private struct Data {
 
     public let machine: Machine
     public var str: String = "MODULE main\n\n"
