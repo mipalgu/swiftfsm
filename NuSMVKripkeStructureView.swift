@@ -96,6 +96,8 @@ public class NuSMVKripkeStructureView<T: OutputStreamType>:
         d.vars += "pc : {\n"
         d.pc.forEach { d.vars += $0 + "\n" }
         d.vars += "};\n\n"
+        d.vars += "INIT\n"
+        d.vars += "pc=\(d.pc[0])\n"
         d.str += d.vars + d.trans
         print(d.str ,terminator: "", toStream: &self.stream)
     }
