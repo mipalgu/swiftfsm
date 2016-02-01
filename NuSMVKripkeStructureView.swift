@@ -56,6 +56,8 @@
  *
  */
 
+import FSM
+
 public class NuSMVKripkeStructureView<T: OutputStreamType>:
     KripkeStructureView
 {
@@ -67,7 +69,43 @@ public class NuSMVKripkeStructureView<T: OutputStreamType>:
     }
 
     public func make(structure: KripkeStructureType) {
-        print(structure.description, terminator: "", toStream: &self.stream)
+        var d: Data = Data(machine: structure.machine)
+        structure.states.map {
+            let pcName: String = getNextName(&d, state: $0)
+        }
+        d.trans += "esac\n"
+        d.vars += "pc : {\n"
+        d.pc.forEach { d.vars += $0 + "\n" }
+        d.vars += "};\n\n"
+        d.str += d.vars + d.trans
+        print(d.str ,terminator: "", toStream: &self.stream)
+    }
+
+    private func getNextName(inout d: Data, state: KripkeState) -> String {
+        var name: String = 
+            "\(d.machine.name)$$\(state.fsm.name)$$\(state.state.name)"
+        if (nil == d.ringlets[name]) {
+            d.ringlets[name] = -1
+        }
+        d.ringlets[name]! += 1
+        name += "$$R\(d.ringlets[name]!)"
+        d.pc.append(name)
+        return name
+    }
+
+}
+
+private class Data {
+
+    public let machine: Machine
+    public var str: String = "MODULE main\n\n"
+    public var vars: String = "VAR\n\n"
+    public var trans: String = "TRANS\ncase\n"
+    public var ringlets: [String: Int] = [:]
+    public var pc: [String] = []
+
+    public init(machine: Machine) {
+        self.machine = machine
     }
 
 }
