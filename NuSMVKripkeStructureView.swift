@@ -162,7 +162,8 @@ public class NuSMVKripkeStructureView<T: OutputStreamType>:
             &d,
             pcName: pcName,
             state: state,
-            prep: "next(", app: ")",
+            prep: "next(",
+            app: ")",
             start: "    ",
             terminator: ";",
             addToProperties: false
@@ -188,13 +189,13 @@ public class NuSMVKripkeStructureView<T: OutputStreamType>:
         inout pre: Bool,
         addToProperties: Bool
     ) -> String {
-        var str: String = ""
         if (p.type == .Some) {
             return ""
         }
         if (true == addToProperties) {
             self.addToProperties(&d, name: name, p: p)
         }
+        var str: String = ""
         if (true == pre) {
            str += " & " 
         }
