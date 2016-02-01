@@ -78,12 +78,21 @@ public class NuSMVKripkeStructureView<T: OutputStreamType>:
         d.states.removeFirst()
         d.states.forEach {
             let pcName: String = getNextName(&d, state: $0)
-            d.trans += getTrans(lastPcName, state: lastState)
-            d.trans += getChanges(pcName, state: $0)
+            d.trans += getTrans(&d, pcName: lastPcName, state: lastState)
+            d.trans += getChanges(&d, pcName: pcName, state: $0)
             lastState = $0
             lastPcName = pcName
         }
         d.trans += "esac\n"
+        d.properties.map {
+            d.vars += "\($0) : {"
+            var pre: Bool = false
+            $1.forEach {
+                d.vars += (true == pre ? ",\n" : "\n") + "\($0.value)"
+                pre = true
+            }
+            d.vars += "\n};\n\n"
+        }
         d.vars += "pc : {\n"
         d.pc.forEach { d.vars += $0 + "\n" }
         d.vars += "};\n\n"
@@ -92,20 +101,24 @@ public class NuSMVKripkeStructureView<T: OutputStreamType>:
     }
 
     private func getTrans(
+        inout d: Data,
         pcName: String,
         state: KripkeState,
         prep: String = "",
         app: String = "",
         start: String = "",
-        terminator: String = ":"
+        terminator: String = ":",
+        addToProperties: Bool = true
     ) -> String {
         var str: String = start 
         var pre: Bool = false
         state.fsmProperties.forEach {
             str += generate(
-                "\(prep)\(state.fsm.name)$$\($0)\(app)",
+                &d,
+                name: "\(prep)\(state.fsm.name)$$\($0)\(app)",
                 p: $1,
-                pre: &pre
+                pre: &pre,
+                addToProperties: addToProperties
             )
         }
         state.properties.forEach {
@@ -113,9 +126,11 @@ public class NuSMVKripkeStructureView<T: OutputStreamType>:
                 return
             }
             str += generate(
-                "\(prep)\(state.fsm.name)$$\(state.state.name)$$\($0)\(app)",
+                &d,
+                name: "\(prep)\(state.fsm.name)$$\(state.state.name)$$\($0)\(app)",
                 p: $1,
-                pre: &pre
+                pre: &pre,
+                addToProperties: addToProperties
             )
         }
         str += 
@@ -123,13 +138,15 @@ public class NuSMVKripkeStructureView<T: OutputStreamType>:
         return str
     }
 
-    private func getChanges(pcName: String, state: KripkeState) -> String {
+    private func getChanges(inout d: Data, pcName: String, state: KripkeState) -> String {
         return self.getTrans(
-            pcName,
+            &d,
+            pcName: pcName,
             state: state,
             prep: "next(", app: ")",
             start: "    ",
-            terminator: ";"
+            terminator: ";",
+            addToProperties: false
         ) 
     }
 
@@ -145,24 +162,46 @@ public class NuSMVKripkeStructureView<T: OutputStreamType>:
         return name
     }
 
-    private func generate(name: String, p: KripkeStateProperty, inout pre: Bool) -> String {
-            var str: String = ""
-            if (p.type == .Some) {
-                return ""
-            }
-            if (true == pre) {
-               str += " & " 
-            }
-            str += "\(name)=\(p.value)"
-            pre = true
-            return str
+    private func generate(
+        inout d: Data,
+        name: String,
+        p: KripkeStateProperty,
+        inout pre: Bool,
+        addToProperties: Bool
+    ) -> String {
+        var str: String = ""
+        if (p.type == .Some) {
+            return ""
+        }
+        if (true == addToProperties) {
+            self.addToProperties(&d, name: name, p: p)
+        }
+        if (true == pre) {
+           str += " & " 
+        }
+        str += "\(name)=\(p.value)"
+        pre = true
+        return str
+    }
+
+    private func addToProperties(
+        inout d: Data,
+        name: String,
+        p: KripkeStateProperty
+    ) {
+        if (nil == d.properties[name]) {
+            d.properties[name] = []
+        }
+        if (false == d.properties[name]!.contains({ $0 == p })) {
+            d.properties[name]!.append(p)
+        }
     }
 
 }
 
 private class Data {
 
-    public var fsmProperties: [String: Any] = [:]
+    public var properties: [String: [KripkeStateProperty]] = [:]
     public var states: [KripkeState]
     public let machine: Machine
     public var str: String = "MODULE main\n\n"
