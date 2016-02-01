@@ -74,17 +74,14 @@ public class NuSMVKripkeStructureView<T: OutputStreamType>:
         }
         var d: Data = Data(machine: structure.machine, states: structure.states)
         var lastState: KripkeState = d.states[0]
+        var lastPcName :String = getNextName(&d, state: lastState)
         d.states.removeFirst()
         d.states.forEach {
-            let pcName: String = getNextName(&d, state: lastState)
-            let fsmName: String = d.machine.name + "$$" + lastState.fsm.name
-            d.trans += getTransition(
-                pcName,
-                fsmName: fsmName,
-                lastState: lastState,
-                currentState: $0
-            )
+            let pcName: String = getNextName(&d, state: $0)
+            d.trans += getConditions(lastPcName, state: lastState)
+            d.trans += getChanges(pcName, state: $0)
             lastState = $0
+            lastPcName = pcName
         }
         d.trans += "esac\n"
         d.vars += "pc : {\n"
@@ -94,22 +91,31 @@ public class NuSMVKripkeStructureView<T: OutputStreamType>:
         print(d.str ,terminator: "", toStream: &self.stream)
     }
 
-    private func getTransition(
-        pcName: String,
-        fsmName: String,
-        lastState: KripkeState,
-        currentState: KripkeState
-    ) -> String {
-        var pre: Bool = false
+    private func getConditions(pcName: String, state: KripkeState) -> String {
         var str: String = ""
-        lastState.fsmProperties.forEach { 
+        var pre: Bool = false
+        state.fsmProperties.forEach {
             if (true == pre) {
-                str += " & "
+               str += " & " 
             }
-            str += "\(fsmName)$$\($0)=\($1.value)"
+            str += "\(state.fsm.name)$$\($0)=\($1.value)"
             pre = true
         }
         str += (true == pre ? " & " : "") + "pc=\(pcName):\n"
+        return str
+    }
+
+    private func getChanges(pcName: String, state: KripkeState) -> String {
+        var str: String = "    "
+        var pre: Bool = false
+        state.fsmProperties.forEach {
+            if (true == pre) {
+               str += " & " 
+            }
+            str += "next(\(state.fsm.name)$$\($0))=\($1.value)"
+            pre = true
+        }
+        str += (true == pre ? " & " : "") + "next(pc)=\(pcName):\n"
         return str
     }
 
