@@ -133,6 +133,14 @@ public class NuSMVKripkeStructureView<T: OutputStreamType>:
                 addToProperties: addToProperties
             )
         }
+        state.globalProperties.forEach {
+            str += generate(
+                &d,
+                name: "\(prep)globals$$\($0)\(app)",
+                p: $1,pre: &pre,
+                addToProperties: addToProperties
+            )
+        }
         str += 
             (true == pre ? " & " : "") + "\(prep)pc\(app)=\(pcName)\(terminator)\n"
         return str
