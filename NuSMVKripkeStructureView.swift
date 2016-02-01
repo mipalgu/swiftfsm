@@ -101,29 +101,21 @@ public class NuSMVKripkeStructureView<T: OutputStreamType>:
     ) -> String {
         var str: String = start 
         var pre: Bool = false
-        let generate: (name: String, value: KripkeStateProperty) -> Void = {
-            if ($1.type == .Some) {
-                return
-            }
-            if (true == pre) {
-               str += " & " 
-            }
-            str += "\($0)=\($1.value)"
-            pre = true
-        }
         state.fsmProperties.forEach {
-            generate(
-                name: "\(prep)\(state.fsm.name)$$\($0)\(app)",
-                value: $1
+            str += generate(
+                "\(prep)\(state.fsm.name)$$\($0)\(app)",
+                p: $1,
+                pre: &pre
             )
         }
         state.properties.forEach {
             if ($0 == "name") {
                 return
             }
-            generate(
-                name: "\(prep)\(state.fsm.name)$$\(state.state.name)$$\($0)\(app)",
-                value: $1
+            str += generate(
+                "\(prep)\(state.fsm.name)$$\(state.state.name)$$\($0)\(app)",
+                p: $1,
+                pre: &pre
             )
         }
         str += 
@@ -151,6 +143,19 @@ public class NuSMVKripkeStructureView<T: OutputStreamType>:
         name += "$$R\(d.ringlets[name]!)"
         d.pc.append(name)
         return name
+    }
+
+    private func generate(name: String, p: KripkeStateProperty, inout pre: Bool) -> String {
+            var str: String = ""
+            if (p.type == .Some) {
+                return ""
+            }
+            if (true == pre) {
+               str += " & " 
+            }
+            str += "\(name)=\(p.value)"
+            pre = true
+            return str
     }
 
 }
