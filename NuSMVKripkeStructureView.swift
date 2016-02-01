@@ -78,7 +78,7 @@ public class NuSMVKripkeStructureView<T: OutputStreamType>:
         d.states.removeFirst()
         d.states.forEach {
             let pcName: String = getNextName(&d, state: $0)
-            d.trans += getConditions(lastPcName, state: lastState)
+            d.trans += getTrans(lastPcName, state: lastState)
             d.trans += getChanges(pcName, state: $0)
             lastState = $0
             lastPcName = pcName
@@ -91,32 +91,36 @@ public class NuSMVKripkeStructureView<T: OutputStreamType>:
         print(d.str ,terminator: "", toStream: &self.stream)
     }
 
-    private func getConditions(pcName: String, state: KripkeState) -> String {
-        var str: String = ""
+    private func getTrans(
+        pcName: String,
+        state: KripkeState,
+        prep: String = "",
+        app: String = "",
+        start: String = "",
+        terminator: String = ":"
+    ) -> String {
+        var str: String = start 
         var pre: Bool = false
         state.fsmProperties.forEach {
             if (true == pre) {
                str += " & " 
             }
-            str += "\(state.fsm.name)$$\($0)=\($1.value)"
+            str += "\(prep)\(state.fsm.name)$$\($0)\(app)=\($1.value)"
             pre = true
         }
-        str += (true == pre ? " & " : "") + "pc=\(pcName):\n"
+        str += 
+            (true == pre ? " & " : "") + "\(prep)pc\(app)=\(pcName)\(terminator)\n"
         return str
     }
 
     private func getChanges(pcName: String, state: KripkeState) -> String {
-        var str: String = "    "
-        var pre: Bool = false
-        state.fsmProperties.forEach {
-            if (true == pre) {
-               str += " & " 
-            }
-            str += "next(\(state.fsm.name)$$\($0))=\($1.value)"
-            pre = true
-        }
-        str += (true == pre ? " & " : "") + "next(pc)=\(pcName):\n"
-        return str
+        return self.getTrans(
+            pcName,
+            state: state,
+            prep: "next(", app: ")",
+            start: "    ",
+            terminator: ";"
+        ) 
     }
 
     private func getNextName(inout d: Data, state: KripkeState) -> String {
