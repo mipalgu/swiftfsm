@@ -74,21 +74,22 @@ public class SwiftfsmParser: HelpableParser {
         return str
     }
     
-    public func parse(var words: [String]) throws -> [Task] {
+    public func parse(words: [String]) throws -> [Task] {
+        var wds: [String] = words
         var tasks: [Task] = []
         var t: Task = Task()
         tasks.append(t)
         // Keep looping while we still have input
-        while (false == words.isEmpty) {
+        while (false == wds.isEmpty) {
             tasks[tasks.count - 1] = try self.handleNextFlag(
                 tasks[tasks.count - 1],
-                words: &words
+                words: &wds
             )
             // Remove words that we are finished with
-            words.removeFirst()
+            wds.removeFirst()
             // Only create a new task if we have found the path to the current
             // task and we have more words to come.
-            if (nil == tasks[tasks.count - 1].path || true == words.isEmpty) {
+            if (nil == tasks[tasks.count - 1].path || true == wds.isEmpty) {
                 continue
             }
             tasks.append(Task())
@@ -113,36 +114,40 @@ public class SwiftfsmParser: HelpableParser {
         }
     }
     
-    private func handleClfsmFlag(var t: Task, inout words: [String]) -> Task {
-        t.isClfsmMachine = true
-        return t
+    private func handleClfsmFlag(t: Task, inout words: [String]) -> Task {
+        var temp: Task = t
+        temp.isClfsmMachine = true
+        return temp
     }
     
-    private func handleDebugFlag(var t: Task, inout words: [String]) -> Task {
-        t.enableDebugging = true
-        return t
+    private func handleDebugFlag(t: Task, inout words: [String]) -> Task {
+        var temp: Task = t
+        temp.enableDebugging = true
+        return temp
     }
     
-    private func handleHelpFlag(var t: Task, inout words: [String]) -> Task {
-        t.printHelpText = true
-        return t
+    private func handleHelpFlag(t: Task, inout words: [String]) -> Task {
+        var temp: Task = t
+        temp.printHelpText = true
+        return temp
     }
     
-    private func handleKripkeFlag(var t: Task, inout words: [String]) -> Task {
-        t.generateKripkeStructure = true
-        t.addToScheduler = false
+    private func handleKripkeFlag(t: Task, inout words: [String]) -> Task {
+        var temp: Task = t
+        temp.generateKripkeStructure = true
+        temp.addToScheduler = false
         if (words.count < 2) {
-            return t
+            return temp
         }
         if ("-r" != words[1] && "--run" != words[1]) {
-            return t
+            return temp
         }
-        t.addToScheduler = true
+        temp.addToScheduler = true
         words.removeFirst()
-        return t
+        return temp
     }
     
-    private func handleNameFlag(var t: Task, inout words: [String]) -> Task {
+    private func handleNameFlag(t: Task, inout words: [String]) -> Task {
         if (words.count < 2) {
             return t
         }
@@ -158,11 +163,12 @@ public class SwiftfsmParser: HelpableParser {
             return t
         }
         words.removeFirst()
-        t.name = words.first!
-        return t
+        var temp: Task = t
+        temp.name = words.first!
+        return temp
     }
     
-    private func handlePath(var t: Task, inout words: [String]) throws -> Task {
+    private func handlePath(t: Task, inout words: [String]) throws -> Task {
         // Ignore empty strings
         if (true == words.first!.isEmpty) {
             return t
@@ -171,8 +177,9 @@ public class SwiftfsmParser: HelpableParser {
         if ("-" == words.first!.characters.first) {
             throw SwiftfsmErrors.UnknownFlag(flag: words.first!)
         }
-        t.path = words.first!
-        return t
+        var temp: Task = t
+        temp.path = words.first!
+        return temp
     }
     
 }

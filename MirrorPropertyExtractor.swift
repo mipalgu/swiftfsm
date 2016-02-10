@@ -93,36 +93,36 @@ public class MirrorPropertyExtractor:
      */
     private func getPropertiesFromMirror(
         mirror: Mirror,
-        var properties: [String: KripkeStateProperty] = [:]
+        properties: [String: KripkeStateProperty] = [:]
     ) -> [String: KripkeStateProperty] {
+        var p: [String: KripkeStateProperty] = properties
         let parent: Mirror? = mirror.superclassMirror()
         if (nil != parent) {
-            properties = self.getPropertiesFromMirror(parent!)
+            p = self.getPropertiesFromMirror(parent!)
         }
         for child: Mirror.Child in mirror.children {
             if (nil == child.label) {
                 continue
             }
-            properties[child.label!] = self.convertValue(child.value)
+            p[child.label!] = self.convertValue(child.value)
         }
-        return properties
+        return p
     }
     
     /*
     *  Convert the value to a KripkeStateProperty.
     */
-    private func convertValue(var value: Any) -> KripkeStateProperty {
-        let type: KripkeStatePropertyTypes = self.getKripkeStatePropertyType(
-            value
-        )
+    private func convertValue(value: Any) -> KripkeStateProperty {
+        var v: Any = value
+        let type: KripkeStatePropertyTypes = self.getKripkeStatePropertyType(v)
         if (type == .Some) {
-            value = self.encode(value)
+            v = self.encode(v)
         }
         //let p: UnsafeMutablePointer<Any> = UnsafeMutablePointer<Any>.alloc(1)
         //p.initialize(value)
         return KripkeStateProperty(
             type: type,
-            value: value
+            value: v
         )
     }
     

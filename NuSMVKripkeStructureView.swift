@@ -62,6 +62,8 @@ public class NuSMVKripkeStructureView<T: OutputStreamType>:
     KripkeStructureView
 {
 
+    private var data: Data!
+
     private var stream: T 
 
     public init(stream: T) {
@@ -72,47 +74,46 @@ public class NuSMVKripkeStructureView<T: OutputStreamType>:
         if (true == structure.states.isEmpty) {
             return
         }
-        var d: Data = Data(machine: structure.machine, states: structure.states)
+        self.data = Data(machine: structure.machine, states: structure.states)
         var str: String = "MODULE main\n\n"
-        self.createTrans(&d)
-        self.createVars(&d)
-        str += d.vars + d.trans
+        self.createTrans()
+        self.createVars()
+        str += self.data.vars + self.data.trans
         print(str, terminator: "", toStream: &self.stream)
     }
 
-    private func createTrans(inout d: Data) {
-        var lastState: KripkeState = d.states[0]
-        var lastPcName :String = getNextName(&d, state: lastState)
-        d.states.removeFirst()
-        d.states.forEach {
-            let pcName: String = getNextName(&d, state: $0)
-            d.trans += getTrans(&d, pcName: lastPcName, state: lastState)
-            d.trans += getChanges(&d, pcName: pcName, state: $0)
+    private func createTrans() {
+        var lastState: KripkeState = self.data.states[0]
+        var lastPcName :String = getNextName(lastState)
+        self.data.states.removeFirst()
+        self.data.states.forEach {
+            let pcName: String = getNextName($0)
+            self.data.trans += getTrans(lastPcName, state: lastState)
+            self.data.trans += getChanges(pcName, state: $0)
             lastState = $0
             lastPcName = pcName
         }
-        d.trans += "esac\n"
+        self.data.trans += "esac\n"
     }
 
-    private func createVars(inout d: Data) {
-        d.properties.map {
-            d.vars += "\($0) : {"
+    private func createVars() {
+        self.data.properties.map {
+            self.data.vars += "\($0) : {"
             var pre: Bool = false
             $1.forEach {
-                d.vars += (true == pre ? ",\n" : "\n") + "\($0.value)"
+                self.data.vars += (true == pre ? ",\n" : "\n") + "\($0.value)"
                 pre = true
             }
-            d.vars += "\n};\n\n"
+            self.data.vars += "\n};\n\n"
         }
-        d.vars += "pc : {\n"
-        d.pc.forEach { d.vars += $0 + "\n" }
-        d.vars += "};\n\n"
-        d.vars += "INIT\n"
-        d.vars += "pc=\(d.pc[0])\n"
+        self.data.vars += "pc : {\n"
+        self.data.pc.forEach { self.data.vars += $0 + "\n" }
+        self.data.vars += "};\n\n"
+        self.data.vars += "INIT\n"
+        self.data.vars += "pc=\(self.data.pc[0])\n"
     }
 
     private func getTrans(
-        inout d: Data,
         pcName: String,
         state: KripkeState,
         prep: String = "",
@@ -125,8 +126,7 @@ public class NuSMVKripkeStructureView<T: OutputStreamType>:
         var pre: Bool = false
         state.fsmProperties.forEach {
             str += generate(
-                &d,
-                name: "\(prep)\(state.fsm.name)$$\($0)\(app)",
+                "\(prep)\(state.fsm.name)$$\($0)\(app)",
                 p: $1,
                 pre: &pre,
                 addToProperties: addToProperties
@@ -137,8 +137,7 @@ public class NuSMVKripkeStructureView<T: OutputStreamType>:
                 return
             }
             str += generate(
-                &d,
-                name: "\(prep)\(state.fsm.name)$$\(state.state.name)$$\($0)\(app)",
+                "\(prep)\(state.fsm.name)$$\(state.state.name)$$\($0)\(app)",
                 p: $1,
                 pre: &pre,
                 addToProperties: addToProperties
@@ -146,8 +145,7 @@ public class NuSMVKripkeStructureView<T: OutputStreamType>:
         }
         state.globalProperties.forEach {
             str += generate(
-                &d,
-                name: "\(prep)globals$$\($0)\(app)",
+                "\(prep)globals$$\($0)\(app)",
                 p: $1,pre: &pre,
                 addToProperties: addToProperties
             )
@@ -157,10 +155,9 @@ public class NuSMVKripkeStructureView<T: OutputStreamType>:
         return str
     }
 
-    private func getChanges(inout d: Data, pcName: String, state: KripkeState) -> String {
+    private func getChanges(pcName: String, state: KripkeState) -> String {
         return self.getTrans(
-            &d,
-            pcName: pcName,
+            pcName,
             state: state,
             prep: "next(",
             app: ")",
@@ -170,20 +167,19 @@ public class NuSMVKripkeStructureView<T: OutputStreamType>:
         ) 
     }
 
-    private func getNextName(inout d: Data, state: KripkeState) -> String {
+    private func getNextName(state: KripkeState) -> String {
         var name: String = 
-            "\(d.machine.name)$$\(state.fsm.name)$$\(state.state.name)"
-        if (nil == d.ringlets[name]) {
-            d.ringlets[name] = -1
+            "\(self.data.machine.name)$$\(state.fsm.name)$$\(state.state.name)"
+        if (nil == self.data.ringlets[name]) {
+            self.data.ringlets[name] = -1
         }
-        d.ringlets[name]! += 1
-        name += "$$R\(d.ringlets[name]!)"
-        d.pc.append(name)
+        self.data.ringlets[name]! += 1
+        name += "$$R\(self.data.ringlets[name]!)"
+        self.data.pc.append(name)
         return name
     }
 
     private func generate(
-        inout d: Data,
         name: String,
         p: KripkeStateProperty,
         inout pre: Bool,
@@ -193,7 +189,7 @@ public class NuSMVKripkeStructureView<T: OutputStreamType>:
             return ""
         }
         if (true == addToProperties) {
-            self.addToProperties(&d, name: name, p: p)
+            self.addToProperties(name, p: p)
         }
         var str: String = ""
         if (true == pre) {
@@ -204,16 +200,12 @@ public class NuSMVKripkeStructureView<T: OutputStreamType>:
         return str
     }
 
-    private func addToProperties(
-        inout d: Data,
-        name: String,
-        p: KripkeStateProperty
-    ) {
-        if (nil == d.properties[name]) {
-            d.properties[name] = []
+    private func addToProperties(name: String, p: KripkeStateProperty) {
+        if (nil == self.data.properties[name]) {
+            self.data.properties[name] = []
         }
-        if (false == d.properties[name]!.contains({ $0 == p })) {
-            d.properties[name]!.append(p)
+        if (false == self.data.properties[name]!.contains({ $0 == p })) {
+            self.data.properties[name]!.append(p)
         }
     }
 

@@ -94,15 +94,16 @@ public class Swiftfsm {
         self.view = view
     }
     
-    public func run(var args: [String]) {
+    public func run(args: [String]) {
+        var _args: [String] = args
         // Print help when we have no input.
         if (args.count < 2) {
             self.view.message(parser.helpText)
             self.handleError(SwiftfsmErrors.NoPathsFound)
         }
-        args.removeFirst()
+        _args.removeFirst()
         // Parse the args and get a bunch of tasks.
-        let tasks: [Task] = self.parseArgs(args)
+        let tasks: [Task] = self.parseArgs(_args)
         // Show the help message when there are no tasks.
         if (true == tasks.isEmpty) {
             self.handleMessage(parser.helpText)
