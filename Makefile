@@ -5,7 +5,7 @@
 #
 ALL_TARGETS=host
 CI_WIP=yes
-TESTABLE=1
+#TESTABLE=1
 all:	all-real
 
 ALL_HDRS!=ls *.h
