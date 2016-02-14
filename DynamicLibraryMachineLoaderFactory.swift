@@ -64,6 +64,12 @@
  */
 public class DynamicLibraryMachineLoaderFactory: MachineLoaderFactory {
     
+    private let printer: Printer
+
+    public init(printer: Printer) {
+        self.printer = printer
+    }
+
     /**
      *  Create the MachineLoader.
      *
@@ -71,7 +77,8 @@ public class DynamicLibraryMachineLoaderFactory: MachineLoaderFactory {
      */
     public func make() -> MachineLoader {
         return LibraryMachineLoader(
-            creator: DynamicLibraryCreator()
+            creator: DynamicLibraryCreator(),
+            printer: self.printer 
         )
     }
     

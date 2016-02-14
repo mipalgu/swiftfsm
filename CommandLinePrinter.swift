@@ -56,7 +56,9 @@
  *
  */
 
-public class CommandLinePrinter<T: OutputStreamType, U: OutputStreamType>: View {
+public class CommandLinePrinter
+    <T: OutputStreamType, U: OutputStreamType>: Printer
+{
     
     private var errorStream: T
     
@@ -66,7 +68,23 @@ public class CommandLinePrinter<T: OutputStreamType, U: OutputStreamType>: View 
         self.errorStream = errorStream
         self.messageStream = messageStream
     }
+
+    public func error(str: String) {
+        print(
+            "\u{001B}[1;31merror: \u{001B}[0m\(str)\n",
+            terminator: "\n",
+            toStream: &self.errorStream
+        )
+    }
     
+    public func message(message: String) {
+        print(message, terminator: "\n", toStream: &self.messageStream)
+    }
+    
+}
+
+extension CommandLinePrinter: View {
+
     public func error(error: SwiftfsmErrors) {
         let str: String
         switch (error) {
@@ -79,15 +97,8 @@ public class CommandLinePrinter<T: OutputStreamType, U: OutputStreamType>: View 
         case .UnknownFlag(let flag):
             str = "Unknown Flag '\(flag)'"
         }
-        print(
-            "\u{001B}[1;31merror: \u{001B}[0m\(str)\n",
-            terminator: "\n",
-            toStream: &self.errorStream
-        )
+        self.error(str)
     }
     
-    public func message(message: String) {
-        print(message, terminator: "\n", toStream: &self.messageStream)
-    }
-    
+
 }

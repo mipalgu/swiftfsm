@@ -78,9 +78,15 @@ public class LibraryMachineLoader: MachineLoader {
      *      url or a network stream.
      */
     public let creator: LibraryCreator
+
+    /**
+     *  Used to print error messages.
+     */
+    public let printer: Printer
     
-    public init(creator: LibraryCreator) {
+    public init(creator: LibraryCreator, printer: Printer) {
         self.creator = creator
+        self.printer = printer
     }
 
     public func clearCache() {
@@ -121,7 +127,7 @@ public class LibraryMachineLoader: MachineLoader {
             library.getSymbolPointer("main")
         // Error with fetching symbol
         if (result.error != nil) {
-            print(result.error!)
+            self.printer.error(result.error!)
             return [] 
         }
         // How many factories do we have now?
@@ -130,7 +136,7 @@ public class LibraryMachineLoader: MachineLoader {
         invoke_func(result.symbol)
         // Did the factory get added?
         if (getFactoryCount() == count) {
-            print("Library was loaded but factory was not added")
+            self.printer.error("Library was loaded but factory was not added")
             return []
         }
         // Get the factory and add it to the cache

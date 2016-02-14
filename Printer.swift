@@ -1,9 +1,9 @@
 /*
- * main.swift
- * swiftfsm
+ * Printer.swift 
+ * swiftfsm 
  *
- * Created by Callum McColl on 14/08/2015.
- * Copyright © 2015 Callum McColl. All rights reserved.
+ * Created by Callum McColl on 15/02/2016.
+ * Copyright © 2016 Callum McColl. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -56,29 +56,14 @@
  *
  */
 
-#if os(Linux)
-import Glibc
-#elseif os(OSX)
-import Darwin
-#endif
+/**
+ *  Conforming types are responsible for printing errors and messages to the
+ *  user.
+ */
+public protocol Printer {
 
-let printer: CommandLinePrinter = 
-    CommandLinePrinter(
-        errorStream: StderrOutputStream(),
-        messageStream: StdoutOutputStream()
-    )
+    func error(str: String) -> Void
 
-Swiftfsm(
-    kripkeGeneratorFactory: MachineKripkeStructureGeneratorFactory(
-        factory: TeleportingTurtleGeneratorFactory(
-            fsmExtractor: MirrorPropertyExtractor(),
-            globalsExtractor: MirrorPropertyExtractor(),
-            stateExtractor: MirrorPropertyExtractor()
-        )
-    ),
-    kripkeStructureView: NuSMVKripkeStructureView(stream: StdoutOutputStream()),
-    machineLoader: DynamicLibraryMachineLoaderFactory(printer: printer).make(),
-    parser: SwiftfsmParser(),
-    schedulerFactory: RoundRobinSchedulerFactory(),
-    view: printer
-).run(Process.arguments)
+    func message(str: String) -> Void
+
+}
