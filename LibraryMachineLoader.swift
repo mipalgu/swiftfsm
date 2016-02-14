@@ -82,6 +82,10 @@ public class LibraryMachineLoader: MachineLoader {
     public init(creator: LibraryCreator) {
         self.creator = creator
     }
+
+    public func clearCache() {
+        self.dynamicType.cache = [:]
+    }
     
     /**
      *  Load the machines from the library specified from the path.
