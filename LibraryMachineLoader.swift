@@ -65,6 +65,8 @@ import FSM
  */
 public class LibraryMachineLoader: MachineLoader {
     
+    private static var cache: [String: FiniteStateMachineFactory] = [:]
+
     /**
      *  Used to create the libraries.
      *
@@ -101,14 +103,18 @@ public class LibraryMachineLoader: MachineLoader {
         }
         // Create the library resource.
         let lib: LibraryResource? = self.creator.open(path)
-        if lib == nil {
+        if (nil == lib) {
             return [] 
         }
         // Load the machines
         return self.loadMachine(lib!)
     }
-    
+
     private func loadMachine(library: LibraryResource) -> [FiniteStateMachine] {
+        // Use the factory in the cache if we have already seen this one.
+        if let factory = self.dynamicType.cache[library.path] {
+            return factory()
+        }
         // Get main method symbol
         let result: (symbol: UnsafeMutablePointer<Void>, error: String?) =
             library.getSymbolPointer("main")
@@ -117,15 +123,19 @@ public class LibraryMachineLoader: MachineLoader {
             print(result.error!)
             return [] 
         }
+        // How many factories do we have now?
+        let count: Int = getFactoryCount() 
         // Call the method
         invoke_func(result.symbol)
-        // Get the factory that was added
-        let f: Factories.FiniteStateMachineFactory? = getLastFactory()
-        if (f == nil) {
+        // Did the factory get added?
+        if (getFactoryCount() == count) {
+            print("Library was loaded but factory was not added")
             return []
         }
-        // Call the factory
-        return f!()
+        // Get the factory and add it to the cache
+        let factory: FiniteStateMachineFactory = getLastFactory()!
+        self.dynamicType.cache[library.path] = factory
+        return factory()
     }
     
 }
