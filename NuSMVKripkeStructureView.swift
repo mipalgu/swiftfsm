@@ -64,9 +64,12 @@ public class NuSMVKripkeStructureView<T: OutputStreamType>:
 
     private var data: Data!
 
+    private let delimiter: String
+
     private var stream: T 
 
-    public init(stream: T) {
+    public init(stream: T, delimiter: String = ".") {
+        self.delimiter = delimiter
         self.stream = stream
     }
 
@@ -126,7 +129,7 @@ public class NuSMVKripkeStructureView<T: OutputStreamType>:
         var pre: Bool = false
         state.fsmProperties.forEach {
             str += generate(
-                "\(prep)\(state.fsm.name)$$\($0)\(app)",
+                "\(prep)\(state.fsm.name)\(self.delimiter)\($0)\(app)",
                 p: $1,
                 pre: &pre,
                 addToProperties: addToProperties
@@ -137,7 +140,7 @@ public class NuSMVKripkeStructureView<T: OutputStreamType>:
                 return
             }
             str += generate(
-                "\(prep)\(state.fsm.name)$$\(state.state.name)$$\($0)\(app)",
+                "\(prep)\(state.fsm.name)\(self.delimiter)\(state.state.name)\(self.delimiter)\($0)\(app)",
                 p: $1,
                 pre: &pre,
                 addToProperties: addToProperties
@@ -145,7 +148,7 @@ public class NuSMVKripkeStructureView<T: OutputStreamType>:
         }
         state.globalProperties.forEach {
             str += generate(
-                "\(prep)globals$$\($0)\(app)",
+                "\(prep)globals\(self.delimiter)\($0)\(app)",
                 p: $1,pre: &pre,
                 addToProperties: addToProperties
             )
@@ -169,12 +172,12 @@ public class NuSMVKripkeStructureView<T: OutputStreamType>:
 
     private func getNextName(state: KripkeState) -> String {
         var name: String = 
-            "\(self.data.machine.name)$$\(state.fsm.name)$$\(state.state.name)"
+            "\(self.data.machine.name)\(self.delimiter)\(state.fsm.name)\(self.delimiter)\(state.state.name)"
         if (nil == self.data.ringlets[name]) {
             self.data.ringlets[name] = -1
         }
         self.data.ringlets[name]! += 1
-        name += "$$R\(self.data.ringlets[name]!)"
+        name += "\(self.delimiter)R\(self.data.ringlets[name]!)"
         self.data.pc.append(name)
         return name
     }

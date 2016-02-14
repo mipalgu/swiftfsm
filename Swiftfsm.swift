@@ -70,6 +70,8 @@ public class Swiftfsm {
     
     private let kripkeStructureView: KripkeStructureView
 
+    private var names: [String: Int] = [:]
+
     private let machineLoader: MachineLoader
     
     private let parser: HelpableParser
@@ -143,11 +145,22 @@ public class Swiftfsm {
     }
     
     private func handleTasks(tasks: [Task]) -> [Machine] {
-        var machines: [Machine] = []
         var i: Int = 1
-        for t: Task in tasks {
+        return tasks.flatMap { self.handleTask($0, i: &i) }
+    }
+
+    private func handleTask(t: Task, inout i: Int) -> [Machine] {
+        var machines: [Machine] = []
+        for _ in 0 ..< t.count  {
             // Get/Generate Name of the Machine.
-            let name: String = nil == t.name ? "machine \(i)" : t.name!
+            var name: String = nil == t.name ? "machine \(i)" : t.name!
+            if let count: Int = self.names[name] {
+                let temp: String = name
+                name += ".\(count)"
+                self.names[temp]! += 1
+            } else {
+                self.names[name] = 1
+            }
             // Handle when there is no path in the Task.
             if (nil == t.path) {
                 self.handleError(SwiftfsmErrors.PathNotFound(machineName: name))
@@ -177,7 +190,7 @@ public class Swiftfsm {
             if (true == t.addToScheduler) {
                 machines.append(temp)
             }
-            i++
+            i = i + 1
         }
         return machines
     }

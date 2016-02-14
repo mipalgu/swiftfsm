@@ -64,6 +64,8 @@ public struct Task {
     
     var addToScheduler: Bool = true
     
+    var count: Int = 1
+
     var enableDebugging: Bool = false
     
     var generateKripkeStructure: Bool = false

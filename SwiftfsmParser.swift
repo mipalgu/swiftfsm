@@ -65,12 +65,13 @@ public class SwiftfsmParser: HelpableParser {
         str += "\t-c, --clfsm\tSpecifies that this is a machine that has been built using the CLFSM specification.\n"
         str += "\t-d, --debug\tEnables debugging.\n"
         str += "\t-h, --help\tPrint this help message.\n"
-        str += "\t-k, --kripke [-r|--run]\n"
+        str += "\t-k [-r|--run], --kripke [-r|--run]\n"
         str += "\t\t\tGenerate the Kripke Structure for the machine.\n"
         str += "\t\t\tNote: Optionally specify -r or --run to schedule the machine to run as well as generate the kripke structure.\n"
-        str += "\t-n, --name <value>\n"
+        str += "\t-n <value>, --name <value>\n"
         str += "\t\t\tSpecify a name for the machine.\n"
-        str += "\n"
+        str += "\t-x <value>, --repeat <value>\n"
+        str += "\t\t\tSpecify number of times to repeat this command\n"
         return str
     }
     
@@ -109,6 +110,8 @@ public class SwiftfsmParser: HelpableParser {
             return self.handleKripkeFlag(t, words: &words)
         case "-n", "--name":
             return self.handleNameFlag(t, words: &words)
+        case "-x", "--repeat":
+            return self.handleRepeatFlag(t, words: &words)
         default:
             return try self.handlePath(t, words: &words)
         }
@@ -179,6 +182,22 @@ public class SwiftfsmParser: HelpableParser {
         }
         var temp: Task = t
         temp.path = words.first!
+        return temp
+    }
+
+    private func handleRepeatFlag(t: Task, inout words: [String]) -> Task {
+        if (words.count < 2) {
+            return t
+        }
+        guard let num: Int = Int(words[1]) else {
+            return t
+        }
+        if (num < 0) {
+            return t
+        }
+        var temp: Task = t
+        temp.count = num
+        words.removeFirst()
         return temp
     }
     
