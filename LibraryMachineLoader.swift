@@ -105,13 +105,10 @@ public class LibraryMachineLoader: MachineLoader {
         if (path.characters.count < 1) {
             return []
         }
-        // Create the library resource.
-        let lib: LibraryResource? = self.creator.open(path)
-        if (nil == lib) {
-            return [] 
+        if let fsms = self.creator.open(path) >>- self.loadMachine {
+            return fsms
         }
-        // Load the machines
-        return self.loadMachine(lib!)
+        return []
     }
 
     private func loadMachine(library: LibraryResource) -> [FiniteStateMachine] {
