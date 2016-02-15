@@ -62,16 +62,41 @@
  import Glibc
  #endif
 
-public struct FileOutputStream: OutputStreamType {
+public class FileOutputStream: OutputStreamType {
     
+    private let close: Bool
+
     private let file: UnsafeMutablePointer<FILE>
     
-    public init(file: UnsafeMutablePointer<FILE>) {
+    public init(file: UnsafeMutablePointer<FILE>, close: Bool = false) {
         self.file = file
+        self.close = close 
+    }
+
+    public convenience init<T: OutputStreamType>(
+        path: String,
+        errorStream: T? = nil
+    ) {
+        let fp: UnsafeMutablePointer<FILE> = fopen(path, "w")
+        if (nil != fp) {
+            self.init(file: fp, close: true)
+            return
+        }
+        if (nil != errorStream) {
+            var stream: T = errorStream!
+            print(strerror(errno), terminator: "\n", toStream: &stream)
+        }
+        exit(EXIT_FAILURE)
     }
     
-    public mutating func write(string: String) {
+    public func write(string: String) {
         fputs(string, self.file)
+    }
+
+    deinit {
+        if (true == self.close) {
+            fclose(self.file)
+        }
     }
     
 }
