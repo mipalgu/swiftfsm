@@ -145,15 +145,14 @@ public class Swiftfsm {
     }
     
     private func handleTasks(tasks: [Task]) -> [Machine] {
-        var i: Int = 1
-        return tasks.flatMap { self.handleTask($0, i: &i) }
+        return tasks.flatMap { self.handleTask($0) }
     }
 
-    private func handleTask(t: Task, inout i: Int) -> [Machine] {
+    private func handleTask(t: Task) -> [Machine] {
         var machines: [Machine] = []
         for _ in 0 ..< t.count  {
             // Get/Generate Name of the Machine.
-            var name: String = nil == t.name ? "machine \(i)" : t.name!
+            var name: String = nil == t.name ? "machine" : t.name!
             if let count: Int = self.names[name] {
                 let temp: String = name
                 name += ".\(count)"
@@ -190,7 +189,6 @@ public class Swiftfsm {
             if (true == t.addToScheduler) {
                 machines.append(temp)
             }
-            i = i + 1
         }
         return machines
     }
