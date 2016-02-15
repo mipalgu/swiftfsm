@@ -1,9 +1,9 @@
 /*
- * CommandLinePrinter.swift
- * swiftfsm
+ * GenericPrinter.swift 
+ * swiftfsm 
  *
- * Created by Callum McColl on 20/12/2015.
- * Copyright © 2015 Callum McColl. All rights reserved.
+ * Created by Callum McColl on 15/02/2016.
+ * Copyright © 2016 Callum McColl. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -56,21 +56,42 @@
  *
  */
 
-public class CommandLinePrinter
-    <T: OutputStreamType, U: OutputStreamType>: GenericPrinter<T, U> 
-{
+public class GenericPrinter<T: OutputStreamType, U: OutputStreamType>: Printer {
     
-    public override init(errorStream: T, messageStream: U) {
-        super.init(errorStream: errorStream, messageStream: messageStream)
+    internal var errorStream: T
+    
+    internal var messageStream: U
+    
+    public init(errorStream: T, messageStream: U) {
+        self.errorStream = errorStream
+        self.messageStream = messageStream
     }
 
-    public override func error(str: String) {
-        print(
-            "\u{001B}[1;31merror: \u{001B}[0m\(str)\n",
-            terminator: "\n",
-            toStream: &self.errorStream
-        )
+    public func error(str: String) {
+        print(str, terminator: "\n", toStream: &self.errorStream)
+    }
+    
+    public func message(message: String) {
+        print(message, terminator: "\n", toStream: &self.messageStream)
     }
     
 }
 
+extension GenericPrinter: View {
+
+    public func error(error: SwiftfsmErrors) {
+        let str: String
+        switch (error) {
+        case .NoPathsFound:
+            str = "Unable to find a path to any machines.  Did you specify one?"
+        case .PathNotFound(let machineName):
+            str = "Unable to find a path for '\(machineName)'"
+        case .UnableToLoad(let machineName, let path):
+            str = "Unable to load '\(machineName)' at '\(path)'"
+        case .UnknownFlag(let flag):
+            str = "Unknown Flag '\(flag)'"
+        }
+        self.error(str)
+    }
+
+}
