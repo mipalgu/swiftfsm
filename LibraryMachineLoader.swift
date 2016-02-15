@@ -111,6 +111,11 @@ public class LibraryMachineLoader: MachineLoader {
         if (path.characters.count < 1) {
             return []
         }
+        // Load the factory from the cache if it is there.
+        if let factory = self.dynamicType.cache[path] {
+            return factory()
+        }
+        // Load the factory from the dynamic library.
         if let fsms = self.creator.open(path) >>- self.loadMachine {
             return fsms
         }
@@ -118,10 +123,6 @@ public class LibraryMachineLoader: MachineLoader {
     }
 
     private func loadMachine(library: LibraryResource) -> [FiniteStateMachine] {
-        // Use the factory in the cache if we have already seen this one.
-        if let factory = self.dynamicType.cache[library.path] {
-            return factory()
-        }
         // Get main method symbol
         let result: (symbol: UnsafeMutablePointer<Void>, error: String?) =
             library.getSymbolPointer("main")
