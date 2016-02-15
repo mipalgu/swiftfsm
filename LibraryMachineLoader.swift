@@ -65,6 +65,10 @@ import FSM
  */
 public class LibraryMachineLoader: MachineLoader {
     
+    /*
+     *  This is used to remember factories for paths, therefore allowing us to
+     *  just use this instead of loading it from the file system.
+     */
     private static var cache: [String: FiniteStateMachineFactory] = [:]
 
     /**
@@ -89,6 +93,9 @@ public class LibraryMachineLoader: MachineLoader {
         self.printer = printer
     }
 
+    /**
+     *  Remove all the factories from the cache.
+     */
     public func clearCache() {
         self.dynamicType.cache = [:]
     }
@@ -96,15 +103,9 @@ public class LibraryMachineLoader: MachineLoader {
     /**
      *  Load the machines from the library specified from the path.
      *
-     *  In order to load the machines the main method is called on all of the 
-     *  loaded libraries.  The individual libraries are responsible for loading
-     *  themselves into the scheduler.
-     *
-     *  - Note: This should change as it would be better to call a method which
-     *      returns an array of machines to load and do the actual loading into
-     *      the scheduler within this method.  This would ensure that the
-     *      libraries would not need to know how to add machines to the
-     *      scheduler.
+     *  To accomplish this the main method is called on the library.  Therefore
+     *  the library is responsible for adding itself to the factories array in
+     *  FSM.Factories.
      */
     public func load(path: String) -> [FiniteStateMachine] {
         // Ignore empty paths
@@ -140,7 +141,7 @@ public class LibraryMachineLoader: MachineLoader {
             self.printer.error("Library was loaded but factory was not added")
             return []
         }
-        // Get the factory and add it to the cache
+        // Get the factory, add it to the cache, call it and return the result.
         let factory: FiniteStateMachineFactory = getLastFactory()!
         self.dynamicType.cache[library.path] = factory
         return factory()
