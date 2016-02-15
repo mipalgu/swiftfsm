@@ -76,7 +76,9 @@ Swiftfsm(
             stateExtractor: MirrorPropertyExtractor()
         )
     ),
-    kripkeStructureView: NuSMVKripkeStructureView(stream: StdoutOutputStream()),
+    kripkeStructureView: NuSMVKripkeStructureView(
+        factory: FilePrinterFactory()
+    ),
     machineLoader: DynamicLibraryMachineLoaderFactory(printer: printer).make(),
     parser: SwiftfsmParser(),
     schedulerFactory: RoundRobinSchedulerFactory(),

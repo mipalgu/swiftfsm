@@ -58,19 +58,17 @@
 
 import FSM
 
-public class NuSMVKripkeStructureView<T: OutputStreamType>:
-    KripkeStructureView
-{
+public class NuSMVKripkeStructureView: KripkeStructureView {
 
     private var data: Data!
 
     private let delimiter: String
 
-    private var stream: T 
+    private var factory: PrinterFactory 
 
-    public init(stream: T, delimiter: String = ".") {
+    public init(factory: PrinterFactory, delimiter: String = ".") {
         self.delimiter = delimiter
-        self.stream = stream
+        self.factory = factory
     }
 
     public func make(structure: KripkeStructureType) {
@@ -82,7 +80,10 @@ public class NuSMVKripkeStructureView<T: OutputStreamType>:
         self.createTrans()
         self.createVars()
         str += self.data.vars + self.data.trans
-        print(str, terminator: "", toStream: &self.stream)
+        let printer: Printer = factory.make(
+            "\(self.data.machine.name).nusmv"
+        )
+        printer.message(str)
     }
 
     private func createTrans() {
