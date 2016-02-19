@@ -78,10 +78,12 @@ public class TeleportingTurtleGeneratorFactory:
     }
 
     public func make(
-        fsm: FiniteStateMachine
+        fsm: FiniteStateMachine,
+        machine: Machine
     ) -> SteppingKripkeStructureGenerator {
         return TeleportingTurtleGenerator(
             fsm: fsm,
+            machine: machine,
             globalsExtractor: self.globalsExtractor,
             fsmExtractor: self.fsmExtractor,
             stateExtractor: self.stateExtractor
