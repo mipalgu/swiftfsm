@@ -149,34 +149,25 @@ public class NuSMVKripkeStructureView: KripkeStructureView {
     ) -> String {
         var str: String = start 
         var pre: Bool = false
-        state.fsmProperties.forEach {
-            str += generate(
-                "\(prep)\(state.machine.name)\(self.delimiter)\(state.fsm.name)\(self.delimiter)\($0)\(app)",
-                state: state,
-                p: $1,
-                pre: &pre,
-                addToProperties: addToProperties
-            )
-        }
-        state.properties.forEach {
-            if ($0 == "name") {
-                return
+        // Holds naming convention functions for the different property lists.
+        let gen: [([String: KripkeStateProperty], (String) -> String)] = [
+            (state.fsmProperties, { "\(prep)\(state.machine.name)\(self.delimiter)\(state.fsm.name)\(self.delimiter)\($0)\(app)" }),
+            (state.properties, { "\(prep)\(state.machine.name)\(self.delimiter)\(state.fsm.name)\(self.delimiter)\(state.state.name)\(self.delimiter)\($0)\(app)" }),
+            (state.globalProperties, { "\(prep)\(state.machine.name)\(self.delimiter)globals\(self.delimiter)\($0)\(app)" })
+        ]
+        // Generate the transitions using the correct naming convention for each
+        // property list.
+        gen.forEach { (properties: [String: KripkeStateProperty], f: (String) -> String) in
+            properties.forEach {
+                print(f($0))
+                str += self.generate(
+                    f($0),
+                    state: state,
+                    p: $1,
+                    pre: &pre,
+                    addToProperties: addToProperties
+                )
             }
-            str += generate(
-                "\(prep)\(state.machine.name)\(self.delimiter)\(state.fsm.name)\(self.delimiter)\(state.state.name)\(self.delimiter)\($0)\(app)",
-                state: state,
-                p: $1,
-                pre: &pre,
-                addToProperties: addToProperties
-            )
-        }
-        state.globalProperties.forEach {
-            str += generate(
-                "\(prep)\(state.machine.name)\(self.delimiter)globals\(self.delimiter)\($0)\(app)",
-                state: state,
-                p: $1,pre: &pre,
-                addToProperties: addToProperties
-            )
         }
         str += 
             (true == pre ? " & " : "") + "\(prep)pc\(app)=\(pcName)\(terminator)\n"
