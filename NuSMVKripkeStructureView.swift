@@ -84,15 +84,24 @@ public class NuSMVKripkeStructureView: KripkeStructureView {
         }
         // Print Kripke Structures 
         for t: (key: String, d: Data) in self.data {
-            self.createTrans(t.d)
-            self.createVars(t.d)
-            var str: String = "MODULE \(t.d.machine.name)\n\n"
-            str += t.d.vars + t.d.trans
-            let printer: Printer = factory.make(
-                "\(t.d.machine.name).nusmv"
-            )
-            printer.message(str)
+            self.printStructure(self.generateData(t.d))
         }
+    }
+
+    private func generateData(d: Data) -> Data {
+        var d: Data = d
+        self.createTrans(d)
+        self.createVars(d)
+        return d
+    }
+
+    private func printStructure(d: Data) {
+        var str: String = "MODULE \(d.machine.name)\n\n"
+        str += d.vars + d.trans
+        let printer: Printer = factory.make(
+            "\(d.machine.name).nusmv"
+        )
+        printer.message(str)
     }
 
     private func createTrans(d: Data) {
