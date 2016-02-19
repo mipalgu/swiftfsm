@@ -77,7 +77,12 @@ public class MirrorPropertyExtractor:
      *  Extract the properties of state using a the builtin swift Mirror type.
      */
     public func extract(state: State) -> [String : KripkeStateProperty] {
-        return self.getPropertiesFromMirror(Mirror(reflecting: state))
+        var p: [String: KripkeStateProperty] = self.getPropertiesFromMirror(
+            Mirror(reflecting: state)
+        )
+        // Ignore the states name property.
+        p["name"] = nil
+        return p
     }
 
     public func extract(vars: FSMVariables) -> [String: KripkeStateProperty] {
