@@ -86,6 +86,13 @@ public class NuSMVKripkeStructureView: KripkeStructureView {
         for t: (key: String, d: Data) in self.data {
             self.printStructure(self.generateData(t.d))
         }
+        // Print a combined kripke structure nusmv
+        var temp: Data = Data(
+            machine: SimpleMachine(name: "m", fsms: [], debug: false)
+        )
+        temp.states = self.states
+        self.data["main"] = temp
+        self.printStructure(self.generateData(temp))
     }
 
     private func generateData(d: Data) -> Data {
@@ -107,13 +114,14 @@ public class NuSMVKripkeStructureView: KripkeStructureView {
     private func createTrans(d: Data) {
         var d: Data = d
         var lastState: KripkeState = d.states[0]
-        var lastPcName: String = getNextName(lastState)
+        var lastPcName: String = getNextName(lastState, d: d)
         var states: [KripkeState] = d.states
         states.removeFirst()
         states.forEach {
-            let pcName: String = getNextName($0)
-            d.trans += getTrans(lastPcName, state: lastState)
-            d.trans += getChanges(pcName, state: $0)
+            print("this is a test")
+            let pcName: String = getNextName($0, d: d)
+            d.trans += getTrans(lastPcName, state: lastState, d: d)
+            d.trans += getChanges(pcName, state: $0, d: d)
             lastState = $0
             lastPcName = pcName
         }
@@ -132,15 +140,21 @@ public class NuSMVKripkeStructureView: KripkeStructureView {
             d.vars += "\n};\n\n"
         }
         d.vars += "pc : {\n"
+        print("1")
         d.pc.forEach { d.vars += $0 + "\n" }
+        print("2")
         d.vars += "};\n\n"
+        print("2.7")
         d.vars += "INIT\n"
+        print("2.8")
         d.vars += "pc=\(d.pc[0])\n"
+        print("2.9")
     }
 
     private func getTrans(
         pcName: String,
         state: KripkeState,
+        d: Data,
         prep: String = "",
         app: String = "",
         start: String = "",
@@ -149,20 +163,20 @@ public class NuSMVKripkeStructureView: KripkeStructureView {
     ) -> String {
         var str: String = start 
         var pre: Bool = false
+        let machine: String = self.getMachinePrefix(state, d: d)
         // Holds naming convention functions for the different property lists.
         let gen: [([String: KripkeStateProperty], (String) -> String)] = [
-            (state.fsmProperties, { "\(prep)\(state.machine.name)\(self.delimiter)\(state.fsm.name)\(self.delimiter)\($0)\(app)" }),
-            (state.properties, { "\(prep)\(state.machine.name)\(self.delimiter)\(state.fsm.name)\(self.delimiter)\(state.state.name)\(self.delimiter)\($0)\(app)" }),
-            (state.globalProperties, { "\(prep)\(state.machine.name)\(self.delimiter)globals\(self.delimiter)\($0)\(app)" })
+            (state.fsmProperties, { "\(prep)\(machine)\(self.delimiter)\(state.fsm.name)\(self.delimiter)\($0)\(app)" }),
+            (state.properties, { "\(prep)\(machine)\(self.delimiter)\(state.fsm.name)\(self.delimiter)\(state.state.name)\(self.delimiter)\($0)\(app)" }),
+            (state.globalProperties, { "\(prep)\(machine)\(self.delimiter)globals\(self.delimiter)\($0)\(app)" })
         ]
         // Generate the transitions using the correct naming convention for each
         // property list.
         gen.forEach { (properties: [String: KripkeStateProperty], f: (String) -> String) in
             properties.forEach {
-                print(f($0))
                 str += self.generate(
                     f($0),
-                    state: state,
+                    d: d,
                     p: $1,
                     pre: &pre,
                     addToProperties: addToProperties
@@ -174,10 +188,15 @@ public class NuSMVKripkeStructureView: KripkeStructureView {
         return str
     }
 
-    private func getChanges(pcName: String, state: KripkeState) -> String {
+    private func getChanges(
+        pcName: String,
+        state: KripkeState,
+        d: Data
+    ) -> String {
         return self.getTrans(
             pcName,
             state: state,
+            d: d,
             prep: "next(",
             app: ")",
             start: "    ",
@@ -186,10 +205,18 @@ public class NuSMVKripkeStructureView: KripkeStructureView {
         ) 
     }
 
-    private func getNextName(state: KripkeState) -> String {
-        var d: Data = self.data(state)
+    private func getMachinePrefix(state: KripkeState, d: Data) -> String {
+        if (state.machine.name == d.machine.name) {
+            return d.machine.name
+        }
+        return "\(d.machine.name)\(self.delimiter)\(state.machine.name)"
+    }
+
+    private func getNextName(state: KripkeState, d: Data) -> String {
+        var d: Data = d
+        let machine: String = self.getMachinePrefix(state, d: d)
         var name: String = 
-            "\(d.machine.name)\(self.delimiter)\(state.fsm.name)\(self.delimiter)\(state.state.name)"
+            "\(machine)\(self.delimiter)\(state.fsm.name)\(self.delimiter)\(state.state.name)"
         if (nil == d.ringlets[name]) {
             d.ringlets[name] = -1
         }
@@ -201,7 +228,7 @@ public class NuSMVKripkeStructureView: KripkeStructureView {
 
     private func generate(
         name: String,
-        state: KripkeState,
+        d: Data,
         p: KripkeStateProperty,
         inout pre: Bool,
         addToProperties: Bool
@@ -210,7 +237,7 @@ public class NuSMVKripkeStructureView: KripkeStructureView {
             return ""
         }
         if (true == addToProperties) {
-            self.addToProperties(name, p: p, state: state)
+            self.addToProperties(name, p: p, d: d)
         }
         var str: String = ""
         if (true == pre) {
@@ -224,9 +251,9 @@ public class NuSMVKripkeStructureView: KripkeStructureView {
     private func addToProperties(
         name: String,
         p: KripkeStateProperty,
-        state: KripkeState
+        d: Data 
     ) {
-        var d: Data = self.data(state)
+        var d: Data = d 
         if (nil == d.properties[name]) {
             d.properties[name] = []
         }
