@@ -80,6 +80,11 @@ public protocol _KripkeStateType: Equatable {
     var globalProperties: [String: KripkeStateProperty] { get }
 
     /**
+     *  The machine that this state belongs to.
+     */
+    var machine: Machine { get }
+
+    /**
      *  Describes the parts of the source state.
      */
     var properties: [String: KripkeStateProperty] { get }
@@ -100,6 +105,8 @@ extension _KripkeStateType where Self: CustomStringConvertible {
     
     public var description: String {
         var str: String = "state = \(self.state.name)\n"
+        str += "machine = \(self.machine.name)\n"
+        str += "fsm = \(self.fsm.name)\n"
         str += "target = \(self.target?.state.name)\n"
         str += "global properties: {\n"
         str += self.globalProperties.reduce("", combine: {

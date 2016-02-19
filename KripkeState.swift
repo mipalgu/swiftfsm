@@ -66,6 +66,8 @@ public class KripkeState: KripkeStateType {
 
     public let globalProperties: [String: KripkeStateProperty]
 
+    public let machine: Machine
+
     public let properties: [String: KripkeStateProperty]
     
     public let state: State
@@ -76,6 +78,7 @@ public class KripkeState: KripkeStateType {
         state: State,
         properties: [String: KripkeStateProperty],
         fsm: FiniteStateMachine,
+        machine: Machine,
         fsmProperties: [String: KripkeStateProperty],
         globalProperties: [String: KripkeStateProperty],
         target: KripkeState? = nil
@@ -83,6 +86,7 @@ public class KripkeState: KripkeStateType {
         self.state = state
         self.properties = properties
         self.fsm = fsm
+        self.machine = machine
         self.fsmProperties = fsmProperties
         self.globalProperties = globalProperties
         self.target = target
