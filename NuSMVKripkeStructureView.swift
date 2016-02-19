@@ -60,11 +60,13 @@ import FSM
 
 public class NuSMVKripkeStructureView: KripkeStructureView {
 
-    private var data: Data!
-
     private let delimiter: String
 
     private var factory: PrinterFactory 
+
+    private var data: [String: Data] = [:]
+
+    private var states: [KripkeState] = []
 
     public init(factory: PrinterFactory, delimiter: String = ".") {
         self.delimiter = delimiter
@@ -75,46 +77,56 @@ public class NuSMVKripkeStructureView: KripkeStructureView {
         if (true == structure.states.isEmpty) {
             return
         }
-        self.data = Data(machine: structure.machine, states: structure.states)
-        var str: String = "MODULE main\n\n"
-        self.createTrans()
-        self.createVars()
-        str += self.data.vars + self.data.trans
-        let printer: Printer = factory.make(
-            "\(self.data.machine.name).nusmv"
-        )
-        printer.message(str)
+        self.states = structure.states
+        for s: KripkeState in self.states {
+            var d: Data = self.data(s)
+            d.states.append(s)
+        }
+        // Print Kripke Structures 
+        for t: (key: String, d: Data) in self.data {
+            self.createTrans(t.d)
+            self.createVars(t.d)
+            var str: String = "MODULE \(t.d.machine.name)\n\n"
+            str += t.d.vars + t.d.trans
+            let printer: Printer = factory.make(
+                "\(t.d.machine.name).nusmv"
+            )
+            printer.message(str)
+        }
     }
 
-    private func createTrans() {
-        var lastState: KripkeState = self.data.states[0]
-        var lastPcName :String = getNextName(lastState)
-        self.data.states.removeFirst()
-        self.data.states.forEach {
+    private func createTrans(d: Data) {
+        var d: Data = d
+        var lastState: KripkeState = d.states[0]
+        var lastPcName: String = getNextName(lastState)
+        var states: [KripkeState] = d.states
+        states.removeFirst()
+        states.forEach {
             let pcName: String = getNextName($0)
-            self.data.trans += getTrans(lastPcName, state: lastState)
-            self.data.trans += getChanges(pcName, state: $0)
+            d.trans += getTrans(lastPcName, state: lastState)
+            d.trans += getChanges(pcName, state: $0)
             lastState = $0
             lastPcName = pcName
         }
-        self.data.trans += "esac\n"
+        d.trans += "esac\n"
     }
 
-    private func createVars() {
-        self.data.properties.map {
-            self.data.vars += "\($0) : {"
+    private func createVars(d: Data) {
+        var d: Data = d
+        d.properties.map {
+            d.vars += "\($0) : {"
             var pre: Bool = false
             $1.forEach {
-                self.data.vars += (true == pre ? ",\n" : "\n") + "\($0.value)"
+                d.vars += (true == pre ? ",\n" : "\n") + "\($0.value)"
                 pre = true
             }
-            self.data.vars += "\n};\n\n"
+            d.vars += "\n};\n\n"
         }
-        self.data.vars += "pc : {\n"
-        self.data.pc.forEach { self.data.vars += $0 + "\n" }
-        self.data.vars += "};\n\n"
-        self.data.vars += "INIT\n"
-        self.data.vars += "pc=\(self.data.pc[0])\n"
+        d.vars += "pc : {\n"
+        d.pc.forEach { d.vars += $0 + "\n" }
+        d.vars += "};\n\n"
+        d.vars += "INIT\n"
+        d.vars += "pc=\(d.pc[0])\n"
     }
 
     private func getTrans(
@@ -130,7 +142,8 @@ public class NuSMVKripkeStructureView: KripkeStructureView {
         var pre: Bool = false
         state.fsmProperties.forEach {
             str += generate(
-                "\(prep)\(state.fsm.name)\(self.delimiter)\($0)\(app)",
+                "\(prep)\(state.machine.name)\(self.delimiter)\(state.fsm.name)\(self.delimiter)\($0)\(app)",
+                state: state,
                 p: $1,
                 pre: &pre,
                 addToProperties: addToProperties
@@ -141,7 +154,8 @@ public class NuSMVKripkeStructureView: KripkeStructureView {
                 return
             }
             str += generate(
-                "\(prep)\(state.fsm.name)\(self.delimiter)\(state.state.name)\(self.delimiter)\($0)\(app)",
+                "\(prep)\(state.machine.name)\(self.delimiter)\(state.fsm.name)\(self.delimiter)\(state.state.name)\(self.delimiter)\($0)\(app)",
+                state: state,
                 p: $1,
                 pre: &pre,
                 addToProperties: addToProperties
@@ -149,7 +163,8 @@ public class NuSMVKripkeStructureView: KripkeStructureView {
         }
         state.globalProperties.forEach {
             str += generate(
-                "\(prep)globals\(self.delimiter)\($0)\(app)",
+                "\(prep)\(state.machine.name)\(self.delimiter)globals\(self.delimiter)\($0)\(app)",
+                state: state,
                 p: $1,pre: &pre,
                 addToProperties: addToProperties
             )
@@ -172,19 +187,21 @@ public class NuSMVKripkeStructureView: KripkeStructureView {
     }
 
     private func getNextName(state: KripkeState) -> String {
+        var d: Data = self.data(state)
         var name: String = 
-            "\(self.data.machine.name)\(self.delimiter)\(state.fsm.name)\(self.delimiter)\(state.state.name)"
-        if (nil == self.data.ringlets[name]) {
-            self.data.ringlets[name] = -1
+            "\(d.machine.name)\(self.delimiter)\(state.fsm.name)\(self.delimiter)\(state.state.name)"
+        if (nil == d.ringlets[name]) {
+            d.ringlets[name] = -1
         }
-        self.data.ringlets[name]! += 1
-        name += "\(self.delimiter)R\(self.data.ringlets[name]!)"
-        self.data.pc.append(name)
+        d.ringlets[name]! += 1
+        name += "\(self.delimiter)R\(d.ringlets[name]!)"
+        d.pc.append(name)
         return name
     }
 
     private func generate(
         name: String,
+        state: KripkeState,
         p: KripkeStateProperty,
         inout pre: Bool,
         addToProperties: Bool
@@ -193,7 +210,7 @@ public class NuSMVKripkeStructureView: KripkeStructureView {
             return ""
         }
         if (true == addToProperties) {
-            self.addToProperties(name, p: p)
+            self.addToProperties(name, p: p, state: state)
         }
         var str: String = ""
         if (true == pre) {
@@ -204,13 +221,25 @@ public class NuSMVKripkeStructureView: KripkeStructureView {
         return str
     }
 
-    private func addToProperties(name: String, p: KripkeStateProperty) {
-        if (nil == self.data.properties[name]) {
-            self.data.properties[name] = []
+    private func addToProperties(
+        name: String,
+        p: KripkeStateProperty,
+        state: KripkeState
+    ) {
+        var d: Data = self.data(state)
+        if (nil == d.properties[name]) {
+            d.properties[name] = []
         }
-        if (false == self.data.properties[name]!.contains({ $0 == p })) {
-            self.data.properties[name]!.append(p)
+        if (false == d.properties[name]!.contains({ $0 == p })) {
+            d.properties[name]!.append(p)
         }
+    }
+
+    private func data(state: KripkeState) -> Data {
+        if (nil == self.data[state.machine.name]) {
+            self.data[state.machine.name] = Data(machine: state.machine)
+        }
+        return self.data[state.machine.name]!
     }
 
 }
@@ -218,17 +247,16 @@ public class NuSMVKripkeStructureView: KripkeStructureView {
 private class Data {
 
     public var properties: [String: [KripkeStateProperty]] = [:]
-    public var states: [KripkeState]
     public let machine: Machine
+    public var states: [KripkeState] = []
     public var str: String = "MODULE main\n\n"
     public var vars: String = "VAR\n\n"
     public var trans: String = "TRANS\ncase\n"
     public var ringlets: [String: Int] = [:]
     public var pc: [String] = []
 
-    public init(machine: Machine, states: [KripkeState]) {
+    public init(machine: Machine) {
         self.machine = machine
-        self.states = states
     }
 
 }
