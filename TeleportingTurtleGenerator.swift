@@ -129,20 +129,7 @@ public class TeleportingTurtleGenerator: SteppingKripkeStructureGenerator {
         if (true == self.isFinished) {
             return self.rabbit
         }
-        // Are we checking a cycle?
-        if (true == inCycle) {
-            // Have we reached the end of the cycle?
-            if (self.cyclePos > self.length) {
-                self.isFinished = true
-                self.generateNextRabbit()
-                return self.rabbit
-            }
-            // Is there a state that doesn't match the cycle?
-            self.inCycle = self.rabbit == self.cycleState
-            // Check the next state in the cycle
-            self.cycleState = self.cycleState.target!
-            self.cyclePos += 1
-        }
+        // Teleport the turtle if we are not in a cycle.
         if (false == self.inCycle) {
             // 'Teleport' the turtle to the rabbit when necessary.
             self.tp()
@@ -154,6 +141,19 @@ public class TeleportingTurtleGenerator: SteppingKripkeStructureGenerator {
             self.inCycle = true
             self.cycleState = self.turtle
             self.cyclePos = 0
+        }
+        // Are we checking a cycle?
+        if (true == inCycle) {
+            // Have we reached the end of the cycle?
+            if (self.cyclePos > self.length) {
+                self.isFinished = true
+                return self.rabbit
+            }
+            // Is there a state that doesn't match the cycle?
+            self.inCycle = self.rabbit == self.cycleState
+            // Check the next state in the cycle
+            self.cycleState = self.cycleState.target!
+            self.cyclePos += 1
         }
         self.isFinished = self.fsm.hasFinished()
         return self.rabbit
