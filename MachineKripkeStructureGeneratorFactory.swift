@@ -64,10 +64,12 @@ public class MachineKripkeStructureGeneratorFactory {
         self.factory = factory 
     }
     
-    func make(machine: Machine) -> KripkeStructureGenerator {
+    func make(machines: [Machine]) -> KripkeStructureGenerator {
         return MachineKripkeStructureGenerator(
-            generators: machine.fsms.map { factory.make($0) },
-            machine: machine
+            generators: machines.flatMap {
+                (m: Machine) -> [SteppingKripkeStructureGenerator] in
+                    m.fsms.map { self.factory.make($0, machine: m) }
+            } 
         )
     }
     
