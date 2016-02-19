@@ -66,6 +66,8 @@ public class TeleportingTurtleGenerator: SteppingKripkeStructureGenerator {
     
     private let globalsExtractor: GlobalPropertyExtractor
 
+    private let machine: Machine
+
     private let stateExtractor: StatePropertyExtractor
 
     public private(set) var isFinished: Bool
@@ -81,11 +83,13 @@ public class TeleportingTurtleGenerator: SteppingKripkeStructureGenerator {
     
     public init(
         fsm: FiniteStateMachine,
+        machine: Machine,
         globalsExtractor: GlobalPropertyExtractor,
         fsmExtractor: FSMPropertyExtractor,
         stateExtractor: StatePropertyExtractor
     ) {
         self.fsm = fsm
+        self.machine = machine
         self.globalsExtractor = globalsExtractor
         self.fsmExtractor = fsmExtractor
         self.stateExtractor = stateExtractor
@@ -164,6 +168,7 @@ public class TeleportingTurtleGenerator: SteppingKripkeStructureGenerator {
             state: state,
             properties: self.stateExtractor.extract(state),
             fsm: self.fsm,
+            machine: self.machine,
             fsmProperties: self.fsmExtractor.extract(self.fsm.vars),
             globalProperties: self.globalsExtractor.extract(fsm.ringlet) 
         )
