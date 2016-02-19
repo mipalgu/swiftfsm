@@ -87,11 +87,8 @@ public class NuSMVKripkeStructureView: KripkeStructureView {
             self.printStructure(self.generateData(t.d))
         }
         // Print a combined kripke structure nusmv
-        var temp: Data = Data(
-            machine: SimpleMachine(name: "m", fsms: [], debug: false)
-        )
+        var temp: Data = Data(module: "main")
         temp.states = self.states
-        self.data["main"] = temp
         self.printStructure(self.generateData(temp))
     }
 
@@ -103,10 +100,10 @@ public class NuSMVKripkeStructureView: KripkeStructureView {
     }
 
     private func printStructure(d: Data) {
-        var str: String = "MODULE \(d.machine.name)\n\n"
+        var str: String = "MODULE \(d.module)\n\n"
         str += d.vars + d.trans
         let printer: Printer = factory.make(
-            "\(d.machine.name).nusmv"
+            "\(d.module).nusmv"
         )
         printer.message(str)
     }
@@ -163,12 +160,11 @@ public class NuSMVKripkeStructureView: KripkeStructureView {
     ) -> String {
         var str: String = start 
         var pre: Bool = false
-        let machine: String = self.getMachinePrefix(state, d: d)
         // Holds naming convention functions for the different property lists.
         let gen: [([String: KripkeStateProperty], (String) -> String)] = [
-            (state.fsmProperties, { "\(prep)\(machine)\(self.delimiter)\(state.fsm.name)\(self.delimiter)\($0)\(app)" }),
-            (state.properties, { "\(prep)\(machine)\(self.delimiter)\(state.fsm.name)\(self.delimiter)\(state.state.name)\(self.delimiter)\($0)\(app)" }),
-            (state.globalProperties, { "\(prep)\(machine)\(self.delimiter)globals\(self.delimiter)\($0)\(app)" })
+            (state.fsmProperties, { "\(prep)\(state.machine.name)\(self.delimiter)\(state.fsm.name)\(self.delimiter)\($0)\(app)" }),
+            (state.properties, { "\(prep)\(state.machine.name)\(self.delimiter)\(state.fsm.name)\(self.delimiter)\(state.state.name)\(self.delimiter)\($0)\(app)" }),
+            (state.globalProperties, { "\(prep)\(state.machine.name)\(self.delimiter)globals\(self.delimiter)\($0)\(app)" })
         ]
         // Generate the transitions using the correct naming convention for each
         // property list.
@@ -205,18 +201,10 @@ public class NuSMVKripkeStructureView: KripkeStructureView {
         ) 
     }
 
-    private func getMachinePrefix(state: KripkeState, d: Data) -> String {
-        if (state.machine.name == d.machine.name) {
-            return d.machine.name
-        }
-        return "\(d.machine.name)\(self.delimiter)\(state.machine.name)"
-    }
-
     private func getNextName(state: KripkeState, d: Data) -> String {
         var d: Data = d
-        let machine: String = self.getMachinePrefix(state, d: d)
         var name: String = 
-            "\(machine)\(self.delimiter)\(state.fsm.name)\(self.delimiter)\(state.state.name)"
+            "\(state.machine.name)\(self.delimiter)\(state.fsm.name)\(self.delimiter)\(state.state.name)"
         if (nil == d.ringlets[name]) {
             d.ringlets[name] = -1
         }
@@ -264,7 +252,7 @@ public class NuSMVKripkeStructureView: KripkeStructureView {
 
     private func data(state: KripkeState) -> Data {
         if (nil == self.data[state.machine.name]) {
-            self.data[state.machine.name] = Data(machine: state.machine)
+            self.data[state.machine.name] = Data(module: state.machine.name)
         }
         return self.data[state.machine.name]!
     }
@@ -274,7 +262,7 @@ public class NuSMVKripkeStructureView: KripkeStructureView {
 private class Data {
 
     public var properties: [String: [KripkeStateProperty]] = [:]
-    public let machine: Machine
+    public let module: String
     public var states: [KripkeState] = []
     public var str: String = "MODULE main\n\n"
     public var vars: String = "VAR\n\n"
@@ -282,8 +270,8 @@ private class Data {
     public var ringlets: [String: Int] = [:]
     public var pc: [String] = []
 
-    public init(machine: Machine) {
-        self.machine = machine
+    public init(module: String) {
+        self.module = module
     }
 
 }
