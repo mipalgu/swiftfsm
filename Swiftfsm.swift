@@ -127,9 +127,9 @@ public class Swiftfsm {
         self.runMachines(self.handleTasks(tasks))
     }
     
-    private func generateKripkeStructure(machine: Machine) {
+    private func generateKripkeStructure(machines: [Machine]) {
         let generator: KripkeStructureGenerator =
-            self.kripkeGeneratorFactory.make(machine)
+            self.kripkeGeneratorFactory.make(machines)
         let structure: KripkeStructureType = generator.generate()
         self.kripkeStructureView.make(structure)
     }
@@ -145,11 +145,16 @@ public class Swiftfsm {
     }
     
     private func handleTasks(tasks: [Task]) -> [Machine] {
-        return tasks.flatMap { self.handleTask($0) }
+        let t: [(schedule: [Machine], kripke: [Machine])] = tasks.map {
+            self.handleTask($0)
+        }
+        self.generateKripkeStructure(t.flatMap { $0.kripke })
+        return t.flatMap { $0.schedule }
     }
 
-    private func handleTask(t: Task) -> [Machine] {
-        var machines: [Machine] = []
+    private func handleTask(t: Task) -> ([Machine], [Machine]) {
+        var schedule: [Machine] = []
+        var kripke: [Machine] = []
         for _ in 0 ..< t.count  {
             // Get/Generate Name of the Machine.
             var name: String = nil == t.name ? "machine" : t.name!
@@ -181,16 +186,16 @@ public class Swiftfsm {
                 fsms: fsms,
                 debug: t.enableDebugging
             )
-            // Generate Kripke Structures.
+            // Remember to generate Kripke Structures.
             if (true == t.generateKripkeStructure) {
-                self.generateKripkeStructure(temp)
+                kripke.append(temp)
             }
             // Remember to add the machine to the scheduler if need be.
             if (true == t.addToScheduler) {
-                machines.append(temp)
+                schedule.append(temp)
             }
         }
-        return machines
+        return (schedule, kripke) 
     }
     
     private func parseArgs(args: [String]) -> [Task] {
