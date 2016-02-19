@@ -160,7 +160,7 @@ public class Swiftfsm {
             var name: String = nil == t.name ? "machine" : t.name!
             if let count: Int = self.names[name] {
                 let temp: String = name
-                name += ".\(count)"
+                name += "\(count)"
                 self.names[temp]! += 1
             } else {
                 self.names[name] = 1
