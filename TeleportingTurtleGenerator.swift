@@ -66,7 +66,7 @@ public class TeleportingTurtleGenerator: SteppingKripkeStructureGenerator {
     
     private let globalsExtractor: GlobalPropertyExtractor
 
-    private let machine: Machine
+    public let machine: Machine
 
     private let stateExtractor: StatePropertyExtractor
 
