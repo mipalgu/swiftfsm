@@ -65,8 +65,6 @@ public protocol _KripkeStructureType {
     
     var states: [KripkeState] { get }
     
-    var machine: Machine { get }
-    
 }
 
 extension _KripkeStructureType where Self: CustomStringConvertible {
