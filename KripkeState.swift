@@ -59,16 +59,16 @@
 import FSM
 
 public class KripkeState: KripkeStateType {
-    
+
     public let fsm: FiniteStateMachine
 
-    public let fsmProperties: [String: KripkeStateProperty]
+    public let fsmProperties: [String: KripkeStateProperty] 
 
-    public let globalProperties: [String: KripkeStateProperty]
+    public let globalProperties: [String: KripkeStateProperty] 
 
     public let machine: Machine
 
-    public let properties: [String: KripkeStateProperty]
+    public let properties: [String: KripkeStateProperty] 
     
     public let state: State
     

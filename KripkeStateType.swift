@@ -143,14 +143,11 @@ extension _KripkeStateType where Self: CustomDebugStringConvertible {
     
 }
 
-public protocol KripkeStateType:
-    _KripkeStateType,
-    CustomStringConvertible,
-    CustomDebugStringConvertible
-{}
-
 /**
  *  Compare KripkeStates for equality.
+ *
+ *  This does not compare the target property as a state is considered equal no
+ *  matter if it transitions to a different state.
  */
 public func ==<T: _KripkeStateType, U: _KripkeStateType>(
    lhs: T,
@@ -186,3 +183,9 @@ public func ==(
     }
     return true
 }
+
+public protocol KripkeStateType:
+    _KripkeStateType,
+    CustomStringConvertible,
+    CustomDebugStringConvertible
+{}
