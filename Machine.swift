@@ -67,3 +67,7 @@ public protocol Machine {
     var fsms: [FiniteStateMachine] { get set }
     
 }
+
+public func ==(lhs: Machine, rhs: Machine) -> Bool {
+    return lhs.name == rhs.name
+}
