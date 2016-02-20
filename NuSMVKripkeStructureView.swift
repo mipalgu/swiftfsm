@@ -115,7 +115,6 @@ public class NuSMVKripkeStructureView: KripkeStructureView {
         var states: [KripkeState] = d.states
         states.removeFirst()
         states.forEach {
-            print("this is a test")
             let pcName: String = getNextName($0, d: d)
             d.trans += getTrans(lastPcName, state: lastState, d: d)
             d.trans += getChanges(pcName, state: $0, d: d)
@@ -137,15 +136,10 @@ public class NuSMVKripkeStructureView: KripkeStructureView {
             d.vars += "\n};\n\n"
         }
         d.vars += "pc : {\n"
-        print("1")
         d.pc.forEach { d.vars += $0 + "\n" }
-        print("2")
         d.vars += "};\n\n"
-        print("2.7")
         d.vars += "INIT\n"
-        print("2.8")
         d.vars += "pc=\(d.pc[0])\n"
-        print("2.9")
     }
 
     private func getTrans(
