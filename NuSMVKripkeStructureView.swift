@@ -58,14 +58,32 @@
 
 import FSM
 
+/**
+ *  Print the Kripke Structure into a format supported by NuSMV.
+ */
 public class NuSMVKripkeStructureView: KripkeStructureView {
 
+    /*
+     *  Used to seperate different names when creating namespaces.
+     */
     private let delimiter: String
 
+    /*
+     *  Used to create the printer that will output the kripke structures.
+     */
     private var factory: PrinterFactory 
 
+    /*
+     *  A Dictionary containing the data objects for every individual machine
+     *  that the structure contains.
+     *
+     *  The key is the name of the machine and the value is the Data object.
+     */
     private var data: [String: Data] = [:]
 
+    /*
+     *  All the states within the kripke structure.
+     */
     private var states: [KripkeState] = []
 
     public init(factory: PrinterFactory, delimiter: String = ".") {
@@ -73,25 +91,51 @@ public class NuSMVKripkeStructureView: KripkeStructureView {
         self.factory = factory
     }
 
+    /**
+     *  Print the specified kripke structure.
+     */
     public func make(structure: KripkeStructureType) {
         if (true == structure.states.isEmpty) {
             return
         }
+        // Create seperate data objects for all the different machines.
         self.states = structure.states
         for s: KripkeState in self.states {
             var d: Data = self.data(s)
             d.states.append(s)
         }
+        // Print individual Kripke Structures.
+        if (self.data.count > 1) {
+            self.generateIndividualStructures()
+        }
         // Print Kripke Structures 
+        self.generateCombinedStructure()
+    }
+
+    /*
+     *  Prints a kripke structure for every different machine in
+     *  the structure.
+     */
+    private func generateIndividualStructures() {
         for t: (key: String, d: Data) in self.data {
             self.printStructure(self.generateData(t.d))
         }
-        // Print a combined kripke structure nusmv
+    }
+
+    /*
+     *  Prints a kripek structure with all the different machines combined into
+     *  one.
+     */
+    private func generateCombinedStructure() {
         var temp: Data = Data(module: "main")
         temp.states = self.states
         self.printStructure(self.generateData(temp))
     }
 
+    /*
+     *  Generate the transitions and variables that we need to print the
+     *  structure.
+     */
     private func generateData(d: Data) -> Data {
         var d: Data = d
         self.createTrans(d)
@@ -99,6 +143,9 @@ public class NuSMVKripkeStructureView: KripkeStructureView {
         return d
     }
 
+    /*
+     *  Create a printer using the factory provided and print the structure.
+     */
     private func printStructure(d: Data) {
         var str: String = "MODULE \(d.module)\n\n"
         str += d.vars + d.trans
@@ -108,6 +155,11 @@ public class NuSMVKripkeStructureView: KripkeStructureView {
         printer.message(str)
     }
 
+    /*
+     *  Generate the transition section string.
+     *
+     *  This is stored within the trans property of the Data Type.
+     */
     private func createTrans(d: Data) {
         var d: Data = d
         var lastState: KripkeState = d.states[0]
@@ -124,6 +176,11 @@ public class NuSMVKripkeStructureView: KripkeStructureView {
         d.trans += "esac\n"
     }
 
+    /*
+     *  Generate the vars section string.
+     *
+     *  This is stored within the vars property of the Data Type.
+     */
     private func createVars(d: Data) {
         var d: Data = d
         d.properties.map {
@@ -142,6 +199,10 @@ public class NuSMVKripkeStructureView: KripkeStructureView {
         d.vars += "pc=\(d.pc[0])\n"
     }
 
+    /*
+     *  Generate a String representing a list of all properties and their
+     *  values.
+     */
     private func getTrans(
         pcName: String,
         state: KripkeState,
@@ -178,6 +239,16 @@ public class NuSMVKripkeStructureView: KripkeStructureView {
         return str
     }
 
+    /*
+     *  This is similar to `getTrans` where it generates a String representing
+     *  a list of all properties and their values, however this list represents
+     *  the effects of the transition or in other words the next values of the
+     *  properties.
+     *
+     *  This method would generate something like `next(count)=3` for every
+     *  property resulting in a string in the following format:
+     *  `next(count)=3 & next(pc)=foo`.
+     */
     private func getChanges(
         pcName: String,
         state: KripkeState,
@@ -195,6 +266,12 @@ public class NuSMVKripkeStructureView: KripkeStructureView {
         ) 
     }
 
+    /*
+     *  Get the next pc name.
+     *
+     *  The name follows the following convention:
+     *      `<machine_name><delimiter><fsm_name><delimiter><state_name><delimiter><ringlet_count>`
+     */
     private func getNextName(state: KripkeState, d: Data) -> String {
         var d: Data = d
         var name: String = 
@@ -208,6 +285,13 @@ public class NuSMVKripkeStructureView: KripkeStructureView {
         return name
     }
 
+    /*
+     *  Used to create an individual item in the property list of the
+     *  transition.
+     *
+     *  This method therefore creates something like this: `name=val` for the
+     *  property.
+     */
     private func generate(
         name: String,
         d: Data,
@@ -230,6 +314,10 @@ public class NuSMVKripkeStructureView: KripkeStructureView {
         return str
     }
 
+    /*
+     *  Add the property to the properties list within Data if it has not
+     *  already been added.
+     */
     private func addToProperties(
         name: String,
         p: KripkeStateProperty,
@@ -244,6 +332,9 @@ public class NuSMVKripkeStructureView: KripkeStructureView {
         }
     }
 
+    /*
+     *  Retrieve/Create the Data object for the specific kripke states machine.
+     */
     private func data(state: KripkeState) -> Data {
         if (nil == self.data[state.machine.name]) {
             self.data[state.machine.name] = Data(module: state.machine.name)
@@ -253,15 +344,57 @@ public class NuSMVKripkeStructureView: KripkeStructureView {
 
 }
 
+/*
+ *  Is used to easily store the data that is required to generate and print a
+ *  Kripke Structure.
+ */
 private class Data {
 
+    /*
+     *  A Dictionary Containing a list of property values.
+     *
+     *  The key represents the name of the property and the value is an array
+     *  of all the possible values of the property.  
+     */
     public var properties: [String: [KripkeStateProperty]] = [:]
+    
+    /*
+     *  The name of the module that we are generating.
+     */
     public let module: String
+
+    /*
+     *  All of the states that belong in this structure.
+     */
     public var states: [KripkeState] = []
+
+    /*
+     *  The output string that we are building.
+     */
     public var str: String = "MODULE main\n\n"
+    
+    /*
+     *  The vars section.
+     */
     public var vars: String = "VAR\n\n"
+    
+    /*
+     *  The trans section.
+     */
     public var trans: String = "TRANS\ncase\n"
+    
+    /*
+     *  Keeps track of how many times an individual state has been run.
+     *
+     *  The key of the dictionary is a string representing the states fully
+     *  namespaced name and the value is how many times it has been run.
+     */
     public var ringlets: [String: Int] = [:]
+    
+    /*
+     *  Contains a list of fully namespaced state names with their ringlet
+     *  counts added on the end.
+     */
     public var pc: [String] = []
 
     public init(module: String) {
