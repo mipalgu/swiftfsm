@@ -369,11 +369,6 @@ private class Data {
     public var states: [KripkeState] = []
 
     /*
-     *  The output string that we are building.
-     */
-    public var str: String = "MODULE main\n\n"
-    
-    /*
      *  The vars section.
      */
     public var vars: String = "VAR\n\n"
