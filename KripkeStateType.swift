@@ -132,10 +132,22 @@ extension _KripkeStateType where Self: CustomDebugStringConvertible {
     
     public var debugDescription: String {
         var str: String = "state = \(self.state.name)\n"
+        str += "machine = \(self.machine.name)\n"
+        str += "fsm = \(self.fsm.name)\n"
         str += "target = \(self.target?.state.name)\n"
+        str += "global properties: {\n"
+        str += self.globalProperties.reduce("", combine: {
+            $0 + "\t" + $1.0 + " = \($1.1)\n"
+        })
+        str += "}\n"
+        str += "fsm properties: {\n"
+        str += self.fsmProperties.reduce("", combine: {
+            $0 + "\t" + $1.0 + " = \($1.1)\n"
+        })
+        str += "}\n"
         str += "properties = {\n"
         str += self.properties.reduce("", combine: {
-            $0 + "\t \($1.1.type)" + $1.0 + " = \($1.1)\n"
+            $0 + "\t" + $1.0 + " = \($1.1)\n"
         })
         str += "}"
         return str
