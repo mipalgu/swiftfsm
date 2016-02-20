@@ -98,6 +98,8 @@ public class NuSMVKripkeStructureView: KripkeStructureView {
         if (true == structure.states.isEmpty) {
             return
         }
+        print("\n")
+        print(structure.states)
         // Create seperate data objects for all the different machines.
         self.states = structure.states
         for s: KripkeState in self.states {
@@ -196,7 +198,11 @@ public class NuSMVKripkeStructureView: KripkeStructureView {
         d.pc.forEach { d.vars += $0 + "\n" }
         d.vars += "};\n\n"
         d.vars += "INIT\n"
-        d.vars += "pc=\(d.pc[0])\n"
+        d.vars += "pc=\(d.pc[0])"
+        d.vars += d.properties.flatMap({
+            nil == $1.first ? nil : " & \($0)=\($1.first!.value)"
+        }).reduce("", combine: +)
+        d.vars += "\n\n"
     }
 
     /*
