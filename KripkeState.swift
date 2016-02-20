@@ -92,45 +92,4 @@ public class KripkeState: KripkeStateType {
         self.target = target
     }
     
-    public func equals(other: KripkeState) -> Bool {
-        // Check if the fsms are the same
-        if (self.fsm != other.fsm) {
-            return false
-        }
-        // Check if the states are the same.
-        if (self.state != other.state) {
-            return false
-        }
-        // Check if fsm properties are the same
-        if (false == self.checkProperties(self.fsmProperties, rhs: other.fsmProperties)) {
-            return false
-        }
-        // Check if the property counts are the same.
-        return self.checkProperties(self.properties, rhs: other.properties)
-    }
-
-    private func checkProperties(
-        lhs: [String: KripkeStateProperty],
-        rhs: [String: KripkeStateProperty]
-    ) -> Bool {
-        // Check if they are the same size
-        if (lhs.count != rhs.count) {
-            return false
-        }
-        // Check values
-        for key: String in lhs.keys {
-            if (nil == rhs[key]) {
-                return false
-            }
-            if (false == (lhs[key]! == rhs[key]!)) {
-                return false
-            }
-        }
-        return true
-    }
-    
-}
-
-public func ==(lhs: KripkeState, rhs: KripkeState) -> Bool {
-    return lhs.equals(rhs)
 }

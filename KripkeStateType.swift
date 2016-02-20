@@ -149,3 +149,40 @@ public protocol KripkeStateType:
     CustomDebugStringConvertible
 {}
 
+/**
+ *  Compare KripkeStates for equality.
+ */
+public func ==<T: _KripkeStateType, U: _KripkeStateType>(
+   lhs: T,
+   rhs: U
+) -> Bool {
+    return lhs.machine == rhs.machine &&
+        lhs.fsm == rhs.fsm &&
+        lhs.state == rhs.state &&
+        lhs.globalProperties == rhs.globalProperties &&
+        lhs.fsmProperties == rhs.fsmProperties &&
+        lhs.properties == rhs.properties
+}
+
+/**
+ *  Compare a list of properties for equality.
+ */
+public func ==(
+    lhs: [String: KripkeStateProperty],
+    rhs: [String: KripkeStateProperty]
+) -> Bool {
+    // Check if they are the same size
+    if (lhs.count != rhs.count) {
+        return false
+    }
+    // Check values
+    for key: String in lhs.keys {
+        if (nil == rhs[key]) {
+            return false
+        }
+        if (false == (lhs[key]! == rhs[key]!)) {
+            return false
+        }
+    }
+    return true
+}
