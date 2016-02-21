@@ -168,12 +168,28 @@ public class NuSMVKripkeStructureView: KripkeStructureView {
         states.removeFirst()
         states.forEach {
             let pcName: String = getNextName($0, d: d)
-            d.trans += getTrans(lastPcName, state: lastState, d: d)
-            d.trans += getChanges(pcName, state: $0, d: d)
+            d.trans += getTrans(
+                lastPcName,
+                state: lastState,
+                d: d,
+                properties: lastState.beforeProperties
+            )
+            d.trans += getChanges(pcName, state: $0, lastState: lastState, d: d)
             lastState = $0
             lastPcName = pcName
         }
         d.trans += "esac\n"
+    }
+
+    private func createChangesPropertyList(
+        lastState: KripkeState,
+        currentState: KripkeState
+    ) -> KripkeStatePropertyList {
+        return KripkeStatePropertyList(
+            stateProperties: lastState.afterProperties.stateProperties,
+            fsmProperties: lastState.afterProperties.fsmProperties,
+            globalProperties: currentState.beforeProperties.globalProperties
+        )
     }
 
     /*
@@ -228,6 +244,7 @@ public class NuSMVKripkeStructureView: KripkeStructureView {
         pcName: String,
         state: KripkeState,
         d: Data,
+        properties: KripkeStatePropertyList,
         prep: String = "",
         app: String = "",
         start: String = "",
@@ -238,9 +255,9 @@ public class NuSMVKripkeStructureView: KripkeStructureView {
         var pre: Bool = false
         // Holds naming convention functions for the different property lists.
         let gen: [([String: KripkeStateProperty], (String) -> String)] = [
-            (state.fsmProperties, { "\(prep)\(state.machine.name)\(self.delimiter)\(state.fsm.name)\(self.delimiter)\($0)\(app)" }),
-            (state.properties, { "\(prep)\(state.machine.name)\(self.delimiter)\(state.fsm.name)\(self.delimiter)\(state.state.name)\(self.delimiter)\($0)\(app)" }),
-            (state.globalProperties, { "\(prep)\(state.machine.name)\(self.delimiter)globals\(self.delimiter)\($0)\(app)" })
+            (properties.fsmProperties, { "\(prep)\(state.machine.name)\(self.delimiter)\(state.fsm.name)\(self.delimiter)\($0)\(app)" }),
+            (properties.stateProperties, { "\(prep)\(state.machine.name)\(self.delimiter)\(state.fsm.name)\(self.delimiter)\(state.state.name)\(self.delimiter)\($0)\(app)" }),
+            (properties.globalProperties, { "\(prep)\(state.machine.name)\(self.delimiter)globals\(self.delimiter)\($0)\(app)" })
         ]
         // Generate the transitions using the correct naming convention for each
         // property list.
@@ -273,12 +290,17 @@ public class NuSMVKripkeStructureView: KripkeStructureView {
     private func getChanges(
         pcName: String,
         state: KripkeState,
+        lastState: KripkeState,
         d: Data
     ) -> String {
         return self.getTrans(
             pcName,
             state: state,
             d: d,
+            properties: self.createChangesPropertyList(
+                lastState,
+                currentState: state
+            ),
             prep: "next(",
             app: ")",
             start: "    ",
