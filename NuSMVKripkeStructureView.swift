@@ -86,7 +86,7 @@ public class NuSMVKripkeStructureView: KripkeStructureView {
      */
     private var states: [KripkeState] = []
 
-    public init(factory: PrinterFactory, delimiter: String = ".") {
+    public init(factory: PrinterFactory, delimiter: String = "-") {
         self.delimiter = delimiter
         self.factory = factory
     }
