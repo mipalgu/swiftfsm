@@ -56,7 +56,7 @@
  *
  */
 
-public struct KripkeStatePropertyList {
+public struct KripkeStatePropertyList: Equatable {
 
     public let stateProperties: [String: KripkeStateProperty]
 
@@ -74,4 +74,59 @@ public struct KripkeStatePropertyList {
         self.globalProperties = globalProperties
     }
 
+}
+
+extension KripkeStatePropertyList: CustomStringConvertible {
+
+    public var description: String {
+        let lists: [[String: KripkeStateProperty]] = [
+            self.stateProperties,
+            self.fsmProperties,
+            self.globalProperties
+        ]
+        var str: String = ""
+        lists.forEach {
+            var list: String = ""
+            $0.forEach {
+               list += "\n\($0)=\($1.value)," 
+            }
+            var temp: String.CharacterView = list.characters
+            temp.removeLast()
+            str += String(temp)
+        }
+        return str
+    }
+
+}
+
+public func ==(
+    lhs: KripkeStatePropertyList,
+    rhs: KripkeStatePropertyList
+) -> Bool {
+    return lhs.globalProperties == rhs.globalProperties &&
+        lhs.fsmProperties == rhs.fsmProperties &&
+        lhs.stateProperties == rhs.stateProperties
+}
+
+/**
+ *  Compare a list of properties for equality.
+ */
+public func ==(
+    lhs: [String: KripkeStateProperty],
+    rhs: [String: KripkeStateProperty]
+) -> Bool {
+    // Check if they are the same size
+    if (lhs.count != rhs.count) {
+        return false
+    }
+    // Check values
+    for key: String in lhs.keys {
+        if (nil == rhs[key]) {
+            return false
+        }
+        if (false == (lhs[key]! == rhs[key]!)) {
+            return false
+        }
+    }
+    return true
 }
