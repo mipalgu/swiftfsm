@@ -85,8 +85,8 @@ public class MirrorPropertyExtractor:
     private func getChild(
         label: String,
         children: Mirror.Children
-    ) -> Mirror.Child? {
-        return children.filter({$0.label == label}).first
+    ) -> Any? {
+        return children.filter({$0.label == label}).first?.value
     }
     
     /**
