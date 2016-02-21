@@ -60,15 +60,13 @@ import FSM
 
 public class KripkeState: KripkeStateType {
 
+    public let afterProperties: KripkeStatePropertyList
+
+    public let beforeProperties: KripkeStatePropertyList
+
     public let fsm: FiniteStateMachine
 
-    public let fsmProperties: [String: KripkeStateProperty] 
-
-    public let globalProperties: [String: KripkeStateProperty] 
-
     public let machine: Machine
-
-    public let properties: [String: KripkeStateProperty] 
     
     public let state: State
     
@@ -76,20 +74,18 @@ public class KripkeState: KripkeStateType {
     
     public init(
         state: State,
-        properties: [String: KripkeStateProperty],
         fsm: FiniteStateMachine,
         machine: Machine,
-        fsmProperties: [String: KripkeStateProperty],
-        globalProperties: [String: KripkeStateProperty],
+        beforeProperties: KripkeStatePropertyList,
+        afterProperties: KripkeStatePropertyList,
         target: KripkeState? = nil
     ) {
         self.state = state
-        self.properties = properties
         self.fsm = fsm
         self.machine = machine
-        self.fsmProperties = fsmProperties
-        self.globalProperties = globalProperties
         self.target = target
+        self.beforeProperties = beforeProperties
+        self.afterProperties = afterProperties
     }
     
 }

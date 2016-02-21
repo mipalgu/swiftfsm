@@ -64,31 +64,20 @@ import FSM
  */
 public protocol _KripkeStateType: Equatable {
     
+    var afterProperties: KripkeStatePropertyList { get }
+
+    var beforeProperties: KripkeStatePropertyList { get }
+
     /**
      *  The fsm that this state belongs to.
      */
     var fsm: FiniteStateMachine { get }
 
     /**
-     *  Describes the parts of the machine that is running the state.
-     */
-    var fsmProperties: [String: KripkeStateProperty] { get }
-
-    /**
-     *  Describes the global properties that effect the running of the state.
-     */
-    var globalProperties: [String: KripkeStateProperty] { get }
-
-    /**
      *  The machine that this state belongs to.
      */
     var machine: Machine { get }
 
-    /**
-     *  Describes the parts of the source state.
-     */
-    var properties: [String: KripkeStateProperty] { get }
-    
     /**
      *  The actual state within the finite state machine.
      */
@@ -108,20 +97,12 @@ extension _KripkeStateType where Self: CustomStringConvertible {
         str += "machine = \(self.machine.name)\n"
         str += "fsm = \(self.fsm.name)\n"
         str += "target = \(self.target?.state.name)\n"
-        str += "global properties: {\n"
-        str += self.globalProperties.reduce("", combine: {
-            $0 + "\t" + $1.0 + " = \($1.1)\n"
-        })
+        str += "beforeProperties: {\n"
+        str += self.beforeProperties.description
         str += "}\n"
-        str += "fsm properties: {\n"
-        str += self.fsmProperties.reduce("", combine: {
-            $0 + "\t" + $1.0 + " = \($1.1)\n"
-        })
+        str += "afterProperties: {\n"
+        str += self.afterProperties.description
         str += "}\n"
-        str += "properties = {\n"
-        str += self.properties.reduce("", combine: {
-            $0 + "\t" + $1.0 + " = \($1.1)\n"
-        })
         str += "}"
         return str
     }
@@ -135,20 +116,12 @@ extension _KripkeStateType where Self: CustomDebugStringConvertible {
         str += "machine = \(self.machine.name)\n"
         str += "fsm = \(self.fsm.name)\n"
         str += "target = \(self.target?.state.name)\n"
-        str += "global properties: {\n"
-        str += self.globalProperties.reduce("", combine: {
-            $0 + "\t" + $1.0 + " = \($1.1)\n"
-        })
+        str += "beforeProperties: {\n"
+        str += self.beforeProperties.description
         str += "}\n"
-        str += "fsm properties: {\n"
-        str += self.fsmProperties.reduce("", combine: {
-            $0 + "\t" + $1.0 + " = \($1.1)\n"
-        })
+        str += "afterProperties: {\n"
+        str += self.afterProperties.description
         str += "}\n"
-        str += "properties = {\n"
-        str += self.properties.reduce("", combine: {
-            $0 + "\t" + $1.0 + " = \($1.1)\n"
-        })
         str += "}"
         return str
     }
@@ -168,32 +141,8 @@ public func ==<T: _KripkeStateType, U: _KripkeStateType>(
     return lhs.machine == rhs.machine &&
         lhs.fsm == rhs.fsm &&
         lhs.state == rhs.state &&
-        lhs.globalProperties == rhs.globalProperties &&
-        lhs.fsmProperties == rhs.fsmProperties &&
-        lhs.properties == rhs.properties
-}
-
-/**
- *  Compare a list of properties for equality.
- */
-public func ==(
-    lhs: [String: KripkeStateProperty],
-    rhs: [String: KripkeStateProperty]
-) -> Bool {
-    // Check if they are the same size
-    if (lhs.count != rhs.count) {
-        return false
-    }
-    // Check values
-    for key: String in lhs.keys {
-        if (nil == rhs[key]) {
-            return false
-        }
-        if (false == (lhs[key]! == rhs[key]!)) {
-            return false
-        }
-    }
-    return true
+        lhs.beforeProperties == rhs.beforeProperties
+        lhs.afterProperties == rhs.afterProperties
 }
 
 public protocol KripkeStateType:
