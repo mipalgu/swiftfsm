@@ -182,6 +182,12 @@ public class NuSMVKripkeStructureView: KripkeStructureView {
      *  This is stored within the vars property of the Data Type.
      */
     private func createVars(d: Data) {
+        self.createPropertiesList(d)
+        self.createPCList(d)
+        self.createInitList(d)
+    }
+
+    private func createPropertiesList(d: Data) {
         var d: Data = d
         d.properties.map {
             d.vars += "\($0) : {"
@@ -192,9 +198,20 @@ public class NuSMVKripkeStructureView: KripkeStructureView {
             }
             d.vars += "\n};\n\n"
         }
-        d.vars += "pc : {\n"
-        d.pc.forEach { d.vars += $0 + "\n" }
-        d.vars += "};\n\n"
+    }
+
+    private func createPCList(d: Data) {
+        var d: Data = d
+        d.vars += "pc : {"
+        d.pc.forEach { d.vars += "\n" + $0 + "," }
+        var temp: String.CharacterView = d.vars.characters
+        temp.removeLast()
+        d.vars = String(temp)
+        d.vars += "\n};\n\n"
+    }
+
+    private func createInitList(d: Data) {
+        var d: Data = d
         d.vars += "INIT\n"
         d.vars += "pc=\(d.pc[0])"
         d.vars += d.properties.flatMap({
