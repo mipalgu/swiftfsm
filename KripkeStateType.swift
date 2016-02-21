@@ -99,10 +99,10 @@ extension _KripkeStateType where Self: CustomStringConvertible {
         str += "target = \(self.target?.state.name)\n"
         str += "beforeProperties: {\n"
         str += self.beforeProperties.description
-        str += "}\n"
+        str += "\n}\n"
         str += "afterProperties: {\n"
         str += self.afterProperties.description
-        str += "}\n"
+        str += "\n}\n"
         str += "}"
         return str
     }
@@ -118,10 +118,10 @@ extension _KripkeStateType where Self: CustomDebugStringConvertible {
         str += "target = \(self.target?.state.name)\n"
         str += "beforeProperties: {\n"
         str += self.beforeProperties.description
-        str += "}\n"
+        str += "\n}\n"
         str += "afterProperties: {\n"
         str += self.afterProperties.description
-        str += "}\n"
+        str += "\n}\n"
         str += "}"
         return str
     }
