@@ -98,8 +98,6 @@ public class NuSMVKripkeStructureView: KripkeStructureView {
         if (true == structure.states.isEmpty) {
             return
         }
-        print("\n")
-        print(structure.states)
         // Create seperate data objects for all the different machines.
         self.states = structure.states
         for s: KripkeState in self.states {
