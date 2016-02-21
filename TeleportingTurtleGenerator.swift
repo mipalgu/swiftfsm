@@ -72,9 +72,9 @@ public class TeleportingTurtleGenerator: SteppingKripkeStructureGenerator {
 
     public private(set) var isFinished: Bool
 
-    private var turtle: KripkeState
-    private var rabbit: KripkeState
-    private var lastState: KripkeState
+    private var turtle: KripkeState!
+    private var rabbit: KripkeState!
+    private var lastState: KripkeState!
     private var power: Int                  // How much distance the turtle and rabbit should have before bringing them together again.
     private var length: Int                 // The current distance between the turtle and rabbit.
     private var inCycle: Bool               // Are we checking a cycle?
@@ -98,12 +98,9 @@ public class TeleportingTurtleGenerator: SteppingKripkeStructureGenerator {
         self.length = 1
         self.inCycle = false
         self.cyclePos = 0
-        self.turtle = self.convertToKripkeState(self.fsm.currentState)
-        self.rabbit = turtle 
-        self.lastState = turtle
-        self.cycleState = turtle
+        self.turtle = nil
     }
-    
+
     /**
      *  Generate a kripke structure from the initial state of the finite state
      *  machine.
@@ -124,6 +121,15 @@ public class TeleportingTurtleGenerator: SteppingKripkeStructureGenerator {
      *  states from the end of the structure.
      */
     public func next() -> KripkeState {
+        // Have we started yet?
+        if (nil == self.turtle) {
+            // No - finish setup.
+            self.turtle = self.generateNextState()
+            self.rabbit = self.turtle
+            self.lastState = self.turtle
+            self.cycleState = self.turtle
+            return self.turtle
+        }
         // Don't bother generating any further if we have finished.
         if (true == self.isFinished) {
             return self.rabbit
@@ -133,7 +139,11 @@ public class TeleportingTurtleGenerator: SteppingKripkeStructureGenerator {
             // 'Teleport' the turtle to the rabbit when necessary.
             self.tp()
         }
-        self.generateNextRabbit()
+        // Update the rabbit with the new state and remember the last state.
+        let temp: KripkeState = self.generateNextState()
+        self.rabbit.target = temp
+        self.lastState = self.rabbit
+        self.rabbit = temp
         // Have we found a new cycle?
         if (false == self.inCycle && self.rabbit == self.turtle) {
             // Start checking the cycle and reset the cycle variables
@@ -160,7 +170,7 @@ public class TeleportingTurtleGenerator: SteppingKripkeStructureGenerator {
         return self.rabbit
     }
 
-    private func generateNextRabbit() {
+    private func generateNextState() -> KripkeState {
         let s: State = self.fsm.currentState
         // Extract the fsm and state properties.
         let beforeProperties: [String: KripkeStateProperty] = 
@@ -191,17 +201,13 @@ public class TeleportingTurtleGenerator: SteppingKripkeStructureGenerator {
             globalProperties: globalProperties.after
         )
         // Create the Kripke State
-        let temp: KripkeState = KripkeState(
+        return KripkeState(
             state: s,
             fsm: self.fsm,
             machine: self.machine,
-            beforeProperties: beforeProperties,
-            afterProperties: afterProperties
+            beforeProperties: before,
+            afterProperties: after
         )
-        // Update the rabbit with the new state and remember the last state.
-        self.rabbit.target = temp
-        self.lastState = self.rabbit
-        self.rabbit = temp
     } 
 
     private func tp() {
