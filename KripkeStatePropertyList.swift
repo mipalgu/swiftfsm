@@ -79,20 +79,22 @@ public struct KripkeStatePropertyList: Equatable {
 extension KripkeStatePropertyList: CustomStringConvertible {
 
     public var description: String {
-        let lists: [[String: KripkeStateProperty]] = [
-            self.stateProperties,
-            self.fsmProperties,
-            self.globalProperties
+        let lists: [String: [String: KripkeStateProperty]] = [
+            "stateProperties": self.stateProperties,
+            "fsmProperties": self.fsmProperties,
+            "globalProperties": self.globalProperties
         ]
         var str: String = ""
         lists.forEach {
+            str += "\n\t" + $0 + " {"
             var list: String = ""
-            $0.forEach {
-               list += "\n\($0)=\($1.value)," 
+            $1.forEach {
+               list += "\n\t\t\($0)=\($1.value)," 
             }
             var temp: String.CharacterView = list.characters
             temp.removeLast()
             str += String(temp)
+            str += "\n\t}\n"
         }
         return str
     }
