@@ -72,8 +72,9 @@ public class TeleportingTurtleGenerator: SteppingKripkeStructureGenerator {
 
     public private(set) var isFinished: Bool
 
-    private var turtle: KripkeState!
-    private var rabbit: KripkeState!
+    private var turtle: KripkeState
+    private var rabbit: KripkeState
+    private var lastState: KripkeState
     private var power: Int                  // How much distance the turtle and rabbit should have before bringing them together again.
     private var length: Int                 // The current distance between the turtle and rabbit.
     private var inCycle: Bool               // Are we checking a cycle?
@@ -99,6 +100,7 @@ public class TeleportingTurtleGenerator: SteppingKripkeStructureGenerator {
         self.cyclePos = 0
         self.turtle = self.convertToKripkeState(self.fsm.currentState)
         self.rabbit = turtle 
+        self.lastState = turtle
         self.cycleState = turtle
     }
     
@@ -154,43 +156,51 @@ public class TeleportingTurtleGenerator: SteppingKripkeStructureGenerator {
         }
         self.isFinished = 
             self.fsm.hasFinished() && 
-            self.rabbit == self.convertToKripkeState(self.fsm.currentState)
+            self.rabbit == self.lastState
         return self.rabbit
     }
 
-    public func convertToKripkeState(state: State) -> KripkeState {
-        return KripkeState(
-            state: state,
-            properties: self.stateExtractor.extract(state),
-            fsm: self.fsm,
-            machine: self.machine,
-            fsmProperties: self.fsmExtractor.extract(self.fsm.vars),
-            globalProperties: self.globalsExtractor.extract(self.fsm.ringlet)
-        )
-    }
-
     private func generateNextRabbit() {
-        // Get state and fsm properties before we execute the state
         let s: State = self.fsm.currentState
-        let properties: [String: KripkeStateProperty] = 
+        // Extract the fsm and state properties.
+        let beforeProperties: [String: KripkeStateProperty] = 
             self.stateExtractor.extract(s)
-        let fsmProperties: [String: KripkeStateProperty] = 
+        let beforeFsmProperties: [String: KripkeStateProperty] = 
             self.fsmExtractor.extract(self.fsm.vars)
+        // Execute the state.
         self.fsm.next()
+        // Extract the fsm and state properties again.
+        let afterProperties: [String: KripkeStateProperty] =
+            self.stateExtractor.extract(s)
+        let afterFsmProperties: [String: KripkeStateProperty] =
+            self.fsmExtractor.extract(self.fsm.vars)
         // Get global properties
-        let globalProperties: [String: KripkeStateProperty] = 
-            self.globalsExtractor.extract(self.fsm.ringlet)
+        let globalProperties: (
+            before: [String: KripkeStateProperty],
+            after: [String: KripkeStateProperty]
+        ) = self.globalsExtractor.extract(self.fsm.ringlet)
+        // Create Before and After Property Lists
+        let before: KripkeStatePropertyList = KripkeStatePropertyList(
+            stateProperties: beforeProperties,
+            fsmProperties: beforeFsmProperties,
+            globalProperties: globalProperties.before
+        )
+        let after: KripkeStatePropertyList = KripkeStatePropertyList(
+            stateProperties: afterProperties,
+            fsmProperties: afterFsmProperties,
+            globalProperties: globalProperties.after
+        )
         // Create the Kripke State
         let temp: KripkeState = KripkeState(
             state: s,
-            properties: properties,
             fsm: self.fsm,
             machine: self.machine,
-            fsmProperties: fsmProperties,
-            globalProperties: globalProperties
+            beforeProperties: beforeProperties,
+            afterProperties: afterProperties
         )
-        // Update the rabbit with the new state.
+        // Update the rabbit with the new state and remember the last state.
         self.rabbit.target = temp
+        self.lastState = self.rabbit
         self.rabbit = temp
     } 
 
