@@ -172,7 +172,6 @@ public class NuSMVKripkeStructureView: KripkeStructureView {
         states.forEach {
             d.trans += getTrans(lastState, d: d, pcName: lastPCName)
             lastPCName = getNextPCName($0, d: d)
-            d.pc.append(lastPCName)
             d.trans += getChanges(
                 $0,
                 lastState: lastState,
@@ -181,7 +180,7 @@ public class NuSMVKripkeStructureView: KripkeStructureView {
             )
             lastState = $0
         }
-        d.trans += "esac\n"
+        d.trans += "TRUE:\n    next(pc)=\(lastPCName);\nesac\n"
     }
 
     /*
@@ -197,7 +196,9 @@ public class NuSMVKripkeStructureView: KripkeStructureView {
             d.ringlets[name] = -1
         }
         d.ringlets[name]! += 1
-        return name + "\(self.delimiter)R\(d.ringlets[name]!)"
+        name += "\(self.delimiter)R\(d.ringlets[name]!)"
+        d.pc.append(name)
+        return name
     }
 
     private func createChangesPropertyList(
