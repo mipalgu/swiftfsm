@@ -231,7 +231,8 @@ public class NuSMVKripkeStructureView: KripkeStructureView {
             d.vars += "\($0) : {"
             var pre: Bool = false
             $1.forEach {
-                d.vars += (true == pre ? ",\n" : "\n") + "\($0.value)"
+                let val: String = self.formatPropertyValue($0)
+                d.vars += (true == pre ? ",\n" : "\n") + val 
                 pre = true
             }
             d.vars += "\n};\n\n"
@@ -253,7 +254,7 @@ public class NuSMVKripkeStructureView: KripkeStructureView {
         d.vars += "INIT\n"
         d.vars += "pc=\(d.pc[0])"
         d.vars += d.properties.flatMap({
-            nil == $1.first ? nil : " & \($0)=\($1.first!.value)"
+            nil == $1.first ? nil : " & \($0)=\(self.formatPropertyValue($1.first!))"
         }).reduce("", combine: +)
         d.vars += "\n\n"
     }
@@ -372,9 +373,20 @@ public class NuSMVKripkeStructureView: KripkeStructureView {
         if (true == pre) {
            str += " & " 
         }
-        str += "\(name)=\(p.value)"
+        str += "\(name)=\(self.formatPropertyValue(p))"
         pre = true
         return str
+    }
+
+    private func formatPropertyValue(p: KripkeStateProperty) -> String {
+        var val: String = "\(p.value)"
+        if (.String == p.type) {
+            val = "\"" + val + "\""
+        }
+        if (.Double == p.type || .Float == p.type || .Float80 == p.type) {
+            val = "F" + String(val.characters.map({ $0 == "." ? "_" : $0 }))
+        }
+        return val
     }
 
     /*
