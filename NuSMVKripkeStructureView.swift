@@ -269,11 +269,8 @@ public class NuSMVKripkeStructureView: KripkeStructureView {
         pcName: String
     ) -> String {
         // Holds naming convention functions for the different property lists.
-        let gen: [([String: KripkeStateProperty], (String) -> String)] = [
-            (state.beforeProperties.stateProperties, { "\(self.stateName(state))\(self.delimiter)\($0)" }),
-            (state.beforeProperties.fsmProperties, { "\(self.fsmName(state))\(self.delimiter)\($0)" }),
-            (state.beforeProperties.globalProperties, { "\(self.globalsName(state))\(self.delimiter)\($0)" })
-        ]
+        let gen: [([String: KripkeStateProperty], (String) -> String)] =
+            self.getNamingFunctions(state, list: state.beforeProperties) 
         var str: String = ""
         let props: String =
             self.generateProperties(gen, d: d, addToProperties: true)
@@ -299,6 +296,16 @@ public class NuSMVKripkeStructureView: KripkeStructureView {
         d: Data,
         pcName: String
     ) -> String {
+        // Add the properties to the data properties list.
+        let _: String = self.generateProperties(
+            self.getNamingFunctions(
+                (lastState, lastState.afterProperties.stateProperties),
+                fsmProperties: (lastState, lastState.afterProperties.fsmProperties),
+                globalProperties: (state, state.beforeProperties.globalProperties)
+            ),
+            d: d,
+            addToProperties: true
+        )
         // Holds naming convention functions for each property list.
         let gen: [([String: KripkeStateProperty], (String) -> String)] = [
             (lastState.afterProperties.stateProperties, { "next(\(self.stateName(lastState))\(self.delimiter)\($0))" }),
@@ -312,6 +319,29 @@ public class NuSMVKripkeStructureView: KripkeStructureView {
         str += (nil == props.characters.first) ? " " : " & "
         str += "next(pc)=\(pcName);\n"
         return str
+    }
+
+    private func getNamingFunctions(
+        state: KripkeState,
+        list: KripkeStatePropertyList
+    ) -> [([String: KripkeStateProperty], (String) -> String)] {
+        return self.getNamingFunctions(
+            (state, list.stateProperties),
+            fsmProperties: (state, list.fsmProperties),
+            globalProperties: (state, list.globalProperties)
+        )
+    }
+
+    private func getNamingFunctions(
+        stateProperties: (KripkeState, [String: KripkeStateProperty]),
+        fsmProperties: (KripkeState, [String: KripkeStateProperty]),
+        globalProperties: (KripkeState, [String: KripkeStateProperty])
+    ) -> [([String: KripkeStateProperty], (String) -> String)] {
+        return [
+            (stateProperties.1, { "\(self.stateName(stateProperties.0))\(self.delimiter)\($0)" }),
+            (fsmProperties.1, { "\(self.fsmName(fsmProperties.0))\(self.delimiter)\($0)" }),
+            (globalProperties.1, { "\(self.globalsName(globalProperties.0))\(self.delimiter)\($0)" })
+        ]
     }
 
     private func stateName(state: KripkeState) -> String {
