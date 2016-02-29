@@ -432,9 +432,7 @@ public class NuSMVKripkeStructureView: KripkeStructureView {
         if (nil == d.properties[name]) {
             d.properties[name] = []
         }
-        if (false == d.properties[name]!.contains({ $0 == p })) {
-            d.properties[name]!.append(p)
-        }
+        d.properties[name]!.insert(p)
     }
 
     /*
@@ -461,7 +459,7 @@ private class Data {
      *  The key represents the name of the property and the value is an array
      *  of all the possible values of the property.  
      */
-    public var properties: [String: [KripkeStateProperty]] = [:]
+    public var properties: [String: Set<KripkeStateProperty>] = [:]
     
     /*
      *  The name of the module that we are generating.
