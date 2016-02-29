@@ -159,6 +159,14 @@ extension KripkeStateProperty: CustomStringConvertible {
     
 }
 
+extension KripkeStateProperty: Hashable {
+
+    public var hashValue: Int {
+        return String("\(self.value)").hashValue
+    }
+
+}
+
 public func ==(lhs: KripkeStateProperty, rhs: KripkeStateProperty) -> Bool {
     return lhs.equals(rhs)
 }
