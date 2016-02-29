@@ -91,9 +91,11 @@ extension KripkeStatePropertyList: CustomStringConvertible {
             $1.forEach {
                list += "\n\t\t\($0)=\($1.value)," 
             }
-            var temp: String.CharacterView = list.characters
-            temp.removeLast()
-            str += String(temp)
+            if (false == list.isEmpty) {
+                var temp: String.CharacterView = list.characters
+                temp.removeLast()
+                str += String(temp)
+            }
             str += "\n\t}\n"
         }
         return str
