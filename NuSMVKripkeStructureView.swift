@@ -180,6 +180,8 @@ public class NuSMVKripkeStructureView: KripkeStructureView {
             )
             lastState = $0
         }
+        let _: String = getTrans(lastState, d: d, pcName: lastPCName)
+        // Handle the last transition.
         d.trans += "TRUE:\n    next(pc)=\(lastPCName);\nesac\n"
     }
 
