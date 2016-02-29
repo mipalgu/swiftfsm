@@ -169,8 +169,14 @@ public class NuSMVKripkeStructureView: KripkeStructureView {
         var lastState: KripkeState = states[0]
         var lastPCName: String = self.getNextPCName(lastState, d: d)
         states.removeFirst()
+        var initial: Bool = true
         states.forEach {
-            d.trans += getTrans(lastState, d: d, pcName: lastPCName)
+            d.trans += getTrans(
+                lastState,
+                d: d,
+                pcName: lastPCName,
+                initial: initial
+            )
             lastPCName = getNextPCName($0, d: d)
             d.trans += getChanges(
                 $0,
@@ -179,6 +185,7 @@ public class NuSMVKripkeStructureView: KripkeStructureView {
                 pcName: lastPCName
             )
             lastState = $0
+            initial = false
         }
         let _: String = getTrans(lastState, d: d, pcName: lastPCName)
         // Handle the last transition.
@@ -231,8 +238,7 @@ public class NuSMVKripkeStructureView: KripkeStructureView {
             d.vars += "\($0) : {"
             var pre: Bool = false
             $1.forEach {
-                let val: String = self.formatPropertyValue($0)
-                d.vars += (true == pre ? ",\n" : "\n") + val 
+                d.vars += (true == pre ? ",\n" : "\n") + $0 
                 pre = true
             }
             d.vars += "\n};\n\n"
@@ -253,9 +259,7 @@ public class NuSMVKripkeStructureView: KripkeStructureView {
         var d: Data = d
         d.vars += "INIT\n"
         d.vars += "pc=\(d.pc[0])"
-        d.vars += d.properties.flatMap({
-            nil == $1.first ? nil : " & \($0)=\(self.formatPropertyValue($1.first!))"
-        }).reduce("", combine: +)
+        d.vars += d.initials.map({" & \($0)=\($1)"}).reduce("", combine: +)
         d.vars += "\n\n"
     }
 
@@ -266,14 +270,19 @@ public class NuSMVKripkeStructureView: KripkeStructureView {
     private func getTrans(
         state: KripkeState,
         d: Data,
-        pcName: String
+        pcName: String,
+        initial: Bool = false
     ) -> String {
         // Holds naming convention functions for the different property lists.
         let gen: [([String: KripkeStateProperty], (String) -> String)] =
             self.getNamingFunctions(state, list: state.beforeProperties) 
         var str: String = ""
-        let props: String =
-            self.generateProperties(gen, d: d, addToProperties: true)
+        let props: String = self.generateProperties(
+            gen,
+            d: d,
+            addToProperties: true,
+            initial: initial
+        )
         str += props
         str += nil == props.characters.first ? " " : " & "
         str += "pc=" + pcName + ":\n"
@@ -359,7 +368,8 @@ public class NuSMVKripkeStructureView: KripkeStructureView {
     private func generateProperties(
         list: [([String: KripkeStateProperty], (String) -> String)],
         d: Data,
-        addToProperties: Bool
+        addToProperties: Bool,
+        initial: Bool = false
     ) -> String {
         var str: String = ""
         var pre: Bool = false
@@ -372,7 +382,8 @@ public class NuSMVKripkeStructureView: KripkeStructureView {
                     d: d,
                     p: $1,
                     pre: &pre,
-                    addToProperties: addToProperties
+                    addToProperties: addToProperties,
+                    initial: initial
                 )
             }
         }
@@ -391,19 +402,24 @@ public class NuSMVKripkeStructureView: KripkeStructureView {
         d: Data,
         p: KripkeStateProperty,
         inout pre: Bool,
-        addToProperties: Bool
+        addToProperties: Bool,
+        initial: Bool
     ) -> String {
         if (p.type == .Some) {
             return ""
-        }
-        if (true == addToProperties) {
-            self.addToProperties(name, p: p, d: d)
         }
         var str: String = ""
         if (true == pre) {
            str += " & " 
         }
-        str += "\(name)=\(self.formatPropertyValue(p))"
+        let val: String = self.formatPropertyValue(p)
+        if (true == addToProperties) {
+            self.addToProperties(name, value: val, d: d)
+        }
+        if (true == initial) {
+            d.initials[name] = val 
+        }
+        str += "\(name)=\(val)"
         pre = true
         return str
     }
@@ -425,14 +441,14 @@ public class NuSMVKripkeStructureView: KripkeStructureView {
      */
     private func addToProperties(
         name: String,
-        p: KripkeStateProperty,
+        value: String,
         d: Data 
     ) {
         var d: Data = d 
         if (nil == d.properties[name]) {
             d.properties[name] = []
         }
-        d.properties[name]!.insert(p)
+        d.properties[name]!.insert(value)
     }
 
     /*
@@ -453,13 +469,15 @@ public class NuSMVKripkeStructureView: KripkeStructureView {
  */
 private class Data {
 
+    public var initials: [String: String] = [:]
+
     /*
      *  A Dictionary Containing a list of property values.
      *
      *  The key represents the name of the property and the value is an array
      *  of all the possible values of the property.  
      */
-    public var properties: [String: Set<KripkeStateProperty>] = [:]
+    public var properties: [String: Set<String>] = [:]
     
     /*
      *  The name of the module that we are generating.
