@@ -59,11 +59,56 @@
 /**
  *  Supported types for Kripke Structures.
  */
-public enum KripkeStatePropertyTypes {
+public enum KripkeStatePropertyTypes: Equatable {
     case Bool
     case Int, Int8, Int16, Int32, Int64
     case UInt, UInt8, UInt16, UInt32, UInt64
     case Float, Float80, Double
     case String
+    indirect case Collection(KripkeStatePropertyTypes)
     case Some
+}
+
+public func ==(
+    lhs: KripkeStatePropertyTypes,
+    rhs: KripkeStatePropertyTypes
+) -> Bool {
+    switch (lhs, rhs) {
+        case (.Bool, .Bool):
+            return true
+        case (.Int, .Int):
+            return true
+        case (.Int8, .Int8):
+            return true
+        case (.Int16, .Int16):
+            return true
+        case (.Int32, .Int32):
+            return true
+        case (.Int64, .Int64):
+            return true
+        case (.UInt, .UInt):
+            return true
+        case (.UInt8, .UInt8):
+            return true
+        case (.UInt16, .UInt16):
+            return true
+        case (.UInt32, .UInt32):
+            return true
+        case (.UInt64, .UInt64):
+            return true
+        case (.Float, .Float):
+            return true
+        case (.Float80, .Float80):
+            return true
+        case (.Double, .Double):
+            return true
+        case (.String, .String):
+            return true
+        case (let .Collection(p1), let .Collection(p2)):
+            return p1 == p2
+        case (.Some, .Some):
+            return true
+        default:
+            return false
+    }
 }
