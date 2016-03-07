@@ -103,8 +103,7 @@ public class NuSMVKripkeStructureView: KripkeStructureView {
         // Create seperate data objects for all the different machines.
         self.states = structure.states
         for s: KripkeState in self.states {
-            var d: Data = self.data(s)
-            d.states.append(s)
+            self.data(s).states.append(s)
         }
         // Print individual Kripke Structures.
         if (self.data.count > 1) {
@@ -129,7 +128,7 @@ public class NuSMVKripkeStructureView: KripkeStructureView {
      *  one.
      */
     private func generateCombinedStructure() {
-        var temp: Data = Data(module: "main")
+        let temp: Data = Data(module: "main")
         temp.states = self.states
         self.printStructure(self.generateData(temp))
     }
@@ -139,7 +138,6 @@ public class NuSMVKripkeStructureView: KripkeStructureView {
      *  structure.
      */
     private func generateData(d: Data) -> Data {
-        var d: Data = d
         self.createTrans(d)
         self.createVars(d)
         dprint(d.trans)
@@ -164,7 +162,6 @@ public class NuSMVKripkeStructureView: KripkeStructureView {
      *  This is stored within the trans property of the Data Type.
      */
     private func createTrans(d: Data) {
-        var d: Data = d
         var states: [KripkeState] = d.states
         var lastState: KripkeState = states[0]
         var lastPCName: String = self.getNextPCName(lastState, d: d)
@@ -199,7 +196,6 @@ public class NuSMVKripkeStructureView: KripkeStructureView {
      *      `<machine_name><delimiter><fsm_name><delimiter><state_name><delimiter><ringlet_count>`
      */
     private func getNextPCName(state: KripkeState, d: Data) -> String {
-        var d: Data = d
         var name: String = self.stateName(state)
         if (nil == d.ringlets[name]) {
             d.ringlets[name] = -1
@@ -233,8 +229,7 @@ public class NuSMVKripkeStructureView: KripkeStructureView {
     }
 
     private func createPropertiesList(d: Data) {
-        var d: Data = d
-        d.properties.map {
+        d.properties.forEach {
             d.vars += "\($0) : {"
             var pre: Bool = false
             $1.forEach {
@@ -246,7 +241,6 @@ public class NuSMVKripkeStructureView: KripkeStructureView {
     }
 
     private func createPCList(d: Data) {
-        var d: Data = d
         d.vars += "pc : {"
         d.pc.forEach { d.vars += "\n" + $0 + "," }
         var temp: String.CharacterView = d.vars.characters
@@ -256,7 +250,6 @@ public class NuSMVKripkeStructureView: KripkeStructureView {
     }
 
     private func createInitList(d: Data) {
-        var d: Data = d
         d.vars += "INIT\n"
         d.vars += "pc=\(d.pc[0])"
         d.vars += d.initials.map({" & \($0)=\($1)"}).reduce("", combine: +)
@@ -444,7 +437,6 @@ public class NuSMVKripkeStructureView: KripkeStructureView {
         value: String,
         d: Data 
     ) {
-        var d: Data = d 
         if (nil == d.properties[name]) {
             d.properties[name] = []
         }
@@ -469,7 +461,7 @@ public class NuSMVKripkeStructureView: KripkeStructureView {
  */
 private class Data {
 
-    public var initials: [String: String] = [:]
+    private var initials: [String: String] = [:]
 
     /*
      *  A Dictionary Containing a list of property values.
@@ -477,27 +469,27 @@ private class Data {
      *  The key represents the name of the property and the value is an array
      *  of all the possible values of the property.  
      */
-    public var properties: [String: Set<String>] = [:]
+    private var properties: [String: Set<String>] = [:]
     
     /*
      *  The name of the module that we are generating.
      */
-    public let module: String
+    private let module: String
 
     /*
      *  All of the states that belong in this structure.
      */
-    public var states: [KripkeState] = []
+    private var states: [KripkeState] = []
 
     /*
      *  The vars section.
      */
-    public var vars: String = "VAR\n\n"
+    private var vars: String = "VAR\n\n"
     
     /*
      *  The trans section.
      */
-    public var trans: String = "TRANS\ncase\n"
+    private var trans: String = "TRANS\ncase\n"
     
     /*
      *  Keeps track of how many times an individual state has been run.
@@ -505,15 +497,15 @@ private class Data {
      *  The key of the dictionary is a string representing the states fully
      *  namespaced name and the value is how many times it has been run.
      */
-    public var ringlets: [String: Int] = [:]
+    private var ringlets: [String: Int] = [:]
     
     /*
      *  Contains a list of fully namespaced state names with their ringlet
      *  counts added on the end.
      */
-    public var pc: [String] = []
+    private var pc: [String] = []
 
-    public init(module: String) {
+    private init(module: String) {
         self.module = module
     }
 

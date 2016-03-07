@@ -211,7 +211,9 @@ public class TeleportingTurtleGenerator: SteppingKripkeStructureGenerator {
     } 
 
     private func tp() {
-        if (self.power != self.length++) {
+        let temp: Int = self.length
+        self.length += 1
+        if (self.power != temp) {
             return
         }
         self.turtle = self.rabbit

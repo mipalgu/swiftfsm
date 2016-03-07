@@ -86,9 +86,8 @@ extension _KripkeStructureType where Self: CustomStringConvertible {
         // Create the states.
         var str: String = start + "\n"
         self.states.forEach {
-            var state: KripkeState = $0 
             str += arrow + border + "\n"
-            str += state.description + "\n" + border + "\n"
+            str += $0.description + "\n" + border + "\n"
         }
         return str
     }

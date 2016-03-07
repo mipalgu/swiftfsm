@@ -78,7 +78,7 @@ public class SwiftfsmParser: HelpableParser {
     public func parse(words: [String]) throws -> [Task] {
         var wds: [String] = words
         var tasks: [Task] = []
-        var t: Task = Task()
+        let t: Task = Task()
         tasks.append(t)
         // Keep looping while we still have input
         while (false == wds.isEmpty) {
@@ -98,7 +98,7 @@ public class SwiftfsmParser: HelpableParser {
         return tasks
     }
     
-    private func handleNextFlag(let t: Task, inout words: [String]) throws -> Task {
+    private func handleNextFlag(t: Task, inout words: [String]) throws -> Task {
         switch (words.first!) {
         case "-c", "--clfsm":
             return self.handleClfsmFlag(t, words: &words)
