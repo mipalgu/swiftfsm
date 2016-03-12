@@ -61,7 +61,7 @@ import XCTest
 
 public class DynamicLibraryCreatorTests: SwiftFSMTestCase {
     
-    public override var allTests: [(String, () -> Void)] {
+    public override var allTests: [(String, () throws -> Void)] {
         return [
             ("testCreatorOpensExistingDylib", testCreatorOpensExistingDylib),
             ("testCreatorDoesNotOpenNonExistingDylib", testCreatorDoesNotOpenNonExistingDylib)

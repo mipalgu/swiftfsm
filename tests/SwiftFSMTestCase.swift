@@ -59,15 +59,9 @@
 import FSM
 import XCTest
 
-#if os(Linux)
-import Glibc
-#elseif os(OSX)
-import Darwin
-#endif
-
 public class SwiftFSMTestCase: XCTestCase {
 
-    public var allTests: [(String, () -> Void)] {
+    public var allTests: [(String, () throws -> Void)] {
         return []
     }
     

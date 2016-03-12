@@ -9,8 +9,6 @@ BIN=swiftfsm_tests
 TESTFILE=1
 
 B_D=./build.host
-DEPDIRS=../
-DEPLIBS=swiftfsm
 
 ALL_HDRS!=ls *.h
 HOST_SWIFTC=swiftc
@@ -22,9 +20,6 @@ C_SRCS!=ls *.c
 LDFLAGS=-lFSM -lswiftfsm
 
 all:	all-real
-
-pre-build:	generate-class
-	cd ../ && bmake install-module TESTING=TESTING	
 
 .include "../../swiftfsm.mk"
 .include "../../../../mk/mipal.mk"
