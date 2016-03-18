@@ -65,6 +65,7 @@ public enum KripkeStatePropertyTypes: Equatable {
     case UInt, UInt8, UInt16, UInt32, UInt64
     case Float, Float80, Double
     case String
+    case EmptyCollection
     indirect case Collection(KripkeStatePropertyTypes)
     case Some
 }
