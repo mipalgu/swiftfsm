@@ -184,6 +184,13 @@ public class MirrorPropertyExtractor:
             return .Double
         case is String:
             return .String
+        case is KripkeCollection:
+            let v: KripkeCollection = value as! KripkeCollection 
+            let arr: [Any] = v.toArray()
+            if (arr.isEmpty) {
+                return .EmptyCollection 
+            }
+            return .Collection(self.getKripkeStatePropertyType(arr[0]))
         default:
             return .Some
         }
