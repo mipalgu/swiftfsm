@@ -105,6 +105,8 @@ public func ==(
             return true
         case (.String, .String):
             return true
+        case (.EmptyCollection, .EmptyCollection):
+            return true
         case (let .Collection(p1), let .Collection(p2)):
             return p1 == p2
         case (.Some, .Some):
