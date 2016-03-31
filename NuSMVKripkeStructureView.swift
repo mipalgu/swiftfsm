@@ -398,7 +398,7 @@ public class NuSMVKripkeStructureView: KripkeStructureView {
         addToProperties: Bool,
         initial: Bool
     ) -> String {
-        if (p.type == .Some) {
+        if (false == self.isSupportedType(p.type)) {
             return ""
         }
         var str: String = ""
@@ -451,6 +451,13 @@ public class NuSMVKripkeStructureView: KripkeStructureView {
             self.data[state.machine.name] = Data(module: state.machine.name)
         }
         return self.data[state.machine.name]!
+    }
+
+    private func isSupportedType(t: KripkeStatePropertyTypes) -> Bool {
+        return t == .Bool || t == .Int8 || t == .Int16 || t == .Int32 ||
+            t == .Int64 || t == .Int || t == .UInt8 || t == .UInt16 ||
+            t == .UInt32 || t == .UInt64 || t == .UInt || t == .Float80 ||
+            t == .Float || t == .Double || t == .String
     }
 
 }
