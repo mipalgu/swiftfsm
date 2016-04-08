@@ -97,7 +97,7 @@ public class Swiftfsm {
     }
     
     public func run(args: [String]) {
-        var _args: [String] = args
+        var args: [String] = args
         // Pad the output
         self.view.message("")
         // Print help when we have no input.
@@ -105,9 +105,9 @@ public class Swiftfsm {
             self.view.message(parser.helpText)
             self.handleError(SwiftfsmErrors.NoPathsFound)
         }
-        _args.removeFirst()
+        args.removeFirst()
         // Parse the args and get a bunch of tasks.
-        let tasks: [Task] = self.parseArgs(_args)
+        let tasks: [Task] = self.parseArgs(args)
         // Show the help message when there are no tasks.
         if (true == tasks.isEmpty) {
             self.handleMessage(parser.helpText)
@@ -124,7 +124,7 @@ public class Swiftfsm {
             self.handleError(SwiftfsmErrors.NoPathsFound)
         }
         // Run the tasks.
-        self.runMachines(self.handleTasks(tasks))
+        self.handleTasks(tasks)
     }
     
     private func generateKripkeStructure(machines: [Machine]) {
@@ -144,46 +144,55 @@ public class Swiftfsm {
         exit(EXIT_SUCCESS)
     }
     
-    private func handleTasks(tasks: [Task]) -> [Machine] {
+    private func handleTasks(tasks: [Task]) {
         let t: [(schedule: [Machine], kripke: [Machine])] = tasks.map {
             self.handleTask($0)
         }
         self.generateKripkeStructure(t.flatMap { $0.kripke })
-        return t.flatMap { $0.schedule }
+        self.runMachines(t.flatMap { $0.schedule })
+    }
+
+    private func getMachinesName(t: Task) -> String {
+        var name: String = nil == t.name ? "machine" : t.name!
+        if let count: Int = self.names[name] {
+            let temp: String = name
+            name += "\(count)"
+            self.names[temp]! += 1
+        } else {
+            self.names[name] = 1
+        }
+        return name
+    }
+
+    private func loadFsms(t: Task, name: String) -> [FiniteStateMachine] {
+        let fsms: [FiniteStateMachine] = self.machineLoader.load(t.path!)
+        if (fsms.count > 0) {
+            return fsms
+        }
+        // Handle when we are unable to load the fsm.
+        self.handleError(
+            SwiftfsmErrors.UnableToLoad(
+                machineName: name,
+                path: t.path!
+            )
+        )
+        return fsms
     }
 
     private func handleTask(t: Task) -> ([Machine], [Machine]) {
         var schedule: [Machine] = []
         var kripke: [Machine] = []
         for _ in 0 ..< t.count  {
-            // Get/Generate Name of the Machine.
-            var name: String = nil == t.name ? "machine" : t.name!
-            if let count: Int = self.names[name] {
-                let temp: String = name
-                name += "\(count)"
-                self.names[temp]! += 1
-            } else {
-                self.names[name] = 1
-            }
+            // Get/Generate Name of the Machine
+            let name: String = self.getMachinesName(t)
             // Handle when there is no path in the Task.
             if (nil == t.path) {
-                self.handleError(SwiftfsmErrors.PathNotFound(machineName: name))
-            }
-            // Load the FSMs.
-            let fsms: [FiniteStateMachine] = self.machineLoader.load(t.path!)
-            if (0 == fsms.count) {
-                // Handle when we are unable to load the fsm.
-                self.handleError(
-                    SwiftfsmErrors.UnableToLoad(
-                        machineName: name,
-                        path: t.path!
-                    )
-                )
+                self.handleError(.PathNotFound(machineName: name))
             }
             // Create the Machine
             let temp: Machine = SimpleMachine(
                 name: name,
-                fsms: fsms,
+                fsms: self.loadFsms(t, name: name),
                 debug: t.enableDebugging
             )
             // Remember to generate Kripke Structures.
