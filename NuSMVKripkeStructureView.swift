@@ -122,7 +122,7 @@ public class NuSMVKripkeStructureView: KripkeStructureView {
             self.printStructure(self.generateData(t.d))
         }
     }
-
+    
     /*
      *  Prints a kripek structure with all the different machines combined into
      *  one.
@@ -168,6 +168,7 @@ public class NuSMVKripkeStructureView: KripkeStructureView {
         states.removeFirst()
         var initial: Bool = true
         states.forEach {
+            initial = nil == d.ringlets[self.stateName($0)]
             d.trans += getTrans(
                 lastState,
                 d: d,
