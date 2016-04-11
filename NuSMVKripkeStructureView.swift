@@ -166,15 +166,8 @@ public class NuSMVKripkeStructureView: KripkeStructureView {
         var lastState: KripkeState = states[0]
         var lastPCName: String = self.getNextPCName(lastState, d: d)
         states.removeFirst()
-        var initial: Bool = true
         states.forEach {
-            initial = nil == d.ringlets[self.stateName($0)]
-            d.trans += getTrans(
-                lastState,
-                d: d,
-                pcName: lastPCName,
-                initial: initial
-            )
+            d.trans += getTrans(lastState, d: d, pcName: lastPCName)
             lastPCName = getNextPCName($0, d: d)
             d.trans += getChanges(
                 $0,
@@ -183,7 +176,6 @@ public class NuSMVKripkeStructureView: KripkeStructureView {
                 pcName: lastPCName
             )
             lastState = $0
-            initial = false
         }
         let _: String = getTrans(lastState, d: d, pcName: lastPCName)
         // Handle the last transition.
@@ -264,8 +256,7 @@ public class NuSMVKripkeStructureView: KripkeStructureView {
     private func getTrans(
         state: KripkeState,
         d: Data,
-        pcName: String,
-        initial: Bool = false
+        pcName: String
     ) -> String {
         // Holds naming convention functions for the different property lists.
         let gen: [([String: KripkeStateProperty], (String) -> String)] =
@@ -274,8 +265,7 @@ public class NuSMVKripkeStructureView: KripkeStructureView {
         let props: String = self.generateProperties(
             gen,
             d: d,
-            addToProperties: true,
-            initial: initial
+            addToProperties: true
         )
         str += props
         str += nil == props.characters.first ? " " : " & "
@@ -362,8 +352,7 @@ public class NuSMVKripkeStructureView: KripkeStructureView {
     private func generateProperties(
         list: [([String: KripkeStateProperty], (String) -> String)],
         d: Data,
-        addToProperties: Bool,
-        initial: Bool = false
+        addToProperties: Bool
     ) -> String {
         var str: String = ""
         var pre: Bool = false
@@ -371,13 +360,13 @@ public class NuSMVKripkeStructureView: KripkeStructureView {
         // property list.
         list.forEach { (properties: [String: KripkeStateProperty], f: (String) -> String) in
             properties.forEach {
+                let name: String = f($0)
                 str += self.generate(
                     f($0),
                     d: d,
                     p: $1,
                     pre: &pre,
-                    addToProperties: addToProperties,
-                    initial: initial
+                    addToProperties: addToProperties
                 )
             }
         }
@@ -396,8 +385,7 @@ public class NuSMVKripkeStructureView: KripkeStructureView {
         d: Data,
         p: KripkeStateProperty,
         inout pre: Bool,
-        addToProperties: Bool,
-        initial: Bool
+        addToProperties: Bool
     ) -> String {
         if (false == self.isSupportedType(p.type)) {
             return ""
@@ -409,9 +397,6 @@ public class NuSMVKripkeStructureView: KripkeStructureView {
         let val: String = self.formatPropertyValue(p)
         if (true == addToProperties) {
             self.addToProperties(name, value: val, d: d)
-        }
-        if (true == initial) {
-            d.initials[name] = val 
         }
         str += "\(name)=\(val)"
         pre = true
@@ -440,6 +425,7 @@ public class NuSMVKripkeStructureView: KripkeStructureView {
     ) {
         if (nil == d.properties[name]) {
             d.properties[name] = []
+            d.initials[name] = value
         }
         d.properties[name]!.insert(value)
     }
