@@ -59,7 +59,7 @@
 /**
  *  A property within a Kripke State.
  */
-public class KripkeStateProperty: Equatable {
+public struct KripkeStateProperty: Equatable {
     
     var type: KripkeStatePropertyTypes
     
