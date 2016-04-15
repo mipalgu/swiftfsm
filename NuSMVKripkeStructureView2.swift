@@ -93,9 +93,19 @@ public class NuSMVKripkeStructureView2: KripkeStructureView {
     
     private let factory: PrinterFactory
 
-    private let parser: NuSMVKripkeStructureParser
+    private let parser: NuSMVKripkeStructureParserType
 
-    private let interpreter: NuSMVInterpreter
+    private let interpreter: NuSMVInterpreterType
+
+    public init(
+        factory: PrinterFactory,
+        parser: NuSMVKripkeStructureParserType,
+        interpreter: NuSMVInterpreterType
+    ) {
+        self.factory = factory
+        self.parser = parser
+        self.interpreter = interpreter
+    }
 
     public func make(structure: KripkeStructureType) {
         // Seperate the states into different modules for each machine. 
