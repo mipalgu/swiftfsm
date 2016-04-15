@@ -66,6 +66,11 @@ public struct NuSMVData {
 
     var states: [KripkeState] = []
 
+    var transitions: [(
+        condition: (properties: [KripkeStateProperty], pc: String),
+        next: (properties: [KripkeStateProperty], pc: String
+    )]
+
     var variables: [String: [KripkeStateProperty]] = [:]
 
     public init(module: String) {
