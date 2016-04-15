@@ -56,6 +56,8 @@
  *
  */
 
+import FSM
+
 /*
  
 MODULE main
@@ -93,13 +95,13 @@ public class NuSMVKripkeStructureView2: KripkeStructureView {
     
     private let factory: PrinterFactory
 
-    private let parser: NuSMVKripkeStructureParserType
+    private let parser: NuSMVKripkeStateParserType
 
     private let interpreter: NuSMVInterpreterType
 
     public init(
         factory: PrinterFactory,
-        parser: NuSMVKripkeStructureParserType,
+        parser: NuSMVKripkeStateParserType,
         interpreter: NuSMVInterpreterType
     ) {
         self.factory = factory
@@ -109,16 +111,20 @@ public class NuSMVKripkeStructureView2: KripkeStructureView {
 
     public func make(structure: KripkeStructureType) {
         // Seperate the states into different modules for each machine. 
-        var states: [String: [KripkeState]] = ["main": structure.states]
+        var modules: [String: [KripkeState]] = ["main": structure.states]
         for s: KripkeState in structure.states {
-            if (states[s.machine.name] == nil) {
-                states[s.machine.name] = []
+            if (modules[s.machine.name] == nil) {
+                modules[s.machine.name] = []
             }
-            states[s.machine.name].append(s)
+            modules[s.machine.name]!.append(s)
         }
         // Print each machines kripke structure.
-        for (module: String, states: [KripkeState]) {
-            self.print(module, self.parser.parse(module, states: states) >>- self.interpreter.interpret)
+        for (module, states) in modules {
+            self.print(
+                module,
+                contents: self.parser.parse(module, states: states) >>- 
+                    self.interpreter.interpret
+            )
         }
     }
 
