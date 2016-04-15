@@ -1,5 +1,5 @@
 /*
- * NuSMVKripkeStateParser.swift 
+ * NuSMVKripkeStateParserType.swift 
  * swiftfsm 
  *
  * Created by Callum McColl on 15/04/2016.
@@ -56,7 +56,7 @@
  *
  */
 
-public protocol NuSMVKripkeStateParser {
+public protocol NuSMVKripkeStateParserType {
 
     func parse(module: String, states: [KripkeState]) -> NuSMVData
 
