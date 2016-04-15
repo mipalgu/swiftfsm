@@ -66,7 +66,7 @@ public struct NuSMVData {
 
     var states: [KripkeState] = []
 
-    var variables: [String: [KripkeStateProperty] = []
+    var variables: [String: [KripkeStateProperty]] = [:]
 
     public init(module: String) {
         self.module = module
