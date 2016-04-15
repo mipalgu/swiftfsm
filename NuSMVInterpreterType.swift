@@ -1,5 +1,5 @@
 /*
- * NuSMVInterpreter.swift 
+ * NuSMVInterpreterType.swift 
  * swiftfsm 
  *
  * Created by Callum McColl on 15/04/2016.
@@ -56,7 +56,7 @@
  *
  */
 
-public protocol NuSMVInterpreter {
+public protocol NuSMVInterpreterType {
 
     func interpret(data: NuSMVData) -> String
 
