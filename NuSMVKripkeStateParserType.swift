@@ -58,6 +58,6 @@
 
 public protocol NuSMVKripkeStateParserType {
 
-    func parse(module: String, states: [KripkeState]) -> NuSMVData
+    func parse(module: String, states: [KripkeState]) -> NuSMVData?
 
 }
