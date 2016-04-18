@@ -58,7 +58,7 @@
 
 public struct NuSMVData {
 
-    var initials: [KripkeStateProperty] = []
+    var initials: [String: KripkeStateProperty] = []
 
     let module: String
 
@@ -71,7 +71,7 @@ public struct NuSMVData {
         next: (properties: [KripkeStateProperty], pc: String
     )]
 
-    var variables: [String: [KripkeStateProperty]] = [:]
+    var variables: [String: Set<KripkeStateProperty>] = [:]
 
     public init(module: String) {
         self.module = module
