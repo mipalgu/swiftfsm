@@ -93,6 +93,12 @@ TRUE:
 
 public class NuSMVKripkeStructureView2: KripkeStructureView {
     
+    private let combinedModuleName: String
+
+    private let debugPrinter: Printer
+
+    private let ext: String
+
     private let factory: PrinterFactory
 
     private let parser: NuSMVKripkeStateParserType
@@ -103,37 +109,61 @@ public class NuSMVKripkeStructureView2: KripkeStructureView {
         factory: PrinterFactory,
         parser: NuSMVKripkeStateParserType,
         interpreter: NuSMVInterpreterType,
-        debugPrinter: Printer = CommandLinePrinter()
+        ext: String = "nusmv",
+        combinedModuleName: String = "main",
+        debugPrinter: Printer = CommandLinePrinter(
+            errorStream: StderrOutputStream(),
+            messageStream: StdoutOutputStream()
+        )
     ) {
+        self.combinedModuleName = combinedModuleName
+        self.debugPrinter = debugPrinter
+        self.ext = ext
         self.factory = factory
         self.parser = parser
         self.interpreter = interpreter
     }
 
     public func make(structure: KripkeStructureType) {
-        // Seperate the states into different modules for each machine. 
-        var modules: [String: [KripkeState]] = ["main": structure.states]
-        for s: KripkeState in structure.states {
+        // Seperate the states into different modules and print the structures. 
+        self.seperate(structure.states).forEach(processModule)
+    }
+
+    private func seperate(states: [KripkeState]) -> [String: [KripkeState]] {
+        var modules: [String: [KripkeState]] = [self.combinedModuleName : states]
+        for s: KripkeState in states {
             if (modules[s.machine.name] == nil) {
                 modules[s.machine.name] = []
             }
             modules[s.machine.name]!.append(s)
         }
-        // Print each machines kripke structure.
-        for (module, states) in modules {
-            self.print(
-                module,
-                contents: self.parser.parse(module, states: states) >>- 
-                    self.interpreter.interpret
-            )
+        // Only returned the combined module if there is only one machine.
+        if (2 == modules.count) {
+            return [self.combinedModuleName : modules[self.combinedModuleName]!]
         }
+        return modules
     }
 
-    private func print(module: String, contents: String?) {
-        if (nil == contents) {
+    private func processModule(module: String, _ states: [KripkeState]) {
+        let data: NuSMVData? = self.parser.parse(module, states: states)
+        if (nil == data) {
+            self.debugPrinter.error(
+                "Unable to Parse Kripke Structure for \(self.fileName(module))"
+            )
             return
         }
-        self.factory.make(module).message(contents!)
+        self.print(
+            module,
+            contents: self.interpreter.interpret(data!)
+        )
+    }
+
+    private func fileName(module: String) -> String {
+        return "\(module).\(self.ext)"
+    }
+
+    private func print(module: String, contents: String) {
+        self.factory.make(self.fileName(module)).message(contents)
     }
 
 }
