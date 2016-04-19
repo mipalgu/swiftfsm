@@ -58,7 +58,7 @@
 
 public struct NuSMVData {
 
-    var initials: [String: KripkeStateProperty] = []
+    var initials: [String: KripkeStateProperty] = [:]
 
     let module: String
 
@@ -68,8 +68,8 @@ public struct NuSMVData {
 
     var transitions: [(
         condition: (properties: [KripkeStateProperty], pc: String),
-        next: (properties: [KripkeStateProperty], pc: String
-    )]
+        next: (properties: [KripkeStateProperty], pc: String)
+    )] = []
 
     var variables: [String: Set<KripkeStateProperty>] = [:]
 

@@ -69,8 +69,8 @@ public class NuSMVKripkeStateParser: NuSMVKripkeStateParserType {
         self.delimiter = delimiter
     }
 
-    public func parse(module: String, state: [KripkeState]) -> NuSMVData {
-        self.lasts = []
+    public func parse(module: String, states: [KripkeState]) -> NuSMVData? {
+        self.lasts = [:]
         var d: NuSMVData = NuSMVData(module: module)
         for s: KripkeState in states {
             d = self.parseState(d, state: s)
@@ -78,9 +78,10 @@ public class NuSMVKripkeStateParser: NuSMVKripkeStateParserType {
         return d
     }
 
-    private func parseState(d: Data, state: KripkeState) -> NuSMVData {
+    private func parseState(d: NuSMVData, state: KripkeState) -> NuSMVData {
+        var d = d
         // Compute pc
-        self.pc.append(namespacePC(state))
+        d.pc.append(namespacePC(state))
         // Compute properties
         var conditions: [String: KripkeStateProperty] = [:]
         // Changed propertes
@@ -105,6 +106,7 @@ public class NuSMVKripkeStateParser: NuSMVKripkeStateParserType {
         conditions: inout [String: KripkeStateProperty],
         changes: inout [String: KripkeStateProperty]
     ) -> NuSMVData {
+        var d = d
         d = self.parseProperties(
             d,
             state: state,
@@ -157,36 +159,40 @@ public class NuSMVKripkeStateParser: NuSMVKripkeStateParserType {
         state: KripkeState,
         list: [String: KripkeStateProperty],
         cache: inout [String: KripkeStateProperty],
-        namespace: (KripkeState, String) -> String
+        namespace: (KripkeState, property: String) -> String
     ) -> NuSMVData {
+        var d = d
         for p: (String, KripkeStateProperty) in list {
             // Calculate the properties namespaced name.
             let name: String = namespace(state, property: p.0)
             // Add property to initials
-            d = self.addToInitials(d, name: name, property: p.1
+            d = self.addToInitials(d, name: name, property: p.1)
             // Add property to variables
-            d = self.addToVariables(d, name: name, property: p.1
+            d = self.addToVariables(d, name: name, property: p.1)
             // Add property to lasts
             self.lasts[name] = p.1
             // Add property to conditions for transition
-            conditions.append((name, p.1))
+            cache[name] = p.1
         }
         return d
     }
 
     private func addToInitials(d: NuSMVData, name: String, property: KripkeStateProperty) -> NuSMVData {
-        if (d.initials[property.0] != nil) {
-            return
+        var d = d
+        if (d.initials[name] != nil) {
+            return d
         }
-        d.initials[property.0] = property.1
+        d.initials[name] = property
         return d
     }
 
     private func addToVariables(d: NuSMVData, name: String, property: KripkeStateProperty) -> NuSMVData {
+        var d = d
         if (d.variables[name] == nil) {
             d.variables[name] = []
         }
         d.variables[name]!.insert(property)
+        return d
     }
 
     /*
@@ -201,7 +207,7 @@ public class NuSMVKripkeStateParser: NuSMVKripkeStateParserType {
         return temp
     }
 
-    private namespacePC(state: KripkeState) -> String {
+    private func namespacePC(state: KripkeState) -> String {
         return "\(self.namespaceState(state))\(self.delimiter)R\(self.ringlet(state))"
     }
 
@@ -217,12 +223,12 @@ public class NuSMVKripkeStateParser: NuSMVKripkeStateParserType {
         return "\(state.machine.name)\(self.delimiter)globals"
     }
 
-    private func namespaceFSMProperty(state: KripkeState, property: String) {
+    private func namespaceFSMProperty(state: KripkeState, property: String) -> String {
         return "\(self.namespaceFSM(state))\(self.delimiter)\(property)"
     }
 
-    private func namespaceGlobalProperty(state: KripkeState, property: String) {
-        return "\(self.namespaceGlobals(state: KripkeState))\(self.delimiter)\(property)"
+    private func namespaceGlobalProperty(state: KripkeState, property: String) -> String {
+        return "\(self.namespaceGlobals(state))\(self.delimiter)\(property)"
     }
 
     private func namespaceProperty(
