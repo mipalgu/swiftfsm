@@ -102,7 +102,8 @@ public class NuSMVKripkeStructureView2: KripkeStructureView {
     public init(
         factory: PrinterFactory,
         parser: NuSMVKripkeStateParserType,
-        interpreter: NuSMVInterpreterType
+        interpreter: NuSMVInterpreterType,
+        debugPrinter: Printer = CommandLinePrinter()
     ) {
         self.factory = factory
         self.parser = parser
