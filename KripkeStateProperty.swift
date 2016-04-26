@@ -76,7 +76,7 @@ public struct KripkeStateProperty: Equatable {
             return false
         }
         // Compare the values
-        return self.equalValues(other)
+        return self.equalValues(other: other)
     }
     
     private func equalValues(other: KripkeStateProperty) -> Bool {
@@ -168,5 +168,5 @@ extension KripkeStateProperty: Hashable {
 }
 
 public func ==(lhs: KripkeStateProperty, rhs: KripkeStateProperty) -> Bool {
-    return lhs.equals(rhs)
+    return lhs.equals(other: rhs)
 }

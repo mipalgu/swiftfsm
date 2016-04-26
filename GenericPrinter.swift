@@ -56,7 +56,7 @@
  *
  */
 
-public class GenericPrinter<T: OutputStreamType, U: OutputStreamType>: Printer {
+public class GenericPrinter<T: OutputStream, U: OutputStream>: Printer {
     
     internal var errorStream: T
     
@@ -68,11 +68,11 @@ public class GenericPrinter<T: OutputStreamType, U: OutputStreamType>: Printer {
     }
 
     public func error(str: String) {
-        print(str, terminator: "\n", toStream: &self.errorStream)
+        print(str, terminator: "\n", to: &self.errorStream)
     }
     
-    public func message(message: String) {
-        print(message, terminator: "\n", toStream: &self.messageStream)
+    public func message(str: String) {
+        print(str, terminator: "\n", to: &self.messageStream)
     }
     
 }
@@ -91,7 +91,11 @@ extension GenericPrinter: View {
         case .UnknownFlag(let flag):
             str = "Unknown Flag '\(flag)'"
         }
-        self.error(str)
+        self.error(str: str)
+    }
+
+    public func message(message: String) {
+        return self.message(str: message)
     }
 
 }

@@ -98,7 +98,7 @@ public class SwiftfsmParser: HelpableParser {
         return tasks
     }
     
-    private func handleNextFlag(t: Task, inout words: [String]) throws -> Task {
+    private func handleNextFlag(_ t: Task, words: inout [String]) throws -> Task {
         switch (words.first!) {
         case "-c", "--clfsm":
             return self.handleClfsmFlag(t, words: &words)
@@ -117,25 +117,25 @@ public class SwiftfsmParser: HelpableParser {
         }
     }
     
-    private func handleClfsmFlag(t: Task, inout words: [String]) -> Task {
+    private func handleClfsmFlag(_ t: Task, words: inout [String]) -> Task {
         var temp: Task = t
         temp.isClfsmMachine = true
         return temp
     }
     
-    private func handleDebugFlag(t: Task, inout words: [String]) -> Task {
+    private func handleDebugFlag(_ t: Task, words: inout [String]) -> Task {
         var temp: Task = t
         temp.enableDebugging = true
         return temp
     }
     
-    private func handleHelpFlag(t: Task, inout words: [String]) -> Task {
+    private func handleHelpFlag(_ t: Task, words: inout [String]) -> Task {
         var temp: Task = t
         temp.printHelpText = true
         return temp
     }
     
-    private func handleKripkeFlag(t: Task, inout words: [String]) -> Task {
+    private func handleKripkeFlag(_ t: Task, words: inout [String]) -> Task {
         var temp: Task = t
         temp.generateKripkeStructure = true
         temp.addToScheduler = false
@@ -150,7 +150,7 @@ public class SwiftfsmParser: HelpableParser {
         return temp
     }
     
-    private func handleNameFlag(t: Task, inout words: [String]) -> Task {
+    private func handleNameFlag(_ t: Task, words: inout [String]) -> Task {
         if (words.count < 2) {
             return t
         }
@@ -171,7 +171,7 @@ public class SwiftfsmParser: HelpableParser {
         return temp
     }
     
-    private func handlePath(t: Task, inout words: [String]) throws -> Task {
+    private func handlePath(_ t: Task, words: inout [String]) throws -> Task {
         // Ignore empty strings
         if (true == words.first!.isEmpty) {
             return t
@@ -185,7 +185,7 @@ public class SwiftfsmParser: HelpableParser {
         return temp
     }
 
-    private func handleRepeatFlag(t: Task, inout words: [String]) -> Task {
+    private func handleRepeatFlag(_ t: Task, words: inout [String]) -> Task {
         if (words.count < 2) {
             return t
         }

@@ -62,7 +62,7 @@
  import Glibc
  #endif
 
-public class FileOutputStream: OutputStreamType {
+public class FileOutputStream: OutputStream {
     
     private let close: Bool
 
@@ -73,23 +73,23 @@ public class FileOutputStream: OutputStreamType {
         self.close = close 
     }
 
-    public convenience init<T: OutputStreamType>(
+    public convenience init<T: OutputStream>(
         path: String,
         errorStream: T? = nil
     ) {
-        let fp: UnsafeMutablePointer<FILE> = fopen(path, "w")
+        let fp: UnsafeMutablePointer<FILE>? = fopen(path, "w")
         if (nil != fp) {
-            self.init(file: fp, close: true)
+            self.init(file: fp!, close: true)
             return
         }
         if (nil != errorStream) {
             var stream: T = errorStream!
-            print(strerror(errno), terminator: "\n", toStream: &stream)
+            print(strerror(errno), terminator: "\n", to: &stream)
         }
         exit(EXIT_FAILURE)
     }
     
-    public func write(string: String) {
+    public func write(_ string: String) {
         fputs(string, self.file)
     }
 

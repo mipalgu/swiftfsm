@@ -56,7 +56,7 @@
  *
  */
 
-public enum SwiftfsmErrors: ErrorType {
+public enum SwiftfsmErrors: ErrorProtocol {
     
     case NoPathsFound
     case PathNotFound(machineName: String)

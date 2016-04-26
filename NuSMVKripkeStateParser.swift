@@ -78,7 +78,7 @@ public class NuSMVKripkeStateParser: NuSMVKripkeStateParserType {
         return d
     }
 
-    private func parseState(d: NuSMVData, state: KripkeState) -> NuSMVData {
+    private func parseState(_ d: NuSMVData, state: KripkeState) -> NuSMVData {
         var d = d
         // Compute pc
         d.pc.append(namespacePC(state))
@@ -101,7 +101,7 @@ public class NuSMVKripkeStateParser: NuSMVKripkeStateParserType {
     }
 
     private func parsePropertyList(
-        d: NuSMVData,
+        _ d: NuSMVData,
         state: KripkeState,
         conditions: inout [String: KripkeStateProperty],
         changes: inout [String: KripkeStateProperty]
@@ -155,7 +155,7 @@ public class NuSMVKripkeStateParser: NuSMVKripkeStateParserType {
     }
 
     private func parseProperties(
-        d: NuSMVData,
+        _ d: NuSMVData,
         state: KripkeState,
         list: [String: KripkeStateProperty],
         cache: inout [String: KripkeStateProperty],
@@ -177,7 +177,7 @@ public class NuSMVKripkeStateParser: NuSMVKripkeStateParserType {
         return d
     }
 
-    private func addToInitials(d: NuSMVData, name: String, property: KripkeStateProperty) -> NuSMVData {
+    private func addToInitials(_ d: NuSMVData, name: String, property: KripkeStateProperty) -> NuSMVData {
         var d = d
         if (d.initials[name] != nil) {
             return d
@@ -186,7 +186,7 @@ public class NuSMVKripkeStateParser: NuSMVKripkeStateParserType {
         return d
     }
 
-    private func addToVariables(d: NuSMVData, name: String, property: KripkeStateProperty) -> NuSMVData {
+    private func addToVariables(_ d: NuSMVData, name: String, property: KripkeStateProperty) -> NuSMVData {
         var d = d
         if (d.variables[name] == nil) {
             d.variables[name] = []
@@ -198,7 +198,7 @@ public class NuSMVKripkeStateParser: NuSMVKripkeStateParserType {
     /*
      *  Retrieve the ringlet number for a particular state.
      */
-    private func ringlet(state: KripkeState) -> Int {
+    private func ringlet(_ state: KripkeState) -> Int {
         if (nil == self.ringlets[state.state.name]) {
             self.ringlets[state.state.name] = 0
         }
@@ -207,32 +207,32 @@ public class NuSMVKripkeStateParser: NuSMVKripkeStateParserType {
         return temp
     }
 
-    private func namespacePC(state: KripkeState) -> String {
+    private func namespacePC(_ state: KripkeState) -> String {
         return "\(self.namespaceState(state))\(self.delimiter)R\(self.ringlet(state))"
     }
 
-    private func namespaceFSM(state: KripkeState) -> String {
+    private func namespaceFSM(_ state: KripkeState) -> String {
         return "\(state.machine.name)\(self.delimiter)\(state.fsm.name)"
     }
 
-    private func namespaceState(state: KripkeState) -> String {
+    private func namespaceState(_ state: KripkeState) -> String {
         return "\(self.namespaceFSM(state))\(self.delimiter)\(state.state.name)"
     }
 
-    private func namespaceGlobals(state: KripkeState) -> String {
+    private func namespaceGlobals(_ state: KripkeState) -> String {
         return "\(state.machine.name)\(self.delimiter)globals"
     }
 
-    private func namespaceFSMProperty(state: KripkeState, property: String) -> String {
+    private func namespaceFSMProperty(_ state: KripkeState, property: String) -> String {
         return "\(self.namespaceFSM(state))\(self.delimiter)\(property)"
     }
 
-    private func namespaceGlobalProperty(state: KripkeState, property: String) -> String {
+    private func namespaceGlobalProperty(_ state: KripkeState, property: String) -> String {
         return "\(self.namespaceGlobals(state))\(self.delimiter)\(property)"
     }
 
     private func namespaceProperty(
-        state: KripkeState,
+        _ state: KripkeState,
         property: String
     ) -> String {
         return "\(self.namespaceState(state))\(self.delimiter)\(property)"

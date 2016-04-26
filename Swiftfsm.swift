@@ -99,10 +99,10 @@ public class Swiftfsm {
     public func run(args: [String]) {
         var args: [String] = args
         // Pad the output
-        self.view.message("")
+        self.view.message(message: "")
         // Print help when we have no input.
         if (args.count < 2) {
-            self.view.message(parser.helpText)
+            self.view.message(message: parser.helpText)
             self.handleError(SwiftfsmErrors.NoPathsFound)
         }
         args.removeFirst()
@@ -120,31 +120,31 @@ public class Swiftfsm {
         }
         // NoPathsFound when there is only one task and it does not have a path
         if (1 == tasks.count && nil == tasks[0].path) {
-            self.view.message(parser.helpText)
+            self.view.message(message: parser.helpText)
             self.handleError(SwiftfsmErrors.NoPathsFound)
         }
         // Run the tasks.
         self.handleTasks(tasks)
     }
     
-    private func generateKripkeStructure(machines: [Machine]) {
+    private func generateKripkeStructure(_ machines: [Machine]) {
         let generator: KripkeStructureGenerator =
-            self.kripkeGeneratorFactory.make(machines)
+            self.kripkeGeneratorFactory.make(machines: machines)
         let structure: KripkeStructureType = generator.generate()
-        self.kripkeStructureView.make(structure)
+        self.kripkeStructureView.make(structure: structure)
     }
     
-    private func handleError(error: SwiftfsmErrors) {
-        self.view.error(error)
+    private func handleError(_ error: SwiftfsmErrors) {
+        self.view.error(error: error)
         exit(EXIT_FAILURE)
     }
 
-    private func handleMessage(message: String) {
-        self.view.message(message)
+    private func handleMessage(_ message: String) {
+        self.view.message(message: message)
         exit(EXIT_SUCCESS)
     }
     
-    private func handleTasks(tasks: [Task]) {
+    private func handleTasks(_ tasks: [Task]) {
         let t: [(schedule: [Machine], kripke: [Machine])] = tasks.map {
             self.handleTask($0)
         }
@@ -152,7 +152,7 @@ public class Swiftfsm {
         self.runMachines(t.flatMap { $0.schedule })
     }
 
-    private func getMachinesName(t: Task) -> String {
+    private func getMachinesName(_ t: Task) -> String {
         var name: String = nil == t.name ? "machine" : t.name!
         if let count: Int = self.names[name] {
             let temp: String = name
@@ -164,8 +164,8 @@ public class Swiftfsm {
         return name
     }
 
-    private func loadFsms(t: Task, name: String) -> [FiniteStateMachine] {
-        let fsms: [FiniteStateMachine] = self.machineLoader.load(t.path!)
+    private func loadFsms(_ t: Task, name: String) -> [FiniteStateMachine] {
+        let fsms: [FiniteStateMachine] = self.machineLoader.load(path: t.path!)
         if (fsms.count > 0) {
             return fsms
         }
@@ -179,7 +179,7 @@ public class Swiftfsm {
         return fsms
     }
 
-    private func handleTask(t: Task) -> ([Machine], [Machine]) {
+    private func handleTask(_ t: Task) -> ([Machine], [Machine]) {
         var schedule: [Machine] = []
         var kripke: [Machine] = []
         for _ in 0 ..< t.count  {
@@ -207,10 +207,10 @@ public class Swiftfsm {
         return (schedule, kripke) 
     }
     
-    private func parseArgs(args: [String]) -> [Task] {
+    private func parseArgs(_ args: [String]) -> [Task] {
         let tasks: [Task]
         do {
-            tasks = try parser.parse(args)
+            tasks = try parser.parse(words: args)
         } catch(let error as SwiftfsmErrors) {
             self.handleError(error)
             return []
@@ -220,8 +220,8 @@ public class Swiftfsm {
         return tasks
     }
     
-    private func runMachines(machines: [Machine]) {
-        self.schedulerFactory.make(machines).run()
+    private func runMachines(_ machines: [Machine]) {
+        self.schedulerFactory.make(machines: machines).run()
     }
     
 }

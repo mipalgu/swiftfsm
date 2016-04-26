@@ -79,7 +79,7 @@ public protocol LibraryResource {
      *  set to an error message.
      */
     func getSymbolPointer(symbol: String) -> (
-        symbol: UnsafeMutablePointer<Void>,
+        symbol: UnsafeMutablePointer<Void>?,
         error: String?
     )
     

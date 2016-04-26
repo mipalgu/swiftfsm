@@ -57,7 +57,7 @@
  */
 
 public class CommandLinePrinter
-    <T: OutputStreamType, U: OutputStreamType>: GenericPrinter<T, U> 
+    <T: OutputStream, U: OutputStream>: GenericPrinter<T, U> 
 {
     
     public override init(errorStream: T, messageStream: U) {
@@ -68,7 +68,7 @@ public class CommandLinePrinter
         print(
             "\u{001B}[1;31merror: \u{001B}[0m\(str)\n",
             terminator: "\n",
-            toStream: &self.errorStream
+            to: &self.errorStream
         )
     }
     

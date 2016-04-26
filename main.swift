@@ -83,4 +83,4 @@ Swiftfsm(
     parser: SwiftfsmParser(),
     schedulerFactory: RoundRobinSchedulerFactory(),
     view: printer
-).run(Process.arguments)
+).run(args: Process.arguments)

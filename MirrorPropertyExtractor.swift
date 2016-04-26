@@ -67,8 +67,8 @@ public class MirrorPropertyExtractor:
     public func extract(ringlet: Ringlet) -> ([String: KripkeStateProperty], [String: KripkeStateProperty]) {
         let children: Mirror.Children = Mirror(reflecting: ringlet).children
         return (
-            self.getSnapshot("snapshotBefore", children: children),
-            self.getSnapshot("snapshotAfter", children: children)
+            self.getSnapshot(label: "snapshotBefore", children: children),
+            self.getSnapshot(label: "snapshotAfter", children: children)
         )
     }
 
@@ -76,10 +76,10 @@ public class MirrorPropertyExtractor:
         label: String,
         children: Mirror.Children
     ) -> [String: KripkeStateProperty] {
-        guard let snapshot = self.getChild(label, children: children) else {
+        guard let snapshot = self.getChild(label: label, children: children) else {
             return [:]
         }
-        return self.getPropertiesFromMirror(Mirror(reflecting: snapshot))
+        return self.getPropertiesFromMirror(mirror: Mirror(reflecting: snapshot))
     }
 
     private func getChild(
@@ -94,7 +94,7 @@ public class MirrorPropertyExtractor:
      */
     public func extract(state: State) -> [String : KripkeStateProperty] {
         var p: [String: KripkeStateProperty] = self.getPropertiesFromMirror(
-            Mirror(reflecting: state)
+            mirror: Mirror(reflecting: state)
         )
         // Ignore the states name property.
         p["name"] = nil
@@ -102,7 +102,7 @@ public class MirrorPropertyExtractor:
     }
 
     public func extract(vars: FSMVariables) -> [String: KripkeStateProperty] {
-        return self.getPropertiesFromMirror(Mirror(reflecting: vars))
+        return self.getPropertiesFromMirror(mirror: Mirror(reflecting: vars))
     }
     
     /*
@@ -117,15 +117,15 @@ public class MirrorPropertyExtractor:
         properties: [String: KripkeStateProperty] = [:]
     ) -> [String: KripkeStateProperty] {
         var p: [String: KripkeStateProperty] = properties
-        let parent: Mirror? = mirror.superclassMirror()
+        let parent: Mirror? = mirror.superclassMirror
         if (nil != parent) {
-            p = self.getPropertiesFromMirror(parent!)
+            p = self.getPropertiesFromMirror(mirror: parent!)
         }
         for child: Mirror.Child in mirror.children {
             if (nil == child.label) {
                 continue
             }
-            p[child.label!] = self.convertValue(child.value)
+            p[child.label!] = self.convertValue(value: child.value)
         }
         return p
     }
@@ -151,7 +151,7 @@ public class MirrorPropertyExtractor:
     *  Derive the KripkeStatePropertyType associated with a value.
     */
     private func getKripkeStatePropertyType(
-        value: Any
+        _ value: Any
     ) -> KripkeStatePropertyTypes {
         switch (value) {
         case is Bool:
@@ -199,12 +199,12 @@ public class MirrorPropertyExtractor:
     /*
      *  Encode a value as a string.
      */
-    private func encode(value: Any) -> String {
+    private func encode(_ value: Any) -> String {
         if (value is String) {
             return "" + (value as! String)
         }
         var str: String = ""
-        print(value, terminator: "", toStream: &str)
+        print(value, terminator: "", to: &str)
         return str
     }
     

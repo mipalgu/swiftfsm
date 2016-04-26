@@ -62,11 +62,11 @@
  import Glibc
  #endif
 
-public struct StderrOutputStream: OutputStreamType {
+public struct StderrOutputStream: OutputStream {
     
     private var stream: FileOutputStream = FileOutputStream(file: stderr)
     
-    public mutating func write(string: String) {
+    public mutating func write(_ string: String) {
         return stream.write(string)
     }
     

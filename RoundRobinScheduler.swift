@@ -87,10 +87,10 @@ public class RoundRobinScheduler: Scheduler {
                         j = j + 1
                         return 
                     }
-                    jobs[i].fsms.removeAtIndex(j)
+                    jobs[i].fsms.remove(at: j)
                 }
                 if (true == jobs[i].fsms.isEmpty) {
-                    jobs.removeAtIndex(i)
+                    jobs.remove(at: i)
                     return 
                 }
                 i = i + 1

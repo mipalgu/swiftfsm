@@ -174,21 +174,21 @@ public class TeleportingTurtleGenerator: SteppingKripkeStructureGenerator {
         let s: State = self.fsm.currentState
         // Extract the fsm and state properties.
         let beforeProperties: [String: KripkeStateProperty] = 
-            self.stateExtractor.extract(s)
+            self.stateExtractor.extract(state: s)
         let beforeFsmProperties: [String: KripkeStateProperty] = 
-            self.fsmExtractor.extract(self.fsm.vars)
+            self.fsmExtractor.extract(vars: self.fsm.vars)
         // Execute the state.
         self.fsm.next()
         // Extract the fsm and state properties again.
         let afterProperties: [String: KripkeStateProperty] =
-            self.stateExtractor.extract(s)
+            self.stateExtractor.extract(state: s)
         let afterFsmProperties: [String: KripkeStateProperty] =
-            self.fsmExtractor.extract(self.fsm.vars)
+            self.fsmExtractor.extract(vars: self.fsm.vars)
         // Get global properties
         let globalProperties: (
             before: [String: KripkeStateProperty],
             after: [String: KripkeStateProperty]
-        ) = self.globalsExtractor.extract(self.fsm.ringlet)
+        ) = self.globalsExtractor.extract(ringlet: self.fsm.ringlet)
         // Create Before and After Property Lists
         let before: KripkeStatePropertyList = KripkeStatePropertyList(
             stateProperties: beforeProperties,

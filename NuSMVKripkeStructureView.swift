@@ -103,7 +103,7 @@ public class NuSMVKripkeStructureView: KripkeStructureView {
         // Create seperate data objects for all the different machines.
         self.states = structure.states
         for s: KripkeState in self.states {
-            self.data(s).states.append(s)
+            self.dataForState(s).states.append(s)
         }
         // Print individual Kripke Structures.
         if (self.data.count > 1) {
@@ -118,8 +118,8 @@ public class NuSMVKripkeStructureView: KripkeStructureView {
      *  the structure.
      */
     private func generateIndividualStructures() {
-        for t: (key: String, d: Data) in self.data {
-            self.printStructure(self.generateData(t.d))
+        for t: (key: String, value: Data) in self.data {
+            self.printStructure(self.generateData(t.value))
         }
     }
     
@@ -137,7 +137,7 @@ public class NuSMVKripkeStructureView: KripkeStructureView {
      *  Generate the transitions and variables that we need to print the
      *  structure.
      */
-    private func generateData(d: Data) -> Data {
+    private func generateData(_ d: Data) -> Data {
         self.createTrans(d)
         self.createVars(d)
         dprint(d.trans)
@@ -147,13 +147,11 @@ public class NuSMVKripkeStructureView: KripkeStructureView {
     /*
      *  Create a printer using the factory provided and print the structure.
      */
-    private func printStructure(d: Data) {
+    private func printStructure(_ d: Data) {
         var str: String = "MODULE \(d.module)\n\n"
         str += d.vars + d.trans
-        let printer: Printer = factory.make(
-            "\(d.module).nusmv"
-        )
-        printer.message(str)
+        let printer: Printer = factory.make(id: "\(d.module).nusmv")
+        printer.message(str: str)
     }
 
     /*
@@ -161,7 +159,7 @@ public class NuSMVKripkeStructureView: KripkeStructureView {
      *
      *  This is stored within the trans property of the Data Type.
      */
-    private func createTrans(d: Data) {
+    private func createTrans(_ d: Data) {
         var states: [KripkeState] = d.states
         var lastState: KripkeState = states[0]
         var lastPCName: String = self.getNextPCName(lastState, d: d)
@@ -188,7 +186,7 @@ public class NuSMVKripkeStructureView: KripkeStructureView {
      *  The name follows the following convention:
      *      `<machine_name><delimiter><fsm_name><delimiter><state_name><delimiter><ringlet_count>`
      */
-    private func getNextPCName(state: KripkeState, d: Data) -> String {
+    private func getNextPCName(_ state: KripkeState, d: Data) -> String {
         var name: String = self.stateName(state)
         if (nil == d.ringlets[name]) {
             d.ringlets[name] = -1
@@ -200,7 +198,7 @@ public class NuSMVKripkeStructureView: KripkeStructureView {
     }
 
     private func createChangesPropertyList(
-        lastState: KripkeState,
+        _ lastState: KripkeState,
         currentState: KripkeState
     ) -> KripkeStatePropertyList {
         return KripkeStatePropertyList(
@@ -215,13 +213,13 @@ public class NuSMVKripkeStructureView: KripkeStructureView {
      *
      *  This is stored within the vars property of the Data Type.
      */
-    private func createVars(d: Data) {
+    private func createVars(_ d: Data) {
         self.createPropertiesList(d)
         self.createPCList(d)
         self.createInitList(d)
     }
 
-    private func createPropertiesList(d: Data) {
+    private func createPropertiesList(_ d: Data) {
         d.properties.forEach {
             d.vars += "\($0) : {"
             var pre: Bool = false
@@ -233,7 +231,7 @@ public class NuSMVKripkeStructureView: KripkeStructureView {
         }
     }
 
-    private func createPCList(d: Data) {
+    private func createPCList(_ d: Data) {
         d.vars += "pc : {"
         d.pc.forEach { d.vars += "\n" + $0 + "," }
         var temp: String.CharacterView = d.vars.characters
@@ -242,7 +240,7 @@ public class NuSMVKripkeStructureView: KripkeStructureView {
         d.vars += "\n};\n\n"
     }
 
-    private func createInitList(d: Data) {
+    private func createInitList(_ d: Data) {
         d.vars += "INIT\n"
         d.vars += "pc=\(d.pc[0])"
         d.vars += d.initials.map({" & \($0)=\($1)"}).reduce("", combine: +)
@@ -254,7 +252,7 @@ public class NuSMVKripkeStructureView: KripkeStructureView {
      *  values.
      */
     private func getTrans(
-        state: KripkeState,
+        _ state: KripkeState,
         d: Data,
         pcName: String
     ) -> String {
@@ -284,7 +282,7 @@ public class NuSMVKripkeStructureView: KripkeStructureView {
      *  `next(count)=3 & next(pc)=foo`.
      */
     private func getChanges(
-        state: KripkeState,
+        _ state: KripkeState,
         lastState: KripkeState,
         d: Data,
         pcName: String
@@ -315,7 +313,7 @@ public class NuSMVKripkeStructureView: KripkeStructureView {
     }
 
     private func getNamingFunctions(
-        state: KripkeState,
+        _ state: KripkeState,
         list: KripkeStatePropertyList
     ) -> [([String: KripkeStateProperty], (String) -> String)] {
         return self.getNamingFunctions(
@@ -326,7 +324,7 @@ public class NuSMVKripkeStructureView: KripkeStructureView {
     }
 
     private func getNamingFunctions(
-        stateProperties: (KripkeState, [String: KripkeStateProperty]),
+        _ stateProperties: (KripkeState, [String: KripkeStateProperty]),
         fsmProperties: (KripkeState, [String: KripkeStateProperty]),
         globalProperties: (KripkeState, [String: KripkeStateProperty])
     ) -> [([String: KripkeStateProperty], (String) -> String)] {
@@ -337,20 +335,20 @@ public class NuSMVKripkeStructureView: KripkeStructureView {
         ]
     }
 
-    private func stateName(state: KripkeState) -> String {
+    private func stateName(_ state: KripkeState) -> String {
         return "\(self.fsmName(state))\(self.delimiter)\(state.state.name)"
     }
 
-    private func fsmName(state: KripkeState) -> String {
+    private func fsmName(_ state: KripkeState) -> String {
         return "\(state.machine.name)\(self.delimiter)\(state.fsm.name)"
     }
 
-    private func globalsName(state: KripkeState) -> String {
+    private func globalsName(_ state: KripkeState) -> String {
         return "\(state.machine.name)\(self.delimiter)globals"
     }
 
     private func generateProperties(
-        list: [([String: KripkeStateProperty], (String) -> String)],
+        _ list: [([String: KripkeStateProperty], (String) -> String)],
         d: Data,
         addToProperties: Bool
     ) -> String {
@@ -381,10 +379,10 @@ public class NuSMVKripkeStructureView: KripkeStructureView {
      *  property.
      */
     private func generate(
-        name: String,
+        _ name: String,
         d: Data,
         p: KripkeStateProperty,
-        inout pre: Bool,
+        pre: inout Bool,
         addToProperties: Bool
     ) -> String {
         if (false == self.isSupportedType(p.type)) {
@@ -403,7 +401,7 @@ public class NuSMVKripkeStructureView: KripkeStructureView {
         return str
     }
 
-    private func formatPropertyValue(p: KripkeStateProperty) -> String {
+    private func formatPropertyValue(_ p: KripkeStateProperty) -> String {
         var val: String = "\(p.value)"
         if (.String == p.type) {
             val = "\"" + val + "\""
@@ -419,7 +417,7 @@ public class NuSMVKripkeStructureView: KripkeStructureView {
      *  already been added.
      */
     private func addToProperties(
-        name: String,
+        _ name: String,
         value: String,
         d: Data 
     ) {
@@ -433,14 +431,14 @@ public class NuSMVKripkeStructureView: KripkeStructureView {
     /*
      *  Retrieve/Create the Data object for the specific kripke states machine.
      */
-    private func data(state: KripkeState) -> Data {
+    private func dataForState(_ state: KripkeState) -> Data {
         if (nil == self.data[state.machine.name]) {
             self.data[state.machine.name] = Data(module: state.machine.name)
         }
         return self.data[state.machine.name]!
     }
 
-    private func isSupportedType(t: KripkeStatePropertyTypes) -> Bool {
+    private func isSupportedType(_ t: KripkeStatePropertyTypes) -> Bool {
         return t == .Bool || t == .Int8 || t == .Int16 || t == .Int32 ||
             t == .Int64 || t == .Int || t == .UInt8 || t == .UInt16 ||
             t == .UInt32 || t == .UInt64 || t == .UInt || t == .Float80 ||

@@ -104,17 +104,17 @@ public class DynamicLibraryResource: LibraryResource {
      *  error message.
      */
     public func getSymbolPointer(symbol: String) -> (
-        symbol: UnsafeMutablePointer<Void>,
+        symbol: UnsafeMutablePointer<Void>?,
         error: String?
     ) {
         // Attempt to get the symbol
-        let sym: UnsafeMutablePointer<Void> = dlsym(self.handler, symbol)
+        let sym: UnsafeMutablePointer<Void>? = dlsym(self.handler, symbol)
         if (sym != nil) {
             // Successful retrieval of symbol
             return (sym, error: nil)
         }
         // Unable to retrieve symbol - retrieve the error
-        return (symbol: sym, error: String.fromCString(dlerror()))
+        return (symbol: sym, error: String(cString: dlerror()))
     }
     
     /**
@@ -137,7 +137,7 @@ public class DynamicLibraryResource: LibraryResource {
             return (successful: true, error: nil)
         }
         // Error
-        return (successful: false, error: String.fromCString(dlerror()))
+        return (successful: false, error: String(cString: dlerror()))
     }
     
 }

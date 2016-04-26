@@ -126,7 +126,7 @@ public class NuSMVKripkeStructureView2: KripkeStructureView {
 
     public func make(structure: KripkeStructureType) {
         // Seperate the states into different modules and print the structures. 
-        self.seperate(structure.states).forEach(processModule)
+        self.seperate(states: structure.states).forEach(processModule)
     }
 
     private func seperate(states: [KripkeState]) -> [String: [KripkeState]] {
@@ -144,26 +144,26 @@ public class NuSMVKripkeStructureView2: KripkeStructureView {
         return modules
     }
 
-    private func processModule(module: String, _ states: [KripkeState]) {
-        let data: NuSMVData? = self.parser.parse(module, states: states)
+    private func processModule(_ module: String, _ states: [KripkeState]) {
+        let data: NuSMVData? = self.parser.parse(module: module, states: states)
         if (nil == data) {
             self.debugPrinter.error(
-                "Unable to Parse Kripke Structure for \(self.fileName(module))"
+                str: "Unable to Parse Kripke Structure for \(self.fileName(module))"
             )
             return
         }
         self.print(
-            module,
-            contents: self.interpreter.interpret(data!)
+            module: module,
+            contents: self.interpreter.interpret(data: data!)
         )
     }
 
-    private func fileName(module: String) -> String {
+    private func fileName(_ module: String) -> String {
         return "\(module).\(self.ext)"
     }
 
     private func print(module: String, contents: String) {
-        self.factory.make(self.fileName(module)).message(contents)
+        self.factory.make(id: self.fileName(module)).message(str: contents)
     }
 
 }

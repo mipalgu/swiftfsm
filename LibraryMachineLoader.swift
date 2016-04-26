@@ -117,7 +117,7 @@ public class LibraryMachineLoader: MachineLoader {
             return factory()
         }
         // Load the factory from the dynamic library.
-        if let fsms = self.creator.open(path) >>- self.loadMachine {
+        if let fsms = self.creator.open(path: path) >>- self.loadMachine {
             return fsms
         }
         return []
@@ -125,20 +125,20 @@ public class LibraryMachineLoader: MachineLoader {
 
     private func loadMachine(library: LibraryResource) -> [FiniteStateMachine] {
         // Get main method symbol
-        let result: (symbol: UnsafeMutablePointer<Void>, error: String?) =
-            library.getSymbolPointer("main")
+        let result: (symbol: UnsafeMutablePointer<Void>?, error: String?) =
+            library.getSymbolPointer(symbol: "main")
         // Error with fetching symbol
         if (result.error != nil) {
-            self.printer.error(result.error!)
+            self.printer.error(str: result.error!)
             return [] 
         }
         // How many factories do we have now?
         let count: Int = getFactoryCount() 
         // Call the method
-        invoke_func(result.symbol)
+        invoke_func(result.symbol!)
         // Did the factory get added?
         if (getFactoryCount() == count) {
-            self.printer.error("Library was loaded but factory was not added")
+            self.printer.error(str: "Library was loaded but factory was not added")
             return []
         }
         // Get the factory, add it to the cache, call it and return the result.
