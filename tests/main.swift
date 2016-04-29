@@ -7,5 +7,6 @@ XCTMain([
     DynamicLibraryResourceTests(),
     LibraryMachineLoaderTests(),
     MachineRunnerTests(),
+    NuSMVKripkeStateParserTests(),
     TimerTests()
 ])
