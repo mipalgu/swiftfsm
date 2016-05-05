@@ -358,7 +358,6 @@ public class NuSMVKripkeStructureView: KripkeStructureView {
         // property list.
         list.forEach { (properties: [String: KripkeStateProperty], f: (String) -> String) in
             properties.forEach {
-                let name: String = f($0)
                 str += self.generate(
                     f($0),
                     d: d,
