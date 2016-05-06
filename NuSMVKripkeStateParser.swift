@@ -142,7 +142,7 @@ public class NuSMVKripkeStateParser: NuSMVKripkeStateParserType {
             cache: &changes,
             namespace: self.namespaceFSMProperty
         )
-        if let next: KripkeState = state.target {
+        if state.target != nil {
             d = self.parseProperties(
                 d,
                 state: state,

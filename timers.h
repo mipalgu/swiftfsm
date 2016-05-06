@@ -59,12 +59,6 @@
 #ifndef timers_h
 #define timers_h
 
-#if defined(__linux__)
-#ifndef _POSIX_C_SOURCE
-#define _POSIX_C_SOURCE 199309L
-#endif
-#endif
-
 #include <stdint.h>
 #include <sys/time.h>
 #include <time.h>
