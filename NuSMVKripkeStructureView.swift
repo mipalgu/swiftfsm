@@ -106,11 +106,11 @@ public class NuSMVKripkeStructureView: KripkeStructureView {
             self.dataForState(s).states.append(s)
         }
         // Print individual Kripke Structures.
+        self.generateIndividualStructures()
+        // Generate a combined Kripke Structure if there is more than 1 machine.
         if (self.data.count > 1) {
-            self.generateIndividualStructures()
+            self.generateCombinedStructure()
         }
-        // Print Kripke Structures 
-        self.generateCombinedStructure()
     }
 
     /*
