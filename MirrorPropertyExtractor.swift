@@ -101,7 +101,7 @@ public class MirrorPropertyExtractor:
         return p
     }
 
-    public func extract(vars: FSMVariables) -> [String: KripkeStateProperty] {
+    public func extract(vars: Variables) -> [String: KripkeStateProperty] {
         return self.getPropertiesFromMirror(mirror: Mirror(reflecting: vars))
     }
     

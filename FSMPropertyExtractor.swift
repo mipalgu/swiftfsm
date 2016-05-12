@@ -59,6 +59,6 @@ import FSM
 
 public protocol FSMPropertyExtractor {
 
-    func extract(vars: FSMVariables) -> [String: KripkeStateProperty]
+    func extract(vars: Variables) -> [String: KripkeStateProperty]
 
 }
