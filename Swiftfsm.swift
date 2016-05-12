@@ -170,25 +170,22 @@ public class Swiftfsm {
             return fsms
         }
         // Handle when we are unable to load the fsm.
-        self.handleError(
-            SwiftfsmErrors.UnableToLoad(
-                machineName: name,
-                path: t.path!
-            )
-        )
+        self.handleError(.UnableToLoad(machineName: name, path: t.path!))
         return fsms
     }
 
     private func handleTask(_ t: Task) -> ([Machine], [Machine]) {
+        var name: String = self.getMachinesName(t)
+        // Handle when there is no path in the Task.
+        if (nil == t.path) {
+            self.handleError(.PathNotFound(machineName: name))
+        }
+        if (true == t.isClfsmMachine) {
+            self.handleError(.CLFSMMachine(machineName: name, path: t.path!))
+        }
         var schedule: [Machine] = []
         var kripke: [Machine] = []
         for _ in 0 ..< t.count  {
-            // Get/Generate Name of the Machine
-            let name: String = self.getMachinesName(t)
-            // Handle when there is no path in the Task.
-            if (nil == t.path) {
-                self.handleError(.PathNotFound(machineName: name))
-            }
             // Create the Machine
             let temp: Machine = SimpleMachine(
                 name: name,
@@ -203,6 +200,8 @@ public class Swiftfsm {
             if (true == t.addToScheduler) {
                 schedule.append(temp)
             }
+            // Generate the next name of the Machine
+            name = self.getMachinesName(t)
         }
         return (schedule, kripke) 
     }
