@@ -58,6 +58,8 @@
 
 public protocol SchedulerFactory {
     
-    func make(machines: [Machine]) -> Scheduler
+    associatedtype Machines: Machine
+
+    func make(machines: [Machines]) -> Scheduler
     
 }

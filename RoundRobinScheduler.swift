@@ -61,12 +61,12 @@ import FSM
 /**
  *  Responsible for the execution of machines.
  */
-public class RoundRobinScheduler: Scheduler {
+public class RoundRobinScheduler<T: Machine>: Scheduler {
     
     // All the machines that will be executed.
-    public private(set) var machines: [Machine]
+    public private(set) var machines: [T]
     
-    public init(machines: [Machine] = []) {
+    public init(machines: [T] = []) {
         self.machines = machines
     }
     
@@ -74,7 +74,7 @@ public class RoundRobinScheduler: Scheduler {
      *  Start executing all machines.
      */
     public func run() -> Void {
-        var jobs: [Machine] = self.machines
+        var jobs: [T] = self.machines
         // Run until all machines are finished.
         while (false == jobs.isEmpty) {
             var i: Int = 0

@@ -1,9 +1,9 @@
 /*
- * MachineKripkeStructureGeneratorFactory.swift
- * swiftfsm
+ * SimpleMachineFactory.swift 
+ * swiftfsm 
  *
- * Created by Callum McColl on 20/12/2015.
- * Copyright © 2015 Callum McColl. All rights reserved.
+ * Created by Callum McColl on 13/05/2016.
+ * Copyright © 2016 Callum McColl. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -58,19 +58,12 @@
 
 import FSM
 
-public class MachineKripkeStructureGeneratorFactory {
-    
-    private let factory: SteppingKripkeStructureGeneratorFactory
-    
-    public init(factory: SteppingKripkeStructureGeneratorFactory) {
-        self.factory = factory 
+public class SimpleMachineFactory: MachineFactory {
+
+    public typealias Make = SimpleMachine
+
+    public func make(name: String, fsms: [FiniteStateMachine], debug: Bool) -> Make {
+        return SimpleMachine(name: name, fsms: fsms, debug: debug)
     }
-    
-    func make<T: Machine>(machines: [T]) -> KripkeStructureGenerator {
-        return MachineKripkeStructureGenerator(generators: machines.flatMap {
-            (m: T) -> [SteppingKripkeStructureGenerator] in
-                m.fsms.map { self.factory.make(fsm: $0, machine: m) }
-        })
-    }
-    
+
 }

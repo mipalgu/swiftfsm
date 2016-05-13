@@ -79,8 +79,9 @@ Swiftfsm(
     kripkeStructureView: NuSMVKripkeStructureView(
         factory: FilePrinterFactory()
     ),
+    machineFactory: SimpleMachineFactory(),
     machineLoader: DynamicLibraryMachineLoaderFactory(printer: printer).make(),
     parser: SwiftfsmParser(),
-    schedulerFactory: RoundRobinSchedulerFactory(),
+    schedulerFactory: RoundRobinSchedulerFactory<SimpleMachine>(),
     view: printer
 ).run(args: Process.arguments)

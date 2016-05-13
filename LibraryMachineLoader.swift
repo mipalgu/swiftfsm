@@ -69,7 +69,7 @@ public class LibraryMachineLoader: MachineLoader {
      *  This is used to remember factories for paths, therefore allowing us to
      *  just use this instead of loading it from the file system.
      */
-    private static var cache: [String: MachineFactory] = [:]
+    private static var cache: [String: FSMArrayFactory] = [:]
 
     /**
      *  Used to create the libraries.
@@ -142,7 +142,7 @@ public class LibraryMachineLoader: MachineLoader {
             return []
         }
         // Get the factory, add it to the cache, call it and return the result.
-        let factory: MachineFactory = getLastFactory()!
+        let factory: FSMArrayFactory = getLastFactory()!
         self.dynamicType.cache[library.path] = factory
         return factory()
     }

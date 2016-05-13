@@ -64,32 +64,40 @@
 
 import FSM
 
-public class Swiftfsm {
-    
+public class Swiftfsm<
+    SF: SchedulerFactory, MF: MachineFactory, MachineType: Machine
+    where SF.Machines == MachineType,
+    MF.Make == MachineType
+> {
+
     private let kripkeGeneratorFactory: MachineKripkeStructureGeneratorFactory
     
     private let kripkeStructureView: KripkeStructureView
 
     private var names: [String: Int] = [:]
 
+    private let machineFactory: MF
+
     private let machineLoader: MachineLoader
     
     private let parser: HelpableParser
     
-    private let schedulerFactory: SchedulerFactory
+    private let schedulerFactory: SF
     
     private let view: View
     
     public init(
         kripkeGeneratorFactory: MachineKripkeStructureGeneratorFactory,
         kripkeStructureView: KripkeStructureView,
+        machineFactory: MF,
         machineLoader: MachineLoader,
         parser: HelpableParser,
-        schedulerFactory: SchedulerFactory,
+        schedulerFactory: SF,
         view: View
     ) {
         self.kripkeGeneratorFactory = kripkeGeneratorFactory
         self.kripkeStructureView = kripkeStructureView
+        self.machineFactory = machineFactory
         self.machineLoader = machineLoader
         self.parser = parser
         self.schedulerFactory = schedulerFactory
@@ -127,7 +135,7 @@ public class Swiftfsm {
         self.handleTasks(tasks)
     }
     
-    private func generateKripkeStructure(_ machines: [Machine]) {
+    private func generateKripkeStructure(_ machines: [MachineType]) {
         let generator: KripkeStructureGenerator =
             self.kripkeGeneratorFactory.make(machines: machines)
         let structure: KripkeStructureType = generator.generate()
@@ -145,7 +153,7 @@ public class Swiftfsm {
     }
     
     private func handleTasks(_ tasks: [Task]) {
-        let t: [(schedule: [Machine], kripke: [Machine])] = tasks.map {
+        let t: [(schedule: [MachineType], kripke: [MachineType])] = tasks.map {
             self.handleTask($0)
         }
         self.generateKripkeStructure(t.flatMap { $0.kripke })
@@ -174,7 +182,7 @@ public class Swiftfsm {
         return fsms
     }
 
-    private func handleTask(_ t: Task) -> ([Machine], [Machine]) {
+    private func handleTask(_ t: Task) -> ([MachineType], [MachineType]) {
         var name: String = self.getMachinesName(t)
         // Handle when there is no path in the Task.
         if (nil == t.path) {
@@ -183,11 +191,11 @@ public class Swiftfsm {
         if (true == t.isClfsmMachine) {
             self.handleError(.CLFSMMachine(machineName: name, path: t.path!))
         }
-        var schedule: [Machine] = []
-        var kripke: [Machine] = []
+        var schedule: [MachineType] = []
+        var kripke: [MachineType] = []
         for _ in 0 ..< t.count  {
             // Create the Machine
-            let temp: Machine = SimpleMachine(
+            let temp: MachineType = self.machineFactory.make(
                 name: name,
                 fsms: self.loadFsms(t, name: name),
                 debug: t.enableDebugging
@@ -219,7 +227,7 @@ public class Swiftfsm {
         return tasks
     }
     
-    private func runMachines(_ machines: [Machine]) {
+    private func runMachines(_ machines: [MachineType]) {
         self.schedulerFactory.make(machines: machines).run()
     }
     
