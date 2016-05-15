@@ -12,7 +12,6 @@ ALL_HDRS!=ls *.h
 SPECIFIC_CFLAGS=-D_POSIX_C_SOURCE=199309L
 .endif
 
-SWIFTCFLAGS=-I${SRCDIR}/../.. -I${SRCDIR}/../../../Common
 SWIFT_SRCS!=ls *.swift
 SWIFT_BRIDGING_HEADER=swiftfsm-Bridging-Header.h
 C_SRCS!=ls *.c
