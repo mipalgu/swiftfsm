@@ -1,1 +1,1 @@
-../../../GNUmakefile
+../../../mk/GNUmakefile
