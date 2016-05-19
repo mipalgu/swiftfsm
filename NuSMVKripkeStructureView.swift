@@ -223,7 +223,12 @@ public class NuSMVKripkeStructureView: KripkeStructureView {
         d.properties.forEach {
             d.vars += "\($0) : {"
             var pre: Bool = false
-            let arr: [String] = Array<String>($1).sorted()
+            let arr: [String] = Array<String>($1).sorted() {
+                if let lhs = Double($0), rhs = Double($1) {
+                    return lhs < rhs
+                }
+                return $0 < $1
+            }
             arr.forEach {
                 d.vars += (true == pre ? ",\n" : "\n") + $0 
                 pre = true
