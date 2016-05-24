@@ -165,7 +165,7 @@ public class TeleportingTurtleGenerator: SteppingKripkeStructureGenerator {
             self.cyclePos += 1
         }
         self.isFinished = 
-            self.fsm.hasFinished() && 
+            self.fsm.hasFinished && 
             self.rabbit == self.lastState
         return self.rabbit
     }

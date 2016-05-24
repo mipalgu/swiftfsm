@@ -82,7 +82,7 @@ public class RoundRobinScheduler<T: Machine>: Scheduler {
                 DEBUG = jobs[i].debug
                 var j: Int = 0
                 $0.fsms.forEach {
-                    if (false == $0.hasFinished()) {
+                    if (false == $0.hasFinished) {
                         jobs[i].fsms[j].next()
                         j = j + 1
                         return 
