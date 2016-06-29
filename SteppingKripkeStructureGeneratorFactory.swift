@@ -60,8 +60,10 @@ import FSM
 
 public protocol SteppingKripkeStructureGeneratorFactory {
 
+    associatedtype M: Machine
+
     associatedtype Generator: SteppingKripkeStructureGenerator
 
-    func make<M: Machine>(fsm: FiniteStateMachine, machine: M) -> Generator
+    func make(fsm: FiniteStateMachine, machine: M) -> Generator
 
 }

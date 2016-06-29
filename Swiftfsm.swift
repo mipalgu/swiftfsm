@@ -68,15 +68,14 @@ public class Swiftfsm<
     SF: SchedulerFactory,
     MF: MachineFactory,
     MachineType: Machine,
-    SteppingFactory: SteppingKripkeStructureGeneratorFactory,
-    SteppingGenerator: SteppingKripkeStructureGenerator
+    SteppingFactory: SteppingKripkeStructureGeneratorFactory
     where SF.Machines == MachineType,
     MF.Make == MachineType,
-    SteppingGenerator == SteppingFactory.Generator
+    SteppingFactory.M == MachineType
 > {
 
     public typealias KripkeStructureGeneratorFactory =
-        MachineKripkeStructureGeneratorFactory<SteppingFactory, SteppingGenerator>
+        MachineKripkeStructureGeneratorFactory<MachineType, SteppingFactory>
 
     private let kripkeGeneratorFactory: KripkeStructureGeneratorFactory
     

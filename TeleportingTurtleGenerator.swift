@@ -58,17 +58,16 @@
 
 import FSM
 
-public class TeleportingTurtleGenerator: SteppingKripkeStructureGenerator {
+public class TeleportingTurtleGenerator<
+    M: Machine,
+    Generator: KripkeStateGeneratorType
+>: SteppingKripkeStructureGenerator {
 
     private var fsm: FiniteStateMachine
 
-    private let fsmExtractor: FSMPropertyExtractor
-    
-    private let globalsExtractor: GlobalPropertyExtractor
+    private let generator: Generator
 
-    public let machine: Machine
-
-    private let stateExtractor: StatePropertyExtractor
+    public let machine: M
 
     public private(set) var isFinished: Bool
 
@@ -83,16 +82,12 @@ public class TeleportingTurtleGenerator: SteppingKripkeStructureGenerator {
     
     public init(
         fsm: FiniteStateMachine,
-        machine: Machine,
-        globalsExtractor: GlobalPropertyExtractor,
-        fsmExtractor: FSMPropertyExtractor,
-        stateExtractor: StatePropertyExtractor
+        machine: M,
+        generator: Generator
     ) {
         self.fsm = fsm
         self.machine = machine
-        self.globalsExtractor = globalsExtractor
-        self.fsmExtractor = fsmExtractor
-        self.stateExtractor = stateExtractor
+        self.generator = generator
         self.isFinished = false 
         self.power = 1
         self.length = 1
@@ -170,45 +165,9 @@ public class TeleportingTurtleGenerator: SteppingKripkeStructureGenerator {
         return self.rabbit
     }
 
-    public func generateNextState() -> KripkeState {
-        let s: State = self.fsm.currentState
-        // Extract the fsm and state properties.
-        let beforeProperties: [String: KripkeStateProperty] = 
-            self.stateExtractor.extract(state: s)
-        let beforeFsmProperties: [String: KripkeStateProperty] = 
-            self.fsmExtractor.extract(vars: self.fsm.vars)
-        // Execute the state.
-        self.fsm.next()
-        // Extract the fsm and state properties again.
-        let afterProperties: [String: KripkeStateProperty] =
-            self.stateExtractor.extract(state: s)
-        let afterFsmProperties: [String: KripkeStateProperty] =
-            self.fsmExtractor.extract(vars: self.fsm.vars)
-        // Get global properties
-        let globalProperties: (
-            before: [String: KripkeStateProperty],
-            after: [String: KripkeStateProperty]
-        ) = self.globalsExtractor.extract(ringlet: self.fsm.ringlet)
-        // Create Before and After Property Lists
-        let before: KripkeStatePropertyList = KripkeStatePropertyList(
-            stateProperties: beforeProperties,
-            fsmProperties: beforeFsmProperties,
-            globalProperties: globalProperties.before
-        )
-        let after: KripkeStatePropertyList = KripkeStatePropertyList(
-            stateProperties: afterProperties,
-            fsmProperties: afterFsmProperties,
-            globalProperties: globalProperties.after
-        )
-        // Create the Kripke State
-        return KripkeState(
-            state: s,
-            fsm: self.fsm,
-            machine: self.machine,
-            beforeProperties: before,
-            afterProperties: after
-        )
-    } 
+    private func generateNextState() -> KripkeState {
+        return self.generator.generate(fsm: self.fsm, machine: self.machine)
+    }
 
     private func tp() {
         let temp: Int = self.length

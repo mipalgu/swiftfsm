@@ -58,34 +58,24 @@
 
 import FSM
 
-public class TeleportingTurtleGeneratorFactory:
+public class TeleportingTurtleGeneratorFactory<Ma: Machine, KripkeStateGen: KripkeStateGeneratorType>:
     SteppingKripkeStructureGeneratorFactory {
 
-    public typealias Generator = TeleportingTurtleGenerator
+    public typealias M = Ma
 
-    private let fsmExtractor: FSMPropertyExtractor
-    
-    private let globalsExtractor: GlobalPropertyExtractor
+    public typealias Generator = TeleportingTurtleGenerator<M, KripkeStateGen>
 
-    private let stateExtractor: StatePropertyExtractor
+    private let generator: KripkeStateGen
 
-    public init(
-        fsmExtractor: FSMPropertyExtractor,
-        globalsExtractor: GlobalPropertyExtractor,
-        stateExtractor: StatePropertyExtractor
-    ) {
-        self.fsmExtractor = fsmExtractor
-        self.globalsExtractor = globalsExtractor
-        self.stateExtractor = stateExtractor
+    public init(generator: KripkeStateGen) {
+        self.generator = generator
     }
 
-    public func make<M: Machine>(fsm: FiniteStateMachine, machine: M) -> Generator {
+    public func make(fsm: FiniteStateMachine, machine: M) -> Generator {
         return TeleportingTurtleGenerator(
             fsm: fsm,
             machine: machine,
-            globalsExtractor: self.globalsExtractor,
-            fsmExtractor: self.fsmExtractor,
-            stateExtractor: self.stateExtractor
+            generator: self.generator
         )
     }
 
