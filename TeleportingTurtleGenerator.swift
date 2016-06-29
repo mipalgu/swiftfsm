@@ -170,7 +170,7 @@ public class TeleportingTurtleGenerator: SteppingKripkeStructureGenerator {
         return self.rabbit
     }
 
-    private func generateNextState() -> KripkeState {
+    public func generateNextState() -> KripkeState {
         let s: State = self.fsm.currentState
         // Extract the fsm and state properties.
         let beforeProperties: [String: KripkeStateProperty] = 

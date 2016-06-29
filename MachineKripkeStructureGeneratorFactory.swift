@@ -58,17 +58,21 @@
 
 import FSM
 
-public class MachineKripkeStructureGeneratorFactory {
+public class MachineKripkeStructureGeneratorFactory<
+    Factory: SteppingKripkeStructureGeneratorFactory,
+    Generator: SteppingKripkeStructureGenerator
+    where Generator == Factory.Generator
+> {
     
-    private let factory: SteppingKripkeStructureGeneratorFactory
+    private let factory: Factory
     
-    public init(factory: SteppingKripkeStructureGeneratorFactory) {
+    public init(factory: Factory) {
         self.factory = factory 
     }
     
-    func make<T: Machine>(machines: [T]) -> KripkeStructureGenerator {
+    func make<M: Machine>(machines: [M]) -> KripkeStructureGenerator {
         return MachineKripkeStructureGenerator(generators: machines.flatMap {
-            (m: T) -> [SteppingKripkeStructureGenerator] in
+            (m: M) -> [Generator] in
                 m.fsms.map { self.factory.make(fsm: $0, machine: m) }
         })
     }

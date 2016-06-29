@@ -58,20 +58,21 @@
 
 import FSM
 
-public class MachineKripkeStructureGenerator: KripkeStructureGenerator {
+public class MachineKripkeStructureGenerator<
+    G: SteppingKripkeStructureGenerator
+>: KripkeStructureGenerator {
     
-    private let generators: [SteppingKripkeStructureGenerator]
+    private let generators: [G]
     
-    public init(generators: [SteppingKripkeStructureGenerator]) {
+    public init(generators: [G]) {
         self.generators = generators
     }
     
     public func generate() -> KripkeStructureType {
         var states: [KripkeState] = []
-        var jobs: [SteppingKripkeStructureGenerator] = generators
+        var jobs: [G] = generators
         while (false == jobs.isEmpty){
             jobs = jobs.flatMap {
-                DEBUG = $0.machine.debug
                 states.append($0.next())
                 return false == $0.isFinished ? $0 : nil
             }

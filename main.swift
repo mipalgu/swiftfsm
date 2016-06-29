@@ -69,7 +69,7 @@ let printer: CommandLinePrinter =
     )
 
 Swiftfsm(
-    kripkeGeneratorFactory: MachineKripkeStructureGeneratorFactory(
+    kripkeGeneratorFactory: MachineKripkeStructureGeneratorFactory<TeleportingTurtleGeneratorFactory, TeleportingTurtleGenerator>(
         factory: TeleportingTurtleGeneratorFactory(
             fsmExtractor: MirrorPropertyExtractor(),
             globalsExtractor: MirrorPropertyExtractor(),

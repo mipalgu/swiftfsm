@@ -65,12 +65,20 @@
 import FSM
 
 public class Swiftfsm<
-    SF: SchedulerFactory, MF: MachineFactory, MachineType: Machine
+    SF: SchedulerFactory,
+    MF: MachineFactory,
+    MachineType: Machine,
+    SteppingFactory: SteppingKripkeStructureGeneratorFactory,
+    SteppingGenerator: SteppingKripkeStructureGenerator
     where SF.Machines == MachineType,
-    MF.Make == MachineType
+    MF.Make == MachineType,
+    SteppingGenerator == SteppingFactory.Generator
 > {
 
-    private let kripkeGeneratorFactory: MachineKripkeStructureGeneratorFactory
+    public typealias KripkeStructureGeneratorFactory =
+        MachineKripkeStructureGeneratorFactory<SteppingFactory, SteppingGenerator>
+
+    private let kripkeGeneratorFactory: KripkeStructureGeneratorFactory
     
     private let kripkeStructureView: KripkeStructureView
 
@@ -87,7 +95,7 @@ public class Swiftfsm<
     private let view: View
     
     public init(
-        kripkeGeneratorFactory: MachineKripkeStructureGeneratorFactory,
+        kripkeGeneratorFactory: KripkeStructureGeneratorFactory,
         kripkeStructureView: KripkeStructureView,
         machineFactory: MF,
         machineLoader: MachineLoader,

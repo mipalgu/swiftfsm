@@ -60,8 +60,6 @@ public protocol SteppingKripkeStructureGenerator {
 
     var isFinished: Bool { get }
 
-    var machine: Machine { get }
-
     func next() -> KripkeState 
 
 }
