@@ -58,7 +58,7 @@
 
 import FSM
 
-public class KripkeStructure: KripkeStructureType {
+public struct KripkeStructure: KripkeStructureType {
     
     public let states: [KripkeState]
     
