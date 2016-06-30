@@ -1,9 +1,9 @@
 /*
- * main.swift
- * swiftfsm
+ * HashTableGenerator.swift 
+ * swiftfsm 
  *
- * Created by Callum McColl on 14/08/2015.
- * Copyright © 2015 Callum McColl. All rights reserved.
+ * Created by Callum McColl on 30/06/2016.
+ * Copyright © 2016 Callum McColl. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -56,34 +56,87 @@
  *
  */
 
-#if os(Linux)
-import Glibc
-#elseif os(OSX)
-import Darwin
-#endif
+import FSM
 
-let printer: CommandLinePrinter = 
-    CommandLinePrinter(
-        errorStream: StderrOutputStream(),
-        messageStream: StdoutOutputStream()
-    )
+public class HashTableGenerator<
+    Ma: Machine,
+    G: KripkeStateGeneratorType
+>: SteppingKripkeStructureGenerator {
 
-Swiftfsm(
-    kripkeGeneratorFactory: MachineKripkeStructureGeneratorFactory(
-        factory: HashTableKripkeStructureGeneratorFactory(
-            generator: KripkeStateGenerator(
-                globalsExtractor: MirrorPropertyExtractor(),
-                fsmExtractor: MirrorPropertyExtractor(),
-                stateExtractor: MirrorPropertyExtractor()
-            )
-        )
-    ),
-    kripkeStructureView: NuSMVKripkeStructureView(
-        factory: FilePrinterFactory()
-    ),
-    machineFactory: SimpleMachineFactory(),
-    machineLoader: DynamicLibraryMachineLoaderFactory(printer: printer).make(),
-    parser: SwiftfsmParser(),
-    schedulerFactory: RoundRobinSchedulerFactory<SimpleMachine>(),
-    view: printer
-).run(args: Process.arguments)
+    public typealias M = Ma
+
+    private var cycleLength: Int = 0
+
+    private var cyclePos: Int = 0
+
+    private var cycleState: KripkeState!
+
+    private let fsm: FiniteStateMachine
+
+    private var inCycle: Bool = false
+
+    public private(set) var isFinished: Bool = false
+
+    private let generator: G
+
+    private var lastState: KripkeState!
+
+    public let machine: M
+
+    private var pos: Int = 0
+
+    var states: [String: (Int, KripkeState)] = [:]
+
+    public init(fsm: FiniteStateMachine, machine: M, generator: G) {
+        self.fsm = fsm
+        self.machine = machine
+        self.generator = generator
+    }
+
+    public func next() -> KripkeState  {
+        if (self.lastState == nil) {
+            self.lastState = self.generateNextState()
+            return self.lastState
+        }
+        if (true == isFinished) {
+            return self.lastState
+        } 
+        let state: KripkeState = self.generateNextState()
+        self.lastState.target = state
+        self.pos += 1
+        if (true == self.inCycle) {
+            if (self.cyclePos >= self.cycleLength) {
+                self.isFinished = true
+                return state
+            }
+            self.handleCycle(state: state)
+        }
+        if (false == self.inCycle && self.states[state.description] != nil) {
+            self.inCycle = true
+            self.cycleState = self.states[state.description]!.1
+            self.cyclePos = 0
+            self.cycleLength = self.pos - self.states[state.description]!.0
+        }
+        if (nil == self.states[state.description]) {
+            self.states[state.description] = (pos, state)
+        } else {
+            self.states[state.description] = (pos, state)
+        }
+        self.isFinished = self.fsm.hasFinished && self.lastState == state
+        self.lastState = state
+        return state
+    }
+
+    private func handleCycle(state: KripkeState) {
+        self.cycleState = self.cycleState.target!
+        self.inCycle = state == self.cycleState
+        self.cyclePos += 1
+        if (false == self.inCycle) {
+            self.cycleLength = 0
+        }
+    }
+
+    private func generateNextState() -> KripkeState {
+        return self.generator.generate(fsm: self.fsm, machine: self.machine)
+    }
+}

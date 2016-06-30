@@ -1,9 +1,9 @@
 /*
- * main.swift
- * swiftfsm
+ * HashTableKripkeStructureGeneratorFactory.swift 
+ * swiftfsm 
  *
- * Created by Callum McColl on 14/08/2015.
- * Copyright © 2015 Callum McColl. All rights reserved.
+ * Created by Callum McColl on 30/06/2016.
+ * Copyright © 2016 Callum McColl. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -56,34 +56,29 @@
  *
  */
 
-#if os(Linux)
-import Glibc
-#elseif os(OSX)
-import Darwin
-#endif
+import FSM
 
-let printer: CommandLinePrinter = 
-    CommandLinePrinter(
-        errorStream: StderrOutputStream(),
-        messageStream: StdoutOutputStream()
-    )
+public class HashTableKripkeStructureGeneratorFactory<
+    Ma: Machine,
+    KripkeStateGen: KripkeStateGeneratorType
+>: SteppingKripkeStructureGeneratorFactory {
+    
+    public typealias M = Ma
 
-Swiftfsm(
-    kripkeGeneratorFactory: MachineKripkeStructureGeneratorFactory(
-        factory: HashTableKripkeStructureGeneratorFactory(
-            generator: KripkeStateGenerator(
-                globalsExtractor: MirrorPropertyExtractor(),
-                fsmExtractor: MirrorPropertyExtractor(),
-                stateExtractor: MirrorPropertyExtractor()
-            )
+    public typealias Generator = HashTableGenerator<M, KripkeStateGen>
+
+    private let generator: KripkeStateGen
+
+    public init(generator: KripkeStateGen) {
+        self.generator = generator
+    }
+
+    public func make(fsm: FiniteStateMachine, machine: M) -> Generator {
+        return HashTableGenerator(
+            fsm: fsm,
+            machine: machine,
+            generator: self.generator
         )
-    ),
-    kripkeStructureView: NuSMVKripkeStructureView(
-        factory: FilePrinterFactory()
-    ),
-    machineFactory: SimpleMachineFactory(),
-    machineLoader: DynamicLibraryMachineLoaderFactory(printer: printer).make(),
-    parser: SwiftfsmParser(),
-    schedulerFactory: RoundRobinSchedulerFactory<SimpleMachine>(),
-    view: printer
-).run(args: Process.arguments)
+    }
+
+}
