@@ -168,9 +168,9 @@ public class NuSMVKripkeStructureView: KripkeStructureView {
      *  Create a printer using the factory provided and print the structure.
      */
     private func printStructure(_ d: Data) {
-        var str: String = "MODULE \(d.module)\n\n"
+        var str: String = "MODULE main\n\n"
         str += d.vars + d.trans
-        let printer: Printer = factory.make(id: "\(d.module).nusmv")
+        let printer: Printer = factory.make(id: "\(d.module).smv")
         printer.message(str: str)
     }
 
@@ -475,7 +475,7 @@ public class NuSMVKripkeStructureView: KripkeStructureView {
      */
     private func dataForState(_ state: KripkeState) -> Data {
         if (nil == self.data[state.machine.name]) {
-            self.data[state.machine.name] = Data(module: "main")
+            self.data[state.machine.name] = Data(module: state.machine.name) 
         }
         return self.data[state.machine.name]!
     }
