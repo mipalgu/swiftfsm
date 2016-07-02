@@ -475,7 +475,7 @@ public class NuSMVKripkeStructureView: KripkeStructureView {
      */
     private func dataForState(_ state: KripkeState) -> Data {
         if (nil == self.data[state.machine.name]) {
-            self.data[state.machine.name] = Data(module: state.machine.name)
+            self.data[state.machine.name] = Data(module: "main")
         }
         return self.data[state.machine.name]!
     }
