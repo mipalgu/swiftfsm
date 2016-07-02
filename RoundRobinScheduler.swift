@@ -76,7 +76,7 @@ public class RoundRobinScheduler<T: Machine>: Scheduler {
     public func run() -> Void {
         var jobs: [T] = self.machines
         // Run until all machines are finished.
-        while (false == jobs.isEmpty) {
+        while (false == jobs.isEmpty && false == STOP) {
             var i: Int = 0
             jobs.forEach {
                 DEBUG = jobs[i].debug

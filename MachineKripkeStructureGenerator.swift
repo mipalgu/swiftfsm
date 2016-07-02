@@ -71,7 +71,7 @@ public class MachineKripkeStructureGenerator<
     public func generate() -> KripkeStructureType {
         var states: [KripkeState] = []
         var jobs: [G] = generators
-        while (false == jobs.isEmpty){
+        while (false == jobs.isEmpty && false == STOP){
             jobs = jobs.flatMap {
                 if let s = $0.next() {
                     states.append(s)
