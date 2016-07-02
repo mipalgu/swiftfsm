@@ -70,7 +70,16 @@ import Glibc
  */
 public class DynamicLibraryCreator: LibraryCreator {
     
-    public init() {}
+    private let printer: Printer
+
+    public init(
+        printer: Printer = CommandLinePrinter(
+            errorStream: StderrOutputStream(),
+            messageStream: StdoutOutputStream()
+        )
+    ) {
+        self.printer = printer
+    }
 
     /**
      *  Create the LibraryResource from the dynamic library.
@@ -81,12 +90,14 @@ public class DynamicLibraryCreator: LibraryCreator {
         #if os(OSX)
         // Can the dylib be opened?
         if (false == dlopen_preflight(path)) {
+            self.printer.error(str: String(cString: dlerror()))
             return nil
         }
         #endif
         // Attempt to open the library.
         let handler: UnsafeMutablePointer<Void>? = dlopen(path, RTLD_NOW | RTLD_LOCAL)
         if (handler == nil) {
+            self.printer.error(str: String(cString: dlerror()))
             return nil
         }
         // Create the resource.
