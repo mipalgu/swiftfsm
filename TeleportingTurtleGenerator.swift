@@ -115,7 +115,7 @@ public class TeleportingTurtleGenerator<
      *  generating the structure, but, it does not bother to remove the cyclic
      *  states from the end of the structure.
      */
-    public func next() -> KripkeState {
+    public func next() -> KripkeState? {
         // Have we started yet?
         if (nil == self.turtle) {
             // No - finish setup.
@@ -126,8 +126,16 @@ public class TeleportingTurtleGenerator<
             return self.turtle
         }
         // Don't bother generating any further if we have finished.
+        if (true == self.fsm.hasFinished) {
+            self.isFinished = true
+        }
         if (true == self.isFinished) {
-            return self.rabbit
+            return nil
+        }
+        let temp: KripkeState = self.generateNextState()
+        // Ignore repeating states.
+        if (temp == self.lastState) {
+            return nil
         }
         // Teleport the turtle if we are not in a cycle.
         if (false == self.inCycle) {
@@ -135,7 +143,6 @@ public class TeleportingTurtleGenerator<
             self.tp()
         }
         // Update the rabbit with the new state and remember the last state.
-        let temp: KripkeState = self.generateNextState()
         self.rabbit.target = temp
         self.lastState = self.rabbit
         self.rabbit = temp

@@ -71,10 +71,6 @@ public class HashTableGenerator<
 
     private var cycleState: KripkeState!
     
-    private var startCycleState: KripkeState!
-
-    private var foundDifferentCycleState: Bool = false
-
     private let fsm: FiniteStateMachine
 
     private var inCycle: Bool = false
@@ -97,22 +93,25 @@ public class HashTableGenerator<
         self.generator = generator
     }
 
-    public func next() -> KripkeState  {
+    public func next() -> KripkeState?  {
         if (self.lastState == nil) {
             self.lastState = self.generateNextState()
             return self.lastState
         }
-        if (true == isFinished) {
-            return self.lastState
+        if (true == self.fsm.hasFinished) {
+            self.isFinished = true
+        }
+        if (true == self.isFinished) {
+            return nil
         } 
         let state: KripkeState = self.generateNextState()
+        if (self.lastState == state) {
+            return nil
+        }
         self.lastState.target = state
         self.pos += 1
         if (true == self.inCycle) {
-            if (self.cyclePos >= self.cycleLength && true == self.foundDifferentCycleState) {
-                print("found cycle")
-                print(self.startCycleState)
-                print(self.cycleState)
+            if (self.cyclePos >= self.cycleLength) {
                 self.isFinished = true
                 return state
             }
@@ -121,9 +120,7 @@ public class HashTableGenerator<
         if (false == self.inCycle && self.states[state.description] != nil) {
             self.inCycle = true
             self.cycleState = self.states[state.description]!.1
-            self.startCycleState = self.cycleState
             self.cyclePos = 0
-            self.foundDifferentCycleState = false
             self.cycleLength = self.pos - self.states[state.description]!.0
         }
         if (nil == self.states[state.description]) {
@@ -138,9 +135,6 @@ public class HashTableGenerator<
 
     private func handleCycle(state: KripkeState) {
         self.cycleState = self.cycleState.target!
-        if (self.cycleState != self.startCycleState) {
-            self.foundDifferentCycleState = true
-        }
         self.inCycle = state == self.cycleState
         self.cyclePos += 1
         if (false == self.inCycle) {
