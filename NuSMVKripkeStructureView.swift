@@ -197,7 +197,14 @@ public class NuSMVKripkeStructureView: KripkeStructureView {
         }
         let _: String = getTrans(lastState, d: d, pcName: lastPCName)
         // Handle the last transition.
-        d.trans += "TRUE:\n    next(pc)=\(lastPCName);\nesac\n"
+        var properties = d.latestProperties
+        guard let first = properties.first else {
+            d.trans += "TRUE:\n    next(pc)=\(lastPCName);\nesac\n"
+            return
+        }
+        properties[first.key] = nil
+        let props: String = properties.reduce("next(\(first.key))=\(first.value)") { $0 + " & next(\($1.0))=\($1.1)" }
+        d.trans += "TRUE:\n    " + props + " & next(pc)=\(lastPCName);\nesac\n"
     }
 
     /*
@@ -401,16 +408,33 @@ public class NuSMVKripkeStructureView: KripkeStructureView {
         ]
     }
 
+    func formatLabel(_ label: String) -> String {
+        guard let first = label.characters.first else {
+            return ""
+        }
+        var str = ""
+        if ((first < "a" || first > "z") && (first < "A" || first > "Z")) {
+            str += "_"
+        }
+        str += label.characters.map({
+            if (($0 < "a" || $0 > "z") && ($0 < "A" || $0 > "Z") && ($0 < "0" || $0 > "9") && $0 != "#" && $0 != "_" && $0 != "$" && $0 != "-" ) {
+                return ""
+            }
+            return "\($0)"
+        }).reduce("", combine: +)
+        return str
+    }
+
     private func stateName(_ state: KripkeState) -> String {
-        return "\(self.fsmName(state))\(self.delimiter)\(state.state.name)"
+        return "\(self.formatLabel(self.fsmName(state)))\(self.delimiter)\(self.formatLabel(state.state.name))"
     }
 
     private func fsmName(_ state: KripkeState) -> String {
-        return "\(state.machine.name)\(self.delimiter)\(state.fsm.name)"
+        return "\(self.formatLabel(state.machine.name))\(self.delimiter)\(self.formatLabel(state.fsm.name))"
     }
 
     private func globalsName(_ state: KripkeState) -> String {
-        return "\(state.machine.name)\(self.delimiter)globals"
+        return "\(self.formatLabel(state.machine.name))\(self.delimiter)globals"
     }
 
     private func generateProperties(_ list: [(String, String)], d: Data, addToProperties: Bool) -> String {
