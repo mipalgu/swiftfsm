@@ -119,8 +119,6 @@ public class Swiftfsm<
             self.view.message(message: parser.helpText)
             self.handleError(SwiftfsmErrors.NoPathsFound)
         }
-        print(args)
-        print(self.cleanArgs(args))
         // Parse the args and get a bunch of tasks.
         let tasks: [Task] = self.parseArgs(self.cleanArgs(args))
         // Show the help message when there are no tasks.
