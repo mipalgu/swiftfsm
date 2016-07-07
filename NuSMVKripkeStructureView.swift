@@ -468,14 +468,22 @@ public class NuSMVKripkeStructureView: KripkeStructureView {
     }
 
     private func formatPropertyValue(_ p: KripkeStateProperty) -> String {
-        var val: String = "\(p.value)"
-        if (.String == p.type) {
-            val = "\"" + val + "\""
+        let val: String = "\(p.value)"
+        switch (p.type) {
+        case .String:
+            return "\"" + val + "\""
+        case .Double, .Float, .Float80:
+            return "F" + String(val.characters.map({ $0 == "." ? "_" : $0 }))
+        case .Collection(let p2):
+            var vals: [String] = p2.map { self.formatPropertyValue($0) }
+            if (true == vals.isEmpty) {
+                return "C__"
+            }
+            let first = vals.removeFirst()
+            return "C_\(vals.reduce(first) { $0 + "-" + $1})_"
+        default:
+            return val
         }
-        if (.Double == p.type || .Float == p.type || .Float80 == p.type) {
-            val = "F" + String(val.characters.map({ $0 == "." ? "_" : $0 }))
-        }
-        return val
     }
 
     /*
@@ -505,10 +513,23 @@ public class NuSMVKripkeStructureView: KripkeStructureView {
     }
 
     private func isSupportedType(_ t: KripkeStatePropertyTypes) -> Bool {
-        return t == .Bool || t == .Int8 || t == .Int16 || t == .Int32 ||
+        if (t == .Bool || t == .Int8 || t == .Int16 || t == .Int32 ||
             t == .Int64 || t == .Int || t == .UInt8 || t == .UInt16 ||
             t == .UInt32 || t == .UInt64 || t == .UInt || t == .Float80 ||
             t == .Float || t == .Double || t == .String
+        ) {
+            return true
+        }
+        switch (t) {
+        case .Collection(let ps):
+            if (true == ps.isEmpty) {
+                return true
+            }
+            let first = ps.first!
+            return self.isSupportedType(first.type)
+        default:
+            return false
+        }
     }
 
 }
