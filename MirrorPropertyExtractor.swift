@@ -57,6 +57,7 @@
  */
 
 import FSM
+import Foundation
 
 public class MirrorPropertyExtractor: 
     FSMPropertyExtractor,
@@ -185,12 +186,9 @@ public class MirrorPropertyExtractor:
         case is String:
             return .String
         case is KripkeCollection:
-            let v: KripkeCollection = value as! KripkeCollection 
-            let arr: [Any] = v.toArray()
-            if (arr.isEmpty) {
-                return .EmptyCollection 
-            }
-            return .Collection(self.getKripkeStatePropertyType(arr[0]))
+            return .Collection(
+                (value as! KripkeCollection).toArray().map(self.convertValue)
+            )
         default:
             return .Some
         }
