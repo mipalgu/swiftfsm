@@ -112,7 +112,6 @@ public class Swiftfsm<
     }
     
     public func run(args: [String]) {
-        var args: [String] = args
         // Pad the output
         self.view.message(message: "")
         // Print help when we have no input.
@@ -120,9 +119,10 @@ public class Swiftfsm<
             self.view.message(message: parser.helpText)
             self.handleError(SwiftfsmErrors.NoPathsFound)
         }
-        args.removeFirst()
+        print(args)
+        print(self.cleanArgs(args))
         // Parse the args and get a bunch of tasks.
-        let tasks: [Task] = self.parseArgs(args)
+        let tasks: [Task] = self.parseArgs(self.cleanArgs(args))
         // Show the help message when there are no tasks.
         if (true == tasks.isEmpty) {
             self.handleMessage(parser.helpText)
@@ -140,6 +140,19 @@ public class Swiftfsm<
         }
         // Run the tasks.
         self.handleTasks(tasks)
+    }
+
+    private func cleanArgs(_ args: [String]) -> [String] {
+        return args[1 ..< args.count].flatMap { (str: String) -> [String] in
+            let cs = Array(str.characters)
+            if (cs.count < 2 || cs.first != "-") {
+                return [str]
+            }
+            if (cs[1] == "-") {
+                return [str]
+            }
+            return cs.filter { $0 != "-" }.map { "-\($0)" }
+        }
     }
     
     private func generateKripkeStructure(_ machines: [MachineType]) {
