@@ -66,7 +66,7 @@ public enum KripkeStatePropertyTypes: Equatable {
     case Float, Float80, Double
     case String
     case EmptyCollection
-    indirect case Collection(KripkeStatePropertyTypes)
+    case Collection([KripkeStateProperty])
     case Some
 }
 
