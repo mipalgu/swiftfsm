@@ -56,7 +56,7 @@
  *
  */
 
-public enum SwiftfsmErrors: ErrorProtocol {
+public enum SwiftfsmErrors: Error {
     
     case CLFSMMachine(machineName: String, path: String)
     case NoPathsFound

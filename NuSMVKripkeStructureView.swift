@@ -251,7 +251,7 @@ public class NuSMVKripkeStructureView: KripkeStructureView {
             d.vars += "\($0) : {"
             var pre: Bool = false
             let arr: [String] = Array<String>($1).sorted() {
-                if let lhs = Double($0), rhs = Double($1) {
+                if let lhs = Double($0), let rhs = Double($1) {
                     return lhs < rhs
                 }
                 return $0 < $1
@@ -276,7 +276,7 @@ public class NuSMVKripkeStructureView: KripkeStructureView {
     private func createInitList(_ d: Data) {
         d.vars += "INIT\n"
         d.vars += "pc=\(d.pc[0])"
-        d.vars += d.initials.map({" & \($0)=\($1)"}).reduce("", combine: +)
+        d.vars += d.initials.map({" & \($0)=\($1)"}).reduce("", +)
         d.vars += "\n\n"
     }
 
@@ -421,7 +421,7 @@ public class NuSMVKripkeStructureView: KripkeStructureView {
                 return ""
             }
             return "\($0)"
-        }).reduce("", combine: +)
+        }).reduce("", +)
         return str
     }
 
