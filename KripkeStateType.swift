@@ -141,7 +141,6 @@ public func ==<T: _KripkeStateType, U: _KripkeStateType>(
     return lhs.machine == rhs.machine &&
         lhs.fsm == rhs.fsm &&
         lhs.state == rhs.state &&
-        lhs.beforeProperties == rhs.beforeProperties &&
         lhs.afterProperties == rhs.afterProperties
 }
 
