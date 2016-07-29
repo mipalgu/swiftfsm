@@ -72,7 +72,9 @@ public class MachineKripkeStructureGeneratorFactory<
     func make(machines: [M]) -> KripkeStructureGenerator {
         return MachineKripkeStructureGenerator(generators: machines.flatMap {
             (m: M) -> [Factory.Generator] in
-                m.fsms.map { (fsm: FiniteStateMachine) -> Factory.Generator in
+                m.fsms.map { (
+                    fsm: AnyScheduleableFiniteStateMachine
+                ) -> Factory.Generator in
                     self.factory.make(fsm: fsm, machine: m)
                 }
             }

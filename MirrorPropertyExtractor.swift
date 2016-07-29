@@ -59,51 +59,28 @@
 import FSM
 import Foundation
 
-public class MirrorPropertyExtractor: 
-    FSMPropertyExtractor,
-    GlobalPropertyExtractor,
-    StatePropertyExtractor
-{
+public class MirrorPropertyExtractor: PropertiesExtractor {
 
-    public func extract(ringlet: Ringlet) -> ([String: KripkeStateProperty], [String: KripkeStateProperty]) {
-        let children: Mirror.Children = Mirror(reflecting: ringlet).children
-        return (
-            self.getSnapshot(label: "snapshotBefore", children: children),
-            self.getSnapshot(label: "snapshotAfter", children: children)
-        )
-    }
-
-    private func getSnapshot(
-        label: String,
-        children: Mirror.Children
-    ) -> [String: KripkeStateProperty] {
-        guard let snapshot = self.getChild(label: label, children: children) else {
-            return [:]
-        }
-        return self.getPropertiesFromMirror(mirror: Mirror(reflecting: snapshot))
-    }
-
-    private func getChild(
-        label: String,
-        children: Mirror.Children
-    ) -> Any? {
-        return children.filter({$0.label == label}).first?.value
-    }
-    
-    /**
-     *  Extract the properties of state using a the builtin swift Mirror type.
-     */
-    public func extract(state: State) -> [String : KripkeStateProperty] {
-        var p: [String: KripkeStateProperty] = self.getPropertiesFromMirror(
-            mirror: Mirror(reflecting: state)
-        )
+    public func extract(_ snapshot: Snapshot) -> KripkeStatePropertyList {
+        var stateProperties: [String: KripkeStateProperty] =
+            self.getPropertiesFromMirror(
+                mirror: Mirror(reflecting: snapshot.state)
+            )
         // Ignore the states name property.
-        p["name"] = nil
-        return p
-    }
-
-    public func extract(vars: Variables) -> [String: KripkeStateProperty] {
-        return self.getPropertiesFromMirror(mirror: Mirror(reflecting: vars))
+        stateProperties["name"] = nil
+        let fsmProperties: [String: KripkeStateProperty] =
+            self.getPropertiesFromMirror(
+                mirror: Mirror(reflecting: snapshot.fsmVars)
+            )
+        let globalProperties: [String: KripkeStateProperty] = 
+            self.getPropertiesFromMirror(
+                mirror: Mirror(reflecting: snapshot.globals)
+            )
+        return KripkeStatePropertyList(
+            stateProperties: stateProperties,
+            fsmProperties: fsmProperties,
+            globalProperties: globalProperties
+        )
     }
     
     /*

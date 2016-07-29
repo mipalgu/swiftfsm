@@ -64,6 +64,6 @@ import FSM
  */
 public protocol StatePropertyExtractor {
     
-    func extract(state: State) -> [String: KripkeStateProperty]
+    func extract(state: AnyState) -> [String: KripkeStateProperty]
     
 }

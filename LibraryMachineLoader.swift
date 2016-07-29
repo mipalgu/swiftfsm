@@ -107,7 +107,7 @@ public class LibraryMachineLoader: MachineLoader {
      *  the library is responsible for adding itself to the factories array in
      *  FSM.Factories.
      */
-    public func load(path: String) -> [FiniteStateMachine] {
+    public func load(path: String) -> [AnyScheduleableFiniteStateMachine] {
         // Ignore empty paths
         if (path.characters.count < 1) {
             return []
@@ -123,7 +123,9 @@ public class LibraryMachineLoader: MachineLoader {
         return []
     }
 
-    private func loadMachine(library: LibraryResource) -> [FiniteStateMachine] {
+    private func loadMachine(
+        library: LibraryResource
+    ) -> [AnyScheduleableFiniteStateMachine] {
         // Get main method symbol
         let result: (symbol: UnsafeMutablePointer<Void>?, error: String?) =
             library.getSymbolPointer(symbol: "main")

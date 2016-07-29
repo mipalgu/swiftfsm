@@ -71,7 +71,7 @@ public protocol _KripkeStateType: Equatable {
     /**
      *  The fsm that this state belongs to.
      */
-    var fsm: FiniteStateMachine { get }
+    var fsm: AnyScheduleableFiniteStateMachine { get }
 
     /**
      *  The machine that this state belongs to.
@@ -81,7 +81,7 @@ public protocol _KripkeStateType: Equatable {
     /**
      *  The actual state within the finite state machine.
      */
-    var state: State { get }
+    var state: AnyState { get }
     
     /**
      *  The state which we will transition to.

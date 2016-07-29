@@ -60,6 +60,6 @@ import FSM
 
 public protocol FSMKripkeStateGenerator {
     
-    func generateFromFSM(fsm: FiniteStateMachine) -> KripkeState
+    func generate(from: AnyScheduleableFiniteStateMachine) -> KripkeState
     
 }

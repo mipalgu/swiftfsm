@@ -62,11 +62,15 @@ public class SimpleMachine: Machine {
     
     public let debug: Bool
 
-    public var fsms: [FiniteStateMachine]
+    public var fsms: [AnyScheduleableFiniteStateMachine]
 
     public let name: String
     
-    public init(name: String, fsms: [FiniteStateMachine], debug: Bool) {
+    public init(
+        name: String,
+        fsms: [AnyScheduleableFiniteStateMachine],
+        debug: Bool
+    ) {
         self.name = name
         self.fsms = fsms
         self.debug = debug

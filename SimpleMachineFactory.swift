@@ -62,7 +62,11 @@ public class SimpleMachineFactory: MachineFactory {
 
     public typealias Make = SimpleMachine
 
-    public func make(name: String, fsms: [FiniteStateMachine], debug: Bool) -> Make {
+    public func make(
+        name: String,
+        fsms: [AnyScheduleableFiniteStateMachine],
+        debug: Bool
+    ) -> Make {
         return SimpleMachine(name: name, fsms: fsms, debug: debug)
     }
 

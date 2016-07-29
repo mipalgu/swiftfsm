@@ -71,7 +71,7 @@ public class HashTableGenerator<
 
     private var cycleState: KripkeState!
     
-    private let fsm: FiniteStateMachine
+    private let fsm: AnyScheduleableFiniteStateMachine
 
     private var inCycle: Bool = false
 
@@ -87,50 +87,64 @@ public class HashTableGenerator<
 
     var states: [String: (Int, KripkeState)] = [:]
 
-    public init(fsm: FiniteStateMachine, machine: M, generator: G) {
+    public init(
+        fsm: AnyScheduleableFiniteStateMachine,
+        machine: M,
+        generator: G
+    ) {
         self.fsm = fsm
         self.machine = machine
         self.generator = generator
     }
 
-    public func next() -> KripkeState?  {
+    public func next() -> [KripkeState]  {
         if (self.lastState == nil) {
-            self.lastState = self.generateNextState()
-            return self.lastState
+            let states: [KripkeState] = self.generateNextStates()
+            self.lastState = states.last
+            return states.flatMap {
+                if ($0 == self.lastState) {
+                    return nil
+                }
+                self.lastState = $0
+                return $0
+            }
         }
         if (true == self.fsm.hasFinished) {
             self.isFinished = true
         }
         if (true == self.isFinished) {
-            return nil
+            return []
         } 
-        let state: KripkeState = self.generateNextState()
-        if (self.lastState == state) {
-            return nil
-        }
-        self.lastState.target = state
-        self.pos += 1
-        if (true == self.inCycle) {
-            if (self.cyclePos >= self.cycleLength) {
-                self.isFinished = true
-                return state
+        let states: [KripkeState] = self.generateNextStates()
+        return states.flatMap {
+            let state: KripkeState = $0
+            if (true == self.isFinished || self.lastState == state) {
+                return nil
+            } 
+            self.lastState.target = state
+            self.pos += 1
+            if (true == self.inCycle) {
+                if (self.cyclePos >= self.cycleLength) {
+                    self.isFinished = true
+                    return state
+                }
+                self.handleCycle(state: state)
             }
-            self.handleCycle(state: state)
+            if (false == self.inCycle && self.states[state.description] != nil) {
+                self.inCycle = true
+                self.cycleState = self.states[state.description]!.1
+                self.cyclePos = 0
+                self.cycleLength = self.pos - self.states[state.description]!.0
+            }
+            if (nil == self.states[state.description]) {
+                self.states[state.description] = (pos, state)
+            } else {
+                self.states[state.description] = (pos, state)
+            }
+            self.isFinished = self.fsm.hasFinished && self.lastState == state
+            self.lastState = state
+            return state
         }
-        if (false == self.inCycle && self.states[state.description] != nil) {
-            self.inCycle = true
-            self.cycleState = self.states[state.description]!.1
-            self.cyclePos = 0
-            self.cycleLength = self.pos - self.states[state.description]!.0
-        }
-        if (nil == self.states[state.description]) {
-            self.states[state.description] = (pos, state)
-        } else {
-            self.states[state.description] = (pos, state)
-        }
-        self.isFinished = self.fsm.hasFinished && self.lastState == state
-        self.lastState = state
-        return state
     }
 
     private func handleCycle(state: KripkeState) {
@@ -142,7 +156,7 @@ public class HashTableGenerator<
         }
     }
 
-    private func generateNextState() -> KripkeState {
+    private func generateNextStates() -> [KripkeState] {
         return self.generator.generate(fsm: self.fsm, machine: self.machine)
     }
 }

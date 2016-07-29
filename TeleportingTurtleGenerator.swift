@@ -63,7 +63,7 @@ public class TeleportingTurtleGenerator<
     Generator: KripkeStateGeneratorType
 >: SteppingKripkeStructureGenerator {
 
-    private var fsm: FiniteStateMachine
+    private var fsm: AnyScheduleableFiniteStateMachine
 
     private let generator: Generator
 
@@ -81,7 +81,7 @@ public class TeleportingTurtleGenerator<
     private var cycleState: KripkeState!    // The current state that is being checked in the cycle
     
     public init(
-        fsm: FiniteStateMachine,
+        fsm: AnyScheduleableFiniteStateMachine,
         machine: M,
         generator: Generator
     ) {
@@ -115,64 +115,76 @@ public class TeleportingTurtleGenerator<
      *  generating the structure, but, it does not bother to remove the cyclic
      *  states from the end of the structure.
      */
-    public func next() -> KripkeState? {
+    public func next() -> [KripkeState] {
         // Have we started yet?
         if (nil == self.turtle) {
             // No - finish setup.
-            self.turtle = self.generateNextState()
-            self.rabbit = self.turtle
-            self.lastState = self.turtle
-            self.cycleState = self.turtle
-            return self.turtle
+            let states: [KripkeState] = self.generateNextStates()
+            return states.flatMap {
+                if ($0 == self.turtle) {
+                    return nil
+                }
+                self.turtle = $0
+                self.rabbit = self.turtle
+                self.lastState = self.turtle
+                self.cycleState = self.turtle
+                return $0
+            }
         }
         // Don't bother generating any further if we have finished.
         if (true == self.fsm.hasFinished) {
             self.isFinished = true
         }
         if (true == self.isFinished) {
-            return nil
+            return []
         }
-        let temp: KripkeState = self.generateNextState()
-        // Ignore repeating states.
-        if (temp == self.lastState) {
-            return nil
-        }
-        // Teleport the turtle if we are not in a cycle.
-        if (false == self.inCycle) {
-            // 'Teleport' the turtle to the rabbit when necessary.
-            self.tp()
-        }
-        // Update the rabbit with the new state and remember the last state.
-        self.rabbit.target = temp
-        self.lastState = self.rabbit
-        self.rabbit = temp
-        // Have we found a new cycle?
-        if (false == self.inCycle && self.rabbit == self.turtle) {
-            // Start checking the cycle and reset the cycle variables
-            self.inCycle = true
-            self.cycleState = self.turtle
-            self.cyclePos = 0
-        }
-        // Are we checking a cycle?
-        if (true == inCycle) {
-            // Have we reached the end of the cycle?
-            if (self.cyclePos > self.length) {
-                self.isFinished = true
-                return self.rabbit
+        let states: [KripkeState] = self.generateNextStates()
+        return states.flatMap {
+            if (true == self.isFinished) {
+                return nil
             }
-            // Is there a state that doesn't match the cycle?
-            self.inCycle = self.rabbit == self.cycleState
-            // Check the next state in the cycle
-            self.cycleState = self.cycleState.target!
-            self.cyclePos += 1
+            let temp: KripkeState = $0
+            // Ignore repeating states.
+            if (temp == self.lastState) {
+                return nil
+            }
+            // Teleport the turtle if we are not in a cycle.
+            if (false == self.inCycle) {
+                // 'Teleport' the turtle to the rabbit when necessary.
+                self.tp()
+            }
+            // Update the rabbit with the new state and remember the last state.
+            self.rabbit.target = temp
+            self.lastState = self.rabbit
+            self.rabbit = temp
+            // Have we found a new cycle?
+            if (false == self.inCycle && self.rabbit == self.turtle) {
+                // Start checking the cycle and reset the cycle variables
+                self.inCycle = true
+                self.cycleState = self.turtle
+                self.cyclePos = 0
+            }
+            // Are we checking a cycle?
+            if (true == inCycle) {
+                // Have we reached the end of the cycle?
+                if (self.cyclePos > self.length) {
+                    self.isFinished = true
+                    return self.rabbit
+                }
+                // Is there a state that doesn't match the cycle?
+                self.inCycle = self.rabbit == self.cycleState
+                // Check the next state in the cycle
+                self.cycleState = self.cycleState.target!
+                self.cyclePos += 1
+            }
+            self.isFinished = 
+                self.fsm.hasFinished && 
+                self.rabbit == self.lastState
+            return self.rabbit
         }
-        self.isFinished = 
-            self.fsm.hasFinished && 
-            self.rabbit == self.lastState
-        return self.rabbit
     }
 
-    private func generateNextState() -> KripkeState {
+    private func generateNextStates() -> [KripkeState] {
         return self.generator.generate(fsm: self.fsm, machine: self.machine)
     }
 

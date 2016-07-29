@@ -64,6 +64,6 @@ public protocol SteppingKripkeStructureGeneratorFactory {
 
     associatedtype Generator: SteppingKripkeStructureGenerator
 
-    func make(fsm: FiniteStateMachine, machine: M) -> Generator
+    func make(fsm: AnyScheduleableFiniteStateMachine, machine: M) -> Generator
 
 }

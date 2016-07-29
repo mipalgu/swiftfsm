@@ -73,9 +73,7 @@ public class MachineKripkeStructureGenerator<
         var jobs: [G] = generators
         while (false == jobs.isEmpty && false == STOP){
             jobs = jobs.flatMap {
-                if let s = $0.next() {
-                    states.append(s)
-                }
+                states.append(contentsOf: $0.next())
                 return false == $0.isFinished ? $0 : nil
             }
         }

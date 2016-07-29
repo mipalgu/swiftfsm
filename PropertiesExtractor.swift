@@ -1,8 +1,8 @@
 /*
- * TeleportingTurtleGeneratorFactory.swift 
+ * PropertiesExtractor.swift 
  * swiftfsm 
  *
- * Created by Callum McColl on 31/01/2016.
+ * Created by Callum McColl on 29/07/2016.
  * Copyright © 2016 Callum McColl. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -58,30 +58,8 @@
 
 import FSM
 
-public class TeleportingTurtleGeneratorFactory<
-    Ma: Machine,
-    KripkeStateGen: KripkeStateGeneratorType
->: SteppingKripkeStructureGeneratorFactory {
+public protocol PropertiesExtractor {
 
-    public typealias M = Ma
-
-    public typealias Generator = TeleportingTurtleGenerator<M, KripkeStateGen>
-
-    private let generator: KripkeStateGen
-
-    public init(generator: KripkeStateGen) {
-        self.generator = generator
-    }
-
-    public func make(
-        fsm: AnyScheduleableFiniteStateMachine,
-        machine: M
-    ) -> Generator {
-        return TeleportingTurtleGenerator(
-            fsm: fsm,
-            machine: machine,
-            generator: self.generator
-        )
-    }
+    func extract(_: Snapshot) -> KripkeStatePropertyList
 
 }

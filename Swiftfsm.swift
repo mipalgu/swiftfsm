@@ -190,8 +190,12 @@ public class Swiftfsm<
         return name
     }
 
-    private func loadFsms(_ t: Task, name: String) -> [FiniteStateMachine] {
-        let fsms: [FiniteStateMachine] = self.machineLoader.load(path: t.path!)
+    private func loadFsms(
+        _ t: Task,
+        name: String
+    ) -> [AnyScheduleableFiniteStateMachine] {
+        let fsms: [AnyScheduleableFiniteStateMachine] =
+            self.machineLoader.load(path: t.path!)
         if (fsms.count > 0) {
             return fsms
         }

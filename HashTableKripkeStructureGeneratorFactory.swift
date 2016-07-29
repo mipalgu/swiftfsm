@@ -73,7 +73,10 @@ public class HashTableKripkeStructureGeneratorFactory<
         self.generator = generator
     }
 
-    public func make(fsm: FiniteStateMachine, machine: M) -> Generator {
+    public func make(
+        fsm: AnyScheduleableFiniteStateMachine,
+        machine: M
+    ) -> Generator {
         return HashTableGenerator(
             fsm: fsm,
             machine: machine,

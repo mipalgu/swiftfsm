@@ -65,9 +65,9 @@ public struct KripkeStatePropertyList: Equatable {
     public let globalProperties: [String: KripkeStateProperty]
 
     public init(
-        stateProperties: [String: KripkeStateProperty],
-        fsmProperties: [String: KripkeStateProperty],
-        globalProperties: [String: KripkeStateProperty]
+        stateProperties: [String: KripkeStateProperty] = [:],
+        fsmProperties: [String: KripkeStateProperty] = [:],
+        globalProperties: [String: KripkeStateProperty] = [:]
     ) {
         self.stateProperties = stateProperties
         self.fsmProperties = fsmProperties

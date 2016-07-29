@@ -62,6 +62,10 @@ public protocol MachineFactory {
 
     associatedtype Make: Machine
 
-    func make(name: String, fsms: [FiniteStateMachine], debug: Bool) -> Make
+    func make(
+        name: String,
+        fsms: [AnyScheduleableFiniteStateMachine],
+        debug: Bool
+    ) -> Make
 
 }

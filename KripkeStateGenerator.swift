@@ -58,66 +58,47 @@
 
 import FSM
 
-public class KripkeStateGenerator: KripkeStateGeneratorType {
+public class KripkeStateGenerator<T: PropertiesExtractor>:
+    KripkeStateGeneratorType
+{
 
-    private let fsmExtractor: FSMPropertyExtractor
+    private let extractor: T
     
-    private let globalsExtractor: GlobalPropertyExtractor
-
-    private let stateExtractor: StatePropertyExtractor
-
-    public init(
-        globalsExtractor: GlobalPropertyExtractor,
-        fsmExtractor: FSMPropertyExtractor,
-        stateExtractor: StatePropertyExtractor
-    ) {
-        self.globalsExtractor = globalsExtractor
-        self.fsmExtractor = fsmExtractor
-        self.stateExtractor = stateExtractor
+    public init(extractor: T) {
+        self.extractor = extractor
     }
 
     public func generate<M: Machine>(
-        fsm: FiniteStateMachine,
+        fsm: AnyScheduleableFiniteStateMachine,
         machine: M
-    ) -> KripkeState {
-        var fsm = fsm
-        let s: State = fsm.currentState
-        // Extract the fsm and state properties.
-        let beforeProperties: [String: KripkeStateProperty] = 
-            self.stateExtractor.extract(state: s)
-        let beforeFsmProperties: [String: KripkeStateProperty] = 
-            self.fsmExtractor.extract(vars: fsm.vars)
+    ) -> [KripkeState] {
+        let s: AnyState = fsm.currentState
+        var lastProperties: KripkeStatePropertyList =
+            self.getLastProperties(fsm.snapshots)
         // Execute the state.
         fsm.next()
-        // Extract the fsm and state properties again.
-        let afterProperties: [String: KripkeStateProperty] =
-            self.stateExtractor.extract(state: s)
-        let afterFsmProperties: [String: KripkeStateProperty] =
-            self.fsmExtractor.extract(vars: fsm.vars)
-        // Get global properties
-        let globalProperties: (
-            before: [String: KripkeStateProperty],
-            after: [String: KripkeStateProperty]
-        ) = self.globalsExtractor.extract(ringlet: fsm.ringlet)
-        // Create Before and After Property Lists
-        let before: KripkeStatePropertyList = KripkeStatePropertyList(
-            stateProperties: beforeProperties,
-            fsmProperties: beforeFsmProperties,
-            globalProperties: globalProperties.before
-        )
-        let after: KripkeStatePropertyList = KripkeStatePropertyList(
-            stateProperties: afterProperties,
-            fsmProperties: afterFsmProperties,
-            globalProperties: globalProperties.after
-        )
-        // Create the Kripke State
-        return KripkeState(
-            state: s,
-            fsm: fsm,
-            machine: machine,
-            beforeProperties: before,
-            afterProperties: after
-        )
+        let afterSnapshots: [Snapshot] = fsm.snapshots
+        // Create the Kripke States
+        return afterSnapshots.map {
+            let properties: KripkeStatePropertyList = self.extractor.extract($0)
+            let state: KripkeState = KripkeState(
+                state: s,
+                fsm: fsm,
+                machine: machine,
+                beforeProperties: lastProperties,
+                afterProperties: properties
+            )
+            lastProperties = properties
+            return state
+        }
+    }
+
+    private func getLastProperties(
+        _ snapshots: [Snapshot]
+    ) -> KripkeStatePropertyList {
+        return snapshots.last == nil
+            ? KripkeStatePropertyList()
+            : self.extractor.extract(snapshots.last!)
     }
 
 }

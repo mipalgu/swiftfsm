@@ -72,9 +72,7 @@ Swiftfsm(
     kripkeGeneratorFactory: MachineKripkeStructureGeneratorFactory(
         factory: HashTableKripkeStructureGeneratorFactory(
             generator: KripkeStateGenerator(
-                globalsExtractor: MirrorPropertyExtractor(),
-                fsmExtractor: MirrorPropertyExtractor(),
-                stateExtractor: MirrorPropertyExtractor()
+                extractor: MirrorPropertyExtractor()
             )
         )
     ),
