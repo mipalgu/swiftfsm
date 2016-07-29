@@ -100,7 +100,6 @@ public class HashTableGenerator<
     public func next() -> [KripkeState]  {
         if (self.lastState == nil) {
             let states: [KripkeState] = self.generateNextStates()
-            self.lastState = states.last
             return states.flatMap {
                 if ($0 == self.lastState) {
                     return nil
