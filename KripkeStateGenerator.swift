@@ -65,13 +65,15 @@ public final class KripkeStateGenerator: KripkeStateGeneratorType {
         machine: M
     ) -> [KripkeState] {
         let s: AnyState = fsm.currentState
-        var lastProperties: KripkeStatePropertyList =
-            fsm.snapshots.last ?? KripkeStatePropertyList()
         // Execute the state.
         fsm.next()
-        let afterSnapshots: [KripkeStatePropertyList] = fsm.snapshots
+        var snapshots: [KripkeStatePropertyList] = fsm.snapshots
+        if (snapshots.count < 2) {
+            return []
+        }
+        var lastProperties: KripkeStatePropertyList = snapshots.removeFirst()
         // Create the Kripke States
-        return afterSnapshots.map {
+        return snapshots.map {
             let state: KripkeState = KripkeState(
                 state: s,
                 fsm: fsm,
