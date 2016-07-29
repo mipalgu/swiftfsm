@@ -98,7 +98,6 @@ public class NuSMVKripkeStructureView: KripkeStructureView {
         if (true == structure.states.isEmpty) {
             return
         }
-        //dprint(structure.states)
         self.data = [:]
         self.states = structure.states
         // Create seperate data objects for all the different machines.
@@ -160,7 +159,6 @@ public class NuSMVKripkeStructureView: KripkeStructureView {
     private func generateData(_ d: Data) -> Data {
         self.createTrans(d)
         self.createVars(d)
-        dprint(d.trans)
         return d
     }
 
