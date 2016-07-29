@@ -194,6 +194,7 @@ public class Swiftfsm<
         _ t: Task,
         name: String
     ) -> [AnyScheduleableFiniteStateMachine] {
+        KRIPKE = t.generateKripkeStructure
         let fsms: [AnyScheduleableFiniteStateMachine] =
             self.machineLoader.load(path: t.path!)
         if (fsms.count > 0) {
