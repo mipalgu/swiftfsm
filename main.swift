@@ -71,9 +71,7 @@ let printer: CommandLinePrinter =
 Swiftfsm(
     kripkeGeneratorFactory: MachineKripkeStructureGeneratorFactory(
         factory: HashTableKripkeStructureGeneratorFactory(
-            generator: KripkeStateGenerator(
-                extractor: MirrorPropertyExtractor()
-            )
+            generator: KripkeStateGenerator()
         )
     ),
     kripkeStructureView: NuSMVKripkeStructureView(

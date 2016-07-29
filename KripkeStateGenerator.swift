@@ -58,15 +58,7 @@
 
 import FSM
 
-public class KripkeStateGenerator<T: PropertiesExtractor>:
-    KripkeStateGeneratorType
-{
-
-    private let extractor: T
-    
-    public init(extractor: T) {
-        self.extractor = extractor
-    }
+public final class KripkeStateGenerator: KripkeStateGeneratorType {
 
     public func generate<M: Machine>(
         fsm: AnyScheduleableFiniteStateMachine,
@@ -74,31 +66,22 @@ public class KripkeStateGenerator<T: PropertiesExtractor>:
     ) -> [KripkeState] {
         let s: AnyState = fsm.currentState
         var lastProperties: KripkeStatePropertyList =
-            self.getLastProperties(fsm.snapshots)
+            fsm.snapshots.last ?? KripkeStatePropertyList()
         // Execute the state.
         fsm.next()
-        let afterSnapshots: [Snapshot] = fsm.snapshots
+        let afterSnapshots: [KripkeStatePropertyList] = fsm.snapshots
         // Create the Kripke States
         return afterSnapshots.map {
-            let properties: KripkeStatePropertyList = self.extractor.extract($0)
             let state: KripkeState = KripkeState(
                 state: s,
                 fsm: fsm,
                 machine: machine,
                 beforeProperties: lastProperties,
-                afterProperties: properties
+                afterProperties: $0
             )
-            lastProperties = properties
+            lastProperties = $0
             return state
         }
-    }
-
-    private func getLastProperties(
-        _ snapshots: [Snapshot]
-    ) -> KripkeStatePropertyList {
-        return snapshots.last == nil
-            ? KripkeStatePropertyList()
-            : self.extractor.extract(snapshots.last!)
     }
 
 }

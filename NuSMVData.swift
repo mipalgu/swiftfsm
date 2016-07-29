@@ -56,6 +56,8 @@
  *
  */
 
+import FSM
+
 public struct NuSMVData {
 
     var initials: [String: KripkeStateProperty] = [:]
