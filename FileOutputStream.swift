@@ -62,7 +62,7 @@
  import Glibc
  #endif
 
-public class FileOutputStream: TextOutputStream {
+public class FileOutputStream: OutputStream {
     
     private let close: Bool
 
@@ -73,7 +73,7 @@ public class FileOutputStream: TextOutputStream {
         self.close = close 
     }
 
-    public convenience init<T: TextOutputStream>(
+    public convenience init<T: OutputStream>(
         path: String,
         errorStream: T? = nil
     ) {

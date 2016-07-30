@@ -57,7 +57,7 @@
  */
 
 public class CommandLinePrinter
-    <T: TextOutputStream, U: TextOutputStream>: GenericPrinter<T, U> 
+    <T: OutputStream, U: OutputStream>: GenericPrinter<T, U> 
 {
     
     public override init(errorStream: T, messageStream: U) {
