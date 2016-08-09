@@ -217,7 +217,7 @@ public class NuSMVKripkeStructureView: KripkeStructureView {
             d.ringlets[name] = -1
         }
         d.ringlets[name]! += 1
-        name += "\(self.delimiter)R\(d.ringlets[name]!)"
+        name += "\(self.delimiter)S\(d.ringlets[name]!)"
         d.pc.append(name)
         return name
     }
