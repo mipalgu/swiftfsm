@@ -60,12 +60,10 @@ import FSM
 
 public protocol MachineFactory {
 
-    associatedtype Make: Machine
-
     func make(
         name: String,
         fsms: [AnyScheduleableFiniteStateMachine],
         debug: Bool
-    ) -> Make
+    ) -> Machine
 
 }

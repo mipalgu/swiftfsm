@@ -58,13 +58,13 @@
 
 import FSM
 
-public protocol Machine {
+public struct Machine: Equatable {
     
-    var debug: Bool { get }
+    public let debug: Bool
 
-    var name: String { get }
+    public let name: String
     
-    var fsms: [AnyScheduleableFiniteStateMachine] { get set }
+    public var fsms: [AnyScheduleableFiniteStateMachine]
     
 }
 

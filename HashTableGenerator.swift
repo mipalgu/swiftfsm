@@ -59,11 +59,8 @@
 import FSM
 
 public class HashTableGenerator<
-    Ma: Machine,
     G: KripkeStateGeneratorType
 >: SteppingKripkeStructureGenerator {
-
-    public typealias M = Ma
 
     private var cycleLength: Int = 0
 
@@ -81,7 +78,7 @@ public class HashTableGenerator<
 
     private var lastState: KripkeState!
 
-    public let machine: M
+    public let machine: Machine
 
     private var pos: Int = 0
 
@@ -89,7 +86,7 @@ public class HashTableGenerator<
 
     public init(
         fsm: AnyScheduleableFiniteStateMachine,
-        machine: M,
+        machine: Machine,
         generator: G
     ) {
         self.fsm = fsm

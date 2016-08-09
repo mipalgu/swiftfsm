@@ -59,7 +59,6 @@
 import FSM
 
 public class TeleportingTurtleGenerator<
-    M: Machine,
     Generator: KripkeStateGeneratorType
 >: SteppingKripkeStructureGenerator {
 
@@ -67,7 +66,7 @@ public class TeleportingTurtleGenerator<
 
     private let generator: Generator
 
-    public let machine: M
+    public let machine: Machine
 
     public private(set) var isFinished: Bool
 
@@ -82,7 +81,7 @@ public class TeleportingTurtleGenerator<
     
     public init(
         fsm: AnyScheduleableFiniteStateMachine,
-        machine: M,
+        machine: Machine,
         generator: Generator
     ) {
         self.fsm = fsm

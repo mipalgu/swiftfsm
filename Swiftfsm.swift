@@ -67,15 +67,11 @@ import FSM
 public class Swiftfsm<
     SF: SchedulerFactory,
     MF: MachineFactory,
-    MachineType: Machine,
     SteppingFactory: SteppingKripkeStructureGeneratorFactory
-    where SF.Machines == MachineType,
-    MF.Make == MachineType,
-    SteppingFactory.M == MachineType
 > {
 
     public typealias KripkeStructureGeneratorFactory =
-        MachineKripkeStructureGeneratorFactory<MachineType, SteppingFactory>
+        MachineKripkeStructureGeneratorFactory<SteppingFactory>
 
     private let kripkeGeneratorFactory: KripkeStructureGeneratorFactory
     
@@ -153,7 +149,7 @@ public class Swiftfsm<
         }
     }
     
-    private func generateKripkeStructure(_ machines: [MachineType]) {
+    private func generateKripkeStructure(_ machines: [Machine]) {
         let generator: KripkeStructureGenerator =
             self.kripkeGeneratorFactory.make(machines: machines)
         let structure: KripkeStructureType = generator.generate()
@@ -171,7 +167,7 @@ public class Swiftfsm<
     }
     
     private func handleTasks(_ tasks: [Task]) {
-        let t: [(schedule: [MachineType], kripke: [MachineType])] = tasks.map {
+        let t: [(schedule: [Machine], kripke: [Machine])] = tasks.map {
             self.handleTask($0)
         }
         self.generateKripkeStructure(t.flatMap { $0.kripke })
@@ -205,7 +201,7 @@ public class Swiftfsm<
         return fsms
     }
 
-    private func handleTask(_ t: Task) -> ([MachineType], [MachineType]) {
+    private func handleTask(_ t: Task) -> ([Machine], [Machine]) {
         var name: String = self.getMachinesName(t)
         // Handle when there is no path in the Task.
         if (nil == t.path) {
@@ -214,11 +210,11 @@ public class Swiftfsm<
         if (true == t.isClfsmMachine) {
             self.handleError(.CLFSMMachine(machineName: name, path: t.path!))
         }
-        var schedule: [MachineType] = []
-        var kripke: [MachineType] = []
+        var schedule: [Machine] = []
+        var kripke: [Machine] = []
         for _ in 0 ..< t.count  {
             // Create the Machine
-            let temp: MachineType = self.machineFactory.make(
+            let temp: Machine = self.machineFactory.make(
                 name: name,
                 fsms: self.loadFsms(t, name: name),
                 debug: t.enableDebugging
@@ -250,7 +246,7 @@ public class Swiftfsm<
         return tasks
     }
     
-    private func runMachines(_ machines: [MachineType]) {
+    private func runMachines(_ machines: [Machine]) {
         self.schedulerFactory.make(machines: machines).run()
     }
     

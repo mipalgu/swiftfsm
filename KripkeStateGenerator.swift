@@ -60,9 +60,9 @@ import FSM
 
 public final class KripkeStateGenerator: KripkeStateGeneratorType {
 
-    public func generate<M: Machine>(
+    public func generate(
         fsm: AnyScheduleableFiniteStateMachine,
-        machine: M
+        machine: Machine
     ) -> [KripkeState] {
         let s: AnyState = fsm.currentState
         // Execute the state.

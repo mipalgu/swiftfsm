@@ -80,6 +80,6 @@ Swiftfsm(
     machineFactory: SimpleMachineFactory(),
     machineLoader: DynamicLibraryMachineLoaderFactory(printer: printer).make(),
     parser: SwiftfsmParser(),
-    schedulerFactory: RoundRobinSchedulerFactory<SimpleMachine>(),
+    schedulerFactory: RoundRobinSchedulerFactory(),
     view: printer
 ).run(args: Process.arguments)

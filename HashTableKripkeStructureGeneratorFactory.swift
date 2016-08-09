@@ -59,13 +59,10 @@
 import FSM
 
 public class HashTableKripkeStructureGeneratorFactory<
-    Ma: Machine,
     KripkeStateGen: KripkeStateGeneratorType
 >: SteppingKripkeStructureGeneratorFactory {
     
-    public typealias M = Ma
-
-    public typealias Generator = HashTableGenerator<M, KripkeStateGen>
+    public typealias Generator = HashTableGenerator<KripkeStateGen>
 
     private let generator: KripkeStateGen
 
@@ -75,7 +72,7 @@ public class HashTableKripkeStructureGeneratorFactory<
 
     public func make(
         fsm: AnyScheduleableFiniteStateMachine,
-        machine: M
+        machine: Machine
     ) -> Generator {
         return HashTableGenerator(
             fsm: fsm,

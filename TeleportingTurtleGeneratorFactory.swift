@@ -59,13 +59,10 @@
 import FSM
 
 public class TeleportingTurtleGeneratorFactory<
-    Ma: Machine,
     KripkeStateGen: KripkeStateGeneratorType
 >: SteppingKripkeStructureGeneratorFactory {
 
-    public typealias M = Ma
-
-    public typealias Generator = TeleportingTurtleGenerator<M, KripkeStateGen>
+    public typealias Generator = TeleportingTurtleGenerator<KripkeStateGen>
 
     private let generator: KripkeStateGen
 
@@ -75,7 +72,7 @@ public class TeleportingTurtleGeneratorFactory<
 
     public func make(
         fsm: AnyScheduleableFiniteStateMachine,
-        machine: M
+        machine: Machine
     ) -> Generator {
         return TeleportingTurtleGenerator(
             fsm: fsm,

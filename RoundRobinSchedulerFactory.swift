@@ -56,11 +56,9 @@
  *
  */
 
-public class RoundRobinSchedulerFactory<T: Machine>: SchedulerFactory {
+public class RoundRobinSchedulerFactory: SchedulerFactory {
     
-    public typealias Machines = T
-
-    public func make(machines: [Machines]) -> Scheduler {
+    public func make(machines: [Machine]) -> Scheduler {
         return RoundRobinScheduler(machines: machines)
     }
     
