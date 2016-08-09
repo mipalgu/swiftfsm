@@ -274,7 +274,7 @@ public class NuSMVKripkeStructureView: KripkeStructureView {
     private func createInitList(_ d: Data) {
         d.vars += "INIT\n"
         d.vars += "pc=\(d.pc[0])"
-        d.vars += d.initials.map({" & \($0)=\($1)"}).reduce("", combine: +)
+        d.vars += d.initials.map({" & \($0)=\($1)"}).reduce("", +)
         d.vars += "\n\n"
     }
 
@@ -419,7 +419,7 @@ public class NuSMVKripkeStructureView: KripkeStructureView {
                 return ""
             }
             return "\($0)"
-        }).reduce("", combine: +)
+        }).reduce("", +)
         return str
     }
 
