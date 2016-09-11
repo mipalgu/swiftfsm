@@ -62,7 +62,7 @@
  import Glibc
  #endif
 
-public struct StderrOutputStream: OutputStream {
+public struct StderrOutputStream: TextOutputStream {
     
     private var stream: FileOutputStream = FileOutputStream(file: stderr)
     
