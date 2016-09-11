@@ -97,7 +97,7 @@ public class LibraryMachineLoader: MachineLoader {
      *  Remove all the factories from the cache.
      */
     public func clearCache() {
-        self.dynamicType.cache = [:]
+        type(of: self).cache = [:]
     }
     
     /**
@@ -113,7 +113,7 @@ public class LibraryMachineLoader: MachineLoader {
             return []
         }
         // Load the factory from the cache if it is there.
-        if let factory = self.dynamicType.cache[path] {
+        if let factory = type(of: self).cache[path] {
             return factory()
         }
         // Load the factory from the dynamic library.
@@ -145,7 +145,7 @@ public class LibraryMachineLoader: MachineLoader {
         }
         // Get the factory, add it to the cache, call it and return the result.
         let factory: FSMArrayFactory = getLastFactory()!
-        self.dynamicType.cache[library.path] = factory
+        type(of: self).cache[library.path] = factory
         return factory()
     }
     
