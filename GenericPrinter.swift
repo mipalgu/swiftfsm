@@ -56,7 +56,7 @@
  *
  */
 
-public class GenericPrinter<T: OutputStream, U: OutputStream>: Printer {
+public class GenericPrinter<T: TextOutputStream, U: TextOutputStream>: Printer {
     
     internal var errorStream: T
     
