@@ -536,9 +536,9 @@ public class NuSMVKripkeStructureView: KripkeStructureView {
  *  Is used to easily store the data that is required to generate and print a
  *  Kripke Structure.
  */
-private class Data {
+fileprivate class Data {
 
-    private var initials: [String: String] = [:]
+    public var initials: [String: String] = [:]
 
     /*
      *  A Dictionary Containing a list of property values.
@@ -546,29 +546,29 @@ private class Data {
      *  The key represents the name of the property and the value is an array
      *  of all the possible values of the property.  
      */
-    private var properties: [String: Set<String>] = [:]
+    public var properties: [String: Set<String>] = [:]
 
-    private var latestProperties: [String: String] = [:]
+    public var latestProperties: [String: String] = [:]
 
     /*
      *  The name of the module that we are generating.
      */
-    private let module: String
+    public let module: String
 
     /*
      *  All of the states that belong in this structure.
      */
-    private var states: [KripkeState] = []
+    public var states: [KripkeState] = []
 
     /*
      *  The vars section.
      */
-    private var vars: String = "VAR\n\n"
+    public var vars: String = "VAR\n\n"
     
     /*
      *  The trans section.
      */
-    private var trans: String = "TRANS\ncase\n"
+    public var trans: String = "TRANS\ncase\n"
     
     /*
      *  Keeps track of how many times an individual state has been run.
@@ -576,15 +576,15 @@ private class Data {
      *  The key of the dictionary is a string representing the states fully
      *  namespaced name and the value is how many times it has been run.
      */
-    private var ringlets: [String: Int] = [:]
+    public var ringlets: [String: Int] = [:]
     
     /*
      *  Contains a list of fully namespaced state names with their ringlet
      *  counts added on the end.
      */
-    private var pc: [String] = []
+    public var pc: [String] = []
 
-    private init(module: String) {
+    public init(module: String) {
         self.module = module
     }
 
