@@ -74,7 +74,7 @@ public class DynamicLibraryResource: LibraryResource {
     /**
      *  A void pointer to the dynamic library that was loaded using dlopen.
      */
-    private let handler: UnsafeMutablePointer<Void>
+    private let handler: UnsafeMutableRawPointer
     
     /**
      *  The path on the file system to the dynamic library.
@@ -87,7 +87,7 @@ public class DynamicLibraryResource: LibraryResource {
      *  Do not create this resource directly.  Instead use
      *  DynamicLibraryCreator.
      */
-    public init(handler: UnsafeMutablePointer<Void>, path: String) {
+    public init(handler: UnsafeMutableRawPointer, path: String) {
         self.handler = handler
         self.path = path
     }
@@ -104,11 +104,11 @@ public class DynamicLibraryResource: LibraryResource {
      *  error message.
      */
     public func getSymbolPointer(symbol: String) -> (
-        symbol: UnsafeMutablePointer<Void>?,
+        symbol: UnsafeMutableRawPointer?,
         error: String?
     ) {
         // Attempt to get the symbol
-        let sym: UnsafeMutablePointer<Void>? = dlsym(self.handler, symbol)
+        let sym: UnsafeMutableRawPointer? = dlsym(self.handler, symbol)
         if (sym != nil) {
             // Successful retrieval of symbol
             return (sym, error: nil)
