@@ -127,7 +127,7 @@ public class LibraryMachineLoader: MachineLoader {
         library: LibraryResource
     ) -> [AnyScheduleableFiniteStateMachine] {
         // Get main method symbol
-        let result: (symbol: UnsafeMutablePointer<Void>?, error: String?) =
+        let result: (symbol: UnsafeMutableRawPointer?, error: String?) =
             library.getSymbolPointer(symbol: "main")
         // Error with fetching symbol
         if (result.error != nil) {
