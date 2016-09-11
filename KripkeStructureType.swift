@@ -73,16 +73,13 @@ extension _KripkeStructureType where Self: CustomStringConvertible {
         // Total width of the printable area
         let width: Int = 40
         // The whitespace to the left of the arrows.
-        let gap: String = String(
-            repeating: Character(" "),
-            count: width / 2 - 1
-        )
+        let gap: String = String(repeating: " ", count: width / 2 - 1)
         // The symbol for the entry point of the structure
         let start: String = gap + "-"
         // The arrows.
         let arrow: String = "\(gap)|\n\(gap)|\n\(gap)V\n"
         // The border of the states.
-        let border: String = String(repeating: Character("="), count: width)
+        let border: String = String(repeating: "=", count: width)
         // Create the states.
         var str: String = start + "\n"
         self.states.forEach {
