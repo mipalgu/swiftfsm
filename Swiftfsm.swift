@@ -122,9 +122,9 @@ public class Swiftfsm<
             self.handleMessage(parser.helpText)
         }
         // Has the user asked to turn on debugging?
-        DEBUG = false == tasks.filter { $0.enableDebugging }.isEmpty
+        DEBUG = nil != tasks.lazy.filter { $0.enableDebugging }.first
         // Has the user said to print the help message?
-        if let _ = tasks.filter({ true == $0.printHelpText }).first {
+        if let _ = tasks.lazy.filter({ true == $0.printHelpText }).first {
             self.handleMessage(parser.helpText)
         }
         // NoPathsFound when there is only one task and it does not have a path
@@ -145,7 +145,7 @@ public class Swiftfsm<
             if (cs[1] == "-") {
                 return [str]
             }
-            return cs.filter { $0 != "-" }.map { "-\($0)" }
+            return cs >>- { $0 == "-" ? nil : "-\($0)" }
         }
     }
     
