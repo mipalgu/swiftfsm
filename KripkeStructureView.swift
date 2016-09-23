@@ -56,6 +56,8 @@
  *
  */
 
+import FSM
+
 /**
  *  Conforming types are responsible for the output of a kripke structure.
  */

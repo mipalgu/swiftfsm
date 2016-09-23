@@ -56,6 +56,8 @@
  *
  */
 
+import FSM
+
 public class RoundRobinSchedulerFactory: SchedulerFactory {
     
     public func make(machines: [Machine]) -> Scheduler {

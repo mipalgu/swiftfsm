@@ -56,6 +56,8 @@
  *
  */
 
+import FSM
+
 public protocol SchedulerFactory {
 
     func make(machines: [Machine]) -> Scheduler

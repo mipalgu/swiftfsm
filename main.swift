@@ -62,6 +62,8 @@ import Glibc
 import Darwin
 #endif
 
+import FSM
+
 let printer: CommandLinePrinter = 
     CommandLinePrinter(
         errorStream: StderrOutputStream(),
