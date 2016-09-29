@@ -66,15 +66,9 @@ import FSM
 
 public class Swiftfsm<
     SF: SchedulerFactory,
-    MF: MachineFactory,
-    SteppingFactory: SteppingKripkeStructureGeneratorFactory
+    MF: MachineFactory
 > {
 
-    public typealias KripkeStructureGeneratorFactory =
-        MachineKripkeStructureGeneratorFactory<SteppingFactory>
-
-    private let kripkeGeneratorFactory: KripkeStructureGeneratorFactory
-    
     private let kripkeStructureView: KripkeStructureView
 
     private var names: [String: Int] = [:]
@@ -90,7 +84,6 @@ public class Swiftfsm<
     private let view: View
     
     public init(
-        kripkeGeneratorFactory: KripkeStructureGeneratorFactory,
         kripkeStructureView: KripkeStructureView,
         machineFactory: MF,
         machineLoader: MachineLoader,
@@ -98,7 +91,6 @@ public class Swiftfsm<
         schedulerFactory: SF,
         view: View
     ) {
-        self.kripkeGeneratorFactory = kripkeGeneratorFactory
         self.kripkeStructureView = kripkeStructureView
         self.machineFactory = machineFactory
         self.machineLoader = machineLoader
@@ -150,9 +142,21 @@ public class Swiftfsm<
     }
     
     private func generateKripkeStructure(_ machines: [Machine]) {
-        let generator: KripkeStructureGenerator =
-            self.kripkeGeneratorFactory.make(machines: machines)
-        let structure: KripkeStructureType = generator.generate()
+        let structures = machines >>- { (machine: Machine) -> [KripkeStructure] in
+            machine.fsms.map { $0.generate(machine: machine.name)  }
+        }
+        var states: [KripkeState] = []
+        states.reserveCapacity(structures.reduce(0) { $0 + $1.states.count })
+        let structure = KripkeStructure(
+                states: zip(structures, 0..<structures.count).reduce(states) {
+                    var states = $0
+                    let t: (KripkeStructure, Int) = $1
+                    t.0.states.reversed().forEach {
+                        states.insert($0, at: t.1)
+                    }
+                    return states
+                }
+            )
         self.kripkeStructureView.make(structure: structure)
     }
     
