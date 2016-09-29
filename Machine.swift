@@ -56,6 +56,8 @@
  *
  */
 
+import FSM
+
 public struct Machine: Equatable {
     
     public let debug: Bool
