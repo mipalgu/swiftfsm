@@ -424,15 +424,15 @@ public class NuSMVKripkeStructureView: KripkeStructureView {
     }
 
     private func stateName(_ state: KripkeState) -> String {
-        return "\(self.formatLabel(self.fsmName(state)))\(self.delimiter)\(self.formatLabel(state.state.name))"
+        return "\(self.formatLabel(self.fsmName(state)))\(self.delimiter)\(self.formatLabel(state.state))"
     }
 
     private func fsmName(_ state: KripkeState) -> String {
-        return "\(self.formatLabel(state.machine.name))\(self.delimiter)\(self.formatLabel(state.fsm.name))"
+        return "\(self.formatLabel(state.machine))\(self.delimiter)\(self.formatLabel(state.fsm))"
     }
 
     private func globalsName(_ state: KripkeState) -> String {
-        return "\(self.formatLabel(state.machine.name))\(self.delimiter)globals"
+        return "\(self.formatLabel(state.machine))\(self.delimiter)globals"
     }
 
     private func generateProperties(_ list: [(String, String)], d: Data, addToProperties: Bool) -> String {
@@ -504,10 +504,10 @@ public class NuSMVKripkeStructureView: KripkeStructureView {
      *  Retrieve/Create the Data object for the specific kripke states machine.
      */
     private func dataForState(_ state: KripkeState) -> Data {
-        if (nil == self.data[state.machine.name]) {
-            self.data[state.machine.name] = Data(module: state.machine.name) 
+        if (nil == self.data[state.machine]) {
+            self.data[state.machine] = Data(module: state.machine) 
         }
-        return self.data[state.machine.name]!
+        return self.data[state.machine]!
     }
 
     private func isSupportedType(_ t: KripkeStatePropertyTypes) -> Bool {
