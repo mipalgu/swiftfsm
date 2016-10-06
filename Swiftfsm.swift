@@ -160,12 +160,12 @@ public class Swiftfsm<
         self.kripkeStructureView.make(structure: structure)
     }
     
-    private func handleError(_ error: SwiftfsmErrors) {
+    private func handleError(_ error: SwiftfsmErrors) -> Never {
         self.view.error(error: error)
         exit(EXIT_FAILURE)
     }
 
-    private func handleMessage(_ message: String) {
+    private func handleMessage(_ message: String) -> Never {
         self.view.message(message: message)
         exit(EXIT_SUCCESS)
     }
@@ -202,7 +202,6 @@ public class Swiftfsm<
         }
         // Handle when we are unable to load the fsm.
         self.handleError(.UnableToLoad(machineName: name, path: t.path!))
-        return fsms
     }
 
     private func handleTask(_ t: Task) -> ([Machine], [Machine]) {
@@ -243,7 +242,6 @@ public class Swiftfsm<
             tasks = try parser.parse(words: args)
         } catch(let error as SwiftfsmErrors) {
             self.handleError(error)
-            return []
         } catch {
             exit(EXIT_FAILURE)
         }
