@@ -84,7 +84,7 @@ public class NuSMVKripkeStructureView: KripkeStructureView {
     /*
      *  All the states within the kripke structure.
      */
-    private var states: [KripkeState] = []
+    private var states: [[KripkeState]] = []
 
     public init(factory: PrinterFactory, delimiter: String = "-") {
         self.delimiter = delimiter
@@ -101,8 +101,8 @@ public class NuSMVKripkeStructureView: KripkeStructureView {
         self.data = [:]
         self.states = structure.states
         // Create seperate data objects for all the different machines.
-        for s: KripkeState in self.states {
-            self.dataForState(s).states.append(s)
+        self.states.forEach {
+            self.dataForState($0.first!).states.append($0)
         }
         self.data.forEach { self.initializeDefaultProperties($0.1) }
         // Print individual Kripke Structures.
@@ -114,18 +114,19 @@ public class NuSMVKripkeStructureView: KripkeStructureView {
     }
 
     private func initializeDefaultProperties(_ d: Data) {
-        d.states.forEach { (s: KripkeState) in
-            var fs = self.getNamingFunctions(s, list: s.beforeProperties)
-            fs.append(contentsOf: self.getNamingFunctions(s, list: s.afterProperties))
-            fs.forEach { (ps: [String: KripkeStateProperty], f: (String) -> String) in
-                ps.forEach { (p: (String, KripkeStateProperty)) in
-                    if (false == self.isSupportedType(p.1.type)) {
-                        return
-                    }
-                    let label = f(p.0)
-                    let value = self.formatPropertyValue(p.1)
-                    if (nil == d.latestProperties[label]) {
-                        d.latestProperties[label] = value
+        d.states.forEach {
+            $0.forEach { (s: KripkeState) in
+                let fs = self.getNamingFunctions(s, list: s.properties)
+                fs.forEach { (ps: [String: KripkeStateProperty], f: (String) -> String) in
+                    ps.forEach { (p: (String, KripkeStateProperty)) in
+                        if (false == self.isSupportedType(p.1.type)) {
+                            return
+                        }
+                        let label = f(p.0)
+                        let value = self.formatPropertyValue(p.1)
+                        if (nil == d.latestProperties[label]) {
+                            d.latestProperties[label] = value
+                        }
                     }
                 }
             }
@@ -178,20 +179,25 @@ public class NuSMVKripkeStructureView: KripkeStructureView {
      *  This is stored within the trans property of the Data Type.
      */
     private func createTrans(_ d: Data) {
-        var states: [KripkeState] = d.states
-        var lastState: KripkeState = states[0]
+        var states: [[KripkeState]] = d.states
+        var lastState: KripkeState = states.first!.first!
         var lastPCName: String = self.getNextPCName(lastState, d: d)
-        states.removeFirst()
+        var temp = states[0]
+        temp.removeFirst()
+        states[0] = temp
         states.forEach {
-            d.trans += getTrans(lastState, d: d, pcName: lastPCName)
-            lastPCName = getNextPCName($0, d: d)
-            d.trans += getChanges(
-                $0,
-                lastState: lastState,
-                d: d,
-                pcName: lastPCName
-            )
-            lastState = $0
+            $0.forEach {
+                d.trans += getTrans(lastState, d: d, pcName: lastPCName)
+                lastPCName = getNextPCName($0, d: d)
+                d.trans += getChanges(
+                    $0,
+                    d: d,
+                    pcName: lastPCName
+                )
+                lastState = $0
+            }
+            d.ringlets[self.stateName(lastState)]! += 1
+            d.snapshots = 0
         }
         let _: String = getTrans(lastState, d: d, pcName: lastPCName)
         // Handle the last transition.
@@ -209,28 +215,17 @@ public class NuSMVKripkeStructureView: KripkeStructureView {
      *  Get the next pc name.
      *
      *  The name follows the following convention:
-     *      `<machine_name><delimiter><fsm_name><delimiter><state_name><delimiter><ringlet_count>`
+     *      `<machine_name><delimiter><fsm_name><delimiter><state_name><delimiter><ringlet_count><delimiter><snapshot_count>`
      */
     private func getNextPCName(_ state: KripkeState, d: Data) -> String {
         var name: String = self.stateName(state)
         if (nil == d.ringlets[name]) {
-            d.ringlets[name] = -1
+            d.ringlets[name] = 0
         }
-        d.ringlets[name]! += 1
-        name += "\(self.delimiter)S\(d.ringlets[name]!)"
+        name += "\(self.delimiter)R\(d.ringlets[name]!)\(self.delimiter)S\(d.snapshots)"
+        d.snapshots += 1
         d.pc.append(name)
         return name
-    }
-
-    private func createChangesPropertyList(
-        _ lastState: KripkeState,
-        currentState: KripkeState
-    ) -> KripkeStatePropertyList {
-        return KripkeStatePropertyList(
-            stateProperties: lastState.afterProperties.stateProperties,
-            fsmProperties: lastState.afterProperties.fsmProperties,
-            globalProperties: currentState.beforeProperties.globalProperties
-        )
     }
 
     /*
@@ -288,7 +283,7 @@ public class NuSMVKripkeStructureView: KripkeStructureView {
         pcName: String
     ) -> String {
         // Holds naming convention functions for the different property lists.
-        self.getNamingFunctions(state, list: state.beforeProperties).forEach {
+        self.getNamingFunctions(state, list: state.properties).forEach {
             self.format(self.trimUnsupported($0.0), $0.1).forEach {
                 self.addToLatestProperties(d, $0)
             }
@@ -313,15 +308,14 @@ public class NuSMVKripkeStructureView: KripkeStructureView {
      */
     private func getChanges(
         _ state: KripkeState,
-        lastState: KripkeState,
         d: Data,
         pcName: String
     ) -> String {
         // Get the actual names and add to latestProperties.
         self.getNamingFunctions(
-            (lastState, lastState.afterProperties.stateProperties),
-            fsmProperties: (lastState, lastState.afterProperties.fsmProperties),
-            globalProperties: (state, state.beforeProperties.globalProperties)
+            (state, state.properties.stateProperties),
+            fsmProperties: (state, state.properties.fsmProperties),
+            globalProperties: (state, state.properties.globalProperties)
         ).forEach { 
             self.format(self.trimUnsupported($0.0), $0.1).forEach {
                 self.addToLatestProperties(d, $0)
@@ -558,7 +552,7 @@ fileprivate class Data {
     /*
      *  All of the states that belong in this structure.
      */
-    public var states: [KripkeState] = []
+    public var states: [[KripkeState]] = []
 
     /*
      *  The vars section.
@@ -577,6 +571,8 @@ fileprivate class Data {
      *  namespaced name and the value is how many times it has been run.
      */
     public var ringlets: [String: Int] = [:]
+
+    public var snapshots: UInt = 0
     
     /*
      *  Contains a list of fully namespaced state names with their ringlet

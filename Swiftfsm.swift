@@ -145,7 +145,7 @@ public class Swiftfsm<
         let structures = machines >>- { (machine: Machine) -> [KripkeStructure] in
             machine.fsms.map { $0.generate(machine: machine.name)  }
         }
-        var states: [KripkeState] = []
+        var states: [[KripkeState]] = []
         states.reserveCapacity(structures.reduce(0) { $0 + $1.states.count })
         let structure = KripkeStructure(
                 states: zip(structures, 0..<structures.count).reduce(states) {
