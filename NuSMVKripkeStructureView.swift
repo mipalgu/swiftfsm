@@ -179,26 +179,53 @@ public class NuSMVKripkeStructureView: KripkeStructureView {
      *  This is stored within the trans property of the Data Type.
      */
     private func createTrans(_ d: Data) {
-        var states: [[KripkeState]] = d.states
-        var lastState: KripkeState = states.first!.first!
-        var lastPCName: String = self.getNextPCName(lastState, d: d)
-        var temp = states[0]
-        temp.removeFirst()
-        states[0] = temp
-        states.forEach {
+        //print(d.states.flatMap { $0 })
+        print()
+        d.states.forEach {
             $0.forEach {
-                d.trans += getTrans(lastState, d: d, pcName: lastPCName)
-                lastPCName = getNextPCName($0, d: d)
-                d.trans += getChanges(
-                    $0,
-                    d: d,
-                    pcName: lastPCName
-                )
-                lastState = $0
+                if (self.getNextPCName($0, d: d) == "machine-Cooking_Controller-Not_Cooking-S3") {
+                    print("")
+                    print("")
+                    print("hash:")
+                    print($0.targets.reduce($0.description) {$0 + "\n\($1.description),"})
+                    print("")
+                    print("")
+                }
+                // Create Trans of current state
+                let trans = getTrans($0, d: d, pcName: self.getNextPCName($0, d: d))
+                if (true == $0.targets.isEmpty) {
+                    return
+                }
+                d.trans += trans
+                // Create Next lists of future states
+                var first: Bool = true
+                d.trans += $0.targets.reduce("") { (str, state) in
+                    if (self.getNextPCName(state, d: d) == "machine-Cooking_Controller-Not_Cooking-S3") {
+                        print("")
+                        print("")
+                        print("target hash: ")
+                        print(state.targets.reduce(state.description) {$0 + "\n\($1.description),"})
+                        print("")
+                        print("")
+                    }
+                    var str = str
+                    str += true == first ? "\n    (" : " |\n    ("
+                    let pc = self.getNextPCName(state, d: d)
+                    //print("change state: \(state), pc: \(pc)") 
+                    str += self.getChanges(
+                        state,
+                        d: d,
+                        pcName: pc
+                    )
+                    str += ")"
+                    first = false
+                    return str
+                }
+                d.trans += ";\n"
             }
-            d.ringlets[self.stateName(lastState)]! += 1
-            d.snapshots = 0
         }
+        let lastState = d.states.last!.last!
+        let lastPCName = self.getNextPCName(lastState, d: d)
         let _: String = getTrans(lastState, d: d, pcName: lastPCName)
         // Handle the last transition.
         var properties = d.latestProperties
@@ -209,6 +236,7 @@ public class NuSMVKripkeStructureView: KripkeStructureView {
         properties[first.key] = nil
         let props: String = properties.reduce("next(\(first.key))=\(first.value)") { $0 + " & next(\($1.0))=\($1.1)" }
         d.trans += "TRUE:\n    " + props + " & next(pc)=\(lastPCName);\nesac\n"
+        //print(d.pcTable)
     }
 
     /*
@@ -218,13 +246,20 @@ public class NuSMVKripkeStructureView: KripkeStructureView {
      *      `<machine_name><delimiter><fsm_name><delimiter><state_name><delimiter><ringlet_count><delimiter><snapshot_count>`
      */
     private func getNextPCName(_ state: KripkeState, d: Data) -> String {
-        var name: String = self.stateName(state)
-        if (nil == d.ringlets[name]) {
-            d.ringlets[name] = 0
+        let key = state.targets.reduce(state.description) { $0 + $1.description }
+        if let pc = d.pcTable[key] {
+            //print("found previous pc: \(pc)")
+            //print("state: \(state)")
+            return pc
         }
-        name += "\(self.delimiter)R\(d.ringlets[name]!)\(self.delimiter)S\(d.snapshots)"
-        d.snapshots += 1
+        let stateName: String = self.stateName(state)
+        if (nil == d.snapshots[stateName]) {
+            d.snapshots[stateName] = 0
+        }
+        let name = stateName + "\(self.delimiter)S\(d.snapshots[stateName]!)"
         d.pc.append(name)
+        d.pcTable[key] = name
+        d.snapshots[stateName]! += 1
         return name
     }
 
@@ -292,7 +327,7 @@ public class NuSMVKripkeStructureView: KripkeStructureView {
         let props: String = self.generateProperties(d.latestProperties.map({$0}), d: d, addToProperties: true)
         str += props
         str += nil == props.characters.first ? " " : " & "
-        str += "pc=" + pcName + ":\n"
+        str += "pc=" + pcName + ":"
         return str
     }
 
@@ -331,11 +366,11 @@ public class NuSMVKripkeStructureView: KripkeStructureView {
         let formatted = gen.flatMap { (ps: [String: String], f: (String) -> String) -> [(String, String)] in
             ps.map { (f($0.0), $0.1) }
         }
-        var str: String = "    "
+        var str: String = ""
         let props: String = self.generateProperties(formatted, d: d, addToProperties: false)
         str += props
-        str += (nil == props.characters.first) ? " " : " & "
-        str += "next(pc)=\(pcName);\n"
+        str += (nil == props.characters.first) ? "" : " & "
+        str += "next(pc)=\(pcName)"
         return str
         /*// Add the properties to the data properties list.
         let _: String = self.generateProperties(
@@ -570,15 +605,15 @@ fileprivate class Data {
      *  The key of the dictionary is a string representing the states fully
      *  namespaced name and the value is how many times it has been run.
      */
-    public var ringlets: [String: Int] = [:]
-
-    public var snapshots: UInt = 0
+    public var snapshots: [String: UInt] = [:]
     
     /*
      *  Contains a list of fully namespaced state names with their ringlet
      *  counts added on the end.
      */
     public var pc: [String] = []
+
+    public var pcTable: [String: String] = [:]
 
     public init(module: String) {
         self.module = module
