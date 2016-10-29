@@ -184,7 +184,12 @@ public class NuSMVKripkeStructureView: KripkeStructureView {
         d.states.forEach {
             $0.forEach {
                 // Create Trans of current state
-                let trans = getTrans($0, d: d, pcName: self.getNextPCName($0, d: d))
+                let pcName = self.getNextPCName($0, d: d)
+                if nil != d.seen[pcName] {
+                    return
+                }
+                d.seen[pcName] = true
+                let trans = getTrans($0, d: d, pcName: pcName)
                 if (true == $0.targets.isEmpty) {
                     return
                 }
@@ -598,6 +603,8 @@ fileprivate class Data {
     public var pc: [String] = []
 
     public var pcTable: [String: String] = [:]
+
+    public var seen: [String: Bool] = [:]
 
     public init(module: String) {
         self.module = module
