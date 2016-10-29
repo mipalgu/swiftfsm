@@ -183,14 +183,6 @@ public class NuSMVKripkeStructureView: KripkeStructureView {
         print()
         d.states.forEach {
             $0.forEach {
-                if (self.getNextPCName($0, d: d) == "machine-Cooking_Controller-Not_Cooking-S3") {
-                    print("")
-                    print("")
-                    print("hash:")
-                    print($0.targets.reduce($0.description) {$0 + "\n\($1.description),"})
-                    print("")
-                    print("")
-                }
                 // Create Trans of current state
                 let trans = getTrans($0, d: d, pcName: self.getNextPCName($0, d: d))
                 if (true == $0.targets.isEmpty) {
@@ -200,14 +192,6 @@ public class NuSMVKripkeStructureView: KripkeStructureView {
                 // Create Next lists of future states
                 var first: Bool = true
                 d.trans += $0.targets.reduce("") { (str, state) in
-                    if (self.getNextPCName(state, d: d) == "machine-Cooking_Controller-Not_Cooking-S3") {
-                        print("")
-                        print("")
-                        print("target hash: ")
-                        print(state.targets.reduce(state.description) {$0 + "\n\($1.description),"})
-                        print("")
-                        print("")
-                    }
                     var str = str
                     str += true == first ? "\n    (" : " |\n    ("
                     let pc = self.getNextPCName(state, d: d)
