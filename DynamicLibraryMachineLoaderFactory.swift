@@ -57,23 +57,29 @@
  */
 
 /**
- *  Creates A MachineLoader that is capable of loading machines from dynamic
+ *  Creates A `MachineLoader` that is capable of loading machines from dynamic
  *  libraries.
  *
- *  The machine loader leverages the DynamicLibraryCreator class.
+ *  The machine loader leverages the `DynamicLibraryCreator` class.
  */
 public class DynamicLibraryMachineLoaderFactory: MachineLoaderFactory {
     
     private let printer: Printer
 
+    /**
+     *  Create a new `DynamicLibraryMachineLoaderFactory`.
+     *
+     *  - Parameter printer: The `LibraryMachineLoader` that is created will use
+     *  this `Printer`.
+     */
     public init(printer: Printer) {
         self.printer = printer
     }
 
     /**
-     *  Create the MachineLoader.
+     *  Create the `MachineLoader`.
      *
-     *  Returns a new instance of MachineLoader.
+     *  - Returns: A new instance of `MachineLoader`.
      */
     public func make() -> MachineLoader {
         return LibraryMachineLoader(
