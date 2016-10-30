@@ -56,14 +56,31 @@
  *
  */
 
+/**
+ *  A printer that formats text so that it can be printed on the command line.
+ */
 public class CommandLinePrinter
     <T: TextOutputStream, U: TextOutputStream>: GenericPrinter<T, U> 
 {
     
+    /**
+     *  Create a `CommandLinePrinter`.
+     *
+     *  - Parameter errorStream: The `TextOutputStream` where the error messages
+     *  are sent.
+     *
+     *  - Parameter messageStream: The `TextOutputStream` where the normal
+     *  messages are sent.
+     */
     public override init(errorStream: T, messageStream: U) {
         super.init(errorStream: errorStream, messageStream: messageStream)
     }
 
+    /**
+     *  Formats `str` so that "error: " in red is printer before `str`.
+     *
+     *  - Parameter str: The error.
+     */
     public override func error(str: String) {
         print(
             "\u{001B}[1;31merror: \u{001B}[0m\(str)\n",
