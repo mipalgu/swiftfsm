@@ -59,9 +59,9 @@
 import FSM
 
 /**
- *  Load a machine from a library.
+ *  Load a `Machine` from a library.
  *
- *  This class conforms to MachineLoader.
+ *  This class conforms to `MachineLoader`.
  */
 public class LibraryMachineLoader: MachineLoader {
     
@@ -88,6 +88,13 @@ public class LibraryMachineLoader: MachineLoader {
      */
     public let printer: Printer
     
+    /**
+     *  Create a new `LibraryMachineLoader`.
+     *
+     *  - Parameter creator: Used to create the `LibraryResource`s.
+     *
+     *  - Parameter printer: Error messages get sent here.
+     */
     public init(creator: LibraryCreator, printer: Printer) {
         self.creator = creator
         self.printer = printer
@@ -105,7 +112,12 @@ public class LibraryMachineLoader: MachineLoader {
      *
      *  To accomplish this the main method is called on the library.  Therefore
      *  the library is responsible for adding itself to the factories array in
-     *  FSM.Factories.
+     *  `FSM.Factories`.
+     *
+     *  - Parameter path: The path to the library.
+     *
+     *  - Returns: An array of `AnyScheduleableFiniteStateMachine`s.  If there
+     *  was a problem, then the array is empty.
      */
     public func load(path: String) -> [AnyScheduleableFiniteStateMachine] {
         // Ignore empty paths
