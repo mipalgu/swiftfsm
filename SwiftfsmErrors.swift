@@ -56,12 +56,35 @@
  *
  */
 
+/**
+ *  A list of errors that can be caused when attempting to run `Swiftfsm`.
+ */
 public enum SwiftfsmErrors: Error {
     
+    /**
+     *  For when a clfsm machine is specified.  clfsm machines are not yet
+     *  implemented.
+     */
     case CLFSMMachine(machineName: String, path: String)
+    
+    /**
+     *  For when there were no paths specified.
+     */
     case NoPathsFound
+
+    /**
+     *  For when there was no way to open anything at the path.
+     */
     case PathNotFound(machineName: String)
+
+    /**
+     *  For when there was no way to load the `Machine` from the path.
+     */
     case UnableToLoad(machineName: String, path: String)
+
+    /**
+     *  For when there was uknown input in the command line arguments.
+     */
     case UnknownFlag(flag: String)
     
 }
