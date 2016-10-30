@@ -64,6 +64,9 @@
 
 import FSM
 
+/**
+ *  Contains the main logic for swiftfsm.
+ */
 public class Swiftfsm<
     SF: SchedulerFactory,
     MF: MachineFactory
@@ -83,6 +86,24 @@ public class Swiftfsm<
     
     private let view: View
     
+    /**
+     *  Create a new `Swiftfsm`.
+     *
+     *  - Parameter kripkeStructureView: Used when outputting a
+     *  `KripkeStructure`.
+     *
+     *  - Parameter machineFactory: Used to create the `Machine`s.
+     *
+     *  - Parameter machineLoader: Used to load the `Machine`s from dynamic
+     *  libraries.
+     *
+     *  - Parameter parser: Used to parse the command line arguments.
+     *
+     *  - Parameter schedulerFactory: Used to create the `Scheduler` so that it
+     *  executes the `Machine`s.
+     *
+     *  - Parameter view: Used to output `SwiftfsmErrors`.
+     */
     public init(
         kripkeStructureView: KripkeStructureView,
         machineFactory: MF,
@@ -99,6 +120,12 @@ public class Swiftfsm<
         self.view = view
     }
     
+    /**
+     *  Run everything!
+     *
+     *  This includes parsing command line arguments, loading machine,
+     *  generating `KripkeStructure`s and executing machines within schedulers.
+     */
     public func run(args: [String]) {
         // Pad the output
         self.view.message(message: "")
