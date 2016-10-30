@@ -62,6 +62,9 @@
  */
 public protocol HelpableParser: Parser {
     
+    /**
+     *  The parsers help text.
+     */
     var helpText: String { get }
     
 }
