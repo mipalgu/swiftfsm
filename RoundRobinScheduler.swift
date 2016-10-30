@@ -66,6 +66,11 @@ public class RoundRobinScheduler: Scheduler {
     // All the machines that will be executed.
     public private(set) var machines: [Machine]
     
+    /**
+     *  Create a new `RoundRobinScheduler`.
+     *
+     *  - Parameter machines: All the `Machine`s that will be executed.
+     */
     public init(machines: [Machine] = []) {
         self.machines = machines
     }
