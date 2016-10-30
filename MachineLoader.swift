@@ -65,6 +65,11 @@ public protocol MachineLoader {
     
     /**
      *  Load machines from a resource path.
+     *
+     *  - Parameter path: A path to the resource.
+     *
+     *  - Returns: An array of `AnyScheduleableFiniteStateMachine`s that were
+     *  loaded from the resource.
      */
     func load(path: String) -> [AnyScheduleableFiniteStateMachine]
     
