@@ -58,14 +58,32 @@
 
 import FSM
 
+/**
+ *  `Machine`s are data structures that contain everything that is needed for
+ *  the Finite State Machines to be scheduled.
+ */
 public struct Machine: Equatable {
     
+    /**
+     *  Should debugging be turned on?
+     */
     public let debug: Bool
 
+    /**
+     *  The name of the `Machine`.
+     *
+     *  - Warning: This should be unique per `Machine`.
+     */
     public let name: String
     
+    /**
+     *  The `AnyScheduleableFiniteStateMachine`s that make up this `Machine`.
+     */
     public var fsms: [AnyScheduleableFiniteStateMachine]
 
+    /**
+     *  Create a new `Machine`.
+     */
     public init(
         debug: Bool,
         name: String,
