@@ -59,11 +59,14 @@
 import FSM
 
 /**
- *  A common interfaces for scheduler who are responsible for the execution of
- *  finite state machines.
+ *  A common interfaces for schedulers who are responsible for the execution of
+ *  objects.
  */
 public protocol Scheduler {
     
+    /**
+     *  Run the scheduler.
+     */
     func run() -> Void
     
 }
