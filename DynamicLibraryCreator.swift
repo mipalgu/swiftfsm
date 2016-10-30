@@ -72,6 +72,11 @@ public class DynamicLibraryCreator: LibraryCreator {
     
     private let printer: Printer
 
+    /**
+     *  Create a new `DynamicLibraryCreator`.
+     *
+     *  - Parameter printer: All output gets printed using this.
+     */
     public init(
         printer: Printer = CommandLinePrinter(
             errorStream: StderrOutputStream(),
