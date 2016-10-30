@@ -56,10 +56,24 @@
  *
  */
 
+/**
+ *  Provides a common interface for types that want to handle output for
+ *  `Swiftfsm`.
+ */
 public protocol View {
     
+    /**
+     *  Output a `SwiftfsmErrors` message.
+     *
+     *  - Parameter error: The error.
+     */
     func error(error: SwiftfsmErrors) -> Void
     
+    /**
+     *  Output a message.
+     *
+     *  - Parameter message: The message.
+     */
     func message(message: String) -> Void
     
 }
