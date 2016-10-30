@@ -58,8 +58,21 @@
 
 import FSM
 
+/**
+ *  Conforming types are responsible for creating `Machine`s.
+ */
 public protocol MachineFactory {
 
+    /**
+     *  Create a `Machine`.
+     *
+     *  - Parameter name: The name of the `Machine`.
+     *
+     *  - Parameter fsms: All `AnyScheduleableFiniteStateMachine`s that make up
+     *  the `Machine`.
+     *
+     *  - Parameter debug: Should we turn debugging on?
+     */
     func make(
         name: String,
         fsms: [AnyScheduleableFiniteStateMachine],
