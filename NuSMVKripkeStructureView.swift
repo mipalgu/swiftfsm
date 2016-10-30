@@ -86,6 +86,17 @@ public class NuSMVKripkeStructureView: KripkeStructureView {
      */
     private var states: [[KripkeState]] = []
 
+    /**
+     *  Create a new `NuSMVKripkeStructureView`.
+     *
+     *  - Parameter factory: Used to create the `Printer` that will output the
+     *  NuSMV representation of the `KripkeStructure`.
+     *
+     *  - Parameter delimiter: Used to place in between identifiers.  For
+     *  example, the program counter is represented as:
+     *  <machine_name>-<fsm_name>-<state_name>-<snapshot_count> where "-" is the
+     *  delimiter.
+     */
     public init(factory: PrinterFactory, delimiter: String = "-") {
         self.delimiter = delimiter
         self.factory = factory
@@ -93,6 +104,9 @@ public class NuSMVKripkeStructureView: KripkeStructureView {
 
     /**
      *  Print the specified kripke structure.
+     *
+     *  - Parameter structure: The `KripkeStructure` that will be converted to
+     *  the NuSMV representation.
      */
     public func make(structure: KripkeStructureType) {
         if (true == structure.states.isEmpty) {
