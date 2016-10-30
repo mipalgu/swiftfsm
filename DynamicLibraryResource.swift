@@ -66,7 +66,7 @@
  *  A library resource for a dynamic library.
  *
  *  This class is used to interact with dynamic libraries.  This class should
- *  not be created directly.  Instead you should use a the DynamicLibraryCreator
+ *  not be created directly.  Instead you should use the `DynamicLibraryCreator`
  *  class to create this resource.
  */
 public class DynamicLibraryResource: LibraryResource {
@@ -85,7 +85,11 @@ public class DynamicLibraryResource: LibraryResource {
      *  Create the resource.
      *
      *  Do not create this resource directly.  Instead use
-     *  DynamicLibraryCreator.
+     *  `DynamicLibraryCreator`.
+     *
+     *  - Parameter handler: A raw pointer to the dynamic library.
+     *
+     *  - Parameter path: The path to where the dynamic library is located.
      */
     public init(handler: UnsafeMutableRawPointer, path: String) {
         self.handler = handler
@@ -102,6 +106,11 @@ public class DynamicLibraryResource: LibraryResource {
      *  attempting to retrieve the symbol then the symbol variable within the
      *  tuple will be a null pointer and the error variable will be set with an
      *  error message.
+     *
+     *  - Parameter symbol: The symbol as a string.
+     *
+     *  - Returns: A tuple where the first element is a raw pointer to the
+     *  symbol and the second element is an error message.
      */
     public func getSymbolPointer(symbol: String) -> (
         symbol: UnsafeMutableRawPointer?,
