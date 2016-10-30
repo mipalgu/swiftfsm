@@ -58,8 +58,21 @@
 
 import FSM
 
+/**
+ *  Provides a bare-bones implementation of a `MachineFactory`.
+ */
 public class SimpleMachineFactory: MachineFactory {
 
+    /**
+     *  Create a `Machine`.
+     *
+     *  - Parameter name: The name of the `Machine`.
+     *
+     *  - Parameter fsms: All `AnyScheduleableFiniteStateMachine`s that make up
+     *  the `Machine`.
+     *
+     *  - Parameter debug: Should we turn debugging on?
+     */
     public func make(
         name: String,
         fsms: [AnyScheduleableFiniteStateMachine],
