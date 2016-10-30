@@ -62,6 +62,9 @@
  */
 public protocol Parser {
     
+    /**
+     *  Parse the input and create `Task`s based on it.
+     */
     func parse(words: [String]) throws -> [Task]
     
 }
