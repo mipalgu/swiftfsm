@@ -62,6 +62,12 @@
  */
 public protocol PrinterFactory {
 
+    /**
+     *  Make a `Printer` from the `id`.
+     *
+     *  - Parameter id: This is used for instance with a printer that outputs to
+     *  a file as the file path.
+     */
     func make(id: String) -> Printer
 
 }
