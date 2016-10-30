@@ -59,10 +59,13 @@
 import FSM
 
 /**
- *  Conforming types are responsible for the output of a kripke structure.
+ *  Conforming types are responsible for the output of a `KripkeStructure`.
  */
 public protocol KripkeStructureView {
 
+    /**
+     *  Output the `KripkeStructure`.
+     */
     func make(structure: KripkeStructureType) -> Void
 
 }
