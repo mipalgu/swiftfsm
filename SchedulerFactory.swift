@@ -58,8 +58,18 @@
 
 import FSM
 
+/**
+ *  Conforming types are responsible for creating `Scheduler`s.
+ */
 public protocol SchedulerFactory {
 
+    /**
+     *  Create a `Scheduler`.
+     *
+     *  - Parameter machines: All `Machine`s that will be executed.
+     *
+     *  - Returns: A newly created `Scheduler`.
+     */
     func make(machines: [Machine]) -> Scheduler
     
 }
