@@ -95,13 +95,12 @@ public class DynamicLibraryCreator: LibraryCreator {
         }
         #endif
         // Attempt to open the library.
-        let handler: UnsafeMutableRawPointer? = dlopen(path, RTLD_NOW | RTLD_LOCAL)
-        if (handler == nil) {
+        guard let handler = dlopen(path, RTLD_NOW | RTLD_LOCAL) else {
             self.printer.error(str: String(cString: dlerror()))
             return nil
         }
         // Create the resource.
-        return DynamicLibraryResource(handler: handler!, path: path)
+        return DynamicLibraryResource(handler: handler, path: path)
     }
     
 }
