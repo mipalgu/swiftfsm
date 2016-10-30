@@ -56,29 +56,60 @@
  *
  */
 
+/**
+ *  Provides a means to print to specific `TextOutputStream`s, one for normal
+ *  messages and one for errors.
+ */
 public class GenericPrinter<T: TextOutputStream, U: TextOutputStream>: Printer {
     
     internal var errorStream: T
     
     internal var messageStream: U
     
+    /**
+     *  Create a `GenericPrinter`.
+     *
+     *  - Parameter errorStream: The `TextOutputStream` where errors will be
+     *  sent.
+     *
+     *  - Parameter messageStream: The `TextOutputStream` where normal messages
+     *  will be sent.
+     */
     public init(errorStream: T, messageStream: U) {
         self.errorStream = errorStream
         self.messageStream = messageStream
     }
 
+    /**
+     *  Print an error to `errorStream`.
+     *
+     *  - Parameter str: The error message.
+     */
     public func error(str: String) {
         print(str, terminator: "\n", to: &self.errorStream)
     }
     
+    /**
+     *  Print a message to `messageStream`.
+     *
+     *  - Parameter str: The contents of the message.
+     */
     public func message(str: String) {
         print(str, terminator: "\n", to: &self.messageStream)
     }
     
 }
 
+/**
+ *  Allow the `GenericPrinter` to print `SwiftfsmErrors`.
+ */
 extension GenericPrinter: View {
 
+    /**
+     *  Print `SwiftfsmErrors` to `errorStream`.
+     *
+     *  - Parameter error: The `SwiftfsmErrors` instance.
+     */
     public func error(error: SwiftfsmErrors) {
         let str: String
         switch (error) {
@@ -96,6 +127,11 @@ extension GenericPrinter: View {
         self.error(str: str)
     }
 
+    /**
+     *  Print a message to `messageStream`.
+     *
+     *  - Parameter message: The contents of the message
+     */
     public func message(message: String) {
         return self.message(str: message)
     }
