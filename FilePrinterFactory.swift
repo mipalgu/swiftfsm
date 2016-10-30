@@ -56,8 +56,19 @@
  *
  */
 
+/**
+ *  Creates a `GenericPrinter` to a file.
+ */
 public class FilePrinterFactory: PrinterFactory {
 
+    /**
+     *  Create a `GenericPrinter` to a file.
+     *
+     *  - Parameter id: The path to the file.
+     *
+     *  - Returns: A `GenericPrinter` with a `messageStream` to the file
+     *  specified by `id` and an `errorStream` to `stderr`.
+     */
     public func make(id: String) -> Printer {
         let errorStream: StderrOutputStream? = StderrOutputStream()
         return GenericPrinter(
