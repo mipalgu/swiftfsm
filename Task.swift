@@ -62,20 +62,44 @@
  */
 public struct Task {
     
+    /**
+     *  Should we add this `Machine` to the scheduler?
+     */
     var addToScheduler: Bool = true
     
+    /**
+     *  How many times should we repeat this task?
+     */
     var count: Int = 1
 
+    /**
+     *  Should we enable debugging for this `Machine`.
+     */
     var enableDebugging: Bool = false
     
+    /**
+     *  Should we generate a `KripkeStructure` for this `Machine`.
+     */
     var generateKripkeStructure: Bool = false
     
+    /**
+     *  Is this `Machine` a clfsm machine?
+     */
     var isClfsmMachine: Bool = false
     
+    /**
+     *  The name of the `Machine`.
+     */
     var name: String? = nil
     
+    /**
+     *  The path to load the `Machine`.
+     */
     var path: String? = nil
     
+    /**
+     *  Should we print the help text?
+     */
     var printHelpText: Bool = false
     
 }
