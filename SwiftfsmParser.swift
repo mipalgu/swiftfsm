@@ -56,6 +56,9 @@
  *
  */
 
+/**
+ *  The standard `Parser`.
+ */
 public class SwiftfsmParser: HelpableParser {
     
     public var helpText: String {
@@ -75,6 +78,14 @@ public class SwiftfsmParser: HelpableParser {
         return str
     }
     
+    /**
+     *  Parse the command line arguments and create new `Task`s.
+     *
+     *  - Parameter words: The command line arguments.
+     *
+     *  - Returns: An array of `Task`s that were created based on the command
+     *  line arguments.
+     */
     public func parse(words: [String]) throws -> [Task] {
         var wds: [String] = words
         var tasks: [Task] = []
