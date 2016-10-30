@@ -62,17 +62,36 @@
  import Glibc
  #endif
 
+/**
+ *  A `TextOutputStream` that is capable of writing to files.
+ */
 public class FileOutputStream: TextOutputStream {
     
     private let close: Bool
 
     private let file: UnsafeMutablePointer<FILE>
     
+    /**
+     *  Create a new `FileOutputStream`.
+     *
+     *  - Parameter: A pointer to the file.  This is normally created with a
+     *  call to `fopen`.
+     *
+     *  - Parameter close: Should the file be closed once the class has ceased
+     *  to exist?
+     */
     public init(file: UnsafeMutablePointer<FILE>, close: Bool = false) {
         self.file = file
         self.close = close 
     }
 
+    /**
+     *  Create a `FileOutputStream` from a file path.
+     *
+     *  - Paramater path: The path to the file.
+     *
+     *  - Parameter errorStream: Error messages will be sent here.
+     */
     public convenience init<T: TextOutputStream>(
         path: String,
         errorStream: T? = nil
@@ -89,10 +108,18 @@ public class FileOutputStream: TextOutputStream {
         exit(EXIT_FAILURE)
     }
     
+    /**
+     *  Write to the file.
+     *
+     *  - Parameter _: The contents of the file.
+     */
     public func write(_ string: String) {
         fputs(string, self.file)
     }
 
+    /**
+     *  Will call `fclose` if `close` is true.
+     */
     deinit {
         if (true == self.close) {
             fclose(self.file)
