@@ -62,8 +62,18 @@
  */
 public protocol Printer {
 
+    /**
+     *  Print the error message.
+     *
+     *  - Parameter str: The errror message.
+     */
     func error(str: String) -> Void
 
+    /**
+     *  Print a message.
+     *
+     *  - Parameter str: The message.
+     */
     func message(str: String) -> Void
 
 }
