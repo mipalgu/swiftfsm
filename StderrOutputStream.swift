@@ -62,10 +62,18 @@
  import Glibc
  #endif
 
+/**
+ *  A `TextOutputStream` that represents `stderr`.
+ */
 public struct StderrOutputStream: TextOutputStream {
     
     private var stream: FileOutputStream = FileOutputStream(file: stderr)
     
+    /**
+     *  Write to `stderr`.
+     *
+     *  - Parameter _: The error message.
+     */
     public mutating func write(_ string: String) {
         return stream.write(string)
     }
