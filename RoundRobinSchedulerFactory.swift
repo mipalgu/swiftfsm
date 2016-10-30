@@ -58,8 +58,16 @@
 
 import FSM
 
+/**
+ *  Provides a way to create a `RoundRobinScheduler`.
+ */
 public class RoundRobinSchedulerFactory: SchedulerFactory {
     
+    /**
+     *  Create a new `RoundRobinScheduler`.
+     *
+     *  - Parameter machines: All the machines that are going to execute.
+     */
     public func make(machines: [Machine]) -> Scheduler {
         return RoundRobinScheduler(machines: machines)
     }
