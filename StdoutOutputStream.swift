@@ -62,10 +62,18 @@
  import Glibc
  #endif
 
+/**
+ *  A `TextOutputStream` that represents `stdout`.
+ */
 public struct StdoutOutputStream: TextOutputStream {
     
     private var stream: FileOutputStream = FileOutputStream(file: stdout)
     
+    /**
+     *  Print to `stdout`.
+     *
+     *  - Parameter _: The message.
+     */
     public mutating func write(_ string: String) {
         return stream.write(string)
     }
