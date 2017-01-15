@@ -56,6 +56,8 @@
  *
  */
 
+import IO
+
 /**
  *  Creates A `MachineLoader` that is capable of loading machines from dynamic
  *  libraries.

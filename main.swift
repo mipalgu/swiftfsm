@@ -63,6 +63,7 @@ import Darwin
 #endif
 
 import FSM
+import IO
 
 let printer: CommandLinePrinter = 
     CommandLinePrinter(

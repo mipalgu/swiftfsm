@@ -57,6 +57,7 @@
  */
 
 import FSM
+import IO
 
 /**
  *  Print the Kripke Structure into a format supported by NuSMV.

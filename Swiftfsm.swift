@@ -63,6 +63,7 @@
  #endif
 
 import FSM
+import Functional
 
 /**
  *  Contains the main logic for swiftfsm.

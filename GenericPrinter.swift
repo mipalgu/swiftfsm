@@ -2,8 +2,8 @@
  * GenericPrinter.swift 
  * swiftfsm 
  *
- * Created by Callum McColl on 15/02/2016.
- * Copyright © 2016 Callum McColl. All rights reserved.
+ * Created by Callum McColl on 16/01/2017.
+ * Copyright © 2017 Callum McColl. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -56,49 +56,7 @@
  *
  */
 
-/**
- *  Provides a means to print to specific `TextOutputStream`s, one for normal
- *  messages and one for errors.
- */
-public class GenericPrinter<T: TextOutputStream, U: TextOutputStream>: Printer {
-    
-    internal var errorStream: T
-    
-    internal var messageStream: U
-    
-    /**
-     *  Create a `GenericPrinter`.
-     *
-     *  - Parameter errorStream: The `TextOutputStream` where errors will be
-     *  sent.
-     *
-     *  - Parameter messageStream: The `TextOutputStream` where normal messages
-     *  will be sent.
-     */
-    public init(errorStream: T, messageStream: U) {
-        self.errorStream = errorStream
-        self.messageStream = messageStream
-    }
-
-    /**
-     *  Print an error to `errorStream`.
-     *
-     *  - Parameter str: The error message.
-     */
-    public func error(str: String) {
-        print(str, terminator: "\n", to: &self.errorStream)
-    }
-    
-    /**
-     *  Print a message to `messageStream`.
-     *
-     *  - Parameter str: The contents of the message.
-     */
-    public func message(str: String) {
-        print(str, terminator: "\n", to: &self.messageStream)
-    }
-    
-}
+import IO
 
 /**
  *  Allow the `GenericPrinter` to print `SwiftfsmErrors`.

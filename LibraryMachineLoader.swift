@@ -57,6 +57,8 @@
  */
 
 import FSM
+import Functional
+import IO
 
 /**
  *  Load a `Machine` from a library.

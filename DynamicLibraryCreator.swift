@@ -62,6 +62,8 @@ import Darwin
 import Glibc
 #endif
 
+import IO
+
 /**
  *  Responsible for creating a LibraryResource.
  *

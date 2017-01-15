@@ -17,7 +17,7 @@ SWIFTCFLAGS=-Xlinker all_load -lFSM -lswiftfsm -ldl -L./ -I${SRCDIR}/../ -I${SRC
 SWIFT_SRCS!=ls *.swift
 SWIFT_BRIDGING_HEADER=swiftfsm_tests-Bridging-Header.h
 C_SRCS!=ls *.c
-LDFLAGS=-lFSM -lswiftfsm
+LDFLAGS=-lFSM -lswiftfsm -lIO
 
 all:	all-real
 
