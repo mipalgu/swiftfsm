@@ -15,7 +15,7 @@ SPECIFIC_CFLAGS=-D_POSIX_C_SOURCE=199309L
 SWIFT_SRCS!=ls *.swift
 SWIFT_BRIDGING_HEADER=swiftfsm-Bridging-Header.h
 C_SRCS!=ls *.c
-LDFLAGS+=-L/usr/local/lib -lIO -lFunctional
+LDFLAGS+=-lIO -lFunctional
 
 .include "../swiftfsm.mk"
 .include "../../../mk/mipal.mk"
