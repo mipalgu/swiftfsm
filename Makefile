@@ -5,6 +5,7 @@
 #
 ALL_TARGETS=host
 CI_WIP=yes
+USE_FSM=yes
 
 ALL_HDRS!=ls *.h
 
