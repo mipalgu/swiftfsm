@@ -1,0 +1,2589 @@
+MODULE main
+
+VAR
+
+BigPingPong-main-ping-count : {
+-128,
+-127,
+-126,
+-125,
+-124,
+-123,
+-122,
+-121,
+-120,
+-119,
+-118,
+-117,
+-116,
+-115,
+-114,
+-113,
+-112,
+-111,
+-110,
+-109,
+-108,
+-107,
+-106,
+-105,
+-104,
+-103,
+-102,
+-101,
+-100,
+-99,
+-98,
+-97,
+-96,
+-95,
+-94,
+-93,
+-92,
+-91,
+-90,
+-89,
+-88,
+-87,
+-86,
+-85,
+-84,
+-83,
+-82,
+-81,
+-80,
+-79,
+-78,
+-77,
+-76,
+-75,
+-74,
+-73,
+-72,
+-71,
+-70,
+-69,
+-68,
+-67,
+-66,
+-65,
+-64,
+-63,
+-62,
+-61,
+-60,
+-59,
+-58,
+-57,
+-56,
+-55,
+-54,
+-53,
+-52,
+-51,
+-50,
+-49,
+-48,
+-47,
+-46,
+-45,
+-44,
+-43,
+-42,
+-41,
+-40,
+-39,
+-38,
+-37,
+-36,
+-35,
+-34,
+-33,
+-32,
+-31,
+-30,
+-29,
+-28,
+-27,
+-26,
+-25,
+-24,
+-23,
+-22,
+-21,
+-20,
+-19,
+-18,
+-17,
+-16,
+-15,
+-14,
+-13,
+-12,
+-11,
+-10,
+-9,
+-8,
+-7,
+-6,
+-5,
+-4,
+-3,
+-2,
+-1,
+0,
+1,
+2,
+3,
+4,
+5,
+6,
+7,
+8,
+9,
+10,
+11,
+12,
+13,
+14,
+15,
+16,
+17,
+18,
+19,
+20,
+21,
+22,
+23,
+24,
+25,
+26,
+27,
+28,
+29,
+30,
+31,
+32,
+33,
+34,
+35,
+36,
+37,
+38,
+39,
+40,
+41,
+42,
+43,
+44,
+45,
+46,
+47,
+48,
+49,
+50,
+51,
+52,
+53,
+54,
+55,
+56,
+57,
+58,
+59,
+60,
+61,
+62,
+63,
+64,
+65,
+66,
+67,
+68,
+69,
+70,
+71,
+72,
+73,
+74,
+75,
+76,
+77,
+78,
+79,
+80,
+81,
+82,
+83,
+84,
+85,
+86,
+87,
+88,
+89,
+90,
+91,
+92,
+93,
+94,
+95,
+96,
+97,
+98,
+99,
+100,
+101,
+102,
+103,
+104,
+105,
+106,
+107,
+108,
+109,
+110,
+111,
+112,
+113,
+114,
+115,
+116,
+117,
+118,
+119,
+120,
+121,
+122,
+123,
+124,
+125,
+126,
+127
+};
+
+pc : {
+BigPingPong-main-ping-S0,
+BigPingPong-main-ping-S1,
+BigPingPong-main-pong-S0,
+BigPingPong-main-pang-S0,
+BigPingPong-main-peng-S0,
+BigPingPong-main-pung-S0,
+BigPingPong-main-ping-S2,
+BigPingPong-main-ping-S3,
+BigPingPong-main-pung-S1,
+BigPingPong-main-ping-S4,
+BigPingPong-main-ping-S5,
+BigPingPong-main-pung-S2,
+BigPingPong-main-ping-S6,
+BigPingPong-main-ping-S7,
+BigPingPong-main-pung-S3,
+BigPingPong-main-ping-S8,
+BigPingPong-main-ping-S9,
+BigPingPong-main-pung-S4,
+BigPingPong-main-ping-S10,
+BigPingPong-main-ping-S11,
+BigPingPong-main-pung-S5,
+BigPingPong-main-ping-S12,
+BigPingPong-main-ping-S13,
+BigPingPong-main-pung-S6,
+BigPingPong-main-ping-S14,
+BigPingPong-main-ping-S15,
+BigPingPong-main-pung-S7,
+BigPingPong-main-ping-S16,
+BigPingPong-main-ping-S17,
+BigPingPong-main-pung-S8,
+BigPingPong-main-ping-S18,
+BigPingPong-main-ping-S19,
+BigPingPong-main-pung-S9,
+BigPingPong-main-ping-S20,
+BigPingPong-main-ping-S21,
+BigPingPong-main-pung-S10,
+BigPingPong-main-ping-S22,
+BigPingPong-main-ping-S23,
+BigPingPong-main-pung-S11,
+BigPingPong-main-ping-S24,
+BigPingPong-main-ping-S25,
+BigPingPong-main-pung-S12,
+BigPingPong-main-ping-S26,
+BigPingPong-main-ping-S27,
+BigPingPong-main-pung-S13,
+BigPingPong-main-ping-S28,
+BigPingPong-main-ping-S29,
+BigPingPong-main-pung-S14,
+BigPingPong-main-ping-S30,
+BigPingPong-main-ping-S31,
+BigPingPong-main-pung-S15,
+BigPingPong-main-ping-S32,
+BigPingPong-main-ping-S33,
+BigPingPong-main-pung-S16,
+BigPingPong-main-ping-S34,
+BigPingPong-main-ping-S35,
+BigPingPong-main-pung-S17,
+BigPingPong-main-ping-S36,
+BigPingPong-main-ping-S37,
+BigPingPong-main-pung-S18,
+BigPingPong-main-ping-S38,
+BigPingPong-main-ping-S39,
+BigPingPong-main-pung-S19,
+BigPingPong-main-ping-S40,
+BigPingPong-main-ping-S41,
+BigPingPong-main-pung-S20,
+BigPingPong-main-ping-S42,
+BigPingPong-main-ping-S43,
+BigPingPong-main-pung-S21,
+BigPingPong-main-ping-S44,
+BigPingPong-main-ping-S45,
+BigPingPong-main-pung-S22,
+BigPingPong-main-ping-S46,
+BigPingPong-main-ping-S47,
+BigPingPong-main-pung-S23,
+BigPingPong-main-ping-S48,
+BigPingPong-main-ping-S49,
+BigPingPong-main-pung-S24,
+BigPingPong-main-ping-S50,
+BigPingPong-main-ping-S51,
+BigPingPong-main-pung-S25,
+BigPingPong-main-ping-S52,
+BigPingPong-main-ping-S53,
+BigPingPong-main-pung-S26,
+BigPingPong-main-ping-S54,
+BigPingPong-main-ping-S55,
+BigPingPong-main-pung-S27,
+BigPingPong-main-ping-S56,
+BigPingPong-main-ping-S57,
+BigPingPong-main-pung-S28,
+BigPingPong-main-ping-S58,
+BigPingPong-main-ping-S59,
+BigPingPong-main-pung-S29,
+BigPingPong-main-ping-S60,
+BigPingPong-main-ping-S61,
+BigPingPong-main-pung-S30,
+BigPingPong-main-ping-S62,
+BigPingPong-main-ping-S63,
+BigPingPong-main-pung-S31,
+BigPingPong-main-ping-S64,
+BigPingPong-main-ping-S65,
+BigPingPong-main-pung-S32,
+BigPingPong-main-ping-S66,
+BigPingPong-main-ping-S67,
+BigPingPong-main-pung-S33,
+BigPingPong-main-ping-S68,
+BigPingPong-main-ping-S69,
+BigPingPong-main-pung-S34,
+BigPingPong-main-ping-S70,
+BigPingPong-main-ping-S71,
+BigPingPong-main-pung-S35,
+BigPingPong-main-ping-S72,
+BigPingPong-main-ping-S73,
+BigPingPong-main-pung-S36,
+BigPingPong-main-ping-S74,
+BigPingPong-main-ping-S75,
+BigPingPong-main-pung-S37,
+BigPingPong-main-ping-S76,
+BigPingPong-main-ping-S77,
+BigPingPong-main-pung-S38,
+BigPingPong-main-ping-S78,
+BigPingPong-main-ping-S79,
+BigPingPong-main-pung-S39,
+BigPingPong-main-ping-S80,
+BigPingPong-main-ping-S81,
+BigPingPong-main-pung-S40,
+BigPingPong-main-ping-S82,
+BigPingPong-main-ping-S83,
+BigPingPong-main-pung-S41,
+BigPingPong-main-ping-S84,
+BigPingPong-main-ping-S85,
+BigPingPong-main-pung-S42,
+BigPingPong-main-ping-S86,
+BigPingPong-main-ping-S87,
+BigPingPong-main-pung-S43,
+BigPingPong-main-ping-S88,
+BigPingPong-main-ping-S89,
+BigPingPong-main-pung-S44,
+BigPingPong-main-ping-S90,
+BigPingPong-main-ping-S91,
+BigPingPong-main-pung-S45,
+BigPingPong-main-ping-S92,
+BigPingPong-main-ping-S93,
+BigPingPong-main-pung-S46,
+BigPingPong-main-ping-S94,
+BigPingPong-main-ping-S95,
+BigPingPong-main-pung-S47,
+BigPingPong-main-ping-S96,
+BigPingPong-main-ping-S97,
+BigPingPong-main-pung-S48,
+BigPingPong-main-ping-S98,
+BigPingPong-main-ping-S99,
+BigPingPong-main-pung-S49,
+BigPingPong-main-ping-S100,
+BigPingPong-main-ping-S101,
+BigPingPong-main-pung-S50,
+BigPingPong-main-ping-S102,
+BigPingPong-main-ping-S103,
+BigPingPong-main-pung-S51,
+BigPingPong-main-ping-S104,
+BigPingPong-main-ping-S105,
+BigPingPong-main-pung-S52,
+BigPingPong-main-ping-S106,
+BigPingPong-main-ping-S107,
+BigPingPong-main-pung-S53,
+BigPingPong-main-ping-S108,
+BigPingPong-main-ping-S109,
+BigPingPong-main-pung-S54,
+BigPingPong-main-ping-S110,
+BigPingPong-main-ping-S111,
+BigPingPong-main-pung-S55,
+BigPingPong-main-ping-S112,
+BigPingPong-main-ping-S113,
+BigPingPong-main-pung-S56,
+BigPingPong-main-ping-S114,
+BigPingPong-main-ping-S115,
+BigPingPong-main-pung-S57,
+BigPingPong-main-ping-S116,
+BigPingPong-main-ping-S117,
+BigPingPong-main-pung-S58,
+BigPingPong-main-ping-S118,
+BigPingPong-main-ping-S119,
+BigPingPong-main-pung-S59,
+BigPingPong-main-ping-S120,
+BigPingPong-main-ping-S121,
+BigPingPong-main-pung-S60,
+BigPingPong-main-ping-S122,
+BigPingPong-main-ping-S123,
+BigPingPong-main-pung-S61,
+BigPingPong-main-ping-S124,
+BigPingPong-main-ping-S125,
+BigPingPong-main-pung-S62,
+BigPingPong-main-ping-S126,
+BigPingPong-main-ping-S127,
+BigPingPong-main-pung-S63,
+BigPingPong-main-ping-S128,
+BigPingPong-main-ping-S129,
+BigPingPong-main-pung-S64,
+BigPingPong-main-ping-S130,
+BigPingPong-main-ping-S131,
+BigPingPong-main-pung-S65,
+BigPingPong-main-ping-S132,
+BigPingPong-main-ping-S133,
+BigPingPong-main-pung-S66,
+BigPingPong-main-ping-S134,
+BigPingPong-main-ping-S135,
+BigPingPong-main-pung-S67,
+BigPingPong-main-ping-S136,
+BigPingPong-main-ping-S137,
+BigPingPong-main-pung-S68,
+BigPingPong-main-ping-S138,
+BigPingPong-main-ping-S139,
+BigPingPong-main-pung-S69,
+BigPingPong-main-ping-S140,
+BigPingPong-main-ping-S141,
+BigPingPong-main-pung-S70,
+BigPingPong-main-ping-S142,
+BigPingPong-main-ping-S143,
+BigPingPong-main-pung-S71,
+BigPingPong-main-ping-S144,
+BigPingPong-main-ping-S145,
+BigPingPong-main-pung-S72,
+BigPingPong-main-ping-S146,
+BigPingPong-main-ping-S147,
+BigPingPong-main-pung-S73,
+BigPingPong-main-ping-S148,
+BigPingPong-main-ping-S149,
+BigPingPong-main-pung-S74,
+BigPingPong-main-ping-S150,
+BigPingPong-main-ping-S151,
+BigPingPong-main-pung-S75,
+BigPingPong-main-ping-S152,
+BigPingPong-main-ping-S153,
+BigPingPong-main-pung-S76,
+BigPingPong-main-ping-S154,
+BigPingPong-main-ping-S155,
+BigPingPong-main-pung-S77,
+BigPingPong-main-ping-S156,
+BigPingPong-main-ping-S157,
+BigPingPong-main-pung-S78,
+BigPingPong-main-ping-S158,
+BigPingPong-main-ping-S159,
+BigPingPong-main-pung-S79,
+BigPingPong-main-ping-S160,
+BigPingPong-main-ping-S161,
+BigPingPong-main-pung-S80,
+BigPingPong-main-ping-S162,
+BigPingPong-main-ping-S163,
+BigPingPong-main-pung-S81,
+BigPingPong-main-ping-S164,
+BigPingPong-main-ping-S165,
+BigPingPong-main-pung-S82,
+BigPingPong-main-ping-S166,
+BigPingPong-main-ping-S167,
+BigPingPong-main-pung-S83,
+BigPingPong-main-ping-S168,
+BigPingPong-main-ping-S169,
+BigPingPong-main-pung-S84,
+BigPingPong-main-ping-S170,
+BigPingPong-main-ping-S171,
+BigPingPong-main-pung-S85,
+BigPingPong-main-ping-S172,
+BigPingPong-main-ping-S173,
+BigPingPong-main-pung-S86,
+BigPingPong-main-ping-S174,
+BigPingPong-main-ping-S175,
+BigPingPong-main-pung-S87,
+BigPingPong-main-ping-S176,
+BigPingPong-main-ping-S177,
+BigPingPong-main-pung-S88,
+BigPingPong-main-ping-S178,
+BigPingPong-main-ping-S179,
+BigPingPong-main-pung-S89,
+BigPingPong-main-ping-S180,
+BigPingPong-main-ping-S181,
+BigPingPong-main-pung-S90,
+BigPingPong-main-ping-S182,
+BigPingPong-main-ping-S183,
+BigPingPong-main-pung-S91,
+BigPingPong-main-ping-S184,
+BigPingPong-main-ping-S185,
+BigPingPong-main-pung-S92,
+BigPingPong-main-ping-S186,
+BigPingPong-main-ping-S187,
+BigPingPong-main-pung-S93,
+BigPingPong-main-ping-S188,
+BigPingPong-main-ping-S189,
+BigPingPong-main-pung-S94,
+BigPingPong-main-ping-S190,
+BigPingPong-main-ping-S191,
+BigPingPong-main-pung-S95,
+BigPingPong-main-ping-S192,
+BigPingPong-main-ping-S193,
+BigPingPong-main-pung-S96,
+BigPingPong-main-ping-S194,
+BigPingPong-main-ping-S195,
+BigPingPong-main-pung-S97,
+BigPingPong-main-ping-S196,
+BigPingPong-main-ping-S197,
+BigPingPong-main-pung-S98,
+BigPingPong-main-ping-S198,
+BigPingPong-main-ping-S199,
+BigPingPong-main-pung-S99,
+BigPingPong-main-ping-S200,
+BigPingPong-main-ping-S201,
+BigPingPong-main-pung-S100,
+BigPingPong-main-ping-S202,
+BigPingPong-main-ping-S203,
+BigPingPong-main-pung-S101,
+BigPingPong-main-ping-S204,
+BigPingPong-main-ping-S205,
+BigPingPong-main-pung-S102,
+BigPingPong-main-ping-S206,
+BigPingPong-main-ping-S207,
+BigPingPong-main-pung-S103,
+BigPingPong-main-ping-S208,
+BigPingPong-main-ping-S209,
+BigPingPong-main-pung-S104,
+BigPingPong-main-ping-S210,
+BigPingPong-main-ping-S211,
+BigPingPong-main-pung-S105,
+BigPingPong-main-ping-S212,
+BigPingPong-main-ping-S213,
+BigPingPong-main-pung-S106,
+BigPingPong-main-ping-S214,
+BigPingPong-main-ping-S215,
+BigPingPong-main-pung-S107,
+BigPingPong-main-ping-S216,
+BigPingPong-main-ping-S217,
+BigPingPong-main-pung-S108,
+BigPingPong-main-ping-S218,
+BigPingPong-main-ping-S219,
+BigPingPong-main-pung-S109,
+BigPingPong-main-ping-S220,
+BigPingPong-main-ping-S221,
+BigPingPong-main-pung-S110,
+BigPingPong-main-ping-S222,
+BigPingPong-main-ping-S223,
+BigPingPong-main-pung-S111,
+BigPingPong-main-ping-S224,
+BigPingPong-main-ping-S225,
+BigPingPong-main-pung-S112,
+BigPingPong-main-ping-S226,
+BigPingPong-main-ping-S227,
+BigPingPong-main-pung-S113,
+BigPingPong-main-ping-S228,
+BigPingPong-main-ping-S229,
+BigPingPong-main-pung-S114,
+BigPingPong-main-ping-S230,
+BigPingPong-main-ping-S231,
+BigPingPong-main-pung-S115,
+BigPingPong-main-ping-S232,
+BigPingPong-main-ping-S233,
+BigPingPong-main-pung-S116,
+BigPingPong-main-ping-S234,
+BigPingPong-main-ping-S235,
+BigPingPong-main-pung-S117,
+BigPingPong-main-ping-S236,
+BigPingPong-main-ping-S237,
+BigPingPong-main-pung-S118,
+BigPingPong-main-ping-S238,
+BigPingPong-main-ping-S239,
+BigPingPong-main-pung-S119,
+BigPingPong-main-ping-S240,
+BigPingPong-main-ping-S241,
+BigPingPong-main-pung-S120,
+BigPingPong-main-ping-S242,
+BigPingPong-main-ping-S243,
+BigPingPong-main-pung-S121,
+BigPingPong-main-ping-S244,
+BigPingPong-main-ping-S245,
+BigPingPong-main-pung-S122,
+BigPingPong-main-ping-S246,
+BigPingPong-main-ping-S247,
+BigPingPong-main-pung-S123,
+BigPingPong-main-ping-S248,
+BigPingPong-main-ping-S249,
+BigPingPong-main-pung-S124,
+BigPingPong-main-ping-S250,
+BigPingPong-main-ping-S251,
+BigPingPong-main-pung-S125,
+BigPingPong-main-ping-S252,
+BigPingPong-main-ping-S253,
+BigPingPong-main-pung-S126,
+BigPingPong-main-ping-S254,
+BigPingPong-main-ping-S255,
+BigPingPong-main-pung-S127,
+BigPingPong-main-ping-S256,
+BigPingPong-main-ping-S257,
+BigPingPong-main-pung-S128,
+BigPingPong-main-ping-S258,
+BigPingPong-main-ping-S259,
+BigPingPong-main-pung-S129,
+BigPingPong-main-ping-S260,
+BigPingPong-main-ping-S261,
+BigPingPong-main-pung-S130,
+BigPingPong-main-ping-S262,
+BigPingPong-main-ping-S263,
+BigPingPong-main-pung-S131,
+BigPingPong-main-ping-S264,
+BigPingPong-main-ping-S265,
+BigPingPong-main-pung-S132,
+BigPingPong-main-ping-S266,
+BigPingPong-main-ping-S267,
+BigPingPong-main-pung-S133,
+BigPingPong-main-ping-S268,
+BigPingPong-main-ping-S269,
+BigPingPong-main-pung-S134,
+BigPingPong-main-ping-S270,
+BigPingPong-main-ping-S271,
+BigPingPong-main-pung-S135,
+BigPingPong-main-ping-S272,
+BigPingPong-main-ping-S273,
+BigPingPong-main-pung-S136,
+BigPingPong-main-ping-S274,
+BigPingPong-main-ping-S275,
+BigPingPong-main-pung-S137,
+BigPingPong-main-ping-S276,
+BigPingPong-main-ping-S277,
+BigPingPong-main-pung-S138,
+BigPingPong-main-ping-S278,
+BigPingPong-main-ping-S279,
+BigPingPong-main-pung-S139,
+BigPingPong-main-ping-S280,
+BigPingPong-main-ping-S281,
+BigPingPong-main-pung-S140,
+BigPingPong-main-ping-S282,
+BigPingPong-main-ping-S283,
+BigPingPong-main-pung-S141,
+BigPingPong-main-ping-S284,
+BigPingPong-main-ping-S285,
+BigPingPong-main-pung-S142,
+BigPingPong-main-ping-S286,
+BigPingPong-main-ping-S287,
+BigPingPong-main-pung-S143,
+BigPingPong-main-ping-S288,
+BigPingPong-main-ping-S289,
+BigPingPong-main-pung-S144,
+BigPingPong-main-ping-S290,
+BigPingPong-main-ping-S291,
+BigPingPong-main-pung-S145,
+BigPingPong-main-ping-S292,
+BigPingPong-main-ping-S293,
+BigPingPong-main-pung-S146,
+BigPingPong-main-ping-S294,
+BigPingPong-main-ping-S295,
+BigPingPong-main-pung-S147,
+BigPingPong-main-ping-S296,
+BigPingPong-main-ping-S297,
+BigPingPong-main-pung-S148,
+BigPingPong-main-ping-S298,
+BigPingPong-main-ping-S299,
+BigPingPong-main-pung-S149,
+BigPingPong-main-ping-S300,
+BigPingPong-main-ping-S301,
+BigPingPong-main-pung-S150,
+BigPingPong-main-ping-S302,
+BigPingPong-main-ping-S303,
+BigPingPong-main-pung-S151,
+BigPingPong-main-ping-S304,
+BigPingPong-main-ping-S305,
+BigPingPong-main-pung-S152,
+BigPingPong-main-ping-S306,
+BigPingPong-main-ping-S307,
+BigPingPong-main-pung-S153,
+BigPingPong-main-ping-S308,
+BigPingPong-main-ping-S309,
+BigPingPong-main-pung-S154,
+BigPingPong-main-ping-S310,
+BigPingPong-main-ping-S311,
+BigPingPong-main-pung-S155,
+BigPingPong-main-ping-S312,
+BigPingPong-main-ping-S313,
+BigPingPong-main-pung-S156,
+BigPingPong-main-ping-S314,
+BigPingPong-main-ping-S315,
+BigPingPong-main-pung-S157,
+BigPingPong-main-ping-S316,
+BigPingPong-main-ping-S317,
+BigPingPong-main-pung-S158,
+BigPingPong-main-ping-S318,
+BigPingPong-main-ping-S319,
+BigPingPong-main-pung-S159,
+BigPingPong-main-ping-S320,
+BigPingPong-main-ping-S321,
+BigPingPong-main-pung-S160,
+BigPingPong-main-ping-S322,
+BigPingPong-main-ping-S323,
+BigPingPong-main-pung-S161,
+BigPingPong-main-ping-S324,
+BigPingPong-main-ping-S325,
+BigPingPong-main-pung-S162,
+BigPingPong-main-ping-S326,
+BigPingPong-main-ping-S327,
+BigPingPong-main-pung-S163,
+BigPingPong-main-ping-S328,
+BigPingPong-main-ping-S329,
+BigPingPong-main-pung-S164,
+BigPingPong-main-ping-S330,
+BigPingPong-main-ping-S331,
+BigPingPong-main-pung-S165,
+BigPingPong-main-ping-S332,
+BigPingPong-main-ping-S333,
+BigPingPong-main-pung-S166,
+BigPingPong-main-ping-S334,
+BigPingPong-main-ping-S335,
+BigPingPong-main-pung-S167,
+BigPingPong-main-ping-S336,
+BigPingPong-main-ping-S337,
+BigPingPong-main-pung-S168,
+BigPingPong-main-ping-S338,
+BigPingPong-main-ping-S339,
+BigPingPong-main-pung-S169,
+BigPingPong-main-ping-S340,
+BigPingPong-main-ping-S341,
+BigPingPong-main-pung-S170,
+BigPingPong-main-ping-S342,
+BigPingPong-main-ping-S343,
+BigPingPong-main-pung-S171,
+BigPingPong-main-ping-S344,
+BigPingPong-main-ping-S345,
+BigPingPong-main-pung-S172,
+BigPingPong-main-ping-S346,
+BigPingPong-main-ping-S347,
+BigPingPong-main-pung-S173,
+BigPingPong-main-ping-S348,
+BigPingPong-main-ping-S349,
+BigPingPong-main-pung-S174,
+BigPingPong-main-ping-S350,
+BigPingPong-main-ping-S351,
+BigPingPong-main-pung-S175,
+BigPingPong-main-ping-S352,
+BigPingPong-main-ping-S353,
+BigPingPong-main-pung-S176,
+BigPingPong-main-ping-S354,
+BigPingPong-main-ping-S355,
+BigPingPong-main-pung-S177,
+BigPingPong-main-ping-S356,
+BigPingPong-main-ping-S357,
+BigPingPong-main-pung-S178,
+BigPingPong-main-ping-S358,
+BigPingPong-main-ping-S359,
+BigPingPong-main-pung-S179,
+BigPingPong-main-ping-S360,
+BigPingPong-main-ping-S361,
+BigPingPong-main-pung-S180,
+BigPingPong-main-ping-S362,
+BigPingPong-main-ping-S363,
+BigPingPong-main-pung-S181,
+BigPingPong-main-ping-S364,
+BigPingPong-main-ping-S365,
+BigPingPong-main-pung-S182,
+BigPingPong-main-ping-S366,
+BigPingPong-main-ping-S367,
+BigPingPong-main-pung-S183,
+BigPingPong-main-ping-S368,
+BigPingPong-main-ping-S369,
+BigPingPong-main-pung-S184,
+BigPingPong-main-ping-S370,
+BigPingPong-main-ping-S371,
+BigPingPong-main-pung-S185,
+BigPingPong-main-ping-S372,
+BigPingPong-main-ping-S373,
+BigPingPong-main-pung-S186,
+BigPingPong-main-ping-S374,
+BigPingPong-main-ping-S375,
+BigPingPong-main-pung-S187,
+BigPingPong-main-ping-S376,
+BigPingPong-main-ping-S377,
+BigPingPong-main-pung-S188,
+BigPingPong-main-ping-S378,
+BigPingPong-main-ping-S379,
+BigPingPong-main-pung-S189,
+BigPingPong-main-ping-S380,
+BigPingPong-main-ping-S381,
+BigPingPong-main-pung-S190,
+BigPingPong-main-ping-S382,
+BigPingPong-main-ping-S383,
+BigPingPong-main-pung-S191,
+BigPingPong-main-ping-S384,
+BigPingPong-main-ping-S385,
+BigPingPong-main-pung-S192,
+BigPingPong-main-ping-S386,
+BigPingPong-main-ping-S387,
+BigPingPong-main-pung-S193,
+BigPingPong-main-ping-S388,
+BigPingPong-main-ping-S389,
+BigPingPong-main-pung-S194,
+BigPingPong-main-ping-S390,
+BigPingPong-main-ping-S391,
+BigPingPong-main-pung-S195,
+BigPingPong-main-ping-S392,
+BigPingPong-main-ping-S393,
+BigPingPong-main-pung-S196,
+BigPingPong-main-ping-S394,
+BigPingPong-main-ping-S395,
+BigPingPong-main-pung-S197,
+BigPingPong-main-ping-S396,
+BigPingPong-main-ping-S397,
+BigPingPong-main-pung-S198,
+BigPingPong-main-ping-S398,
+BigPingPong-main-ping-S399,
+BigPingPong-main-pung-S199,
+BigPingPong-main-ping-S400,
+BigPingPong-main-ping-S401,
+BigPingPong-main-pung-S200,
+BigPingPong-main-ping-S402,
+BigPingPong-main-ping-S403,
+BigPingPong-main-pung-S201,
+BigPingPong-main-ping-S404,
+BigPingPong-main-ping-S405,
+BigPingPong-main-pung-S202,
+BigPingPong-main-ping-S406,
+BigPingPong-main-ping-S407,
+BigPingPong-main-pung-S203,
+BigPingPong-main-ping-S408,
+BigPingPong-main-ping-S409,
+BigPingPong-main-pung-S204,
+BigPingPong-main-ping-S410,
+BigPingPong-main-ping-S411,
+BigPingPong-main-pung-S205,
+BigPingPong-main-ping-S412,
+BigPingPong-main-ping-S413,
+BigPingPong-main-pung-S206,
+BigPingPong-main-ping-S414,
+BigPingPong-main-ping-S415,
+BigPingPong-main-pung-S207,
+BigPingPong-main-ping-S416,
+BigPingPong-main-ping-S417,
+BigPingPong-main-pung-S208,
+BigPingPong-main-ping-S418,
+BigPingPong-main-ping-S419,
+BigPingPong-main-pung-S209,
+BigPingPong-main-ping-S420,
+BigPingPong-main-ping-S421,
+BigPingPong-main-pung-S210,
+BigPingPong-main-ping-S422,
+BigPingPong-main-ping-S423,
+BigPingPong-main-pung-S211,
+BigPingPong-main-ping-S424,
+BigPingPong-main-ping-S425,
+BigPingPong-main-pung-S212,
+BigPingPong-main-ping-S426,
+BigPingPong-main-ping-S427,
+BigPingPong-main-pung-S213,
+BigPingPong-main-ping-S428,
+BigPingPong-main-ping-S429,
+BigPingPong-main-pung-S214,
+BigPingPong-main-ping-S430,
+BigPingPong-main-ping-S431,
+BigPingPong-main-pung-S215,
+BigPingPong-main-ping-S432,
+BigPingPong-main-ping-S433,
+BigPingPong-main-pung-S216,
+BigPingPong-main-ping-S434,
+BigPingPong-main-ping-S435,
+BigPingPong-main-pung-S217,
+BigPingPong-main-ping-S436,
+BigPingPong-main-ping-S437,
+BigPingPong-main-pung-S218,
+BigPingPong-main-ping-S438,
+BigPingPong-main-ping-S439,
+BigPingPong-main-pung-S219,
+BigPingPong-main-ping-S440,
+BigPingPong-main-ping-S441,
+BigPingPong-main-pung-S220,
+BigPingPong-main-ping-S442,
+BigPingPong-main-ping-S443,
+BigPingPong-main-pung-S221,
+BigPingPong-main-ping-S444,
+BigPingPong-main-ping-S445,
+BigPingPong-main-pung-S222,
+BigPingPong-main-ping-S446,
+BigPingPong-main-ping-S447,
+BigPingPong-main-pung-S223,
+BigPingPong-main-ping-S448,
+BigPingPong-main-ping-S449,
+BigPingPong-main-pung-S224,
+BigPingPong-main-ping-S450,
+BigPingPong-main-ping-S451,
+BigPingPong-main-pung-S225,
+BigPingPong-main-ping-S452,
+BigPingPong-main-ping-S453,
+BigPingPong-main-pung-S226,
+BigPingPong-main-ping-S454,
+BigPingPong-main-ping-S455,
+BigPingPong-main-pung-S227,
+BigPingPong-main-ping-S456,
+BigPingPong-main-ping-S457,
+BigPingPong-main-pung-S228,
+BigPingPong-main-ping-S458,
+BigPingPong-main-ping-S459,
+BigPingPong-main-pung-S229,
+BigPingPong-main-ping-S460,
+BigPingPong-main-ping-S461,
+BigPingPong-main-pung-S230,
+BigPingPong-main-ping-S462,
+BigPingPong-main-ping-S463,
+BigPingPong-main-pung-S231,
+BigPingPong-main-ping-S464,
+BigPingPong-main-ping-S465,
+BigPingPong-main-pung-S232,
+BigPingPong-main-ping-S466,
+BigPingPong-main-ping-S467,
+BigPingPong-main-pung-S233,
+BigPingPong-main-ping-S468,
+BigPingPong-main-ping-S469,
+BigPingPong-main-pung-S234,
+BigPingPong-main-ping-S470,
+BigPingPong-main-ping-S471,
+BigPingPong-main-pung-S235,
+BigPingPong-main-ping-S472,
+BigPingPong-main-ping-S473,
+BigPingPong-main-pung-S236,
+BigPingPong-main-ping-S474,
+BigPingPong-main-ping-S475,
+BigPingPong-main-pung-S237,
+BigPingPong-main-ping-S476,
+BigPingPong-main-ping-S477,
+BigPingPong-main-pung-S238,
+BigPingPong-main-ping-S478,
+BigPingPong-main-ping-S479,
+BigPingPong-main-pung-S239,
+BigPingPong-main-ping-S480,
+BigPingPong-main-ping-S481,
+BigPingPong-main-pung-S240,
+BigPingPong-main-ping-S482,
+BigPingPong-main-ping-S483,
+BigPingPong-main-pung-S241,
+BigPingPong-main-ping-S484,
+BigPingPong-main-ping-S485,
+BigPingPong-main-pung-S242,
+BigPingPong-main-ping-S486,
+BigPingPong-main-ping-S487,
+BigPingPong-main-pung-S243,
+BigPingPong-main-ping-S488,
+BigPingPong-main-ping-S489,
+BigPingPong-main-pung-S244,
+BigPingPong-main-ping-S490,
+BigPingPong-main-ping-S491,
+BigPingPong-main-pung-S245,
+BigPingPong-main-ping-S492,
+BigPingPong-main-ping-S493,
+BigPingPong-main-pung-S246,
+BigPingPong-main-ping-S494,
+BigPingPong-main-ping-S495,
+BigPingPong-main-pung-S247,
+BigPingPong-main-ping-S496,
+BigPingPong-main-ping-S497,
+BigPingPong-main-pung-S248,
+BigPingPong-main-ping-S498,
+BigPingPong-main-ping-S499,
+BigPingPong-main-pung-S249,
+BigPingPong-main-ping-S500,
+BigPingPong-main-ping-S501,
+BigPingPong-main-pung-S250,
+BigPingPong-main-ping-S502,
+BigPingPong-main-ping-S503,
+BigPingPong-main-pung-S251,
+BigPingPong-main-ping-S504,
+BigPingPong-main-ping-S505,
+BigPingPong-main-pung-S252,
+BigPingPong-main-ping-S506,
+BigPingPong-main-ping-S507,
+BigPingPong-main-pung-S253,
+BigPingPong-main-ping-S508,
+BigPingPong-main-ping-S509,
+BigPingPong-main-pung-S254,
+BigPingPong-main-ping-S510,
+BigPingPong-main-ping-S511,
+BigPingPong-main-pung-S255,
+BigPingPong-main-peng-S1
+};
+
+INIT
+pc=BigPingPong-main-ping-S0 & BigPingPong-main-ping-count=0
+
+TRANS
+case
+BigPingPong-main-ping-count=0 & pc=BigPingPong-main-ping-S0:
+    (next(BigPingPong-main-ping-count)=1 & next(pc)=BigPingPong-main-ping-S1);
+BigPingPong-main-ping-count=1 & pc=BigPingPong-main-ping-S1:
+    (next(BigPingPong-main-ping-count)=1 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=1 & pc=BigPingPong-main-pong-S0:
+    (next(BigPingPong-main-ping-count)=1 & next(pc)=BigPingPong-main-pang-S0);
+BigPingPong-main-ping-count=1 & pc=BigPingPong-main-pang-S0:
+    (next(BigPingPong-main-ping-count)=1 & next(pc)=BigPingPong-main-peng-S0);
+BigPingPong-main-ping-count=1 & pc=BigPingPong-main-peng-S0:
+    (next(BigPingPong-main-ping-count)=1 & next(pc)=BigPingPong-main-pung-S0);
+BigPingPong-main-ping-count=1 & pc=BigPingPong-main-pung-S0:
+    (next(BigPingPong-main-ping-count)=1 & next(pc)=BigPingPong-main-ping-S2);
+BigPingPong-main-ping-count=1 & pc=BigPingPong-main-ping-S2:
+    (next(BigPingPong-main-ping-count)=2 & next(pc)=BigPingPong-main-ping-S3);
+BigPingPong-main-ping-count=2 & pc=BigPingPong-main-ping-S3:
+    (next(BigPingPong-main-ping-count)=2 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=2 & pc=BigPingPong-main-pung-S1:
+    (next(BigPingPong-main-ping-count)=2 & next(pc)=BigPingPong-main-ping-S4);
+BigPingPong-main-ping-count=2 & pc=BigPingPong-main-ping-S4:
+    (next(BigPingPong-main-ping-count)=3 & next(pc)=BigPingPong-main-ping-S5);
+BigPingPong-main-ping-count=3 & pc=BigPingPong-main-ping-S5:
+    (next(BigPingPong-main-ping-count)=3 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=3 & pc=BigPingPong-main-pung-S2:
+    (next(BigPingPong-main-ping-count)=3 & next(pc)=BigPingPong-main-ping-S6);
+BigPingPong-main-ping-count=3 & pc=BigPingPong-main-ping-S6:
+    (next(BigPingPong-main-ping-count)=4 & next(pc)=BigPingPong-main-ping-S7);
+BigPingPong-main-ping-count=4 & pc=BigPingPong-main-ping-S7:
+    (next(BigPingPong-main-ping-count)=4 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=4 & pc=BigPingPong-main-pung-S3:
+    (next(BigPingPong-main-ping-count)=4 & next(pc)=BigPingPong-main-ping-S8);
+BigPingPong-main-ping-count=4 & pc=BigPingPong-main-ping-S8:
+    (next(BigPingPong-main-ping-count)=5 & next(pc)=BigPingPong-main-ping-S9);
+BigPingPong-main-ping-count=5 & pc=BigPingPong-main-ping-S9:
+    (next(BigPingPong-main-ping-count)=5 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=5 & pc=BigPingPong-main-pung-S4:
+    (next(BigPingPong-main-ping-count)=5 & next(pc)=BigPingPong-main-ping-S10);
+BigPingPong-main-ping-count=5 & pc=BigPingPong-main-ping-S10:
+    (next(BigPingPong-main-ping-count)=6 & next(pc)=BigPingPong-main-ping-S11);
+BigPingPong-main-ping-count=6 & pc=BigPingPong-main-ping-S11:
+    (next(BigPingPong-main-ping-count)=6 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=6 & pc=BigPingPong-main-pung-S5:
+    (next(BigPingPong-main-ping-count)=6 & next(pc)=BigPingPong-main-ping-S12);
+BigPingPong-main-ping-count=6 & pc=BigPingPong-main-ping-S12:
+    (next(BigPingPong-main-ping-count)=7 & next(pc)=BigPingPong-main-ping-S13);
+BigPingPong-main-ping-count=7 & pc=BigPingPong-main-ping-S13:
+    (next(BigPingPong-main-ping-count)=7 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=7 & pc=BigPingPong-main-pung-S6:
+    (next(BigPingPong-main-ping-count)=7 & next(pc)=BigPingPong-main-ping-S14);
+BigPingPong-main-ping-count=7 & pc=BigPingPong-main-ping-S14:
+    (next(BigPingPong-main-ping-count)=8 & next(pc)=BigPingPong-main-ping-S15);
+BigPingPong-main-ping-count=8 & pc=BigPingPong-main-ping-S15:
+    (next(BigPingPong-main-ping-count)=8 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=8 & pc=BigPingPong-main-pung-S7:
+    (next(BigPingPong-main-ping-count)=8 & next(pc)=BigPingPong-main-ping-S16);
+BigPingPong-main-ping-count=8 & pc=BigPingPong-main-ping-S16:
+    (next(BigPingPong-main-ping-count)=9 & next(pc)=BigPingPong-main-ping-S17);
+BigPingPong-main-ping-count=9 & pc=BigPingPong-main-ping-S17:
+    (next(BigPingPong-main-ping-count)=9 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=9 & pc=BigPingPong-main-pung-S8:
+    (next(BigPingPong-main-ping-count)=9 & next(pc)=BigPingPong-main-ping-S18);
+BigPingPong-main-ping-count=9 & pc=BigPingPong-main-ping-S18:
+    (next(BigPingPong-main-ping-count)=10 & next(pc)=BigPingPong-main-ping-S19);
+BigPingPong-main-ping-count=10 & pc=BigPingPong-main-ping-S19:
+    (next(BigPingPong-main-ping-count)=10 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=10 & pc=BigPingPong-main-pung-S9:
+    (next(BigPingPong-main-ping-count)=10 & next(pc)=BigPingPong-main-ping-S20);
+BigPingPong-main-ping-count=10 & pc=BigPingPong-main-ping-S20:
+    (next(BigPingPong-main-ping-count)=11 & next(pc)=BigPingPong-main-ping-S21);
+BigPingPong-main-ping-count=11 & pc=BigPingPong-main-ping-S21:
+    (next(BigPingPong-main-ping-count)=11 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=11 & pc=BigPingPong-main-pung-S10:
+    (next(BigPingPong-main-ping-count)=11 & next(pc)=BigPingPong-main-ping-S22);
+BigPingPong-main-ping-count=11 & pc=BigPingPong-main-ping-S22:
+    (next(BigPingPong-main-ping-count)=12 & next(pc)=BigPingPong-main-ping-S23);
+BigPingPong-main-ping-count=12 & pc=BigPingPong-main-ping-S23:
+    (next(BigPingPong-main-ping-count)=12 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=12 & pc=BigPingPong-main-pung-S11:
+    (next(BigPingPong-main-ping-count)=12 & next(pc)=BigPingPong-main-ping-S24);
+BigPingPong-main-ping-count=12 & pc=BigPingPong-main-ping-S24:
+    (next(BigPingPong-main-ping-count)=13 & next(pc)=BigPingPong-main-ping-S25);
+BigPingPong-main-ping-count=13 & pc=BigPingPong-main-ping-S25:
+    (next(BigPingPong-main-ping-count)=13 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=13 & pc=BigPingPong-main-pung-S12:
+    (next(BigPingPong-main-ping-count)=13 & next(pc)=BigPingPong-main-ping-S26);
+BigPingPong-main-ping-count=13 & pc=BigPingPong-main-ping-S26:
+    (next(BigPingPong-main-ping-count)=14 & next(pc)=BigPingPong-main-ping-S27);
+BigPingPong-main-ping-count=14 & pc=BigPingPong-main-ping-S27:
+    (next(BigPingPong-main-ping-count)=14 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=14 & pc=BigPingPong-main-pung-S13:
+    (next(BigPingPong-main-ping-count)=14 & next(pc)=BigPingPong-main-ping-S28);
+BigPingPong-main-ping-count=14 & pc=BigPingPong-main-ping-S28:
+    (next(BigPingPong-main-ping-count)=15 & next(pc)=BigPingPong-main-ping-S29);
+BigPingPong-main-ping-count=15 & pc=BigPingPong-main-ping-S29:
+    (next(BigPingPong-main-ping-count)=15 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=15 & pc=BigPingPong-main-pung-S14:
+    (next(BigPingPong-main-ping-count)=15 & next(pc)=BigPingPong-main-ping-S30);
+BigPingPong-main-ping-count=15 & pc=BigPingPong-main-ping-S30:
+    (next(BigPingPong-main-ping-count)=16 & next(pc)=BigPingPong-main-ping-S31);
+BigPingPong-main-ping-count=16 & pc=BigPingPong-main-ping-S31:
+    (next(BigPingPong-main-ping-count)=16 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=16 & pc=BigPingPong-main-pung-S15:
+    (next(BigPingPong-main-ping-count)=16 & next(pc)=BigPingPong-main-ping-S32);
+BigPingPong-main-ping-count=16 & pc=BigPingPong-main-ping-S32:
+    (next(BigPingPong-main-ping-count)=17 & next(pc)=BigPingPong-main-ping-S33);
+BigPingPong-main-ping-count=17 & pc=BigPingPong-main-ping-S33:
+    (next(BigPingPong-main-ping-count)=17 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=17 & pc=BigPingPong-main-pung-S16:
+    (next(BigPingPong-main-ping-count)=17 & next(pc)=BigPingPong-main-ping-S34);
+BigPingPong-main-ping-count=17 & pc=BigPingPong-main-ping-S34:
+    (next(BigPingPong-main-ping-count)=18 & next(pc)=BigPingPong-main-ping-S35);
+BigPingPong-main-ping-count=18 & pc=BigPingPong-main-ping-S35:
+    (next(BigPingPong-main-ping-count)=18 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=18 & pc=BigPingPong-main-pung-S17:
+    (next(BigPingPong-main-ping-count)=18 & next(pc)=BigPingPong-main-ping-S36);
+BigPingPong-main-ping-count=18 & pc=BigPingPong-main-ping-S36:
+    (next(BigPingPong-main-ping-count)=19 & next(pc)=BigPingPong-main-ping-S37);
+BigPingPong-main-ping-count=19 & pc=BigPingPong-main-ping-S37:
+    (next(BigPingPong-main-ping-count)=19 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=19 & pc=BigPingPong-main-pung-S18:
+    (next(BigPingPong-main-ping-count)=19 & next(pc)=BigPingPong-main-ping-S38);
+BigPingPong-main-ping-count=19 & pc=BigPingPong-main-ping-S38:
+    (next(BigPingPong-main-ping-count)=20 & next(pc)=BigPingPong-main-ping-S39);
+BigPingPong-main-ping-count=20 & pc=BigPingPong-main-ping-S39:
+    (next(BigPingPong-main-ping-count)=20 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=20 & pc=BigPingPong-main-pung-S19:
+    (next(BigPingPong-main-ping-count)=20 & next(pc)=BigPingPong-main-ping-S40);
+BigPingPong-main-ping-count=20 & pc=BigPingPong-main-ping-S40:
+    (next(BigPingPong-main-ping-count)=21 & next(pc)=BigPingPong-main-ping-S41);
+BigPingPong-main-ping-count=21 & pc=BigPingPong-main-ping-S41:
+    (next(BigPingPong-main-ping-count)=21 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=21 & pc=BigPingPong-main-pung-S20:
+    (next(BigPingPong-main-ping-count)=21 & next(pc)=BigPingPong-main-ping-S42);
+BigPingPong-main-ping-count=21 & pc=BigPingPong-main-ping-S42:
+    (next(BigPingPong-main-ping-count)=22 & next(pc)=BigPingPong-main-ping-S43);
+BigPingPong-main-ping-count=22 & pc=BigPingPong-main-ping-S43:
+    (next(BigPingPong-main-ping-count)=22 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=22 & pc=BigPingPong-main-pung-S21:
+    (next(BigPingPong-main-ping-count)=22 & next(pc)=BigPingPong-main-ping-S44);
+BigPingPong-main-ping-count=22 & pc=BigPingPong-main-ping-S44:
+    (next(BigPingPong-main-ping-count)=23 & next(pc)=BigPingPong-main-ping-S45);
+BigPingPong-main-ping-count=23 & pc=BigPingPong-main-ping-S45:
+    (next(BigPingPong-main-ping-count)=23 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=23 & pc=BigPingPong-main-pung-S22:
+    (next(BigPingPong-main-ping-count)=23 & next(pc)=BigPingPong-main-ping-S46);
+BigPingPong-main-ping-count=23 & pc=BigPingPong-main-ping-S46:
+    (next(BigPingPong-main-ping-count)=24 & next(pc)=BigPingPong-main-ping-S47);
+BigPingPong-main-ping-count=24 & pc=BigPingPong-main-ping-S47:
+    (next(BigPingPong-main-ping-count)=24 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=24 & pc=BigPingPong-main-pung-S23:
+    (next(BigPingPong-main-ping-count)=24 & next(pc)=BigPingPong-main-ping-S48);
+BigPingPong-main-ping-count=24 & pc=BigPingPong-main-ping-S48:
+    (next(BigPingPong-main-ping-count)=25 & next(pc)=BigPingPong-main-ping-S49);
+BigPingPong-main-ping-count=25 & pc=BigPingPong-main-ping-S49:
+    (next(BigPingPong-main-ping-count)=25 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=25 & pc=BigPingPong-main-pung-S24:
+    (next(BigPingPong-main-ping-count)=25 & next(pc)=BigPingPong-main-ping-S50);
+BigPingPong-main-ping-count=25 & pc=BigPingPong-main-ping-S50:
+    (next(BigPingPong-main-ping-count)=26 & next(pc)=BigPingPong-main-ping-S51);
+BigPingPong-main-ping-count=26 & pc=BigPingPong-main-ping-S51:
+    (next(BigPingPong-main-ping-count)=26 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=26 & pc=BigPingPong-main-pung-S25:
+    (next(BigPingPong-main-ping-count)=26 & next(pc)=BigPingPong-main-ping-S52);
+BigPingPong-main-ping-count=26 & pc=BigPingPong-main-ping-S52:
+    (next(BigPingPong-main-ping-count)=27 & next(pc)=BigPingPong-main-ping-S53);
+BigPingPong-main-ping-count=27 & pc=BigPingPong-main-ping-S53:
+    (next(BigPingPong-main-ping-count)=27 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=27 & pc=BigPingPong-main-pung-S26:
+    (next(BigPingPong-main-ping-count)=27 & next(pc)=BigPingPong-main-ping-S54);
+BigPingPong-main-ping-count=27 & pc=BigPingPong-main-ping-S54:
+    (next(BigPingPong-main-ping-count)=28 & next(pc)=BigPingPong-main-ping-S55);
+BigPingPong-main-ping-count=28 & pc=BigPingPong-main-ping-S55:
+    (next(BigPingPong-main-ping-count)=28 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=28 & pc=BigPingPong-main-pung-S27:
+    (next(BigPingPong-main-ping-count)=28 & next(pc)=BigPingPong-main-ping-S56);
+BigPingPong-main-ping-count=28 & pc=BigPingPong-main-ping-S56:
+    (next(BigPingPong-main-ping-count)=29 & next(pc)=BigPingPong-main-ping-S57);
+BigPingPong-main-ping-count=29 & pc=BigPingPong-main-ping-S57:
+    (next(BigPingPong-main-ping-count)=29 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=29 & pc=BigPingPong-main-pung-S28:
+    (next(BigPingPong-main-ping-count)=29 & next(pc)=BigPingPong-main-ping-S58);
+BigPingPong-main-ping-count=29 & pc=BigPingPong-main-ping-S58:
+    (next(BigPingPong-main-ping-count)=30 & next(pc)=BigPingPong-main-ping-S59);
+BigPingPong-main-ping-count=30 & pc=BigPingPong-main-ping-S59:
+    (next(BigPingPong-main-ping-count)=30 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=30 & pc=BigPingPong-main-pung-S29:
+    (next(BigPingPong-main-ping-count)=30 & next(pc)=BigPingPong-main-ping-S60);
+BigPingPong-main-ping-count=30 & pc=BigPingPong-main-ping-S60:
+    (next(BigPingPong-main-ping-count)=31 & next(pc)=BigPingPong-main-ping-S61);
+BigPingPong-main-ping-count=31 & pc=BigPingPong-main-ping-S61:
+    (next(BigPingPong-main-ping-count)=31 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=31 & pc=BigPingPong-main-pung-S30:
+    (next(BigPingPong-main-ping-count)=31 & next(pc)=BigPingPong-main-ping-S62);
+BigPingPong-main-ping-count=31 & pc=BigPingPong-main-ping-S62:
+    (next(BigPingPong-main-ping-count)=32 & next(pc)=BigPingPong-main-ping-S63);
+BigPingPong-main-ping-count=32 & pc=BigPingPong-main-ping-S63:
+    (next(BigPingPong-main-ping-count)=32 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=32 & pc=BigPingPong-main-pung-S31:
+    (next(BigPingPong-main-ping-count)=32 & next(pc)=BigPingPong-main-ping-S64);
+BigPingPong-main-ping-count=32 & pc=BigPingPong-main-ping-S64:
+    (next(BigPingPong-main-ping-count)=33 & next(pc)=BigPingPong-main-ping-S65);
+BigPingPong-main-ping-count=33 & pc=BigPingPong-main-ping-S65:
+    (next(BigPingPong-main-ping-count)=33 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=33 & pc=BigPingPong-main-pung-S32:
+    (next(BigPingPong-main-ping-count)=33 & next(pc)=BigPingPong-main-ping-S66);
+BigPingPong-main-ping-count=33 & pc=BigPingPong-main-ping-S66:
+    (next(BigPingPong-main-ping-count)=34 & next(pc)=BigPingPong-main-ping-S67);
+BigPingPong-main-ping-count=34 & pc=BigPingPong-main-ping-S67:
+    (next(BigPingPong-main-ping-count)=34 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=34 & pc=BigPingPong-main-pung-S33:
+    (next(BigPingPong-main-ping-count)=34 & next(pc)=BigPingPong-main-ping-S68);
+BigPingPong-main-ping-count=34 & pc=BigPingPong-main-ping-S68:
+    (next(BigPingPong-main-ping-count)=35 & next(pc)=BigPingPong-main-ping-S69);
+BigPingPong-main-ping-count=35 & pc=BigPingPong-main-ping-S69:
+    (next(BigPingPong-main-ping-count)=35 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=35 & pc=BigPingPong-main-pung-S34:
+    (next(BigPingPong-main-ping-count)=35 & next(pc)=BigPingPong-main-ping-S70);
+BigPingPong-main-ping-count=35 & pc=BigPingPong-main-ping-S70:
+    (next(BigPingPong-main-ping-count)=36 & next(pc)=BigPingPong-main-ping-S71);
+BigPingPong-main-ping-count=36 & pc=BigPingPong-main-ping-S71:
+    (next(BigPingPong-main-ping-count)=36 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=36 & pc=BigPingPong-main-pung-S35:
+    (next(BigPingPong-main-ping-count)=36 & next(pc)=BigPingPong-main-ping-S72);
+BigPingPong-main-ping-count=36 & pc=BigPingPong-main-ping-S72:
+    (next(BigPingPong-main-ping-count)=37 & next(pc)=BigPingPong-main-ping-S73);
+BigPingPong-main-ping-count=37 & pc=BigPingPong-main-ping-S73:
+    (next(BigPingPong-main-ping-count)=37 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=37 & pc=BigPingPong-main-pung-S36:
+    (next(BigPingPong-main-ping-count)=37 & next(pc)=BigPingPong-main-ping-S74);
+BigPingPong-main-ping-count=37 & pc=BigPingPong-main-ping-S74:
+    (next(BigPingPong-main-ping-count)=38 & next(pc)=BigPingPong-main-ping-S75);
+BigPingPong-main-ping-count=38 & pc=BigPingPong-main-ping-S75:
+    (next(BigPingPong-main-ping-count)=38 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=38 & pc=BigPingPong-main-pung-S37:
+    (next(BigPingPong-main-ping-count)=38 & next(pc)=BigPingPong-main-ping-S76);
+BigPingPong-main-ping-count=38 & pc=BigPingPong-main-ping-S76:
+    (next(BigPingPong-main-ping-count)=39 & next(pc)=BigPingPong-main-ping-S77);
+BigPingPong-main-ping-count=39 & pc=BigPingPong-main-ping-S77:
+    (next(BigPingPong-main-ping-count)=39 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=39 & pc=BigPingPong-main-pung-S38:
+    (next(BigPingPong-main-ping-count)=39 & next(pc)=BigPingPong-main-ping-S78);
+BigPingPong-main-ping-count=39 & pc=BigPingPong-main-ping-S78:
+    (next(BigPingPong-main-ping-count)=40 & next(pc)=BigPingPong-main-ping-S79);
+BigPingPong-main-ping-count=40 & pc=BigPingPong-main-ping-S79:
+    (next(BigPingPong-main-ping-count)=40 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=40 & pc=BigPingPong-main-pung-S39:
+    (next(BigPingPong-main-ping-count)=40 & next(pc)=BigPingPong-main-ping-S80);
+BigPingPong-main-ping-count=40 & pc=BigPingPong-main-ping-S80:
+    (next(BigPingPong-main-ping-count)=41 & next(pc)=BigPingPong-main-ping-S81);
+BigPingPong-main-ping-count=41 & pc=BigPingPong-main-ping-S81:
+    (next(BigPingPong-main-ping-count)=41 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=41 & pc=BigPingPong-main-pung-S40:
+    (next(BigPingPong-main-ping-count)=41 & next(pc)=BigPingPong-main-ping-S82);
+BigPingPong-main-ping-count=41 & pc=BigPingPong-main-ping-S82:
+    (next(BigPingPong-main-ping-count)=42 & next(pc)=BigPingPong-main-ping-S83);
+BigPingPong-main-ping-count=42 & pc=BigPingPong-main-ping-S83:
+    (next(BigPingPong-main-ping-count)=42 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=42 & pc=BigPingPong-main-pung-S41:
+    (next(BigPingPong-main-ping-count)=42 & next(pc)=BigPingPong-main-ping-S84);
+BigPingPong-main-ping-count=42 & pc=BigPingPong-main-ping-S84:
+    (next(BigPingPong-main-ping-count)=43 & next(pc)=BigPingPong-main-ping-S85);
+BigPingPong-main-ping-count=43 & pc=BigPingPong-main-ping-S85:
+    (next(BigPingPong-main-ping-count)=43 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=43 & pc=BigPingPong-main-pung-S42:
+    (next(BigPingPong-main-ping-count)=43 & next(pc)=BigPingPong-main-ping-S86);
+BigPingPong-main-ping-count=43 & pc=BigPingPong-main-ping-S86:
+    (next(BigPingPong-main-ping-count)=44 & next(pc)=BigPingPong-main-ping-S87);
+BigPingPong-main-ping-count=44 & pc=BigPingPong-main-ping-S87:
+    (next(BigPingPong-main-ping-count)=44 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=44 & pc=BigPingPong-main-pung-S43:
+    (next(BigPingPong-main-ping-count)=44 & next(pc)=BigPingPong-main-ping-S88);
+BigPingPong-main-ping-count=44 & pc=BigPingPong-main-ping-S88:
+    (next(BigPingPong-main-ping-count)=45 & next(pc)=BigPingPong-main-ping-S89);
+BigPingPong-main-ping-count=45 & pc=BigPingPong-main-ping-S89:
+    (next(BigPingPong-main-ping-count)=45 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=45 & pc=BigPingPong-main-pung-S44:
+    (next(BigPingPong-main-ping-count)=45 & next(pc)=BigPingPong-main-ping-S90);
+BigPingPong-main-ping-count=45 & pc=BigPingPong-main-ping-S90:
+    (next(BigPingPong-main-ping-count)=46 & next(pc)=BigPingPong-main-ping-S91);
+BigPingPong-main-ping-count=46 & pc=BigPingPong-main-ping-S91:
+    (next(BigPingPong-main-ping-count)=46 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=46 & pc=BigPingPong-main-pung-S45:
+    (next(BigPingPong-main-ping-count)=46 & next(pc)=BigPingPong-main-ping-S92);
+BigPingPong-main-ping-count=46 & pc=BigPingPong-main-ping-S92:
+    (next(BigPingPong-main-ping-count)=47 & next(pc)=BigPingPong-main-ping-S93);
+BigPingPong-main-ping-count=47 & pc=BigPingPong-main-ping-S93:
+    (next(BigPingPong-main-ping-count)=47 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=47 & pc=BigPingPong-main-pung-S46:
+    (next(BigPingPong-main-ping-count)=47 & next(pc)=BigPingPong-main-ping-S94);
+BigPingPong-main-ping-count=47 & pc=BigPingPong-main-ping-S94:
+    (next(BigPingPong-main-ping-count)=48 & next(pc)=BigPingPong-main-ping-S95);
+BigPingPong-main-ping-count=48 & pc=BigPingPong-main-ping-S95:
+    (next(BigPingPong-main-ping-count)=48 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=48 & pc=BigPingPong-main-pung-S47:
+    (next(BigPingPong-main-ping-count)=48 & next(pc)=BigPingPong-main-ping-S96);
+BigPingPong-main-ping-count=48 & pc=BigPingPong-main-ping-S96:
+    (next(BigPingPong-main-ping-count)=49 & next(pc)=BigPingPong-main-ping-S97);
+BigPingPong-main-ping-count=49 & pc=BigPingPong-main-ping-S97:
+    (next(BigPingPong-main-ping-count)=49 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=49 & pc=BigPingPong-main-pung-S48:
+    (next(BigPingPong-main-ping-count)=49 & next(pc)=BigPingPong-main-ping-S98);
+BigPingPong-main-ping-count=49 & pc=BigPingPong-main-ping-S98:
+    (next(BigPingPong-main-ping-count)=50 & next(pc)=BigPingPong-main-ping-S99);
+BigPingPong-main-ping-count=50 & pc=BigPingPong-main-ping-S99:
+    (next(BigPingPong-main-ping-count)=50 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=50 & pc=BigPingPong-main-pung-S49:
+    (next(BigPingPong-main-ping-count)=50 & next(pc)=BigPingPong-main-ping-S100);
+BigPingPong-main-ping-count=50 & pc=BigPingPong-main-ping-S100:
+    (next(BigPingPong-main-ping-count)=51 & next(pc)=BigPingPong-main-ping-S101);
+BigPingPong-main-ping-count=51 & pc=BigPingPong-main-ping-S101:
+    (next(BigPingPong-main-ping-count)=51 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=51 & pc=BigPingPong-main-pung-S50:
+    (next(BigPingPong-main-ping-count)=51 & next(pc)=BigPingPong-main-ping-S102);
+BigPingPong-main-ping-count=51 & pc=BigPingPong-main-ping-S102:
+    (next(BigPingPong-main-ping-count)=52 & next(pc)=BigPingPong-main-ping-S103);
+BigPingPong-main-ping-count=52 & pc=BigPingPong-main-ping-S103:
+    (next(BigPingPong-main-ping-count)=52 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=52 & pc=BigPingPong-main-pung-S51:
+    (next(BigPingPong-main-ping-count)=52 & next(pc)=BigPingPong-main-ping-S104);
+BigPingPong-main-ping-count=52 & pc=BigPingPong-main-ping-S104:
+    (next(BigPingPong-main-ping-count)=53 & next(pc)=BigPingPong-main-ping-S105);
+BigPingPong-main-ping-count=53 & pc=BigPingPong-main-ping-S105:
+    (next(BigPingPong-main-ping-count)=53 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=53 & pc=BigPingPong-main-pung-S52:
+    (next(BigPingPong-main-ping-count)=53 & next(pc)=BigPingPong-main-ping-S106);
+BigPingPong-main-ping-count=53 & pc=BigPingPong-main-ping-S106:
+    (next(BigPingPong-main-ping-count)=54 & next(pc)=BigPingPong-main-ping-S107);
+BigPingPong-main-ping-count=54 & pc=BigPingPong-main-ping-S107:
+    (next(BigPingPong-main-ping-count)=54 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=54 & pc=BigPingPong-main-pung-S53:
+    (next(BigPingPong-main-ping-count)=54 & next(pc)=BigPingPong-main-ping-S108);
+BigPingPong-main-ping-count=54 & pc=BigPingPong-main-ping-S108:
+    (next(BigPingPong-main-ping-count)=55 & next(pc)=BigPingPong-main-ping-S109);
+BigPingPong-main-ping-count=55 & pc=BigPingPong-main-ping-S109:
+    (next(BigPingPong-main-ping-count)=55 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=55 & pc=BigPingPong-main-pung-S54:
+    (next(BigPingPong-main-ping-count)=55 & next(pc)=BigPingPong-main-ping-S110);
+BigPingPong-main-ping-count=55 & pc=BigPingPong-main-ping-S110:
+    (next(BigPingPong-main-ping-count)=56 & next(pc)=BigPingPong-main-ping-S111);
+BigPingPong-main-ping-count=56 & pc=BigPingPong-main-ping-S111:
+    (next(BigPingPong-main-ping-count)=56 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=56 & pc=BigPingPong-main-pung-S55:
+    (next(BigPingPong-main-ping-count)=56 & next(pc)=BigPingPong-main-ping-S112);
+BigPingPong-main-ping-count=56 & pc=BigPingPong-main-ping-S112:
+    (next(BigPingPong-main-ping-count)=57 & next(pc)=BigPingPong-main-ping-S113);
+BigPingPong-main-ping-count=57 & pc=BigPingPong-main-ping-S113:
+    (next(BigPingPong-main-ping-count)=57 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=57 & pc=BigPingPong-main-pung-S56:
+    (next(BigPingPong-main-ping-count)=57 & next(pc)=BigPingPong-main-ping-S114);
+BigPingPong-main-ping-count=57 & pc=BigPingPong-main-ping-S114:
+    (next(BigPingPong-main-ping-count)=58 & next(pc)=BigPingPong-main-ping-S115);
+BigPingPong-main-ping-count=58 & pc=BigPingPong-main-ping-S115:
+    (next(BigPingPong-main-ping-count)=58 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=58 & pc=BigPingPong-main-pung-S57:
+    (next(BigPingPong-main-ping-count)=58 & next(pc)=BigPingPong-main-ping-S116);
+BigPingPong-main-ping-count=58 & pc=BigPingPong-main-ping-S116:
+    (next(BigPingPong-main-ping-count)=59 & next(pc)=BigPingPong-main-ping-S117);
+BigPingPong-main-ping-count=59 & pc=BigPingPong-main-ping-S117:
+    (next(BigPingPong-main-ping-count)=59 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=59 & pc=BigPingPong-main-pung-S58:
+    (next(BigPingPong-main-ping-count)=59 & next(pc)=BigPingPong-main-ping-S118);
+BigPingPong-main-ping-count=59 & pc=BigPingPong-main-ping-S118:
+    (next(BigPingPong-main-ping-count)=60 & next(pc)=BigPingPong-main-ping-S119);
+BigPingPong-main-ping-count=60 & pc=BigPingPong-main-ping-S119:
+    (next(BigPingPong-main-ping-count)=60 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=60 & pc=BigPingPong-main-pung-S59:
+    (next(BigPingPong-main-ping-count)=60 & next(pc)=BigPingPong-main-ping-S120);
+BigPingPong-main-ping-count=60 & pc=BigPingPong-main-ping-S120:
+    (next(BigPingPong-main-ping-count)=61 & next(pc)=BigPingPong-main-ping-S121);
+BigPingPong-main-ping-count=61 & pc=BigPingPong-main-ping-S121:
+    (next(BigPingPong-main-ping-count)=61 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=61 & pc=BigPingPong-main-pung-S60:
+    (next(BigPingPong-main-ping-count)=61 & next(pc)=BigPingPong-main-ping-S122);
+BigPingPong-main-ping-count=61 & pc=BigPingPong-main-ping-S122:
+    (next(BigPingPong-main-ping-count)=62 & next(pc)=BigPingPong-main-ping-S123);
+BigPingPong-main-ping-count=62 & pc=BigPingPong-main-ping-S123:
+    (next(BigPingPong-main-ping-count)=62 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=62 & pc=BigPingPong-main-pung-S61:
+    (next(BigPingPong-main-ping-count)=62 & next(pc)=BigPingPong-main-ping-S124);
+BigPingPong-main-ping-count=62 & pc=BigPingPong-main-ping-S124:
+    (next(BigPingPong-main-ping-count)=63 & next(pc)=BigPingPong-main-ping-S125);
+BigPingPong-main-ping-count=63 & pc=BigPingPong-main-ping-S125:
+    (next(BigPingPong-main-ping-count)=63 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=63 & pc=BigPingPong-main-pung-S62:
+    (next(BigPingPong-main-ping-count)=63 & next(pc)=BigPingPong-main-ping-S126);
+BigPingPong-main-ping-count=63 & pc=BigPingPong-main-ping-S126:
+    (next(BigPingPong-main-ping-count)=64 & next(pc)=BigPingPong-main-ping-S127);
+BigPingPong-main-ping-count=64 & pc=BigPingPong-main-ping-S127:
+    (next(BigPingPong-main-ping-count)=64 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=64 & pc=BigPingPong-main-pung-S63:
+    (next(BigPingPong-main-ping-count)=64 & next(pc)=BigPingPong-main-ping-S128);
+BigPingPong-main-ping-count=64 & pc=BigPingPong-main-ping-S128:
+    (next(BigPingPong-main-ping-count)=65 & next(pc)=BigPingPong-main-ping-S129);
+BigPingPong-main-ping-count=65 & pc=BigPingPong-main-ping-S129:
+    (next(BigPingPong-main-ping-count)=65 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=65 & pc=BigPingPong-main-pung-S64:
+    (next(BigPingPong-main-ping-count)=65 & next(pc)=BigPingPong-main-ping-S130);
+BigPingPong-main-ping-count=65 & pc=BigPingPong-main-ping-S130:
+    (next(BigPingPong-main-ping-count)=66 & next(pc)=BigPingPong-main-ping-S131);
+BigPingPong-main-ping-count=66 & pc=BigPingPong-main-ping-S131:
+    (next(BigPingPong-main-ping-count)=66 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=66 & pc=BigPingPong-main-pung-S65:
+    (next(BigPingPong-main-ping-count)=66 & next(pc)=BigPingPong-main-ping-S132);
+BigPingPong-main-ping-count=66 & pc=BigPingPong-main-ping-S132:
+    (next(BigPingPong-main-ping-count)=67 & next(pc)=BigPingPong-main-ping-S133);
+BigPingPong-main-ping-count=67 & pc=BigPingPong-main-ping-S133:
+    (next(BigPingPong-main-ping-count)=67 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=67 & pc=BigPingPong-main-pung-S66:
+    (next(BigPingPong-main-ping-count)=67 & next(pc)=BigPingPong-main-ping-S134);
+BigPingPong-main-ping-count=67 & pc=BigPingPong-main-ping-S134:
+    (next(BigPingPong-main-ping-count)=68 & next(pc)=BigPingPong-main-ping-S135);
+BigPingPong-main-ping-count=68 & pc=BigPingPong-main-ping-S135:
+    (next(BigPingPong-main-ping-count)=68 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=68 & pc=BigPingPong-main-pung-S67:
+    (next(BigPingPong-main-ping-count)=68 & next(pc)=BigPingPong-main-ping-S136);
+BigPingPong-main-ping-count=68 & pc=BigPingPong-main-ping-S136:
+    (next(BigPingPong-main-ping-count)=69 & next(pc)=BigPingPong-main-ping-S137);
+BigPingPong-main-ping-count=69 & pc=BigPingPong-main-ping-S137:
+    (next(BigPingPong-main-ping-count)=69 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=69 & pc=BigPingPong-main-pung-S68:
+    (next(BigPingPong-main-ping-count)=69 & next(pc)=BigPingPong-main-ping-S138);
+BigPingPong-main-ping-count=69 & pc=BigPingPong-main-ping-S138:
+    (next(BigPingPong-main-ping-count)=70 & next(pc)=BigPingPong-main-ping-S139);
+BigPingPong-main-ping-count=70 & pc=BigPingPong-main-ping-S139:
+    (next(BigPingPong-main-ping-count)=70 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=70 & pc=BigPingPong-main-pung-S69:
+    (next(BigPingPong-main-ping-count)=70 & next(pc)=BigPingPong-main-ping-S140);
+BigPingPong-main-ping-count=70 & pc=BigPingPong-main-ping-S140:
+    (next(BigPingPong-main-ping-count)=71 & next(pc)=BigPingPong-main-ping-S141);
+BigPingPong-main-ping-count=71 & pc=BigPingPong-main-ping-S141:
+    (next(BigPingPong-main-ping-count)=71 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=71 & pc=BigPingPong-main-pung-S70:
+    (next(BigPingPong-main-ping-count)=71 & next(pc)=BigPingPong-main-ping-S142);
+BigPingPong-main-ping-count=71 & pc=BigPingPong-main-ping-S142:
+    (next(BigPingPong-main-ping-count)=72 & next(pc)=BigPingPong-main-ping-S143);
+BigPingPong-main-ping-count=72 & pc=BigPingPong-main-ping-S143:
+    (next(BigPingPong-main-ping-count)=72 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=72 & pc=BigPingPong-main-pung-S71:
+    (next(BigPingPong-main-ping-count)=72 & next(pc)=BigPingPong-main-ping-S144);
+BigPingPong-main-ping-count=72 & pc=BigPingPong-main-ping-S144:
+    (next(BigPingPong-main-ping-count)=73 & next(pc)=BigPingPong-main-ping-S145);
+BigPingPong-main-ping-count=73 & pc=BigPingPong-main-ping-S145:
+    (next(BigPingPong-main-ping-count)=73 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=73 & pc=BigPingPong-main-pung-S72:
+    (next(BigPingPong-main-ping-count)=73 & next(pc)=BigPingPong-main-ping-S146);
+BigPingPong-main-ping-count=73 & pc=BigPingPong-main-ping-S146:
+    (next(BigPingPong-main-ping-count)=74 & next(pc)=BigPingPong-main-ping-S147);
+BigPingPong-main-ping-count=74 & pc=BigPingPong-main-ping-S147:
+    (next(BigPingPong-main-ping-count)=74 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=74 & pc=BigPingPong-main-pung-S73:
+    (next(BigPingPong-main-ping-count)=74 & next(pc)=BigPingPong-main-ping-S148);
+BigPingPong-main-ping-count=74 & pc=BigPingPong-main-ping-S148:
+    (next(BigPingPong-main-ping-count)=75 & next(pc)=BigPingPong-main-ping-S149);
+BigPingPong-main-ping-count=75 & pc=BigPingPong-main-ping-S149:
+    (next(BigPingPong-main-ping-count)=75 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=75 & pc=BigPingPong-main-pung-S74:
+    (next(BigPingPong-main-ping-count)=75 & next(pc)=BigPingPong-main-ping-S150);
+BigPingPong-main-ping-count=75 & pc=BigPingPong-main-ping-S150:
+    (next(BigPingPong-main-ping-count)=76 & next(pc)=BigPingPong-main-ping-S151);
+BigPingPong-main-ping-count=76 & pc=BigPingPong-main-ping-S151:
+    (next(BigPingPong-main-ping-count)=76 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=76 & pc=BigPingPong-main-pung-S75:
+    (next(BigPingPong-main-ping-count)=76 & next(pc)=BigPingPong-main-ping-S152);
+BigPingPong-main-ping-count=76 & pc=BigPingPong-main-ping-S152:
+    (next(BigPingPong-main-ping-count)=77 & next(pc)=BigPingPong-main-ping-S153);
+BigPingPong-main-ping-count=77 & pc=BigPingPong-main-ping-S153:
+    (next(BigPingPong-main-ping-count)=77 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=77 & pc=BigPingPong-main-pung-S76:
+    (next(BigPingPong-main-ping-count)=77 & next(pc)=BigPingPong-main-ping-S154);
+BigPingPong-main-ping-count=77 & pc=BigPingPong-main-ping-S154:
+    (next(BigPingPong-main-ping-count)=78 & next(pc)=BigPingPong-main-ping-S155);
+BigPingPong-main-ping-count=78 & pc=BigPingPong-main-ping-S155:
+    (next(BigPingPong-main-ping-count)=78 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=78 & pc=BigPingPong-main-pung-S77:
+    (next(BigPingPong-main-ping-count)=78 & next(pc)=BigPingPong-main-ping-S156);
+BigPingPong-main-ping-count=78 & pc=BigPingPong-main-ping-S156:
+    (next(BigPingPong-main-ping-count)=79 & next(pc)=BigPingPong-main-ping-S157);
+BigPingPong-main-ping-count=79 & pc=BigPingPong-main-ping-S157:
+    (next(BigPingPong-main-ping-count)=79 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=79 & pc=BigPingPong-main-pung-S78:
+    (next(BigPingPong-main-ping-count)=79 & next(pc)=BigPingPong-main-ping-S158);
+BigPingPong-main-ping-count=79 & pc=BigPingPong-main-ping-S158:
+    (next(BigPingPong-main-ping-count)=80 & next(pc)=BigPingPong-main-ping-S159);
+BigPingPong-main-ping-count=80 & pc=BigPingPong-main-ping-S159:
+    (next(BigPingPong-main-ping-count)=80 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=80 & pc=BigPingPong-main-pung-S79:
+    (next(BigPingPong-main-ping-count)=80 & next(pc)=BigPingPong-main-ping-S160);
+BigPingPong-main-ping-count=80 & pc=BigPingPong-main-ping-S160:
+    (next(BigPingPong-main-ping-count)=81 & next(pc)=BigPingPong-main-ping-S161);
+BigPingPong-main-ping-count=81 & pc=BigPingPong-main-ping-S161:
+    (next(BigPingPong-main-ping-count)=81 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=81 & pc=BigPingPong-main-pung-S80:
+    (next(BigPingPong-main-ping-count)=81 & next(pc)=BigPingPong-main-ping-S162);
+BigPingPong-main-ping-count=81 & pc=BigPingPong-main-ping-S162:
+    (next(BigPingPong-main-ping-count)=82 & next(pc)=BigPingPong-main-ping-S163);
+BigPingPong-main-ping-count=82 & pc=BigPingPong-main-ping-S163:
+    (next(BigPingPong-main-ping-count)=82 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=82 & pc=BigPingPong-main-pung-S81:
+    (next(BigPingPong-main-ping-count)=82 & next(pc)=BigPingPong-main-ping-S164);
+BigPingPong-main-ping-count=82 & pc=BigPingPong-main-ping-S164:
+    (next(BigPingPong-main-ping-count)=83 & next(pc)=BigPingPong-main-ping-S165);
+BigPingPong-main-ping-count=83 & pc=BigPingPong-main-ping-S165:
+    (next(BigPingPong-main-ping-count)=83 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=83 & pc=BigPingPong-main-pung-S82:
+    (next(BigPingPong-main-ping-count)=83 & next(pc)=BigPingPong-main-ping-S166);
+BigPingPong-main-ping-count=83 & pc=BigPingPong-main-ping-S166:
+    (next(BigPingPong-main-ping-count)=84 & next(pc)=BigPingPong-main-ping-S167);
+BigPingPong-main-ping-count=84 & pc=BigPingPong-main-ping-S167:
+    (next(BigPingPong-main-ping-count)=84 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=84 & pc=BigPingPong-main-pung-S83:
+    (next(BigPingPong-main-ping-count)=84 & next(pc)=BigPingPong-main-ping-S168);
+BigPingPong-main-ping-count=84 & pc=BigPingPong-main-ping-S168:
+    (next(BigPingPong-main-ping-count)=85 & next(pc)=BigPingPong-main-ping-S169);
+BigPingPong-main-ping-count=85 & pc=BigPingPong-main-ping-S169:
+    (next(BigPingPong-main-ping-count)=85 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=85 & pc=BigPingPong-main-pung-S84:
+    (next(BigPingPong-main-ping-count)=85 & next(pc)=BigPingPong-main-ping-S170);
+BigPingPong-main-ping-count=85 & pc=BigPingPong-main-ping-S170:
+    (next(BigPingPong-main-ping-count)=86 & next(pc)=BigPingPong-main-ping-S171);
+BigPingPong-main-ping-count=86 & pc=BigPingPong-main-ping-S171:
+    (next(BigPingPong-main-ping-count)=86 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=86 & pc=BigPingPong-main-pung-S85:
+    (next(BigPingPong-main-ping-count)=86 & next(pc)=BigPingPong-main-ping-S172);
+BigPingPong-main-ping-count=86 & pc=BigPingPong-main-ping-S172:
+    (next(BigPingPong-main-ping-count)=87 & next(pc)=BigPingPong-main-ping-S173);
+BigPingPong-main-ping-count=87 & pc=BigPingPong-main-ping-S173:
+    (next(BigPingPong-main-ping-count)=87 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=87 & pc=BigPingPong-main-pung-S86:
+    (next(BigPingPong-main-ping-count)=87 & next(pc)=BigPingPong-main-ping-S174);
+BigPingPong-main-ping-count=87 & pc=BigPingPong-main-ping-S174:
+    (next(BigPingPong-main-ping-count)=88 & next(pc)=BigPingPong-main-ping-S175);
+BigPingPong-main-ping-count=88 & pc=BigPingPong-main-ping-S175:
+    (next(BigPingPong-main-ping-count)=88 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=88 & pc=BigPingPong-main-pung-S87:
+    (next(BigPingPong-main-ping-count)=88 & next(pc)=BigPingPong-main-ping-S176);
+BigPingPong-main-ping-count=88 & pc=BigPingPong-main-ping-S176:
+    (next(BigPingPong-main-ping-count)=89 & next(pc)=BigPingPong-main-ping-S177);
+BigPingPong-main-ping-count=89 & pc=BigPingPong-main-ping-S177:
+    (next(BigPingPong-main-ping-count)=89 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=89 & pc=BigPingPong-main-pung-S88:
+    (next(BigPingPong-main-ping-count)=89 & next(pc)=BigPingPong-main-ping-S178);
+BigPingPong-main-ping-count=89 & pc=BigPingPong-main-ping-S178:
+    (next(BigPingPong-main-ping-count)=90 & next(pc)=BigPingPong-main-ping-S179);
+BigPingPong-main-ping-count=90 & pc=BigPingPong-main-ping-S179:
+    (next(BigPingPong-main-ping-count)=90 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=90 & pc=BigPingPong-main-pung-S89:
+    (next(BigPingPong-main-ping-count)=90 & next(pc)=BigPingPong-main-ping-S180);
+BigPingPong-main-ping-count=90 & pc=BigPingPong-main-ping-S180:
+    (next(BigPingPong-main-ping-count)=91 & next(pc)=BigPingPong-main-ping-S181);
+BigPingPong-main-ping-count=91 & pc=BigPingPong-main-ping-S181:
+    (next(BigPingPong-main-ping-count)=91 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=91 & pc=BigPingPong-main-pung-S90:
+    (next(BigPingPong-main-ping-count)=91 & next(pc)=BigPingPong-main-ping-S182);
+BigPingPong-main-ping-count=91 & pc=BigPingPong-main-ping-S182:
+    (next(BigPingPong-main-ping-count)=92 & next(pc)=BigPingPong-main-ping-S183);
+BigPingPong-main-ping-count=92 & pc=BigPingPong-main-ping-S183:
+    (next(BigPingPong-main-ping-count)=92 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=92 & pc=BigPingPong-main-pung-S91:
+    (next(BigPingPong-main-ping-count)=92 & next(pc)=BigPingPong-main-ping-S184);
+BigPingPong-main-ping-count=92 & pc=BigPingPong-main-ping-S184:
+    (next(BigPingPong-main-ping-count)=93 & next(pc)=BigPingPong-main-ping-S185);
+BigPingPong-main-ping-count=93 & pc=BigPingPong-main-ping-S185:
+    (next(BigPingPong-main-ping-count)=93 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=93 & pc=BigPingPong-main-pung-S92:
+    (next(BigPingPong-main-ping-count)=93 & next(pc)=BigPingPong-main-ping-S186);
+BigPingPong-main-ping-count=93 & pc=BigPingPong-main-ping-S186:
+    (next(BigPingPong-main-ping-count)=94 & next(pc)=BigPingPong-main-ping-S187);
+BigPingPong-main-ping-count=94 & pc=BigPingPong-main-ping-S187:
+    (next(BigPingPong-main-ping-count)=94 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=94 & pc=BigPingPong-main-pung-S93:
+    (next(BigPingPong-main-ping-count)=94 & next(pc)=BigPingPong-main-ping-S188);
+BigPingPong-main-ping-count=94 & pc=BigPingPong-main-ping-S188:
+    (next(BigPingPong-main-ping-count)=95 & next(pc)=BigPingPong-main-ping-S189);
+BigPingPong-main-ping-count=95 & pc=BigPingPong-main-ping-S189:
+    (next(BigPingPong-main-ping-count)=95 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=95 & pc=BigPingPong-main-pung-S94:
+    (next(BigPingPong-main-ping-count)=95 & next(pc)=BigPingPong-main-ping-S190);
+BigPingPong-main-ping-count=95 & pc=BigPingPong-main-ping-S190:
+    (next(BigPingPong-main-ping-count)=96 & next(pc)=BigPingPong-main-ping-S191);
+BigPingPong-main-ping-count=96 & pc=BigPingPong-main-ping-S191:
+    (next(BigPingPong-main-ping-count)=96 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=96 & pc=BigPingPong-main-pung-S95:
+    (next(BigPingPong-main-ping-count)=96 & next(pc)=BigPingPong-main-ping-S192);
+BigPingPong-main-ping-count=96 & pc=BigPingPong-main-ping-S192:
+    (next(BigPingPong-main-ping-count)=97 & next(pc)=BigPingPong-main-ping-S193);
+BigPingPong-main-ping-count=97 & pc=BigPingPong-main-ping-S193:
+    (next(BigPingPong-main-ping-count)=97 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=97 & pc=BigPingPong-main-pung-S96:
+    (next(BigPingPong-main-ping-count)=97 & next(pc)=BigPingPong-main-ping-S194);
+BigPingPong-main-ping-count=97 & pc=BigPingPong-main-ping-S194:
+    (next(BigPingPong-main-ping-count)=98 & next(pc)=BigPingPong-main-ping-S195);
+BigPingPong-main-ping-count=98 & pc=BigPingPong-main-ping-S195:
+    (next(BigPingPong-main-ping-count)=98 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=98 & pc=BigPingPong-main-pung-S97:
+    (next(BigPingPong-main-ping-count)=98 & next(pc)=BigPingPong-main-ping-S196);
+BigPingPong-main-ping-count=98 & pc=BigPingPong-main-ping-S196:
+    (next(BigPingPong-main-ping-count)=99 & next(pc)=BigPingPong-main-ping-S197);
+BigPingPong-main-ping-count=99 & pc=BigPingPong-main-ping-S197:
+    (next(BigPingPong-main-ping-count)=99 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=99 & pc=BigPingPong-main-pung-S98:
+    (next(BigPingPong-main-ping-count)=99 & next(pc)=BigPingPong-main-ping-S198);
+BigPingPong-main-ping-count=99 & pc=BigPingPong-main-ping-S198:
+    (next(BigPingPong-main-ping-count)=100 & next(pc)=BigPingPong-main-ping-S199);
+BigPingPong-main-ping-count=100 & pc=BigPingPong-main-ping-S199:
+    (next(BigPingPong-main-ping-count)=100 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=100 & pc=BigPingPong-main-pung-S99:
+    (next(BigPingPong-main-ping-count)=100 & next(pc)=BigPingPong-main-ping-S200);
+BigPingPong-main-ping-count=100 & pc=BigPingPong-main-ping-S200:
+    (next(BigPingPong-main-ping-count)=101 & next(pc)=BigPingPong-main-ping-S201);
+BigPingPong-main-ping-count=101 & pc=BigPingPong-main-ping-S201:
+    (next(BigPingPong-main-ping-count)=101 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=101 & pc=BigPingPong-main-pung-S100:
+    (next(BigPingPong-main-ping-count)=101 & next(pc)=BigPingPong-main-ping-S202);
+BigPingPong-main-ping-count=101 & pc=BigPingPong-main-ping-S202:
+    (next(BigPingPong-main-ping-count)=102 & next(pc)=BigPingPong-main-ping-S203);
+BigPingPong-main-ping-count=102 & pc=BigPingPong-main-ping-S203:
+    (next(BigPingPong-main-ping-count)=102 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=102 & pc=BigPingPong-main-pung-S101:
+    (next(BigPingPong-main-ping-count)=102 & next(pc)=BigPingPong-main-ping-S204);
+BigPingPong-main-ping-count=102 & pc=BigPingPong-main-ping-S204:
+    (next(BigPingPong-main-ping-count)=103 & next(pc)=BigPingPong-main-ping-S205);
+BigPingPong-main-ping-count=103 & pc=BigPingPong-main-ping-S205:
+    (next(BigPingPong-main-ping-count)=103 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=103 & pc=BigPingPong-main-pung-S102:
+    (next(BigPingPong-main-ping-count)=103 & next(pc)=BigPingPong-main-ping-S206);
+BigPingPong-main-ping-count=103 & pc=BigPingPong-main-ping-S206:
+    (next(BigPingPong-main-ping-count)=104 & next(pc)=BigPingPong-main-ping-S207);
+BigPingPong-main-ping-count=104 & pc=BigPingPong-main-ping-S207:
+    (next(BigPingPong-main-ping-count)=104 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=104 & pc=BigPingPong-main-pung-S103:
+    (next(BigPingPong-main-ping-count)=104 & next(pc)=BigPingPong-main-ping-S208);
+BigPingPong-main-ping-count=104 & pc=BigPingPong-main-ping-S208:
+    (next(BigPingPong-main-ping-count)=105 & next(pc)=BigPingPong-main-ping-S209);
+BigPingPong-main-ping-count=105 & pc=BigPingPong-main-ping-S209:
+    (next(BigPingPong-main-ping-count)=105 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=105 & pc=BigPingPong-main-pung-S104:
+    (next(BigPingPong-main-ping-count)=105 & next(pc)=BigPingPong-main-ping-S210);
+BigPingPong-main-ping-count=105 & pc=BigPingPong-main-ping-S210:
+    (next(BigPingPong-main-ping-count)=106 & next(pc)=BigPingPong-main-ping-S211);
+BigPingPong-main-ping-count=106 & pc=BigPingPong-main-ping-S211:
+    (next(BigPingPong-main-ping-count)=106 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=106 & pc=BigPingPong-main-pung-S105:
+    (next(BigPingPong-main-ping-count)=106 & next(pc)=BigPingPong-main-ping-S212);
+BigPingPong-main-ping-count=106 & pc=BigPingPong-main-ping-S212:
+    (next(BigPingPong-main-ping-count)=107 & next(pc)=BigPingPong-main-ping-S213);
+BigPingPong-main-ping-count=107 & pc=BigPingPong-main-ping-S213:
+    (next(BigPingPong-main-ping-count)=107 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=107 & pc=BigPingPong-main-pung-S106:
+    (next(BigPingPong-main-ping-count)=107 & next(pc)=BigPingPong-main-ping-S214);
+BigPingPong-main-ping-count=107 & pc=BigPingPong-main-ping-S214:
+    (next(BigPingPong-main-ping-count)=108 & next(pc)=BigPingPong-main-ping-S215);
+BigPingPong-main-ping-count=108 & pc=BigPingPong-main-ping-S215:
+    (next(BigPingPong-main-ping-count)=108 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=108 & pc=BigPingPong-main-pung-S107:
+    (next(BigPingPong-main-ping-count)=108 & next(pc)=BigPingPong-main-ping-S216);
+BigPingPong-main-ping-count=108 & pc=BigPingPong-main-ping-S216:
+    (next(BigPingPong-main-ping-count)=109 & next(pc)=BigPingPong-main-ping-S217);
+BigPingPong-main-ping-count=109 & pc=BigPingPong-main-ping-S217:
+    (next(BigPingPong-main-ping-count)=109 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=109 & pc=BigPingPong-main-pung-S108:
+    (next(BigPingPong-main-ping-count)=109 & next(pc)=BigPingPong-main-ping-S218);
+BigPingPong-main-ping-count=109 & pc=BigPingPong-main-ping-S218:
+    (next(BigPingPong-main-ping-count)=110 & next(pc)=BigPingPong-main-ping-S219);
+BigPingPong-main-ping-count=110 & pc=BigPingPong-main-ping-S219:
+    (next(BigPingPong-main-ping-count)=110 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=110 & pc=BigPingPong-main-pung-S109:
+    (next(BigPingPong-main-ping-count)=110 & next(pc)=BigPingPong-main-ping-S220);
+BigPingPong-main-ping-count=110 & pc=BigPingPong-main-ping-S220:
+    (next(BigPingPong-main-ping-count)=111 & next(pc)=BigPingPong-main-ping-S221);
+BigPingPong-main-ping-count=111 & pc=BigPingPong-main-ping-S221:
+    (next(BigPingPong-main-ping-count)=111 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=111 & pc=BigPingPong-main-pung-S110:
+    (next(BigPingPong-main-ping-count)=111 & next(pc)=BigPingPong-main-ping-S222);
+BigPingPong-main-ping-count=111 & pc=BigPingPong-main-ping-S222:
+    (next(BigPingPong-main-ping-count)=112 & next(pc)=BigPingPong-main-ping-S223);
+BigPingPong-main-ping-count=112 & pc=BigPingPong-main-ping-S223:
+    (next(BigPingPong-main-ping-count)=112 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=112 & pc=BigPingPong-main-pung-S111:
+    (next(BigPingPong-main-ping-count)=112 & next(pc)=BigPingPong-main-ping-S224);
+BigPingPong-main-ping-count=112 & pc=BigPingPong-main-ping-S224:
+    (next(BigPingPong-main-ping-count)=113 & next(pc)=BigPingPong-main-ping-S225);
+BigPingPong-main-ping-count=113 & pc=BigPingPong-main-ping-S225:
+    (next(BigPingPong-main-ping-count)=113 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=113 & pc=BigPingPong-main-pung-S112:
+    (next(BigPingPong-main-ping-count)=113 & next(pc)=BigPingPong-main-ping-S226);
+BigPingPong-main-ping-count=113 & pc=BigPingPong-main-ping-S226:
+    (next(BigPingPong-main-ping-count)=114 & next(pc)=BigPingPong-main-ping-S227);
+BigPingPong-main-ping-count=114 & pc=BigPingPong-main-ping-S227:
+    (next(BigPingPong-main-ping-count)=114 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=114 & pc=BigPingPong-main-pung-S113:
+    (next(BigPingPong-main-ping-count)=114 & next(pc)=BigPingPong-main-ping-S228);
+BigPingPong-main-ping-count=114 & pc=BigPingPong-main-ping-S228:
+    (next(BigPingPong-main-ping-count)=115 & next(pc)=BigPingPong-main-ping-S229);
+BigPingPong-main-ping-count=115 & pc=BigPingPong-main-ping-S229:
+    (next(BigPingPong-main-ping-count)=115 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=115 & pc=BigPingPong-main-pung-S114:
+    (next(BigPingPong-main-ping-count)=115 & next(pc)=BigPingPong-main-ping-S230);
+BigPingPong-main-ping-count=115 & pc=BigPingPong-main-ping-S230:
+    (next(BigPingPong-main-ping-count)=116 & next(pc)=BigPingPong-main-ping-S231);
+BigPingPong-main-ping-count=116 & pc=BigPingPong-main-ping-S231:
+    (next(BigPingPong-main-ping-count)=116 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=116 & pc=BigPingPong-main-pung-S115:
+    (next(BigPingPong-main-ping-count)=116 & next(pc)=BigPingPong-main-ping-S232);
+BigPingPong-main-ping-count=116 & pc=BigPingPong-main-ping-S232:
+    (next(BigPingPong-main-ping-count)=117 & next(pc)=BigPingPong-main-ping-S233);
+BigPingPong-main-ping-count=117 & pc=BigPingPong-main-ping-S233:
+    (next(BigPingPong-main-ping-count)=117 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=117 & pc=BigPingPong-main-pung-S116:
+    (next(BigPingPong-main-ping-count)=117 & next(pc)=BigPingPong-main-ping-S234);
+BigPingPong-main-ping-count=117 & pc=BigPingPong-main-ping-S234:
+    (next(BigPingPong-main-ping-count)=118 & next(pc)=BigPingPong-main-ping-S235);
+BigPingPong-main-ping-count=118 & pc=BigPingPong-main-ping-S235:
+    (next(BigPingPong-main-ping-count)=118 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=118 & pc=BigPingPong-main-pung-S117:
+    (next(BigPingPong-main-ping-count)=118 & next(pc)=BigPingPong-main-ping-S236);
+BigPingPong-main-ping-count=118 & pc=BigPingPong-main-ping-S236:
+    (next(BigPingPong-main-ping-count)=119 & next(pc)=BigPingPong-main-ping-S237);
+BigPingPong-main-ping-count=119 & pc=BigPingPong-main-ping-S237:
+    (next(BigPingPong-main-ping-count)=119 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=119 & pc=BigPingPong-main-pung-S118:
+    (next(BigPingPong-main-ping-count)=119 & next(pc)=BigPingPong-main-ping-S238);
+BigPingPong-main-ping-count=119 & pc=BigPingPong-main-ping-S238:
+    (next(BigPingPong-main-ping-count)=120 & next(pc)=BigPingPong-main-ping-S239);
+BigPingPong-main-ping-count=120 & pc=BigPingPong-main-ping-S239:
+    (next(BigPingPong-main-ping-count)=120 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=120 & pc=BigPingPong-main-pung-S119:
+    (next(BigPingPong-main-ping-count)=120 & next(pc)=BigPingPong-main-ping-S240);
+BigPingPong-main-ping-count=120 & pc=BigPingPong-main-ping-S240:
+    (next(BigPingPong-main-ping-count)=121 & next(pc)=BigPingPong-main-ping-S241);
+BigPingPong-main-ping-count=121 & pc=BigPingPong-main-ping-S241:
+    (next(BigPingPong-main-ping-count)=121 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=121 & pc=BigPingPong-main-pung-S120:
+    (next(BigPingPong-main-ping-count)=121 & next(pc)=BigPingPong-main-ping-S242);
+BigPingPong-main-ping-count=121 & pc=BigPingPong-main-ping-S242:
+    (next(BigPingPong-main-ping-count)=122 & next(pc)=BigPingPong-main-ping-S243);
+BigPingPong-main-ping-count=122 & pc=BigPingPong-main-ping-S243:
+    (next(BigPingPong-main-ping-count)=122 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=122 & pc=BigPingPong-main-pung-S121:
+    (next(BigPingPong-main-ping-count)=122 & next(pc)=BigPingPong-main-ping-S244);
+BigPingPong-main-ping-count=122 & pc=BigPingPong-main-ping-S244:
+    (next(BigPingPong-main-ping-count)=123 & next(pc)=BigPingPong-main-ping-S245);
+BigPingPong-main-ping-count=123 & pc=BigPingPong-main-ping-S245:
+    (next(BigPingPong-main-ping-count)=123 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=123 & pc=BigPingPong-main-pung-S122:
+    (next(BigPingPong-main-ping-count)=123 & next(pc)=BigPingPong-main-ping-S246);
+BigPingPong-main-ping-count=123 & pc=BigPingPong-main-ping-S246:
+    (next(BigPingPong-main-ping-count)=124 & next(pc)=BigPingPong-main-ping-S247);
+BigPingPong-main-ping-count=124 & pc=BigPingPong-main-ping-S247:
+    (next(BigPingPong-main-ping-count)=124 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=124 & pc=BigPingPong-main-pung-S123:
+    (next(BigPingPong-main-ping-count)=124 & next(pc)=BigPingPong-main-ping-S248);
+BigPingPong-main-ping-count=124 & pc=BigPingPong-main-ping-S248:
+    (next(BigPingPong-main-ping-count)=125 & next(pc)=BigPingPong-main-ping-S249);
+BigPingPong-main-ping-count=125 & pc=BigPingPong-main-ping-S249:
+    (next(BigPingPong-main-ping-count)=125 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=125 & pc=BigPingPong-main-pung-S124:
+    (next(BigPingPong-main-ping-count)=125 & next(pc)=BigPingPong-main-ping-S250);
+BigPingPong-main-ping-count=125 & pc=BigPingPong-main-ping-S250:
+    (next(BigPingPong-main-ping-count)=126 & next(pc)=BigPingPong-main-ping-S251);
+BigPingPong-main-ping-count=126 & pc=BigPingPong-main-ping-S251:
+    (next(BigPingPong-main-ping-count)=126 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=126 & pc=BigPingPong-main-pung-S125:
+    (next(BigPingPong-main-ping-count)=126 & next(pc)=BigPingPong-main-ping-S252);
+BigPingPong-main-ping-count=126 & pc=BigPingPong-main-ping-S252:
+    (next(BigPingPong-main-ping-count)=127 & next(pc)=BigPingPong-main-ping-S253);
+BigPingPong-main-ping-count=127 & pc=BigPingPong-main-ping-S253:
+    (next(BigPingPong-main-ping-count)=127 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=127 & pc=BigPingPong-main-pung-S126:
+    (next(BigPingPong-main-ping-count)=127 & next(pc)=BigPingPong-main-ping-S254);
+BigPingPong-main-ping-count=127 & pc=BigPingPong-main-ping-S254:
+    (next(BigPingPong-main-ping-count)=-128 & next(pc)=BigPingPong-main-ping-S255);
+BigPingPong-main-ping-count=-128 & pc=BigPingPong-main-ping-S255:
+    (next(BigPingPong-main-ping-count)=-128 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=-128 & pc=BigPingPong-main-pung-S127:
+    (next(BigPingPong-main-ping-count)=-128 & next(pc)=BigPingPong-main-ping-S256);
+BigPingPong-main-ping-count=-128 & pc=BigPingPong-main-ping-S256:
+    (next(BigPingPong-main-ping-count)=-127 & next(pc)=BigPingPong-main-ping-S257);
+BigPingPong-main-ping-count=-127 & pc=BigPingPong-main-ping-S257:
+    (next(BigPingPong-main-ping-count)=-127 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=-127 & pc=BigPingPong-main-pung-S128:
+    (next(BigPingPong-main-ping-count)=-127 & next(pc)=BigPingPong-main-ping-S258);
+BigPingPong-main-ping-count=-127 & pc=BigPingPong-main-ping-S258:
+    (next(BigPingPong-main-ping-count)=-126 & next(pc)=BigPingPong-main-ping-S259);
+BigPingPong-main-ping-count=-126 & pc=BigPingPong-main-ping-S259:
+    (next(BigPingPong-main-ping-count)=-126 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=-126 & pc=BigPingPong-main-pung-S129:
+    (next(BigPingPong-main-ping-count)=-126 & next(pc)=BigPingPong-main-ping-S260);
+BigPingPong-main-ping-count=-126 & pc=BigPingPong-main-ping-S260:
+    (next(BigPingPong-main-ping-count)=-125 & next(pc)=BigPingPong-main-ping-S261);
+BigPingPong-main-ping-count=-125 & pc=BigPingPong-main-ping-S261:
+    (next(BigPingPong-main-ping-count)=-125 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=-125 & pc=BigPingPong-main-pung-S130:
+    (next(BigPingPong-main-ping-count)=-125 & next(pc)=BigPingPong-main-ping-S262);
+BigPingPong-main-ping-count=-125 & pc=BigPingPong-main-ping-S262:
+    (next(BigPingPong-main-ping-count)=-124 & next(pc)=BigPingPong-main-ping-S263);
+BigPingPong-main-ping-count=-124 & pc=BigPingPong-main-ping-S263:
+    (next(BigPingPong-main-ping-count)=-124 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=-124 & pc=BigPingPong-main-pung-S131:
+    (next(BigPingPong-main-ping-count)=-124 & next(pc)=BigPingPong-main-ping-S264);
+BigPingPong-main-ping-count=-124 & pc=BigPingPong-main-ping-S264:
+    (next(BigPingPong-main-ping-count)=-123 & next(pc)=BigPingPong-main-ping-S265);
+BigPingPong-main-ping-count=-123 & pc=BigPingPong-main-ping-S265:
+    (next(BigPingPong-main-ping-count)=-123 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=-123 & pc=BigPingPong-main-pung-S132:
+    (next(BigPingPong-main-ping-count)=-123 & next(pc)=BigPingPong-main-ping-S266);
+BigPingPong-main-ping-count=-123 & pc=BigPingPong-main-ping-S266:
+    (next(BigPingPong-main-ping-count)=-122 & next(pc)=BigPingPong-main-ping-S267);
+BigPingPong-main-ping-count=-122 & pc=BigPingPong-main-ping-S267:
+    (next(BigPingPong-main-ping-count)=-122 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=-122 & pc=BigPingPong-main-pung-S133:
+    (next(BigPingPong-main-ping-count)=-122 & next(pc)=BigPingPong-main-ping-S268);
+BigPingPong-main-ping-count=-122 & pc=BigPingPong-main-ping-S268:
+    (next(BigPingPong-main-ping-count)=-121 & next(pc)=BigPingPong-main-ping-S269);
+BigPingPong-main-ping-count=-121 & pc=BigPingPong-main-ping-S269:
+    (next(BigPingPong-main-ping-count)=-121 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=-121 & pc=BigPingPong-main-pung-S134:
+    (next(BigPingPong-main-ping-count)=-121 & next(pc)=BigPingPong-main-ping-S270);
+BigPingPong-main-ping-count=-121 & pc=BigPingPong-main-ping-S270:
+    (next(BigPingPong-main-ping-count)=-120 & next(pc)=BigPingPong-main-ping-S271);
+BigPingPong-main-ping-count=-120 & pc=BigPingPong-main-ping-S271:
+    (next(BigPingPong-main-ping-count)=-120 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=-120 & pc=BigPingPong-main-pung-S135:
+    (next(BigPingPong-main-ping-count)=-120 & next(pc)=BigPingPong-main-ping-S272);
+BigPingPong-main-ping-count=-120 & pc=BigPingPong-main-ping-S272:
+    (next(BigPingPong-main-ping-count)=-119 & next(pc)=BigPingPong-main-ping-S273);
+BigPingPong-main-ping-count=-119 & pc=BigPingPong-main-ping-S273:
+    (next(BigPingPong-main-ping-count)=-119 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=-119 & pc=BigPingPong-main-pung-S136:
+    (next(BigPingPong-main-ping-count)=-119 & next(pc)=BigPingPong-main-ping-S274);
+BigPingPong-main-ping-count=-119 & pc=BigPingPong-main-ping-S274:
+    (next(BigPingPong-main-ping-count)=-118 & next(pc)=BigPingPong-main-ping-S275);
+BigPingPong-main-ping-count=-118 & pc=BigPingPong-main-ping-S275:
+    (next(BigPingPong-main-ping-count)=-118 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=-118 & pc=BigPingPong-main-pung-S137:
+    (next(BigPingPong-main-ping-count)=-118 & next(pc)=BigPingPong-main-ping-S276);
+BigPingPong-main-ping-count=-118 & pc=BigPingPong-main-ping-S276:
+    (next(BigPingPong-main-ping-count)=-117 & next(pc)=BigPingPong-main-ping-S277);
+BigPingPong-main-ping-count=-117 & pc=BigPingPong-main-ping-S277:
+    (next(BigPingPong-main-ping-count)=-117 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=-117 & pc=BigPingPong-main-pung-S138:
+    (next(BigPingPong-main-ping-count)=-117 & next(pc)=BigPingPong-main-ping-S278);
+BigPingPong-main-ping-count=-117 & pc=BigPingPong-main-ping-S278:
+    (next(BigPingPong-main-ping-count)=-116 & next(pc)=BigPingPong-main-ping-S279);
+BigPingPong-main-ping-count=-116 & pc=BigPingPong-main-ping-S279:
+    (next(BigPingPong-main-ping-count)=-116 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=-116 & pc=BigPingPong-main-pung-S139:
+    (next(BigPingPong-main-ping-count)=-116 & next(pc)=BigPingPong-main-ping-S280);
+BigPingPong-main-ping-count=-116 & pc=BigPingPong-main-ping-S280:
+    (next(BigPingPong-main-ping-count)=-115 & next(pc)=BigPingPong-main-ping-S281);
+BigPingPong-main-ping-count=-115 & pc=BigPingPong-main-ping-S281:
+    (next(BigPingPong-main-ping-count)=-115 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=-115 & pc=BigPingPong-main-pung-S140:
+    (next(BigPingPong-main-ping-count)=-115 & next(pc)=BigPingPong-main-ping-S282);
+BigPingPong-main-ping-count=-115 & pc=BigPingPong-main-ping-S282:
+    (next(BigPingPong-main-ping-count)=-114 & next(pc)=BigPingPong-main-ping-S283);
+BigPingPong-main-ping-count=-114 & pc=BigPingPong-main-ping-S283:
+    (next(BigPingPong-main-ping-count)=-114 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=-114 & pc=BigPingPong-main-pung-S141:
+    (next(BigPingPong-main-ping-count)=-114 & next(pc)=BigPingPong-main-ping-S284);
+BigPingPong-main-ping-count=-114 & pc=BigPingPong-main-ping-S284:
+    (next(BigPingPong-main-ping-count)=-113 & next(pc)=BigPingPong-main-ping-S285);
+BigPingPong-main-ping-count=-113 & pc=BigPingPong-main-ping-S285:
+    (next(BigPingPong-main-ping-count)=-113 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=-113 & pc=BigPingPong-main-pung-S142:
+    (next(BigPingPong-main-ping-count)=-113 & next(pc)=BigPingPong-main-ping-S286);
+BigPingPong-main-ping-count=-113 & pc=BigPingPong-main-ping-S286:
+    (next(BigPingPong-main-ping-count)=-112 & next(pc)=BigPingPong-main-ping-S287);
+BigPingPong-main-ping-count=-112 & pc=BigPingPong-main-ping-S287:
+    (next(BigPingPong-main-ping-count)=-112 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=-112 & pc=BigPingPong-main-pung-S143:
+    (next(BigPingPong-main-ping-count)=-112 & next(pc)=BigPingPong-main-ping-S288);
+BigPingPong-main-ping-count=-112 & pc=BigPingPong-main-ping-S288:
+    (next(BigPingPong-main-ping-count)=-111 & next(pc)=BigPingPong-main-ping-S289);
+BigPingPong-main-ping-count=-111 & pc=BigPingPong-main-ping-S289:
+    (next(BigPingPong-main-ping-count)=-111 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=-111 & pc=BigPingPong-main-pung-S144:
+    (next(BigPingPong-main-ping-count)=-111 & next(pc)=BigPingPong-main-ping-S290);
+BigPingPong-main-ping-count=-111 & pc=BigPingPong-main-ping-S290:
+    (next(BigPingPong-main-ping-count)=-110 & next(pc)=BigPingPong-main-ping-S291);
+BigPingPong-main-ping-count=-110 & pc=BigPingPong-main-ping-S291:
+    (next(BigPingPong-main-ping-count)=-110 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=-110 & pc=BigPingPong-main-pung-S145:
+    (next(BigPingPong-main-ping-count)=-110 & next(pc)=BigPingPong-main-ping-S292);
+BigPingPong-main-ping-count=-110 & pc=BigPingPong-main-ping-S292:
+    (next(BigPingPong-main-ping-count)=-109 & next(pc)=BigPingPong-main-ping-S293);
+BigPingPong-main-ping-count=-109 & pc=BigPingPong-main-ping-S293:
+    (next(BigPingPong-main-ping-count)=-109 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=-109 & pc=BigPingPong-main-pung-S146:
+    (next(BigPingPong-main-ping-count)=-109 & next(pc)=BigPingPong-main-ping-S294);
+BigPingPong-main-ping-count=-109 & pc=BigPingPong-main-ping-S294:
+    (next(BigPingPong-main-ping-count)=-108 & next(pc)=BigPingPong-main-ping-S295);
+BigPingPong-main-ping-count=-108 & pc=BigPingPong-main-ping-S295:
+    (next(BigPingPong-main-ping-count)=-108 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=-108 & pc=BigPingPong-main-pung-S147:
+    (next(BigPingPong-main-ping-count)=-108 & next(pc)=BigPingPong-main-ping-S296);
+BigPingPong-main-ping-count=-108 & pc=BigPingPong-main-ping-S296:
+    (next(BigPingPong-main-ping-count)=-107 & next(pc)=BigPingPong-main-ping-S297);
+BigPingPong-main-ping-count=-107 & pc=BigPingPong-main-ping-S297:
+    (next(BigPingPong-main-ping-count)=-107 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=-107 & pc=BigPingPong-main-pung-S148:
+    (next(BigPingPong-main-ping-count)=-107 & next(pc)=BigPingPong-main-ping-S298);
+BigPingPong-main-ping-count=-107 & pc=BigPingPong-main-ping-S298:
+    (next(BigPingPong-main-ping-count)=-106 & next(pc)=BigPingPong-main-ping-S299);
+BigPingPong-main-ping-count=-106 & pc=BigPingPong-main-ping-S299:
+    (next(BigPingPong-main-ping-count)=-106 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=-106 & pc=BigPingPong-main-pung-S149:
+    (next(BigPingPong-main-ping-count)=-106 & next(pc)=BigPingPong-main-ping-S300);
+BigPingPong-main-ping-count=-106 & pc=BigPingPong-main-ping-S300:
+    (next(BigPingPong-main-ping-count)=-105 & next(pc)=BigPingPong-main-ping-S301);
+BigPingPong-main-ping-count=-105 & pc=BigPingPong-main-ping-S301:
+    (next(BigPingPong-main-ping-count)=-105 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=-105 & pc=BigPingPong-main-pung-S150:
+    (next(BigPingPong-main-ping-count)=-105 & next(pc)=BigPingPong-main-ping-S302);
+BigPingPong-main-ping-count=-105 & pc=BigPingPong-main-ping-S302:
+    (next(BigPingPong-main-ping-count)=-104 & next(pc)=BigPingPong-main-ping-S303);
+BigPingPong-main-ping-count=-104 & pc=BigPingPong-main-ping-S303:
+    (next(BigPingPong-main-ping-count)=-104 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=-104 & pc=BigPingPong-main-pung-S151:
+    (next(BigPingPong-main-ping-count)=-104 & next(pc)=BigPingPong-main-ping-S304);
+BigPingPong-main-ping-count=-104 & pc=BigPingPong-main-ping-S304:
+    (next(BigPingPong-main-ping-count)=-103 & next(pc)=BigPingPong-main-ping-S305);
+BigPingPong-main-ping-count=-103 & pc=BigPingPong-main-ping-S305:
+    (next(BigPingPong-main-ping-count)=-103 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=-103 & pc=BigPingPong-main-pung-S152:
+    (next(BigPingPong-main-ping-count)=-103 & next(pc)=BigPingPong-main-ping-S306);
+BigPingPong-main-ping-count=-103 & pc=BigPingPong-main-ping-S306:
+    (next(BigPingPong-main-ping-count)=-102 & next(pc)=BigPingPong-main-ping-S307);
+BigPingPong-main-ping-count=-102 & pc=BigPingPong-main-ping-S307:
+    (next(BigPingPong-main-ping-count)=-102 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=-102 & pc=BigPingPong-main-pung-S153:
+    (next(BigPingPong-main-ping-count)=-102 & next(pc)=BigPingPong-main-ping-S308);
+BigPingPong-main-ping-count=-102 & pc=BigPingPong-main-ping-S308:
+    (next(BigPingPong-main-ping-count)=-101 & next(pc)=BigPingPong-main-ping-S309);
+BigPingPong-main-ping-count=-101 & pc=BigPingPong-main-ping-S309:
+    (next(BigPingPong-main-ping-count)=-101 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=-101 & pc=BigPingPong-main-pung-S154:
+    (next(BigPingPong-main-ping-count)=-101 & next(pc)=BigPingPong-main-ping-S310);
+BigPingPong-main-ping-count=-101 & pc=BigPingPong-main-ping-S310:
+    (next(BigPingPong-main-ping-count)=-100 & next(pc)=BigPingPong-main-ping-S311);
+BigPingPong-main-ping-count=-100 & pc=BigPingPong-main-ping-S311:
+    (next(BigPingPong-main-ping-count)=-100 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=-100 & pc=BigPingPong-main-pung-S155:
+    (next(BigPingPong-main-ping-count)=-100 & next(pc)=BigPingPong-main-ping-S312);
+BigPingPong-main-ping-count=-100 & pc=BigPingPong-main-ping-S312:
+    (next(BigPingPong-main-ping-count)=-99 & next(pc)=BigPingPong-main-ping-S313);
+BigPingPong-main-ping-count=-99 & pc=BigPingPong-main-ping-S313:
+    (next(BigPingPong-main-ping-count)=-99 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=-99 & pc=BigPingPong-main-pung-S156:
+    (next(BigPingPong-main-ping-count)=-99 & next(pc)=BigPingPong-main-ping-S314);
+BigPingPong-main-ping-count=-99 & pc=BigPingPong-main-ping-S314:
+    (next(BigPingPong-main-ping-count)=-98 & next(pc)=BigPingPong-main-ping-S315);
+BigPingPong-main-ping-count=-98 & pc=BigPingPong-main-ping-S315:
+    (next(BigPingPong-main-ping-count)=-98 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=-98 & pc=BigPingPong-main-pung-S157:
+    (next(BigPingPong-main-ping-count)=-98 & next(pc)=BigPingPong-main-ping-S316);
+BigPingPong-main-ping-count=-98 & pc=BigPingPong-main-ping-S316:
+    (next(BigPingPong-main-ping-count)=-97 & next(pc)=BigPingPong-main-ping-S317);
+BigPingPong-main-ping-count=-97 & pc=BigPingPong-main-ping-S317:
+    (next(BigPingPong-main-ping-count)=-97 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=-97 & pc=BigPingPong-main-pung-S158:
+    (next(BigPingPong-main-ping-count)=-97 & next(pc)=BigPingPong-main-ping-S318);
+BigPingPong-main-ping-count=-97 & pc=BigPingPong-main-ping-S318:
+    (next(BigPingPong-main-ping-count)=-96 & next(pc)=BigPingPong-main-ping-S319);
+BigPingPong-main-ping-count=-96 & pc=BigPingPong-main-ping-S319:
+    (next(BigPingPong-main-ping-count)=-96 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=-96 & pc=BigPingPong-main-pung-S159:
+    (next(BigPingPong-main-ping-count)=-96 & next(pc)=BigPingPong-main-ping-S320);
+BigPingPong-main-ping-count=-96 & pc=BigPingPong-main-ping-S320:
+    (next(BigPingPong-main-ping-count)=-95 & next(pc)=BigPingPong-main-ping-S321);
+BigPingPong-main-ping-count=-95 & pc=BigPingPong-main-ping-S321:
+    (next(BigPingPong-main-ping-count)=-95 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=-95 & pc=BigPingPong-main-pung-S160:
+    (next(BigPingPong-main-ping-count)=-95 & next(pc)=BigPingPong-main-ping-S322);
+BigPingPong-main-ping-count=-95 & pc=BigPingPong-main-ping-S322:
+    (next(BigPingPong-main-ping-count)=-94 & next(pc)=BigPingPong-main-ping-S323);
+BigPingPong-main-ping-count=-94 & pc=BigPingPong-main-ping-S323:
+    (next(BigPingPong-main-ping-count)=-94 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=-94 & pc=BigPingPong-main-pung-S161:
+    (next(BigPingPong-main-ping-count)=-94 & next(pc)=BigPingPong-main-ping-S324);
+BigPingPong-main-ping-count=-94 & pc=BigPingPong-main-ping-S324:
+    (next(BigPingPong-main-ping-count)=-93 & next(pc)=BigPingPong-main-ping-S325);
+BigPingPong-main-ping-count=-93 & pc=BigPingPong-main-ping-S325:
+    (next(BigPingPong-main-ping-count)=-93 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=-93 & pc=BigPingPong-main-pung-S162:
+    (next(BigPingPong-main-ping-count)=-93 & next(pc)=BigPingPong-main-ping-S326);
+BigPingPong-main-ping-count=-93 & pc=BigPingPong-main-ping-S326:
+    (next(BigPingPong-main-ping-count)=-92 & next(pc)=BigPingPong-main-ping-S327);
+BigPingPong-main-ping-count=-92 & pc=BigPingPong-main-ping-S327:
+    (next(BigPingPong-main-ping-count)=-92 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=-92 & pc=BigPingPong-main-pung-S163:
+    (next(BigPingPong-main-ping-count)=-92 & next(pc)=BigPingPong-main-ping-S328);
+BigPingPong-main-ping-count=-92 & pc=BigPingPong-main-ping-S328:
+    (next(BigPingPong-main-ping-count)=-91 & next(pc)=BigPingPong-main-ping-S329);
+BigPingPong-main-ping-count=-91 & pc=BigPingPong-main-ping-S329:
+    (next(BigPingPong-main-ping-count)=-91 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=-91 & pc=BigPingPong-main-pung-S164:
+    (next(BigPingPong-main-ping-count)=-91 & next(pc)=BigPingPong-main-ping-S330);
+BigPingPong-main-ping-count=-91 & pc=BigPingPong-main-ping-S330:
+    (next(BigPingPong-main-ping-count)=-90 & next(pc)=BigPingPong-main-ping-S331);
+BigPingPong-main-ping-count=-90 & pc=BigPingPong-main-ping-S331:
+    (next(BigPingPong-main-ping-count)=-90 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=-90 & pc=BigPingPong-main-pung-S165:
+    (next(BigPingPong-main-ping-count)=-90 & next(pc)=BigPingPong-main-ping-S332);
+BigPingPong-main-ping-count=-90 & pc=BigPingPong-main-ping-S332:
+    (next(BigPingPong-main-ping-count)=-89 & next(pc)=BigPingPong-main-ping-S333);
+BigPingPong-main-ping-count=-89 & pc=BigPingPong-main-ping-S333:
+    (next(BigPingPong-main-ping-count)=-89 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=-89 & pc=BigPingPong-main-pung-S166:
+    (next(BigPingPong-main-ping-count)=-89 & next(pc)=BigPingPong-main-ping-S334);
+BigPingPong-main-ping-count=-89 & pc=BigPingPong-main-ping-S334:
+    (next(BigPingPong-main-ping-count)=-88 & next(pc)=BigPingPong-main-ping-S335);
+BigPingPong-main-ping-count=-88 & pc=BigPingPong-main-ping-S335:
+    (next(BigPingPong-main-ping-count)=-88 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=-88 & pc=BigPingPong-main-pung-S167:
+    (next(BigPingPong-main-ping-count)=-88 & next(pc)=BigPingPong-main-ping-S336);
+BigPingPong-main-ping-count=-88 & pc=BigPingPong-main-ping-S336:
+    (next(BigPingPong-main-ping-count)=-87 & next(pc)=BigPingPong-main-ping-S337);
+BigPingPong-main-ping-count=-87 & pc=BigPingPong-main-ping-S337:
+    (next(BigPingPong-main-ping-count)=-87 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=-87 & pc=BigPingPong-main-pung-S168:
+    (next(BigPingPong-main-ping-count)=-87 & next(pc)=BigPingPong-main-ping-S338);
+BigPingPong-main-ping-count=-87 & pc=BigPingPong-main-ping-S338:
+    (next(BigPingPong-main-ping-count)=-86 & next(pc)=BigPingPong-main-ping-S339);
+BigPingPong-main-ping-count=-86 & pc=BigPingPong-main-ping-S339:
+    (next(BigPingPong-main-ping-count)=-86 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=-86 & pc=BigPingPong-main-pung-S169:
+    (next(BigPingPong-main-ping-count)=-86 & next(pc)=BigPingPong-main-ping-S340);
+BigPingPong-main-ping-count=-86 & pc=BigPingPong-main-ping-S340:
+    (next(BigPingPong-main-ping-count)=-85 & next(pc)=BigPingPong-main-ping-S341);
+BigPingPong-main-ping-count=-85 & pc=BigPingPong-main-ping-S341:
+    (next(BigPingPong-main-ping-count)=-85 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=-85 & pc=BigPingPong-main-pung-S170:
+    (next(BigPingPong-main-ping-count)=-85 & next(pc)=BigPingPong-main-ping-S342);
+BigPingPong-main-ping-count=-85 & pc=BigPingPong-main-ping-S342:
+    (next(BigPingPong-main-ping-count)=-84 & next(pc)=BigPingPong-main-ping-S343);
+BigPingPong-main-ping-count=-84 & pc=BigPingPong-main-ping-S343:
+    (next(BigPingPong-main-ping-count)=-84 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=-84 & pc=BigPingPong-main-pung-S171:
+    (next(BigPingPong-main-ping-count)=-84 & next(pc)=BigPingPong-main-ping-S344);
+BigPingPong-main-ping-count=-84 & pc=BigPingPong-main-ping-S344:
+    (next(BigPingPong-main-ping-count)=-83 & next(pc)=BigPingPong-main-ping-S345);
+BigPingPong-main-ping-count=-83 & pc=BigPingPong-main-ping-S345:
+    (next(BigPingPong-main-ping-count)=-83 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=-83 & pc=BigPingPong-main-pung-S172:
+    (next(BigPingPong-main-ping-count)=-83 & next(pc)=BigPingPong-main-ping-S346);
+BigPingPong-main-ping-count=-83 & pc=BigPingPong-main-ping-S346:
+    (next(BigPingPong-main-ping-count)=-82 & next(pc)=BigPingPong-main-ping-S347);
+BigPingPong-main-ping-count=-82 & pc=BigPingPong-main-ping-S347:
+    (next(BigPingPong-main-ping-count)=-82 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=-82 & pc=BigPingPong-main-pung-S173:
+    (next(BigPingPong-main-ping-count)=-82 & next(pc)=BigPingPong-main-ping-S348);
+BigPingPong-main-ping-count=-82 & pc=BigPingPong-main-ping-S348:
+    (next(BigPingPong-main-ping-count)=-81 & next(pc)=BigPingPong-main-ping-S349);
+BigPingPong-main-ping-count=-81 & pc=BigPingPong-main-ping-S349:
+    (next(BigPingPong-main-ping-count)=-81 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=-81 & pc=BigPingPong-main-pung-S174:
+    (next(BigPingPong-main-ping-count)=-81 & next(pc)=BigPingPong-main-ping-S350);
+BigPingPong-main-ping-count=-81 & pc=BigPingPong-main-ping-S350:
+    (next(BigPingPong-main-ping-count)=-80 & next(pc)=BigPingPong-main-ping-S351);
+BigPingPong-main-ping-count=-80 & pc=BigPingPong-main-ping-S351:
+    (next(BigPingPong-main-ping-count)=-80 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=-80 & pc=BigPingPong-main-pung-S175:
+    (next(BigPingPong-main-ping-count)=-80 & next(pc)=BigPingPong-main-ping-S352);
+BigPingPong-main-ping-count=-80 & pc=BigPingPong-main-ping-S352:
+    (next(BigPingPong-main-ping-count)=-79 & next(pc)=BigPingPong-main-ping-S353);
+BigPingPong-main-ping-count=-79 & pc=BigPingPong-main-ping-S353:
+    (next(BigPingPong-main-ping-count)=-79 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=-79 & pc=BigPingPong-main-pung-S176:
+    (next(BigPingPong-main-ping-count)=-79 & next(pc)=BigPingPong-main-ping-S354);
+BigPingPong-main-ping-count=-79 & pc=BigPingPong-main-ping-S354:
+    (next(BigPingPong-main-ping-count)=-78 & next(pc)=BigPingPong-main-ping-S355);
+BigPingPong-main-ping-count=-78 & pc=BigPingPong-main-ping-S355:
+    (next(BigPingPong-main-ping-count)=-78 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=-78 & pc=BigPingPong-main-pung-S177:
+    (next(BigPingPong-main-ping-count)=-78 & next(pc)=BigPingPong-main-ping-S356);
+BigPingPong-main-ping-count=-78 & pc=BigPingPong-main-ping-S356:
+    (next(BigPingPong-main-ping-count)=-77 & next(pc)=BigPingPong-main-ping-S357);
+BigPingPong-main-ping-count=-77 & pc=BigPingPong-main-ping-S357:
+    (next(BigPingPong-main-ping-count)=-77 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=-77 & pc=BigPingPong-main-pung-S178:
+    (next(BigPingPong-main-ping-count)=-77 & next(pc)=BigPingPong-main-ping-S358);
+BigPingPong-main-ping-count=-77 & pc=BigPingPong-main-ping-S358:
+    (next(BigPingPong-main-ping-count)=-76 & next(pc)=BigPingPong-main-ping-S359);
+BigPingPong-main-ping-count=-76 & pc=BigPingPong-main-ping-S359:
+    (next(BigPingPong-main-ping-count)=-76 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=-76 & pc=BigPingPong-main-pung-S179:
+    (next(BigPingPong-main-ping-count)=-76 & next(pc)=BigPingPong-main-ping-S360);
+BigPingPong-main-ping-count=-76 & pc=BigPingPong-main-ping-S360:
+    (next(BigPingPong-main-ping-count)=-75 & next(pc)=BigPingPong-main-ping-S361);
+BigPingPong-main-ping-count=-75 & pc=BigPingPong-main-ping-S361:
+    (next(BigPingPong-main-ping-count)=-75 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=-75 & pc=BigPingPong-main-pung-S180:
+    (next(BigPingPong-main-ping-count)=-75 & next(pc)=BigPingPong-main-ping-S362);
+BigPingPong-main-ping-count=-75 & pc=BigPingPong-main-ping-S362:
+    (next(BigPingPong-main-ping-count)=-74 & next(pc)=BigPingPong-main-ping-S363);
+BigPingPong-main-ping-count=-74 & pc=BigPingPong-main-ping-S363:
+    (next(BigPingPong-main-ping-count)=-74 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=-74 & pc=BigPingPong-main-pung-S181:
+    (next(BigPingPong-main-ping-count)=-74 & next(pc)=BigPingPong-main-ping-S364);
+BigPingPong-main-ping-count=-74 & pc=BigPingPong-main-ping-S364:
+    (next(BigPingPong-main-ping-count)=-73 & next(pc)=BigPingPong-main-ping-S365);
+BigPingPong-main-ping-count=-73 & pc=BigPingPong-main-ping-S365:
+    (next(BigPingPong-main-ping-count)=-73 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=-73 & pc=BigPingPong-main-pung-S182:
+    (next(BigPingPong-main-ping-count)=-73 & next(pc)=BigPingPong-main-ping-S366);
+BigPingPong-main-ping-count=-73 & pc=BigPingPong-main-ping-S366:
+    (next(BigPingPong-main-ping-count)=-72 & next(pc)=BigPingPong-main-ping-S367);
+BigPingPong-main-ping-count=-72 & pc=BigPingPong-main-ping-S367:
+    (next(BigPingPong-main-ping-count)=-72 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=-72 & pc=BigPingPong-main-pung-S183:
+    (next(BigPingPong-main-ping-count)=-72 & next(pc)=BigPingPong-main-ping-S368);
+BigPingPong-main-ping-count=-72 & pc=BigPingPong-main-ping-S368:
+    (next(BigPingPong-main-ping-count)=-71 & next(pc)=BigPingPong-main-ping-S369);
+BigPingPong-main-ping-count=-71 & pc=BigPingPong-main-ping-S369:
+    (next(BigPingPong-main-ping-count)=-71 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=-71 & pc=BigPingPong-main-pung-S184:
+    (next(BigPingPong-main-ping-count)=-71 & next(pc)=BigPingPong-main-ping-S370);
+BigPingPong-main-ping-count=-71 & pc=BigPingPong-main-ping-S370:
+    (next(BigPingPong-main-ping-count)=-70 & next(pc)=BigPingPong-main-ping-S371);
+BigPingPong-main-ping-count=-70 & pc=BigPingPong-main-ping-S371:
+    (next(BigPingPong-main-ping-count)=-70 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=-70 & pc=BigPingPong-main-pung-S185:
+    (next(BigPingPong-main-ping-count)=-70 & next(pc)=BigPingPong-main-ping-S372);
+BigPingPong-main-ping-count=-70 & pc=BigPingPong-main-ping-S372:
+    (next(BigPingPong-main-ping-count)=-69 & next(pc)=BigPingPong-main-ping-S373);
+BigPingPong-main-ping-count=-69 & pc=BigPingPong-main-ping-S373:
+    (next(BigPingPong-main-ping-count)=-69 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=-69 & pc=BigPingPong-main-pung-S186:
+    (next(BigPingPong-main-ping-count)=-69 & next(pc)=BigPingPong-main-ping-S374);
+BigPingPong-main-ping-count=-69 & pc=BigPingPong-main-ping-S374:
+    (next(BigPingPong-main-ping-count)=-68 & next(pc)=BigPingPong-main-ping-S375);
+BigPingPong-main-ping-count=-68 & pc=BigPingPong-main-ping-S375:
+    (next(BigPingPong-main-ping-count)=-68 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=-68 & pc=BigPingPong-main-pung-S187:
+    (next(BigPingPong-main-ping-count)=-68 & next(pc)=BigPingPong-main-ping-S376);
+BigPingPong-main-ping-count=-68 & pc=BigPingPong-main-ping-S376:
+    (next(BigPingPong-main-ping-count)=-67 & next(pc)=BigPingPong-main-ping-S377);
+BigPingPong-main-ping-count=-67 & pc=BigPingPong-main-ping-S377:
+    (next(BigPingPong-main-ping-count)=-67 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=-67 & pc=BigPingPong-main-pung-S188:
+    (next(BigPingPong-main-ping-count)=-67 & next(pc)=BigPingPong-main-ping-S378);
+BigPingPong-main-ping-count=-67 & pc=BigPingPong-main-ping-S378:
+    (next(BigPingPong-main-ping-count)=-66 & next(pc)=BigPingPong-main-ping-S379);
+BigPingPong-main-ping-count=-66 & pc=BigPingPong-main-ping-S379:
+    (next(BigPingPong-main-ping-count)=-66 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=-66 & pc=BigPingPong-main-pung-S189:
+    (next(BigPingPong-main-ping-count)=-66 & next(pc)=BigPingPong-main-ping-S380);
+BigPingPong-main-ping-count=-66 & pc=BigPingPong-main-ping-S380:
+    (next(BigPingPong-main-ping-count)=-65 & next(pc)=BigPingPong-main-ping-S381);
+BigPingPong-main-ping-count=-65 & pc=BigPingPong-main-ping-S381:
+    (next(BigPingPong-main-ping-count)=-65 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=-65 & pc=BigPingPong-main-pung-S190:
+    (next(BigPingPong-main-ping-count)=-65 & next(pc)=BigPingPong-main-ping-S382);
+BigPingPong-main-ping-count=-65 & pc=BigPingPong-main-ping-S382:
+    (next(BigPingPong-main-ping-count)=-64 & next(pc)=BigPingPong-main-ping-S383);
+BigPingPong-main-ping-count=-64 & pc=BigPingPong-main-ping-S383:
+    (next(BigPingPong-main-ping-count)=-64 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=-64 & pc=BigPingPong-main-pung-S191:
+    (next(BigPingPong-main-ping-count)=-64 & next(pc)=BigPingPong-main-ping-S384);
+BigPingPong-main-ping-count=-64 & pc=BigPingPong-main-ping-S384:
+    (next(BigPingPong-main-ping-count)=-63 & next(pc)=BigPingPong-main-ping-S385);
+BigPingPong-main-ping-count=-63 & pc=BigPingPong-main-ping-S385:
+    (next(BigPingPong-main-ping-count)=-63 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=-63 & pc=BigPingPong-main-pung-S192:
+    (next(BigPingPong-main-ping-count)=-63 & next(pc)=BigPingPong-main-ping-S386);
+BigPingPong-main-ping-count=-63 & pc=BigPingPong-main-ping-S386:
+    (next(BigPingPong-main-ping-count)=-62 & next(pc)=BigPingPong-main-ping-S387);
+BigPingPong-main-ping-count=-62 & pc=BigPingPong-main-ping-S387:
+    (next(BigPingPong-main-ping-count)=-62 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=-62 & pc=BigPingPong-main-pung-S193:
+    (next(BigPingPong-main-ping-count)=-62 & next(pc)=BigPingPong-main-ping-S388);
+BigPingPong-main-ping-count=-62 & pc=BigPingPong-main-ping-S388:
+    (next(BigPingPong-main-ping-count)=-61 & next(pc)=BigPingPong-main-ping-S389);
+BigPingPong-main-ping-count=-61 & pc=BigPingPong-main-ping-S389:
+    (next(BigPingPong-main-ping-count)=-61 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=-61 & pc=BigPingPong-main-pung-S194:
+    (next(BigPingPong-main-ping-count)=-61 & next(pc)=BigPingPong-main-ping-S390);
+BigPingPong-main-ping-count=-61 & pc=BigPingPong-main-ping-S390:
+    (next(BigPingPong-main-ping-count)=-60 & next(pc)=BigPingPong-main-ping-S391);
+BigPingPong-main-ping-count=-60 & pc=BigPingPong-main-ping-S391:
+    (next(BigPingPong-main-ping-count)=-60 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=-60 & pc=BigPingPong-main-pung-S195:
+    (next(BigPingPong-main-ping-count)=-60 & next(pc)=BigPingPong-main-ping-S392);
+BigPingPong-main-ping-count=-60 & pc=BigPingPong-main-ping-S392:
+    (next(BigPingPong-main-ping-count)=-59 & next(pc)=BigPingPong-main-ping-S393);
+BigPingPong-main-ping-count=-59 & pc=BigPingPong-main-ping-S393:
+    (next(BigPingPong-main-ping-count)=-59 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=-59 & pc=BigPingPong-main-pung-S196:
+    (next(BigPingPong-main-ping-count)=-59 & next(pc)=BigPingPong-main-ping-S394);
+BigPingPong-main-ping-count=-59 & pc=BigPingPong-main-ping-S394:
+    (next(BigPingPong-main-ping-count)=-58 & next(pc)=BigPingPong-main-ping-S395);
+BigPingPong-main-ping-count=-58 & pc=BigPingPong-main-ping-S395:
+    (next(BigPingPong-main-ping-count)=-58 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=-58 & pc=BigPingPong-main-pung-S197:
+    (next(BigPingPong-main-ping-count)=-58 & next(pc)=BigPingPong-main-ping-S396);
+BigPingPong-main-ping-count=-58 & pc=BigPingPong-main-ping-S396:
+    (next(BigPingPong-main-ping-count)=-57 & next(pc)=BigPingPong-main-ping-S397);
+BigPingPong-main-ping-count=-57 & pc=BigPingPong-main-ping-S397:
+    (next(BigPingPong-main-ping-count)=-57 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=-57 & pc=BigPingPong-main-pung-S198:
+    (next(BigPingPong-main-ping-count)=-57 & next(pc)=BigPingPong-main-ping-S398);
+BigPingPong-main-ping-count=-57 & pc=BigPingPong-main-ping-S398:
+    (next(BigPingPong-main-ping-count)=-56 & next(pc)=BigPingPong-main-ping-S399);
+BigPingPong-main-ping-count=-56 & pc=BigPingPong-main-ping-S399:
+    (next(BigPingPong-main-ping-count)=-56 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=-56 & pc=BigPingPong-main-pung-S199:
+    (next(BigPingPong-main-ping-count)=-56 & next(pc)=BigPingPong-main-ping-S400);
+BigPingPong-main-ping-count=-56 & pc=BigPingPong-main-ping-S400:
+    (next(BigPingPong-main-ping-count)=-55 & next(pc)=BigPingPong-main-ping-S401);
+BigPingPong-main-ping-count=-55 & pc=BigPingPong-main-ping-S401:
+    (next(BigPingPong-main-ping-count)=-55 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=-55 & pc=BigPingPong-main-pung-S200:
+    (next(BigPingPong-main-ping-count)=-55 & next(pc)=BigPingPong-main-ping-S402);
+BigPingPong-main-ping-count=-55 & pc=BigPingPong-main-ping-S402:
+    (next(BigPingPong-main-ping-count)=-54 & next(pc)=BigPingPong-main-ping-S403);
+BigPingPong-main-ping-count=-54 & pc=BigPingPong-main-ping-S403:
+    (next(BigPingPong-main-ping-count)=-54 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=-54 & pc=BigPingPong-main-pung-S201:
+    (next(BigPingPong-main-ping-count)=-54 & next(pc)=BigPingPong-main-ping-S404);
+BigPingPong-main-ping-count=-54 & pc=BigPingPong-main-ping-S404:
+    (next(BigPingPong-main-ping-count)=-53 & next(pc)=BigPingPong-main-ping-S405);
+BigPingPong-main-ping-count=-53 & pc=BigPingPong-main-ping-S405:
+    (next(BigPingPong-main-ping-count)=-53 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=-53 & pc=BigPingPong-main-pung-S202:
+    (next(BigPingPong-main-ping-count)=-53 & next(pc)=BigPingPong-main-ping-S406);
+BigPingPong-main-ping-count=-53 & pc=BigPingPong-main-ping-S406:
+    (next(BigPingPong-main-ping-count)=-52 & next(pc)=BigPingPong-main-ping-S407);
+BigPingPong-main-ping-count=-52 & pc=BigPingPong-main-ping-S407:
+    (next(BigPingPong-main-ping-count)=-52 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=-52 & pc=BigPingPong-main-pung-S203:
+    (next(BigPingPong-main-ping-count)=-52 & next(pc)=BigPingPong-main-ping-S408);
+BigPingPong-main-ping-count=-52 & pc=BigPingPong-main-ping-S408:
+    (next(BigPingPong-main-ping-count)=-51 & next(pc)=BigPingPong-main-ping-S409);
+BigPingPong-main-ping-count=-51 & pc=BigPingPong-main-ping-S409:
+    (next(BigPingPong-main-ping-count)=-51 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=-51 & pc=BigPingPong-main-pung-S204:
+    (next(BigPingPong-main-ping-count)=-51 & next(pc)=BigPingPong-main-ping-S410);
+BigPingPong-main-ping-count=-51 & pc=BigPingPong-main-ping-S410:
+    (next(BigPingPong-main-ping-count)=-50 & next(pc)=BigPingPong-main-ping-S411);
+BigPingPong-main-ping-count=-50 & pc=BigPingPong-main-ping-S411:
+    (next(BigPingPong-main-ping-count)=-50 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=-50 & pc=BigPingPong-main-pung-S205:
+    (next(BigPingPong-main-ping-count)=-50 & next(pc)=BigPingPong-main-ping-S412);
+BigPingPong-main-ping-count=-50 & pc=BigPingPong-main-ping-S412:
+    (next(BigPingPong-main-ping-count)=-49 & next(pc)=BigPingPong-main-ping-S413);
+BigPingPong-main-ping-count=-49 & pc=BigPingPong-main-ping-S413:
+    (next(BigPingPong-main-ping-count)=-49 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=-49 & pc=BigPingPong-main-pung-S206:
+    (next(BigPingPong-main-ping-count)=-49 & next(pc)=BigPingPong-main-ping-S414);
+BigPingPong-main-ping-count=-49 & pc=BigPingPong-main-ping-S414:
+    (next(BigPingPong-main-ping-count)=-48 & next(pc)=BigPingPong-main-ping-S415);
+BigPingPong-main-ping-count=-48 & pc=BigPingPong-main-ping-S415:
+    (next(BigPingPong-main-ping-count)=-48 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=-48 & pc=BigPingPong-main-pung-S207:
+    (next(BigPingPong-main-ping-count)=-48 & next(pc)=BigPingPong-main-ping-S416);
+BigPingPong-main-ping-count=-48 & pc=BigPingPong-main-ping-S416:
+    (next(BigPingPong-main-ping-count)=-47 & next(pc)=BigPingPong-main-ping-S417);
+BigPingPong-main-ping-count=-47 & pc=BigPingPong-main-ping-S417:
+    (next(BigPingPong-main-ping-count)=-47 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=-47 & pc=BigPingPong-main-pung-S208:
+    (next(BigPingPong-main-ping-count)=-47 & next(pc)=BigPingPong-main-ping-S418);
+BigPingPong-main-ping-count=-47 & pc=BigPingPong-main-ping-S418:
+    (next(BigPingPong-main-ping-count)=-46 & next(pc)=BigPingPong-main-ping-S419);
+BigPingPong-main-ping-count=-46 & pc=BigPingPong-main-ping-S419:
+    (next(BigPingPong-main-ping-count)=-46 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=-46 & pc=BigPingPong-main-pung-S209:
+    (next(BigPingPong-main-ping-count)=-46 & next(pc)=BigPingPong-main-ping-S420);
+BigPingPong-main-ping-count=-46 & pc=BigPingPong-main-ping-S420:
+    (next(BigPingPong-main-ping-count)=-45 & next(pc)=BigPingPong-main-ping-S421);
+BigPingPong-main-ping-count=-45 & pc=BigPingPong-main-ping-S421:
+    (next(BigPingPong-main-ping-count)=-45 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=-45 & pc=BigPingPong-main-pung-S210:
+    (next(BigPingPong-main-ping-count)=-45 & next(pc)=BigPingPong-main-ping-S422);
+BigPingPong-main-ping-count=-45 & pc=BigPingPong-main-ping-S422:
+    (next(BigPingPong-main-ping-count)=-44 & next(pc)=BigPingPong-main-ping-S423);
+BigPingPong-main-ping-count=-44 & pc=BigPingPong-main-ping-S423:
+    (next(BigPingPong-main-ping-count)=-44 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=-44 & pc=BigPingPong-main-pung-S211:
+    (next(BigPingPong-main-ping-count)=-44 & next(pc)=BigPingPong-main-ping-S424);
+BigPingPong-main-ping-count=-44 & pc=BigPingPong-main-ping-S424:
+    (next(BigPingPong-main-ping-count)=-43 & next(pc)=BigPingPong-main-ping-S425);
+BigPingPong-main-ping-count=-43 & pc=BigPingPong-main-ping-S425:
+    (next(BigPingPong-main-ping-count)=-43 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=-43 & pc=BigPingPong-main-pung-S212:
+    (next(BigPingPong-main-ping-count)=-43 & next(pc)=BigPingPong-main-ping-S426);
+BigPingPong-main-ping-count=-43 & pc=BigPingPong-main-ping-S426:
+    (next(BigPingPong-main-ping-count)=-42 & next(pc)=BigPingPong-main-ping-S427);
+BigPingPong-main-ping-count=-42 & pc=BigPingPong-main-ping-S427:
+    (next(BigPingPong-main-ping-count)=-42 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=-42 & pc=BigPingPong-main-pung-S213:
+    (next(BigPingPong-main-ping-count)=-42 & next(pc)=BigPingPong-main-ping-S428);
+BigPingPong-main-ping-count=-42 & pc=BigPingPong-main-ping-S428:
+    (next(BigPingPong-main-ping-count)=-41 & next(pc)=BigPingPong-main-ping-S429);
+BigPingPong-main-ping-count=-41 & pc=BigPingPong-main-ping-S429:
+    (next(BigPingPong-main-ping-count)=-41 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=-41 & pc=BigPingPong-main-pung-S214:
+    (next(BigPingPong-main-ping-count)=-41 & next(pc)=BigPingPong-main-ping-S430);
+BigPingPong-main-ping-count=-41 & pc=BigPingPong-main-ping-S430:
+    (next(BigPingPong-main-ping-count)=-40 & next(pc)=BigPingPong-main-ping-S431);
+BigPingPong-main-ping-count=-40 & pc=BigPingPong-main-ping-S431:
+    (next(BigPingPong-main-ping-count)=-40 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=-40 & pc=BigPingPong-main-pung-S215:
+    (next(BigPingPong-main-ping-count)=-40 & next(pc)=BigPingPong-main-ping-S432);
+BigPingPong-main-ping-count=-40 & pc=BigPingPong-main-ping-S432:
+    (next(BigPingPong-main-ping-count)=-39 & next(pc)=BigPingPong-main-ping-S433);
+BigPingPong-main-ping-count=-39 & pc=BigPingPong-main-ping-S433:
+    (next(BigPingPong-main-ping-count)=-39 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=-39 & pc=BigPingPong-main-pung-S216:
+    (next(BigPingPong-main-ping-count)=-39 & next(pc)=BigPingPong-main-ping-S434);
+BigPingPong-main-ping-count=-39 & pc=BigPingPong-main-ping-S434:
+    (next(BigPingPong-main-ping-count)=-38 & next(pc)=BigPingPong-main-ping-S435);
+BigPingPong-main-ping-count=-38 & pc=BigPingPong-main-ping-S435:
+    (next(BigPingPong-main-ping-count)=-38 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=-38 & pc=BigPingPong-main-pung-S217:
+    (next(BigPingPong-main-ping-count)=-38 & next(pc)=BigPingPong-main-ping-S436);
+BigPingPong-main-ping-count=-38 & pc=BigPingPong-main-ping-S436:
+    (next(BigPingPong-main-ping-count)=-37 & next(pc)=BigPingPong-main-ping-S437);
+BigPingPong-main-ping-count=-37 & pc=BigPingPong-main-ping-S437:
+    (next(BigPingPong-main-ping-count)=-37 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=-37 & pc=BigPingPong-main-pung-S218:
+    (next(BigPingPong-main-ping-count)=-37 & next(pc)=BigPingPong-main-ping-S438);
+BigPingPong-main-ping-count=-37 & pc=BigPingPong-main-ping-S438:
+    (next(BigPingPong-main-ping-count)=-36 & next(pc)=BigPingPong-main-ping-S439);
+BigPingPong-main-ping-count=-36 & pc=BigPingPong-main-ping-S439:
+    (next(BigPingPong-main-ping-count)=-36 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=-36 & pc=BigPingPong-main-pung-S219:
+    (next(BigPingPong-main-ping-count)=-36 & next(pc)=BigPingPong-main-ping-S440);
+BigPingPong-main-ping-count=-36 & pc=BigPingPong-main-ping-S440:
+    (next(BigPingPong-main-ping-count)=-35 & next(pc)=BigPingPong-main-ping-S441);
+BigPingPong-main-ping-count=-35 & pc=BigPingPong-main-ping-S441:
+    (next(BigPingPong-main-ping-count)=-35 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=-35 & pc=BigPingPong-main-pung-S220:
+    (next(BigPingPong-main-ping-count)=-35 & next(pc)=BigPingPong-main-ping-S442);
+BigPingPong-main-ping-count=-35 & pc=BigPingPong-main-ping-S442:
+    (next(BigPingPong-main-ping-count)=-34 & next(pc)=BigPingPong-main-ping-S443);
+BigPingPong-main-ping-count=-34 & pc=BigPingPong-main-ping-S443:
+    (next(BigPingPong-main-ping-count)=-34 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=-34 & pc=BigPingPong-main-pung-S221:
+    (next(BigPingPong-main-ping-count)=-34 & next(pc)=BigPingPong-main-ping-S444);
+BigPingPong-main-ping-count=-34 & pc=BigPingPong-main-ping-S444:
+    (next(BigPingPong-main-ping-count)=-33 & next(pc)=BigPingPong-main-ping-S445);
+BigPingPong-main-ping-count=-33 & pc=BigPingPong-main-ping-S445:
+    (next(BigPingPong-main-ping-count)=-33 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=-33 & pc=BigPingPong-main-pung-S222:
+    (next(BigPingPong-main-ping-count)=-33 & next(pc)=BigPingPong-main-ping-S446);
+BigPingPong-main-ping-count=-33 & pc=BigPingPong-main-ping-S446:
+    (next(BigPingPong-main-ping-count)=-32 & next(pc)=BigPingPong-main-ping-S447);
+BigPingPong-main-ping-count=-32 & pc=BigPingPong-main-ping-S447:
+    (next(BigPingPong-main-ping-count)=-32 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=-32 & pc=BigPingPong-main-pung-S223:
+    (next(BigPingPong-main-ping-count)=-32 & next(pc)=BigPingPong-main-ping-S448);
+BigPingPong-main-ping-count=-32 & pc=BigPingPong-main-ping-S448:
+    (next(BigPingPong-main-ping-count)=-31 & next(pc)=BigPingPong-main-ping-S449);
+BigPingPong-main-ping-count=-31 & pc=BigPingPong-main-ping-S449:
+    (next(BigPingPong-main-ping-count)=-31 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=-31 & pc=BigPingPong-main-pung-S224:
+    (next(BigPingPong-main-ping-count)=-31 & next(pc)=BigPingPong-main-ping-S450);
+BigPingPong-main-ping-count=-31 & pc=BigPingPong-main-ping-S450:
+    (next(BigPingPong-main-ping-count)=-30 & next(pc)=BigPingPong-main-ping-S451);
+BigPingPong-main-ping-count=-30 & pc=BigPingPong-main-ping-S451:
+    (next(BigPingPong-main-ping-count)=-30 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=-30 & pc=BigPingPong-main-pung-S225:
+    (next(BigPingPong-main-ping-count)=-30 & next(pc)=BigPingPong-main-ping-S452);
+BigPingPong-main-ping-count=-30 & pc=BigPingPong-main-ping-S452:
+    (next(BigPingPong-main-ping-count)=-29 & next(pc)=BigPingPong-main-ping-S453);
+BigPingPong-main-ping-count=-29 & pc=BigPingPong-main-ping-S453:
+    (next(BigPingPong-main-ping-count)=-29 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=-29 & pc=BigPingPong-main-pung-S226:
+    (next(BigPingPong-main-ping-count)=-29 & next(pc)=BigPingPong-main-ping-S454);
+BigPingPong-main-ping-count=-29 & pc=BigPingPong-main-ping-S454:
+    (next(BigPingPong-main-ping-count)=-28 & next(pc)=BigPingPong-main-ping-S455);
+BigPingPong-main-ping-count=-28 & pc=BigPingPong-main-ping-S455:
+    (next(BigPingPong-main-ping-count)=-28 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=-28 & pc=BigPingPong-main-pung-S227:
+    (next(BigPingPong-main-ping-count)=-28 & next(pc)=BigPingPong-main-ping-S456);
+BigPingPong-main-ping-count=-28 & pc=BigPingPong-main-ping-S456:
+    (next(BigPingPong-main-ping-count)=-27 & next(pc)=BigPingPong-main-ping-S457);
+BigPingPong-main-ping-count=-27 & pc=BigPingPong-main-ping-S457:
+    (next(BigPingPong-main-ping-count)=-27 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=-27 & pc=BigPingPong-main-pung-S228:
+    (next(BigPingPong-main-ping-count)=-27 & next(pc)=BigPingPong-main-ping-S458);
+BigPingPong-main-ping-count=-27 & pc=BigPingPong-main-ping-S458:
+    (next(BigPingPong-main-ping-count)=-26 & next(pc)=BigPingPong-main-ping-S459);
+BigPingPong-main-ping-count=-26 & pc=BigPingPong-main-ping-S459:
+    (next(BigPingPong-main-ping-count)=-26 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=-26 & pc=BigPingPong-main-pung-S229:
+    (next(BigPingPong-main-ping-count)=-26 & next(pc)=BigPingPong-main-ping-S460);
+BigPingPong-main-ping-count=-26 & pc=BigPingPong-main-ping-S460:
+    (next(BigPingPong-main-ping-count)=-25 & next(pc)=BigPingPong-main-ping-S461);
+BigPingPong-main-ping-count=-25 & pc=BigPingPong-main-ping-S461:
+    (next(BigPingPong-main-ping-count)=-25 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=-25 & pc=BigPingPong-main-pung-S230:
+    (next(BigPingPong-main-ping-count)=-25 & next(pc)=BigPingPong-main-ping-S462);
+BigPingPong-main-ping-count=-25 & pc=BigPingPong-main-ping-S462:
+    (next(BigPingPong-main-ping-count)=-24 & next(pc)=BigPingPong-main-ping-S463);
+BigPingPong-main-ping-count=-24 & pc=BigPingPong-main-ping-S463:
+    (next(BigPingPong-main-ping-count)=-24 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=-24 & pc=BigPingPong-main-pung-S231:
+    (next(BigPingPong-main-ping-count)=-24 & next(pc)=BigPingPong-main-ping-S464);
+BigPingPong-main-ping-count=-24 & pc=BigPingPong-main-ping-S464:
+    (next(BigPingPong-main-ping-count)=-23 & next(pc)=BigPingPong-main-ping-S465);
+BigPingPong-main-ping-count=-23 & pc=BigPingPong-main-ping-S465:
+    (next(BigPingPong-main-ping-count)=-23 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=-23 & pc=BigPingPong-main-pung-S232:
+    (next(BigPingPong-main-ping-count)=-23 & next(pc)=BigPingPong-main-ping-S466);
+BigPingPong-main-ping-count=-23 & pc=BigPingPong-main-ping-S466:
+    (next(BigPingPong-main-ping-count)=-22 & next(pc)=BigPingPong-main-ping-S467);
+BigPingPong-main-ping-count=-22 & pc=BigPingPong-main-ping-S467:
+    (next(BigPingPong-main-ping-count)=-22 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=-22 & pc=BigPingPong-main-pung-S233:
+    (next(BigPingPong-main-ping-count)=-22 & next(pc)=BigPingPong-main-ping-S468);
+BigPingPong-main-ping-count=-22 & pc=BigPingPong-main-ping-S468:
+    (next(BigPingPong-main-ping-count)=-21 & next(pc)=BigPingPong-main-ping-S469);
+BigPingPong-main-ping-count=-21 & pc=BigPingPong-main-ping-S469:
+    (next(BigPingPong-main-ping-count)=-21 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=-21 & pc=BigPingPong-main-pung-S234:
+    (next(BigPingPong-main-ping-count)=-21 & next(pc)=BigPingPong-main-ping-S470);
+BigPingPong-main-ping-count=-21 & pc=BigPingPong-main-ping-S470:
+    (next(BigPingPong-main-ping-count)=-20 & next(pc)=BigPingPong-main-ping-S471);
+BigPingPong-main-ping-count=-20 & pc=BigPingPong-main-ping-S471:
+    (next(BigPingPong-main-ping-count)=-20 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=-20 & pc=BigPingPong-main-pung-S235:
+    (next(BigPingPong-main-ping-count)=-20 & next(pc)=BigPingPong-main-ping-S472);
+BigPingPong-main-ping-count=-20 & pc=BigPingPong-main-ping-S472:
+    (next(BigPingPong-main-ping-count)=-19 & next(pc)=BigPingPong-main-ping-S473);
+BigPingPong-main-ping-count=-19 & pc=BigPingPong-main-ping-S473:
+    (next(BigPingPong-main-ping-count)=-19 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=-19 & pc=BigPingPong-main-pung-S236:
+    (next(BigPingPong-main-ping-count)=-19 & next(pc)=BigPingPong-main-ping-S474);
+BigPingPong-main-ping-count=-19 & pc=BigPingPong-main-ping-S474:
+    (next(BigPingPong-main-ping-count)=-18 & next(pc)=BigPingPong-main-ping-S475);
+BigPingPong-main-ping-count=-18 & pc=BigPingPong-main-ping-S475:
+    (next(BigPingPong-main-ping-count)=-18 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=-18 & pc=BigPingPong-main-pung-S237:
+    (next(BigPingPong-main-ping-count)=-18 & next(pc)=BigPingPong-main-ping-S476);
+BigPingPong-main-ping-count=-18 & pc=BigPingPong-main-ping-S476:
+    (next(BigPingPong-main-ping-count)=-17 & next(pc)=BigPingPong-main-ping-S477);
+BigPingPong-main-ping-count=-17 & pc=BigPingPong-main-ping-S477:
+    (next(BigPingPong-main-ping-count)=-17 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=-17 & pc=BigPingPong-main-pung-S238:
+    (next(BigPingPong-main-ping-count)=-17 & next(pc)=BigPingPong-main-ping-S478);
+BigPingPong-main-ping-count=-17 & pc=BigPingPong-main-ping-S478:
+    (next(BigPingPong-main-ping-count)=-16 & next(pc)=BigPingPong-main-ping-S479);
+BigPingPong-main-ping-count=-16 & pc=BigPingPong-main-ping-S479:
+    (next(BigPingPong-main-ping-count)=-16 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=-16 & pc=BigPingPong-main-pung-S239:
+    (next(BigPingPong-main-ping-count)=-16 & next(pc)=BigPingPong-main-ping-S480);
+BigPingPong-main-ping-count=-16 & pc=BigPingPong-main-ping-S480:
+    (next(BigPingPong-main-ping-count)=-15 & next(pc)=BigPingPong-main-ping-S481);
+BigPingPong-main-ping-count=-15 & pc=BigPingPong-main-ping-S481:
+    (next(BigPingPong-main-ping-count)=-15 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=-15 & pc=BigPingPong-main-pung-S240:
+    (next(BigPingPong-main-ping-count)=-15 & next(pc)=BigPingPong-main-ping-S482);
+BigPingPong-main-ping-count=-15 & pc=BigPingPong-main-ping-S482:
+    (next(BigPingPong-main-ping-count)=-14 & next(pc)=BigPingPong-main-ping-S483);
+BigPingPong-main-ping-count=-14 & pc=BigPingPong-main-ping-S483:
+    (next(BigPingPong-main-ping-count)=-14 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=-14 & pc=BigPingPong-main-pung-S241:
+    (next(BigPingPong-main-ping-count)=-14 & next(pc)=BigPingPong-main-ping-S484);
+BigPingPong-main-ping-count=-14 & pc=BigPingPong-main-ping-S484:
+    (next(BigPingPong-main-ping-count)=-13 & next(pc)=BigPingPong-main-ping-S485);
+BigPingPong-main-ping-count=-13 & pc=BigPingPong-main-ping-S485:
+    (next(BigPingPong-main-ping-count)=-13 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=-13 & pc=BigPingPong-main-pung-S242:
+    (next(BigPingPong-main-ping-count)=-13 & next(pc)=BigPingPong-main-ping-S486);
+BigPingPong-main-ping-count=-13 & pc=BigPingPong-main-ping-S486:
+    (next(BigPingPong-main-ping-count)=-12 & next(pc)=BigPingPong-main-ping-S487);
+BigPingPong-main-ping-count=-12 & pc=BigPingPong-main-ping-S487:
+    (next(BigPingPong-main-ping-count)=-12 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=-12 & pc=BigPingPong-main-pung-S243:
+    (next(BigPingPong-main-ping-count)=-12 & next(pc)=BigPingPong-main-ping-S488);
+BigPingPong-main-ping-count=-12 & pc=BigPingPong-main-ping-S488:
+    (next(BigPingPong-main-ping-count)=-11 & next(pc)=BigPingPong-main-ping-S489);
+BigPingPong-main-ping-count=-11 & pc=BigPingPong-main-ping-S489:
+    (next(BigPingPong-main-ping-count)=-11 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=-11 & pc=BigPingPong-main-pung-S244:
+    (next(BigPingPong-main-ping-count)=-11 & next(pc)=BigPingPong-main-ping-S490);
+BigPingPong-main-ping-count=-11 & pc=BigPingPong-main-ping-S490:
+    (next(BigPingPong-main-ping-count)=-10 & next(pc)=BigPingPong-main-ping-S491);
+BigPingPong-main-ping-count=-10 & pc=BigPingPong-main-ping-S491:
+    (next(BigPingPong-main-ping-count)=-10 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=-10 & pc=BigPingPong-main-pung-S245:
+    (next(BigPingPong-main-ping-count)=-10 & next(pc)=BigPingPong-main-ping-S492);
+BigPingPong-main-ping-count=-10 & pc=BigPingPong-main-ping-S492:
+    (next(BigPingPong-main-ping-count)=-9 & next(pc)=BigPingPong-main-ping-S493);
+BigPingPong-main-ping-count=-9 & pc=BigPingPong-main-ping-S493:
+    (next(BigPingPong-main-ping-count)=-9 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=-9 & pc=BigPingPong-main-pung-S246:
+    (next(BigPingPong-main-ping-count)=-9 & next(pc)=BigPingPong-main-ping-S494);
+BigPingPong-main-ping-count=-9 & pc=BigPingPong-main-ping-S494:
+    (next(BigPingPong-main-ping-count)=-8 & next(pc)=BigPingPong-main-ping-S495);
+BigPingPong-main-ping-count=-8 & pc=BigPingPong-main-ping-S495:
+    (next(BigPingPong-main-ping-count)=-8 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=-8 & pc=BigPingPong-main-pung-S247:
+    (next(BigPingPong-main-ping-count)=-8 & next(pc)=BigPingPong-main-ping-S496);
+BigPingPong-main-ping-count=-8 & pc=BigPingPong-main-ping-S496:
+    (next(BigPingPong-main-ping-count)=-7 & next(pc)=BigPingPong-main-ping-S497);
+BigPingPong-main-ping-count=-7 & pc=BigPingPong-main-ping-S497:
+    (next(BigPingPong-main-ping-count)=-7 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=-7 & pc=BigPingPong-main-pung-S248:
+    (next(BigPingPong-main-ping-count)=-7 & next(pc)=BigPingPong-main-ping-S498);
+BigPingPong-main-ping-count=-7 & pc=BigPingPong-main-ping-S498:
+    (next(BigPingPong-main-ping-count)=-6 & next(pc)=BigPingPong-main-ping-S499);
+BigPingPong-main-ping-count=-6 & pc=BigPingPong-main-ping-S499:
+    (next(BigPingPong-main-ping-count)=-6 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=-6 & pc=BigPingPong-main-pung-S249:
+    (next(BigPingPong-main-ping-count)=-6 & next(pc)=BigPingPong-main-ping-S500);
+BigPingPong-main-ping-count=-6 & pc=BigPingPong-main-ping-S500:
+    (next(BigPingPong-main-ping-count)=-5 & next(pc)=BigPingPong-main-ping-S501);
+BigPingPong-main-ping-count=-5 & pc=BigPingPong-main-ping-S501:
+    (next(BigPingPong-main-ping-count)=-5 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=-5 & pc=BigPingPong-main-pung-S250:
+    (next(BigPingPong-main-ping-count)=-5 & next(pc)=BigPingPong-main-ping-S502);
+BigPingPong-main-ping-count=-5 & pc=BigPingPong-main-ping-S502:
+    (next(BigPingPong-main-ping-count)=-4 & next(pc)=BigPingPong-main-ping-S503);
+BigPingPong-main-ping-count=-4 & pc=BigPingPong-main-ping-S503:
+    (next(BigPingPong-main-ping-count)=-4 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=-4 & pc=BigPingPong-main-pung-S251:
+    (next(BigPingPong-main-ping-count)=-4 & next(pc)=BigPingPong-main-ping-S504);
+BigPingPong-main-ping-count=-4 & pc=BigPingPong-main-ping-S504:
+    (next(BigPingPong-main-ping-count)=-3 & next(pc)=BigPingPong-main-ping-S505);
+BigPingPong-main-ping-count=-3 & pc=BigPingPong-main-ping-S505:
+    (next(BigPingPong-main-ping-count)=-3 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=-3 & pc=BigPingPong-main-pung-S252:
+    (next(BigPingPong-main-ping-count)=-3 & next(pc)=BigPingPong-main-ping-S506);
+BigPingPong-main-ping-count=-3 & pc=BigPingPong-main-ping-S506:
+    (next(BigPingPong-main-ping-count)=-2 & next(pc)=BigPingPong-main-ping-S507);
+BigPingPong-main-ping-count=-2 & pc=BigPingPong-main-ping-S507:
+    (next(BigPingPong-main-ping-count)=-2 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=-2 & pc=BigPingPong-main-pung-S253:
+    (next(BigPingPong-main-ping-count)=-2 & next(pc)=BigPingPong-main-ping-S508);
+BigPingPong-main-ping-count=-2 & pc=BigPingPong-main-ping-S508:
+    (next(BigPingPong-main-ping-count)=-1 & next(pc)=BigPingPong-main-ping-S509);
+BigPingPong-main-ping-count=-1 & pc=BigPingPong-main-ping-S509:
+    (next(BigPingPong-main-ping-count)=-1 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=-1 & pc=BigPingPong-main-pung-S254:
+    (next(BigPingPong-main-ping-count)=-1 & next(pc)=BigPingPong-main-ping-S510);
+BigPingPong-main-ping-count=-1 & pc=BigPingPong-main-ping-S510:
+    (next(BigPingPong-main-ping-count)=0 & next(pc)=BigPingPong-main-ping-S511);
+BigPingPong-main-ping-count=0 & pc=BigPingPong-main-ping-S511:
+    (next(BigPingPong-main-ping-count)=0 & next(pc)=BigPingPong-main-pong-S0);
+BigPingPong-main-ping-count=0 & pc=BigPingPong-main-pung-S255:
+    (next(BigPingPong-main-ping-count)=0 & next(pc)=BigPingPong-main-ping-S0);
+TRUE:
+    next(BigPingPong-main-ping-count)=0 & next(pc)=BigPingPong-main-peng-S1;
+esac
+

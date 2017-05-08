@@ -1,0 +1,23 @@
+MODULE main
+
+VAR
+
+pc : {
+PingPong-main-ping-S0,
+PingPong-main-pong-S0,
+PingPong-main-ping-S1
+};
+
+INIT
+pc=PingPong-main-ping-S0
+
+TRANS
+case
+ pc=PingPong-main-ping-S0:
+    (next(pc)=PingPong-main-pong-S0);
+ pc=PingPong-main-pong-S0:
+    (next(pc)=PingPong-main-ping-S1);
+TRUE:
+    next(pc)=PingPong-main-ping-S1;
+esac
+
