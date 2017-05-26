@@ -18,9 +18,8 @@ all:	all-real
 
 install:
 	sudo mkdir -p /usr/local/include/swiftfsm
-	sudo mkdir -p /usr/local/lib/swiftfsm
-	${E}sudo cp .build/${SWIFT_BUILD_CONFIG}/lib*.${EXT} /usr/local/lib/swiftfsm/
-	${E}sudo cp .build/${SWIFT_BUILD_CONFIG}/*.swift* /usr/local/include/swiftfsm/
+	${E}sudo cp .build/${SWIFT_BUILD_CONFIG}/lib*.${EXT} /usr/local/lib
+	${E}sudo cp .build/${SWIFT_BUILD_CONFIG}/*.swift* /usr/local/include/swiftfsm
 	${E}sudo cp .build/${SWIFT_BUILD_CONFIG}/swiftfsm /usr/local/bin/
 
 test:	swift-test-package
