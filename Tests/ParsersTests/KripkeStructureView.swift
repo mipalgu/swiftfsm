@@ -1,1 +1,0 @@
-../../swiftfsm/KripkeStructureView.swift

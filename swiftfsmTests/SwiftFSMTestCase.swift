@@ -1,9 +1,9 @@
 /*
- * NuSMVKripkeStructureParserTests.swift 
- * tests 
+ * SwiftFSMTestCase.swift
+ * swiftfsm_tests
  *
- * Created by Callum McColl on 16/01/2017.
- * Copyright © 2017 Callum McColl. All rights reserved.
+ * Created by Callum McColl on 26/10/2015.
+ * Copyright © 2015 Callum McColl. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -56,52 +56,56 @@
  *
  */
 
-import IO
+import FSM
 import XCTest
-@testable import Parsers
 
-class NuSMVKripkeStructureParserTests: XCTestCase {
+public class SwiftFSMTestCase: XCTestCase {
 
-    var factory: VariablePrinterFactory!
-    var parser: NuSMVKripkeStructureParser!
-    var writer: NuSMVKripkeStructureView!
+    public var allTests: [(String, () throws -> Void)] {
+        return []
+    }
+    
+    public var counter: UInt = 0
+    
+    public func setUp() {
+        self.counter = 0
+    }
+    
+    public func tearDown() {}
 
-    static var allTests: [(String, (NuSMVKripkeStructureParserTests) -> () throws -> Void)] {
-        return [
-            ("test_parseReturnsTheCorrectStructureFromPingPong", test_parseReturnsTheCorrectStructureFromPingPong),
-            ("test_parseReturnsTheCorrectStructureFromBigPingPong", test_parseReturnsTheCorrectStructureFromBigPingPong)
+    public func createPingPongMachine(
+        end: Bool,
+        slow: Bool
+    ) -> FiniteStateMachine {
+        let f: (String) -> Void = { (str: String) in
+            print(str)
+            self.counter++
+            if (slow) {
+                sleep(1)
+            }
+        }
+        var states: [CallbackState] = [
+            CallbackState("ping", onEntry: {f("ping")}),
+            CallbackState("pong", onEntry: {f("pong")})
         ]
-    }
-
-    override func setUp() {
-        super.setUp()
-        self.factory = VariablePrinterFactory()
-        self.parser = NuSMVKripkeStructureParser()
-        self.writer = NuSMVKripkeStructureView(factory: self.factory)
-        self.continueAfterFailure = false
-    }
-
-    func test_parseReturnsTheCorrectStructureFromPingPong() {
-        self.checkSMV(fromFile: "../PingPong.smv")
-    }
-
-    func test_parseReturnsTheCorrectStructureFromBigPingPong() {
-        self.checkSMV(fromFile: "../BigPingPong.smv")
-    }
-
-    func checkSMV(fromFile file: String) {
-        guard let structure = self.parser.parse(file: file) else {
-            XCTAssertNotNil(nil)
-            return
+        var transitions: [Transition] = [
+            EmptyTransition(source: states[0], target: states[1]),
+            EmptyTransition(source: states[1], target: states[0])
+        ]
+        states[0].addTransition(transitions[0])
+        if (false == end) {
+            states[1].addTransition(transitions[1])
         }
-        self.writer.make(structure: structure)
-        var contents: String? = nil
-        do {
-            contents = try String(contentsOfFile: file)
-        } catch {
-            XCTAssertNotNil(nil)
-        }
-        XCTAssertEqual(self.factory.payload[file], contents)
+        
+        return FSM(initialState: states[0], ringlet: MiPalRinglet())
     }
-
+    
+    public func getSlowPingPongMachine(end: Bool = true) -> FiniteStateMachine {
+        return self.createPingPongMachine(end, slow: true)
+    }
+    
+    public func getFastPingPongMachine(end: Bool = true) -> FiniteStateMachine {
+        return self.createPingPongMachine(end, slow: false)
+    }
+    
 }

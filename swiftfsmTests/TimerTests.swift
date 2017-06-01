@@ -1,9 +1,9 @@
 /*
- * main.swift 
- * tests 
+ * TimerTests.swift
+ * swiftfsm_tests
  *
- * Created by Callum McColl on 14/01/2017.
- * Copyright © 2017 Callum McColl. All rights reserved.
+ * Created by Callum McColl on 26/10/2015.
+ * Copyright © 2015 Callum McColl. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -56,9 +56,45 @@
  *
  */
 
+@testable import swiftfsm
 import XCTest
 
-XCTMain([
-    testCase(MachineParserTests.allTests),
-    testCase(NuSMVKripkeStructureParserTests.allTests)
-])
+#if os(Linux)
+import Glibc
+#elseif os(OSX)
+import Darwin
+#endif
+
+public class TimerTests: SwiftFSMTestCase {
+    
+    public override var allTests: [(String, () -> Void)] {
+        return [
+            ("testDelayWorks", testDelayWorks)
+        ]
+    }
+    
+    private var running: Bool = false
+    private var timer: Timer!
+    
+    public override func setUp() {
+        self.running = false
+        self.timer = Timer(thread: SingleThread())
+    }
+    
+    private func testFunc() {
+        self.running = true
+        sleep(1)
+        self.running = false
+    }
+    
+    public func testDelayWorks() {
+        let timestamp: UInt = microseconds()
+        let delay: UInt = 15000
+        self.timer.delay(delay, callback: testFunc)
+        while(false == self.running) {}
+        while(true == self.running) {}
+        let runTime: UInt = microseconds() - timestamp
+        XCTAssert(runTime >= delay && delay < runTime + 1000)
+    }
+    
+}

@@ -56,56 +56,51 @@
  *
  */
 
+@testable import swiftfsm
 import FSM
 import XCTest
 
 public class SwiftFSMTestCase: XCTestCase {
 
-    public var allTests: [(String, () throws -> Void)] {
-        return []
-    }
-    
     public var counter: UInt = 0
     
-    public func setUp() {
+    public override func setUp() {
         self.counter = 0
     }
     
-    public func tearDown() {}
+    public override func tearDown() {}
 
-    public func createPingPongMachine(
-        end: Bool,
+    /*public func createPingPongMachine(
+        _ end: Bool,
         slow: Bool
-    ) -> FiniteStateMachine {
+    ) -> AnyScheduleableFiniteStateMachine {
         let f: (String) -> Void = { (str: String) in
             print(str)
-            self.counter++
+            self.counter += 1
             if (slow) {
                 sleep(1)
             }
         }
-        var states: [CallbackState] = [
-            CallbackState("ping", onEntry: {f("ping")}),
-            CallbackState("pong", onEntry: {f("pong")})
+        var states: [CallbackMiPalState] = [
+            CallbackMiPalState("ping", onEntry: {f("ping")}),
+            CallbackMiPalState("pong", onEntry: {f("pong")})
         ]
-        var transitions: [Transition] = [
-            EmptyTransition(source: states[0], target: states[1]),
-            EmptyTransition(source: states[1], target: states[0])
-        ]
-        states[0].addTransition(transitions[0])
+        let t1: Transition<MiPalState, MiPalState> = Transition(states[1])
+        states[0].addTransition(t1)
         if (false == end) {
-            states[1].addTransition(transitions[1])
+            let t2: Transition<MiPalState, MiPalState> = Transition(states[0])
+            states[1].addTransition(t2)
         }
         
-        return FSM(initialState: states[0], ringlet: MiPalRinglet())
+        return FSM("PingPong\(self.counter)", ringlet: MiPalRinglet(), initialState: states[0])
     }
     
-    public func getSlowPingPongMachine(end: Bool = true) -> FiniteStateMachine {
+    public func getSlowPingPongMachine(end: Bool = true) -> AnyScheduleableFiniteStateMachine {
         return self.createPingPongMachine(end, slow: true)
     }
     
-    public func getFastPingPongMachine(end: Bool = true) -> FiniteStateMachine {
+    public func getFastPingPongMachine(end: Bool = true) -> AnyScheduleableFiniteStateMachine {
         return self.createPingPongMachine(end, slow: false)
-    }
+    }*/
     
 }
