@@ -83,7 +83,7 @@ public class RoundRobinScheduler: Scheduler {
         // Run until all machines are finished.
         while (false == jobs.isEmpty && false == STOP) {
             var i: Int = 0
-            jobs.forEach { $0.fsms.forEach { $0.takeSnapshot() } }
+            jobs.forEach { $0.fsms.first?.takeSnapshot() }
             jobs.forEach {
                 DEBUG = jobs[i].debug
                 var j: Int = 0
@@ -101,7 +101,7 @@ public class RoundRobinScheduler: Scheduler {
                 }
                 i = i + 1
             }
-            jobs.forEach { $0.fsms.forEach { $0.saveSnapshot() } }
+            jobs.forEach { $0.fsms.first?.saveSnapshot() }
         }
     }
     
