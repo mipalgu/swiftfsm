@@ -101,5 +101,7 @@ public struct Task {
      *  Should we print the help text?
      */
     var printHelpText: Bool = false
+
+    var scheduler: SchedulerFactory? = nil
     
 }
