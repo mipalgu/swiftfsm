@@ -73,6 +73,8 @@ extension GenericPrinter: View {
         switch (error) {
         case .CLFSMMachine(let machineName, let path):
             str = "Unable to load '\(machineName)' at '\(path)', clfsm machines are currently not supported."
+        case .GeneralError(let error):
+            str = error
         case .NoPathsFound:
             str = "Unable to find a path to any machines.  Did you specify one?"
         case .PathNotFound(let machineName):

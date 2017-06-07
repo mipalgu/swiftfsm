@@ -153,8 +153,14 @@ public class Swiftfsm<
             self.view.message(message: parser.helpText)
             self.handleError(SwiftfsmErrors.NoPathsFound)
         }
+        // Error when more than one scheduler is specified.
+        let schedulers = tasks.filter { $0.scheduler != nil }
+        if (schedulers.count > 1) {
+            self.handleError(SwiftfsmErrors.GeneralError(error: "You cannot define more than 1 scheduler."))
+        }
+        let scheduler: SchedulerFactory = schedulers.first?.scheduler ?? self.schedulerFactory
         // Run the tasks.
-        self.handleTasks(tasks)
+        self.handleTasks(tasks, withScheduler: scheduler)
     }
 
     private func cleanArgs(_ args: [String]) -> [String] {
@@ -199,12 +205,12 @@ public class Swiftfsm<
         exit(EXIT_SUCCESS)
     }
     
-    private func handleTasks(_ tasks: [Task]) {
+    private func handleTasks(_ tasks: [Task], withScheduler factory: SchedulerFactory) {
         let t: [(schedule: [Machine], kripke: [Machine])] = tasks.map {
             self.handleTask($0)
         }
         self.generateKripkeStructure(t.flatMap { $0.kripke })
-        self.runMachines(t.flatMap { $0.schedule })
+        self.runMachines(t.flatMap { $0.schedule }, withScheduler: factory)
     }
 
     private func getMachinesName(_ t: Task) -> String {
@@ -277,8 +283,8 @@ public class Swiftfsm<
         return tasks
     }
     
-    private func runMachines(_ machines: [Machine]) {
-        self.schedulerFactory.make(machines: machines).run()
+    private func runMachines(_ machines: [Machine], withScheduler factory: SchedulerFactory) {
+        factory.make(machines: machines).run()
     }
     
 }
