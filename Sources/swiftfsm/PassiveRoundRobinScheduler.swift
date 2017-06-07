@@ -1,8 +1,8 @@
 /*
- * RoundRobinScheduler.swift
+ * PassiveRoundRobinScheduler.swift
  * swiftfsm
  *
- * Created by Callum McColl on 18/08/2015.
+ * Created by Callum McColl on 08/06/2017.
  * Copyright © 2015 Callum McColl. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -61,13 +61,13 @@ import FSM
 /**
  *  Responsible for the execution of machines.
  */
-public class RoundRobinScheduler: Scheduler {
+public class PassiveRoundRobinScheduler: Scheduler {
     
     // All the machines that will be executed.
     public private(set) var machines: [Machine]
     
     /**
-     *  Create a new `RoundRobinScheduler`.
+     *  Create a new `PassiveRoundRobinScheduler`.
      *
      *  - Parameter machines: All the `Machine`s that will be executed.
      */
@@ -83,14 +83,13 @@ public class RoundRobinScheduler: Scheduler {
         // Run until all machines are finished.
         while (false == jobs.isEmpty && false == STOP) {
             var i: Int = 0
+            jobs.forEach { $0.fsms.first?.takeSnapshot() }
             jobs.forEach {
                 DEBUG = jobs[i].debug
                 var j: Int = 0
                 $0.fsms.forEach {
                     if (false == $0.hasFinished) {
-                        jobs[i].fsms[j].takeSnapshot()
                         jobs[i].fsms[j].next()
-                        jobs[i].fsms[j].saveSnapshot()
                         j = j + 1
                         return 
                     }
@@ -98,10 +97,11 @@ public class RoundRobinScheduler: Scheduler {
                 }
                 if (true == jobs[i].fsms.isEmpty) {
                     jobs.remove(at: i)
-                    return
+                    return 
                 }
                 i = i + 1
             }
+            jobs.forEach { $0.fsms.first?.saveSnapshot() }
         }
     }
     
