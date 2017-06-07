@@ -73,8 +73,8 @@ public class SwiftfsmParser: HelpableParser {
         str += "\t\t\tNote: Optionally specify -r or --run to schedule the machine to run as well as generate the kripke structure.\n"
         str += "\t-n <value>, --name <value>\n"
         str += "\t\t\tSpecify a name for the machine.\n"
-        str += "\t-s <rr|prr=rr>, --scheduler <RoundRobin|PassiveRoundRobin=RoundRobin>\n"
-        str += "\t\t Specify which scheduler to use.  Defaults to a round robin scheduler."
+        str += "\t-s <rr|prr>, --scheduler <RoundRobin|PassiveRoundRobin>\n"
+        str += "\t\t\tSpecify which scheduler to use.  Defaults to a round robin scheduler.\n"
         str += "\t-x <value>, --repeat <value>\n"
         str += "\t\t\tSpecify number of times to repeat this command\n"
         return str
