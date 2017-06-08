@@ -123,6 +123,8 @@ public class SwiftfsmParser: HelpableParser {
             return self.handleKripkeFlag(t, words: &words)
         case "-n", "--name":
             return self.handleNameFlag(t, words: &words)
+        case "-s", "--scheduler":
+            return try self.handleSchedulerFlag(t, words: &words)
         case "-x", "--repeat":
             return self.handleRepeatFlag(t, words: &words)
         default:
@@ -184,7 +186,7 @@ public class SwiftfsmParser: HelpableParser {
         return temp
     }
 
-    private func handleScheduleFlag(_ t: Task, words: inout [String]) throws -> Task {
+    private func handleSchedulerFlag(_ t: Task, words: inout [String]) throws -> Task {
         if (words.count < 2) {
             return t
         }
@@ -202,10 +204,12 @@ public class SwiftfsmParser: HelpableParser {
         words.removeFirst()
         switch scheduler {
         case "rr", "RoundRobin":
+            print("Using Round Robin Scheduler")
             var temp: Task = t
             temp.scheduler = RoundRobinSchedulerFactory() 
             return temp
         case "prr", "PassiveRoundRobin":
+            print("Using Passive Scheduler")
             var temp: Task = t
             temp.scheduler = PassiveRoundRobinSchedulerFactory()
             return temp
