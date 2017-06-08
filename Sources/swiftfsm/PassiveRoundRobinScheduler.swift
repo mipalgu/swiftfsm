@@ -1,8 +1,8 @@
 /*
- * Task.swift
+ * PassiveRoundRobinScheduler.swift
  * swiftfsm
  *
- * Created by Callum McColl on 15/12/2015.
+ * Created by Callum McColl on 08/06/2017.
  * Copyright © 2015 Callum McColl. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -56,52 +56,53 @@
  *
  */
 
+import FSM
+
 /**
- *  A data structure that represent all the possible tasks that swiftfsm can
- *  perform.
+ *  Responsible for the execution of machines.
  */
-public struct Task {
+public class PassiveRoundRobinScheduler: Scheduler {
+    
+    // All the machines that will be executed.
+    public private(set) var machines: [Machine]
     
     /**
-     *  Should we add this `Machine` to the scheduler?
+     *  Create a new `PassiveRoundRobinScheduler`.
+     *
+     *  - Parameter machines: All the `Machine`s that will be executed.
      */
-    var addToScheduler: Bool = true
+    public init(machines: [Machine] = []) {
+        self.machines = machines
+    }
     
     /**
-     *  How many times should we repeat this task?
+     *  Start executing all machines.
      */
-    var count: Int = 1
-
-    /**
-     *  Should we enable debugging for this `Machine`.
-     */
-    var enableDebugging: Bool = false
-    
-    /**
-     *  Should we generate a `KripkeStructure` for this `Machine`.
-     */
-    var generateKripkeStructure: Bool = false
-    
-    /**
-     *  Is this `Machine` a clfsm machine?
-     */
-    var isClfsmMachine: Bool = false
-    
-    /**
-     *  The name of the `Machine`.
-     */
-    var name: String? = nil
-    
-    /**
-     *  The path to load the `Machine`.
-     */
-    var path: String? = nil
-    
-    /**
-     *  Should we print the help text?
-     */
-    var printHelpText: Bool = false
-
-    var scheduler: SchedulerFactory? = nil
+    public func run() -> Void {
+        var jobs: [Machine] = self.machines
+        // Run until all machines are finished.
+        while (false == jobs.isEmpty && false == STOP) {
+            var i: Int = 0
+            jobs.forEach { $0.fsms.first?.takeSnapshot() }
+            jobs.forEach {
+                DEBUG = jobs[i].debug
+                var j: Int = 0
+                $0.fsms.forEach {
+                    if (false == $0.hasFinished) {
+                        jobs[i].fsms[j].next()
+                        j = j + 1
+                        return 
+                    }
+                    jobs[i].fsms.remove(at: j)
+                }
+                if (true == jobs[i].fsms.isEmpty) {
+                    jobs.remove(at: i)
+                    return 
+                }
+                i = i + 1
+            }
+            jobs.forEach { $0.fsms.first?.saveSnapshot() }
+        }
+    }
     
 }

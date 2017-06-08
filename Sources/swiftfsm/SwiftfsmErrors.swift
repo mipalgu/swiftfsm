@@ -66,6 +66,11 @@ public enum SwiftfsmErrors: Error {
      *  implemented.
      */
     case CLFSMMachine(machineName: String, path: String)
+
+    /**
+     *  For any error that does not fit nicely into the other errors.
+     */
+    case GeneralError(error: String)
     
     /**
      *  For when there were no paths specified.

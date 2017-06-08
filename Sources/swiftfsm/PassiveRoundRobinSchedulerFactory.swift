@@ -1,8 +1,8 @@
 /*
- * Task.swift
+ * PassiveRoundRobinSchedulerFactory.swift
  * swiftfsm
  *
- * Created by Callum McColl on 15/12/2015.
+ * Created by Callum McColl on 08/06/2017.
  * Copyright © 2015 Callum McColl. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -56,52 +56,20 @@
  *
  */
 
+import FSM
+
 /**
- *  A data structure that represent all the possible tasks that swiftfsm can
- *  perform.
+ *  Provides a way to create a `PassiveRoundRobinScheduler`.
  */
-public struct Task {
+public class PassiveRoundRobinSchedulerFactory: SchedulerFactory {
     
     /**
-     *  Should we add this `Machine` to the scheduler?
+     *  Create a new `PassiveRoundRobinScheduler`.
+     *
+     *  - Parameter machines: All the machines that are going to execute.
      */
-    var addToScheduler: Bool = true
-    
-    /**
-     *  How many times should we repeat this task?
-     */
-    var count: Int = 1
-
-    /**
-     *  Should we enable debugging for this `Machine`.
-     */
-    var enableDebugging: Bool = false
-    
-    /**
-     *  Should we generate a `KripkeStructure` for this `Machine`.
-     */
-    var generateKripkeStructure: Bool = false
-    
-    /**
-     *  Is this `Machine` a clfsm machine?
-     */
-    var isClfsmMachine: Bool = false
-    
-    /**
-     *  The name of the `Machine`.
-     */
-    var name: String? = nil
-    
-    /**
-     *  The path to load the `Machine`.
-     */
-    var path: String? = nil
-    
-    /**
-     *  Should we print the help text?
-     */
-    var printHelpText: Bool = false
-
-    var scheduler: SchedulerFactory? = nil
+    public func make(machines: [Machine]) -> Scheduler {
+        return PassiveRoundRobinScheduler(machines: machines)
+    }
     
 }

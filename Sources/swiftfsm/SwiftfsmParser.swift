@@ -73,6 +73,8 @@ public class SwiftfsmParser: HelpableParser {
         str += "\t\t\tNote: Optionally specify -r or --run to schedule the machine to run as well as generate the kripke structure.\n"
         str += "\t-n <value>, --name <value>\n"
         str += "\t\t\tSpecify a name for the machine.\n"
+        str += "\t-s <rr|prr>, --scheduler <RoundRobin|PassiveRoundRobin>\n"
+        str += "\t\t\tSpecify which scheduler to use.  Defaults to a round robin scheduler.\n"
         str += "\t-x <value>, --repeat <value>\n"
         str += "\t\t\tSpecify number of times to repeat this command\n"
         return str
@@ -180,6 +182,36 @@ public class SwiftfsmParser: HelpableParser {
         var temp: Task = t
         temp.name = words.first!
         return temp
+    }
+
+    private func handleScheduleFlag(_ t: Task, words: inout [String]) throws -> Task {
+        if (words.count < 2) {
+            return t
+        }
+        let scheduler = words[1]
+        // Ignore empty strings as schedulers.
+        if (true == scheduler.characters.isEmpty) {
+            words.removeFirst()
+            return t
+        }
+        // Ignore other flags if the user forgets to enter a scheduler after the
+        // flag.
+        if ("-" == scheduler.characters.first!) {
+            return t
+        }
+        words.removeFirst()
+        switch scheduler {
+        case "rr", "RoundRobin":
+            var temp: Task = t
+            temp.scheduler = RoundRobinSchedulerFactory() 
+            return temp
+        case "prr", "PassiveRoundRobin":
+            var temp: Task = t
+            temp.scheduler = PassiveRoundRobinSchedulerFactory()
+            return temp
+        default:
+            throw SwiftfsmErrors.UnknownFlag(flag: scheduler)
+        }
     }
     
     private func handlePath(_ t: Task, words: inout [String]) throws -> Task {

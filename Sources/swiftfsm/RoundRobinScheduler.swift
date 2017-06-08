@@ -88,7 +88,9 @@ public class RoundRobinScheduler: Scheduler {
                 var j: Int = 0
                 $0.fsms.forEach {
                     if (false == $0.hasFinished) {
+                        jobs[i].fsms[j].takeSnapshot()
                         jobs[i].fsms[j].next()
+                        jobs[i].fsms[j].saveSnapshot()
                         j = j + 1
                         return 
                     }
@@ -96,7 +98,7 @@ public class RoundRobinScheduler: Scheduler {
                 }
                 if (true == jobs[i].fsms.isEmpty) {
                     jobs.remove(at: i)
-                    return 
+                    return
                 }
                 i = i + 1
             }
