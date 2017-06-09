@@ -1,9 +1,9 @@
 /*
- * PassiveRoundRobinScheduler.swift
- * swiftfsm
+ * PerMachineTokenizer.swift 
+ * swiftfsm 
  *
- * Created by Callum McColl on 08/06/2017.
- * Copyright © 2015 Callum McColl. All rights reserved.
+ * Created by Callum McColl on 09/06/2017.
+ * Copyright © 2017 Callum McColl. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -58,51 +58,12 @@
 
 import FSM
 
-/**
- *  Responsible for the execution of machines.
- */
-public class PassiveRoundRobinScheduler: Scheduler {
-    
-    // All the machines that will be executed.
-    public private(set) var machines: [Machine]
-    
-    /**
-     *  Create a new `PassiveRoundRobinScheduler`.
-     *
-     *  - Parameter machines: All the `Machine`s that will be executed.
-     */
-    public init(machines: [Machine] = []) {
-        self.machines = machines
-    }
-    
-    /**
-     *  Start executing all machines.
-     */
-    public func run() -> Void {
-        var jobs: [Machine] = self.machines
-        // Run until all machines are finished.
-        while (false == jobs.isEmpty && false == STOP) {
-            var i: Int = 0
-            jobs.forEach { $0.fsms.first?.takeSnapshot() }
-            jobs.forEach {
-                DEBUG = jobs[i].debug
-                var j: Int = 0
-                $0.fsms.forEach {
-                    if (false == $0.hasFinished) {
-                        jobs[i].fsms[j].next()
-                        j = j + 1
-                        return 
-                    }
-                    jobs[i].fsms.remove(at: j)
-                }
-                if (true == jobs[i].fsms.isEmpty) {
-                    jobs.remove(at: i)
-                    return 
-                }
-                i = i + 1
-            }
-            jobs.forEach { $0.fsms.first?.saveSnapshot() }
+public final class PerMachineTokenizer: SchedulerTokenizer {
+
+    public func separate(_ machines: [Machine]) -> [[(AnyScheduleableFiniteStateMachine, Machine)]] {
+        return machines.map { machine in
+            machine.fsms.map { ($0, machine) }
         }
     }
-    
+
 }

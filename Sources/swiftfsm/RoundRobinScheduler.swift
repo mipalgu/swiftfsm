@@ -61,48 +61,63 @@ import FSM
 /**
  *  Responsible for the execution of machines.
  */
-public class RoundRobinScheduler: Scheduler {
+public class RoundRobinScheduler<Tokenizer: SchedulerTokenizer>: Scheduler where
+    Tokenizer.Object == Machine,
+    Tokenizer.SchedulerToken == AnyScheduleableFiniteStateMachine
+{
     
     // All the machines that will be executed.
     public private(set) var machines: [Machine]
+
+    private let tokenizer: Tokenizer
     
     /**
      *  Create a new `RoundRobinScheduler`.
      *
      *  - Parameter machines: All the `Machine`s that will be executed.
      */
-    public init(machines: [Machine] = []) {
+    public init(machines: [Machine] = [], tokenizer: Tokenizer) {
         self.machines = machines
+        self.tokenizer = tokenizer
     }
     
     /**
      *  Start executing all machines.
      */
     public func run() -> Void {
-        var jobs: [Machine] = self.machines
+        var jobs = self.tokenizer.separate(self.machines)
         // Run until all machines are finished.
         while (false == jobs.isEmpty && false == STOP) {
-            var i: Int = 0
-            jobs.forEach {
-                DEBUG = jobs[i].debug
-                var j: Int = 0
-                $0.fsms.forEach {
-                    if (false == $0.hasFinished) {
-                        jobs[i].fsms[j].takeSnapshot()
-                        jobs[i].fsms[j].next()
-                        jobs[i].fsms[j].saveSnapshot()
-                        j = j + 1
-                        return 
+            var i = 0
+            for job in jobs {
+                var j = 0
+                let machines: Set<Machine> = self.getMachines(fromJob: job)
+                machines.forEach { $0.fsms.first?.takeSnapshot() }
+                for (fsm, machine) in job {
+                    DEBUG = machine.debug
+                    fsm.next()
+                    if (true == fsm.hasFinished) {
+                        jobs[i].remove(at: j)
+                        continue
                     }
-                    jobs[i].fsms.remove(at: j)
+                    j += 1
                 }
-                if (true == jobs[i].fsms.isEmpty) {
+                machines.forEach { $0.fsms.first?.saveSnapshot() }
+                if (true == jobs[i].isEmpty) {
                     jobs.remove(at: i)
-                    return
+                    continue
                 }
-                i = i + 1
+                i += 1
             }
         }
+    }
+
+    private func getMachines(fromJob job: [(AnyScheduleableFiniteStateMachine, Machine)]) -> Set<Machine> {
+        var machines: Set<Machine> = []
+        job.forEach {
+            machines.insert($1)
+        }
+        return machines
     }
     
 }

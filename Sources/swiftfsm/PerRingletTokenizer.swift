@@ -1,9 +1,9 @@
 /*
- * PassiveRoundRobinSchedulerFactory.swift
- * swiftfsm
+ * PerRingletTokenizer.swift 
+ * swiftfsm 
  *
- * Created by Callum McColl on 08/06/2017.
- * Copyright © 2015 Callum McColl. All rights reserved.
+ * Created by Callum McColl on 09/06/2017.
+ * Copyright © 2017 Callum McColl. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -58,21 +58,12 @@
 
 import FSM
 
-/**
- *  Provides a way to create a `PassiveRoundRobinScheduler`.
- */
-public class PassiveRoundRobinSchedulerFactory: SchedulerFactory {
-    
-    /**
-     *  Create a new `PassiveRoundRobinScheduler`.
-     *
-     *  - Parameter machines: All the machines that are going to execute.
-     */
-    public func make(machines: [Machine]) -> Scheduler {
-        return RoundRobinScheduler(
-            machines: machines,
-            tokenizer: PerScheduleCycleTokenizer()
-        )
+public final class PerRingletTokenizer: SchedulerTokenizer {
+
+    public func separate(_ machines: [Machine]) -> [[(AnyScheduleableFiniteStateMachine, Machine)]] {
+        return machines.lazy.flatMap { machine in
+            machine.fsms.map { ($0, machine) }
+        }.map { [$0] }
     }
-    
+
 }

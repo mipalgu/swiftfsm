@@ -62,7 +62,7 @@ import FSM
  *  `Machine`s are data structures that contain everything that is needed for
  *  the Finite State Machines to be scheduled.
  */
-public struct Machine: Equatable {
+public struct Machine {
     
     /**
      *  Should debugging be turned on?
@@ -96,6 +96,16 @@ public struct Machine: Equatable {
     
 }
 
+extension Machine: Equatable {}
+
 public func ==(lhs: Machine, rhs: Machine) -> Bool {
     return lhs.name == rhs.name
+}
+
+extension Machine: Hashable {
+
+    public var hashValue: Int {
+        return self.name.hashValue
+    }
+
 }

@@ -111,7 +111,7 @@ public class NuSMVKripkeStructureView: KripkeStructureView {
      *  the NuSMV representation.
      */
     public func make(structure: KripkeStructureType) {
-        if (true == structure.states.isEmpty) {
+        /*if (true == structure.states.isEmpty) {
             return
         }
         self.data = [:]
@@ -126,8 +126,10 @@ public class NuSMVKripkeStructureView: KripkeStructureView {
         // Generate a combined Kripke Structure if there is more than 1 machine.
         if (self.data.count > 1) {
             self.generateCombinedStructure()
-        }
+        }*/
     }
+
+/*
 
     private func initializeDefaultProperties(_ d: Data) {
         d.states.forEach {
@@ -579,6 +581,8 @@ public class NuSMVKripkeStructureView: KripkeStructureView {
             return false
         }
     }
+
+*/
 
 }
 

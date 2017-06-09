@@ -1,9 +1,9 @@
 /*
- * PassiveRoundRobinSchedulerFactory.swift
- * swiftfsm
+ * SchedulerTokenizer.swift 
+ * swiftfsm 
  *
- * Created by Callum McColl on 08/06/2017.
- * Copyright © 2015 Callum McColl. All rights reserved.
+ * Created by Callum McColl on 09/06/2017.
+ * Copyright © 2017 Callum McColl. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -57,22 +57,18 @@
  */
 
 import FSM
+import KripkeStructure
 
-/**
- *  Provides a way to create a `PassiveRoundRobinScheduler`.
- */
-public class PassiveRoundRobinSchedulerFactory: SchedulerFactory {
-    
-    /**
-     *  Create a new `PassiveRoundRobinScheduler`.
-     *
-     *  - Parameter machines: All the machines that are going to execute.
-     */
-    public func make(machines: [Machine]) -> Scheduler {
-        return RoundRobinScheduler(
-            machines: machines,
-            tokenizer: PerScheduleCycleTokenizer()
-        )
-    }
-    
+public protocol SchedulerTokenizer {
+
+    associatedtype Object
+    associatedtype SchedulerToken:
+        PartialExecuter,
+        Finishable,
+        Suspendable,
+        Snapshotable,
+        KripkePropertiesRecordable
+
+    func separate(_: [Object]) -> [[(SchedulerToken, Object)]]
+
 }

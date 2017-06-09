@@ -214,7 +214,7 @@ public class SwiftfsmParser: HelpableParser {
             temp.scheduler = PassiveRoundRobinSchedulerFactory()
             return temp
         default:
-            throw SwiftfsmErrors.UnknownFlag(flag: scheduler)
+            throw SwiftfsmErrors.GeneralError(error: "Unknown value for scheduler flag")
         }
     }
     
