@@ -95,6 +95,7 @@ public class RoundRobinScheduler<Tokenizer: SchedulerTokenizer>: Scheduler where
                 machines.forEach { $0.fsms.first?.takeSnapshot() }
                 for (fsm, machine) in job {
                     DEBUG = machine.debug
+                    fsm.next()
                     if (true == fsm.hasFinished) {
                         jobs[i].remove(at: j)
                         continue
