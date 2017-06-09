@@ -116,6 +116,7 @@ public class RoundRobinScheduler<Tokenizer: SchedulerTokenizer>: Scheduler where
         job.forEach {
             machines.insert($1)
         }
+        return machines
     }
     
 }
