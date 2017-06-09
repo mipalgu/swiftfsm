@@ -177,7 +177,7 @@ public class Swiftfsm<
     }
     
     private func generateKripkeStructure(_ machines: [Machine]) {
-        let structures = machines >>- { (machine: Machine) -> [KripkeStructure] in
+        /*let structures = machines >>- { (machine: Machine) -> [KripkeStructure] in
             machine.fsms.map { $0.generate(machine: machine.name)  }
         }
         var states: [[KripkeState]] = []
@@ -192,7 +192,7 @@ public class Swiftfsm<
                     return states
                 }
             )
-        self.kripkeStructureView.make(structure: structure)
+        self.kripkeStructureView.make(structure: structure)*/
     }
     
     private func handleError(_ error: SwiftfsmErrors) -> Never {
