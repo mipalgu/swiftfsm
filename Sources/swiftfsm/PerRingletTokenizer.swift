@@ -61,9 +61,9 @@ import FSM
 public final class PerRingletTokenizer: SchedulerTokenizer {
 
     public func separate(_ machines: [Machine]) -> [[(AnyScheduleableFiniteStateMachine, Machine)]] {
-        return [machines.flatMap { machine in
+        return machines.lazy.flatMap { machine in
             machine.fsms.map { ($0, machine) }
-        }]
+        }.map { [$0] }
     }
 
 }
