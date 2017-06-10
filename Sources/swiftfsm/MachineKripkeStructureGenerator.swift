@@ -60,23 +60,45 @@ import KripkeStructure
 import FSM
 
 public final class MachineKripkeStructureGenerator<
+    Detector: CycleDetector,
     Tokenizer: SchedulerTokenizer
 >: KripkeStructureGenerator where 
     Tokenizer.Object == Machine,
     Tokenizer.SchedulerToken == AnyScheduleableFiniteStateMachine
 {
 
+    private struct Job {
+
+        let cache: Detector.Data
+
+        let lastSnapshot: World
+
+        let tokens: [(AnyScheduleableFiniteStateMachine, Machine)]
+
+    }
+
+    private let cycleDetector: Detector
+
     private let machines: [Machine]
 
     private let tokenizer: Tokenizer
 
-    public init(machines: [Machine], tokenizer: Tokenizer) {
+    public init(cycleDetector: Detector, machines: [Machine], tokenizer: Tokenizer) {
+        self.cycleDetector = cycleDetector
         self.machines = machines
         self.tokenizer = tokenizer
     }
 
     public func generate() -> KripkeStructure {
         let tokens = tokenizer.separate(machines)
+        var jobs: [MachineKripkeStructureGenerator.Job] = tokens.map {
+            MachineKripkeStructureGenerator.Job(
+                cache: self.cycleDetector.initialData,
+                lastSnapshot: World(externalVariables: [:], variables: [:]),
+                tokens: $0
+            )
+        }
+        var states: [KripkeState] = []
         return KripkeStructure()
     }
 
