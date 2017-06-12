@@ -189,7 +189,7 @@ public class Swiftfsm<
                     runner: SpinnerRunner()
                 )
             ),
-            tokenizer: PerRingletTokenizer()
+            tokenizer: PerScheduleCycleTokenizer()
         )
         let _ = generator.generate()
         /*let structures = machines >>- { (machine: Machine) -> [KripkeStructure] in
