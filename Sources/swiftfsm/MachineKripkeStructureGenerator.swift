@@ -135,7 +135,7 @@ public final class MachineKripkeStructureGenerator<
         while false == jobs.isEmpty {
             let job = jobs.removeFirst()
             // Execute the tokens for the current job for all variations of external variables.
-            while let (externals, properties) = spinner() {
+            while let externals = spinner() {
                 // Clone all fsms.
                 let clones = job.tokens.lazy.map { (fsm: AnyScheduleableFiniteStateMachine, machine: Machine) -> (AnyScheduleableFiniteStateMachine, Machine) in
                     var clone = fsm.clone()
@@ -144,7 +144,7 @@ public final class MachineKripkeStructureGenerator<
                     }
                     var j = 0
                     for i in index..<(index + count) {
-                        clone.externalVariables[j].val = externals[i].val
+                        clone.externalVariables[j].val = externals[i].0.val
                         j += 1
                     }
                     return (clone, machine)
@@ -153,9 +153,13 @@ public final class MachineKripkeStructureGenerator<
                 guard let firstClone = clones.first else {
                     continue
                 }
+                var ps: KripkeStatePropertyList = [:]
+                externals.enumerated().forEach {
+                    ps["\($0)"] = KripkeStateProperty(type: .Compound($1.1), value: $1.0.val)
+                }
                 let startingWorld = World(
-                    externalsVariables: job.lastWorld.externalVariables <| properties,
-                    variables: job.lastWorld.variables <| ["\(firstClone.machine.name).\(firstClone.fsm.name)": firstClone.fsm.currentRecord()]
+                    externalVariables: job.lastSnapshot.externalVariables <| ps,
+                    variables: job.lastSnapshot.variables <| ["\(firstClone.1.name).\(firstClone.0.name)": KripkeStateProperty(type: .Compound(firstClone.0.currentRecord), value: firstClone.0)]
                 )
                 // Check for cycles.
                 let (inCycle, newCache) = self.cycleDetector.inCycle(data: job.cache, element: startingWorld)
@@ -193,7 +197,7 @@ public final class MachineKripkeStructureGenerator<
                 jobs.append(MachineKripkeStructureGenerator.Job(
                     cache: newCache,
                     lastSnapshot: startingWorld,
-                    tokens: clones,
+                    tokens: Array(clones),
                     lastState: tempStates.last
                 ))
             }
@@ -204,7 +208,7 @@ public final class MachineKripkeStructureGenerator<
     private func fetchUniqueMachines(fromMachines machines: [Machine]) -> Set<Machine> {
         var uniqueMachines: Set<Machine> = []
         machines.forEach {
-            uniqueMachines.insert($1)
+            uniqueMachines.insert($0)
         }
         return uniqueMachines
     }
