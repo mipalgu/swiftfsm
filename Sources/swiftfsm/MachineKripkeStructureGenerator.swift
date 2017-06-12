@@ -120,7 +120,6 @@ public final class MachineKripkeStructureGenerator<
             return KripkeStructure(states: [])
         }
         let (data, externalCounts) = self.makeExternalsData(forMachines: machines)
-        let spinner = self.spinnerConstructor.makeSpinner(forExternals: data.flatMap { $0 })
         // Create initial jobs.
         let tokens = tokenizer.separate(self.machines)
         var jobs: [MachineKripkeStructureGenerator.Job] = tokens.map {
@@ -133,12 +132,10 @@ public final class MachineKripkeStructureGenerator<
         }
         // Loop until we run out of jobs.
         while false == jobs.isEmpty {
-            print("jobs: \(jobs.count)")
             let job = jobs.removeFirst()
             // Execute the tokens for the current job for all variations of external variables.
-            print("start spinning")
+            let spinner = self.spinnerConstructor.makeSpinner(forExternals: data.flatMap { $0 })
             while let externals = spinner() {
-                print("externals: \(externals.map { $0.0.val })")
                 // Clone all fsms.
                 let clones = job.tokens.lazy.map { (fsm: AnyScheduleableFiniteStateMachine, machine: Machine) -> (AnyScheduleableFiniteStateMachine, Machine) in
                     var clone = fsm.clone()
@@ -153,16 +150,20 @@ public final class MachineKripkeStructureGenerator<
                     return (clone, machine)
                 }
                 // Create a world from the first clone.
-                guard let firstClone = clones.first else {
-                    continue
-                }
                 var ps: KripkeStatePropertyList = [:]
                 externals.enumerated().forEach {
                     ps["\($0)"] = KripkeStateProperty(type: .Compound($1.1), value: $1.0.val)
                 }
+                var varPs: KripkeStatePropertyList = [:]
+                clones.forEach {
+                    varPs["\($0.1.name).\($0.0.name)"] = KripkeStateProperty(
+                        type: .Compound($0.0.currentRecord),
+                        value: $0.0
+                    )
+                }
                 let startingWorld = World(
                     externalVariables: job.lastSnapshot.externalVariables <| ps,
-                    variables: job.lastSnapshot.variables <| ["\(firstClone.1.name).\(firstClone.0.name)": KripkeStateProperty(type: .Compound(firstClone.0.currentRecord), value: firstClone.0)]
+                    variables: job.lastSnapshot.variables <| varPs
                 )
                 // Check for cycles.
                 let (inCycle, newCache) = self.cycleDetector.inCycle(data: job.cache, element: startingWorld)
