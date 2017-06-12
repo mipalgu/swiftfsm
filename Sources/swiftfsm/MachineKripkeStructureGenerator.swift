@@ -133,9 +133,12 @@ public final class MachineKripkeStructureGenerator<
         }
         // Loop until we run out of jobs.
         while false == jobs.isEmpty {
+            print("jobs: \(jobs.count)")
             let job = jobs.removeFirst()
             // Execute the tokens for the current job for all variations of external variables.
+            print("start spinning")
             while let externals = spinner() {
+                print("externals: \(externals.map { $0.0.val })")
                 // Clone all fsms.
                 let clones = job.tokens.lazy.map { (fsm: AnyScheduleableFiniteStateMachine, machine: Machine) -> (AnyScheduleableFiniteStateMachine, Machine) in
                     var clone = fsm.clone()
