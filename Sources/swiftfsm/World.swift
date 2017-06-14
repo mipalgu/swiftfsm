@@ -69,8 +69,21 @@ public struct World {
 extension World: CustomStringConvertible {
 
     public var description: String {
-        return "externalVariables: \(self.externalVariables), variables: \(self.variables)"
+        return "externalVariables: \(self.sortedStrings(self.externalVariables)), variables: \(self.sortedStrings(self.variables))"
     }
+
+    private func sortedStrings(_ list: KripkeStatePropertyList) -> [String] {
+        let unsorted: [String] = list.map {
+            switch $1.type {
+            case .Compound(let l):
+                return $0 + ": \(self.sortedStrings(l))"
+            default:
+                return  $0 + ":" + $1.description
+            }
+        }
+        return unsorted.sorted()
+    }
+
 
 }
 
