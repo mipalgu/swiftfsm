@@ -69,7 +69,16 @@ public struct World {
 extension World: CustomStringConvertible {
 
     public var description: String {
-        return "externalVariables: \(self.sortedStrings(self.externalVariables)), variables: \(self.sortedStrings(self.variables))"
+        return "externalVariables: \(self.externalVariables), variables: \(self.variables)"
+    }
+
+
+}
+
+extension World: Hashable {
+
+    public var hashValue: Int {
+        return "externalVariables: \(self.sortedStrings(self.externalVariables)), variables: \(self.sortedStrings(self.variables))".hashValue
     }
 
     private func sortedStrings(_ list: KripkeStatePropertyList) -> [String] {
@@ -82,15 +91,6 @@ extension World: CustomStringConvertible {
             }
         }
         return unsorted.sorted()
-    }
-
-
-}
-
-extension World: Hashable {
-
-    public var hashValue: Int {
-        return self.description.hashValue
     }
 
 }
