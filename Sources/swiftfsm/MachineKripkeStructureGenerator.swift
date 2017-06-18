@@ -117,7 +117,8 @@ public final class MachineKripkeStructureGenerator<
     }
 
     public func generate() -> KripkeStructure {
-        var states: [[KripkeState]] = []
+        var states: [KripkeState] = []
+        states.reserveCapacity(500000)
         // Create spinner.
         let machines = self.fetchUniqueMachines(fromMachines: self.machines)
         guard false == machines.isEmpty else {
@@ -158,9 +159,7 @@ public final class MachineKripkeStructureGenerator<
                 // Create a `KripkeState` for each ringlet executing in each fsm.
                 let tempStates = execute(clones: clones[job.executing], withLastState: job.lastState)
                 // Append the states to the states array if these are starting states.
-                if (nil == job.lastState) {
-                    states.append(tempStates)
-                }
+                states.append(contentsOf: tempStates)
                 // Create a new job from the clones.
                 jobs.append(MachineKripkeStructureGenerator.Job(
                     cache: newCache,
@@ -172,7 +171,7 @@ public final class MachineKripkeStructureGenerator<
                 ))
             }
         }
-        return KripkeStructure(states: states)
+        return KripkeStructure(states: [states])
     }
 
     private func execute(clones: [(fsm: AnyScheduleableFiniteStateMachine, machine: Machine)], withLastState last: KripkeState?) -> [KripkeState] {
