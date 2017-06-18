@@ -191,7 +191,8 @@ public class Swiftfsm<
             ),
             tokenizer: PerRingletTokenizer()
         )
-        let _ = generator.generate()
+        let structure = generator.generate()
+        self.kripkeStructureView.make(structure: structure)
         /*let structures = machines >>- { (machine: Machine) -> [KripkeStructure] in
             machine.fsms.map { $0.generate(machine: machine.name)  }
         }
