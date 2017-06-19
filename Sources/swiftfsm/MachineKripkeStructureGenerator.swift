@@ -151,7 +151,7 @@ public final class MachineKripkeStructureGenerator<
                     )
                 }
                 // Check for cycles.
-                let world = self.createWorld(fromExternals: externals, andTokens: clones, andLastWorld: job.lastSnapshot)
+                let world = self.createWorld(fromExternals: externals, andTokens: clones, andLastWorld: job.lastSnapshot, andExecuting: job.executing)
                 let (inCycle, newCache) = self.cycleDetector.inCycle(data: job.cache, element: world)
                 if true == inCycle {
                     continue
@@ -161,11 +161,12 @@ public final class MachineKripkeStructureGenerator<
                 // Append the states to the states array if these are starting states.
                 states.append(contentsOf: tempStates)
                 // Create a new job from the clones.
+                let executing = (job.executing + 1) % clones.count
                 jobs.append(MachineKripkeStructureGenerator.Job(
                     cache: newCache,
-                    lastSnapshot: self.createWorld(fromExternals: externals, andTokens: clones, andLastWorld: world),
+                    lastSnapshot: self.createWorld(fromExternals: externals, andTokens: clones, andLastWorld: world, andExecuting: executing),
                     tokens: clones,
-                    executing: (job.executing + 1) % clones.count,
+                    executing: executing,
                     lastState: tempStates.last,
                     lastRecords: clones.map { $0.map { $0.0.currentRecord } }
                 ))
@@ -247,7 +248,8 @@ public final class MachineKripkeStructureGenerator<
     private func createWorld(
         fromExternals externals: [(AnySnapshotController, KripkeStatePropertyList)],
         andTokens tokens: [[(fsm: AnyScheduleableFiniteStateMachine, machine: Machine)]],
-        andLastWorld lastWorld: World
+        andLastWorld lastWorld: World,
+        andExecuting executing: Int
     ) -> World {
         var ps: KripkeStatePropertyList = [:]
         externals.enumerated().forEach {
@@ -262,6 +264,7 @@ public final class MachineKripkeStructureGenerator<
                 )
             }
         }
+        varPs["executing"] = KripkeStateProperty(type: .Int, value: executing)
         return World(
             externalVariables: lastWorld.externalVariables <| ps,
             variables: lastWorld.variables <| varPs
