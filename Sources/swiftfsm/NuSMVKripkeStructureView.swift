@@ -470,7 +470,7 @@ public class NuSMVKripkeStructureView: KripkeStructureView {
         case .Compound(let list):
             let formattedList = self.format(list, self.formatLabel)
             guard let first = formattedList.first else {
-                return "D__"
+                return "D____"
             }
             return formattedList.dropFirst().reduce("D__\(first.0)\(self.delimiter)\(first.1)") {
                 $0 + "_\($1.0)\(self.delimiter)\($1.1)"
