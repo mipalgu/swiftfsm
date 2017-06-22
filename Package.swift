@@ -63,8 +63,9 @@ let package = Package(
     name: "swiftfsm",
     targets: [
         Target(name: "IO", dependencies: []),
+        Target(name: "CFSMs", dependencies: []),
         Target(name: "swiftfsm_helpers", dependencies: []),
-        Target(name: "swiftfsm", dependencies: ["IO", "swiftfsm_helpers"])
+        Target(name: "swiftfsm", dependencies: ["IO", "CFSMs", "swiftfsm_helpers"])
     ],
     dependencies: [
         .Package(url: "ssh://git.mipal.net/git/swift_wb.git", majorVersion: 1)
