@@ -126,7 +126,7 @@ public final class MachineKripkeStructureGenerator<
         }
         let (data, externalCounts) = self.makeExternalsData(forMachines: machines)
         // Create initial jobs.
-        let tokens = tokenizer.separate(self.machines)
+        let tokens = self.tokenizer.separate(self.machines)
         var jobs = [MachineKripkeStructureGenerator.Job(
             cache: self.cycleDetector.initialData,
             lastSnapshot: World(externalVariables: [:], variables: [:]),
@@ -137,6 +137,7 @@ public final class MachineKripkeStructureGenerator<
         )]
         // Loop until we run out of jobs.
         while false == jobs.isEmpty {
+            print(jobs.count)
             let job = jobs.removeFirst()
             // Execute the tokens for the current job for all variations of external variables.
             let spinner = self.spinnerConstructor.makeSpinner(forExternals: data.flatMap { $0 })
