@@ -111,40 +111,28 @@ public class NuSMVKripkeStructureView: KripkeStructureView {
      *  the NuSMV representation.
      */
     public func make(structure: KripkeStructureType) {
-        /*if (true == structure.states.isEmpty) {
+        if (true == structure.states.isEmpty) {
             return
         }
-        self.data = [:]
         self.states = structure.states
-        // Create seperate data objects for all the different machines.
-        self.states.forEach {
-            self.dataForState($0.first!).states.append($0)
-        }
-        self.data.forEach { self.initializeDefaultProperties($0.1) }
-        // Print individual Kripke Structures.
-        self.generateIndividualStructures()
-        // Generate a combined Kripke Structure if there is more than 1 machine.
-        if (self.data.count > 1) {
-            self.generateCombinedStructure()
-        }*/
+        let data: Data = Data(module: "main")
+        data.states = self.states
+        self.initializeDefaultProperties(data)
+        self.printStructure(self.generateData(data))
     }
-
-/*
 
     private func initializeDefaultProperties(_ d: Data) {
         d.states.forEach {
             $0.forEach { (s: KripkeState) in
-                let fs = self.getNamingFunctions(s, list: s.properties)
-                fs.forEach { (ps: [String: KripkeStateProperty], f: (String) -> String) in
-                    ps.forEach { (p: (String, KripkeStateProperty)) in
-                        if (false == self.isSupportedType(p.1.type)) {
-                            return
-                        }
-                        let label = f(p.0)
-                        let value = self.formatPropertyValue(p.1)
-                        if (nil == d.latestProperties[label]) {
-                            d.latestProperties[label] = value
-                        }
+                let f = self.createNamingFunction(forState: s)
+                s.properties.forEach { (p: (String, KripkeStateProperty)) in
+                    if (false == self.isSupportedType(p.1.type)) {
+                        return
+                    }
+                    let label = f(p.0)
+                    let value = self.formatPropertyValue(p.1)
+                    if (nil == d.latestProperties[label]) {
+                        d.latestProperties[label] = value
                     }
                 }
             }
@@ -259,14 +247,13 @@ public class NuSMVKripkeStructureView: KripkeStructureView {
             //print("state: \(state)")
             return pc
         }
-        let stateName: String = self.stateName(state)
-        if (nil == d.snapshots[stateName]) {
-            d.snapshots[stateName] = 0
+        if (nil == d.snapshots[state.id]) {
+            d.snapshots[state.id] = 0
         }
-        let name = stateName + "\(self.delimiter)S\(d.snapshots[stateName]!)"
+        let name = state.id + "\(self.delimiter)S\(d.snapshots[state.id]!)"
         d.pc.append(name)
         d.pcTable[key] = name
-        d.snapshots[stateName]! += 1
+        d.snapshots[state.id]! += 1
         return name
     }
 
@@ -324,11 +311,8 @@ public class NuSMVKripkeStructureView: KripkeStructureView {
         d: Data,
         pcName: String
     ) -> String {
-        // Holds naming convention functions for the different property lists.
-        self.getNamingFunctions(state, list: state.properties).forEach {
-            self.format(self.trimUnsupported($0.0), $0.1).forEach {
-                self.addToLatestProperties(d, $0)
-            }
+        self.format(self.trimUnsupported(state.properties), self.createNamingFunction(forState: state)).forEach {
+            self.addToLatestProperties(d, $0)
         }
         var str: String = ""
         let props: String = self.generateProperties(d.latestProperties.map({$0}), d: d, addToProperties: true)
@@ -354,14 +338,8 @@ public class NuSMVKripkeStructureView: KripkeStructureView {
         pcName: String
     ) -> String {
         // Get the actual names and add to latestProperties.
-        self.getNamingFunctions(
-            (state, state.properties.stateProperties),
-            fsmProperties: (state, state.properties.fsmProperties),
-            externalProperties: (state, state.properties.externalProperties)
-        ).forEach { 
-            self.format(self.trimUnsupported($0.0), $0.1).forEach {
-                self.addToLatestProperties(d, $0)
-            }
+        self.format(self.trimUnsupported(state.properties), self.createNamingFunction(forState: state)).forEach {
+            self.addToLatestProperties(d, $0)
         }
         // Holds naming convention functions for the different property lists.
         let gen: [([String: String], (String) -> String)] = [
@@ -399,6 +377,12 @@ public class NuSMVKripkeStructureView: KripkeStructureView {
         return str*/
     }
 
+    private func createNamingFunction(forState state: KripkeState) -> (String) -> String {
+        return {
+            self.formatLabel(state.id + self.delimiter + $0)
+        }
+    }
+
     private func format(_ ps: [String: KripkeStateProperty], _ f: (String) -> String) -> [(String, String)] {
         return ps.map { (f($0.0), self.formatPropertyValue($0.1)) }
     }
@@ -419,45 +403,6 @@ public class NuSMVKripkeStructureView: KripkeStructureView {
         d.latestProperties[p.0] = p.1
     }
 
-    private func getNamingFunctions(
-        _ state: KripkeState,
-        list: KripkeStatePropertyList
-    ) -> [([String: KripkeStateProperty], (String) -> String)] {
-        return self.getNamingFunctions(
-            (state, list.stateProperties),
-            fsmProperties: (state, list.fsmProperties),
-            externalProperties: list.externalProperties.map { (state, $0) }
-        )
-    }
-
-    private func getNamingFunctions(
-        _ stateProperties: (KripkeState, [String: KripkeStateProperty]),
-        fsmProperties: (KripkeState, [String: KripkeStateProperty]),
-        externalProperties: (KripkeState, [[String: KripkeStateProperty]])
-    ) -> [([String: KripkeStateProperty], (String) -> String)] {
-        let eps = externalProperties.1.map { (externalProperties.0, $0) }
-        return self.getNamingFunctions(
-            stateProperties,
-            fsmProperties: fsmProperties,
-            externalProperties: eps
-        )
-    }
-
-    private func getNamingFunctions(
-        _ stateProperties: (KripkeState, [String: KripkeStateProperty]),
-        fsmProperties: (KripkeState, [String: KripkeStateProperty]),
-        externalProperties: [(KripkeState, [String: KripkeStateProperty])]
-    ) -> [([String: KripkeStateProperty], (String) -> String)] {
-        var arr: [([String: KripkeStateProperty], (String) -> String)] = [
-            (stateProperties.1, { "\(self.stateName(stateProperties.0))\(self.delimiter)\($0)" }),
-            (fsmProperties.1, { "\(self.fsmName(fsmProperties.0))\(self.delimiter)\($0)" }),
-        ]
-        arr.append(contentsOf: externalProperties.map { (externalProperties) in
-            (externalProperties.1, { "\(self.externalsName(externalProperties.0))\(self.delimiter)\($0)" })
-        })
-        return arr
-    }
-
     func formatLabel(_ label: String) -> String {
         guard let first = label.characters.first else {
             return ""
@@ -467,24 +412,15 @@ public class NuSMVKripkeStructureView: KripkeStructureView {
             str += "_"
         }
         str += label.characters.map({
+            if ($0 == ".") {
+                return self.delimiter
+            }
             if (($0 < "a" || $0 > "z") && ($0 < "A" || $0 > "Z") && ($0 < "0" || $0 > "9") && $0 != "#" && $0 != "_" && $0 != "$" && $0 != "-" ) {
                 return ""
             }
             return "\($0)"
         }).reduce("", +)
         return str
-    }
-
-    private func stateName(_ state: KripkeState) -> String {
-        return "\(self.formatLabel(self.fsmName(state)))\(self.delimiter)\(self.formatLabel(state.state))"
-    }
-
-    private func fsmName(_ state: KripkeState) -> String {
-        return "\(self.formatLabel(state.machine))\(self.delimiter)\(self.formatLabel(state.fsm))"
-    }
-
-    private func externalsName(_: KripkeState) -> String {
-        return "externalVariables"
     }
 
     private func generateProperties(_ list: [(String, String)], d: Data, addToProperties: Bool) -> String {
@@ -531,6 +467,14 @@ public class NuSMVKripkeStructureView: KripkeStructureView {
             }
             let first = vals.removeFirst()
             return "C_\(vals.reduce(first) { $0 + "-" + $1})_"
+        case .Compound(let list):
+            let formattedList = self.format(list, self.formatLabel)
+            guard let first = formattedList.first else {
+                return "D____"
+            }
+            return formattedList.dropFirst().reduce("D__\(first.0)\(self.delimiter)\(first.1)") {
+                $0 + "_\($1.0)\(self.delimiter)\($1.1)"
+            } + "__"
         default:
             return val
         }
@@ -552,16 +496,6 @@ public class NuSMVKripkeStructureView: KripkeStructureView {
         d.properties[name]!.insert(value)
     }
 
-    /*
-     *  Retrieve/Create the Data object for the specific kripke states machine.
-     */
-    private func dataForState(_ state: KripkeState) -> Data {
-        if (nil == self.data[state.machine]) {
-            self.data[state.machine] = Data(module: state.machine) 
-        }
-        return self.data[state.machine]!
-    }
-
     private func isSupportedType(_ t: KripkeStatePropertyTypes) -> Bool {
         if (t == .Bool || t == .Int8 || t == .Int16 || t == .Int32 ||
             t == .Int64 || t == .Int || t == .UInt8 || t == .UInt16 ||
@@ -571,6 +505,8 @@ public class NuSMVKripkeStructureView: KripkeStructureView {
             return true
         }
         switch (t) {
+        case .Compound:
+            return true
         case .Collection(let ps):
             if (true == ps.isEmpty) {
                 return true
@@ -581,8 +517,6 @@ public class NuSMVKripkeStructureView: KripkeStructureView {
             return false
         }
     }
-
-*/
 
 }
 

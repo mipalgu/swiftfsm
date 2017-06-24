@@ -177,6 +177,22 @@ public class Swiftfsm<
     }
     
     private func generateKripkeStructure(_ machines: [Machine]) {
+        let generator = MachineKripkeStructureGenerator(
+            cycleDetector: HashTableCycleDetector(),
+            extractor: ExternalsSpinnerDataExtractor(
+                converter: KripkeStatePropertySpinnerConverter(),
+                extractor: MirrorKripkePropertiesRecorder()
+            ),
+            machines: machines,
+            spinnerConstructor: MultipleExternalsSpinnerConstructor(
+                constructor: ExternalsSpinnerConstructor(
+                    runner: SpinnerRunner()
+                )
+            ),
+            tokenizer: PerRingletTokenizer()
+        )
+        let structure = generator.generate()
+        self.kripkeStructureView.make(structure: structure)
         /*let structures = machines >>- { (machine: Machine) -> [KripkeStructure] in
             machine.fsms.map { $0.generate(machine: machine.name)  }
         }
