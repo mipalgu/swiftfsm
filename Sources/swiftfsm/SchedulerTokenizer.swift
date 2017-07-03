@@ -63,7 +63,7 @@ public protocol SchedulerTokenizer {
 
     associatedtype Object
     associatedtype SchedulerToken:
-        PartialExecuter,
+        IncrementalExecuter,
         Finishable,
         Suspendable,
         Snapshotable,
