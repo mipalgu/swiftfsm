@@ -1,9 +1,9 @@
 /*
- * main.swift
- * swiftfsm
+ * MachineKripkeStructureGeneratorFactory.swift 
+ * swiftfsm 
  *
- * Created by Callum McColl on 14/08/2015.
- * Copyright © 2015 Callum McColl. All rights reserved.
+ * Created by Callum McColl on 04/07/2017.
+ * Copyright © 2017 Callum McColl. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -56,29 +56,38 @@
  *
  */
 
-#if os(Linux)
-import Glibc
-#elseif os(OSX)
-import Darwin
-#endif
-
 import FSM
-import IO
+import KripkeStructure
 
-let printer: CommandLinePrinter = 
-    CommandLinePrinter(
-        errorStream: StderrOutputStream(),
-        messageStream: StdoutOutputStream()
-    )
+public final class MachineKripkeStructureGeneratorFactory: KripkeStructureGeneratorFactory {
 
-Swiftfsm(
-    kripkeStructureGeneratorFactory: MachineKripkeStructureGeneratorFactory(),
-    kripkeStructureView: NuSMVKripkeStructureView(
-        factory: FilePrinterFactory()
-    ),
-    machineFactory: SimpleMachineFactory(),
-    machineLoader: DynamicLibraryMachineLoaderFactory(printer: printer).make(),
-    parser: SwiftfsmParser(),
-    schedulerFactory: RoundRobinSchedulerFactory(),
-    view: printer
-).run(args: CommandLine.arguments)
+    public func make(
+        fromMachines machines: [Machine]
+    ) -> MachineKripkeStructureGenerator<
+        HashTableCycleDetector<World>,
+        ExternalsSpinnerDataExtractor<
+            MirrorKripkePropertiesRecorder,
+            KripkeStatePropertySpinnerConverter
+        >,
+        MultipleExternalsSpinnerConstructor<
+            ExternalsSpinnerConstructor<SpinnerRunner>
+        >,
+        PerRingletTokenizer
+    > {
+        return MachineKripkeStructureGenerator(
+            cycleDetector: HashTableCycleDetector<World>(),
+            extractor: ExternalsSpinnerDataExtractor(
+                converter: KripkeStatePropertySpinnerConverter(),
+                extractor: MirrorKripkePropertiesRecorder()
+            ),
+            machines: machines,
+            spinnerConstructor: MultipleExternalsSpinnerConstructor(
+                constructor: ExternalsSpinnerConstructor(
+                    runner: SpinnerRunner()
+                )
+            ),
+            tokenizer: PerRingletTokenizer()
+        )
+    }
+
+}

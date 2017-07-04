@@ -1,9 +1,9 @@
 /*
- * main.swift
- * swiftfsm
+ * KripkeStructureGeneratorFactory.swift 
+ * swiftfsm 
  *
- * Created by Callum McColl on 14/08/2015.
- * Copyright © 2015 Callum McColl. All rights reserved.
+ * Created by Callum McColl on 04/07/2017.
+ * Copyright © 2017 Callum McColl. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -56,29 +56,12 @@
  *
  */
 
-#if os(Linux)
-import Glibc
-#elseif os(OSX)
-import Darwin
-#endif
+import KripkeStructure
 
-import FSM
-import IO
+public protocol KripkeStructureGeneratorFactory {
 
-let printer: CommandLinePrinter = 
-    CommandLinePrinter(
-        errorStream: StderrOutputStream(),
-        messageStream: StdoutOutputStream()
-    )
+    associatedtype Generator: KripkeStructureGenerator
 
-Swiftfsm(
-    kripkeStructureGeneratorFactory: MachineKripkeStructureGeneratorFactory(),
-    kripkeStructureView: NuSMVKripkeStructureView(
-        factory: FilePrinterFactory()
-    ),
-    machineFactory: SimpleMachineFactory(),
-    machineLoader: DynamicLibraryMachineLoaderFactory(printer: printer).make(),
-    parser: SwiftfsmParser(),
-    schedulerFactory: RoundRobinSchedulerFactory(),
-    view: printer
-).run(args: CommandLine.arguments)
+    func make(fromMachines: [Machine]) -> Generator
+
+}

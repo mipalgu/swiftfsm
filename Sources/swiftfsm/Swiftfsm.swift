@@ -71,8 +71,11 @@ import KripkeStructure
  */
 public class Swiftfsm<
     SF: SchedulerFactory,
-    MF: MachineFactory
+    MF: MachineFactory,
+    KF: KripkeStructureGeneratorFactory
 > {
+
+    private let kripkeStructureGeneratorFactory: KF
 
     private let kripkeStructureView: KripkeStructureView
 
@@ -91,6 +94,9 @@ public class Swiftfsm<
     /**
      *  Create a new `Swiftfsm`.
      *
+     *  - Parameter kripkeStructureGeneratorFactory: Used to generate the
+     *  `KripkeStructure`.
+     *
      *  - Parameter kripkeStructureView: Used when outputting a
      *  `KripkeStructure`.
      *
@@ -107,6 +113,7 @@ public class Swiftfsm<
      *  - Parameter view: Used to output `SwiftfsmErrors`.
      */
     public init(
+        kripkeStructureGeneratorFactory: KF,
         kripkeStructureView: KripkeStructureView,
         machineFactory: MF,
         machineLoader: MachineLoader,
@@ -114,6 +121,7 @@ public class Swiftfsm<
         schedulerFactory: SF,
         view: View
     ) {
+        self.kripkeStructureGeneratorFactory = kripkeStructureGeneratorFactory
         self.kripkeStructureView = kripkeStructureView
         self.machineFactory = machineFactory
         self.machineLoader = machineLoader
@@ -177,20 +185,7 @@ public class Swiftfsm<
     }
     
     private func generateKripkeStructure(_ machines: [Machine]) {
-        let generator = MachineKripkeStructureGenerator(
-            cycleDetector: HashTableCycleDetector(),
-            extractor: ExternalsSpinnerDataExtractor(
-                converter: KripkeStatePropertySpinnerConverter(),
-                extractor: MirrorKripkePropertiesRecorder()
-            ),
-            machines: machines,
-            spinnerConstructor: MultipleExternalsSpinnerConstructor(
-                constructor: ExternalsSpinnerConstructor(
-                    runner: SpinnerRunner()
-                )
-            ),
-            tokenizer: PerRingletTokenizer()
-        )
+        let generator = self.kripkeStructureGeneratorFactory.make(fromMachines: machines)
         let structure = generator.generate()
         self.kripkeStructureView.make(structure: structure)
         /*let structures = machines >>- { (machine: Machine) -> [KripkeStructure] in
