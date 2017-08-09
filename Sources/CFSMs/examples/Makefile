@@ -7,6 +7,8 @@ MACHINES=PingPong #FunctionsTest
 
 CLFSM_CXX_ONLY=yes
 
+WANT_FSM_REFLECTION=yes
+
 .include "../../../../../../mk/fsm.mk"	# comes first: required for compiling state machines
 
 .include "../../../../../../mk/mipal.mk"	# comes last!
