@@ -21,6 +21,7 @@ extern "C"
 {
     int main(int argc, char *argv[])
     {
+        number_of_fsms = 0;
         //setup
         for (unsigned char i = 0; i < number_of_fsms; i++)
         {
