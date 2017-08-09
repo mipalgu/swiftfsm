@@ -27,6 +27,7 @@ HDRS=CLAction.h CLMachine.h CLMacros.h CLState.h CLTransitionExpression.h CLTran
 INSTHDRS=CLMacros.h #CLWhiteboard.h
 LDFLAGS+=-lCLReflect
 
+
 .include "../../../../../mk/whiteboard.mk"	# required for whiteboard clients
 .include "../../../../../mk/util.mk"		# required for GU utility functions
 
