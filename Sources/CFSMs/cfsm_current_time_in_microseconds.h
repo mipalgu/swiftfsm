@@ -60,6 +60,7 @@
 
 namespace FSM
 {
+
     /**
      *  Get the current time in microseconds
      *
