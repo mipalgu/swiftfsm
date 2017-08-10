@@ -56,10 +56,28 @@
  *
  */
 #include "cfsm_current_time_in_microseconds.h"
+#include <time.h>
+#include <sys/time.h>
 
 extern "C" {
-    long micros();
+    unsigned long micros();
 }
+
+unsigned long micros(void)
+{
+#if defined(BSD) && BSD > 199300
+    struct timeval tv;
+    if (gettimeofday(&tv, NULL) == -1) return ~0UL;
+
+    long long t = static_cast<long long>(tv.tv_usec) + static_cast<long long>(tv.tv_sec) * 1000000LL;
+#else
+    struct timespec tv;
+    if(clock_gettime(CLOCK_REALTIME, &tv) == -1) return ~0UL;
+    long long t = static_cast<long long>(tv.tv_nsec) / 1000LL + static_cast<long long>(tv.tv_sec) * 1000000LL;
+#endif
+    return static_cast<unsigned long>(t);
+}
+
 
 long FSM::current_time_in_microseconds(void)
 {

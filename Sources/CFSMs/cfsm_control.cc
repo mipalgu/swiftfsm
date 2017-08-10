@@ -57,11 +57,14 @@
  */
 #include "cfsm_control.h"
 #include "CLMachine.h"
+#include <stdlib.h>
 
 using namespace FSM;
 
 extern CLMachine *finite_state_machines[1]; ///< fsms set up
 extern unsigned char number_of_fsms;        ///< number of fsms in vector
+unsigned char number_of_fsms = 0;
+CLMachine *finite_state_machines[1] = {NULL};
 
 enum CLControlStatus FSM::control_machine_at_index(const int index, const enum CLControlStatus command)
 {

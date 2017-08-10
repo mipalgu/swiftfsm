@@ -64,6 +64,9 @@ import Darwin
 
 import FSM
 import IO
+import swiftfsm_helpers
+
+print("Hello, world!")
 
 let printer: CommandLinePrinter = 
     CommandLinePrinter(
@@ -71,8 +74,27 @@ let printer: CommandLinePrinter =
         messageStream: StdoutOutputStream()
     )
 
+let dynamicLibraryCreator = DynamicLibraryCreator(printer: printer)
+guard let dyLibRes = dynamicLibraryCreator.open(path: "/home/bren/Desktop/PingPongCLFSM.machine/Linux-x86_64/PingPongCLFSM.so") else 
+{
+    fatalError( "dylibres error")
+}
+let res = dyLibRes.getSymbolPointer(symbol: "CLM_Create_PingPongCLFSM")
+guard let symbol = res.0 else 
+{	
+    fatalError(res.1 ?? "unknown error")
+}
+
+print(symbol)
+
+let whatever = testMachineFactory(symbol)
+
+print(whatever)
+
+
+
+/*
 Swiftfsm(
-    print("hello!")
     kripkeStructureGeneratorFactory: MachineKripkeStructureGeneratorFactory(),
     kripkeStructureView: NuSMVKripkeStructureView(
         factory: FilePrinterFactory()
@@ -83,3 +105,4 @@ Swiftfsm(
     schedulerFactory: RoundRobinSchedulerFactory(),
     view: printer
 ).run(args: CommandLine.arguments)
+*/
