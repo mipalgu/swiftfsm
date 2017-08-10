@@ -72,6 +72,7 @@ let printer: CommandLinePrinter =
     )
 
 Swiftfsm(
+    clfsmMachineLoader: CLFSMMachineLoader(),
     kripkeStructureGeneratorFactory: MachineKripkeStructureGeneratorFactory(),
     kripkeStructureView: NuSMVKripkeStructureView(
         factory: FilePrinterFactory()

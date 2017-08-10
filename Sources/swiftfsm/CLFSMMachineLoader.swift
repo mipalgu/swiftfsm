@@ -62,12 +62,12 @@ import FSM
  *  Is responsible for loading CLFSM machines.
  */
 public class CLFSMMachineLoader: MachineLoader {
-    
+
     /**
      *  This is currently not yet implemented.
      */
     public func load(path: String) -> [AnyScheduleableFiniteStateMachine] {
-        return [] 
+        return []
     }
-    
+
 }
