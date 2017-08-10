@@ -75,6 +75,8 @@ public class Swiftfsm<
     KF: KripkeStructureGeneratorFactory
 > {
 
+    private let clfsmMachineLoader: MachineLoader
+
     private let kripkeStructureGeneratorFactory: KF
 
     private let kripkeStructureView: KripkeStructureView
@@ -113,6 +115,7 @@ public class Swiftfsm<
      *  - Parameter view: Used to output `SwiftfsmErrors`.
      */
     public init(
+        clfsmMachineLoader: MachineLoader,
         kripkeStructureGeneratorFactory: KF,
         kripkeStructureView: KripkeStructureView,
         machineFactory: MF,
@@ -121,6 +124,7 @@ public class Swiftfsm<
         schedulerFactory: SF,
         view: View
     ) {
+        self.clfsmMachineLoader = clfsmMachineLoader
         self.kripkeStructureGeneratorFactory = kripkeStructureGeneratorFactory
         self.kripkeStructureView = kripkeStructureView
         self.machineFactory = machineFactory
@@ -241,8 +245,12 @@ public class Swiftfsm<
         name: String
     ) -> [AnyScheduleableFiniteStateMachine] {
         KRIPKE = t.generateKripkeStructure
-        let fsms: [AnyScheduleableFiniteStateMachine] =
-            self.machineLoader.load(path: t.path!)
+        let fsms: [AnyScheduleableFiniteStateMachine]
+        if true == t.isClfsmMachine {
+            fsms = self.clfsmMachineLoader.load(path: t.path!)
+        } else {
+            fsms = self.machineLoader.load(path: t.path!)
+        }
         if (fsms.count > 0) {
             return fsms
         }
@@ -255,9 +263,6 @@ public class Swiftfsm<
         // Handle when there is no path in the Task.
         if (nil == t.path) {
             self.handleError(.PathNotFound(machineName: name))
-        }
-        if (true == t.isClfsmMachine) {
-            self.handleError(.CLFSMMachine(machineName: name, path: t.path!))
         }
         var schedule: [Machine] = []
         var kripke: [Machine] = []
