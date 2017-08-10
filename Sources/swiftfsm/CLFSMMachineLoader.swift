@@ -71,3 +71,31 @@ public class CLFSMMachineLoader: MachineLoader {
     }
 
 }
+
+import swiftfsm_helpers
+ 68 
+ 69 print("Hello, world!")
+ 70 
+ 71 let printer: CommandLinePrinter =
+ 72     CommandLinePrinter(
+ 73         errorStream: StderrOutputStream(),
+ 74         messageStream: StdoutOutputStream()
+ 75     )
+ 76 
+ 77 let dynamicLibraryCreator = DynamicLibraryCreator(printer: printer)
+ 78 guard let dyLibRes = dynamicLibraryCreator.open(path: "/home/bren/Desktop/PingPongCLFSM.machine/Linux-x86_64/PingPongCLFSM.so") else
+ 79 {
+ 80     fatalError( "dylibres error")
+ 81 }
+ 82 let res = dyLibRes.getSymbolPointer(symbol: "CLM_Create_PingPongCLFSM")
+ 83 guard let symbol = res.0 else
+ 84 {
+ 85     fatalError(res.1 ?? "unknown error")
+ 86 }
+ 87 
+ 88 print(symbol)
+ 89 
+ 90 let whatever = testMachineFactory(symbol)
+ 91 
+ 92 print(whatever)
+
