@@ -130,8 +130,12 @@ public class CLFSMMachineLoader: MachineLoader {
 
         print("scheduled meta machine pointer: \(scheduledMetaMachinePointer)")
 
+        
+        //register meta machine
+        registerMetaMachine(scheduledMetaMachinePointer, 0)
 
-        /*
+
+        
         //test running invoke_OnEntry(refl_metaMachine metaMachine, unsigned int stateNum, refl_userData_t data) 
         //get pointer to invoke_OnEntry function
         let pingOnEntryTuple = dynamicLibraryResource.getSymbolPointer(symbol: "refl_invokeOnEntry")
@@ -140,7 +144,7 @@ public class CLFSMMachineLoader: MachineLoader {
         }
 
         print("ping on entry func pointer: \(pingOnEntryPointer)")
-        */
+        
 
         return []
     }
