@@ -74,19 +74,50 @@ public class CLFSMMachineLoader: MachineLoader {
                 errorStream: StderrOutputStream(),
                 messageStream: StdoutOutputStream()
             )
-
+        
+        //get pointer to machine .so
         let dynamicLibraryCreator = DynamicLibraryCreator(printer: printer)
         guard let dynamicLibraryResource = dynamicLibraryCreator.open(path: path) else {
             fatalError("Error creating DynamicLibraryResource")
         }
-
-        let symbolPointer = dynamicLibraryResource.getSymbolPointer(symbol: "CLM_Create_PingPongCLFSM")
-        guard let symbol = symbolPointer.0 else {
-            fatalError(symbolPointer.1 ?? "getSymbolPointer(): unknown error")
+        
+        //get pointer to machine create function
+        let createMachineTuple = dynamicLibraryResource.getSymbolPointer(symbol: "CLM_Create_PingPongCLFSM")
+        guard let createMachinePointer = createMachineTuple.0 else {
+            fatalError(createMachineTuple.1 ?? "getSymbolPointer(): unknown error")
         }
 
-        let machinePointer = testMachineFactory(symbol)
+        //call machine create function and get pointer to machine
+        guard let machinePointer = testMachineFactory(createMachinePointer) else {
+            fatalError("Error getting CL machine pointer")
+        }
 
+        print("machine pointer: \(machinePointer)")
+
+        //get pointer to create meta machine function
+        let createMetaMachineTuple = dynamicLibraryResource.getSymbolPointer(symbol: "Create_MetaMachine")
+        guard let createMetaMachinePointer = createMetaMachineTuple.0 else {
+            fatalError(createMetaMachineTuple.1 ?? "getSymbolPointer(): unknown error")
+        }
+
+        print("create meta machine func pointer: \(createMetaMachinePointer)")
+
+        //get pointer to create scheduled meta machine function
+        let createScheduledMetaMachineTuple = dynamicLibraryResource.getSymbolPointer(symbol: "Create_ScheduledMetaMachine")
+        guard let createScheduledMetaMachinePointer = createScheduledMetaMachineTuple.0 else {
+            fatalError(createScheduledMetaMachineTuple.1 ?? "getSymbolPointer(): unknown error")
+        }
+
+        print("create scheduled meta machine func pointer: \(createScheduledMetaMachinePointer)")
+
+        //test running Ping_OnEntry(refl_machine_t machine, refl_userData_t data) 
+        //get pointer to Ping_OnEntry function
+        let pingOnEntryTuple = dynamicLibraryResource.getSymbolPointer(symbol: "refl_invokeOnEntry")
+        guard let pingOnEntryPointer = pingOnEntryTuple.0 else {
+            fatalError(pingOnEntryTuple.1 ?? "getSymbolPointer(): unknown error")
+        }
+
+        print("ping on entry func pointer: \(pingOnEntryPointer)")
 
         return []
     }
