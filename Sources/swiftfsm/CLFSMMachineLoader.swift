@@ -57,45 +57,38 @@
  */
 
 import FSM
+import IO //needed for printer
+import swiftfsm_helpers //testMachineFactory
+
 
 /**
  *  Is responsible for loading CLFSM machines.
  */
 public class CLFSMMachineLoader: MachineLoader {
 
-    /**
-     *  This is currently not yet implemented.
-     */
     public func load(path: String) -> [AnyScheduleableFiniteStateMachine] {
+       
+        //perhaps add printer to constructor so we can use the one in main.swift
+        let printer: CommandLinePrinter = 
+            CommandLinePrinter(
+                errorStream: StderrOutputStream(),
+                messageStream: StdoutOutputStream()
+            )
+
+        let dynamicLibraryCreator = DynamicLibraryCreator(printer: printer)
+        guard let dynamicLibraryResource = dynamicLibraryCreator.open(path: path) else {
+            fatalError("Error creating DynamicLibraryResource")
+        }
+
+        let symbolPointer = dynamicLibraryResource.getSymbolPointer(symbol: "CLM_Create_PingPongCLFSM")
+        guard let symbol = symbolPointer.0 else {
+            fatalError(symbolPointer.1 ?? "getSymbolPointer(): unknown error")
+        }
+
+        let machinePointer = testMachineFactory(symbol)
+
+
         return []
     }
 
 }
-
-import swiftfsm_helpers
- 68 
- 69 print("Hello, world!")
- 70 
- 71 let printer: CommandLinePrinter =
- 72     CommandLinePrinter(
- 73         errorStream: StderrOutputStream(),
- 74         messageStream: StdoutOutputStream()
- 75     )
- 76 
- 77 let dynamicLibraryCreator = DynamicLibraryCreator(printer: printer)
- 78 guard let dyLibRes = dynamicLibraryCreator.open(path: "/home/bren/Desktop/PingPongCLFSM.machine/Linux-x86_64/PingPongCLFSM.so") else
- 79 {
- 80     fatalError( "dylibres error")
- 81 }
- 82 let res = dyLibRes.getSymbolPointer(symbol: "CLM_Create_PingPongCLFSM")
- 83 guard let symbol = res.0 else
- 84 {
- 85     fatalError(res.1 ?? "unknown error")
- 86 }
- 87 
- 88 print(symbol)
- 89 
- 90 let whatever = testMachineFactory(symbol)
- 91 
- 92 print(whatever)
-
