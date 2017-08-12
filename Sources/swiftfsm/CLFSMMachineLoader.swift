@@ -142,6 +142,12 @@ public class CLFSMMachineLoader: MachineLoader {
         }
         
         if (debug) { print("ping on entry func pointer: \(pingOnEntryPointer)") }
+
+
+        let metaMachine = scheduledMetaMachinePointer.load(as: refl_metaMachine.self)
+        var result = CLReflectResult(0)
+        refl_invokeOnEntry(metaMachine, 0, &result);
+        print(result);
         
 
         return []
