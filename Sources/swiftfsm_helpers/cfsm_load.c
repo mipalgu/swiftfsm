@@ -1,6 +1,7 @@
 #include "cfsm_load.h"
 #include <CLReflectAPI.h>
 #include <stdio.h>
+   
    void* testMachineFactory(void* p)
    {
        void* (*f)(int, const char*) = (void* (*)(int, const char*)) (p);
@@ -18,6 +19,13 @@
        void* (*f)(void*) = (void* (*)(void*)) (p);
        return( f(machine) );
     }
+
+  void set_number_of_machines(void* p, int n)
+  {
+      void* (*f)(int*) = (void* (*)(int*)) (p);
+      f(n);
+  }
+
 
    void registerMetaMachine(void* metaMachine, unsigned int machineID)
    {

@@ -75,8 +75,22 @@ public class CLFSMMachineLoader: MachineLoader {
                 messageStream: StdoutOutputStream()
             )
         
-        //get pointer to machine .so
         let dynamicLibraryCreator = DynamicLibraryCreator(printer: printer)
+        
+        //access libCFMs via dlopen/dlsym and set fsm vector and fsm count
+        guard let dlrCFSM = dynamicLibraryCreator.open(path: "/usr/local/lib/libCFSMs.so") else {
+            fatalError("Error creating DLC for CFSMs")
+        }
+
+        let setNumMachinesTuple = dlrCFSM.getSymbolPointer(symbol: "set_number_of_machines")
+        guard let setNumMachinesPtr = setNumMachinesTuple.0 else {
+            fatalError(setNumMachinesTuple.1 ?? "getSymbolPointer(set_number_of_machines): unknown error")
+        }
+
+        print(setNumMachinesPtr)
+
+
+        //get pointer to machine .so
         guard let dynamicLibraryResource = dynamicLibraryCreator.open(path: path) else {
             fatalError("Error creating DynamicLibraryResource")
         }

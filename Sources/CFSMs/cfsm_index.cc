@@ -63,13 +63,14 @@
 #include "CLMacros.h"
 
 extern FSM::CLMachine *finite_state_machines[1];///< fsms set up
-extern unsigned char number_of_fsms;            ///< number of fsms in vector
 
 int FSM::index_of_machine_named(const char *name)
 {
     using namespace FSM;
     
-    for (unsigned char i = 0; i < number_of_fsms; i++)
+    int number_of_fsms = number_of_machines();
+
+    for (int i = 0; i < number_of_fsms; i++)
     {
         CLMachine *machine = finite_state_machines[i];
         if (strcmp(name, machine->machineName()) == 0)
