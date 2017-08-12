@@ -1,7 +1,8 @@
 #include "cfsm_load.h"
 #include <CLReflectAPI.h>
 #include <stdio.h>
-   
+#define DEBUG 
+
    void* testMachineFactory(void* p)
    {
        void* (*f)(int, const char*) = (void* (*)(int, const char*)) (p);
@@ -20,10 +21,13 @@
        return( f(machine) );
     }
 
-  void set_number_of_machines(void* p, int n)
+  void incrementNumberOfMachines(void* p)
   {
-      void* (*f)(int*) = (void* (*)(int*)) (p);
-      f(n);
+      void* (*f)() = (void*) (p);
+      f();
+#ifdef DEBUG      
+      printf("Incremented machine count\n");
+#endif
   }
 
 
@@ -37,6 +41,8 @@
 
        refl_metaMachine machine = (refl_metaMachine) (metaMachine);
        refl_registerMetaMachine(machine, machineID, result);
+       
+#ifdef DEBUG
        if (*result == REFL_INVALID_ARGS) 
        { 
            printf("registerMetaMachine: REFL_INVALID_ARGS\n");
@@ -49,9 +55,10 @@
         {
             printf("registerMetaMachine: WHAT HAPPEN\n");
         }
-
+#endif
         refl_invokeOnEntry(machine,0 , result);
+#ifdef DEBUG
         if (*result == REFL_SUCCESS) printf ("invokeOnEntry: REFL_SUCCESS\n");
-       
+#endif
     }
 

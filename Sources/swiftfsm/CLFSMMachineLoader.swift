@@ -68,6 +68,8 @@ public class CLFSMMachineLoader: MachineLoader {
 
     public func load(path: String) -> [AnyScheduleableFiniteStateMachine] {
        
+        let debug = true; //gross but no preprocessor
+
         //perhaps add printer to constructor so we can use the one in main.swift
         let printer: CommandLinePrinter = 
             CommandLinePrinter(
@@ -87,10 +89,14 @@ public class CLFSMMachineLoader: MachineLoader {
             fatalError(setNumMachinesTuple.1 ?? "getSymbolPointer(set_number_of_machines): unknown error")
         }
 
-        print(setNumMachinesPtr)
+        if (debug) { print("set num machines ptr: \(setNumMachinesPtr)") }
 
+        //NYI: get count from command line args
+        incrementNumberOfMachines(setNumMachinesPtr)
+        
+        //NYI: set fsm vector
 
-        //get pointer to machine .so
+        //get pointer to CLFSM machine library
         guard let dynamicLibraryResource = dynamicLibraryCreator.open(path: path) else {
             fatalError("Error creating DynamicLibraryResource")
         }
@@ -101,33 +107,14 @@ public class CLFSMMachineLoader: MachineLoader {
             fatalError(createMachineTuple.1 ?? "getSymbolPointer(): unknown error")
         }
 
-        print("machine create func pointer: \(createMachinePointer)")
+        if (debug) { print("machine create func pointer: \(createMachinePointer)") }
 
         //call machine create function and get pointer to machine
         guard let machinePointer = testMachineFactory(createMachinePointer) else {
             fatalError("Error getting CL machine pointer")
         }
 
-        print("machine pointer: \(machinePointer)")
-
-        /*
-
-        //get pointer to create meta machine function
-        let createMetaMachineTuple = dynamicLibraryResource.getSymbolPointer(symbol: "Create_MetaMachine")
-        guard let createMetaMachinePointer = createMetaMachineTuple.0 else {
-            fatalError(createMetaMachineTuple.1 ?? "getSymbolPointer(): unknown error")
-        }
-
-        print("create meta machine func pointer: \(createMetaMachinePointer)")
-
-        //call meta machine create function and get pointer to meta machine
-        guard let metaMachinePointer = testCreateMetaMachine(createMetaMachinePointer) else {
-            fatalError("Error getting meta machine pointer")
-        }
-
-        print("meta machine pointer: \(metaMachinePointer)")
-
-        */
+        if (debug) { print("machine pointer: \(machinePointer)") }
 
         //get pointer to create scheduled meta machine function
         let createScheduledMetaMachineTuple = dynamicLibraryResource.getSymbolPointer(symbol: "Create_ScheduledMetaMachine")
@@ -135,20 +122,17 @@ public class CLFSMMachineLoader: MachineLoader {
             fatalError(createScheduledMetaMachineTuple.1 ?? "getSymbolPointer(): unknown error")
         }
 
-        print("create scheduled meta machine func pointer: \(createScheduledMetaMachinePointer)")
+        if (debug) { print("create scheduled meta machine func pointer: \(createScheduledMetaMachinePointer)") }
 
         //call create scheduled meta machine and get pointer to meta machine
         guard let scheduledMetaMachinePointer = createScheduledMetaMachine(createScheduledMetaMachinePointer, machinePointer) else {
             fatalError("error creating meta machine")
         }
 
-        print("scheduled meta machine pointer: \(scheduledMetaMachinePointer)")
+        if (debug) { print("scheduled meta machine pointer: \(scheduledMetaMachinePointer)") }
 
-        
         //register meta machine
         registerMetaMachine(scheduledMetaMachinePointer, 0)
-
-
         
         //test running invoke_OnEntry(refl_metaMachine metaMachine, unsigned int stateNum, refl_userData_t data) 
         //get pointer to invoke_OnEntry function
@@ -156,8 +140,8 @@ public class CLFSMMachineLoader: MachineLoader {
         guard let pingOnEntryPointer = pingOnEntryTuple.0 else {
             fatalError(pingOnEntryTuple.1 ?? "getSymbolPointer(): unknown error")
         }
-
-        print("ping on entry func pointer: \(pingOnEntryPointer)")
+        
+        if (debug) { print("ping on entry func pointer: \(pingOnEntryPointer)") }
         
 
         return []
