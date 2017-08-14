@@ -3,19 +3,13 @@
 #include <stdio.h>
 #define DEBUG 
 
-   void* testMachineFactory(void* p)
+   void* createMachine(void* p)
    {
        void* (*f)(int, const char*) = (void* (*)(int, const char*)) (p);
        return( f(0, "PingPongCLFSM") );
    }
 
-   void* testCreateMetaMachine(void* p)
-   {
-       void* (*f)() = (void*) (p);
-       return( f() );
-   }
-
-   void* createScheduledMetaMachine(void* p, void* machine)
+   void* createMetaMachine(void* p, void* machine)
    {
        void* (*f)(void*) = (void* (*)(void*)) (p);
        return( f(machine) );
@@ -31,11 +25,12 @@
   }
 
 
+   //Keep for testing but needs to be removed once CLRelfect is called from swiftfsm
    void registerMetaMachine(void* metaMachine, unsigned int machineID)
    {
        
        CLReflectResult* result;
-
+       
        refl_initAPI(result);
        if (*result == REFL_SUCCESS) printf ("CLReflect API successfully initialised\n");
 
@@ -56,6 +51,7 @@
             printf("registerMetaMachine: WHAT HAPPEN\n");
         }
 #endif
+        
         refl_invokeOnEntry(machine,0 , result);
 #ifdef DEBUG
         if (*result == REFL_SUCCESS) printf ("invokeOnEntry: REFL_SUCCESS\n");

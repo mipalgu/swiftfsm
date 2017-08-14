@@ -1,10 +1,8 @@
 #include <CLReflectAPI.h>    
 
-void* testMachineFactory(void*);
+void* createMachine(void*);
 
-void* testCreateMetaMachine(void*);
-
-void* createScheduledMetaMachine(void*, void*);
+void* createMetaMachine(void*, void*);
 
 void registerMetaMachine(void* metaMachine, unsigned int machineID);
 

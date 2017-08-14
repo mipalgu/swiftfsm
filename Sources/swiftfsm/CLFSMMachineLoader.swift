@@ -58,7 +58,7 @@
 
 import FSM
 import IO //needed for printer
-import swiftfsm_helpers //testMachineFactory
+import swiftfsm_helpers 
 
 
 /**
@@ -91,9 +91,11 @@ public class CLFSMMachineLoader: MachineLoader {
 
         if (debug) { print("set num machines ptr: \(setNumMachinesPtr)") }
 
+        //Set number_of_machines in cfsm (required by CLMacros)
         //NYI: get count from command line args
         incrementNumberOfMachines(setNumMachinesPtr)
         
+        //Place machines in vector and set in cfsm (required by CLMacros)
         //NYI: set fsm vector
 
         //get pointer to CLFSM machine library
@@ -110,7 +112,7 @@ public class CLFSMMachineLoader: MachineLoader {
         if (debug) { print("machine create func pointer: \(createMachinePointer)") }
 
         //call machine create function and get pointer to machine
-        guard let machinePointer = testMachineFactory(createMachinePointer) else {
+        guard let machinePointer = createMachine(createMachinePointer) else {
             fatalError("Error getting CL machine pointer")
         }
 
@@ -125,30 +127,22 @@ public class CLFSMMachineLoader: MachineLoader {
         if (debug) { print("create scheduled meta machine func pointer: \(createScheduledMetaMachinePointer)") }
 
         //call create scheduled meta machine and get pointer to meta machine
-        guard let scheduledMetaMachinePointer = createScheduledMetaMachine(createScheduledMetaMachinePointer, machinePointer) else {
+        guard let scheduledMetaMachinePointer = createMetaMachine(createScheduledMetaMachinePointer, machinePointer) else {
             fatalError("error creating meta machine")
         }
 
         if (debug) { print("scheduled meta machine pointer: \(scheduledMetaMachinePointer)") }
 
-        //register meta machine
-        registerMetaMachine(scheduledMetaMachinePointer, 0)
-        
-        //test running invoke_OnEntry(refl_metaMachine metaMachine, unsigned int stateNum, refl_userData_t data) 
-        //get pointer to invoke_OnEntry function
-        let pingOnEntryTuple = dynamicLibraryResource.getSymbolPointer(symbol: "refl_invokeOnEntry")
-        guard let pingOnEntryPointer = pingOnEntryTuple.0 else {
-            fatalError(pingOnEntryTuple.1 ?? "getSymbolPointer(): unknown error")
-        }
-        
-        if (debug) { print("ping on entry func pointer: \(pingOnEntryPointer)") }
+        //TODO: how to initialise and pass "UnsafeMutablePointer<CLReflectResult>!"
+        //TODO: should make swift wrappers for these API calls
+        //initialise CLReflect API
+        //refl_initAPI(nil)
 
-
-        let metaMachine = scheduledMetaMachinePointer.load(as: refl_metaMachine.self)
-        var result = CLReflectResult(0)
-        refl_invokeOnEntry(metaMachine, 0, &result);
-        print(result);
+        //register meta machine with API
+        //refl_registerMetaMachine(metaMachine, 0, nil)
         
+        //temporary solution: call init API and register meta machine from swiftfsm_helpers/cfsm_load.c
+        registerMetaMachine(scheduledMetaMachinePointer, 0) //TODO: machineID (does it just increment?)
 
         return []
     }
