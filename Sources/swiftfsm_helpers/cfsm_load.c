@@ -90,14 +90,13 @@ void loadMachine(void* createMachineP, void* createMetaMachineP, unsigned int mi
 {
     void* machinePointer = createMachine(createMachineP);
     refl_metaMachine metaMachine = (refl_metaMachine) (createMetaMachine(createMetaMachineP, machinePointer));
-    free(machinePointer);
     //incrementNumberOfMachines    
     //initCLReflectAPI(); //<--segfault
-    CLReflectResult* result;
-    refl_initAPI(result);
-    printResult(result);
+    //CLReflectResult* result;
+    //refl_initAPI(result);
+    //printResult(result);
     //registerMetaMachine(metaMachine, mid); //<--segfault
-    refl_registerMetaMachine(metaMachine, mid, result);
-    printResult(result);
+    //refl_registerMetaMachine(metaMachine, mid, result);
+    //printResult(result);
 }
 

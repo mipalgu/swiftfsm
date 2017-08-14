@@ -112,14 +112,14 @@ public class CLFSMMachineLoader: MachineLoader {
 
         if (debug) { print("machine create func pointer: \(createMachinePointer)") }
         
-        /*
+        
         //call machine create function and get pointer to machine
         guard let machinePointer = createMachine(createMachinePointer) else {
             fatalError("Error getting CL machine pointer")
         }
 
         if (debug) { print("machine pointer: \(machinePointer)") }
-        */
+        
 
         //get pointer to create scheduled meta machine function
         let createScheduledMetaMachineTuple = dynamicLibraryResource.getSymbolPointer(symbol: "Create_ScheduledMetaMachine")
@@ -129,35 +129,39 @@ public class CLFSMMachineLoader: MachineLoader {
 
         if (debug) { print("create scheduled meta machine func pointer: \(createScheduledMetaMachinePointer)") }
         
-        loadMachine(createMachinePointer, createScheduledMetaMachinePointer, 0)
 
-        /*
+        
         //call create scheduled meta machine and get pointer to meta machine
         guard let scheduledMetaMachinePointer = createMetaMachine(createScheduledMetaMachinePointer, machinePointer) else {
             fatalError("error creating meta machine")
         }
     
         if (debug) { print("scheduled meta machine pointer: \(scheduledMetaMachinePointer)") }
-        */
+               
+        //loadMachine(createMachinePointer, createScheduledMetaMachinePointer, 0)
 
         //TODO: how to work with C enums (imported as structs)
         //TODO: should make swift wrappers for these API calls
         
-        //initialise CLReflect API
-        //refl_initAPI(nil)
-        
-        //temporary solution: call init API and register meta machine from swiftfsm_helpers/cfsm_load.c
-        //registerMetaMachine(scheduledMetaMachinePointer, 0) //TODO: machineID (does it just increment?)
-
         //initCLReflectAPI()
         //registerMetaMachine(scheduledMetaMachinePointer, 0)
-        //invokeOnEntry(scheduledMetaMachinePointer, 0)
+        invokeOnEntry(scheduledMetaMachinePointer, 0)
+
+
+        /*
+        //convert unsafemutablerawpointer
+        let opaquePtr = OpaquePointer(scheduledMetaMachinePointer)
+        let metaMachinePtr = UnsafeMutablePointer<refl_metaMachine>(opaquePtr)
+        let metaMachine = metaMachinePtr.pointee
+
+        refl_invokeOnEntry(metaMachine, 0, nil) <-- segfault
+        */ 
 
         //let mm = refl_getMetaMachine(0, nil)
         //refl_invokeOnEntry(mm, 0, nil)
 
         let dlCloseResult = dynamicLibraryResource.close()
-        if (!dlCloseResult.0) { print(dlCloseResult.1!) }
+        if (!dlCloseResult.0) { print(dlCloseResult.1 ?? "No error message for DynamicLibraryResource.close()!") }
 
         return []
     }
