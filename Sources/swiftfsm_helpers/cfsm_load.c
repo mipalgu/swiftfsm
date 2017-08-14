@@ -64,22 +64,17 @@ void initCLReflectAPI()
 #endif
 }
 
-void registerMetaMachine(void* m, unsigned int mid)
+void registerMetaMachine(refl_metaMachine metaMachine, unsigned int mid)
 {
     CLReflectResult* result;
-    refl_initAPI(result);
-    printf("init in register: ");
-    printResult(result);
-    refl_metaMachine machine = (refl_metaMachine) (m);
-    printf("one\n");
-    refl_registerMetaMachine(machine, 0, result);
-    printf("two\n");
+    refl_registerMetaMachine(metaMachine, 0, result);
 #ifdef DEBUG
     printf("registerMetaMachine: ");
     printResult(result);
 #endif
 }
 
+//test function, to be removed
 void invokeOnEntry(void* m, unsigned int statenum)
 {
     CLReflectResult* result;
@@ -91,4 +86,18 @@ void invokeOnEntry(void* m, unsigned int statenum)
 #endif
 }
 
+void loadMachine(void* createMachineP, void* createMetaMachineP, unsigned int mid)
+{
+    void* machinePointer = createMachine(createMachineP);
+    refl_metaMachine metaMachine = (refl_metaMachine) (createMetaMachine(createMetaMachineP, machinePointer));
+    free(machinePointer);
+    //incrementNumberOfMachines    
+    //initCLReflectAPI(); //<--segfault
+    CLReflectResult* result;
+    refl_initAPI(result);
+    printResult(result);
+    //registerMetaMachine(metaMachine, mid); //<--segfault
+    refl_registerMetaMachine(metaMachine, mid, result);
+    printResult(result);
+}
 

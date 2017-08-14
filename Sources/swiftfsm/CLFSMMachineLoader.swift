@@ -78,7 +78,8 @@ public class CLFSMMachineLoader: MachineLoader {
             )
         
         let dynamicLibraryCreator = DynamicLibraryCreator(printer: printer)
-        
+       
+        /*
         //access libCFMs via dlopen/dlsym and set fsm vector and fsm count
         guard let dlrCFSM = dynamicLibraryCreator.open(path: "/usr/local/lib/libCFSMs.so") else {
             fatalError("Error creating DLC for CFSMs")
@@ -93,10 +94,10 @@ public class CLFSMMachineLoader: MachineLoader {
 
         //Set number_of_machines in cfsm (required by CLMacros)
         //NYI: get count from command line args
-        incrementNumberOfMachines(setNumMachinesPtr)
         
         //Place machines in vector and set in cfsm (required by CLMacros)
         //NYI: set fsm vector
+        */
 
         //get pointer to CLFSM machine library
         guard let dynamicLibraryResource = dynamicLibraryCreator.open(path: path) else {
@@ -110,13 +111,15 @@ public class CLFSMMachineLoader: MachineLoader {
         }
 
         if (debug) { print("machine create func pointer: \(createMachinePointer)") }
-
+        
+        /*
         //call machine create function and get pointer to machine
         guard let machinePointer = createMachine(createMachinePointer) else {
             fatalError("Error getting CL machine pointer")
         }
 
         if (debug) { print("machine pointer: \(machinePointer)") }
+        */
 
         //get pointer to create scheduled meta machine function
         let createScheduledMetaMachineTuple = dynamicLibraryResource.getSymbolPointer(symbol: "Create_ScheduledMetaMachine")
@@ -125,13 +128,17 @@ public class CLFSMMachineLoader: MachineLoader {
         }
 
         if (debug) { print("create scheduled meta machine func pointer: \(createScheduledMetaMachinePointer)") }
+        
+        loadMachine(createMachinePointer, createScheduledMetaMachinePointer, 0)
 
+        /*
         //call create scheduled meta machine and get pointer to meta machine
         guard let scheduledMetaMachinePointer = createMetaMachine(createScheduledMetaMachinePointer, machinePointer) else {
             fatalError("error creating meta machine")
         }
-
+    
         if (debug) { print("scheduled meta machine pointer: \(scheduledMetaMachinePointer)") }
+        */
 
         //TODO: how to work with C enums (imported as structs)
         //TODO: should make swift wrappers for these API calls
@@ -144,7 +151,13 @@ public class CLFSMMachineLoader: MachineLoader {
 
         //initCLReflectAPI()
         //registerMetaMachine(scheduledMetaMachinePointer, 0)
-        invokeOnEntry(scheduledMetaMachinePointer, 0)
+        //invokeOnEntry(scheduledMetaMachinePointer, 0)
+
+        //let mm = refl_getMetaMachine(0, nil)
+        //refl_invokeOnEntry(mm, 0, nil)
+
+        let dlCloseResult = dynamicLibraryResource.close()
+        if (!dlCloseResult.0) { print(dlCloseResult.1!) }
 
         return []
     }
