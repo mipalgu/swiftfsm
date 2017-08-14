@@ -133,16 +133,18 @@ public class CLFSMMachineLoader: MachineLoader {
 
         if (debug) { print("scheduled meta machine pointer: \(scheduledMetaMachinePointer)") }
 
-        //TODO: how to initialise and pass "UnsafeMutablePointer<CLReflectResult>!"
+        //TODO: how to work with C enums (imported as structs)
         //TODO: should make swift wrappers for these API calls
+        
         //initialise CLReflect API
         //refl_initAPI(nil)
-
-        //register meta machine with API
-        //refl_registerMetaMachine(metaMachine, 0, nil)
         
         //temporary solution: call init API and register meta machine from swiftfsm_helpers/cfsm_load.c
-        registerMetaMachine(scheduledMetaMachinePointer, 0) //TODO: machineID (does it just increment?)
+        //registerMetaMachine(scheduledMetaMachinePointer, 0) //TODO: machineID (does it just increment?)
+
+        //initCLReflectAPI()
+        //registerMetaMachine(scheduledMetaMachinePointer, 0)
+        invokeOnEntry(scheduledMetaMachinePointer, 0)
 
         return []
     }
