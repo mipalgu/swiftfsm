@@ -62,8 +62,7 @@
 
 using namespace FSM;
 
-extern CLMachine *finite_state_machines[1]; ///< fsms set up
-CLMachine *finite_state_machines[1] = {NULL};
+//extern CLMachine *finite_state_machines[1]; ///< fsms set up
 
 enum CLControlStatus FSM::control_machine_at_index(const int index, const enum CLControlStatus command)
 {

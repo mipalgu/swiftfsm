@@ -62,7 +62,7 @@
 #include "CLMachine.h"
 #include "CLMacros.h"
 
-extern FSM::CLMachine *finite_state_machines[1];///< fsms set up
+//extern FSM::CLMachine *finite_state_machines[1];///< fsms set up
 
 int FSM::index_of_machine_named(const char *name)
 {
@@ -79,4 +79,14 @@ int FSM::index_of_machine_named(const char *name)
 
     return CLError;
 }
+
+const char *FSM::name_of_machine_at_index(int index)
+{
+    using namespace FSM;
+    
+    CLMachine *machine = finite_state_machines[index];
+    
+    return machine->machineName();
+}
+
 
