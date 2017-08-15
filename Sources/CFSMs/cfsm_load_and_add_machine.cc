@@ -1,7 +1,9 @@
 #include "cfsm_load_and_add_machine.h"
 #include "StateMachineVector.h"
 #include "cfsm_number_of_machines.h"
+#include <CLReflectAPI.h>
 #include <stdlib.h>
+
 
 using namespace FSM;
 
@@ -10,6 +12,7 @@ CLMachine **finite_state_machines = NULL;
 
 //TODO: delegate this to swiftfsm/CLFSMMachineLoader to dynamically load machines
 //TODO: findIndexForNewMachine - assign smallest unused index first, currently it increments and grows
+//TODO: maybe refactor, lots going on in this function
 int loadAndAddMachine(const char *machine, bool initiallySuspended = false)
 {
     //init the fsm array if it hasn't been done
@@ -19,9 +22,10 @@ int loadAndAddMachine(const char *machine, bool initiallySuspended = false)
         if (!finite_state_machines) return CLError;
     }
 
-    //in swiftfsm, call dlopen on path and get CLMachine pointer
+    //call dlopen on path and get CLMachine pointer and metamachine pointer
     CLMachine *machinePtr = NULL;
-    
+    refl_metaMachine metaMachine = NULL;
+
     //if we can't get pointer, return CLError
 
     //get the new amount of machines
@@ -30,7 +34,17 @@ int loadAndAddMachine(const char *machine, bool initiallySuspended = false)
     //realloc array and place machine pointer at index number_of_machines + 1
     finite_state_machines = (CLMachine**) realloc(finite_state_machines, (number_of_fsms) * sizeof(CLMachine*));
     if (!finite_state_machines) return CLError;
+
     finite_state_machines[number_of_fsms] = machinePtr;
+
+    //init CLReflect API and register metamachine
+    CLReflectResult* result;
+    refl_initAPI(result);
+    if (!result || *result != REFL_SUCCESS) return CLError;
+
+    refl_registerMetaMachine(metaMachine, number_of_fsms, result);
+    if (!result || *result != REFL_SUCCESS) return CLError;
+
 
     set_number_of_machines(number_of_fsms);
 
