@@ -1,12 +1,10 @@
 #include "cfsm_load_and_add_machine.h"
 #include "StateMachineVector.h"
-#include "CLMachine.h"
 #include "cfsm_number_of_machines.h"
 #include <stdlib.h>
 
 using namespace FSM;
 
-extern CLMachine **finite_state_machines;
 CLMachine **finite_state_machines = NULL;
 
 

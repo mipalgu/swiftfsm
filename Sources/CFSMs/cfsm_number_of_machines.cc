@@ -2,11 +2,9 @@
 
 int number_of_clmachines = 0;
 
-extern "C" {
-    void set_number_of_machines(int n)
-    {   
-        number_of_clmachines = n;
-    }
+void set_number_of_machines(int n)
+{   
+    number_of_clmachines = n;
 }
 
 int FSM::number_of_machines(void)

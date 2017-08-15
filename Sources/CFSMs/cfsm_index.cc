@@ -58,6 +58,7 @@
 
 #include <string.h>
 #include "cfsm_index.h"
+#include "cfsm_load_and_add_machine.h"
 #include "StateMachineVector.h"
 #include "CLMachine.h"
 #include "CLMacros.h"
