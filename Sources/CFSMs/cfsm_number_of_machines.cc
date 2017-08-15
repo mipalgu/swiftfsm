@@ -3,14 +3,9 @@
 int number_of_clmachines = 0;
 
 extern "C" {
-    void increment_number_of_machines(int n)
+    void set_number_of_machines(int n)
     {   
-        number_of_clmachines++;
-    }
-
-    void decrement_number_of_machines(int n)
-    {
-        number_of_clmachines--;
+        number_of_clmachines = n;
     }
 }
 
