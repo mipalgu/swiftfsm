@@ -85,7 +85,7 @@ int FSM::loadAndAddMachine(const char *machine, bool initiallySuspended)
     finite_state_machines[number_of_fsms] = machine_ptr;
     printf("machine ptr at [0]: %p\n", finite_state_machines[0]);
     CLMachine *test = finite_state_machines[0];
-    std::cout << "test name: " << test->machineName() << std::endl;
+    std::cout << "test name: " << test->machineID() << std::endl;
     set_number_of_machines(number_of_fsms);
     
     //get create meta machine function
