@@ -68,6 +68,8 @@ public class CLFSMMachineLoader: MachineLoader {
 
     public func load(path: String) -> [AnyScheduleableFiniteStateMachine] {
        
+        print("CLFSMMachineLoader path: \(path)")
+
         let debug = true; //gross but no preprocessor
 
         //perhaps add printer to constructor so we can use the one in main.swift
@@ -94,9 +96,8 @@ public class CLFSMMachineLoader: MachineLoader {
         print("loadMachinePtr: \(loadMachinePtr)")
 
 
-       let _ = path.utf8CString.withUnsafeBufferPointer { 
-            loadMachine(loadMachinePtr, $0.baseAddress!, false)
-       }
+        let res = loadMachine(loadMachinePtr, path, false)
+        print("load res: \(res)")
         // loadMachine(loadMachinePtr, path.utf8CString, false)
 
         let dlCloseResult = dlrCFSM.close()

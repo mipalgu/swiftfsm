@@ -90,4 +90,8 @@ const char *FSM::name_of_machine_at_index(int index)
     return machine->machineName();
 }
 
-
+FSM::CLMachine *FSM::machine_at_index(unsigned index)
+{
+    using namespace FSM;
+    return finite_state_machines[index];
+}
