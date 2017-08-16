@@ -5,8 +5,8 @@
 #include <CLReflectAPI.h>
 #include <stdlib.h>
 #include <string>
+#include <string.h>
 #include <stdio.h>
-#include <iostream>
 #include <unistd.h>
 
 using namespace FSM;
@@ -30,22 +30,13 @@ const char* getMachineNameFromPath(const char* path)
     std::size_t start = tmp.find_last_of("/");
     std::size_t end = tmp.find_last_of(".so");
     std::string name = tmp.substr(start + 1, (end - start - 3) );
-    std::cout << "name from substr function: " << name << std::endl;
-    if ((name.c_str())[0] == '\0') std::cout << "name is empty in substr func" << std::endl;
-    return name.c_str();
+    char* csymbol = (char*) calloc(1, sizeof(symbol.c_str()));
+    strcpy(csymbol, symbol.c_str());
+    return csymbol;
 }
 
 int FSM::loadAndAddMachine(const char *machine, bool initiallySuspended)
 {
-    //if(!machine) printf("path is NULL!\n");
-    //printf("path ptr: %p\n", machine);
-    //printf("path: %s\n", machine); //<--if this isn't here, name sometimes doesn't get printed
-    //sleep(1);
-    const char* name = getMachineNameFromPath(machine);
-    printf("name: %s, ptr: %p\n", name, name);
-    if (name[0] == '\0') printf("shit's empty\n");
-    
-    /*
     //init the fsm array if it hasn't been done
     if (!finite_state_machines)
     {
@@ -53,11 +44,18 @@ int FSM::loadAndAddMachine(const char *machine, bool initiallySuspended)
         if (!finite_state_machines) return CLError;
     }
 
-    //call dlopen on path and get CLMachine pointer and metamachine pointer
+    //get machine lib handle
     void* machineLibHandle = dlopen(machine, RTLD_LAZY);
     if (!machineLibHandle) return CLError;
-    
-    CLMachine *machinePtr = NULL; //(CLMachine*) dlsym(machineLibHandle);
+   
+    //get pointers to create machine and metamachine functions
+    const char* createMachineSymbol = getCreateMachineSymbol(machine);
+    void* createMachinePtr = dlsym(machineLibHandle, createMachineSymbol);
+    if (!createMachinePtr) return CLError;
+    CLMachine* (*createMachine)(int, const char*) = (CLMachine* (*)(int, const char*)) (createMachinePtr);
+    //CLMachine* m = createMachine(
+
+
     refl_metaMachine metaMachine = NULL;
 
     //if we can't get pointer, return CLError
@@ -85,8 +83,6 @@ int FSM::loadAndAddMachine(const char *machine, bool initiallySuspended)
     //get metamachine pointer and register meta machine
 
     return number_of_fsms;
-    */
-    return 0;
 }
 
 
