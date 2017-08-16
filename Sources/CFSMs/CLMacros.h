@@ -107,6 +107,7 @@ namespace FSM
          @return index of the loaded machine, CLError on error
          */
         int loadAndAddMachine(const char *machine, bool initiallySuspended = false);
+        extern "C" { int _C_loadAndAddMachine(const char *machine, bool initiallySuspended = false); }
         bool unloadMachineAtIndex(int index);
 
 /*

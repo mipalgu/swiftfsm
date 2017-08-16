@@ -1,20 +1,41 @@
 #include "cfsm_load_and_add_machine.h"
 #include "StateMachineVector.h"
 #include "cfsm_number_of_machines.h"
+#include <dlfcn.h>
 #include <CLReflectAPI.h>
 #include <stdlib.h>
-
+#include <string>
+#include <stdio.h>
 
 using namespace FSM;
 
 CLMachine **finite_state_machines = NULL;
 
-
-//TODO: delegate this to swiftfsm/CLFSMMachineLoader to dynamically load machines
 //TODO: findIndexForNewMachine - assign smallest unused index first, currently it increments and grows
-//TODO: maybe refactor, lots going on in this function
-int loadAndAddMachine(const char *machine, bool initiallySuspended = false)
+//TODO: create StateMachineVector from fsm array
+
+extern "C"
 {
+    int _C_loadAndAddMachine(const char *machine, bool initiallySuspended)
+    {
+        return FSM::loadAndAddMachine(machine, initiallySuspended);
+    }
+}
+
+const char* getMachineNameFromPath(const char* path)
+{
+    std::string tmp = std::string(path);
+    std::size_t start = tmp.find_last_of("/");
+    std::size_t end = tmp.find_last_of(".so");
+    std::string name = tmp.substr(start + 1, (end - start - 3) );
+    return name.c_str();
+}
+
+int FSM::loadAndAddMachine(const char *machine, bool initiallySuspended)
+{
+    const char* name = getMachineNameFromPath(machine);
+    printf("name: %s, ptr: %p\n", name, name);
+    /*
     //init the fsm array if it hasn't been done
     if (!finite_state_machines)
     {
@@ -23,7 +44,10 @@ int loadAndAddMachine(const char *machine, bool initiallySuspended = false)
     }
 
     //call dlopen on path and get CLMachine pointer and metamachine pointer
-    CLMachine *machinePtr = NULL;
+    void* machineLibHandle = dlopen(machine, RTLD_LAZY);
+    if (!machineLibHandle) return CLError;
+    
+    CLMachine *machinePtr = NULL; //(CLMachine*) dlsym(machineLibHandle);
     refl_metaMachine metaMachine = NULL;
 
     //if we can't get pointer, return CLError
@@ -51,9 +75,8 @@ int loadAndAddMachine(const char *machine, bool initiallySuspended = false)
     //get metamachine pointer and register meta machine
 
     return number_of_fsms;
+    */
+    return 0;
 }
 
 
-
-
-    

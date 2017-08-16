@@ -1,8 +1,21 @@
 #include "cfsm_load.h"
-#include <CLReflectAPI.h>
 #include <stdio.h>
 #define DEBUG 
 
+
+int loadMachine(void* p, const char *machine, bool initiallySuspended)
+{
+   printf("ptr: %p, machine path: %s, initsuspended: %d\n", p, machine, initiallySuspended);
+   int (*f)(const char*, bool) = (int (*)(const char*, bool)) (p);
+   return( f(machine, initiallySuspended) );
+}
+
+//int loadMachine(const char *machine, bool initiallySuspended)
+//{
+//    return _C_loadAndAddMachine(machine, initiallySuspended);
+//}
+
+/*
 void* createMachine(void* p)
 {
     void* (*f)(int, const char*) = (void* (*)(int, const char*)) (p);
@@ -99,4 +112,4 @@ void loadMachine(void* createMachineP, void* createMetaMachineP, unsigned int mi
     //refl_registerMetaMachine(metaMachine, mid, result);
     //printResult(result);
 }
-
+*/

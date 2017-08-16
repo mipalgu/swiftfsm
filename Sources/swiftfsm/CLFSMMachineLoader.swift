@@ -78,13 +78,27 @@ public class CLFSMMachineLoader: MachineLoader {
             )
         
         let dynamicLibraryCreator = DynamicLibraryCreator(printer: printer)
-       
-        /*
+
+        
         //access libCFMs via dlopen/dlsym and set fsm vector and fsm count
         guard let dlrCFSM = dynamicLibraryCreator.open(path: "/usr/local/lib/libCFSMs.so") else {
             fatalError("Error creating DLC for CFSMs")
         }
 
+        let loadMachineTuple = dlrCFSM.getSymbolPointer(symbol: "_C_loadAndAddMachine")
+        guard let loadMachinePtr = loadMachineTuple.0 else {
+            fatalError(loadMachineTuple.1 ?? "getSymbolPointer(loadAndAddMachine): unknown error")
+        }
+
+
+        print("loadMachinePtr: \(loadMachinePtr)")
+
+        loadMachine(loadMachinePtr, path, false)
+
+        let dlCloseResult = dlrCFSM.close()
+        if (!dlCloseResult.0) { print(dlCloseResult.1 ?? "No error message for DynamicLibraryResource.close()!") }
+
+        /*
         let setNumMachinesTuple = dlrCFSM.getSymbolPointer(symbol: "set_number_of_machines")
         guard let setNumMachinesPtr = setNumMachinesTuple.0 else {
             fatalError(setNumMachinesTuple.1 ?? "getSymbolPointer(set_number_of_machines): unknown error")
@@ -97,7 +111,7 @@ public class CLFSMMachineLoader: MachineLoader {
         
         //Place machines in vector and set in cfsm (required by CLMacros)
         //NYI: set fsm vector
-        */
+        
 
         //get pointer to CLFSM machine library
         guard let dynamicLibraryResource = dynamicLibraryCreator.open(path: path) else {
@@ -148,21 +162,21 @@ public class CLFSMMachineLoader: MachineLoader {
         invokeOnEntry(scheduledMetaMachinePointer, 0)
 
 
-        /*
+        
         //convert unsafemutablerawpointer
         let opaquePtr = OpaquePointer(scheduledMetaMachinePointer)
         let metaMachinePtr = UnsafeMutablePointer<refl_metaMachine>(opaquePtr)
         let metaMachine = metaMachinePtr.pointee
 
         refl_invokeOnEntry(metaMachine, 0, nil) <-- segfault
-        */ 
+         
 
         //let mm = refl_getMetaMachine(0, nil)
         //refl_invokeOnEntry(mm, 0, nil)
 
         let dlCloseResult = dynamicLibraryResource.close()
         if (!dlCloseResult.0) { print(dlCloseResult.1 ?? "No error message for DynamicLibraryResource.close()!") }
-
+        */
         return []
     }
 
