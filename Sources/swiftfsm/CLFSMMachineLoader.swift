@@ -93,7 +93,11 @@ public class CLFSMMachineLoader: MachineLoader {
 
         print("loadMachinePtr: \(loadMachinePtr)")
 
-        loadMachine(loadMachinePtr, path, false)
+
+       let _ = path.utf8CString.withUnsafeBufferPointer { 
+            loadMachine(loadMachinePtr, $0.baseAddress!, false)
+       }
+        // loadMachine(loadMachinePtr, path.utf8CString, false)
 
         let dlCloseResult = dlrCFSM.close()
         if (!dlCloseResult.0) { print(dlCloseResult.1 ?? "No error message for DynamicLibraryResource.close()!") }

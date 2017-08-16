@@ -6,6 +6,8 @@
 #include <stdlib.h>
 #include <string>
 #include <stdio.h>
+#include <iostream>
+#include <unistd.h>
 
 using namespace FSM;
 
@@ -28,13 +30,21 @@ const char* getMachineNameFromPath(const char* path)
     std::size_t start = tmp.find_last_of("/");
     std::size_t end = tmp.find_last_of(".so");
     std::string name = tmp.substr(start + 1, (end - start - 3) );
+    std::cout << "name from substr function: " << name << std::endl;
+    if ((name.c_str())[0] == '\0') std::cout << "name is empty in substr func" << std::endl;
     return name.c_str();
 }
 
 int FSM::loadAndAddMachine(const char *machine, bool initiallySuspended)
 {
+    //if(!machine) printf("path is NULL!\n");
+    //printf("path ptr: %p\n", machine);
+    //printf("path: %s\n", machine); //<--if this isn't here, name sometimes doesn't get printed
+    //sleep(1);
     const char* name = getMachineNameFromPath(machine);
     printf("name: %s, ptr: %p\n", name, name);
+    if (name[0] == '\0') printf("shit's empty\n");
+    
     /*
     //init the fsm array if it hasn't been done
     if (!finite_state_machines)
