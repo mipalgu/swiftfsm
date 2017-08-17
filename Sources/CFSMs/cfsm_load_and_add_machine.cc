@@ -1,5 +1,4 @@
 #include "cfsm_load_and_add_machine.h"
-#include "StateMachineVector.h"
 #include "cfsm_number_of_machines.h"
 #include <dlfcn.h>
 #include <CLReflectAPI.h>
@@ -14,7 +13,7 @@ using namespace FSM;
 
 CLMachine **finite_state_machines = NULL;
 
-//TODO: findIndexForNewMachine - assign smallest unused index first, currently it increments and grows
+//TODO: findIndexForNewMachine - assign smallest unused index first, currently it increments and grows (however maintain unique ID)
 //TODO: create StateMachineVector from fsm array
 
 extern "C"
@@ -23,6 +22,13 @@ extern "C"
     {
         return FSM::loadAndAddMachine(machine, initiallySuspended);
     }
+}
+
+Machine *createMachineContext(CLMachine *machine)
+{
+    CLState *initial_state = machine->initialState();
+    CLState *suspend_state = machine->suspendState();
+    return new Machine(initial_state, suspend_state, false);
 }
 
 const char* getMachineNameFromPath(const char* path)
@@ -36,6 +42,7 @@ const char* getMachineNameFromPath(const char* path)
     return name;
 }
 
+//TODO: refactor
 //TODO: print dlerror() on dlopen/dlsym failure
 int FSM::loadAndAddMachine(const char *machine, bool initiallySuspended)
 {
@@ -75,6 +82,15 @@ int FSM::loadAndAddMachine(const char *machine, bool initiallySuspended)
     if (!machine_ptr) return CLError;
     printf("six\n");
 
+    //create internal machine (CL machine context)
+    Machine *machine_context = createMachineContext(machine_ptr);
+    if (!machine_context) return CLError;
+
+    //set CL machine name, id, machine context
+    machine_ptr->setMachineName(name);
+    machine_ptr->setMachineID(number_of_fsms);
+    machine_ptr->setMachineContext(machine_context);
+
     printf("number of fsms: %d\n", number_of_fsms);
 
     //realloc array and place machine pointer at index number_of_machines + 1
@@ -84,8 +100,6 @@ int FSM::loadAndAddMachine(const char *machine, bool initiallySuspended)
 
     finite_state_machines[number_of_fsms] = machine_ptr;
     printf("machine ptr at [0]: %p\n", finite_state_machines[0]);
-    CLMachine *test = finite_state_machines[0];
-    std::cout << "test name: " << test->machineID() << std::endl;
     set_number_of_machines(number_of_fsms);
     
     //get create meta machine function
@@ -110,8 +124,28 @@ int FSM::loadAndAddMachine(const char *machine, bool initiallySuspended)
     refl_registerMetaMachine(meta_machine, number_of_fsms, NULL);
     //if (!result || *result != REFL_SUCCESS) return CLError;
     printf("eleven\n");
-
+    
     printf("machine name: %s\n", name_of_machine_at_index(0));
+
+    printf("number of states: %d\n", machine_ptr->numberOfStates());
+
+    CLState *const *cl_states = machine_ptr->states();
+    CLState *state_from_array = cl_states[0];
+    if (!state_from_array) printf("state from array is nil\n");
+    const char* state_from_array_name = state_from_array->name();
+    if (!state_from_array_name) printf("state from array name is nil\n");
+    printf("state from array name: %s\n", state_from_array_name);
+
+    machine_ptr->setInitialState(state_from_array);
+    CLState *cl_state = machine_ptr->initialState();
+    if (!cl_state) printf("cl_state is nil\n");
+    printf("cl_state name: %s\n", cl_state->name());
+
+    Machine *test_machine = machine_ptr->machineContext();
+    if (!test_machine) printf("test_machine is nil\n");
+    CLState *test_state = test_machine->currentState();
+    if (!test_state) printf("test_state is nil\n");
+
 
     return number_of_fsms;
 }

@@ -59,6 +59,7 @@
 #define ucfsm_CLState_h
 
 #include "CLAction.h"
+#include "stdio.h"
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wweak-vtables"
@@ -82,7 +83,7 @@ namespace FSM
         virtual ~CLState() {}
 
         /** name getter */
-        const char *name() const { return _name; }
+        const char *name() const { if (!_name) printf ("shit dude\n"); return _name; }
 
         /** name setter */
         void setName(const char *name) { _name = name; }

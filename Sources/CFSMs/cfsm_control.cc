@@ -72,7 +72,8 @@ enum CLControlStatus FSM::control_machine_at_index(const int index, const enum C
 #ifdef CFSM_CHECK_BOUNDS
     if (i >= number_of_fsms) return CLError;
 #endif
-    CLMachine * const machine = finite_state_machines[i];
+    CLMachine * const cl_machine = finite_state_machines[i];
+    Machine *machine = cl_machine->machineContext();
     switch (command)
     {
         case CLSuspend:
@@ -80,7 +81,7 @@ enum CLControlStatus FSM::control_machine_at_index(const int index, const enum C
             break;
 
         case CLRestart:
-            machine->setPreviousState(machine->initialState());
+            machine->setPreviousState(cl_machine->initialState());
         case CLResume:
             machine->resume();
             break;
@@ -88,7 +89,7 @@ enum CLControlStatus FSM::control_machine_at_index(const int index, const enum C
         case CLStatus:
             if (machine->currentState() == machine->suspendState())
                 return CLSuspend;
-            else if (machine->currentState() == machine->initialState())
+            else if (machine->currentState() == cl_machine->initialState())
                 return CLRestart;
             else
                 return CLResume;

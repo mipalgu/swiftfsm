@@ -55,7 +55,7 @@
  * Fifth Floor, Boston, MA  02110-1301, USA.
  *
  */
-#include "SuspensibleMachine.h"
+#include "Machine.h"
 #include "CLState.h"
 
 #pragma clang diagnostic push
@@ -66,14 +66,14 @@ using namespace FSM;
 
 static CLAction noAction;
 
-SuspensibleMachine::~SuspensibleMachine()
+Machine::~Machine()
 {
     if (_deleteSuspendState && _suspendState)
         delete _suspendState;
 }
 
 
-void SuspensibleMachine::setSuspendState(CLState *s, bool del)
+void Machine::setSuspendState(CLState *s, bool del)
 {
     if (_deleteSuspendState && _suspendState)
         delete _suspendState;
@@ -83,7 +83,7 @@ void SuspensibleMachine::setSuspendState(CLState *s, bool del)
 }
 
 
-void SuspensibleMachine::suspend()
+void Machine::suspend()
 {
     if (!_suspendState)
     {
@@ -103,7 +103,7 @@ void SuspensibleMachine::suspend()
 }
 
 
-void SuspensibleMachine::resume()
+void Machine::resume()
 {
     CLState *curr = currentState();
 

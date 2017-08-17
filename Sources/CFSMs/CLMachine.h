@@ -74,20 +74,27 @@
 
 namespace FSM
 {
-    class StateMachineVector;
     class CLState;
 
     /**
-     *  Simple uc FSM base class
+     *  Simple CFSM base class
      */
     class Machine
     {
         CLState                 *_currentState;         ///< current state
         CLState                 *_previousState;        ///< previous state
+        CLState                 *_suspendState;         ///< suspend state
+        CLState                 *_resumeState;          ///< resume state
+        bool                    _deleteSuspendState;    ///< should delete in destructor?
         unsigned long           _state_time;            ///< state start time
     public:
         /// Designated constructor
-        Machine(CLState *initialState): _currentState(initialState), _previousState(0), _state_time(0UL) {}
+        Machine(CLState *initialState, CLState *s = 0, bool del = false): _currentState(initialState), _previousState(0), _suspendState(s), _resumeState(0),  _state_time(0UL), _deleteSuspendState(del) {}
+    
+        /// Destructor
+        virtual ~Machine();
+
+        CLState *suspendState() const { return _suspendState; }
 
         /**
          *  Current state getter
@@ -102,6 +109,31 @@ namespace FSM
          *  @return the current state of the machine
          */
         CLState * const currentState() const { return _currentState; }
+
+        /**
+         * Suspend state setter
+         *
+         * @param s the new suspend state
+         * @param del whether suspend state should be deleted in destructor
+         */
+        void setSuspendState(CLState *s, bool del = false);
+
+        /**
+         * Whether this machine is suspended
+         *
+         * @return suspend status
+         */
+        bool isSuspended() const { return _suspendState && currentState() == _suspendState; }
+
+        /**
+         * Suspend this machine
+         */
+        virtual void suspend();
+
+        /** 
+         * Resume this machine 
+         */
+        virtual void resume();
 
         /**
          *  Current state setter
@@ -146,55 +178,20 @@ namespace FSM
          */
         void setStateTime(const unsigned long t) { _state_time = t; }
     };
-
-#ifndef UCFSM_WITHOUT_SUSPEND
-
-    class SuspensibleMachine: public Machine
-    {
-        CLState *_suspendState;         ///< the suspend state
-        CLState *_resumeState;          ///< state to resume to
-        bool _deleteSuspendState;       ///< should delete in destructor?
-    public:
-        /** constructor */
-        SuspensibleMachine(CLState *initialState = 0, CLState *s = 0, bool del = false): Machine(initialState), _suspendState(s), _resumeState(0), _deleteSuspendState(del) {}
-
-        /** destructor */
-        virtual ~SuspensibleMachine();
-
-        /** suspend state getter method */
-        CLState *suspendState() const { return _suspendState; }
-
-        /** suspend state setter */
-        void setSuspendState(CLState *s, bool del = false);
-
-        /** tell whether this machine is suspended */
-        bool isSuspended() const { return _suspendState && currentState() == _suspendState; }
-
-        /** suspend this state machine */
-        virtual void suspend();
-
-        /** resume this state machine where it left off */
-        virtual void resume();
-    };
-
-#define CL_SUPER_MACHINE SuspensibleMachine
-#else                                                   // UCFSM_WITHOUT_SUSPEND
-#define CL_SUPER_MACHINE Machine
-#endif
-
+    
     /**
      *  This is the machine as seen from within an FSM
      */
-    class CLMachine: public CL_SUPER_MACHINE
+    class CLMachine
     {
-        StateMachineVector      *_vectorContext;        ///< current vector
+        Machine                 *_machineContext;       ///< fsm context 
         CLState                 *_initialState;         ///< initial state
         CLState                 *_suspendState;         ///< suspend state
         const char              *_machineName;          ///< name of this machine
         int                      _machineID;            ///< number of this machine
     public:
         /** default constructor */
-        CLMachine(int mid = 0, const char *name = ""): CL_SUPER_MACHINE(), _vectorContext(0), _initialState(0), _suspendState(0), _machineName(name), _machineID(mid) {}
+        CLMachine(int mid = 0, const char *name = ""): _machineContext(), _initialState(0), _suspendState(0), _machineName(name), _machineID(mid) {}
 
         /** default destructor (subclass responsibility) */
         virtual ~CLMachine() {}
@@ -206,10 +203,7 @@ namespace FSM
         CLState *suspendState() const { return _suspendState; }
 
         /** access method for the FSM context of this machine */
-        Machine *machineContext() const { return const_cast<Machine *>(static_cast<const Machine *>(this)); }
-
-        /** access method for the FSM vector of this machine */
-        StateMachineVector *vectorContext() const { return _vectorContext; }
+        Machine *machineContext() const { return _machineContext; }
 
         /** return the name of this machine */
         const char *machineName() const { return _machineName; }
@@ -229,6 +223,9 @@ namespace FSM
         /** set the ID number of this machine */
         void setMachineID(int mid) { _machineID = mid; }
 
+        /** set the machine context of this machine */
+        void setMachineContext(Machine *m) { _machineContext = m; }
+
         /** return the ith state of this machine */
         CLState *state(int i) const { return states()[i]; }
 
@@ -237,14 +234,8 @@ namespace FSM
 
         /** return the number of states this machine has */
         virtual int numberOfStates() const = 0;
-
-#ifndef UCFSM_WITHOUT_SUSPEND
-        /** resume */
-        virtual void resume() { SuspensibleMachine::resume(); if (!currentState()) setCurrentState(states()[0]); }
-#endif
     };
 }
 
 #pragma clang diagnostic pop
-
 #endif

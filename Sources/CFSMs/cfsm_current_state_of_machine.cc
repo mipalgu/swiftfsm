@@ -4,5 +4,6 @@
 
 FSM::CLState *current_state_of_machine(FSM::CLMachine *machine)
 {
-    return machine->currentState();
+    FSM::Machine *context = machine->machineContext();
+    return context->currentState();
 }
