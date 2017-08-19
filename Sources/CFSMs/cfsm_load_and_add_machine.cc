@@ -78,6 +78,7 @@ int FSM::loadAndAddMachine(const char *machine, bool initiallySuspended)
     printf("five\n");
 
     //get CL machine pointer
+    printf("CREATING CLMACHINE\n");
     CLMachine* machine_ptr = createMachine(number_of_fsms, name);
     if (!machine_ptr) return CLError;
     printf("six\n");
@@ -87,9 +88,11 @@ int FSM::loadAndAddMachine(const char *machine, bool initiallySuspended)
     if (!machine_context) return CLError;
 
     //set CL machine name, id, machine context
-    machine_ptr->setMachineName(name);
-    machine_ptr->setMachineID(number_of_fsms);
+    //machine_ptr->setMachineName(name);
+    //machine_ptr->setMachineID(number_of_fsms);
     machine_ptr->setMachineContext(machine_context);
+
+    printf("machine name: %s\n", machine_ptr->machineName());
 
     printf("number of fsms: %d\n", number_of_fsms);
 
@@ -136,15 +139,14 @@ int FSM::loadAndAddMachine(const char *machine, bool initiallySuspended)
     if (!state_from_array_name) printf("state from array name is nil\n");
     printf("state from array name: %s\n", state_from_array_name);
 
-    machine_ptr->setInitialState(state_from_array);
-    CLState *cl_state = machine_ptr->initialState();
-    if (!cl_state) printf("cl_state is nil\n");
-    printf("cl_state name: %s\n", cl_state->name());
+    //machine_ptr->setInitialState(state_from_array);
 
-    Machine *test_machine = machine_ptr->machineContext();
-    if (!test_machine) printf("test_machine is nil\n");
-    CLState *test_state = test_machine->currentState();
-    if (!test_state) printf("test_state is nil\n");
+    CLState *init_state = machine_ptr->initialState();
+    if (!init_state) printf("init_state is nil\n");
+    printf("init state name is: %s\n", init_state->name());
+
+    refl_invokeOnEntry(meta_machine, 0, NULL);
+    refl_invokeOnEntry(meta_machine, 1, NULL);
 
 
     return number_of_fsms;

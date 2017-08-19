@@ -77,7 +77,7 @@ namespace FSM
         CLAction        &_internalAction;       /// internal
     public:
         /** default constructor */
-        CLState(const char *name, CLAction &onEntry, CLAction &onExit, CLAction &internal): _name(name), _onEntryAction(onEntry), _onExitAction(onExit), _internalAction(internal) {}
+        CLState(const char *name, CLAction &onEntry, CLAction &onExit, CLAction &internal): _name(name), _onEntryAction(onEntry), _onExitAction(onExit), _internalAction(internal) { printf("creating state\n");}
 
         /** destructor (subclass responsibility!) */
         virtual ~CLState() {}

@@ -72,6 +72,8 @@
 #pragma clang diagnostic ignored "-Wweak-vtables"
 #pragma clang diagnostic ignored "-Wignored-qualifiers"
 
+#include <stdio.h>
+
 namespace FSM
 {
     class CLState;
@@ -84,9 +86,9 @@ namespace FSM
         CLState                 *_currentState;         ///< current state
         CLState                 *_previousState;        ///< previous state
         CLState                 *_suspendState;         ///< suspend state
-        CLState                 *_resumeState;          ///< resume state
-        bool                    _deleteSuspendState;    ///< should delete in destructor?
+        CLState                 *_resumeState;          ///< resume state 
         unsigned long           _state_time;            ///< state start time
+        bool                    _deleteSuspendState;    ///< should delete in destructor?
     public:
         /// Designated constructor
         Machine(CLState *initialState, CLState *s = 0, bool del = false): _currentState(initialState), _previousState(0), _suspendState(s), _resumeState(0),  _state_time(0UL), _deleteSuspendState(del) {}
@@ -191,7 +193,7 @@ namespace FSM
         int                      _machineID;            ///< number of this machine
     public:
         /** default constructor */
-        CLMachine(int mid = 0, const char *name = ""): _machineContext(), _initialState(0), _suspendState(0), _machineName(name), _machineID(mid) {}
+        CLMachine(int mid = 0, const char *name = ""): _machineContext(0), _initialState(0), _suspendState(0), _machineName(name), _machineID(mid) { printf("creating machine\n"); }
 
         /** default destructor (subclass responsibility) */
         virtual ~CLMachine() {}
@@ -212,7 +214,7 @@ namespace FSM
         int machineID() const { return _machineID; }
 
         /** set the current state of this machine */
-        void setInitialState(CLState *state) { _initialState = state; }
+        void setInitialState(CLState *state) { printf("setting initial state\n"); _initialState = state; }
 
         /** set the suspend state of this machine */
         void setSuspendState(CLState *state) { _suspendState = state; }
