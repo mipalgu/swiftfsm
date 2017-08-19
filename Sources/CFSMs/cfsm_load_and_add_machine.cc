@@ -23,6 +23,17 @@ extern "C"
     {
         return FSM::loadAndAddMachine(machine, initiallySuspended);
     }
+
+    bool _C_unloadMachineAtIndex(int index)
+    {
+        return FSM::unloadMachineAtIndex(index);
+    }
+
+    void _C_destroyCFSM()
+    {
+        free(finite_state_machines);
+        refl_destroyAPI(NULL);
+    }
 }
 
 Machine *createMachineContext(CLMachine *machine)
@@ -68,7 +79,6 @@ int FSM::loadAndAddMachine(const char *machine, bool initiallySuspended)
     strcat(create_machine_symbol, name);
     void* create_machine_ptr = dlsym(machine_lib_handle, create_machine_symbol);
     free(create_machine_symbol);
-    //free((char*)(name));
     if (!create_machine_ptr) return CLError;
     
     CLMachine* (*createMachine)(int, const char*) = (CLMachine* (*)(int, const char*)) (create_machine_ptr);
@@ -115,4 +125,12 @@ int FSM::loadAndAddMachine(const char *machine, bool initiallySuspended)
     return number_of_fsms;
 }
 
-
+bool FSM::unloadMachineAtIndex(int index)
+{
+    if ( index > number_of_machines() ) return false;
+    if ( !finite_state_machines[index] ) return false;
+    finite_state_machines[index] = NULL;
+    set_number_of_machines(number_of_machines() - 1);
+    if (number_of_machines() < 0) _C_destroyCFSM();
+    return true;
+}

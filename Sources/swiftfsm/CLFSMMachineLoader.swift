@@ -87,6 +87,11 @@ public class CLFSMMachineLoader: MachineLoader {
             fatalError(loadMachineTuple.1 ?? "getSymbolPointer(loadAndAddMachine): unknown error")
         }
 
+        let destroyCFSMTuple = dlrCFSM.getSymbolPointer(symbol: "_C_destroyCFSM")
+        guard let destroyCFSMPtr = destroyCFSMTuple.0 else {
+            fatalError(destroyCFSMTuple.1 ?? "getSymbolPointer(destroyCFSM): unknown error")
+        }
+
         print("CLFSMMachineLoader() - loadMachinePtr: \(loadMachinePtr)") //DEBUG
 
         let res = loadMachine(loadMachinePtr, path, false)
@@ -95,6 +100,8 @@ public class CLFSMMachineLoader: MachineLoader {
 
         let dlCloseResult = dlrCFSM.close()
         if (!dlCloseResult.0) { print(dlCloseResult.1 ?? "No error message for DynamicLibraryResource.close()!") }
+
+        destroyCFSM(destroyCFSMPtr)
 
         return []
     }
