@@ -68,11 +68,8 @@ public class CLFSMMachineLoader: MachineLoader {
 
     public func load(path: String) -> [AnyScheduleableFiniteStateMachine] {
        
-        print("CLFSMMachineLoader path: \(path)")
+        print("CLFSMMachineLoader() - path: \(path)") //DEBUG
 
-        let debug = true; //gross but no preprocessor
-
-        //perhaps add printer to constructor so we can use the one in main.swift
         let printer: CommandLinePrinter = 
             CommandLinePrinter(
                 errorStream: StderrOutputStream(),
@@ -81,8 +78,6 @@ public class CLFSMMachineLoader: MachineLoader {
         
         let dynamicLibraryCreator = DynamicLibraryCreator(printer: printer)
 
-        
-        //access libCFMs via dlopen/dlsym and set fsm vector and fsm count
         guard let dlrCFSM = dynamicLibraryCreator.open(path: "/usr/local/lib/libCFSMs.so") else {
             fatalError("Error creating DLC for CFSMs")
         }
@@ -92,96 +87,15 @@ public class CLFSMMachineLoader: MachineLoader {
             fatalError(loadMachineTuple.1 ?? "getSymbolPointer(loadAndAddMachine): unknown error")
         }
 
-
-        print("loadMachinePtr: \(loadMachinePtr)")
-
+        print("CLFSMMachineLoader() - loadMachinePtr: \(loadMachinePtr)") //DEBUG
 
         let res = loadMachine(loadMachinePtr, path, false)
-        print("load res: \(res)")
-        // loadMachine(loadMachinePtr, path.utf8CString, false)
+
+        print("CLFSMMachineLoader() - load res: \(res)") //DEBUG
 
         let dlCloseResult = dlrCFSM.close()
         if (!dlCloseResult.0) { print(dlCloseResult.1 ?? "No error message for DynamicLibraryResource.close()!") }
 
-        /*
-        let setNumMachinesTuple = dlrCFSM.getSymbolPointer(symbol: "set_number_of_machines")
-        guard let setNumMachinesPtr = setNumMachinesTuple.0 else {
-            fatalError(setNumMachinesTuple.1 ?? "getSymbolPointer(set_number_of_machines): unknown error")
-        }
-
-        if (debug) { print("set num machines ptr: \(setNumMachinesPtr)") }
-
-        //Set number_of_machines in cfsm (required by CLMacros)
-        //NYI: get count from command line args
-        
-        //Place machines in vector and set in cfsm (required by CLMacros)
-        //NYI: set fsm vector
-        
-
-        //get pointer to CLFSM machine library
-        guard let dynamicLibraryResource = dynamicLibraryCreator.open(path: path) else {
-            fatalError("Error creating DynamicLibraryResource")
-        }
-        
-        //get pointer to machine create function
-        let createMachineTuple = dynamicLibraryResource.getSymbolPointer(symbol: "CLM_Create_PingPongCLFSM")
-        guard let createMachinePointer = createMachineTuple.0 else {
-            fatalError(createMachineTuple.1 ?? "getSymbolPointer(): unknown error")
-        }
-
-        if (debug) { print("machine create func pointer: \(createMachinePointer)") }
-        
-        
-        //call machine create function and get pointer to machine
-        guard let machinePointer = createMachine(createMachinePointer) else {
-            fatalError("Error getting CL machine pointer")
-        }
-
-        if (debug) { print("machine pointer: \(machinePointer)") }
-        
-
-        //get pointer to create scheduled meta machine function
-        let createScheduledMetaMachineTuple = dynamicLibraryResource.getSymbolPointer(symbol: "Create_ScheduledMetaMachine")
-        guard let createScheduledMetaMachinePointer = createScheduledMetaMachineTuple.0 else {
-            fatalError(createScheduledMetaMachineTuple.1 ?? "getSymbolPointer(): unknown error")
-        }
-
-        if (debug) { print("create scheduled meta machine func pointer: \(createScheduledMetaMachinePointer)") }
-        
-
-        
-        //call create scheduled meta machine and get pointer to meta machine
-        guard let scheduledMetaMachinePointer = createMetaMachine(createScheduledMetaMachinePointer, machinePointer) else {
-            fatalError("error creating meta machine")
-        }
-    
-        if (debug) { print("scheduled meta machine pointer: \(scheduledMetaMachinePointer)") }
-               
-        //loadMachine(createMachinePointer, createScheduledMetaMachinePointer, 0)
-
-        //TODO: how to work with C enums (imported as structs)
-        //TODO: should make swift wrappers for these API calls
-        
-        //initCLReflectAPI()
-        //registerMetaMachine(scheduledMetaMachinePointer, 0)
-        invokeOnEntry(scheduledMetaMachinePointer, 0)
-
-
-        
-        //convert unsafemutablerawpointer
-        let opaquePtr = OpaquePointer(scheduledMetaMachinePointer)
-        let metaMachinePtr = UnsafeMutablePointer<refl_metaMachine>(opaquePtr)
-        let metaMachine = metaMachinePtr.pointee
-
-        refl_invokeOnEntry(metaMachine, 0, nil) <-- segfault
-         
-
-        //let mm = refl_getMetaMachine(0, nil)
-        //refl_invokeOnEntry(mm, 0, nil)
-
-        let dlCloseResult = dynamicLibraryResource.close()
-        if (!dlCloseResult.0) { print(dlCloseResult.1 ?? "No error message for DynamicLibraryResource.close()!") }
-        */
         return []
     }
 

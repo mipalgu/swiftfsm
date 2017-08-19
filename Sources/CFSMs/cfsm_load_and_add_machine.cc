@@ -7,7 +7,8 @@
 #include <string.h>
 #include <stdio.h>
 #include <unistd.h>
-#include <iostream>
+
+#define DEBUG
 
 using namespace FSM;
 
@@ -67,7 +68,7 @@ int FSM::loadAndAddMachine(const char *machine, bool initiallySuspended)
     strcat(create_machine_symbol, name);
     void* create_machine_ptr = dlsym(machine_lib_handle, create_machine_symbol);
     free(create_machine_symbol);
-    free((char*)(name));
+    //free((char*)(name));
     if (!create_machine_ptr) return CLError;
     
     CLMachine* (*createMachine)(int, const char*) = (CLMachine* (*)(int, const char*)) (create_machine_ptr);
@@ -75,6 +76,7 @@ int FSM::loadAndAddMachine(const char *machine, bool initiallySuspended)
 
     //get CL machine pointer
     CLMachine* machine_ptr = createMachine(number_of_fsms, name);
+    free((char*)(name));
     if (!machine_ptr) return CLError;
 
     //create internal machine (CL machine context)
@@ -105,6 +107,10 @@ int FSM::loadAndAddMachine(const char *machine, bool initiallySuspended)
     refl_registerMetaMachine(meta_machine, number_of_fsms, result);
     if (!result || *result != REFL_SUCCESS) return CLError;
     free(result);
+
+    #ifdef DEBUG
+    printf("cfsm_load_and_add_machine() - machine successfuly loaded, load res: %d\n", number_of_fsms);
+    #endif
 
     return number_of_fsms;
 }
