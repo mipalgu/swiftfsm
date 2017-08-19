@@ -59,6 +59,7 @@
 import FSM
 import IO //needed for printer
 import swiftfsm_helpers 
+import swift_CLReflect
 
 
 /**
@@ -100,6 +101,9 @@ public class CLFSMMachineLoader: MachineLoader {
 
         let dlCloseResult = dlrCFSM.close()
         if (!dlCloseResult.0) { print(dlCloseResult.1 ?? "No error message for DynamicLibraryResource.close()!") }
+        
+        let metaMachine = refl_getMetaMachine(1, nil)
+        refl_invokeOnEntry(metaMachine, 0, nil)
 
         destroyCFSM(destroyCFSMPtr)
 
