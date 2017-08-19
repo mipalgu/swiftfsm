@@ -59,7 +59,6 @@
 #define ucfsm_CLState_h
 
 #include "CLAction.h"
-#include "stdio.h"
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wweak-vtables"
@@ -77,13 +76,13 @@ namespace FSM
         CLAction        &_internalAction;       /// internal
     public:
         /** default constructor */
-        CLState(const char *name, CLAction &onEntry, CLAction &onExit, CLAction &internal): _name(name), _onEntryAction(onEntry), _onExitAction(onExit), _internalAction(internal) { printf("creating state\n");}
+        CLState(const char *name, CLAction &onEntry, CLAction &onExit, CLAction &internal): _name(name), _onEntryAction(onEntry), _onExitAction(onExit), _internalAction(internal) {}
 
         /** destructor (subclass responsibility!) */
         virtual ~CLState() {}
 
         /** name getter */
-        const char *name() const { if (!_name) printf ("shit dude\n"); return _name; }
+        const char *name() const { return _name; }
 
         /** name setter */
         void setName(const char *name) { _name = name; }

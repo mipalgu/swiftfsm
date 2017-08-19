@@ -1,6 +1,6 @@
 #include "cfsm_number_of_machines.h"
 
-int number_of_clmachines = -1;
+int number_of_clmachines = 0;
 
 void set_number_of_machines(int n)
 {   
