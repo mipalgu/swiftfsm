@@ -95,14 +95,17 @@ public class CLFSMMachineLoader: MachineLoader {
 
         print("CLFSMMachineLoader() - loadMachinePtr: \(loadMachinePtr)") //DEBUG
 
-        let res = loadMachine(loadMachinePtr, path, false)
+        let machineID = loadMachine(loadMachinePtr, path, false)
+        if (machineID == -1) {
+            fatalError("Failed to load machine")
+        }
 
-        print("CLFSMMachineLoader() - load res: \(res)") //DEBUG
+        print("CLFSMMachineLoader() - machineID: \(machineID)") //DEBUG
 
         let dlCloseResult = dlrCFSM.close()
         if (!dlCloseResult.0) { print(dlCloseResult.1 ?? "No error message for DynamicLibraryResource.close()!") }
         
-        let metaMachine = refl_getMetaMachine(1, nil)
+        let metaMachine = refl_getMetaMachine(UInt32(machineID), nil)
         refl_invokeOnEntry(metaMachine, 0, nil)
 
         destroyCFSM(destroyCFSMPtr)
