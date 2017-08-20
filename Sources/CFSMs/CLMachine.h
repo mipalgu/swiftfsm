@@ -92,7 +92,7 @@ namespace FSM
         Machine(CLState *initialState, CLState *s = 0, bool del = false): _currentState(initialState), _previousState(0), _suspendState(s), _resumeState(0),  _state_time(0UL), _deleteSuspendState(del) {}
     
         /// Destructor
-        virtual ~Machine();
+        ~Machine();
 
         CLState *suspendState() const { return _suspendState; }
 
@@ -128,12 +128,12 @@ namespace FSM
         /**
          * Suspend this machine
          */
-        virtual void suspend();
+        void suspend();
 
         /** 
          * Resume this machine 
          */
-        virtual void resume();
+        void resume();
 
         /**
          *  Current state setter

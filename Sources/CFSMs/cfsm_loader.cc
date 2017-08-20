@@ -1,5 +1,6 @@
 #include "cfsm_loader.h"
 #include "cfsm_number_of_machines.h"
+#include "cfsm_control.h"
 #include <dlfcn.h>
 #include <CLReflectAPI.h>
 #include <stdlib.h>
@@ -112,6 +113,7 @@ int smallestUnusedIndex()
  */
 int FSM::loadAndAddMachine(const char *machine, bool initiallySuspended)
 {
+    //init fsm array
     if (!finite_state_machines)
     {
         finite_state_machines = (CLMachine**) calloc(1, sizeof(CLMachine*));
@@ -145,11 +147,11 @@ int FSM::loadAndAddMachine(const char *machine, bool initiallySuspended)
     Machine *machine_context = createMachineContext(machine_ptr);
     if (!machine_context) { fprintf(stderr, "Error creating internal machine context"); return CLError; }
     machine_ptr->setMachineContext(machine_context);
-
+    
+    //place CL machine in fsm array
     int index = smallestUnusedIndex();
     if (index == -1)
     {
-        //realloc array and place machine pointer at index number_of_machines + 1
         finite_state_machines = (CLMachine**) realloc(finite_state_machines, (number_of_machines() + 1) * sizeof(CLMachine*));
         finite_state_machines[number_of_machines()] = machine_ptr;
         if (!finite_state_machines) { fprintf(stderr, "Reallocation of finite_state_machines array return NULL\n"); return CLError; }
@@ -161,6 +163,10 @@ int FSM::loadAndAddMachine(const char *machine, bool initiallySuspended)
     }
 
     set_number_of_machines(number_of_machines() + 1);
+
+    //suspend if initially suspended
+    if (initiallySuspended) { control_machine_at_index(index, CLSuspend); }
+
 
 #ifdef DEBUG
     printf("cfsm_loader() - CLMachine ptr: %p\n", machine_ptr);

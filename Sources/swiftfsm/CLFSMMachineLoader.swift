@@ -68,7 +68,7 @@ import swift_CLReflect
 public class CLFSMMachineLoader: MachineLoader {
 
     public func load(path: String) -> [AnyScheduleableFiniteStateMachine] {
-       
+        
         print("CLFSMMachineLoader() - path: \(path)") //DEBUG
 
         let printer: CommandLinePrinter = 
