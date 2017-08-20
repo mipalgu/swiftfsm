@@ -63,6 +63,11 @@ extern "C" {
     unsigned long micros();
 }
 
+/**
+ * Gets the current time in microseconds
+ *
+ * @return the current time in microseconds
+ */
 unsigned long micros(void)
 {
 #if defined(BSD) && BSD > 199300
@@ -78,7 +83,11 @@ unsigned long micros(void)
     return static_cast<unsigned long>(t);
 }
 
-
+/**
+ * Gets the current time in microseconds
+ *
+ * @return the current time in microseconds
+ */
 long FSM::current_time_in_microseconds(void)
 {
     return micros();

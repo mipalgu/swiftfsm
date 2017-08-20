@@ -62,7 +62,7 @@
 #include "CLMachine.h"
 #include "CLMacros.h"
 
-/*
+/**
  * Gets the index of a machine
  *
  * @param name the name of the CLMachine to find the index for
@@ -84,7 +84,7 @@ int FSM::index_of_machine_named(const char *name)
     return CLError;
 }
 
-/*
+/**
  * Gets the name of a machine
  *
  * @param index of the CLMachine to find the name for
@@ -99,7 +99,7 @@ const char *FSM::name_of_machine_at_index(int index)
     return machine->machineName();
 }
 
-/*
+/**
  * Gets a machine
  *
  * @param index index of the machine to get

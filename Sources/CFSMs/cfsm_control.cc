@@ -63,8 +63,14 @@
 
 using namespace FSM;
 
-//extern CLMachine *finite_state_machines[1]; ///< fsms set up
-
+/**
+ * Controls a CLMachine at an index
+ *
+ * @param index index of machine to control
+ * @param command command status representing command to carry out
+ *
+ * @return the control status if successful, CLError on error
+ */
 enum CLControlStatus FSM::control_machine_at_index(const int index, const enum CLControlStatus command)
 {
     int number_of_fsms = FSM::number_of_machines();

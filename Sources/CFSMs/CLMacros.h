@@ -98,14 +98,6 @@ namespace FSM
         const char *name_of_machine_at_index(int index = 0);
         int index_of_machine_named(const char *machine_name);
         enum CLControlStatus control_machine_at_index(int index, enum CLControlStatus command);
-
-        /**
-         Load and add a machine
-
-         @param machine name of the machine to load
-         @param initiallySuspended `true` to initially suspend the loaded machine
-         @return index of the loaded machine, CLError on error
-         */
         int loadAndAddMachine(const char *machine, bool initiallySuspended = false);
         bool unloadMachineAtIndex(int index);
 

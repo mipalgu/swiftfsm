@@ -14,12 +14,15 @@ using namespace FSM;
 
 //TODO: handle dynamic loadin
 
+/// The array of loaded machines
 CLMachine **finite_state_machines = NULL;
+
+/// The last machine ID assigned
 int last_unique_id = -1;
 
 extern "C"
 {
-    /*
+    /**
      * Wrapper around CLMacros loadAndAddMachine that returns the machine ID
      *
      * @param machine path to the CL machine .so
@@ -33,7 +36,7 @@ extern "C"
         return m->machineID();
     }
     
-    /*
+    /**
      * Wrapper around CLMacros unloadMachineAtIndex
      *
      * @param index index of machine to unload
@@ -54,7 +57,7 @@ extern "C"
     }
 }
 
-/*
+/**
  * Creates the internal Machine context of a CL Machine
  *
  * @param machine the CL Machine to create the context for
@@ -67,7 +70,7 @@ Machine *createMachineContext(CLMachine *machine)
     return new Machine(initial_state, suspend_state, false);
 }
 
-/*
+/**
  * Gets the machine name from the supplied path
  *
  * @param path the path of the CLMachine .so
@@ -84,7 +87,7 @@ const char* getMachineNameFromPath(const char* path)
     return name;
 }
 
-/*
+/**
  * Gets the smallest unused index from the finite_state_machines array
  *
  * @return the smallest unused index, -1 if there is not enough room in the array
@@ -99,7 +102,7 @@ int smallestUnusedIndex()
     return no_index;
 }
 
-/*
+/**
  * Load a CLMachine and associated Meta Machine
  *
  * @param machine the path to the CLMachine .so
@@ -182,6 +185,12 @@ int FSM::loadAndAddMachine(const char *machine, bool initiallySuspended)
     return index;
 }
 
+/**
+ * Unloads the machine at the given index
+ *
+ * @param index index of the machine to unload
+ * @return true on success, false on failure
+ */
 bool FSM::unloadMachineAtIndex(int index)
 {
     if ( index > number_of_machines() ) return false;
