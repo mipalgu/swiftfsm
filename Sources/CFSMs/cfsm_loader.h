@@ -3,4 +3,5 @@
 #include "CLState.h"
 
 extern FSM::CLMachine **finite_state_machines;
-//extern FSM::StateMachineVector stateMachineVector;
+
+extern int last_unique_id;

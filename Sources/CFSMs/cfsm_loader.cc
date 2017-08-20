@@ -1,4 +1,4 @@
-#include "cfsm_load_and_add_machine.h"
+#include "cfsm_loader.h"
 #include "cfsm_number_of_machines.h"
 #include <dlfcn.h>
 #include <CLReflectAPI.h>
@@ -12,23 +12,41 @@
 
 using namespace FSM;
 
-CLMachine **finite_state_machines = NULL;
+//TODO: handle dynamic loadin
 
-//TODO: findIndexForNewMachine - assign smallest unused index first, currently it increments and grows (however maintain unique ID)
-//TODO: create StateMachineVector from fsm array
+CLMachine **finite_state_machines = NULL;
+int last_unique_id = -1;
 
 extern "C"
 {
+    /*
+     * Wrapper around CLMacros loadAndAddMachine that returns the machine ID
+     *
+     * @param machine path to the CL machine .so
+     * @param initiallySuspended whether this machine starts suspended
+     * @return the ID of the machine
+     */
     int _C_loadAndAddMachine(const char *machine, bool initiallySuspended)
     {
-        return FSM::loadAndAddMachine(machine, initiallySuspended);
+        int index = FSM::loadAndAddMachine(machine, initiallySuspended);
+        CLMachine *m = machine_at_index(index);
+        return m->machineID();
     }
-
+    
+    /*
+     * Wrapper around CLMacros unloadMachineAtIndex
+     *
+     * @param index index of machine to unload
+     * @return whether the machine successfully unloaded
+     */
     bool _C_unloadMachineAtIndex(int index)
     {
         return FSM::unloadMachineAtIndex(index);
     }
 
+    /*
+     * Destroys the finite state machine array and CLReflect API
+     */
     void _C_destroyCFSM()
     {
         free(finite_state_machines);
@@ -36,6 +54,12 @@ extern "C"
     }
 }
 
+/*
+ * Creates the internal Machine context of a CL Machine
+ *
+ * @param machine the CL Machine to create the context for
+ * @return the internal machine context
+ */
 Machine *createMachineContext(CLMachine *machine)
 {
     CLState *initial_state = machine->initialState();
@@ -43,6 +67,12 @@ Machine *createMachineContext(CLMachine *machine)
     return new Machine(initial_state, suspend_state, false);
 }
 
+/*
+ * Gets the machine name from the supplied path
+ *
+ * @param path the path of the CLMachine .so
+ * @return the machine name
+ */
 const char* getMachineNameFromPath(const char* path)
 {
     std::string tmp = std::string(path);
@@ -54,19 +84,35 @@ const char* getMachineNameFromPath(const char* path)
     return name;
 }
 
-//TODO: refactor
-//TODO: print dlerror() on dlopen/dlsym failure
+/*
+ * Gets the smallest unused index from the finite_state_machines array
+ *
+ * @return the smallest unused index, -1 if there is not enough room in the array
+ */
+int smallestUnusedIndex()
+{
+    int no_index = -1;
+    for (int i = 0; i < number_of_machines() + 1; i++)
+    {
+        if (finite_state_machines[i] == 0 || finite_state_machines[i] == NULL) return i;
+    }
+    return no_index;
+}
+
+/*
+ * Load a CLMachine and associated Meta Machine
+ *
+ * @param machine the path to the CLMachine .so
+ * @param initiallySuspended whether this machine starts suspended
+ * @return the index of the loaded machine
+ */
 int FSM::loadAndAddMachine(const char *machine, bool initiallySuspended)
 {
-    //init the fsm array if it hasn't been done
     if (!finite_state_machines)
     {
         finite_state_machines = (CLMachine**) calloc(1, sizeof(CLMachine*));
         if (!finite_state_machines) return CLError;
     }
-    
-    //get new amount of machines/machine ID
-    int number_of_fsms = number_of_machines() + 1;
     
     //get machine lib handle
     void* machine_lib_handle = dlopen(machine, RTLD_LAZY);
@@ -85,21 +131,32 @@ int FSM::loadAndAddMachine(const char *machine, bool initiallySuspended)
     if (!createMachine) return CLError;
 
     //get CL machine pointer
-    CLMachine* machine_ptr = createMachine(number_of_fsms, name);
+    int machine_id = last_unique_id + 1;
+    CLMachine* machine_ptr = createMachine(machine_id, name);
     free((char*)(name));
     if (!machine_ptr) return CLError;
+    last_unique_id = machine_id;
 
     //create internal machine (CL machine context)
     Machine *machine_context = createMachineContext(machine_ptr);
     if (!machine_context) return CLError;
     machine_ptr->setMachineContext(machine_context);
 
-    //realloc array and place machine pointer at index number_of_machines + 1
-    finite_state_machines = (CLMachine**) realloc(finite_state_machines, (number_of_fsms + 1) * sizeof(CLMachine*));
-    if (!finite_state_machines) return CLError;
+    int index = smallestUnusedIndex();
+    if (index == -1)
+    {
+        //realloc array and place machine pointer at index number_of_machines + 1
+        finite_state_machines = (CLMachine**) realloc(finite_state_machines, (number_of_machines() + 1) * sizeof(CLMachine*));
+        finite_state_machines[number_of_machines()] = machine_ptr;
+        if (!finite_state_machines) return CLError;
+        index = number_of_machines();
+    }
+    else
+    {
+        finite_state_machines[index] = machine_ptr; 
+    }
 
-    finite_state_machines[number_of_fsms] = machine_ptr;
-    set_number_of_machines(number_of_fsms);
+    set_number_of_machines(number_of_machines() + 1);
     
     //get create meta machine function
     void* create_meta_machine_ptr = dlsym(machine_lib_handle, "Create_ScheduledMetaMachine");
@@ -114,15 +171,15 @@ int FSM::loadAndAddMachine(const char *machine, bool initiallySuspended)
     CLReflectResult *result = (CLReflectResult*) calloc(1, sizeof(CLReflectResult));
     refl_initAPI(result);
     if (!result || *result != REFL_SUCCESS) return CLError;
-    refl_registerMetaMachine(meta_machine, number_of_fsms, result);
+    refl_registerMetaMachine(meta_machine, machine_id, result);
     if (!result || *result != REFL_SUCCESS) return CLError;
     free(result);
 
     #ifdef DEBUG
-    printf("cfsm_load_and_add_machine() - machine successfuly loaded, load res: %d\n", number_of_fsms);
+    printf("cfsm_load_and_add_machine() - machine successfuly loaded, index: %d, ID: %d\n", index, machine_ptr->machineID());
     #endif
 
-    return number_of_fsms;
+    return index;
 }
 
 bool FSM::unloadMachineAtIndex(int index)

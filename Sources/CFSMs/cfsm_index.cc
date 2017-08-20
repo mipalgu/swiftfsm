@@ -58,12 +58,16 @@
 
 #include <string.h>
 #include "cfsm_index.h"
-#include "cfsm_load_and_add_machine.h"
+#include "cfsm_loader.h"
 #include "CLMachine.h"
 #include "CLMacros.h"
 
-//extern FSM::CLMachine *finite_state_machines[1];///< fsms set up
-
+/*
+ * Gets the index of a machine
+ *
+ * @param name the name of the CLMachine to find the index for
+ * @return the index of the machine
+ */
 int FSM::index_of_machine_named(const char *name)
 {
     using namespace FSM;
@@ -80,6 +84,12 @@ int FSM::index_of_machine_named(const char *name)
     return CLError;
 }
 
+/*
+ * Gets the name of a machine
+ *
+ * @param index of the CLMachine to find the name for
+ * @return the name of the machine
+ */
 const char *FSM::name_of_machine_at_index(int index)
 {
     using namespace FSM;
@@ -89,6 +99,12 @@ const char *FSM::name_of_machine_at_index(int index)
     return machine->machineName();
 }
 
+/*
+ * Gets a machine
+ *
+ * @param index index of the machine to get
+ * @return the CLMachine at index
+ */
 FSM::CLMachine *FSM::machine_at_index(unsigned index)
 {
     using namespace FSM;

@@ -56,7 +56,7 @@
  *
  */
 #include "cfsm_control.h"
-#include "cfsm_load_and_add_machine.h"
+#include "cfsm_loader.h"
 #include "CLMachine.h"
 #include "CLMacros.h"
 #include <stdlib.h>
