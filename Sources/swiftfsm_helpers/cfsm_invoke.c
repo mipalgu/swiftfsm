@@ -2,7 +2,15 @@
 #include <stdio.h>
 #define DEBUG 
 
-
+/**
+ * Calls the CFSM machine loader
+ *
+ * @param p pointer to the CFSM loader function
+ * @param machine path of the machine to load
+ * @param whether this machine starts suspended
+ *
+ * @return the ID of the loaded machine
+ */
 int loadMachine(void* p, const char *machine, bool initiallySuspended)
 {
 #ifdef DEBUG
@@ -12,6 +20,11 @@ int loadMachine(void* p, const char *machine, bool initiallySuspended)
    return( f(machine, initiallySuspended) );
 }
 
+/**
+ * Destroys CFSM
+ *
+ * @param p pointer to the destroy CFSM function
+ */
 void destroyCFSM(void* p)
 {
 #ifdef DEBUG

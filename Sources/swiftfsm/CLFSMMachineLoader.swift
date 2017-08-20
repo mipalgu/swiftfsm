@@ -105,8 +105,8 @@ public class CLFSMMachineLoader: MachineLoader {
         let dlCloseResult = dlrCFSM.close()
         if (!dlCloseResult.0) { print(dlCloseResult.1 ?? "No error message for DynamicLibraryResource.close()!") }
         
+        //test the meta machine
         let metaMachine = refl_getMetaMachine(UInt32(machineID), nil)
-        
         refl_invokeOnEntry(metaMachine, 0, nil)
         
         destroyCFSM(destroyCFSMPtr)
