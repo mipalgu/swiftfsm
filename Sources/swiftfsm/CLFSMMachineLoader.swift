@@ -113,4 +113,34 @@ public class CLFSMMachineLoader: MachineLoader {
         return []
     }
 
+    public func createFiniteStateMachines(_ machineIDs: [Int]) -> [AnyScheduleableFiniteStateMachine] {
+        for machineID in machineIDs {
+            guard let metaMachine = refl_getMetaMachine(UInt32(machineID), nil) else {
+                fatalError("Could not get metamachine for machineID = \(machineID)")
+            }
+            let states = createStates(metaMachine)
+        }
+    }
+
+    public func createStates(_ metaMachine: refl_metaMachine) -> [CFSMState] {
+        let cfsmStates = [CFSMState]()
+        guard let metaStates = refl_getMetaStates(metaMachine, nil) else {
+            fatalError("Could not get meta states for metamachine");
+        }
+        let numberOfStates = refl_getNumberOfStates(metaMachine, nil)
+        for stateNumber in 0...numberOfStates - 1 {
+            guard let metaState = metaStates[Int(stateNumber)] else {
+                fatalError("Could not get meta state for state number = \(stateNumber)")
+            }
+            let transitions = createTransitions(metaState)
+            let stateName = String(cString: refl_getMetaStateName(metaState, nil))
+            let cfsmState = CFSMState(stateName, transitions: transitions, metaMachine: metaMachine, stateNumber: stateNumber)
+            cfsmStates.append(cfsmState)
+        }
+        return cfsmStates
+    }
+
+    public func createTransitions(_ metaState: refl_metaState) -> [Transition<CFSMState, CFSMState>] {
+        return [Transition<CFSMState, CFSMState>]()
+    }
 }
