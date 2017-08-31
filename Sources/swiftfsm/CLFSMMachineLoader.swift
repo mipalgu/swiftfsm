@@ -69,6 +69,8 @@ public class CLFSMMachineLoader: MachineLoader {
 
     public func load(path: String) -> [AnyScheduleableFiniteStateMachine] {
         
+        let cPath = path.utf8CString 
+
         print("CLFSMMachineLoader() - path: \(path)") //DEBUG
 
         let printer: CommandLinePrinter = 
@@ -95,7 +97,7 @@ public class CLFSMMachineLoader: MachineLoader {
 
         print("CLFSMMachineLoader() - loadMachinePtr: \(loadMachinePtr)") //DEBUG
 
-        let machineID = loadMachine(loadMachinePtr, path, false)
+        let machineID = cPath.withUnsafeBufferPointer { loadMachine(loadMachinePtr, $0.baseAddress, false) }
         if (machineID == -1) {
             fatalError("cfsm_load() - Failed to load machine")
         }
