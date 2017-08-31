@@ -133,22 +133,14 @@ int FSM::loadAndAddMachine(const char *machine, bool initiallySuspended)
 #endif
     //get create CL machine function
     const char* name = getMachineNameFromPath(machine);
-    printf("one\n");
     char* create_machine_symbol = (char*) calloc(11 + strlen(name) + 1, sizeof(char));
-    printf("two\n");
     strcpy(create_machine_symbol, "CLM_Create_");
-    printf("three\n");
     strcat(create_machine_symbol, name);
-    printf("four\n");
     void* create_machine_ptr = dlsym(machine_lib_handle, create_machine_symbol);
-    printf("five\n");
     free(create_machine_symbol); //<- double free when called more than once - is it being clever and reusing the address?
-    printf("six\n");
     if (!create_machine_ptr) { fprintf(stderr, "Error getting CL Create Machine symbol - dlerror(): %s\n", dlerror()); return CLError; }
-    printf("seven\n");
     
     CLMachine* (*createMachine)(int, const char*) = (CLMachine* (*)(int, const char*)) (create_machine_ptr);
-    printf("eight\n");
     if (!createMachine) { fprintf(stderr, "CL Create Machine function from dlsym is NULL\n"); return CLError; }
 #ifdef DEBUG
     printf("cfsm_loader() - creating machine\n");
