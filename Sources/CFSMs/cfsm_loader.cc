@@ -84,7 +84,7 @@ const char* getMachineNameFromPath(const char* path)
     std::size_t start = tmp.find_last_of("/");
     std::size_t end = tmp.find_last_of(".so");
     std::string n = tmp.substr(start + 1, (end - start - 3) );
-    char* name = (char*) calloc(strlen(n.c_str()), sizeof(char));
+    char* name = (char*) calloc(strlen(n.c_str()) + 1, sizeof(char));
     strcpy(name, n.c_str());
     return name;
 }
@@ -97,7 +97,7 @@ const char* getMachineNameFromPath(const char* path)
 int smallestUnusedIndex()
 {
     int no_index = -1;
-    for (int i = 0; i < number_of_machines() + 1; i++)
+    for (int i = 0; i < number_of_machines(); i++)
     {
         if (finite_state_machines[i] == 0 || finite_state_machines[i] == NULL) return i;
     }
@@ -134,7 +134,7 @@ int FSM::loadAndAddMachine(const char *machine, bool initiallySuspended)
     //get create CL machine function
     const char* name = getMachineNameFromPath(machine);
     printf("one\n");
-    char* create_machine_symbol = (char*) calloc(11 + strlen(name), sizeof(char));
+    char* create_machine_symbol = (char*) calloc(11 + strlen(name) + 1, sizeof(char));
     printf("two\n");
     strcpy(create_machine_symbol, "CLM_Create_");
     printf("three\n");
