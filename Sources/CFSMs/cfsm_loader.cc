@@ -142,7 +142,7 @@ int FSM::loadAndAddMachine(const char *machine, bool initiallySuspended)
     printf("four\n");
     void* create_machine_ptr = dlsym(machine_lib_handle, create_machine_symbol);
     printf("five\n");
-    //free(create_machine_symbol); <- double free when called more than once - is it being clever and reusing the address?
+    free(create_machine_symbol); //<- double free when called more than once - is it being clever and reusing the address?
     printf("six\n");
     if (!create_machine_ptr) { fprintf(stderr, "Error getting CL Create Machine symbol - dlerror(): %s\n", dlerror()); return CLError; }
     printf("seven\n");

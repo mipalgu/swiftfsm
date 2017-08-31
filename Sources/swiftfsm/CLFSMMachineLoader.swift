@@ -69,7 +69,8 @@ public class CLFSMMachineLoader: MachineLoader {
 
 
     public func load(path: String) -> [AnyScheduleableFiniteStateMachine] {
-        
+       
+        print("\n\n\nNEW MACHINE\n\n\n")
         print("CLFSMMachineLoader() - path: \(path)") //DEBUG
 
         let printer: CommandLinePrinter = 
