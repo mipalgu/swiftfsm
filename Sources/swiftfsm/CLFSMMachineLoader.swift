@@ -67,6 +67,7 @@ import swift_CLReflect
  */
 public class CLFSMMachineLoader: MachineLoader {
 
+
     public func load(path: String) -> [AnyScheduleableFiniteStateMachine] {
         
         print("CLFSMMachineLoader() - path: \(path)") //DEBUG
@@ -103,7 +104,7 @@ public class CLFSMMachineLoader: MachineLoader {
         print("CLFSMMachineLoader() - machineID: \(machineID)") //DEBUG
 
         let machines = createFiniteStateMachines([Int(machineID)])
-        
+
         let dlCloseResult = dlrCFSM.close()
         if (!dlCloseResult.0) { print(dlCloseResult.1 ?? "No error message for DynamicLibraryResource.close()!") }
 
@@ -131,6 +132,7 @@ public class CLFSMMachineLoader: MachineLoader {
             let finiteStateMachine = FSM(name, initialState: states[0])
             finiteStateMachines.append(finiteStateMachine)
         }
+        print("fsm array successfully created")
         return finiteStateMachines
     }
 
