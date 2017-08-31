@@ -84,7 +84,7 @@ const char* getMachineNameFromPath(const char* path)
     std::size_t start = tmp.find_last_of("/");
     std::size_t end = tmp.find_last_of(".so");
     std::string n = tmp.substr(start + 1, (end - start - 3) );
-    char* name = (char*) calloc(1, sizeof(char*));
+    char* name = (char*) calloc(strlen(n.c_str()) + 1, sizeof(char));
     strcpy(name, n.c_str());
     return name;
 }
@@ -97,7 +97,7 @@ const char* getMachineNameFromPath(const char* path)
 int smallestUnusedIndex()
 {
     int no_index = -1;
-    for (int i = 0; i < number_of_machines() + 1; i++)
+    for (int i = 0; i < number_of_machines(); i++)
     {
         if (finite_state_machines[i] == 0 || finite_state_machines[i] == NULL) return i;
     }
@@ -126,11 +126,15 @@ int FSM::loadAndAddMachine(const char *machine, bool initiallySuspended)
 
     //get create CL machine function
     const char* name = getMachineNameFromPath(machine);
-    char* create_machine_symbol = (char*) calloc(1, sizeof(char*));
+    char* create_machine_symbol = (char*) calloc(strlen(name) + 1, sizeof(char));
     strcpy(create_machine_symbol, "CLM_Create_");
     strcat(create_machine_symbol, name);
     void* create_machine_ptr = dlsym(machine_lib_handle, create_machine_symbol);
+
+    printf("create machine symbol: %p\n", create_machine_symbol);
     free(create_machine_symbol);
+    printf("finished free\n");
+
     if (!create_machine_ptr) { fprintf(stderr, "Error getting CL Create Machine symbol - dlerror(): %s\n", dlerror()); return CLError; }
     
     CLMachine* (*createMachine)(int, const char*) = (CLMachine* (*)(int, const char*)) (create_machine_ptr);
@@ -139,7 +143,10 @@ int FSM::loadAndAddMachine(const char *machine, bool initiallySuspended)
     //get CL machine pointer
     int machine_id = last_unique_id + 1;
     CLMachine* machine_ptr = createMachine(machine_id, name);
+    printf("name ptr: %p\n", name);
     free((char*)(name));
+    printf("finished free\n");
+
     if (!machine_ptr) { fprintf(stderr, "CL Create Machine return NULL\n"); return CLError; }
     last_unique_id = machine_id;
 
