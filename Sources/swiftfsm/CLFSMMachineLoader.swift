@@ -102,16 +102,12 @@ public class CLFSMMachineLoader: MachineLoader {
 
         print("CLFSMMachineLoader() - machineID: \(machineID)") //DEBUG
 
-        //test the meta machine
-        //let metaMachine = refl_getMetaMachine(UInt32(machineID), nil)
-        //refl_invokeOnEntry(metaMachine, 0, nil)
+        let machines = createFiniteStateMachines([Int(machineID)])
         
         let dlCloseResult = dlrCFSM.close()
         if (!dlCloseResult.0) { print(dlCloseResult.1 ?? "No error message for DynamicLibraryResource.close()!") }
-        
-        //destroyCFSM(destroyCFSMPtr)
-        //return [AnyScheduleableFiniteStateMachine]()
-        return createFiniteStateMachines([Int(machineID)]) 
+
+        return machines
     }
     
     /**

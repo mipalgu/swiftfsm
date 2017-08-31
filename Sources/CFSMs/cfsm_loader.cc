@@ -84,7 +84,7 @@ const char* getMachineNameFromPath(const char* path)
     std::size_t start = tmp.find_last_of("/");
     std::size_t end = tmp.find_last_of(".so");
     std::string n = tmp.substr(start + 1, (end - start - 3) );
-    char* name = (char*) calloc(1, sizeof(char*));
+    char* name = (char*) calloc(strlen(n.c_str()), sizeof(char));
     strcpy(name, n.c_str());
     return name;
 }
@@ -121,12 +121,12 @@ int FSM::loadAndAddMachine(const char *machine, bool initiallySuspended)
     }
     
     //get machine lib handle
-    void* machine_lib_handle = dlopen(machine, RTLD_LAZY);
+    void* machine_lib_handle = dlopen(machine, RTLD_NOW);
     if (!machine_lib_handle) { fprintf(stderr, "Error opening machine lib - dlerror(): %s\n", dlerror()); return CLError; }
 
     //get create CL machine function
     const char* name = getMachineNameFromPath(machine);
-    char* create_machine_symbol = (char*) calloc(1, sizeof(char*));
+    char* create_machine_symbol = (char*) calloc(11 + strlen(name), sizeof(char));
     strcpy(create_machine_symbol, "CLM_Create_");
     strcat(create_machine_symbol, name);
     void* create_machine_ptr = dlsym(machine_lib_handle, create_machine_symbol);
@@ -146,15 +146,15 @@ int FSM::loadAndAddMachine(const char *machine, bool initiallySuspended)
     //create internal machine (CL machine context)
     Machine *machine_context = createMachineContext(machine_ptr);
     if (!machine_context) { fprintf(stderr, "Error creating internal machine context"); return CLError; }
-    machine_ptr->setMachineContext(machine_context);
+    machine_ptr->setMachineContext(machine_context)
     
     //place CL machine in fsm array
     int index = smallestUnusedIndex();
     if (index == -1)
     {
         finite_state_machines = (CLMachine**) realloc(finite_state_machines, (number_of_machines() + 1) * sizeof(CLMachine*));
-        finite_state_machines[number_of_machines()] = machine_ptr;
         if (!finite_state_machines) { fprintf(stderr, "Reallocation of finite_state_machines array return NULL\n"); return CLError; }
+        finite_state_machines[number_of_machines()] = machine_ptr;
         index = number_of_machines();
     }
     else
@@ -177,13 +177,21 @@ int FSM::loadAndAddMachine(const char *machine, bool initiallySuspended)
     if (!create_meta_machine_ptr) { fprintf(stderr, "Error getting Create Meta Machine symbol - dlerror(): %s\n", dlerror());  return CLError; }
     refl_metaMachine (*createMetaMachine)(void*) = (refl_metaMachine (*)(void*)) (create_meta_machine_ptr);
     if (!createMetaMachine) { fprintf(stderr, "Create Meta Machine function pointer from dlsym is NULL\n"); return CLError; }
-
+#ifdef DEBUG
+    printf("hiya\n");
+    printf("cfsm_loader() - createMetaMachine ptr: %p\n", createMetaMachine);
+#endif
     //get meta machine
     refl_metaMachine meta_machine = createMetaMachine(machine_ptr);
-
+#ifdef DEBUG
+    printf("hey\n");
+#endif
     //init CLReflect API and register metamachine
     CLReflectResult *result = (CLReflectResult*) calloc(1, sizeof(CLReflectResult));
     refl_initAPI(result);
+#ifdef DEBUG
+    printf("hello\n");
+#endif
     if (!result || *result != REFL_SUCCESS) { fprintf(stderr, "Error initialising CLReflect API\n"); return CLError; }
     refl_registerMetaMachine(meta_machine, machine_id, result);
     if (!result || *result != REFL_SUCCESS) { fprintf(stderr, "Error registering Meta Machine\n"); return CLError; }
