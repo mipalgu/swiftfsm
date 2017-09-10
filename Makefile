@@ -28,4 +28,4 @@ test:	swift-test-package
 
 CFLAGS+=-I/usr/local/include -I/usr/local/include/swiftfsm -I${GUNAO_DIR}/Common -I${GUNAO_DIR}/posix/CLReflect
 
-LDFLAGS+=-L/usr/local/lib/swiftfsm -lFSM -lCLReflect -ldl
+LDFLAGS+=-L/usr/local/lib/swiftfsm -lFSM -lCLReflect
