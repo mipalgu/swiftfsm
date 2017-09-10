@@ -17,9 +17,7 @@
 
 using namespace FSM;
 
-//TODO: .dy extension for winduhs
 //TODO: handle dynamic loadin
-//TODO: REFACTOR
 
 /// The array of loaded machines
 std::vector<CLMachine*> finite_state_machines = std::vector<CLMachine*>();
@@ -36,7 +34,7 @@ extern "C"
      * @param initiallySuspended whether this machine starts suspended
      * @return the ID of the machine (-1 if an error occurred)
      */
-    int _C_loadAndAddMachine(const char *machine, bool initiallySuspended)
+    int C_loadAndAddMachine(const char *machine, bool initiallySuspended)
     {
         int index = FSM::loadAndAddMachine(machine, initiallySuspended);
         if (index == -1) return index;
@@ -50,7 +48,7 @@ extern "C"
      * @param index index of machine to unload
      * @return whether the machine successfully unloaded
      */
-    bool _C_unloadMachineAtIndex(int index)
+    bool C_unloadMachineAtIndex(int index)
     {
         return FSM::unloadMachineAtIndex(index);
     }
@@ -70,7 +68,7 @@ Machine *createMachineContext(CLMachine *machine)
     return new Machine(initial_state, suspend_state, false);
 }
 
-/** TODO: Refucktor
+/**
  * Gets the machine name from the supplied path
  *
  * @param path the path of the CLMachine .so

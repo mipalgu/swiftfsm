@@ -86,14 +86,9 @@ public class CLFSMMachineLoader: MachineLoader {
             fatalError("Error creating DLC for CFSMs")
         }
 
-        let loadMachineTuple = dlrCFSM.getSymbolPointer(symbol: "_C_loadAndAddMachine")
+        let loadMachineTuple = dlrCFSM.getSymbolPointer(symbol: "C_loadAndAddMachine")
         guard let loadMachinePtr = loadMachineTuple.0 else {
             fatalError(loadMachineTuple.1 ?? "getSymbolPointer(loadAndAddMachine): unknown error")
-        }
-
-        let destroyCFSMTuple = dlrCFSM.getSymbolPointer(symbol: "_C_destroyCFSM")
-        guard let destroyCFSMPtr = destroyCFSMTuple.0 else {
-            fatalError(destroyCFSMTuple.1 ?? "getSymbolPointer(destroyCFSM): unknown error")
         }
 
         let machineID = cPath.withUnsafeBufferPointer { loadMachine(loadMachinePtr, $0.baseAddress, false) }
