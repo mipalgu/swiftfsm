@@ -6,14 +6,18 @@
 #include <stdlib.h>
 #include <string>
 #include <string.h>
-#include <stdio.h>
 #include <unistd.h>
 
 #define DEBUG
 
+#ifdef DEBUG
+    #include<stdio.h>
+#endif
+
 using namespace FSM;
 
 //TODO: handle dynamic loadin
+//TODO: REFACTOR
 
 /// The array of loaded machines
 CLMachine **finite_state_machines = NULL;

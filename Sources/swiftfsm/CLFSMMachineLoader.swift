@@ -68,10 +68,11 @@ import swift_CLReflect
 public class CLFSMMachineLoader: MachineLoader {
 
     public func load(path: String) -> [AnyScheduleableFiniteStateMachine] {
-        
+        let debug = true //DEBUG
+
         let cPath = path.utf8CString 
 
-        print("CLFSMMachineLoader() - path: \(path)") //DEBUG
+        if debug { print("CLFSMMachineLoader() - path: \(path)") }
 
         let printer: CommandLinePrinter = 
             CommandLinePrinter(
@@ -95,28 +96,15 @@ public class CLFSMMachineLoader: MachineLoader {
             fatalError(destroyCFSMTuple.1 ?? "getSymbolPointer(destroyCFSM): unknown error")
         }
 
-        print("CLFSMMachineLoader() - loadMachinePtr: \(loadMachinePtr)") //DEBUG
-
         let machineID = cPath.withUnsafeBufferPointer { loadMachine(loadMachinePtr, $0.baseAddress, false) }
-        if (machineID == -1) {
+        if machineID == -1 {
             fatalError("cfsm_load() - Failed to load machine")
         }
-
-        print("CLFSMMachineLoader() - machineID: \(machineID)") //DEBUG
-
-        //test the meta machine
-        print("testing metamachine")
-        let metaMachine = refl_getMetaMachine(UInt32(machineID), nil)
-        refl_invokeOnEntry(metaMachine, 0, nil)
         
         let dlCloseResult = dlrCFSM.close()
-        if (!dlCloseResult.0) { print(dlCloseResult.1 ?? "No error message for DynamicLibraryResource.close()!") }
+        if !dlCloseResult.0 { print(dlCloseResult.1 ?? "No error message for DynamicLibraryResource.close()!") }
         
-        //destroyCFSM(destroyCFSMPtr)
-        //return [AnyScheduleableFiniteStateMachine]()
         return createFiniteStateMachines([Int(machineID)])
-        //print("created fsms, scheduling...")
-        //return fsms
     }
     
     /**
@@ -127,15 +115,11 @@ public class CLFSMMachineLoader: MachineLoader {
      */
     public func createFiniteStateMachines(_ machineIDs: [Int]) -> [AnyScheduleableFiniteStateMachine] {
         var finiteStateMachines = [AnyScheduleableFiniteStateMachine]()
-        print("create fsm: looping through machine IDs") //DEBUG
         for machineID in machineIDs {
-            print("creating fsm for \(machineID)") //DEBUG
             guard let metaMachine = refl_getMetaMachine(UInt32(machineID), nil) else {
                 fatalError("Could not get metamachine for machineID = \(machineID)")
             }
-            print("getting name for \(machineID)") //DEBUG
             let name = String(cString: refl_getMetaMachineName(metaMachine, nil))
-            print("creating states for \(machineID)") //DEBUG
             let states = createStates(metaMachine)
             let finiteStateMachine = FSM(name, initialState: states[0])
             finiteStateMachines.append(finiteStateMachine)
@@ -151,24 +135,18 @@ public class CLFSMMachineLoader: MachineLoader {
      */
     public func createStates(_ metaMachine: refl_metaMachine) -> [CFSMState] {
         var cfsmStates = [CFSMState]()
-        print("getting metastates for metamachine") //DEBUG
         guard let metaStates = refl_getMetaStates(metaMachine, nil) else {
             fatalError("Could not get meta states for metamachine")
         }
-        print("getting number of states for metamachine") //DEBUG
         let numberOfStates = refl_getNumberOfStates(metaMachine, nil)
-        print("looping through metastates") //DEBUG
         for stateNumber in 0...numberOfStates - 1 {
             guard let metaState = metaStates[Int(stateNumber)] else {
                 fatalError("Could not get meta state for state number = \(stateNumber)")
             }
-            print("getting name for metastate \(stateNumber)") //DEBUG
             let stateName = String(cString: refl_getMetaStateName(metaState, nil))
-            print("constructing cfsm state for \(stateName)") //DEBUG
             let cfsmState = CFSMState(stateName, metaMachine: metaMachine, stateNumber: Int(stateNumber))
             cfsmStates.append(cfsmState)
         }
-        print("adding transitions to cfsm states") //DEBUG
         addTransitions(cfsmStates, metaMachine: metaMachine)
         return cfsmStates
     }
@@ -180,32 +158,24 @@ public class CLFSMMachineLoader: MachineLoader {
      * Parameter metaMachine the underlying CLReflect metamachine
      */
     public func addTransitions(_ cfsmStates: [CFSMState], metaMachine: refl_metaMachine) {
-        print("getting metastates (addTransitions)") //DEBUG
         guard let metaStates = refl_getMetaStates(metaMachine, nil) else {
                 fatalError("Could not get metastates for metamachine")
         }
         for var (_, cfsmState) in cfsmStates.enumerated()
         {
-            print("getting source metastate")
             let sourceMetaState = metaStates[cfsmState.stateNumber]
-            print("getting metatransitions for state \(cfsmState.stateNumber)") //DEBUG
             guard let metaTransitions = refl_getMetaTransitions(sourceMetaState, nil) else {
                 fatalError("Could not get metatransitions for state: \(cfsmState.name)") //DEBUG
             }
-            print("getting number of metatransitions for \(cfsmState.stateNumber)") //DEBUG
             let numberOfTransitions = refl_getNumberOfTransitions(sourceMetaState, nil)
             for transitionNumber in 0...numberOfTransitions - 1 {
-                print("getting mettransition for trans num \(transitionNumber)") //DEBUG
                 let metaTransition = metaTransitions[Int(transitionNumber)]
-                print("getting target state for trans \(transitionNumber)") //DEBUG
                 let targetStateNumber = refl_getMetaTransitionTarget(metaTransition, nil)
-                print("getting target cfsm state") //DEBUG
 
                 guard let targetCFSMState = cfsmStates.first(where: { $0.stateNumber == Int(targetStateNumber) }) else {
                     fatalError("Could not get target state for transition \(transitionNumber)")
                 }
 
-                print("adding transition JAJDAJDJASJD") //DEBUG
                 cfsmState.addTransition(Transition(targetCFSMState) {
                     let state = $0 as! CFSMState
                     return state.evaluateTransition(transitionNumber: Int(transitionNumber)) 
