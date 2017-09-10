@@ -19,10 +19,13 @@ using namespace FSM;
 
 //TODO: handle dynamic loadin
 
-/// The array of loaded machines
+/// The vector of loaded machines.
 std::vector<CLMachine*> finite_state_machines = std::vector<CLMachine*>();
 
-/// The last machine ID assigned
+/// The vector of machine library handles.
+std::vector<void*> machine_lib_handles = std::vector<void*>();
+
+/// The last machine ID assigned.
 static int last_unique_id = -1;
 
 extern "C"
@@ -180,7 +183,8 @@ int FSM::loadAndAddMachine(const char *machine, bool initiallySuspended)
     printf("cfsm_loader() - machine successfuly loaded, index: %d, ID: %d\n", index, machine_ptr->machineID());
 #endif
 
-    //if (dlclose(machine_lib_handle)) { fprintf(stderr, "Error closing machine library - dlerror(): %s\n", dlerror()); return CLError; }
+    // Place machine lib handle in lib handles vector so it can be closed later.
+    machine_lib_handles.push_back(machine_lib_handle);
 
     return index;
 }
@@ -200,5 +204,13 @@ bool FSM::unloadMachineAtIndex(int index)
     if ( !finite_state_machines[index] ) return false;
     finite_state_machines.erase(finite_state_machines.begin() + index);
     set_number_of_machines(number_of_machines() - 1);
+    
+    // Get machine lib handle for this machine and close the lib.
+    void* machine_lib_handle = machine_lib_handles.at(index);
+    if (dlclose(machine_lib_handle)) 
+    { 
+        fprintf(stderr, "Error closing machine library - dlerror(): %s\n", dlerror()); return CLError; 
+    }
+
     return true;
 }

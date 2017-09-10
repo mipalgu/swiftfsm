@@ -8,6 +8,8 @@
 
 extern std::vector<FSM::CLMachine*> finite_state_machines;
 
+extern std::vector<void*> machine_lib_handles; 
+
 extern "C"
 {
 int C_loadAndAddMachine(const char *machine, bool initiallySuspended);
