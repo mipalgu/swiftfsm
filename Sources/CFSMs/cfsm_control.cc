@@ -75,9 +75,7 @@ enum CLControlStatus FSM::control_machine_at_index(const int index, const enum C
 {
     int number_of_fsms = FSM::number_of_machines();
     const unsigned char i = static_cast<unsigned char>(index);
-#ifdef CFSM_CHECK_BOUNDS
     if (i >= number_of_fsms) return CLError;
-#endif
     CLMachine * const cl_machine = finite_state_machines[i];
     Machine *machine = cl_machine->machineContext();
     switch (command)
