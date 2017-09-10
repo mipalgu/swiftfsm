@@ -17,6 +17,7 @@
 
 using namespace FSM;
 
+//TODO: .dy extension for winduhs
 //TODO: handle dynamic loadin
 //TODO: REFACTOR
 
@@ -54,14 +55,6 @@ extern "C"
         return FSM::unloadMachineAtIndex(index);
     }
 
-    /*
-     * Destroys the finite state machine array and CLReflect API
-     */
-    void _C_destroyCFSM()
-    {
-        free(finite_state_machines);
-        refl_destroyAPI(NULL);
-    }
 }
 
 /**
@@ -77,7 +70,7 @@ Machine *createMachineContext(CLMachine *machine)
     return new Machine(initial_state, suspend_state, false);
 }
 
-/**
+/** TODO: Refucktor
  * Gets the machine name from the supplied path
  *
  * @param path the path of the CLMachine .so
@@ -88,25 +81,22 @@ const char* getMachineNameFromPath(const char* path)
     std::string tmp = std::string(path);
     std::size_t start = tmp.find_last_of("/");
     std::size_t end = tmp.find_last_of(".so");
-    std::string n = tmp.substr(start + 1, (end - start - 3) );
+    int offset = 3; // Length of ".so"
+
+    // If the .so path hasn't been provided, check if the .machine path was provided
+    if (end == std::string::npos) 
+    {
+        std::size_t end = tmp.find_last_of(".machine");
+        if (end == std::string::npos) return NULL; //.so or .machine path wasn't provided
+        offset = 8; //Length of ".machine"
+    }
+    
+    std::string n = tmp.substr(start + 1, (end - start - offset) );
+
+    // Need to allocate memory for c-string as it only lives as long as the C++ string.
     char* name = (char*) calloc(strlen(n.c_str()) + 1, sizeof(char));
     strcpy(name, n.c_str());
     return name;
-}
-
-/**
- * Gets the smallest unused index from the finite_state_machines array
- *
- * @return the smallest unused index, -1 if there is not enough room in the array
- */
-int smallestUnusedIndex()
-{
-    int no_index = -1;
-    for (int i = 0; i < number_of_machines(); i++)
-    {
-        if (finite_state_machines[i] == 0 || finite_state_machines[i] == NULL) return i;
-    }
-    return no_index;
 }
 
 /**
@@ -122,24 +112,17 @@ int FSM::loadAndAddMachine(const char *machine, bool initiallySuspended)
     printf("cfsm_loader() - loading machine: %s\n", machine);
 #endif
 
-    // Initialise the CFSM array.
-    if (!finite_state_machines)
-    {
-        finite_state_machines = (CLMachine**) calloc(1, sizeof(CLMachine*));
-        if (!finite_state_machines) { fprintf(stderr, "Error allocating memory for finite_state_machines array\n"); return CLError; }
-    }
-
     // Get handle for machine library
     void* machine_lib_handle = dlopen(machine, RTLD_NOW);
     if (!machine_lib_handle) { fprintf(stderr, "Error opening machine lib - dlerror(): %s\n", dlerror()); return CLError; }
 
     // Get pointer to machine lib's create CL machine function
     const char* name = getMachineNameFromPath(machine);
-    char* create_machine_symbol = (char*) calloc(11 + strlen(name) + 1, sizeof(char));
+    const char cl_create_function_name[] = "CLM_Create_";
+    char create_machine_symbol[strlen(cl_create_function_name) + strlen(name) + 1];
     strcpy(create_machine_symbol, "CLM_Create_");
     strcat(create_machine_symbol, name);
     void* create_machine_ptr = dlsym(machine_lib_handle, create_machine_symbol);
-    free(create_machine_symbol); //<- double free when called more than once - is it being clever and reusing the address?
     if (!create_machine_ptr) { fprintf(stderr, "Error getting CL Create Machine symbol - dlerror(): %s\n", dlerror()); return CLError; }
     
     CLMachine* (*createMachine)(int, const char*) = (CLMachine* (*)(int, const char*)) (create_machine_ptr);
@@ -161,25 +144,12 @@ int FSM::loadAndAddMachine(const char *machine, bool initiallySuspended)
     machine_ptr->setMachineContext(machine_context);
     
     // Place machine in CFSM array
-    int index = smallestUnusedIndex();
-
-    if (index == -1)
-    {
-
-        finite_state_machines = (CLMachine**) realloc(finite_state_machines, (number_of_machines() + 1) * sizeof(CLMachine*));
-        if (!finite_state_machines) { fprintf(stderr, "Reallocation of finite_state_machines array return NULL\n"); return CLError; }
-        finite_state_machines[number_of_machines()] = machine_ptr;
-        index = number_of_machines();
-    }
-    else
-    {
-        finite_state_machines[index] = machine_ptr; 
-    }
-
+    finite_state_machines.push_back(machine_ptr);
+    int index = finite_state_machines.size() -1;
     set_number_of_machines(number_of_machines() + 1);
 
     // Suspend the machine if initiallySuspended
-    if (initiallySuspended) { control_machine_at_index(index, CLSuspend); }
+    if (initiallySuspended) { FSM::control_machine_at_index(index, CLSuspend); }
 
 
 #ifdef DEBUG
@@ -228,10 +198,9 @@ bool FSM::unloadMachineAtIndex(int index)
 #ifdef DEBUG
     printf("cfsm_loader() - unloading machine at index %d\n", index);
 #endif
-    if ( index > number_of_machines() ) return false;
+    if ( index < 0 || index > number_of_machines() ) return false;
     if ( !finite_state_machines[index] ) return false;
-    finite_state_machines[index] = NULL;
+    finite_state_machines.erase(finite_state_machines.begin() + index);
     set_number_of_machines(number_of_machines() - 1);
-    if (number_of_machines() < 0) _C_destroyCFSM();
     return true;
 }

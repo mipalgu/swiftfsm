@@ -1,6 +1,5 @@
 #include "CLMacros.h"
 #include <vector>
-//#include "CLMachine.h"
 
 // Header guard.
 #ifndef _CFSM_LOADER_INCLUDED_
@@ -21,8 +20,6 @@ void _C_destroyCFSM();
 FSM::Machine* createMachineContext(FSM::CLMachine *machine);
 
 const char* getMachineNameFromPath(const char* path);
-
-int smallestUnusedIndex;
 
 namespace fsm
 {
