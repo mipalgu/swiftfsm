@@ -1,7 +1,7 @@
 #include "cfsm_number_of_machines.h"
 
 // The number of CLMachines in the finite_state_machines array
-int number_of_clmachines = 0;
+static int number_of_clmachines = 0;
 
 /**
  * Sets the number of machines in the finite_state_machines array

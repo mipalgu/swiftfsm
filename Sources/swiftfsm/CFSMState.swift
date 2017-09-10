@@ -56,6 +56,7 @@
  *
  */
 
+import FSM
 import KripkeStructure
 import swift_CLReflect
 
