@@ -86,6 +86,8 @@ enum CLControlStatus FSM::control_machine_at_index(const int index, const enum C
 
         case CLRestart:
             machine->setPreviousState(cl_machine->initialState());
+            break;
+
         case CLResume:
             machine->resume();
             break;
@@ -98,8 +100,9 @@ enum CLControlStatus FSM::control_machine_at_index(const int index, const enum C
             else
                 return CLResume;
 
-        default:
+        case CLError:
             return CLError;
+
     }
 
     return command;
