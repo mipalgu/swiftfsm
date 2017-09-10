@@ -1,6 +1,7 @@
 #include "cfsm_loader.h"
 #include "cfsm_number_of_machines.h"
 #include "cfsm_control.h"
+#include "CLMachine.h"
 #include <dlfcn.h>
 #include <CLReflectAPI.h>
 #include <stdlib.h>
@@ -20,7 +21,7 @@ using namespace FSM;
 //TODO: REFACTOR
 
 /// The array of loaded machines
-CLMachine **finite_state_machines = NULL;
+std::vector<CLMachine*> finite_state_machines = std::vector<CLMachine*>();
 
 /// The last machine ID assigned
 static int last_unique_id = -1;
