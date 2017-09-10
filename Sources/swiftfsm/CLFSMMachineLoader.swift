@@ -159,10 +159,14 @@ public class CLFSMMachineLoader: MachineLoader {
         for var (_, cfsmState) in cfsmStates.enumerated()
         {
             let sourceMetaState = metaStates[cfsmState.stateNumber]
+            let numberOfTransitions = refl_getNumberOfTransitions(sourceMetaState, nil)
+            if numberOfTransitions == 0 
+            {
+                return // No transitions so stop here
+            }
             guard let metaTransitions = refl_getMetaTransitions(sourceMetaState, nil) else {
                 fatalError("Could not get metatransitions for state: \(cfsmState.name)") //DEBUG
             }
-            let numberOfTransitions = refl_getNumberOfTransitions(sourceMetaState, nil)
             for transitionNumber in 0...numberOfTransitions - 1 {
                 let metaTransition = metaTransitions[Int(transitionNumber)]
                 let targetStateNumber = refl_getMetaTransitionTarget(metaTransition, nil)
