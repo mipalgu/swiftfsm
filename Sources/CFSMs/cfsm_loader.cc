@@ -216,7 +216,7 @@ int FSM::loadAndAddMachine(const char *machine, bool initiallySuspended)
     printf("cfsm_loader() - machine successfuly loaded, index: %d, ID: %d\n", index, machine_ptr->machineID());
 #endif
 
-    if (dlclose(machine_lib_handle)) { fprintf(stderr, "Error closing machine library - dlerror(): %s\n", dlerror()); return CLError; }
+    //if (dlclose(machine_lib_handle)) { fprintf(stderr, "Error closing machine library - dlerror(): %s\n", dlerror()); return CLError; }
 
     return index;
 }
