@@ -17,7 +17,8 @@
 
 using namespace FSM;
 
-//TODO: handle dynamic loadin
+//TODO: handle dynamic loading
+//TODO: support loading when ".machine" path is supplied rather than ".so"
 
 /// The vector of loaded machines.
 std::vector<CLMachine*> finite_state_machines = std::vector<CLMachine*>();
@@ -115,7 +116,10 @@ int FSM::loadAndAddMachine(const char *machine, bool initiallySuspended)
 
     // Get handle for machine library
     void* machine_lib_handle = dlopen(machine, RTLD_NOW);
-    if (!machine_lib_handle) { fprintf(stderr, "Error opening machine lib - dlerror(): %s\n", dlerror()); return CLError; }
+    if (!machine_lib_handle) // Check if ".machine" path was provided rather than ".so" 
+    {
+        fprintf(stderr, "cfsm_loader(): Error opening machine library: dlerror(): %s\n", dlerror()); return CLError; 
+    }
 
     // Get pointer to machine lib's create CL machine function
     const char* name = getMachineNameFromPath(machine);
