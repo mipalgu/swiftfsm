@@ -57,10 +57,10 @@
  */
 
 #include <string.h>
+#include <iterator>
+#include "CLMachine.h"
 #include "cfsm_index.h"
 #include "cfsm_loader.h"
-#include "CLMachine.h"
-#include "CLMacros.h"
 
 /**
  * Gets the index of a machine
@@ -72,13 +72,11 @@ int FSM::index_of_machine_named(const char *name)
 {
     using namespace FSM;
     
-    int number_of_fsms = number_of_machines();
-
-    for (int i = 0; i < number_of_fsms; i++)
+    for (unsigned index = 0; index < finite_state_machines.size(); ++index)
     {
-        CLMachine *machine = finite_state_machines[i];
+        CLMachine *machine = machine_at_index(index);
         if (strcmp(name, machine->machineName()) == 0)
-            return i;
+            return index;
     }
 
     return CLError;
@@ -94,7 +92,7 @@ const char *FSM::name_of_machine_at_index(int index)
 {
     using namespace FSM;
     
-    CLMachine *machine = finite_state_machines[index];
+    CLMachine *machine = finite_state_machines.at(index);
     
     return machine->machineName();
 }
@@ -108,5 +106,5 @@ const char *FSM::name_of_machine_at_index(int index)
 FSM::CLMachine *FSM::machine_at_index(unsigned index)
 {
     using namespace FSM;
-    return finite_state_machines[index];
+    return finite_state_machines.at(index);
 }

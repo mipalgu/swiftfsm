@@ -55,12 +55,18 @@
  * Fifth Floor, Boston, MA  02110-1301, USA.
  *
  */
-#ifndef cfsm__cfsm_index__
-#define cfsm__cfsm_index__
+
+#include "CLMacros.h"
+
+// Header guard.
+#ifndef _CFSM_INDEX_INCLUDED_
+#define _CFSM_INDEX_INCLUDED_
 
 namespace FSM
 {
     int index_of_machine_named(const char *name);
+    const char* name_of_machine_at_index(int index);
+    FSM::CLMachine* machine_at_index(unsigned index);
 }
 
-#endif /* defined cfsm__cfsm_index__) */
+#endif // Header guard.

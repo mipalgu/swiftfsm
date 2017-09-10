@@ -1,6 +1,6 @@
 /*
- *  ucfsm_control.cc
- *  ucfsm
+ *  cfsm_control.cc
+ *  cfsm
  *
  *  Created by Bren Moushall on 08/08/2017.
  *  Copyright (c) 2017 Rene Hexel. All rights reserved.
@@ -57,6 +57,7 @@
  */
 #include "cfsm_control.h"
 #include "cfsm_loader.h"
+#include "cfsm_index.h"
 #include "CLMachine.h"
 #include "CLMacros.h"
 #include <stdlib.h>
@@ -76,7 +77,7 @@ enum CLControlStatus FSM::control_machine_at_index(const int index, const enum C
     int number_of_fsms = FSM::number_of_machines();
     const unsigned char i = static_cast<unsigned char>(index);
     if (i >= number_of_fsms) return CLError;
-    CLMachine * const cl_machine = finite_state_machines[i];
+    CLMachine * const cl_machine = machine_at_index(index);
     Machine *machine = cl_machine->machineContext();
     switch (command)
     {
