@@ -10,6 +10,10 @@ extern std::vector<FSM::CLMachine*> finite_state_machines;
 
 extern "C"
 {
+int C_numberOfDynamicallyLoadedMachines();
+
+int C_numberOfDynamicallyUnloadedMachines();
+    
 int* C_getDynamicallyLoadedMachineIDs();
 
 int* C_getDynamicallyUnloadedMachineIDs();

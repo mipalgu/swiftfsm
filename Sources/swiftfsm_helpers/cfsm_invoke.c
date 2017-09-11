@@ -54,3 +54,26 @@ void destroyCFSM(void* p)
     f();
 }
 
+int* getLoadedMachines(void* p) 
+{
+    int* (*f)() = (int* (*)()) (p);
+    return( f() );
+}
+
+int* getUnloadedMachines(void* p)
+{
+    int* (*f)() = (int* (*)()) (p);
+    return ( f() );
+}
+
+int numberOfLoadedMachines(void* p)
+{
+    int (*f)() = (int (*)()) (p);
+    return f();
+}
+
+int numberOfUnloadedMachines(void* p)
+{
+    int (*f)() = (int (*)()) (p);
+    return f();
+}

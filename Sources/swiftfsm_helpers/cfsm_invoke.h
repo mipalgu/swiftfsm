@@ -6,4 +6,9 @@ bool unloadMachine(void*, int);
 
 void destroyCFSM(void*);
 
+int* getLoadedMachines(void*);
+
+int* getUnloadedMachines(void*);
+
+int numberOfLoadedMachines(void*);
 

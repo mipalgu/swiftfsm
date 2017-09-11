@@ -78,7 +78,44 @@ public class CLFSMMachineLoader: MachineLoader, MachineUnloader {
 
     /// libCFSMs path.
     let cfsmPath = "/usr/local/lib/libCFSMs.so"
-    
+ 
+
+    public func handleLoadedMachines() -> [Int]
+    {
+        // Test.
+        let dynamicLibraryCreator = DynamicLibraryCreator(printer: printer)
+
+        guard let dlrCFSM = dynamicLibraryCreator.open(path: cfsmPath) else {
+            fatalError("Error creating DLC for CFSMs")
+        }
+
+        let numTuple = dlrCFSM.getSymbolPointer(symbol: "C_numberOfDynamicallyLoadedMachines")
+        guard let numMachinesPtr = numTuple.0 else {
+            fatalError(numTuple.1 ?? "getSymbolPointer(C_numberOfDynamicallyLoadedMachines")
+        }
+
+        let numOfLoadedMachines = numberOfLoadedMachines(numMachinesPtr)
+        print("swiftfsm - there are \(numOfLoadedMachines) dy loaded machines")
+
+        let tuple = dlrCFSM.getSymbolPointer(symbol: "C_getDynamicallyLoadedMachineIDs")
+        guard let loadedMachinesPtr = tuple.0 else {
+            fatalError(tuple.1 ?? "getSymbolPointer(C_getDynamicallyLoadedMachineIDs)): unknown error")
+        }
+
+        guard let machineIDVector = getLoadedMachines(loadedMachinesPtr) else {
+            fatalError("Could not get IDs for dynamically loaded machines")
+        }
+        
+        let machineIDInt32 = Array(UnsafeBufferPointer(start: machineIDVector, count: Int(numOfLoadedMachines)))
+        
+        let machineIDs = machineIDInt32.map { Int($0) }
+        return machineIDs
+    }
+
+    //public func handleUnloadedMachines() -> [Int]
+    //{
+//
+  //  }
 
     /**
      * Unloads the underlying C++ machine of a swift FSM.

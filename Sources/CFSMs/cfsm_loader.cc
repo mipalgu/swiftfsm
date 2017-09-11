@@ -42,6 +42,26 @@ static int last_unique_id = -1;
 extern "C"
 {
     /**
+     * Wrapper for returning the number of dynamically loaded machines.
+     *
+     * @return loaded_machineIDs vector size
+     */
+    int C_numberOfDynamicallyLoadedMachines()
+    {
+        return loaded_machineIDs.size();
+    }
+
+    /**
+     * Wrapper for returning the number of dynamically loaded machines.
+     *
+     * @return unloaded_machineIDs vector size
+     */
+    int C_numberOfDynamicallyUnloadedMachines()
+    {
+        return unloaded_machineIDs.size();
+    }
+
+    /**
      * Wrapper for accessing the dynamically loaded machine ID vector.
      *
      * @return loaded_machineIDs vector
