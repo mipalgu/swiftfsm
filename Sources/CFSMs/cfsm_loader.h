@@ -8,15 +8,15 @@
 
 extern std::vector<FSM::CLMachine*> finite_state_machines;
 
-extern std::vector<void*> machine_lib_handles; 
-
 extern "C"
 {
+int* C_getDynamicallyLoadedMachineIDs();
+
+int* C_getDynamicallyUnloadedMachineIDs();
+
 int C_loadAndAddMachine(const char *machine, bool initiallySuspended);
 
 bool C_unloadMachineAtIndex(int index);
-
-void _C_destroyCFSM();
 }
 
 FSM::Machine* createMachineContext(FSM::CLMachine *machine);

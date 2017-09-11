@@ -25,7 +25,16 @@ using namespace FSM;
 std::vector<CLMachine*> finite_state_machines = std::vector<CLMachine*>();
 
 /// The vector of machine library handles.
-std::vector<void*> machine_lib_handles = std::vector<void*>();
+static std::vector<void*> machine_lib_handles = std::vector<void*>();
+
+/// The vector of dynamically loaded machine IDs.
+static std::vector<int> loaded_machineIDs = std::vector<int>();
+
+/// The vector of dynamically unloaded machine IDs.
+static std::vector<int> unloaded_machineIDs = std::vector<int>();
+
+/// Whether machines are being loaded/unloaded by another machine.
+static bool dynamic = true;
 
 /// The last machine ID assigned.
 static int last_unique_id = -1;
@@ -33,7 +42,28 @@ static int last_unique_id = -1;
 extern "C"
 {
     /**
+     * Wrapper for accessing the dynamically loaded machine ID vector.
+     *
+     * @return loaded_machineIDs vector
+     */
+    int* C_getDynamicallyLoadedMachineIDs()
+    {
+        return &loaded_machineIDs[0];
+    }
+
+    /**
+     * Wrapper for accessing the dynamically unloaded machine ID vector.
+     *
+     * @return unloaded_machineIDs vector
+     */
+    int* C_getDynamicallyUnloadedMachineIDs()
+    {
+        return &unloaded_machineIDs[0];
+    }
+
+    /**
      * Wrapper around CLMacros loadAndAddMachine that returns the machine ID
+     * and turns off the "dynamically_loaded" flag
      *
      * @param machine path to the CL machine .so
      * @param initiallySuspended whether this machine starts suspended
@@ -41,6 +71,7 @@ extern "C"
      */
     int C_loadAndAddMachine(const char *machine, bool initiallySuspended)
     {
+        dynamic = false;
         int index = FSM::loadAndAddMachine(machine, initiallySuspended);
         if (index == CLError) return -1;
         CLMachine *m = machine_at_index(index);
@@ -138,9 +169,7 @@ int FSM::loadAndAddMachine(const char *machine, bool initiallySuspended)
     // Call the machine lib's create CL machine function
     int machine_id = last_unique_id + 1;
     CLMachine* machine_ptr = createMachine(machine_id, name);
-    printf("name ptr: %p\n", name);
     free((char*)(name));
-    printf("finished free\n");
 
     if (!machine_ptr) { fprintf(stderr, "CL Create Machine return NULL\n"); return CLError; }
     last_unique_id = machine_id;
@@ -192,6 +221,16 @@ int FSM::loadAndAddMachine(const char *machine, bool initiallySuspended)
     // Place machine lib handle in lib handles vector so it can be closed later.
     machine_lib_handles.push_back(machine_lib_handle);
 
+    if (dynamic) 
+    { 
+        loaded_machineIDs.push_back(machine_id);
+    }
+    dynamic = true; // Reset flag if it was turned off.
+    
+#ifdef DEBUG
+    printf("cfsm_loader() - %d machines have been dynamically loaded\n", loaded_machineIDs.size());
+#endif
+
     return index;
 }
 
@@ -207,7 +246,15 @@ bool FSM::unloadMachineAtIndex(int index)
     printf("cfsm_loader() - unloading machine at index %d\n", index);
 #endif
     if ( index < 0 || index > number_of_machines() ) return false;
-    if ( !finite_state_machines[index] ) return false;
+    
+    if (dynamic)
+    {
+        CLMachine *machine = machine_at_index(index);
+        int machine_id = machine->machineID();
+        unloaded_machineIDs.push_back(machine_id);
+    }
+    dynamic = true; // Reset flag if it was turned off.
+
     finite_state_machines.erase(finite_state_machines.begin() + index);
     set_number_of_machines(number_of_machines() - 1);
     
@@ -217,6 +264,10 @@ bool FSM::unloadMachineAtIndex(int index)
     { 
         fprintf(stderr, "Error closing machine library - dlerror(): %s\n", dlerror()); return CLError; 
     }
+
+#ifdef DEBUG
+    printf("cfsm_loader() - %d machines have been dynamically unloaded\n", unloaded_machineIDs.size());
+#endif
 
     return true;
 }
