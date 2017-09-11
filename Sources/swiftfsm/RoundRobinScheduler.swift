@@ -70,15 +70,18 @@ public class RoundRobinScheduler<Tokenizer: SchedulerTokenizer>: Scheduler where
     public private(set) var machines: [Machine]
 
     private let tokenizer: Tokenizer
+
+    private let unloader: MachineUnloader
     
     /**
      *  Create a new `RoundRobinScheduler`.
      *
      *  - Parameter machines: All the `Machine`s that will be executed.
      */
-    public init(machines: [Machine] = [], tokenizer: Tokenizer) {
+    public init(machines: [Machine] = [], tokenizer: Tokenizer, unloader: MachineUnloader) {
         self.machines = machines
         self.tokenizer = tokenizer
+        self.unloader = unloader
     }
     
     /**
@@ -98,6 +101,7 @@ public class RoundRobinScheduler<Tokenizer: SchedulerTokenizer>: Scheduler where
                     fsm.next()
                     if (true == fsm.hasFinished) {
                         jobs[i].remove(at: j)
+                        self.unloader.unload(fsm)
                         continue
                     }
                     j += 1

@@ -65,7 +65,10 @@ import swift_CLReflect
 /**
  *  Is responsible for loading and unloading CLFSM machines.
  */
-public class CLFSMMachineLoader: MachineLoader, CFSMRoundRobinSchedulerUnloader {
+public class CLFSMMachineLoader: MachineLoader, MachineUnloader {
+
+    /// Dictionary of swiftfsm machine names to C++ machine IDs.
+    static var nameToMachineID = [String: Int]()
 
     /// String constant for load function name.
     let loadMachineFunctionName = "C_loadAndAddMachine"
@@ -74,23 +77,19 @@ public class CLFSMMachineLoader: MachineLoader, CFSMRoundRobinSchedulerUnloader 
     let unloadMachineFunctionName = "C_unloadMachineWithID"
 
     /// libCFSMs path.
-    let cfsmPath = "/usr/local/lib/libCFSMs.so" //TODO: make this dynamic
-
-    /// Dictionary of swiftfsm machine names to C++ machine IDs.
-    var nameToMachineID = [String: Int]()
-
+    let cfsmPath = "/usr/local/lib/libCFSMs.so"
+    
 
     /**
-     * Unloads a C++ machine.
+     * Unloads the underlying C++ machine of a swift FSM.
      * 
-     * - Parameter name name of the machine to unload
-     * - Return whether the machine successfully unloaded
+     * - Parameter fsm the FSM to unload.
      */
-    public func unload(name: String) -> Bool {
+    public func unload(_ fsm: AnyScheduleableFiniteStateMachine) {
         
         // Get ID of machine to unload.
-        guard let machineID = self.nameToMachineID[name] else {
-            fatalError("No C++ machine ID for swift machine \(name)")
+        guard let machineID = type(of: self).nameToMachineID[fsm.name] else {
+            fatalError("No C++ machine ID for swift machine \(fsm.name)")
         }
         
         let printer: CommandLinePrinter =
@@ -109,8 +108,8 @@ public class CLFSMMachineLoader: MachineLoader, CFSMRoundRobinSchedulerUnloader 
         guard let unloadMachinePtr = unloadMachineTuple.0 else {
             fatalError(unloadMachineTuple.1 ?? "getSymbolPointer(\(unloadMachineFunctionName)): unknown error")
         }
-
-        return unloadMachine(unloadMachinePtr, Int32(machineID))
+        unloadMachine(unloadMachinePtr, Int32(machineID))
+        //return unloadMachine(unloadMachinePtr, Int32(machineID))
     }
     
         
@@ -173,7 +172,7 @@ public class CLFSMMachineLoader: MachineLoader, CFSMRoundRobinSchedulerUnloader 
         let states = createStates(metaMachine)
         let finiteStateMachine = FSM(uniqueName, initialState: states[0])
         finiteStateMachines.append(finiteStateMachine)
-        self.nameToMachineID[uniqueName] = machineID
+        type(of: self).nameToMachineID[uniqueName] = machineID
         return finiteStateMachines
     }
 

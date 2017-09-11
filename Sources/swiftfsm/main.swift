@@ -71,10 +71,9 @@ let printer: CommandLinePrinter =
         messageStream: StdoutOutputStream()
     )
 
-let clfsmMachineLoader = CLFSMMachineLoader()
 
 Swiftfsm(
-    clfsmMachineLoader: clfsmMachineLoader,
+    clfsmMachineLoader: CLFSMMachineLoader(),
     kripkeStructureGeneratorFactory: MachineKripkeStructureGeneratorFactory(),
     kripkeStructureView: NuSMVKripkeStructureView(
         factory: FilePrinterFactory()
@@ -82,6 +81,6 @@ Swiftfsm(
     machineFactory: SimpleMachineFactory(),
     machineLoader: DynamicLibraryMachineLoaderFactory(printer: printer).make(),
     parser: SwiftfsmParser(),
-    schedulerFactory: CFSMRoundRobinSchedulerFactory(unloader: clfsmMachineLoader),
+    schedulerFactory: RoundRobinSchedulerFactory(),
     view: printer
 ).run(args: CommandLine.arguments)
