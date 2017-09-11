@@ -1,6 +1,7 @@
 #include "cfsm_loader.h"
 #include "cfsm_number_of_machines.h"
 #include "cfsm_control.h"
+#include "cfsm_index.h"
 #include "CLMachine.h"
 #include <dlfcn.h>
 #include <CLReflectAPI.h>
@@ -41,19 +42,20 @@ extern "C"
     int C_loadAndAddMachine(const char *machine, bool initiallySuspended)
     {
         int index = FSM::loadAndAddMachine(machine, initiallySuspended);
-        if (index == -1) return index;
+        if (index == CLError) return -1;
         CLMachine *m = machine_at_index(index);
         return m->machineID();
     }
     
     /**
-     * Wrapper around CLMacros unloadMachineAtIndex
+     * Wrapper around CLMacros unloadMachineAtIndex that takes an ID of machine to unload
      *
-     * @param index index of machine to unload
+     * @param id ID of the machine to unload
      * @return whether the machine successfully unloaded
      */
-    bool C_unloadMachineAtIndex(int index)
+    bool C_unloadMachineWithID(int id)
     {
+        int index = index_of_machine_with_id(id);
         return FSM::unloadMachineAtIndex(index);
     }
 

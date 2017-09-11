@@ -63,6 +63,26 @@
 #include "cfsm_loader.h"
 
 /**
+ * Gets the index of a machine given its ID
+ *
+ * @param id the id of the CLMachine to find the index for
+ * @return the index of the machine
+ */
+int index_of_machine_with_id(int id)
+{
+    using namespace FSM;
+
+    for (unsigned index = 0; index < finite_state_machines.size(); ++index)
+    {
+        CLMachine *machine = machine_at_index(index);
+        if (machine->machineID() == id)
+            return index;
+    }
+
+    return CLError;
+}
+
+/**
  * Gets the index of a machine
  *
  * @param name the name of the CLMachine to find the index for

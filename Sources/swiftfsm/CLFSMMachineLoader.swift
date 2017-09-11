@@ -63,10 +63,65 @@ import swift_CLReflect
 
 
 /**
- *  Is responsible for loading CLFSM machines.
+ *  Is responsible for loading and unloading CLFSM machines.
  */
-public class CLFSMMachineLoader: MachineLoader {
+public class CLFSMMachineLoader: MachineLoader, CFSMRoundRobinSchedulerUnloader {
 
+    /// String constant for load function name.
+    let loadMachineFunctionName = "C_loadAndAddMachine"
+    
+    /// String constant for unload function name.
+    let unloadMachineFunctionName = "C_unloadMachineWithID"
+
+    /// libCFSMs path.
+    let cfsmPath = "/usr/local/lib/libCFSMs.so" //TODO: make this dynamic
+
+    /// Dictionary of swiftfsm machine names to C++ machine IDs.
+    var nameToMachineID = [String: Int]()
+
+
+    /**
+     * Unloads a C++ machine.
+     * 
+     * - Parameter name name of the machine to unload
+     * - Return whether the machine successfully unloaded
+     */
+    public func unload(name: String) -> Bool {
+        
+        // Get ID of machine to unload.
+        guard let machineID = self.nameToMachineID[name] else {
+            fatalError("No C++ machine ID for swift machine \(name)")
+        }
+        
+        let printer: CommandLinePrinter =
+            CommandLinePrinter(
+                errorStream: StderrOutputStream(),
+                messageStream: StdoutOutputStream()
+            )
+
+        let dynamicLibraryCreator = DynamicLibraryCreator(printer: printer)
+
+        guard let dlrCFSM = dynamicLibraryCreator.open(path: cfsmPath) else {
+            fatalError("Error creating DLC for CFSMs")
+        }
+
+        let unloadMachineTuple = dlrCFSM.getSymbolPointer(symbol: unloadMachineFunctionName)
+        guard let unloadMachinePtr = unloadMachineTuple.0 else {
+            fatalError(unloadMachineTuple.1 ?? "getSymbolPointer(\(unloadMachineFunctionName)): unknown error")
+        }
+
+        return unloadMachine(unloadMachinePtr, Int32(machineID))
+    }
+    
+        
+
+
+    /**
+     * Loads a C++ machine.
+     *
+     * - Parameter path path to the machine library
+     * - Return an array of FSMs to be scheduled
+     */
     public func load(path: String) -> [AnyScheduleableFiniteStateMachine] {
         let debug = true //DEBUG
 
@@ -82,13 +137,13 @@ public class CLFSMMachineLoader: MachineLoader {
         
         let dynamicLibraryCreator = DynamicLibraryCreator(printer: printer)
 
-        guard let dlrCFSM = dynamicLibraryCreator.open(path: "/usr/local/lib/libCFSMs.so") else {
+        guard let dlrCFSM = dynamicLibraryCreator.open(path: cfsmPath) else {
             fatalError("Error creating DLC for CFSMs")
         }
 
-        let loadMachineTuple = dlrCFSM.getSymbolPointer(symbol: "C_loadAndAddMachine")
+        let loadMachineTuple = dlrCFSM.getSymbolPointer(symbol: loadMachineFunctionName)
         guard let loadMachinePtr = loadMachineTuple.0 else {
-            fatalError(loadMachineTuple.1 ?? "getSymbolPointer(loadAndAddMachine): unknown error")
+            fatalError(loadMachineTuple.1 ?? "getSymbolPointer(\(loadMachineFunctionName)): unknown error")
         }
 
         let machineID = cPath.withUnsafeBufferPointer { loadMachine(loadMachinePtr, $0.baseAddress, false) }
@@ -99,7 +154,7 @@ public class CLFSMMachineLoader: MachineLoader {
         let dlCloseResult = dlrCFSM.close()
         if !dlCloseResult.0 { print(dlCloseResult.1 ?? "No error message for DynamicLibraryResource.close()!") }
         
-        return createFiniteStateMachines([Int(machineID)])
+        return createFiniteStateMachines(Int(machineID))
     }
     
     /**
@@ -108,17 +163,17 @@ public class CLFSMMachineLoader: MachineLoader {
      * - Parameter machineIDs the array of CLFSM machine IDs
      * - Return an array of AnyScheduleableFiniteStateMachines
      */
-    public func createFiniteStateMachines(_ machineIDs: [Int]) -> [AnyScheduleableFiniteStateMachine] {
+    public func createFiniteStateMachines(_ machineID: Int) -> [AnyScheduleableFiniteStateMachine] {
         var finiteStateMachines = [AnyScheduleableFiniteStateMachine]()
-        for machineID in machineIDs {
-            guard let metaMachine = refl_getMetaMachine(UInt32(machineID), nil) else {
-                fatalError("Could not get metamachine for machineID = \(machineID)")
-            }
-            let name = String(cString: refl_getMetaMachineName(metaMachine, nil))
-            let states = createStates(metaMachine)
-            let finiteStateMachine = FSM(name, initialState: states[0])
-            finiteStateMachines.append(finiteStateMachine)
+        guard let metaMachine = refl_getMetaMachine(UInt32(machineID), nil) else {
+            fatalError("Could not get metamachine for machineID = \(machineID)")
         }
+        let machineName = String(cString: refl_getMetaMachineName(metaMachine, nil))
+        let uniqueName = machineName + String(machineID)
+        let states = createStates(metaMachine)
+        let finiteStateMachine = FSM(uniqueName, initialState: states[0])
+        finiteStateMachines.append(finiteStateMachine)
+        self.nameToMachineID[uniqueName] = machineID
         return finiteStateMachines
     }
 

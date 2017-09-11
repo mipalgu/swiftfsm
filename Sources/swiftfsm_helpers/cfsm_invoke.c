@@ -24,6 +24,23 @@ int loadMachine(void* p, const char *machine, bool initiallySuspended)
 }
 
 /**
+ * Calls the CFSM machine unloader.
+ *
+ * @param p pointer the CFSM unload function
+ * @param id the id of the machine to unload 
+ *
+ * @return whether the machine successfully unloaded
+ */
+bool unloadMachine(void* p, int id)
+{
+#ifdef DEBUG
+    printf("unloadMachine() - ptr: %p, id: %d\n", p, id);
+#endif
+    bool (*f)(int) = (bool (*)(int)) (p);
+    return( f(id) );
+}
+
+/**
  * Destroys CFSM
  *
  * @param p pointer to the destroy CFSM function

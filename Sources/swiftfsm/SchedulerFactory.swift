@@ -70,6 +70,5 @@ public protocol SchedulerFactory {
      *
      *  - Returns: A newly created `Scheduler`.
      */
-    func make(machines: [Machine]) -> Scheduler
-    
+    func make(machines: [Machine]) -> Scheduler    
 }

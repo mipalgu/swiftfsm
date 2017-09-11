@@ -1,9 +1,9 @@
 /*
- *  cfsm_index.h
- *  cfsm
+ * RoundRobinScheduler.swift
+ * swiftfsm
  *
- *  Created by Bren Moushall on 08/08/2017.
- *  Copyright (c) 2017 Rene Hexel. All rights reserved.
+ * Created by Callum McColl on 18/08/2015.
+ * Copyright © 2015 Callum McColl. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -20,7 +20,7 @@
  * 3. All advertising materials mentioning features or use of this
  *    software must display the following acknowledgement:
  *
- *        This product includes software developed by Rene Hexel.
+ *        This product includes software developed by Callum McColl.
  *
  * 4. Neither the name of the author nor the names of contributors
  *    may be used to endorse or promote products derived from this
@@ -56,19 +56,76 @@
  *
  */
 
-#include "CLMacros.h"
+import FSM
 
-// Header guard.
-#ifndef _CFSM_INDEX_INCLUDED_
-#define _CFSM_INDEX_INCLUDED_
-
-int index_of_machine_with_id(int id);
-
-namespace FSM
-{
-    int index_of_machine_named(const char *name);
-    const char* name_of_machine_at_index(int index);
-    FSM::CLMachine* machine_at_index(unsigned index);
+public protocol CFSMRoundRobinSchedulerUnloader {
+    func unload(name: String) -> Bool
 }
 
-#endif // Header guard.
+/**
+ *  Responsible for the execution of machines.
+ */
+public class CFSMRoundRobinScheduler<Tokenizer: SchedulerTokenizer>: Scheduler where
+    Tokenizer.Object == Machine,
+    Tokenizer.SchedulerToken == AnyScheduleableFiniteStateMachine
+{
+    
+    // All the machines that will be executed.
+    public private(set) var machines: [Machine]
+
+    private let tokenizer: Tokenizer
+
+    private let unloader: CFSMRoundRobinSchedulerUnloader
+    
+    /**
+     *  Create a new `CFSMRoundRobinScheduler`.
+     *
+     *  - Parameter machines: All the `Machine`s that will be executed.
+     */
+    public init(machines: [Machine] = [], tokenizer: Tokenizer, unloader: CFSMRoundRobinSchedulerUnloader) {
+        self.machines = machines
+        self.tokenizer = tokenizer
+        self.unloader = unloader
+    }
+    
+    /**
+     *  Start executing all machines.
+     */
+    public func run() -> Void {
+        var jobs = self.tokenizer.separate(self.machines)
+        // Run until all machines are finished.
+        while (false == jobs.isEmpty && false == STOP) {
+            var i = 0
+            for job in jobs {
+                var j = 0
+                let machines: Set<Machine> = self.getMachines(fromJob: job)
+                machines.forEach { $0.fsms.first?.takeSnapshot() }
+                for (fsm, machine) in job {
+                    DEBUG = machine.debug
+                    fsm.next()
+                    if (true == fsm.hasFinished) {
+                        jobs[i].remove(at: j)
+                        unloader.unload(name: fsm.name)
+                        continue
+                    }
+                    j += 1
+                }
+                machines.forEach { $0.fsms.first?.saveSnapshot() }
+                if (true == jobs[i].isEmpty) {
+                    jobs.remove(at: i)
+                    continue
+                }
+                i += 1
+            }
+        }
+    }
+
+    private func getMachines(fromJob job: [(AnyScheduleableFiniteStateMachine, Machine)]) -> Set<Machine> {
+        var machines: Set<Machine> = []
+        job.forEach {
+            machines.insert($1)
+        }
+        return machines
+    }
+    
+}

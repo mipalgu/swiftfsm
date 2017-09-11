@@ -300,7 +300,7 @@ public class Swiftfsm<
     }
     
     private func runMachines(_ machines: [Machine], withScheduler factory: SchedulerFactory) {
-        factory.make(machines: machines).run()
+            factory.make(machines: machines).run()
     }
     
 }

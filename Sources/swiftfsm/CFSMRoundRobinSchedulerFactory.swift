@@ -1,9 +1,9 @@
 /*
- *  cfsm_index.h
- *  cfsm
+ * RoundRobinSchedulerFactory.swift
+ * swiftfsm
  *
- *  Created by Bren Moushall on 08/08/2017.
- *  Copyright (c) 2017 Rene Hexel. All rights reserved.
+ * Created by Callum McColl on 20/12/2015.
+ * Copyright © 2015 Callum McColl. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -20,7 +20,7 @@
  * 3. All advertising materials mentioning features or use of this
  *    software must display the following acknowledgement:
  *
- *        This product includes software developed by Rene Hexel.
+ *        This product includes software developed by Callum McColl.
  *
  * 4. Neither the name of the author nor the names of contributors
  *    may be used to endorse or promote products derived from this
@@ -56,19 +56,27 @@
  *
  */
 
-#include "CLMacros.h"
+import FSM
 
-// Header guard.
-#ifndef _CFSM_INDEX_INCLUDED_
-#define _CFSM_INDEX_INCLUDED_
+/**
+ *  Provides a way to create a `RoundRobinScheduler`.
+ */
+public class CFSMRoundRobinSchedulerFactory: SchedulerFactory {
 
-int index_of_machine_with_id(int id);
+    private let unloader: CFSMRoundRobinSchedulerUnloader
 
-namespace FSM
-{
-    int index_of_machine_named(const char *name);
-    const char* name_of_machine_at_index(int index);
-    FSM::CLMachine* machine_at_index(unsigned index);
+    public init(unloader: CFSMRoundRobinSchedulerUnloader)
+    {
+        self.unloader = unloader
+    }
+
+    public func make(machines: [Machine]) -> Scheduler {
+        return CFSMRoundRobinScheduler(
+            machines: machines,
+            tokenizer: PerRingletTokenizer(),
+            unloader: self.unloader
+        )
+    }
+
+    
 }
-
-#endif // Header guard.
