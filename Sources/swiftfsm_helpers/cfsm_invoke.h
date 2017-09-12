@@ -12,3 +12,5 @@ int* getUnloadedMachines(void*);
 
 int numberOfLoadedMachines(void*);
 
+int numberOfUnloadedMachines(void*);
+

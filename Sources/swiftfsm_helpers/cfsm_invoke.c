@@ -41,37 +41,51 @@ bool unloadMachine(void* p, int id)
 }
 
 /**
- * Destroys CFSM
+ * Gets the vector of dynamically loaded machine IDs from CFSM.
  *
- * @param p pointer to the destroy CFSM function
+ * @param p pointer to the CFSM function.
+ *
+ * @return 
  */
-void destroyCFSM(void* p)
-{
-#ifdef DEBUG
-    printf("destroyCFSM() - ptr: %p\n", p);
-#endif
-    void (*f)() = (void (*)()) (p);
-    f();
-}
-
 int* getLoadedMachines(void* p) 
 {
     int* (*f)() = (int* (*)()) (p);
     return( f() );
 }
 
+/**
+ * Gets the vector of dynamically unloaded machine IDs from CFSM.
+ *
+ * @param p pointer to the CFSM function.
+ *
+ * @return
+ */
 int* getUnloadedMachines(void* p)
 {
     int* (*f)() = (int* (*)()) (p);
     return ( f() );
 }
 
+/**
+ * Gets the number of dynamically loaded machine IDs from CFSM.
+ *
+ * @param p pointer to the CFSM function.
+ *
+ * @return
+ */
 int numberOfLoadedMachines(void* p)
 {
     int (*f)() = (int (*)()) (p);
     return f();
 }
 
+/**
+ * Gets the number of dynamically unloaded machine IDs from CFSM.
+ *
+ * @param p pointer to the CFSM function.
+ *
+ * @return
+ */
 int numberOfUnloadedMachines(void* p)
 {
     int (*f)() = (int (*)()) (p);
