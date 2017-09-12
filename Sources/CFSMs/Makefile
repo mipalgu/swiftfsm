@@ -21,10 +21,9 @@ ALL_TARGETS=host-local
 #CPPFLAGS+=-g -O0
 SPECIFIC_LDFLAGS+=-Wl,-rpath -Wl,/usr/local/lib
 
-#C_SRCS=stringConstants.c
-CC_SRCS=cfsm_control.cc cfsm_current_time_in_microseconds.cc cfsm_index.cc cfsm_start_time_for_current_state.cc cfsm_number_of_machines.cc
-HDRS=CLAction.h CLMachine.h CLMacros.h CLState.h CLTransitionExpression.h CLTransition.h
-INSTHDRS=CLMacros.h #CLWhiteboard.h
+CC_SRCS!=ls *.cc
+HDRS!=ls !.h
+INSTHDRS=CLMacros.h
 LDFLAGS+=-lCLReflect
 
 

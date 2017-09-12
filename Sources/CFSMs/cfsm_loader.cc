@@ -97,13 +97,13 @@ extern "C"
         CLMachine *m = machine_at_index(index);
         return m->machineID();
     }
-    
+
     /**
      * Wrapper around CLMacros unloadMachineAtIndex that takes an ID of machine to unload
      *
      * @param id ID of the machine to unload
      * @return whether the machine successfully unloaded
-     */
+    */
     bool C_unloadMachineWithID(int id)
     {
         dynamic = false;
@@ -164,15 +164,12 @@ const char* getMachineNameFromPath(const char* path)
  */
 int FSM::loadAndAddMachine(const char *machine, bool initiallySuspended)
 {
-#ifdef DEBUG
-    printf("cfsm_loader() - loading machine: %s\n", machine);
-#endif
-
     // Get handle for machine library
     void* machine_lib_handle = dlopen(machine, RTLD_NOW);
     if (!machine_lib_handle) // Check if ".machine" path was provided rather than ".so" 
     {
-        fprintf(stderr, "cfsm_loader(): Error opening machine library: dlerror(): %s\n", dlerror()); return CLError; 
+        fprintf(stderr, "cfsm_loader(): Error opening machine library: dlerror(): %s\n", dlerror());
+        return CLError; 
     }
 
     // Get pointer to machine lib's create CL machine function
@@ -182,22 +179,38 @@ int FSM::loadAndAddMachine(const char *machine, bool initiallySuspended)
     strcpy(create_machine_symbol, "CLM_Create_");
     strcat(create_machine_symbol, name);
     void* create_machine_ptr = dlsym(machine_lib_handle, create_machine_symbol);
-    if (!create_machine_ptr) { fprintf(stderr, "Error getting CL Create Machine symbol - dlerror(): %s\n", dlerror()); return CLError; }
+    if (!create_machine_ptr)
+    {
+        fprintf(stderr, "Error getting CL Create Machine symbol - dlerror(): %s\n", dlerror());
+        return CLError;
+    }
     
     CLMachine* (*createMachine)(int, const char*) = (CLMachine* (*)(int, const char*)) (create_machine_ptr);
-    if (!createMachine) { fprintf(stderr, "CL Create Machine function from dlsym is NULL\n"); return CLError; }
+    if (!createMachine)
+    { 
+        fprintf(stderr, "CL Create Machine function from dlsym is NULL\n");
+        return CLError;
+    }
 
     // Call the machine lib's create CL machine function
     int machine_id = last_unique_id + 1;
     CLMachine* machine_ptr = createMachine(machine_id, name);
     free((char*)(name));
 
-    if (!machine_ptr) { fprintf(stderr, "CL Create Machine return NULL\n"); return CLError; }
+    if (!machine_ptr)
+    {
+        fprintf(stderr, "CL Create Machine return NULL\n");
+        return CLError;
+    }
     last_unique_id = machine_id;
 
     // Create internal CL machine context for machine
     Machine *machine_context = createMachineContext(machine_ptr);
-    if (!machine_context) { fprintf(stderr, "Error creating internal machine context"); return CLError; }
+    if (!machine_context)
+    {
+        fprintf(stderr, "Error creating internal machine context");
+        return CLError;
+    }
     machine_ptr->setMachineContext(machine_context);
     
     // Place machine in CFSM array
@@ -207,21 +220,19 @@ int FSM::loadAndAddMachine(const char *machine, bool initiallySuspended)
 
     // Suspend the machine if initiallySuspended
     if (initiallySuspended) { FSM::control_machine_at_index(index, CLSuspend); }
-
-
-#ifdef DEBUG
-    printf("cfsm_loader() - CLMachine ptr: %p\n", machine_ptr);
-#endif
-
+ 
     // Get pointer to machine lib's create metamachine function
     void* create_meta_machine_ptr = dlsym(machine_lib_handle, "Create_ScheduledMetaMachine");
-    if (!create_meta_machine_ptr) { fprintf(stderr, "Error getting Create Meta Machine symbol - dlerror(): %s\n", dlerror());  return CLError; }
+    if (!create_meta_machine_ptr) {
+        fprintf(stderr, "Error getting Create Meta Machine symbol - dlerror(): %s\n", dlerror());
+        return CLError;
+    }
     refl_metaMachine (*createMetaMachine)(void*) = (refl_metaMachine (*)(void*)) (create_meta_machine_ptr);
-    if (!createMetaMachine) { fprintf(stderr, "Create Meta Machine function pointer from dlsym is NULL\n"); return CLError; }
-
-#ifdef DEBUG
-    printf("cfsm_loader() - createMetaMachine ptr: %p\n", createMetaMachine);
-#endif
+    if (!createMetaMachine)
+    {
+        fprintf(stderr, "Create Meta Machine function pointer from dlsym is NULL\n");
+        return CLError;
+    }
 
     // Call the machine lib's create metamachine function
     refl_metaMachine meta_machine = createMetaMachine(machine_ptr);
@@ -229,15 +240,18 @@ int FSM::loadAndAddMachine(const char *machine, bool initiallySuspended)
     // Initialise CLReflect API and register metamachine
     CLReflectResult *result = (CLReflectResult*) calloc(1, sizeof(CLReflectResult));
     refl_initAPI(result);
-    if (!result || *result != REFL_SUCCESS) { fprintf(stderr, "Error initialising CLReflect API\n"); return CLError; }
+    if (!result || *result != REFL_SUCCESS)
+    {
+        fprintf(stderr, "Error initialising CLReflect API\n");
+        return CLError;
+    }
     refl_registerMetaMachine(meta_machine, machine_id, result);
-    if (!result || *result != REFL_SUCCESS) { fprintf(stderr, "Error registering Meta Machine\n"); return CLError; }
+    if (!result || *result != REFL_SUCCESS)
+    {
+        fprintf(stderr, "Error registering Meta Machine\n");
+        return CLError;
+    }
     free(result);
-
-#ifdef DEBUG
-    printf("cfsm_loader() - meta machine ptr: %p\n", meta_machine);
-    printf("cfsm_loader() - machine successfuly loaded, index: %d, ID: %d\n", index, machine_ptr->machineID());
-#endif
 
     // Place machine lib handle in lib handles vector so it can be closed later.
     machine_lib_handles.push_back(machine_lib_handle);
@@ -248,10 +262,6 @@ int FSM::loadAndAddMachine(const char *machine, bool initiallySuspended)
     }
     dynamic = true; // Reset flag if it was turned off.
     
-#ifdef DEBUG
-    printf("cfsm_loader() - %d machines have been dynamically loaded\n", loaded_machineIDs.size());
-#endif
-
     return index;
 }
 
@@ -263,9 +273,6 @@ int FSM::loadAndAddMachine(const char *machine, bool initiallySuspended)
  */
 bool FSM::unloadMachineAtIndex(int index)
 {
-#ifdef DEBUG
-    printf("cfsm_loader() - unloading machine at index %d\n", index);
-#endif
     if ( index < 0 || index > number_of_machines() ) return false;
     
     if (dynamic)
@@ -285,10 +292,6 @@ bool FSM::unloadMachineAtIndex(int index)
     { 
         fprintf(stderr, "Error closing machine library - dlerror(): %s\n", dlerror()); return CLError; 
     }
-
-#ifdef DEBUG
-    printf("cfsm_loader() - %d machines have been dynamically unloaded\n", unloaded_machineIDs.size());
-#endif
 
     return true;
 }

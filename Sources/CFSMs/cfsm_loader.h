@@ -23,6 +23,8 @@ int C_loadAndAddMachine(const char *machine, bool initiallySuspended);
 bool C_unloadMachineAtIndex(int index);
 }
 
+
+
 FSM::Machine* createMachineContext(FSM::CLMachine *machine);
 
 const char* getMachineNameFromPath(const char* path);

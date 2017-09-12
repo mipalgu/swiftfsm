@@ -13,13 +13,7 @@
  */
 int loadMachine(void* p, const char *machine, bool initiallySuspended)
 {
-#ifdef DEBUG
-   printf("loadMachine() - ptr: %p, machine path: %s, initsuspended: %d\n", p, machine, initiallySuspended);
-#endif
    int (*f)(const char*, bool) = (int (*)(const char*, bool)) (p);
-#ifdef DEBUG
-   printf("loadMachine() - casted function pointer successfully\n");
-#endif
    return( f(machine, initiallySuspended) );
 }
 

@@ -111,11 +111,7 @@ public class CLFSMMachineLoader: MachineLoader, MachineUnloader {
      * - Return an array of FSMs to be scheduled
      */
     public func load(path: String) -> [AnyScheduleableFiniteStateMachine] {
-        let debug = true //DEBUG
-
         let cPath = path.utf8CString 
-
-        if debug { print("CLFSMMachineLoader() - path: \(path)") }
 
         let dynamicLibraryCreator = DynamicLibraryCreator(printer: printer)
 
@@ -134,8 +130,9 @@ public class CLFSMMachineLoader: MachineLoader, MachineUnloader {
         }
         
         let dlCloseResult = dlrCFSM.close()
-        if !dlCloseResult.0 { print(dlCloseResult.1 ?? "No error message for DynamicLibraryResource.close()!") }
-        
+        if !dlCloseResult.0 { 
+            print(dlCloseResult.1 ?? "No error message for DynamicLibraryResource.close()!") 
+        }
         return createFiniteStateMachines(Int(machineID))
     }
     
@@ -153,7 +150,16 @@ public class CLFSMMachineLoader: MachineLoader, MachineUnloader {
         let machineName = String(cString: refl_getMetaMachineName(metaMachine, nil))
         let uniqueName = machineName + String(machineID)
         let states = createStates(metaMachine)
-        let finiteStateMachine = FSM(uniqueName, initialState: states[0])
+        
+        //suspend
+        var finiteStateMachine: AnyScheduleableFiniteStateMachine
+        let suspendStateIndex = Int(refl_getSuspendState(metaMachine, nil))
+        if suspendStateIndex < 0 || suspendStateIndex > states.count {
+            finiteStateMachine = FSM(uniqueName, initialState: states[0])
+        } else {
+            finiteStateMachine = FSM(uniqueName, initialState: states[0], suspendState: states[suspendStateIndex])
+            print("this machine is suspendable")
+        }
         finiteStateMachines.append(finiteStateMachine)
         type(of: self).nameToMachineID[uniqueName] = machineID
         return finiteStateMachines
@@ -171,6 +177,7 @@ public class CLFSMMachineLoader: MachineLoader, MachineUnloader {
             fatalError("Could not get meta states for metamachine")
         }
         let numberOfStates = refl_getNumberOfStates(metaMachine, nil)
+
         for stateNumber in 0...numberOfStates - 1 {
             guard let metaState = metaStates[Int(stateNumber)] else {
                 fatalError("Could not get meta state for state number = \(stateNumber)")
