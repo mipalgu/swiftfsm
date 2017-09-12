@@ -106,6 +106,7 @@ extern "C"
      */
     bool C_unloadMachineWithID(int id)
     {
+        dynamic = false;
         int index = index_of_machine_with_id(id);
         return FSM::unloadMachineAtIndex(index);
     }
