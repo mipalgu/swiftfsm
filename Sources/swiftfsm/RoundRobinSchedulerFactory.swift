@@ -69,10 +69,12 @@ public class RoundRobinSchedulerFactory: SchedulerFactory {
      *  - Parameter machines: All the machines that are going to execute.
      */
     public func make(machines: [Machine]) -> Scheduler {
+        let clfsmMachineLoader = CLFSMMachineLoader()
         return RoundRobinScheduler(
             machines: machines,
             tokenizer: PerRingletTokenizer(),
-            unloader: CLFSMMachineLoader()
+            unloader: clfsmMachineLoader,
+            scheduleHandler: clfsmMachineLoader
         )
     }
     

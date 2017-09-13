@@ -12,17 +12,13 @@ extern "C"
 {
 int C_numberOfDynamicallyLoadedMachines();
 
-int C_numberOfDynamicallyUnloadedMachines();
-    
 int* C_getDynamicallyLoadedMachineIDs();
 
-int* C_getDynamicallyUnloadedMachineIDs();
+bool C_checkDynamicallyUnloadedMachine(int id);
 
 int C_loadAndAddMachine(const char *machine, bool initiallySuspended);
 
 bool C_unloadMachineAtIndex(int index);
-
-void C_emptyDynamicallyUnloadedMachineVector();
 
 void C_emptyDynamicallyLoadedMachineVector();
 }

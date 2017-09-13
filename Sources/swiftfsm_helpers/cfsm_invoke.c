@@ -27,9 +27,6 @@ int loadMachine(void* p, const char *machine, bool initiallySuspended)
  */
 bool unloadMachine(void* p, int id)
 {
-#ifdef DEBUG
-    printf("unloadMachine() - ptr: %p, id: %d\n", p, id);
-#endif
     bool (*f)(int) = (bool (*)(int)) (p);
     return( f(id) );
 }
@@ -39,7 +36,7 @@ bool unloadMachine(void* p, int id)
  *
  * @param p pointer to the CFSM function.
  *
- * @return 
+ * @return array of loaded machine IDs.
  */
 int* getLoadedMachines(void* p) 
 {
@@ -48,24 +45,11 @@ int* getLoadedMachines(void* p)
 }
 
 /**
- * Gets the vector of dynamically unloaded machine IDs from CFSM.
- *
- * @param p pointer to the CFSM function.
- *
- * @return
- */
-int* getUnloadedMachines(void* p)
-{
-    int* (*f)() = (int* (*)()) (p);
-    return ( f() );
-}
-
-/**
  * Gets the number of dynamically loaded machine IDs from CFSM.
  *
  * @param p pointer to the CFSM function.
  *
- * @return
+ * @return the number of dynamically loaded machines.
  */
 int numberOfLoadedMachines(void* p)
 {
@@ -73,15 +57,29 @@ int numberOfLoadedMachines(void* p)
     return f();
 }
 
+
 /**
- * Gets the number of dynamically unloaded machine IDs from CFSM.
+ * Empties the dynamically loaded machine ID vector in CFSM.
  *
  * @param p pointer to the CFSM function.
- *
- * @return
  */
-int numberOfUnloadedMachines(void* p)
+void emptyLoadedMachines(void* p)
 {
-    int (*f)() = (int (*)()) (p);
+    void (*f)() = (void (*)()) (p);
     return f();
 }
+
+/**
+ * Checks if machine ID belongs to unloaded machine.
+ *
+ * @param p pointer to the CFSM function.
+ * @param id machine ID to check.
+ *
+ * @return whether this machine ID belonds to unloaded machine.
+ */
+bool checkUnloadedMachines(void* p, int id)
+{
+    bool (*f)(int) = (bool (*)(int)) (p);
+    return( f(id) );
+}
+

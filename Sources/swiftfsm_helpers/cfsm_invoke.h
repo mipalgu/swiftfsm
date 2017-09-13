@@ -8,9 +8,9 @@ void destroyCFSM(void*);
 
 int* getLoadedMachines(void*);
 
-int* getUnloadedMachines(void*);
-
 int numberOfLoadedMachines(void*);
 
-int numberOfUnloadedMachines(void*);
+void emptyLoadedMachines(void*);
+
+bool checkUnloadedMachines(void*, int);
 

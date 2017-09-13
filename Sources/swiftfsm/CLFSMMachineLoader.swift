@@ -60,7 +60,6 @@ import FSM
 import swiftfsm_helpers 
 import swift_CLReflect
 
-//TODO: move library opening/closing to swiftfsm_helpers/cfsm_invoke.c
 
 /**
  *  Is responsible for loading and unloading CLFSM machines.
@@ -68,72 +67,65 @@ import swift_CLReflect
 public class CLFSMMachineLoader: MachineLoader, MachineUnloader, ScheduleHandler {
 
     /// Dictionary of swiftfsm machine names to C++ machine IDs.
-    static var nameToMachineID = [String: Int]()
+    private static var nameToMachineID = [String: Int]()
 
+    // STRING COSNTANTS //
     /// String constant for load function name.
-    private let loadMachineFunctionName = "C_loadAndAddMachine"
+    private let loadMachineFunc = "C_loadAndAddMachine"
     
     /// String constant for unload function name.
-    private let unloadMachineFunctionName = "C_unloadMachineWithID"
+    private let unloadMachineFunc = "C_unloadMachineWithID"
 
-    /// String consant for get number of dynamically loaded machines.
-
-    /// String constant for get number of dynamically unloaded machines.
-    private let numUnloadedMachinesFunction = "C_numberOfDynamicallyUnloadedMachines"
-
-    /// String constant for get dynmaically loaded machine IDs.
-
-    /// String constant for get dynamically unloaded machine IDs.
-
-    /// String constant for emptying dynamically unloaded machine IDs.
-
-    /// String constant for emptying dynamically loaded machine IDs.
+    /// String constant for check dynamically unloaded machine function name.
+    private let checkUnloadedMachineFunc = "C_checkDynamicallyUnloadedMachine"
 
     /// Library name for lib that handles C++ machines (CFSM, CLFSM, etc.).
     private let cfsmPath = "libCFSMs.so"
 
-    /**
-     * Takes a scheduler "jobs" and removes C++ machines that have been dynamically unloaded.
-     *
-     * - Parameter jobs the scheduler's array of FSMs to execute.
-     * - Return a copy of the passed in "jobs" with dynamically unloaded machines removed.
-     */
-    public func handleUnloadedMachines(jobs: [[(AnyScheduleableFiniteStateMachine, Machine)]])
-    {
-        //Get number of unloaded machines.
-        //If num <= 0, stop (return empty)
-        //Get unloaded machine IDs.
-        //For job in jobs:
-            //for (fsm, machine) in job:
-                //get ID for fsm name using nameToMachineID dictionary
-                //if retrievedID == unloadedID, remove the tuple from job
-                //if job is empty, remove it from jobs
-        //empty the unloaded machine array in cfsm
-        //return copy of jobs
+    
+    public func getFunctionPtr(_ symbol: String) -> UnsafeMutableRawPointer {
+        let dynamicLibraryCreator = DynamicLibraryCreator(printer: printer)
+
+        guard let libHandle = dynamicLibraryCreator.open(path: cfsmPath) else {
+            fatalError("CLFSMMachineLoader.getFunctionPtr(): Error opening library")
+        }
+        
+        let tuple = libHandle.getSymbolPointer(symbol: symbol)
+        guard let funcPtr = tuple.0 else {
+            fatalError(tuple.1 ?? "getSymbolPointer(\(symbol)): unknown error")
+        }
+
+        return funcPtr
     }
 
+    /**
+     * Takes an FSM and returns true if it's a C++ machine that has been dynamically unloaded.
+     *
+     * - Parameter FSM the fsm to inspect.
+     * - Return whether the FSM is a C++ machine that has been dynamically unloaded.
+    */ 
+    public func handleUnloadedMachine(_ fsm: AnyScheduleableFiniteStateMachine) -> Bool
+    {
+        //Get unloaded machine IDs.
+        guard let id = type(of: self).nameToMachineID[fsm.name] else {
+            return false //Not a C++ machine. 
+        }
+        let unloadedPtr = getFunctionPtr(checkUnloadedMachineFunc)
+        return checkUnloadedMachines(unloadedPtr, Int32(id))
+    }
+    
     /**
      * Unloads the underlying C++ machine of a swift FSM.
      * 
      * - Parameter fsm the FSM to unload.
      */
     public func unload(_ fsm: AnyScheduleableFiniteStateMachine) {
-        
         // Get ID of machine to unload.
         guard let machineID = type(of: self).nameToMachineID[fsm.name] else {
-            fatalError("No C++ machine ID for swift machine \(fsm.name)")
+            return //Not a C++ machine.
         }
-        
-        let dynamicLibraryCreator = DynamicLibraryCreator(printer: printer)
-
-        guard let dlrCFSM = dynamicLibraryCreator.open(path: cfsmPath) else {
-            fatalError("Error creating DLC for CFSMs")
-        }
-
-        let unloadMachineTuple = dlrCFSM.getSymbolPointer(symbol: unloadMachineFunctionName)
-        guard let unloadMachinePtr = unloadMachineTuple.0 else {
-            fatalError(unloadMachineTuple.1 ?? "getSymbolPointer(\(unloadMachineFunctionName)): unknown error")
-        }
+        // Call unload function.
+        let unloadMachinePtr = getFunctionPtr(unloadMachineFunc)
         unloadMachine(unloadMachinePtr, Int32(machineID))
     }
 
@@ -144,29 +136,14 @@ public class CLFSMMachineLoader: MachineLoader, MachineUnloader, ScheduleHandler
      * - Return an array of FSMs to be scheduled
      */
     public func load(path: String) -> [AnyScheduleableFiniteStateMachine] {
+        // Call load function with path.
+        let loadMachinePtr = getFunctionPtr(loadMachineFunc)
         let cPath = path.utf8CString 
-
-        let dynamicLibraryCreator = DynamicLibraryCreator(printer: printer)
-
-        guard let dlrCFSM = dynamicLibraryCreator.open(path: cfsmPath) else {
-            fatalError("Error creating DLC for CFSMs")
-        }
-
-        let loadMachineTuple = dlrCFSM.getSymbolPointer(symbol: loadMachineFunctionName)
-        guard let loadMachinePtr = loadMachineTuple.0 else {
-            fatalError(loadMachineTuple.1 ?? "getSymbolPointer(\(loadMachineFunctionName)): unknown error")
-        }
-
         let machineID = cPath.withUnsafeBufferPointer { loadMachine(loadMachinePtr, $0.baseAddress, false) }
         if machineID == -1 {
             fatalError("cfsm_load() - Failed to load machine")
         }
-        
-        let dlCloseResult = dlrCFSM.close()
-        if !dlCloseResult.0 { 
-            print(dlCloseResult.1 ?? "No error message for DynamicLibraryResource.close()!") 
-        }
-        return createFiniteStateMachines(Int(machineID))
+        return createFiniteStateMachines([Int(machineID)])
     }
     
 /**
@@ -175,7 +152,7 @@ public class CLFSMMachineLoader: MachineLoader, MachineUnloader, ScheduleHandler
  * - Parameter machineIDs the array of CLFSM machine IDs
  * - Return an array of AnyScheduleableFiniteStateMachines
  */
-public func createFiniteStateMachines(_ machineID: [Int]) -> [AnyScheduleableFiniteStateMachine] {
+public func createFiniteStateMachines(_ machineIDs: [Int]) -> [AnyScheduleableFiniteStateMachine] {
     var finiteStateMachines = [AnyScheduleableFiniteStateMachine]()
     for machineID in machineIDs {
         guard let metaMachine = refl_getMetaMachine(UInt32(machineID), nil) else {

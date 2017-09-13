@@ -7,6 +7,7 @@
 #include <CLReflectAPI.h>
 #include <stdlib.h>
 #include <string>
+#include <algorithm>
 #include <string.h>
 #include <unistd.h>
 
@@ -52,29 +53,11 @@ extern "C"
     }
 
     /**
-     * Returns the number of dynamically loaded machines.
-     *
-     * @return unloaded_machineIDs vector size
-     */
-    int C_numberOfDynamicallyUnloadedMachines()
-    {
-        return unloaded_machineIDs.size();
-    }
-
-    /**
      * Empties the dynamically loaded machine ID vector,
      */
     void C_emptyDynamicallyLoadedMachineVector()
     {
-        loadeded_machineIDs.clear();
-    }
-
-    /**
-     * Empties the dynamically unloaded machine ID vector.
-     */
-    void C_emptyDynamicallyUnloadedMachineVector()
-    {
-        unloaded_machineIDs.clear();
+        loaded_machineIDs.clear();
     }
 
     /**
@@ -88,13 +71,23 @@ extern "C"
     }
 
     /**
-     * Returns the dynamically unloaded machine ID vector.
+     * Checks if given ID corresponds to a dynamically unloaded machine.
+     * If so, removes it from dynamically unloaded machine ID vector.
      *
-     * @return unloaded_machineIDs vector
+     * @return true if ID corresponds to unloaded machine, false otherwise
      */
-    int* C_getDynamicallyUnloadedMachineIDs()
+    bool C_checkDynamicallyUnloadedMachine(int id)
     {
-        return &unloaded_machineIDs[0];
+        std::vector<int>::iterator index = std::find(unloaded_machineIDs.begin(), unloaded_machineIDs.end(), id);
+        if (index == unloaded_machineIDs.end())
+        {
+            return false;
+        }
+        else 
+        {
+            unloaded_machineIDs.erase(index);
+            return true;
+        }
     }
 
     /**
