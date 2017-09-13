@@ -65,19 +65,52 @@ import swift_CLReflect
 /**
  *  Is responsible for loading and unloading CLFSM machines.
  */
-public class CLFSMMachineLoader: MachineLoader, MachineUnloader {
+public class CLFSMMachineLoader: MachineLoader, MachineUnloader, ScheduleHandler {
 
     /// Dictionary of swiftfsm machine names to C++ machine IDs.
     static var nameToMachineID = [String: Int]()
 
     /// String constant for load function name.
-    let loadMachineFunctionName = "C_loadAndAddMachine"
+    private let loadMachineFunctionName = "C_loadAndAddMachine"
     
     /// String constant for unload function name.
-    let unloadMachineFunctionName = "C_unloadMachineWithID"
+    private let unloadMachineFunctionName = "C_unloadMachineWithID"
 
-    /// libCFSMs path.
-    let cfsmPath = "/usr/local/lib/libCFSMs.so"
+    /// String consant for get number of dynamically loaded machines.
+
+    /// String constant for get number of dynamically unloaded machines.
+    private let numUnloadedMachinesFunction = "C_numberOfDynamicallyUnloadedMachines"
+
+    /// String constant for get dynmaically loaded machine IDs.
+
+    /// String constant for get dynamically unloaded machine IDs.
+
+    /// String constant for emptying dynamically unloaded machine IDs.
+
+    /// String constant for emptying dynamically loaded machine IDs.
+
+    /// Library name for lib that handles C++ machines (CFSM, CLFSM, etc.).
+    private let cfsmPath = "libCFSMs.so"
+
+    /**
+     * Takes a scheduler "jobs" and removes C++ machines that have been dynamically unloaded.
+     *
+     * - Parameter jobs the scheduler's array of FSMs to execute.
+     * - Return a copy of the passed in "jobs" with dynamically unloaded machines removed.
+     */
+    public func handleUnloadedMachines(jobs: [[(AnyScheduleableFiniteStateMachine, Machine)]])
+    {
+        //Get number of unloaded machines.
+        //If num <= 0, stop (return empty)
+        //Get unloaded machine IDs.
+        //For job in jobs:
+            //for (fsm, machine) in job:
+                //get ID for fsm name using nameToMachineID dictionary
+                //if retrievedID == unloadedID, remove the tuple from job
+                //if job is empty, remove it from jobs
+        //empty the unloaded machine array in cfsm
+        //return copy of jobs
+    }
 
     /**
      * Unloads the underlying C++ machine of a swift FSM.
@@ -136,34 +169,33 @@ public class CLFSMMachineLoader: MachineLoader, MachineUnloader {
         return createFiniteStateMachines(Int(machineID))
     }
     
-    /**
-     * Creates an array of AnyScheduleableFiniteStateMachine from an array of CLFSM machine IDs
-     * 
-     * - Parameter machineIDs the array of CLFSM machine IDs
-     * - Return an array of AnyScheduleableFiniteStateMachines
-     */
-    public func createFiniteStateMachines(_ machineID: Int) -> [AnyScheduleableFiniteStateMachine] {
-        var finiteStateMachines = [AnyScheduleableFiniteStateMachine]()
+/**
+ * Creates an array of AnyScheduleableFiniteStateMachine from an array of CLFSM machine IDs
+ * 
+ * - Parameter machineIDs the array of CLFSM machine IDs
+ * - Return an array of AnyScheduleableFiniteStateMachines
+ */
+public func createFiniteStateMachines(_ machineID: [Int]) -> [AnyScheduleableFiniteStateMachine] {
+    var finiteStateMachines = [AnyScheduleableFiniteStateMachine]()
+    for machineID in machineIDs {
         guard let metaMachine = refl_getMetaMachine(UInt32(machineID), nil) else {
             fatalError("Could not get metamachine for machineID = \(machineID)")
         }
         let machineName = String(cString: refl_getMetaMachineName(metaMachine, nil))
         let uniqueName = machineName + String(machineID)
         let states = createStates(metaMachine)
-        
-        //suspend
         var finiteStateMachine: AnyScheduleableFiniteStateMachine
         let suspendStateIndex = Int(refl_getSuspendState(metaMachine, nil))
         if suspendStateIndex < 0 || suspendStateIndex > states.count {
             finiteStateMachine = FSM(uniqueName, initialState: states[0])
         } else {
             finiteStateMachine = FSM(uniqueName, initialState: states[0], suspendState: states[suspendStateIndex])
-            print("this machine is suspendable")
         }
         finiteStateMachines.append(finiteStateMachine)
         type(of: self).nameToMachineID[uniqueName] = machineID
-        return finiteStateMachines
     }
+    return finiteStateMachines
+}
 
     /**
      * Creates an array of CFSMState from the metastates of the underlying CLReflect metamachine

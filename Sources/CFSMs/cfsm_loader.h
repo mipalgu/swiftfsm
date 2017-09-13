@@ -21,6 +21,10 @@ int* C_getDynamicallyUnloadedMachineIDs();
 int C_loadAndAddMachine(const char *machine, bool initiallySuspended);
 
 bool C_unloadMachineAtIndex(int index);
+
+void C_emptyDynamicallyUnloadedMachineVector();
+
+void C_emptyDynamicallyLoadedMachineVector();
 }
 
 
