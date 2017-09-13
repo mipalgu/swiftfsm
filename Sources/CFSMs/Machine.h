@@ -1,6 +1,6 @@
 /*
- *  SuspensibleMachine.h
- *  cfsm
+ *  Machine.h
+ *  CFSM
  *
  *  Created by Rene Hexel on 10/09/2014.
  *  Copyright (c) 2014, 2015 Rene Hexel. All rights reserved.

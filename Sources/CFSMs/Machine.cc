@@ -1,6 +1,6 @@
 /*
- *  SuspensibleMachine.cc
- *  cfsm
+ *  Machine.cc
+ *  CFSM
  *
  *  Created by Rene Hexel on 10/09/2014.
  *  Copyright (c) 2012, 2013, 2014, 2015 Rene Hexel. All rights reserved.

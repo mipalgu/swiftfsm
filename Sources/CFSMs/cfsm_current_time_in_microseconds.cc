@@ -1,6 +1,6 @@
 /*
  *  cfsm_current_time_in_microseconds.cc
- *  cfsm
+ *  CFSM
  *
  *  Created by Bren Moushall on 08/08/2017.
  *  Copyright (c) 2014 Rene Hexel. All rights reserved.

@@ -55,8 +55,8 @@
  * Fifth Floor, Boston, MA  02110-1301, USA.
  *
  */
-#ifndef cfsm_current_time_in_microseconds__
-#define cfsm_current_time_in_microseconds__
+#ifndef _CFSM_CURRENT_TIME_IN_MICROSECONDS_INCLUDED_
+#define _CFSM_CURRENT_TIME_IN_MICROSECONDS_INCLUDED_
 
 namespace FSM
 {
@@ -68,4 +68,4 @@ namespace FSM
      */
     long current_time_in_microseconds(void);
 }
-#endif /* defined cfsm__cfsm_current_time_in_microseconds__) */
+#endif

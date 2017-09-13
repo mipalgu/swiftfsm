@@ -1,6 +1,6 @@
 /*
  *  cfsm_start_time_for_current_state.h
- *  cfsm
+ *  CFSM
  *
  *  Created by Bren Moushall on 08/08/2017.
  *  Copyright (c) 2017 Rene Hexel. All rights reserved.
@@ -55,8 +55,8 @@
  * Fifth Floor, Boston, MA  02110-1301, USA.
  *
  */
-#ifndef cfsm_start_time_for_current_state__
-#define cfsm_start_time_for_current_state__
+#ifndef _CFSM_START_TIME_FOR_CURRENT_STATE_INCLUDED_
+#define _CFSM_START_TIME_FOR_CURRENT_STATE_INCLUDED_
 
 namespace FSM
 {
@@ -65,4 +65,4 @@ namespace FSM
     long start_time_for_current_state(const class Machine *machine);
 }
 
-#endif /* defined cfsm__cfsm_start_time_for_current_state__) */
+#endif

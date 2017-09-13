@@ -1,6 +1,6 @@
 /*
  *  cfsm_index.h
- *  cfsm
+ *  CFSM
  *
  *  Created by Bren Moushall on 08/08/2017.
  *  Copyright (c) 2017 Rene Hexel. All rights reserved.
@@ -56,11 +56,10 @@
  *
  */
 
-#include "CLMacros.h"
-
-// Header guard.
 #ifndef _CFSM_INDEX_INCLUDED_
 #define _CFSM_INDEX_INCLUDED_
+
+#include "CLMacros.h"
 
 int index_of_machine_with_id(int id);
 
@@ -71,4 +70,4 @@ namespace FSM
     FSM::CLMachine* machine_at_index(unsigned index);
 }
 
-#endif // Header guard.
+#endif

@@ -1,6 +1,6 @@
 /*
  *  CLMachine.h
- *  ucfsm
+ *  CFSM
  *
  *  Created by Rene Hexel on 24/08/2014.
  *  Copyright (c) 2012, 2013, 2014, 2015 Rene Hexel. All rights reserved.

@@ -1,6 +1,6 @@
 /*
  *  cfsm_start_time_for_current_state.cc
- *  cfsm
+ *  CFSM
  *
  *  Created by Bren Moushall on 08/08/2017.
  *  Copyright (c) 2017 Rene Hexel. All rights reserved.
