@@ -2,7 +2,7 @@
  * CLFSMMachineLoader.swift
  * swiftfsm
  *
- * Created by Callum McColl on 16/12/2015.
+ * Created by Callum McColl on 16/12/2015, extended by Bren Moushall on 28/08/2017.
  * Copyright © 2015 Callum McColl. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
