@@ -81,8 +81,13 @@ public class CLFSMMachineLoader: MachineLoader, MachineUnloader, ScheduleHandler
 
     /// Library name for lib that handles C++ machines (CFSM, CLFSM, etc.).
     private let cfsmPath = "libCFSMs.so"
-
     
+    /**
+     * Gets a function pointer from the C++ machine library given its symbol.
+     *
+     * - Parameter symbol the symbol for the function
+     * - Return a pointer to the function
+     */
     public func getFunctionPtr(_ symbol: String) -> UnsafeMutableRawPointer {
         let dynamicLibraryCreator = DynamicLibraryCreator(printer: printer)
 
@@ -98,21 +103,21 @@ public class CLFSMMachineLoader: MachineLoader, MachineUnloader, ScheduleHandler
         return funcPtr
     }
 
-    /**
-     * Takes an FSM and returns true if it's a C++ machine that has been dynamically unloaded.
-     *
-     * - Parameter FSM the fsm to inspect.
-     * - Return whether the FSM is a C++ machine that has been dynamically unloaded.
-    */ 
-    public func handleUnloadedMachine(_ fsm: AnyScheduleableFiniteStateMachine) -> Bool
-    {
-        //Get unloaded machine IDs.
-        guard let id = type(of: self).nameToMachineID[fsm.name] else {
-            return false //Not a C++ machine. 
-        }
-        let unloadedPtr = getFunctionPtr(checkUnloadedMachineFunc)
-        return checkUnloadedMachines(unloadedPtr, Int32(id))
+/**
+ * Takes an FSM and returns true if it's a C++ machine that has been dynamically unloaded.
+ *
+ * - Parameter FSM the fsm to inspect.
+ * - Return whether the FSM is a C++ machine that has been dynamically unloaded.
+*/ 
+public func handleUnloadedMachine(_ fsm: AnyScheduleableFiniteStateMachine) -> Bool
+{
+    //Get unloaded machine IDs.
+    guard let id = type(of: self).nameToMachineID[fsm.name] else {
+        return false //Not a C++ machine. 
     }
+    let unloadedPtr = getFunctionPtr(checkUnloadedMachineFunc)
+    return checkUnloadedMachines(unloadedPtr, Int32(id))
+}
     
     /**
      * Unloads the underlying C++ machine of a swift FSM.
@@ -146,33 +151,33 @@ public class CLFSMMachineLoader: MachineLoader, MachineUnloader, ScheduleHandler
         return createFiniteStateMachines([Int(machineID)])
     }
     
-/**
- * Creates an array of AnyScheduleableFiniteStateMachine from an array of CLFSM machine IDs
- * 
- * - Parameter machineIDs the array of CLFSM machine IDs
- * - Return an array of AnyScheduleableFiniteStateMachines
- */
-public func createFiniteStateMachines(_ machineIDs: [Int]) -> [AnyScheduleableFiniteStateMachine] {
-    var finiteStateMachines = [AnyScheduleableFiniteStateMachine]()
-    for machineID in machineIDs {
-        guard let metaMachine = refl_getMetaMachine(UInt32(machineID), nil) else {
-            fatalError("Could not get metamachine for machineID = \(machineID)")
+    /**
+     * Creates an array of AnyScheduleableFiniteStateMachine from an array of CLFSM machine IDs
+     * 
+     * - Parameter machineIDs the array of CLFSM machine IDs
+     * - Return an array of AnyScheduleableFiniteStateMachines
+     */
+    public func createFiniteStateMachines(_ machineIDs: [Int]) -> [AnyScheduleableFiniteStateMachine] {
+        var finiteStateMachines = [AnyScheduleableFiniteStateMachine]()
+        for machineID in machineIDs {
+            guard let metaMachine = refl_getMetaMachine(UInt32(machineID), nil) else {
+                fatalError("Could not get metamachine for machineID = \(machineID)")
+            }
+            let machineName = String(cString: refl_getMetaMachineName(metaMachine, nil))
+            let uniqueName = machineName + String(machineID)
+            let states = createStates(metaMachine)
+            var finiteStateMachine: AnyScheduleableFiniteStateMachine
+            let suspendStateIndex = Int(refl_getSuspendState(metaMachine, nil))
+            if suspendStateIndex < 0 || suspendStateIndex > states.count {
+                finiteStateMachine = FSM(uniqueName, initialState: states[0])
+            } else {
+                finiteStateMachine = FSM(uniqueName, initialState: states[0], suspendState: states[suspendStateIndex])
+            }
+            finiteStateMachines.append(finiteStateMachine)
+            type(of: self).nameToMachineID[uniqueName] = machineID
         }
-        let machineName = String(cString: refl_getMetaMachineName(metaMachine, nil))
-        let uniqueName = machineName + String(machineID)
-        let states = createStates(metaMachine)
-        var finiteStateMachine: AnyScheduleableFiniteStateMachine
-        let suspendStateIndex = Int(refl_getSuspendState(metaMachine, nil))
-        if suspendStateIndex < 0 || suspendStateIndex > states.count {
-            finiteStateMachine = FSM(uniqueName, initialState: states[0])
-        } else {
-            finiteStateMachine = FSM(uniqueName, initialState: states[0], suspendState: states[suspendStateIndex])
-        }
-        finiteStateMachines.append(finiteStateMachine)
-        type(of: self).nameToMachineID[uniqueName] = machineID
+        return finiteStateMachines
     }
-    return finiteStateMachines
-}
 
     /**
      * Creates an array of CFSMState from the metastates of the underlying CLReflect metamachine
