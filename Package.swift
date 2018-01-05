@@ -5,6 +5,10 @@ import PackageDescription
 let package = Package(
     name: "swiftfsm",
     products: [
+        .executable(
+            name: "swiftfsm",
+            targets: ["IO", "CFSMs", "swiftfsm_helpers", "swiftfsm"]
+        ),
         .library(
             name: "IO",
             targets: ["IO"]
