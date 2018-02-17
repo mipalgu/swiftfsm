@@ -41,6 +41,7 @@ let package = Package(
                 "CFSMWrappers"
             ]
         ),
+        .testTarget(name: "VerificationTests", dependencies: [.target(name: "Verification")]),
         .testTarget(name: "swiftfsmTests", dependencies: [.target(name: "swiftfsm")])
     ]
 )

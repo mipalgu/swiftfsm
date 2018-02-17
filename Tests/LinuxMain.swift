@@ -1,6 +1,7 @@
 import XCTest
-//@testable import tempTests
+
+@testable import swiftfsmTests
+@testable import VerificationTests
 
 XCTMain([
-     //testCase(swiftfsmTests.allTests)
 ])
