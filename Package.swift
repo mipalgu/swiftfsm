@@ -7,11 +7,7 @@ let package = Package(
     products: [
         .executable(
             name: "swiftfsm",
-            targets: ["IO", "CFSMs", "swiftfsm_helpers", "swiftfsm"]
-        ),
-        .library(
-            name: "IO",
-            targets: ["IO"]
+            targets: ["swiftfsm"]
         )
     ],
     dependencies: [

@@ -71,7 +71,7 @@ import Parsing
 import Verification
 import CFSMWrappers
 
-let printer: CommandLinePrinter = 
+let printer: CommandLinePrinter =
     CommandLinePrinter(
         errorStream: StderrOutputStream(),
         messageStream: StdoutOutputStream()
