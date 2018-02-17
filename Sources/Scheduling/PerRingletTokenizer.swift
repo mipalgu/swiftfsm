@@ -1,5 +1,5 @@
 /*
- * PerMachineTokenizer.swift 
+ * PerRingletTokenizer.swift 
  * swiftfsm 
  *
  * Created by Callum McColl on 09/06/2017.
@@ -57,13 +57,16 @@
  */
 
 import FSM
+import Machines
 
-public final class PerMachineTokenizer: SchedulerTokenizer {
+public final class PerRingletTokenizer: SchedulerTokenizer {
+
+    public init() {}
 
     public func separate(_ machines: [Machine]) -> [[(AnyScheduleableFiniteStateMachine, Machine)]] {
-        return machines.map { machine in
+        return machines.lazy.flatMap { machine in
             machine.fsms.map { ($0, machine) }
-        }
+        }.map { [$0] }
     }
 
 }

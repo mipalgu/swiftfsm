@@ -65,6 +65,9 @@
 import FSM
 import Functional
 import KripkeStructure
+import Machines
+import MachineLoading
+import Scheduling
 
 /**
  *  Contains the main logic for swiftfsm.

@@ -1,8 +1,8 @@
 /*
- * RoundRobinSchedulerFactory.swift
+ * PassiveRoundRobinSchedulerFactory.swift
  * swiftfsm
  *
- * Created by Callum McColl on 20/12/2015.
+ * Created by Callum McColl on 08/06/2017.
  * Copyright © 2015 Callum McColl. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -57,25 +57,35 @@
  */
 
 import FSM
+import Machines
+import MachineLoading
 
 /**
- *  Provides a way to create a `RoundRobinScheduler`.
+ *  Provides a way to create a `PassiveRoundRobinScheduler`.
  */
-public class RoundRobinSchedulerFactory: SchedulerFactory {
-    
+public class PassiveRoundRobinSchedulerFactory: SchedulerFactory {
+
+    fileprivate let scheduleHandler: ScheduleHandler
+
+    fileprivate let unloader: MachineUnloader
+
+    public init(scheduleHandler: ScheduleHandler, unloader: MachineUnloader) {
+        self.scheduleHandler = scheduleHandler
+        self.unloader = unloader
+    }
+
     /**
-     *  Create a new `RoundRobinScheduler`.
+     *  Create a new `PassiveRoundRobinScheduler`.
      *
      *  - Parameter machines: All the machines that are going to execute.
      */
     public func make(machines: [Machine]) -> Scheduler {
-        let clfsmMachineLoader = CLFSMMachineLoader()
         return RoundRobinScheduler(
             machines: machines,
-            tokenizer: PerRingletTokenizer(),
-            unloader: clfsmMachineLoader,
-            scheduleHandler: clfsmMachineLoader
+            tokenizer: PerScheduleCycleTokenizer(),
+            unloader: self.unloader,
+            scheduleHandler: self.scheduleHandler
         )
     }
-    
+
 }

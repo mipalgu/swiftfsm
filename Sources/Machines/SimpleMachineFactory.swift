@@ -1,9 +1,9 @@
 /*
- * PerScheduleCycleTokenizer.swift 
+ * SimpleMachineFactory.swift 
  * swiftfsm 
  *
- * Created by Callum McColl on 09/06/2017.
- * Copyright © 2017 Callum McColl. All rights reserved.
+ * Created by Callum McColl on 13/05/2016.
+ * Copyright © 2016 Callum McColl. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -58,12 +58,29 @@
 
 import FSM
 
-public final class PerScheduleCycleTokenizer: SchedulerTokenizer {
+/**
+ *  Provides a bare-bones implementation of a `MachineFactory`.
+ */
+public class SimpleMachineFactory: MachineFactory {
 
-    public func separate(_ machines: [Machine]) -> [[(AnyScheduleableFiniteStateMachine, Machine)]] {
-        return [machines.flatMap { machine in
-            machine.fsms.map { ($0, machine) }
-        }]
+    public init() {}
+
+    /**
+     *  Create a `Machine`.
+     *
+     *  - Parameter name: The name of the `Machine`.
+     *
+     *  - Parameter fsms: All `AnyScheduleableFiniteStateMachine`s that make up
+     *  the `Machine`.
+     *
+     *  - Parameter debug: Should we turn debugging on?
+     */
+    public func make(
+        name: String,
+        fsms: [AnyScheduleableFiniteStateMachine],
+        debug: Bool
+    ) -> Machine {
+        return Machine(debug: debug, name: name, fsms: fsms)
     }
 
 }

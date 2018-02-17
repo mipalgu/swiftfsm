@@ -64,6 +64,10 @@ import Darwin
 
 import FSM
 import IO
+import Machines
+import MachineLoading
+import Scheduling
+import CFSMWrappers
 
 let printer: CommandLinePrinter = 
     CommandLinePrinter(
@@ -71,6 +75,12 @@ let printer: CommandLinePrinter =
         messageStream: StdoutOutputStream()
     )
 
+let clfsmMachineLoader = CLFSMMachineLoader()
+
+let roundRobinFactory = RoundRobinSchedulerFactory(
+    scheduleHandler: clfsmMachineLoader,
+    unloader: clfsmMachineLoader
+)
 
 Swiftfsm(
     clfsmMachineLoader: CLFSMMachineLoader(),
@@ -80,7 +90,13 @@ Swiftfsm(
     ),
     machineFactory: SimpleMachineFactory(),
     machineLoader: DynamicLibraryMachineLoaderFactory(printer: printer).make(),
-    parser: SwiftfsmParser(),
-    schedulerFactory: RoundRobinSchedulerFactory(),
+    parser: SwiftfsmParser(
+        passiveRoundRobinFactory: PassiveRoundRobinSchedulerFactory(
+            scheduleHandler: clfsmMachineLoader,
+            unloader: clfsmMachineLoader
+        ),
+        roundRobinFactory: roundRobinFactory
+    ),
+    schedulerFactory: roundRobinFactory,
     view: printer
 ).run(args: CommandLine.arguments)

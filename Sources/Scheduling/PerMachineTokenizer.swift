@@ -1,9 +1,9 @@
 /*
- * ScheduleHandler.swift
- * swiftfsm
+ * PerMachineTokenizer.swift 
+ * swiftfsm 
  *
- * Created by Bren Moushall 11/09/2017.
- * Copyright © 2015 Callum McColl. All rights reserved.
+ * Created by Callum McColl on 09/06/2017.
+ * Copyright © 2017 Callum McColl. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -57,17 +57,14 @@
  */
 
 import FSM
+import Machines
 
-/**
- * Conforming types are able to check for dynamically loaded and unloaded C++ LLFSMs.
- */
-public protocol ScheduleHandler {
+public final class PerMachineTokenizer: SchedulerTokenizer {
 
-    /**
-     * Checks if a swiftfsm's corresponding C++ LLFSM has been dynamically unloaded.
-     * 
-     * - Parameter fsm The FSM to check.
-     * - Return True if the C++ LLFSM has been unloaded. False if it hasn't or the FSM does not have a corresponding C++ LLFSM.
-     */
-    func handleUnloadedMachine(_ fsm: AnyScheduleableFiniteStateMachine) -> Bool
+    public func separate(_ machines: [Machine]) -> [[(AnyScheduleableFiniteStateMachine, Machine)]] {
+        return machines.map { machine in
+            machine.fsms.map { ($0, machine) }
+        }
+    }
+
 }

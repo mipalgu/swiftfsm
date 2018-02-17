@@ -22,7 +22,25 @@ let package = Package(
         .target(name: "IO", dependencies: []),
         .target(name: "CFSMs", dependencies: []),
         .target(name: "swiftfsm_helpers", dependencies: []),
-        .target(name: "swiftfsm", dependencies: ["GUSimpleWhiteboard", "IO", "CFSMs", "swiftfsm_helpers"]),
+        .target(name: "Libraries", dependencies: []),
+        .target(name: "Machines", dependencies: ["Libraries", "GUSimpleWhiteboard"]),
+        .target(name: "MachineLoading", dependencies: ["Machines", "GUSimpleWhiteboard"]),
+        .target(name: "Scheduling", dependencies: ["Machines", "MachineLoading", "GUSimpleWhiteboard"]),
+        .target(name: "CFSMWrappers", dependencies: ["GUSimpleWhiteboard", "Libraries", "Scheduling"]),
+        .target(
+            name: "swiftfsm",
+            dependencies: [
+                "GUSimpleWhiteboard",
+                "IO",
+                "CFSMs",
+                "swiftfsm_helpers",
+                "Libraries",
+                "Machines",
+                "MachineLoading",
+                "Scheduling",
+                "CFSMWrappers"
+            ]
+        ),
         .testTarget(name: "swiftfsmTests", dependencies: [.target(name: "swiftfsm")])
     ]
 )

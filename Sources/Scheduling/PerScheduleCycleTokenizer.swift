@@ -1,9 +1,9 @@
 /*
- * DynamicLibraryMachineLoaderFactory.swift
- * swiftfsm
+ * PerScheduleCycleTokenizer.swift 
+ * swiftfsm 
  *
- * Created by Callum McColl on 27/08/2015.
- * Copyright © 2015 Callum McColl. All rights reserved.
+ * Created by Callum McColl on 09/06/2017.
+ * Copyright © 2017 Callum McColl. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -56,38 +56,15 @@
  *
  */
 
-import IO
+import FSM
+import Machines
 
-/**
- *  Creates A `MachineLoader` that is capable of loading machines from dynamic
- *  libraries.
- *
- *  The machine loader leverages the `DynamicLibraryCreator` class.
- */
-public class DynamicLibraryMachineLoaderFactory: MachineLoaderFactory {
-    
-    private let printer: Printer
+public final class PerScheduleCycleTokenizer: SchedulerTokenizer {
 
-    /**
-     *  Create a new `DynamicLibraryMachineLoaderFactory`.
-     *
-     *  - Parameter printer: The `LibraryMachineLoader` that is created will use
-     *  this `Printer`.
-     */
-    public init(printer: Printer) {
-        self.printer = printer
+    public func separate(_ machines: [Machine]) -> [[(AnyScheduleableFiniteStateMachine, Machine)]] {
+        return [machines.flatMap { machine in
+            machine.fsms.map { ($0, machine) }
+        }]
     }
 
-    /**
-     *  Create the `MachineLoader`.
-     *
-     *  - Returns: A new instance of `MachineLoader`.
-     */
-    public func make() -> MachineLoader {
-        return LibraryMachineLoader(
-            creator: DynamicLibraryCreator(),
-            printer: self.printer 
-        )
-    }
-    
 }

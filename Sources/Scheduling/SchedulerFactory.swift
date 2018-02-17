@@ -1,9 +1,9 @@
 /*
- * PerRingletTokenizer.swift 
- * swiftfsm 
+ * SchedulerFactory.swift
+ * swiftfsm
  *
- * Created by Callum McColl on 09/06/2017.
- * Copyright © 2017 Callum McColl. All rights reserved.
+ * Created by Callum McColl on 20/12/2015.
+ * Copyright © 2015 Callum McColl. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -57,13 +57,19 @@
  */
 
 import FSM
+import Machines
 
-public final class PerRingletTokenizer: SchedulerTokenizer {
+/**
+ *  Conforming types are responsible for creating `Scheduler`s.
+ */
+public protocol SchedulerFactory {
 
-    public func separate(_ machines: [Machine]) -> [[(AnyScheduleableFiniteStateMachine, Machine)]] {
-        return machines.lazy.flatMap { machine in
-            machine.fsms.map { ($0, machine) }
-        }.map { [$0] }
-    }
-
+    /**
+     *  Create a `Scheduler`.
+     *
+     *  - Parameter machines: All `Machine`s that will be executed.
+     *
+     *  - Returns: A newly created `Scheduler`.
+     */
+    func make(machines: [Machine]) -> Scheduler    
 }

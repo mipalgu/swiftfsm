@@ -1,8 +1,8 @@
 /*
- * PassiveRoundRobinSchedulerFactory.swift
+ * ScheduleHandler.swift
  * swiftfsm
  *
- * Created by Callum McColl on 08/06/2017.
+ * Created by Bren Moushall 11/09/2017.
  * Copyright © 2015 Callum McColl. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -59,23 +59,16 @@
 import FSM
 
 /**
- *  Provides a way to create a `PassiveRoundRobinScheduler`.
+ * Conforming types are able to check for dynamically loaded and unloaded C++ LLFSMs.
  */
-public class PassiveRoundRobinSchedulerFactory: SchedulerFactory {
-    
+public protocol ScheduleHandler {
+
     /**
-     *  Create a new `PassiveRoundRobinScheduler`.
-     *
-     *  - Parameter machines: All the machines that are going to execute.
+     * Checks if a swiftfsm's corresponding C++ LLFSM has been dynamically unloaded.
+     * 
+     * - Parameter fsm The FSM to check.
+     * - Return True if the C++ LLFSM has been unloaded. False if it hasn't or the FSM does not have a corresponding
+     * C++ LLFSM.
      */
-    public func make(machines: [Machine]) -> Scheduler {
-        let clfsmMachineLoader = CLFSMMachineLoader()
-        return RoundRobinScheduler(
-            machines: machines,
-            tokenizer: PerScheduleCycleTokenizer(),
-            unloader: clfsmMachineLoader,
-            scheduleHandler: clfsmMachineLoader
-        )
-    }
-    
+    func handleUnloadedMachine(_ fsm: AnyScheduleableFiniteStateMachine) -> Bool
 }

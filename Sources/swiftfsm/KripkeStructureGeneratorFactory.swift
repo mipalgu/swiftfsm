@@ -57,6 +57,7 @@
  */
 
 import KripkeStructure
+import Machines
 
 public protocol KripkeStructureGeneratorFactory {
 

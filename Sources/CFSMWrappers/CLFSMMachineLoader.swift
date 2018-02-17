@@ -57,9 +57,11 @@
  */
 
 import FSM
-import swiftfsm_helpers 
+import swiftfsm_helpers
 import swift_CLReflect
-
+import Libraries
+import MachineLoading
+import Scheduling
 
 /**
  *  Is responsible for loading and unloading CLFSM machines.
@@ -81,7 +83,9 @@ public class CLFSMMachineLoader: MachineLoader, MachineUnloader, ScheduleHandler
 
     /// Library name for lib that handles C++ machines (CFSM, CLFSM, etc.).
     private let cfsmPath = "libCFSMs.so"
-    
+
+    public init() {}
+
     /**
      * Gets a function pointer from the C++ machine library given its symbol.
      *
@@ -89,7 +93,7 @@ public class CLFSMMachineLoader: MachineLoader, MachineUnloader, ScheduleHandler
      * - Return a pointer to the function
      */
     public func getFunctionPtr(_ symbol: String) -> UnsafeMutableRawPointer {
-        let dynamicLibraryCreator = DynamicLibraryCreator(printer: printer)
+        let dynamicLibraryCreator = DynamicLibraryCreator()
 
         guard let libHandle = dynamicLibraryCreator.open(path: cfsmPath) else {
             fatalError("CLFSMMachineLoader.getFunctionPtr(): Error opening library")

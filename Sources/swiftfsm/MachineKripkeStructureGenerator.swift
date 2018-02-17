@@ -58,6 +58,8 @@
 
 import KripkeStructure
 import FSM
+import Scheduling
+import Machines
 
 public final class MachineKripkeStructureGenerator<
     Detector: CycleDetector,

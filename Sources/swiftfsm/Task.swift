@@ -56,6 +56,8 @@
  *
  */
 
+import Scheduling
+
 /**
  *  A data structure that represent all the possible tasks that swiftfsm can
  *  perform.

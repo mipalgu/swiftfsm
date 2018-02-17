@@ -60,6 +60,7 @@ import FSM
 import Functional
 import IO
 import swiftfsm_helpers
+import Libraries
 
 /**
  *  Load a `Machine` from a library.

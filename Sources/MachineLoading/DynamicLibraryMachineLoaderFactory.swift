@@ -1,8 +1,8 @@
 /*
- * RoundRobinScheduler.swift
+ * DynamicLibraryMachineLoaderFactory.swift
  * swiftfsm
  *
- * Created by Callum McColl on 18/08/2015.
+ * Created by Callum McColl on 27/08/2015.
  * Copyright © 2015 Callum McColl. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -56,79 +56,39 @@
  *
  */
 
-import FSM
+import IO
+import Libraries
 
 /**
- *  Responsible for the execution of machines.
+ *  Creates A `MachineLoader` that is capable of loading machines from dynamic
+ *  libraries.
+ *
+ *  The machine loader leverages the `DynamicLibraryCreator` class.
  */
-public class RoundRobinScheduler<Tokenizer: SchedulerTokenizer>: Scheduler where
-    Tokenizer.Object == Machine,
-    Tokenizer.SchedulerToken == AnyScheduleableFiniteStateMachine
-{
+public class DynamicLibraryMachineLoaderFactory: MachineLoaderFactory {
     
-    // All the machines that will be executed.
-    public private(set) var machines: [Machine]
+    private let printer: Printer
 
-    private let tokenizer: Tokenizer
-
-    private let unloader: MachineUnloader
-
-    private let scheduleHandler: ScheduleHandler
-    
     /**
-     *  Create a new `RoundRobinScheduler`.
+     *  Create a new `DynamicLibraryMachineLoaderFactory`.
      *
-     *  - Parameter machines: All the `Machine`s that will be executed.
+     *  - Parameter printer: The `LibraryMachineLoader` that is created will use
+     *  this `Printer`.
      */
-    public init(machines: [Machine] = [], tokenizer: Tokenizer, unloader: MachineUnloader, scheduleHandler: ScheduleHandler) {
-        self.machines = machines
-        self.tokenizer = tokenizer
-        self.unloader = unloader
-        self.scheduleHandler = scheduleHandler
-    }
-    
-    /**
-     *  Start executing all machines.
-     */
-    public func run() -> Void {
-        var jobs = self.tokenizer.separate(self.machines)
-        // Run until all machines are finished.
-        while (false == jobs.isEmpty && false == STOP) {
-            var i = 0
-            for job in jobs {
-                var j = 0
-                let machines: Set<Machine> = self.getMachines(fromJob: job)
-                machines.forEach { $0.fsms.first?.takeSnapshot() }
-                for (fsm, machine) in job {
-                    DEBUG = machine.debug
-                    if (true == scheduleHandler.handleUnloadedMachine(fsm)) {
-                        jobs[i].remove(at: j)
-                        continue
-                    }
-                    fsm.next()
-                    if (true == fsm.hasFinished) {
-                        jobs[i].remove(at: j)
-                        self.unloader.unload(fsm)
-                        continue
-                    }
-                    j += 1
-                }
-                machines.forEach { $0.fsms.first?.saveSnapshot() }
-                if (true == jobs[i].isEmpty) {
-                    jobs.remove(at: i)
-                    continue
-                }
-                i += 1
-            }
-        }
+    public init(printer: Printer) {
+        self.printer = printer
     }
 
-    private func getMachines(fromJob job: [(AnyScheduleableFiniteStateMachine, Machine)]) -> Set<Machine> {
-        var machines: Set<Machine> = []
-        job.forEach {
-            machines.insert($1)
-        }
-        return machines
+    /**
+     *  Create the `MachineLoader`.
+     *
+     *  - Returns: A new instance of `MachineLoader`.
+     */
+    public func make() -> MachineLoader {
+        return LibraryMachineLoader(
+            creator: DynamicLibraryCreator(),
+            printer: self.printer 
+        )
     }
     
 }

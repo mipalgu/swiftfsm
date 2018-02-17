@@ -1,5 +1,5 @@
 /*
- * SchedulerFactory.swift
+ * RoundRobinSchedulerFactory.swift
  * swiftfsm
  *
  * Created by Callum McColl on 20/12/2015.
@@ -57,18 +57,35 @@
  */
 
 import FSM
+import Machines
+import MachineLoading
 
 /**
- *  Conforming types are responsible for creating `Scheduler`s.
+ *  Provides a way to create a `RoundRobinScheduler`.
  */
-public protocol SchedulerFactory {
+public class RoundRobinSchedulerFactory: SchedulerFactory {
+
+    fileprivate let scheduleHandler: ScheduleHandler
+
+    fileprivate let unloader: MachineUnloader
+
+    public init(scheduleHandler: ScheduleHandler, unloader: MachineUnloader) {
+        self.scheduleHandler = scheduleHandler
+        self.unloader = unloader
+    }
 
     /**
-     *  Create a `Scheduler`.
+     *  Create a new `RoundRobinScheduler`.
      *
-     *  - Parameter machines: All `Machine`s that will be executed.
-     *
-     *  - Returns: A newly created `Scheduler`.
+     *  - Parameter machines: All the machines that are going to execute.
      */
-    func make(machines: [Machine]) -> Scheduler    
+    public func make(machines: [Machine]) -> Scheduler {
+        return RoundRobinScheduler(
+            machines: machines,
+            tokenizer: PerRingletTokenizer(),
+            unloader: self.unloader,
+            scheduleHandler: self.scheduleHandler
+        )
+    }
+
 }

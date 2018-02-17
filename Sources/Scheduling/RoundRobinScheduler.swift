@@ -1,9 +1,9 @@
 /*
- * SimpleMachineFactory.swift 
- * swiftfsm 
+ * RoundRobinScheduler.swift
+ * swiftfsm
  *
- * Created by Callum McColl on 13/05/2016.
- * Copyright © 2016 Callum McColl. All rights reserved.
+ * Created by Callum McColl on 18/08/2015.
+ * Copyright © 2015 Callum McColl. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -57,28 +57,80 @@
  */
 
 import FSM
+import Machines
+import MachineLoading
 
 /**
- *  Provides a bare-bones implementation of a `MachineFactory`.
+ *  Responsible for the execution of machines.
  */
-public class SimpleMachineFactory: MachineFactory {
+public class RoundRobinScheduler<Tokenizer: SchedulerTokenizer>: Scheduler where
+    Tokenizer.Object == Machine,
+    Tokenizer.SchedulerToken == AnyScheduleableFiniteStateMachine
+{
+    
+    // All the machines that will be executed.
+    public private(set) var machines: [Machine]
 
+    private let tokenizer: Tokenizer
+
+    private let unloader: MachineUnloader
+
+    private let scheduleHandler: ScheduleHandler
+    
     /**
-     *  Create a `Machine`.
+     *  Create a new `RoundRobinScheduler`.
      *
-     *  - Parameter name: The name of the `Machine`.
-     *
-     *  - Parameter fsms: All `AnyScheduleableFiniteStateMachine`s that make up
-     *  the `Machine`.
-     *
-     *  - Parameter debug: Should we turn debugging on?
+     *  - Parameter machines: All the `Machine`s that will be executed.
      */
-    public func make(
-        name: String,
-        fsms: [AnyScheduleableFiniteStateMachine],
-        debug: Bool
-    ) -> Machine {
-        return Machine(debug: debug, name: name, fsms: fsms)
+    public init(machines: [Machine] = [], tokenizer: Tokenizer, unloader: MachineUnloader, scheduleHandler: ScheduleHandler) {
+        self.machines = machines
+        self.tokenizer = tokenizer
+        self.unloader = unloader
+        self.scheduleHandler = scheduleHandler
+    }
+    
+    /**
+     *  Start executing all machines.
+     */
+    public func run() -> Void {
+        var jobs = self.tokenizer.separate(self.machines)
+        // Run until all machines are finished.
+        while (false == jobs.isEmpty && false == STOP) {
+            var i = 0
+            for job in jobs {
+                var j = 0
+                let machines: Set<Machine> = self.getMachines(fromJob: job)
+                machines.forEach { $0.fsms.first?.takeSnapshot() }
+                for (fsm, machine) in job {
+                    DEBUG = machine.debug
+                    if (true == scheduleHandler.handleUnloadedMachine(fsm)) {
+                        jobs[i].remove(at: j)
+                        continue
+                    }
+                    fsm.next()
+                    if (true == fsm.hasFinished) {
+                        jobs[i].remove(at: j)
+                        self.unloader.unload(fsm)
+                        continue
+                    }
+                    j += 1
+                }
+                machines.forEach { $0.fsms.first?.saveSnapshot() }
+                if (true == jobs[i].isEmpty) {
+                    jobs.remove(at: i)
+                    continue
+                }
+                i += 1
+            }
+        }
     }
 
+    private func getMachines(fromJob job: [(AnyScheduleableFiniteStateMachine, Machine)]) -> Set<Machine> {
+        var machines: Set<Machine> = []
+        job.forEach {
+            machines.insert($1)
+        }
+        return machines
+    }
+    
 }

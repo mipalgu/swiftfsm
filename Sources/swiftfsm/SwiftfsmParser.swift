@@ -56,6 +56,8 @@
  *
  */
 
+import Scheduling
+
 /**
  *  The standard `Parser`.
  */
@@ -78,6 +80,15 @@ public class SwiftfsmParser: HelpableParser {
         str += "\t-x <value>, --repeat <value>\n"
         str += "\t\t\tSpecify number of times to repeat this command\n"
         return str
+    }
+
+    fileprivate let passiveRoundRobinFactory: SchedulerFactory
+
+    fileprivate let roundRobinFactory: SchedulerFactory
+
+    public init(passiveRoundRobinFactory: SchedulerFactory, roundRobinFactory: SchedulerFactory) {
+        self.passiveRoundRobinFactory = passiveRoundRobinFactory
+        self.roundRobinFactory = roundRobinFactory
     }
     
     /**
@@ -206,12 +217,12 @@ public class SwiftfsmParser: HelpableParser {
         case "rr", "RoundRobin":
             print("Using Round Robin Scheduler")
             var temp: Task = t
-            temp.scheduler = RoundRobinSchedulerFactory() 
+            temp.scheduler = self.roundRobinFactory 
             return temp
         case "prr", "PassiveRoundRobin":
             print("Using Passive Scheduler")
             var temp: Task = t
-            temp.scheduler = PassiveRoundRobinSchedulerFactory()
+            temp.scheduler = passiveRoundRobinFactory
             return temp
         default:
             throw SwiftfsmErrors.GeneralError(error: "Unknown value for scheduler flag")
