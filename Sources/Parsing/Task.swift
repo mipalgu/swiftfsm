@@ -63,47 +63,47 @@ import Scheduling
  *  perform.
  */
 public struct Task {
-    
+
     /**
      *  Should we add this `Machine` to the scheduler?
      */
-    var addToScheduler: Bool = true
-    
+    public var addToScheduler: Bool = true
+
     /**
      *  How many times should we repeat this task?
      */
-    var count: Int = 1
+    public var count: Int = 1
 
     /**
      *  Should we enable debugging for this `Machine`.
      */
-    var enableDebugging: Bool = false
-    
+    public var enableDebugging: Bool = false
+
     /**
      *  Should we generate a `KripkeStructure` for this `Machine`.
      */
-    var generateKripkeStructure: Bool = false
-    
+    public var generateKripkeStructure: Bool = false
+
     /**
      *  Is this `Machine` a clfsm machine?
      */
-    var isClfsmMachine: Bool = false
-    
+    public var isClfsmMachine: Bool = false
+
     /**
      *  The name of the `Machine`.
      */
-    var name: String? = nil
-    
+    public var name: String?
+
     /**
      *  The path to load the `Machine`.
      */
-    var path: String? = nil
-    
+    public var path: String?
+
     /**
      *  Should we print the help text?
      */
-    var printHelpText: Bool = false
+    public var printHelpText: Bool = false
 
-    var scheduler: SchedulerFactory? = nil
-    
+    public var scheduler: SchedulerFactory?
+
 }

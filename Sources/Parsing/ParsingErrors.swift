@@ -1,9 +1,9 @@
 /*
- * GenericPrinter.swift 
- * swiftfsm 
+ * ParsingErrors.swift 
+ * Parsing 
  *
- * Created by Callum McColl on 16/01/2017.
- * Copyright © 2017 Callum McColl. All rights reserved.
+ * Created by Callum McColl on 17/02/2018.
+ * Copyright © 2018 Callum McColl. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -56,47 +56,26 @@
  *
  */
 
-import IO
-
-/**
- *  Allow the `GenericPrinter` to print `SwiftfsmErrors`.
- */
-extension GenericPrinter: View {
+public enum ParsingErrors: Error {
 
     /**
-     *  Print `SwiftfsmErrors` to `errorStream`.
-     *
-     *  - Parameter error: The `SwiftfsmErrors` instance.
+     *  For any error that does not fit nicely into the other errors.
      */
-    public func error(error: SwiftfsmErrors) {
-        let str: String
-        switch error {
-        case .generalError(let error):
-            str = error
-        case .parsingError(let error):
-            switch error {
-            case .noPathsFound:
-                str = "Unable to find a path to any machines.  Did you specify one?"
-            case .pathNotFound(let machineName):
-                str = "Unable to find a path for '\(machineName)'"
-            case .generalError(let error):
-                str = error
-            case .unknownFlag(let flag):
-                str = "Unknown Flag '\(flag)'"
-            }
-        case .unableToLoad(let machineName, let path):
-            str = "Unable to load '\(machineName)' at '\(path)'"
-        }
-        self.error(str: str)
-    }
+    case generalError(error: String)
 
     /**
-     *  Print a message to `messageStream`.
-     *
-     *  - Parameter message: The contents of the message
+     *  For when there were no paths specified.
      */
-    public func message(message: String) {
-        return self.message(str: message)
-    }
+    case noPathsFound
+
+    /**
+     *  For when no path was specified for a machine.
+     */
+    case pathNotFound(machineName: String)
+
+    /**
+     *  For when there was uknown input in the command line arguments.
+     */
+    case unknownFlag(flag: String)
 
 }

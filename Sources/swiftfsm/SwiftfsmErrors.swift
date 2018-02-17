@@ -56,40 +56,26 @@
  *
  */
 
+import Parsing
+
 /**
  *  A list of errors that can be caused when attempting to run `Swiftfsm`.
  */
 public enum SwiftfsmErrors: Error {
-    
-    /**
-     *  For when a clfsm machine is specified.  clfsm machines are not yet
-     *  implemented.
-     */
-    case CLFSMMachine(machineName: String, path: String)
 
     /**
      *  For any error that does not fit nicely into the other errors.
      */
-    case GeneralError(error: String)
-    
-    /**
-     *  For when there were no paths specified.
-     */
-    case NoPathsFound
+    case generalError(error: String)
 
     /**
-     *  For when there was no way to open anything at the path.
+     * For when the parser has errors.
      */
-    case PathNotFound(machineName: String)
+    case parsingError(error: ParsingErrors)
 
     /**
      *  For when there was no way to load the `Machine` from the path.
      */
-    case UnableToLoad(machineName: String, path: String)
+    case unableToLoad(machineName: String, path: String)
 
-    /**
-     *  For when there was uknown input in the command line arguments.
-     */
-    case UnknownFlag(flag: String)
-    
 }

@@ -68,6 +68,7 @@ import KripkeStructure
 import Machines
 import MachineLoading
 import Scheduling
+import Parsing
 import Verification
 
 /**
@@ -150,7 +151,7 @@ public class Swiftfsm<
         // Print help when we have no input.
         if (args.count < 2) {
             self.view.message(message: parser.helpText)
-            self.handleError(SwiftfsmErrors.NoPathsFound)
+            self.handleError(SwiftfsmErrors.parsingError(error: .noPathsFound))
         }
         // Parse the args and get a bunch of tasks.
         let tasks: [Task] = self.parseArgs(self.cleanArgs(args))
@@ -167,12 +168,12 @@ public class Swiftfsm<
         // NoPathsFound when there is only one task and it does not have a path
         if (1 == tasks.count && nil == tasks[0].path) {
             self.view.message(message: parser.helpText)
-            self.handleError(SwiftfsmErrors.NoPathsFound)
+            self.handleError(SwiftfsmErrors.parsingError(error: .noPathsFound))
         }
         // Error when more than one scheduler is specified.
         let schedulers = tasks.filter { $0.scheduler != nil }
         if (schedulers.count > 1) {
-            self.handleError(SwiftfsmErrors.GeneralError(error: "You cannot define more than 1 scheduler."))
+            self.handleError(SwiftfsmErrors.generalError(error: "You cannot define more than 1 scheduler."))
         }
         let scheduler: SchedulerFactory = schedulers.first?.scheduler ?? self.schedulerFactory
         // Run the tasks.
@@ -259,14 +260,14 @@ public class Swiftfsm<
             return fsms
         }
         // Handle when we are unable to load the fsm.
-        self.handleError(.UnableToLoad(machineName: name, path: t.path!))
+        self.handleError(.unableToLoad(machineName: name, path: t.path!))
     }
 
     private func handleTask(_ t: Task) -> ([Machine], [Machine]) {
         var name: String = self.getMachinesName(t)
         // Handle when there is no path in the Task.
         if (nil == t.path) {
-            self.handleError(.PathNotFound(machineName: name))
+            self.handleError(.parsingError(error: .pathNotFound(machineName: name)))
         }
         var schedule: [Machine] = []
         var kripke: [Machine] = []

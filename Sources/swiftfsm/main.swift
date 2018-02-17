@@ -67,8 +67,9 @@ import IO
 import Machines
 import MachineLoading
 import Scheduling
-import CFSMWrappers
+import Parsing
 import Verification
+import CFSMWrappers
 
 let printer: CommandLinePrinter = 
     CommandLinePrinter(

@@ -225,7 +225,7 @@ public class SwiftfsmParser: HelpableParser {
             temp.scheduler = passiveRoundRobinFactory
             return temp
         default:
-            throw SwiftfsmErrors.GeneralError(error: "Unknown value for scheduler flag")
+            throw ParsingErrors.generalError(error: "Unknown value for scheduler flag")
         }
     }
     
@@ -236,7 +236,7 @@ public class SwiftfsmParser: HelpableParser {
         }
         // Ignore unknown flags
         if ("-" == words.first!.characters.first) {
-            throw SwiftfsmErrors.UnknownFlag(flag: words.first!)
+            throw ParsingErrors.unknownFlag(flag: words.first!)
         }
         var temp: Task = t
         temp.path = words.first!

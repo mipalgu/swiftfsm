@@ -26,6 +26,7 @@ let package = Package(
         .target(name: "Machines", dependencies: ["Libraries", "GUSimpleWhiteboard"]),
         .target(name: "MachineLoading", dependencies: ["Machines", "GUSimpleWhiteboard"]),
         .target(name: "Scheduling", dependencies: ["Machines", "MachineLoading", "GUSimpleWhiteboard"]),
+        .target(name: "Parsing", dependencies: ["Scheduling"]),
         .target(name: "Verification", dependencies: ["IO", "Machines", "Scheduling"]),
         .target(name: "CFSMWrappers", dependencies: ["GUSimpleWhiteboard", "Libraries", "Scheduling"]),
         .target(
@@ -39,6 +40,7 @@ let package = Package(
                 "Machines",
                 "MachineLoading",
                 "Scheduling",
+                "Parsing",
                 "Verification",
                 "CFSMWrappers"
             ]
