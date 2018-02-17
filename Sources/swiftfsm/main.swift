@@ -68,6 +68,7 @@ import Machines
 import MachineLoading
 import Scheduling
 import CFSMWrappers
+import Verification
 
 let printer: CommandLinePrinter = 
     CommandLinePrinter(

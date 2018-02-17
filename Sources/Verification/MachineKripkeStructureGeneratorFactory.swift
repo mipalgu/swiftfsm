@@ -63,6 +63,8 @@ import Scheduling
 
 public final class MachineKripkeStructureGeneratorFactory: KripkeStructureGeneratorFactory {
 
+    public init() {}
+
     public func make(
         fromMachines machines: [Machine]
     ) -> MachineKripkeStructureGenerator<

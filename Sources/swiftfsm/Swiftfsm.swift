@@ -68,6 +68,7 @@ import KripkeStructure
 import Machines
 import MachineLoading
 import Scheduling
+import Verification
 
 /**
  *  Contains the main logic for swiftfsm.
