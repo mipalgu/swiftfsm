@@ -63,6 +63,7 @@ import Machines
 
 //swiftlint:disable opening_brace
 public final class MachineKripkeStructureGenerator<
+    Converter: KripkeStatePropertyListConverterProtocol,
     Detector: CycleDetector,
     Extractor: ExternalsSpinnerDataExtractorType,
     Constructor: MultipleExternalsSpinnerConstructorType,
@@ -96,6 +97,8 @@ public final class MachineKripkeStructureGenerator<
 
     }
 
+    private let converter: Converter
+
     private let cycleDetector: Detector
 
     private let extractor: Extractor
@@ -109,6 +112,7 @@ public final class MachineKripkeStructureGenerator<
     private let tokenizer: Tokenizer
 
     public init(
+        converter: Converter,
         cycleDetector: Detector,
         extractor: Extractor,
         machines: [Machine],
@@ -116,6 +120,7 @@ public final class MachineKripkeStructureGenerator<
         stateGenerator: StateGenerator,
         tokenizer: Tokenizer
     ) {
+        self.converter = converter
         self.cycleDetector = cycleDetector
         self.extractor = extractor
         self.machines = machines
@@ -245,19 +250,6 @@ public final class MachineKripkeStructureGenerator<
         return (data, externalCounts)
     }
 
-    private func fetchValues(fromList list: KripkeStatePropertyList) -> [String: Any] {
-        var ps: [String: Any] = [:]
-        list.forEach {
-            switch $1.type {
-            case .Compound(let l):
-                ps[$0] = self.fetchValues(fromList: l)
-            default:
-                ps[$0] = $1.value
-            }
-        }
-        return ps
-    }
-
     private func createWorld(
         fromExternals externals: [(AnySnapshotController, KripkeStatePropertyList)],
         andTokens tokens: [[(fsm: AnyScheduleableFiniteStateMachine, machine: Machine)]],
@@ -292,7 +284,7 @@ public final class MachineKripkeStructureGenerator<
     ) -> [(fsm: AnyScheduleableFiniteStateMachine, machine: Machine)] {
         return tokens.enumerated().map { (offset: Int, element: (fsm: AnyScheduleableFiniteStateMachine, machine: Machine)) -> (AnyScheduleableFiniteStateMachine, Machine) in
             var clone = element.fsm.clone()
-            clone.update(fromDictionary: self.fetchValues(fromList: lastRecords[offset]))
+            clone.update(fromDictionary: self.converter.convert(fromList: lastRecords[offset]))
             guard let (externalIndex, count) = externalCounts[element.machine] else {
                 return (clone, element.machine)
             }
