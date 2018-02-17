@@ -1,9 +1,9 @@
 /*
- * MachineKripkeStructureGeneratorFactory.swift 
- * swiftfsm 
+ * KripkeStateGeneratorProtocol.swift 
+ * Verification 
  *
- * Created by Callum McColl on 04/07/2017.
- * Copyright © 2017 Callum McColl. All rights reserved.
+ * Created by Callum McColl on 17/02/2018.
+ * Copyright © 2018 Callum McColl. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -59,41 +59,12 @@
 import FSM
 import KripkeStructure
 import Machines
-import Scheduling
 
-public final class MachineKripkeStructureGeneratorFactory: KripkeStructureGeneratorFactory {
+public protocol KripkeStateGeneratorProtocol {
 
-    public init() {}
-
-    public func make(
-        fromMachines machines: [Machine]
-    ) -> MachineKripkeStructureGenerator<
-        HashTableCycleDetector<World>,
-        ExternalsSpinnerDataExtractor<
-            MirrorKripkePropertiesRecorder,
-            KripkeStatePropertySpinnerConverter
-        >,
-        MultipleExternalsSpinnerConstructor<
-            ExternalsSpinnerConstructor<SpinnerRunner>
-        >,
-        KripkeStateGenerator,
-        PerRingletTokenizer
-    > {
-        return MachineKripkeStructureGenerator(
-            cycleDetector: HashTableCycleDetector<World>(),
-            extractor: ExternalsSpinnerDataExtractor(
-                converter: KripkeStatePropertySpinnerConverter(),
-                extractor: MirrorKripkePropertiesRecorder()
-            ),
-            machines: machines,
-            spinnerConstructor: MultipleExternalsSpinnerConstructor(
-                constructor: ExternalsSpinnerConstructor(
-                    runner: SpinnerRunner()
-                )
-            ),
-            stateGenerator: KripkeStateGenerator(),
-            tokenizer: PerRingletTokenizer()
-        )
-    }
-
+    func generateKripkeState(
+        fromFSM: AnyScheduleableFiniteStateMachine,
+        withinMachine: Machine,
+        withLastState: KripkeState?
+    ) -> KripkeState
 }
