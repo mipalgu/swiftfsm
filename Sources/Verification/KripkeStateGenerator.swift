@@ -63,12 +63,14 @@ import Machines
 public final class KripkeStateGenerator: KripkeStateGeneratorProtocol {
 
     public func generateKripkeState(
+        id: String,
         fromFSM fsm: AnyScheduleableFiniteStateMachine,
         withinMachine machine: Machine,
-        withLastState last: KripkeState? = nil
-    ) -> KripkeState {
+        withLastState last: KripkeState<AnyScheduleableFiniteStateMachine>? = nil
+    ) -> KripkeState<AnyScheduleableFiniteStateMachine> {
         let state = KripkeState(
-            id: "\(machine.name).\(fsm.name)",
+            id: id,
+            object: fsm,
             properties: fsm.currentRecord,
             previous: last,
             targets: []

@@ -86,7 +86,7 @@ public class NuSMVKripkeStructureView: KripkeStructureView {
     /*
      *  All the states within the kripke structure.
      */
-    private var states: [[KripkeState]] = []
+    private var states: [[KripkeState<AnyScheduleableFiniteStateMachine>]] = []
 
     /**
      *  Create a new `NuSMVKripkeStructureView`.
@@ -110,7 +110,7 @@ public class NuSMVKripkeStructureView: KripkeStructureView {
      *  - Parameter structure: The `KripkeStructure` that will be converted to
      *  the NuSMV representation.
      */
-    public func make(structure: KripkeStructureType) {
+    public func make(structure: KripkeStructure) {
         if (true == structure.states.isEmpty) {
             return
         }
@@ -123,7 +123,7 @@ public class NuSMVKripkeStructureView: KripkeStructureView {
 
     private func initializeDefaultProperties(_ d: Data) {
         d.states.forEach {
-            $0.forEach { (s: KripkeState) in
+            $0.forEach { (s: KripkeState<AnyScheduleableFiniteStateMachine>) in
                 let f = self.createNamingFunction(forState: s)
                 s.properties.forEach { (p: (String, KripkeStateProperty)) in
                     if (false == self.isSupportedType(p.1.type)) {
@@ -240,7 +240,7 @@ public class NuSMVKripkeStructureView: KripkeStructureView {
      *  The name follows the following convention:
      *      `<machine_name><delimiter><fsm_name><delimiter><state_name><delimiter><ringlet_count><delimiter><snapshot_count>`
      */
-    private func getNextPCName(_ state: KripkeState, d: Data) -> String {
+    private func getNextPCName(_ state: KripkeState<AnyScheduleableFiniteStateMachine>, d: Data) -> String {
         let key = state.targets.reduce(state.description) { $0 + $1.description }
         if let pc = d.pcTable[key] {
             //print("found previous pc: \(pc)")
@@ -307,7 +307,7 @@ public class NuSMVKripkeStructureView: KripkeStructureView {
      *  values.
      */
     private func getTrans(
-        _ state: KripkeState,
+        _ state: KripkeState<AnyScheduleableFiniteStateMachine>,
         d: Data,
         pcName: String
     ) -> String {
@@ -333,7 +333,7 @@ public class NuSMVKripkeStructureView: KripkeStructureView {
      *  `next(count)=3 & next(pc)=foo`.
      */
     private func getChanges(
-        _ state: KripkeState,
+        _ state: KripkeState<AnyScheduleableFiniteStateMachine>,
         d: Data,
         pcName: String
     ) -> String {
@@ -377,7 +377,7 @@ public class NuSMVKripkeStructureView: KripkeStructureView {
         return str*/
     }
 
-    private func createNamingFunction(forState state: KripkeState) -> (String) -> String {
+    private func createNamingFunction(forState state: KripkeState<AnyScheduleableFiniteStateMachine>) -> (String) -> String {
         return {
             self.formatLabel(state.id + self.delimiter + $0)
         }
@@ -546,7 +546,7 @@ fileprivate class Data {
     /*
      *  All of the states that belong in this structure.
      */
-    public var states: [[KripkeState]] = []
+    public var states: [[KripkeState<AnyScheduleableFiniteStateMachine>]] = []
 
     /*
      *  The vars section.

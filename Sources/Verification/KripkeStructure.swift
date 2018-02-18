@@ -1,9 +1,9 @@
 /*
- * KripkeStateGeneratorProtocol.swift 
- * Verification 
+ * KripkeStructure.swift
+ * swiftfsm
  *
- * Created by Callum McColl on 17/02/2018.
- * Copyright © 2018 Callum McColl. All rights reserved.
+ * Created by Callum McColl on 11/11/2015.
+ * Copyright © 2015 Callum McColl. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -58,14 +58,29 @@
 
 import FSM
 import KripkeStructure
-import Machines
 
-public protocol KripkeStateGeneratorProtocol {
+/**
+ *  A Kripke Structure.
+ *
+ *  Kripke Structures are a graph that represent every possible execution path
+ *  that software may take.  In this case this Kripke Structure is made up of
+ *  `KripkeState`s where a `KripkeState` represents an individual node in the
+ *  graph and encapsulates the state of all variables at a given point in time.
+ */
+public struct KripkeStructure: KripkeStructureType {
+    
+    /**
+     *  All `KripkeState`s in the structure.
+     */
+    public let states: [[KripkeState<AnyScheduleableFiniteStateMachine>]]
 
-    func generateKripkeState(
-        id: String,
-        fromFSM: AnyScheduleableFiniteStateMachine,
-        withinMachine: Machine,
-        withLastState: KripkeState<AnyScheduleableFiniteStateMachine>?
-    ) -> KripkeState<AnyScheduleableFiniteStateMachine>
+    /**
+     *  Create a new `KripkeStructure`.
+     *
+     *  - Parameter states: All `KripkeState`s in the structure.
+     */
+    public init(states: [[KripkeState<AnyScheduleableFiniteStateMachine>]] = []) {
+        self.states = states
+    }
+    
 }

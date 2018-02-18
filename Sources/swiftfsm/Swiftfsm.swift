@@ -78,7 +78,7 @@ public class Swiftfsm<
     SF: SchedulerFactory,
     MF: MachineFactory,
     KF: KripkeStructureGeneratorFactory
-> {
+> where KF.Generator.KripkeStructure == KripkeStructure {
 
     private let clfsmMachineLoader: MachineLoader
 

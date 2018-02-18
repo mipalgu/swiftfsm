@@ -67,6 +67,6 @@ public protocol KripkeStructureView {
     /**
      *  Output the `KripkeStructure`.
      */
-    func make(structure: KripkeStructureType) -> Void
+    func make(structure: KripkeStructure) -> Void
 
 }
