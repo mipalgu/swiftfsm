@@ -1,5 +1,5 @@
 /*
- * ClonerProtocol.swift 
+ * AggregateVerificationJobFactory.swift 
  * Verification 
  *
  * Created by Callum McColl on 18/02/2018.
@@ -60,11 +60,43 @@ import FSM
 import KripkeStructure
 import Machines
 
-public protocol ClonerProtocol {
+public final class AggregateVerificationJobFactory<
+    Factory: VerificationJobFactoryProtocol
+>: AggregateVerificationJobFactoryProtocol {
 
-    func clone(
-        job: VerificationJob,
-        withLastRecord: KripkeStatePropertyList
-    ) -> (AnyScheduleableFiniteStateMachine, Machine)
+    fileprivate let factory: Factory
+
+    public init(factory: Factory) {
+        self.factory = factory
+    }
+
+    //swiftlint:disable large_tuple
+    //swiftlint:disable line_length
+    public func make(
+        tokens: [(AnyScheduleableFiniteStateMachine, Machine)],
+        externalVariables: [(AnySnapshotController, KripkeStatePropertyList)],
+        externalCounts: [Machine: (Int, Int)]
+    ) -> LazyMapRandomAccessCollection<
+        LazyMapRandomAccessCollection<
+            [(AnyScheduleableFiniteStateMachine, Machine)],
+            (AnyScheduleableFiniteStateMachine, Machine, [AnySnapshotController])
+        >,
+        VerificationJob
+    > {
+        let lazyCollection = tokens.lazy
+        let separated = lazyCollection.map { (arg: (fsm: AnyScheduleableFiniteStateMachine, machine: Machine)) -> (AnyScheduleableFiniteStateMachine, Machine, [AnySnapshotController]) in
+            guard let (index, count) = externalCounts[arg.machine] else {
+                return (arg.fsm, arg.machine, [])
+            }
+            return (arg.fsm, arg.machine, Array(externalVariables[index..<(index + count)].lazy.map { $0.0 }))
+        }
+        return separated.map {
+            self.factory.make(
+                fsm: $0,
+                machine: $1,
+                externalVariables: $2
+            )
+        }
+    }
 
 }

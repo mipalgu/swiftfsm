@@ -68,12 +68,13 @@ public final class MachineKripkeStructureGeneratorFactory: KripkeStructureGenera
     public func make(
         fromMachines machines: [Machine]
     ) -> MachineKripkeStructureGenerator<
-        KripkeStatePropertyListConverter,
+        AggregateCloner<Cloner<KripkeStatePropertyListConverter>>,
         HashTableCycleDetector<World>,
         ExternalsSpinnerDataExtractor<
             MirrorKripkePropertiesRecorder,
             KripkeStatePropertySpinnerConverter
         >,
+        AggregateVerificationJobFactory<VerificationJobFactory>,
         MultipleExternalsSpinnerConstructor<
             ExternalsSpinnerConstructor<SpinnerRunner>
         >,
@@ -81,11 +82,14 @@ public final class MachineKripkeStructureGeneratorFactory: KripkeStructureGenera
         PerRingletTokenizer
     > {
         return MachineKripkeStructureGenerator(
-            converter: KripkeStatePropertyListConverter(),
+            cloner: AggregateCloner(cloner: Cloner(converter: KripkeStatePropertyListConverter())),
             cycleDetector: HashTableCycleDetector<World>(),
             extractor: ExternalsSpinnerDataExtractor(
                 converter: KripkeStatePropertySpinnerConverter(),
                 extractor: MirrorKripkePropertiesRecorder()
+            ),
+            factory: AggregateVerificationJobFactory(
+                factory: VerificationJobFactory()
             ),
             machines: machines,
             spinnerConstructor: MultipleExternalsSpinnerConstructor(

@@ -58,6 +58,7 @@
 
 import FSM
 import KripkeStructure
+import Machines
 
 public final class Cloner<Converter: KripkeStatePropertyListConverter>: ClonerProtocol {
 
@@ -67,16 +68,15 @@ public final class Cloner<Converter: KripkeStatePropertyListConverter>: ClonerPr
         self.converter = converter
     }
 
-    private func clone(
-        fsm: AnyScheduleableFiniteStateMachine,
-        assigningExternals externalVariables: [AnySnapshotController],
-        withLastRecord: KripkeStatePropertyList
-    ) -> [AnyScheduleableFiniteStateMachine] {
-        var clone = fsm.clone()
-        clone.update(fromDictionary: self.converter.convert(fromList: lastRecords))
-        for i in 0..<externalVariables.count {
-            clone.externalVariables[i].val = externalVariables[i].val
+    public func clone(
+        job: VerificationJob,
+        withLastRecord lastRecord: KripkeStatePropertyList
+    ) -> (AnyScheduleableFiniteStateMachine, Machine) {
+        var clone = job.fsm.clone()
+        clone.update(fromDictionary: self.converter.convert(fromList: lastRecord))
+        for i in 0..<job.externalVariables.count {
+            clone.externalVariables[i].val = job.externalVariables[i].val
         }
-        return clone
+        return (clone, job.machine)
     }
 }

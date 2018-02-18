@@ -1,5 +1,5 @@
 /*
- * ClonerProtocol.swift 
+ * AggregateVerificationJobFactoryProtocol.swift 
  * Verification 
  *
  * Created by Callum McColl on 18/02/2018.
@@ -60,11 +60,14 @@ import FSM
 import KripkeStructure
 import Machines
 
-public protocol ClonerProtocol {
+public protocol AggregateVerificationJobFactoryProtocol {
 
-    func clone(
-        job: VerificationJob,
-        withLastRecord: KripkeStatePropertyList
-    ) -> (AnyScheduleableFiniteStateMachine, Machine)
+    associatedtype VerificationJobSequence: Sequence where VerificationJobSequence.Iterator.Element == VerificationJob
+
+    func make(
+        tokens: [(AnyScheduleableFiniteStateMachine, Machine)],
+        externalVariables: [(AnySnapshotController, KripkeStatePropertyList)],
+        externalCounts: [Machine: (Int, Int)]
+    ) -> VerificationJobSequence
 
 }

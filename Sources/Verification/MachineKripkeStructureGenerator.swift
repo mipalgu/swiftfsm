@@ -63,9 +63,10 @@ import Machines
 
 //swiftlint:disable opening_brace
 public final class MachineKripkeStructureGenerator<
-    Converter: KripkeStatePropertyListConverterProtocol,
+    Cloner: AggregateClonerProtocol,
     Detector: CycleDetector,
     Extractor: ExternalsSpinnerDataExtractorType,
+    Factory: AggregateVerificationJobFactoryProtocol,
     Constructor: MultipleExternalsSpinnerConstructorType,
     StateGenerator: KripkeStateGeneratorProtocol,
     Tokenizer: SchedulerTokenizer
@@ -97,11 +98,13 @@ public final class MachineKripkeStructureGenerator<
 
     }
 
-    private let converter: Converter
+    private let cloner: Cloner
 
     private let cycleDetector: Detector
 
     private let extractor: Extractor
+
+    private let factory: Factory
 
     private let stateGenerator: StateGenerator
 
@@ -112,22 +115,45 @@ public final class MachineKripkeStructureGenerator<
     private let tokenizer: Tokenizer
 
     public init(
-        converter: Converter,
+        cloner: Cloner,
         cycleDetector: Detector,
         extractor: Extractor,
+        factory: Factory,
         machines: [Machine],
         spinnerConstructor: Constructor,
         stateGenerator: StateGenerator,
         tokenizer: Tokenizer
     ) {
-        self.converter = converter
+        self.cloner = cloner
         self.cycleDetector = cycleDetector
         self.extractor = extractor
+        self.factory = factory
         self.machines = machines
         self.spinnerConstructor = spinnerConstructor
         self.stateGenerator = stateGenerator
         self.tokenizer = tokenizer
     }
+
+/*
+    fileprivate func gen() -> KripkeStructure {
+        var states: [KripkeState] = []
+        states.reserveCapacity(500000)
+        let machines = self.fetchUniqueMachines(fromMAchines: self.machines)
+        guard false == machines.isEmpty else {
+            return KripkeStructure(states: [])
+        }
+        // 1. Seperate fsms from machines -> array of fsms.
+        // 2. Create jobs -> initial job
+        // 3. While there are jobs
+        // 4. Check if job has been done before
+        // 5. Spin external variables
+        // 6. For each external variable combination -> Verification Job
+        // 7. Clone fsm, execute and generate R and W Kripke States
+        // 8. Check if R and W exist.
+        // 9. Add them if they don't exist.
+        // 10. Convert W to new job.
+    }
+*/
 
     public func generate() -> KripkeStructure {
         var states: [KripkeState] = []
@@ -156,13 +182,16 @@ public final class MachineKripkeStructureGenerator<
             let spinner = self.spinnerConstructor.makeSpinner(forExternals: data.flatMap { $0 })
             while let externals = spinner() {
                 // Clone all fsms.
-                let clones = job.tokens.enumerated().map {
-                    self.clone(
-                        tokens: $1,
-                        andAssignExternals: externals,
-                        withExternalCounts: externalCounts,
-                        andLastRecords: job.lastRecords[$0]
-                    )
+                // swiftlint:disable:next line_length
+                let clones = job.tokens.enumerated().map { (arg: (offset: Int, element: [(fsm: AnyScheduleableFiniteStateMachine, machine: Machine)])) in
+                    Array(self.cloner.clone(
+                        jobs: self.factory.make(
+                            tokens: arg.element,
+                            externalVariables: externals,
+                            externalCounts: externalCounts
+                        ),
+                        withLastRecords: job.lastRecords[arg.offset]
+                    ))
                 }
                 // Check for cycles.
                 let world = self.createWorld(
@@ -274,27 +303,6 @@ public final class MachineKripkeStructureGenerator<
             externalVariables: lastWorld.externalVariables <| ps,
             variables: lastWorld.variables <| varPs
         )
-    }
-
-    private func clone(
-        tokens: [(fsm: AnyScheduleableFiniteStateMachine, machine: Machine)],
-        andAssignExternals externals: [(AnySnapshotController, KripkeStatePropertyList)],
-        withExternalCounts externalCounts: [Machine: (Int, Int)],
-        andLastRecords lastRecords: [KripkeStatePropertyList]
-    ) -> [(fsm: AnyScheduleableFiniteStateMachine, machine: Machine)] {
-        return tokens.enumerated().map { (offset: Int, element: (fsm: AnyScheduleableFiniteStateMachine, machine: Machine)) -> (AnyScheduleableFiniteStateMachine, Machine) in
-            var clone = element.fsm.clone()
-            clone.update(fromDictionary: self.converter.convert(fromList: lastRecords[offset]))
-            guard let (externalIndex, count) = externalCounts[element.machine] else {
-                return (clone, element.machine)
-            }
-            var j = 0
-            for i in externalIndex..<(externalIndex + count) {
-                clone.externalVariables[j].val = externals[i].0.val
-                j += 1
-            }
-            return (clone, element.machine)
-        }
     }
 
 }

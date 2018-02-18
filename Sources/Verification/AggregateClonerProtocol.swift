@@ -56,28 +56,31 @@
  *
  */
 
+import FSM
+import KripkeStructure
+import Machines
+
 public protocol AggregateClonerProtocol {
 
-    private func clone(
-        fsms: [AnyScheduleableFiniteStateMachine],
-        assigningExternals externals: [[AnySnapshotController]],
+    func clone<S: Sequence>(
+        jobs: S,
         withLastRecords: [KripkeStatePropertyList]
-    ) -> [AnyScheduleableFiniteStateMachine]
+    ) -> LazyMapSequence<EnumeratedSequence<LazySequence<S>>, (AnyScheduleableFiniteStateMachine, Machine)> where
+        S.Iterator.Element == VerificationJob
 
 }
 
 extension AggregateClonerProtocol where Self: ClonerContainer {
 
-    private func clone(
-        fsms: [AnyScheduleableFiniteStateMachine],
-        assigningExternals externals: [[AnySnapshotController]],
-        withLastRecords: [KripkeStatePropertyList]
-    ) -> [AnyScheduleableFiniteStateMachine] {
-        return fsms.enumerated().map { (offset, fsm) in
+    public func clone<S: Sequence>(
+        jobs: S,
+        withLastRecords lastRecords: [KripkeStatePropertyList]
+    ) -> LazyMapSequence<EnumeratedSequence<LazySequence<S>>, (AnyScheduleableFiniteStateMachine, Machine)> where
+        S.Iterator.Element == VerificationJob {
+        return jobs.lazy.enumerated().lazy.map { (arg: (offset: Int, element: VerificationJob)) -> (AnyScheduleableFiniteStateMachine, Machine) in
             return self.cloner.clone(
-                fsm: fsm,
-                assignExternals: externals[offset],
-                withLastRecord: lastRecords[offset]
+                job: arg.element,
+                withLastRecord: lastRecords[arg.offset]
             )
         }
     }
