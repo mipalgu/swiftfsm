@@ -66,6 +66,10 @@ public final class KripkeStatePropertyListConverter: KripkeStatePropertyListConv
             switch $1.type {
             case .Compound(let l):
                 ps[$0] = self.convert(fromList: l)
+            case .Collection(let states):
+                ps[$0] = self.convert(fromList: [String: KripkeStateProperty](uniqueKeysWithValues: states.enumerated().lazy.map { ("\($0)", $1) }))
+            case .EmptyCollection:
+                ps[$0] = []
             default:
                 ps[$0] = $1.value
             }
