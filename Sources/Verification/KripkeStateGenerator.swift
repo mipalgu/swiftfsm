@@ -62,20 +62,30 @@ import Machines
 
 public final class KripkeStateGenerator: KripkeStateGeneratorProtocol {
 
+    fileprivate var cache: [String: KripkeState<AnyScheduleableFiniteStateMachine>] = [:]
+
     public func generateKripkeState(
         id: String,
         fromFSM fsm: AnyScheduleableFiniteStateMachine,
         withinMachine machine: Machine,
         withLastState last: KripkeState<AnyScheduleableFiniteStateMachine>? = nil
     ) -> KripkeState<AnyScheduleableFiniteStateMachine> {
+        let record = fsm.currentRecord
+        if let state = self.cache[record.description] {
+            last?.targets.append(state)
+            print("total states in cache: \(self.cache.count)")
+            return state
+        }
         let state = KripkeState(
             id: id,
             object: fsm,
-            properties: fsm.currentRecord,
+            properties: record,
             previous: last,
             targets: []
         )
         last?.targets.append(state)
+        cache[record.description] = state
+        print("total states in cache: \(self.cache.count)")
         return state
     }
 
