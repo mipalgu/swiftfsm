@@ -213,7 +213,7 @@ public final class MachineKripkeStructureGenerator<
                     }*/
                 }
                 // Create a `KripkeState` for each ringlet executing in each fsm.
-                let tempStates = execute(clones: clones[job.executing], withLastState: job.lastState)
+                let tempStates = execute(withWorld: world, clones: clones[job.executing], withLastState: job.lastState)
                 // Append the states to the states array if these are starting states.
                 states.append(contentsOf: tempStates)
                 // Create a new job from the clones.
@@ -233,7 +233,8 @@ public final class MachineKripkeStructureGenerator<
         let statesProps = states.map { (state) -> [String: Any] in
             let props = worldConverter.convert(fromList: state.properties)
             return [
-                "properties": props
+                "properties": props,
+                "effects": state.effects.map { worldConverter.convert(fromList: $0) }
             ]
         }
         guard
@@ -247,6 +248,7 @@ public final class MachineKripkeStructureGenerator<
     }
 
     private func execute(
+        withWorld world: World,
         clones: [(fsm: AnyScheduleableFiniteStateMachine, machine: Machine)],
         withLastState last: KripkeState?
     ) -> [KripkeState] {
@@ -257,7 +259,7 @@ public final class MachineKripkeStructureGenerator<
                 fromFSM: fsm.clone(),
                 withinMachine: machine,
                 withLastState: last,
-                addingProperties: [
+                addingProperties: world.variables <| [
                     "pc": KripkeStateProperty(
                         type: .String,
                         value: "\(machine.name).\(fsm.name).\(stateName).R"
@@ -269,7 +271,7 @@ public final class MachineKripkeStructureGenerator<
                 fromFSM: fsm.clone(),
                 withinMachine: machine,
                 withLastState: preState,
-                addingProperties: [
+                addingProperties: preState.properties <| [
                     "pc": KripkeStateProperty(
                         type: .String,
                         value: "\(machine.name).\(fsm.name).\(stateName).W"

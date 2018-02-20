@@ -70,20 +70,22 @@ public final class KripkeStateGenerator: KripkeStateGeneratorProtocol {
         withLastState last: KripkeState? = nil,
         addingProperties props: KripkeStatePropertyList = [:]
     ) -> KripkeState {
-        let record = (last?.properties ?? [:]) <| fsm.currentRecord <| props
+        let record: KripkeStatePropertyList = props <| [
+            "\(machine.name).\(fsm.name)": KripkeStateProperty(
+                type: .Compound(fsm.currentRecord),
+                value: fsm
+            )
+        ]
+        if nil == last?.effects.first(where: { $0 == record }) {
+            last?.effects.append(record)
+        }
         if let state = self.cache[record.description] {
-            if nil == last?.effects.first(where: { $0 == record }) {
-                last?.effects.append(record)
-            }
             return state
         }
         let state = KripkeState(
             properties: record,
             effects: []
         )
-        if nil == last?.effects.first(where: { $0 == record }) {
-            last?.effects.append(record)
-        }
         cache[record.description] = state
         return state
     }
