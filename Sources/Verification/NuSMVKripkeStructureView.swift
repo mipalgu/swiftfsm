@@ -60,6 +60,11 @@ import FSM
 import IO
 import KripkeStructure
 
+//swiftlint:disable type_body_length
+//swiftlint:disable identifier_name
+//swiftlint:disable file_length
+//swiftlint:disable line_length
+
 /**
  *  Print the Kripke Structure into a format supported by NuSMV.
  */
@@ -73,7 +78,7 @@ public class NuSMVKripkeStructureView: KripkeStructureView {
     /*
      *  Used to create the printer that will output the kripke structures.
      */
-    private var factory: PrinterFactory 
+    private var factory: PrinterFactory
 
     /*
      *  A Dictionary containing the data objects for every individual machine
@@ -111,7 +116,7 @@ public class NuSMVKripkeStructureView: KripkeStructureView {
      *  the NuSMV representation.
      */
     public func make(structure: KripkeStructure) {
-        if (true == structure.states.isEmpty) {
+        if true == structure.states.isEmpty {
             return
         }
         self.states = structure.states
@@ -126,12 +131,12 @@ public class NuSMVKripkeStructureView: KripkeStructureView {
             $0.forEach { (s: KripkeState<AnyScheduleableFiniteStateMachine>) in
                 let f = self.createNamingFunction(forState: s)
                 s.properties.forEach { (p: (String, KripkeStateProperty)) in
-                    if (false == self.isSupportedType(p.1.type)) {
+                    if false == self.isSupportedType(p.1.type) {
                         return
                     }
                     let label = f(p.0)
                     let value = self.formatPropertyValue(p.1)
-                    if (nil == d.latestProperties[label]) {
+                    if nil == d.latestProperties[label] {
                         d.latestProperties[label] = value
                     }
                 }
@@ -148,7 +153,7 @@ public class NuSMVKripkeStructureView: KripkeStructureView {
             self.printStructure(self.generateData(t.value))
         }
     }
-    
+
     /*
      *  Prints a kripek structure with all the different machines combined into
      *  one.
@@ -196,7 +201,7 @@ public class NuSMVKripkeStructureView: KripkeStructureView {
                 }
                 d.seen[pcName] = true
                 let trans = getTrans($0, d: d, pcName: pcName)
-                if (true == $0.targets.isEmpty) {
+                if true == $0.targets.isEmpty {
                     return
                 }
                 d.trans += trans
@@ -247,7 +252,7 @@ public class NuSMVKripkeStructureView: KripkeStructureView {
             //print("state: \(state)")
             return pc
         }
-        if (nil == d.snapshots[state.id]) {
+        if nil == d.snapshots[state.id] {
             d.snapshots[state.id] = 0
         }
         let name = state.id + "\(self.delimiter)S\(d.snapshots[state.id]!)"
@@ -272,14 +277,14 @@ public class NuSMVKripkeStructureView: KripkeStructureView {
         d.properties.forEach {
             d.vars += "\($0) : {"
             var pre: Bool = false
-            let arr: [String] = Array<String>($1).sorted() {
+            let arr: [String] = [String]($1).sorted {
                 if let lhs = Double($0), let rhs = Double($1) {
                     return lhs < rhs
                 }
                 return $0 < $1
             }
             arr.forEach {
-                d.vars += (true == pre ? ",\n" : "\n") + $0 
+                d.vars += (true == pre ? ",\n" : "\n") + $0
                 pre = true
             }
             d.vars += "\n};\n\n"
@@ -344,9 +349,6 @@ public class NuSMVKripkeStructureView: KripkeStructureView {
         // Holds naming convention functions for the different property lists.
         let gen: [([String: String], (String) -> String)] = [
             (d.latestProperties, { "next(\($0))"})
-            //(lastState.afterProperties.stateProperties, { "next(\(self.stateName(lastState))\(self.delimiter)\($0))" }),
-            //(lastState.afterProperties.fsmProperties, { "next(\(self.fsmName(lastState))\(self.delimiter)\($0))" }),
-            //(state.beforeProperties.globalProperties, { "next(\(self.globalsName(state))\(self.delimiter)\($0))" })
         ]
         let formatted = gen.flatMap { (ps: [String: String], f: (String) -> String) -> [(String, String)] in
             ps.map { (f($0.0), $0.1) }
@@ -377,7 +379,9 @@ public class NuSMVKripkeStructureView: KripkeStructureView {
         return str*/
     }
 
-    private func createNamingFunction(forState state: KripkeState<AnyScheduleableFiniteStateMachine>) -> (String) -> String {
+    private func createNamingFunction(
+        forState state: KripkeState<AnyScheduleableFiniteStateMachine>
+    ) -> (String) -> String {
         return {
             self.formatLabel(state.id + self.delimiter + $0)
         }
@@ -391,7 +395,7 @@ public class NuSMVKripkeStructureView: KripkeStructureView {
         // Remove all unsupported types.
         var d: [String: KripkeStateProperty] = [:]
         ps.forEach {
-            if (false == self.isSupportedType($0.1.type)) {
+            if false == self.isSupportedType($0.1.type) {
                 return
             }
             d[$0.0] = $0.1
@@ -399,7 +403,7 @@ public class NuSMVKripkeStructureView: KripkeStructureView {
         return d
     }
 
-    private func addToLatestProperties(_ d: Data, _ p: (String, String)) -> Void {
+    private func addToLatestProperties(_ d: Data, _ p: (String, String)) {
         d.latestProperties[p.0] = p.1
     }
 
@@ -408,14 +412,20 @@ public class NuSMVKripkeStructureView: KripkeStructureView {
             return ""
         }
         var str = ""
-        if ((first < "a" || first > "z") && (first < "A" || first > "Z")) {
+        if (first < "a" || first > "z") && (first < "A" || first > "Z") {
             str += "_"
         }
         str += label.characters.map({
-            if ($0 == ".") {
+            if $0 == "." {
                 return self.delimiter
             }
-            if (($0 < "a" || $0 > "z") && ($0 < "A" || $0 > "Z") && ($0 < "0" || $0 > "9") && $0 != "#" && $0 != "_" && $0 != "$" && $0 != "-" ) {
+            if ($0 < "a" || $0 > "z")
+                && ($0 < "A" || $0 > "Z")
+                && ($0 < "0" || $0 > "9")
+                && $0 != "#"
+                && $0 != "_"
+                && $0 != "$"
+                && $0 != "-" {
                 return ""
             }
             return "\($0)"
@@ -429,7 +439,7 @@ public class NuSMVKripkeStructureView: KripkeStructureView {
         list.forEach {
             str += self.generate(label: $0.0, value: $0.1, pre: pre)
             pre = true
-            if (false == addToProperties) {
+            if false == addToProperties {
                 return
             }
             self.addToProperties($0.0, value: $0.1, d: d)
@@ -446,8 +456,8 @@ public class NuSMVKripkeStructureView: KripkeStructureView {
      */
     private func generate(label: String, value: String, pre: Bool) -> String {
         var str: String = ""
-        if (true == pre) {
-           str += " & " 
+        if true == pre {
+           str += " & "
         }
         str += "\(label)=\(value)"
         return str
@@ -455,14 +465,14 @@ public class NuSMVKripkeStructureView: KripkeStructureView {
 
     private func formatPropertyValue(_ p: KripkeStateProperty) -> String {
         let val: String = "\(p.value)"
-        switch (p.type) {
+        switch p.type {
         case .String:
             return "\"" + val + "\""
         case .Double, .Float, .Float80:
             return "F" + String(val.characters.map({ $0 == "." ? "_" : $0 }))
         case .Collection(let p2):
             var vals: [String] = p2.map { self.formatPropertyValue($0) }
-            if (true == vals.isEmpty) {
+            if true == vals.isEmpty {
                 return "C__"
             }
             let first = vals.removeFirst()
@@ -487,9 +497,9 @@ public class NuSMVKripkeStructureView: KripkeStructureView {
     private func addToProperties(
         _ name: String,
         value: String,
-        d: Data 
+        d: Data
     ) {
-        if (nil == d.properties[name]) {
+        if nil == d.properties[name] {
             d.properties[name] = []
             d.initials[name] = value
         }
@@ -497,18 +507,17 @@ public class NuSMVKripkeStructureView: KripkeStructureView {
     }
 
     private func isSupportedType(_ t: KripkeStatePropertyTypes) -> Bool {
-        if (t == .Bool || t == .Int8 || t == .Int16 || t == .Int32 ||
+        if t == .Bool || t == .Int8 || t == .Int16 || t == .Int32 ||
             t == .Int64 || t == .Int || t == .UInt8 || t == .UInt16 ||
             t == .UInt32 || t == .UInt64 || t == .UInt || t == .Float80 ||
-            t == .Float || t == .Double || t == .String
-        ) {
+            t == .Float || t == .Double || t == .String {
             return true
         }
-        switch (t) {
+        switch t {
         case .Compound:
             return true
         case .Collection(let ps):
-            if (true == ps.isEmpty) {
+            if true == ps.isEmpty {
                 return true
             }
             let first = ps.first!
@@ -552,12 +561,12 @@ fileprivate class Data {
      *  The vars section.
      */
     public var vars: String = "VAR\n\n"
-    
+
     /*
      *  The trans section.
      */
     public var trans: String = "TRANS\ncase\n"
-    
+
     /*
      *  Keeps track of how many times an individual state has been run.
      *
@@ -565,7 +574,7 @@ fileprivate class Data {
      *  namespaced name and the value is how many times it has been run.
      */
     public var snapshots: [String: UInt] = [:]
-    
+
     /*
      *  Contains a list of fully namespaced state names with their ringlet
      *  counts added on the end.
