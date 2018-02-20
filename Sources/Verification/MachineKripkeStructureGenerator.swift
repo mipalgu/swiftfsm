@@ -94,7 +94,7 @@ public final class MachineKripkeStructureGenerator<
 
         let executing: Int
 
-        let lastState: KripkeState<AnyScheduleableFiniteStateMachine>?
+        let lastState: KripkeState?
 
         let lastRecords: [[KripkeStatePropertyList]]
 
@@ -158,7 +158,7 @@ public final class MachineKripkeStructureGenerator<
 */
 
     public func generate() -> KripkeStructure {
-        var states: [KripkeState<AnyScheduleableFiniteStateMachine>] = []
+        var states: [KripkeState] = []
         states.reserveCapacity(500000)
         // Create spinner.
         let machines = self.fetchUniqueMachines(fromMachines: self.machines)
@@ -204,19 +204,13 @@ public final class MachineKripkeStructureGenerator<
                 )
                 let (inCycle, newCache) = self.cycleDetector.inCycle(data: job.cache, element: world)
                 if true == inCycle {
-                    guard let firstClone = clones[job.executing].first else {
+                    continue
+                    /*guard let firstClone = clones[job.executing].first else {
                         continue
                     }
                     if true == firstClone.0.hasFinished {
                         continue
-                    }
-                    job.lastState?.targets.append(self.stateGenerator.generateKripkeState(
-                        id: "\(firstClone.1.name).\(firstClone.0.name).\(firstClone.0.currentState.name).R",
-                        fromFSM: firstClone.0.clone(),
-                        withinMachine: firstClone.1,
-                        withLastState: job.lastState
-                    ))
-                    continue
+                    }*/
                 }
                 // Create a `KripkeState` for each ringlet executing in each fsm.
                 let tempStates = execute(clones: clones[job.executing], withLastState: job.lastState)
@@ -239,9 +233,7 @@ public final class MachineKripkeStructureGenerator<
         let statesProps = states.map { (state) -> [String: Any] in
             let props = worldConverter.convert(fromList: state.properties)
             return [
-                "id": state.id,
-                "properties": props,
-                "targets": state.targets.map { $0.id }
+                "properties": props
             ]
         }
         guard
@@ -256,28 +248,33 @@ public final class MachineKripkeStructureGenerator<
 
     private func execute(
         clones: [(fsm: AnyScheduleableFiniteStateMachine, machine: Machine)],
-        withLastState last: KripkeState<AnyScheduleableFiniteStateMachine>?
-    ) -> [KripkeState<AnyScheduleableFiniteStateMachine>] {
+        withLastState last: KripkeState?
+    ) -> [KripkeState] {
         var last = last
-        return clones.flatMap { (fsm: AnyScheduleableFiniteStateMachine, machine: Machine) -> [KripkeState<AnyScheduleableFiniteStateMachine>] in
-            print("before\n\n")
+        return clones.flatMap { (fsm: AnyScheduleableFiniteStateMachine, machine: Machine) -> [KripkeState] in
             let stateName = fsm.currentState.name
             let preState = self.stateGenerator.generateKripkeState(
-                id: "\(machine.name).\(fsm.name).\(stateName).R",
                 fromFSM: fsm.clone(),
                 withinMachine: machine,
-                withLastState: last
+                withLastState: last,
+                addingProperties: [
+                    "pc": KripkeStateProperty(
+                        type: .String,
+                        value: "\(machine.name).\(fsm.name).\(stateName).R"
+                    )
+                ]
             )
-            print(fsm.currentRecord)
             fsm.next()
-            print("\n\nafter\n\n")
-            print(fsm.currentRecord)
-            print("\n\n")
             let postState = self.stateGenerator.generateKripkeState(
-                id: "\(machine.name).\(fsm.name).\(stateName).W",
                 fromFSM: fsm.clone(),
                 withinMachine: machine,
-                withLastState: preState
+                withLastState: preState,
+                addingProperties: [
+                    "pc": KripkeStateProperty(
+                        type: .String,
+                        value: "\(machine.name).\(fsm.name).\(stateName).W"
+                    )
+                ]
             )
             last = postState
             return [preState, postState]

@@ -63,9 +63,9 @@ import Machines
 public protocol KripkeStateGeneratorProtocol {
 
     func generateKripkeState(
-        id: String,
         fromFSM: AnyScheduleableFiniteStateMachine,
         withinMachine: Machine,
-        withLastState: KripkeState<AnyScheduleableFiniteStateMachine>?
-    ) -> KripkeState<AnyScheduleableFiniteStateMachine>
+        withLastState: KripkeState?,
+        addingProperties: KripkeStatePropertyList
+    ) -> KripkeState
 }

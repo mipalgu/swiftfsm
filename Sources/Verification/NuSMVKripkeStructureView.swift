@@ -91,7 +91,7 @@ public class NuSMVKripkeStructureView: KripkeStructureView {
     /*
      *  All the states within the kripke structure.
      */
-    private var states: [[KripkeState<AnyScheduleableFiniteStateMachine>]] = []
+    private var states: [[KripkeState]] = []
 
     /**
      *  Create a new `NuSMVKripkeStructureView`.
@@ -116,16 +116,16 @@ public class NuSMVKripkeStructureView: KripkeStructureView {
      *  the NuSMV representation.
      */
     public func make(structure: KripkeStructure) {
-        if true == structure.states.isEmpty {
+        /*if true == structure.states.isEmpty {
             return
         }
         self.states = structure.states
         let data: Data = Data(module: "main")
         data.states = self.states
         self.initializeDefaultProperties(data)
-        self.printStructure(self.generateData(data))
+        self.printStructure(self.generateData(data))*/
     }
-
+/*
     private func initializeDefaultProperties(_ d: Data) {
         d.states.forEach {
             $0.forEach { (s: KripkeState<AnyScheduleableFiniteStateMachine>) in
@@ -528,6 +528,7 @@ public class NuSMVKripkeStructureView: KripkeStructureView {
     }
 
 }
+*/
 
 /*
  *  Is used to easily store the data that is required to generate and print a
@@ -555,7 +556,7 @@ fileprivate class Data {
     /*
      *  All of the states that belong in this structure.
      */
-    public var states: [[KripkeState<AnyScheduleableFiniteStateMachine>]] = []
+    public var states: [[KripkeState]] = []
 
     /*
      *  The vars section.
@@ -588,5 +589,7 @@ fileprivate class Data {
     public init(module: String) {
         self.module = module
     }
+
+}
 
 }

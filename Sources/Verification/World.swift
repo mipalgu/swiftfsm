@@ -61,7 +61,7 @@ import KripkeStructure
 public struct World {
 
     public let externalVariables: KripkeStatePropertyList
-    
+
     public let variables: KripkeStatePropertyList
 
 }
@@ -72,13 +72,13 @@ extension World: CustomStringConvertible {
         return "externalVariables: \(self.externalVariables), variables: \(self.variables)"
     }
 
-
 }
 
 extension World: Hashable {
 
     public var hashValue: Int {
-        return "externalVariables: \(self.sortedStrings(self.externalVariables)), variables: \(self.sortedStrings(self.variables))".hashValue
+        return ("externalVariables: \(self.sortedStrings(self.externalVariables)), "
+            + "variables: \(self.sortedStrings(self.variables))").hashValue
     }
 
     private func sortedStrings(_ list: KripkeStatePropertyList) -> [String] {
@@ -95,6 +95,6 @@ extension World: Hashable {
 
 }
 
-public func ==(lhs: World, rhs: World) -> Bool {
+public func == (lhs: World, rhs: World) -> Bool {
     return lhs.description == rhs.description
 }

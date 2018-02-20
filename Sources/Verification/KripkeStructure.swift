@@ -68,19 +68,19 @@ import KripkeStructure
  *  graph and encapsulates the state of all variables at a given point in time.
  */
 public struct KripkeStructure: KripkeStructureType {
-    
+
     /**
      *  All `KripkeState`s in the structure.
      */
-    public let states: [[KripkeState<AnyScheduleableFiniteStateMachine>]]
+    public let states: [[KripkeState]]
 
     /**
      *  Create a new `KripkeStructure`.
      *
      *  - Parameter states: All `KripkeState`s in the structure.
      */
-    public init(states: [[KripkeState<AnyScheduleableFiniteStateMachine>]] = []) {
+    public init(states: [[KripkeState]] = []) {
         self.states = states
     }
-    
+
 }
