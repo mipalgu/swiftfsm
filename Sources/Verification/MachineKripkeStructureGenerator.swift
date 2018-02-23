@@ -259,7 +259,7 @@ public final class MachineKripkeStructureGenerator<
                 fromFSM: fsm.clone(),
                 withinMachine: machine,
                 withLastState: last,
-                addingProperties: world.variables <| [
+                addingProperties: world.variables <| (last?.properties ?? [:]) <| [
                     "pc": KripkeStateProperty(
                         type: .String,
                         value: "\(machine.name).\(fsm.name).\(stateName).R"
