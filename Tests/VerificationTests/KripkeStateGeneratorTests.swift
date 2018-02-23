@@ -72,18 +72,21 @@ public final class KripkeStateGeneratorTests: XCTestCase {
     }
 
     public func test_createKripkeState() {
+        let fsm = AnyScheduleableFiniteStateMachine(TempFiniteStateMachine())
         let expected = KripkeState(
-            id: "machine.fsm",
             properties: [
-                "fsm": KripkeStateProperty(
-                    type: .Bool,
-                    value: true
+                "machine.fsm": KripkeStateProperty(
+                    type: .Compound([
+                        "fsm": KripkeStateProperty(
+                            type: .Bool,
+                            value: true
+                        )
+                    ]),
+                    value: fsm
                 )
             ],
-            previous: nil,
-            targets: []
+            effects: []
         )
-        let fsm = AnyScheduleableFiniteStateMachine(TempFiniteStateMachine())
         let machine = Machine(debug: false, name: "machine", fsms: [fsm])
         let result = self.stateGenerator.generateKripkeState(
             fromFSM: fsm,
