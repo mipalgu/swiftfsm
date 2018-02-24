@@ -87,6 +87,8 @@ public final class MachineKripkeStructureGenerator<
 
     private struct Job {
 
+        let initial: Bool
+
         let cache: Detector.Data
 
         let tokens: [[(fsm: AnyScheduleableFiniteStateMachine, machine: Machine)]]
@@ -158,6 +160,7 @@ public final class MachineKripkeStructureGenerator<
 
     //swiftlint:disable:next function_body_length
     public func generate() -> KripkeStructure {
+        var initialStates: [KripkeState] = []
         var states: [KripkeState] = []
         states.reserveCapacity(500000)
         // Create spinner.
@@ -169,6 +172,7 @@ public final class MachineKripkeStructureGenerator<
         // Create initial jobs.
         let tokens = self.tokenizer.separate(self.machines)
         var jobs = [MachineKripkeStructureGenerator.Job(
+            initial: true,
             cache: self.cycleDetector.initialData,
             tokens: tokens,
             executing: 0,
@@ -223,6 +227,9 @@ public final class MachineKripkeStructureGenerator<
                     let state = $0
                     guard let existingState = states.first(where: { $0.properties == state.properties }) else {
                         states.append(state)
+                        if true == job.initial {
+                            initialStates.append(state)
+                        }
                         added = true
                         return
                     }
@@ -238,6 +245,7 @@ public final class MachineKripkeStructureGenerator<
                 // Create a new job from the clones.
                 let executing = (job.executing + 1) % clones.count
                 jobs.append(MachineKripkeStructureGenerator.Job(
+                    initial: false,
                     cache: newCache,
                     tokens: clones,
                     executing: executing,
@@ -263,7 +271,7 @@ public final class MachineKripkeStructureGenerator<
             fatalError("Unable to write file.")
         }
         print("total states: \(states.count)")
-        return KripkeStructure(states: [states])
+        return KripkeStructure(initialStates: initialStates, states: states)
     }
 
     private func execute(

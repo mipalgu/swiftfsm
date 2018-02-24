@@ -95,9 +95,8 @@ public class NuSMVKripkeStructureView: KripkeStructureView {
      *  the NuSMV representation.
      */
     public func make(structure: KripkeStructure) {
-        let states = structure.states.flatMap { $0 }
-        let plist = self.createPropertiesList(from: self.extractProperties(of: states))
-        let trans = self.createTransitions(from: states)
+        let plist = self.createPropertiesList(from: self.extractProperties(of: structure.states))
+        let trans = self.createTransitions(from: structure.states)
         self.printStructure(properties: plist, initial: "", transitions: trans)
     }
 

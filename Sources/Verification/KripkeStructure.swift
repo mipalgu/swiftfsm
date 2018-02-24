@@ -69,17 +69,20 @@ import KripkeStructure
  */
 public struct KripkeStructure: KripkeStructureType {
 
+    public let initialStates: [KripkeState]
+
     /**
      *  All `KripkeState`s in the structure.
      */
-    public let states: [[KripkeState]]
+    public let states: [KripkeState]
 
     /**
      *  Create a new `KripkeStructure`.
      *
      *  - Parameter states: All `KripkeState`s in the structure.
      */
-    public init(states: [[KripkeState]] = []) {
+    public init(initialStates: [KripkeState] = [], states: [KripkeState] = []) {
+        self.initialStates = initialStates
         self.states = states
     }
 
