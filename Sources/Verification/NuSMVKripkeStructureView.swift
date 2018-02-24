@@ -70,10 +70,7 @@ import KripkeStructure
  */
 public class NuSMVKripkeStructureView: KripkeStructureView {
 
-    /*
-     *  Used to seperate different names when creating namespaces.
-     */
-    private let delimiter: String
+    fileprivate let extractor: NuSMVPropertyExtractor
 
     /*
      *  Used to create the printer that will output the kripke structures.
@@ -104,8 +101,8 @@ public class NuSMVKripkeStructureView: KripkeStructureView {
      *  <machine_name>-<fsm_name>-<state_name>-<snapshot_count> where "-" is the
      *  delimiter.
      */
-    public init(factory: PrinterFactory, delimiter: String = "-") {
-        self.delimiter = delimiter
+    public init(extractor: NuSMVPropertyExtractor = NuSMVPropertyExtractor(), factory: PrinterFactory) {
+        self.extractor = extractor
         self.factory = factory
     }
 
@@ -116,6 +113,11 @@ public class NuSMVKripkeStructureView: KripkeStructureView {
      *  the NuSMV representation.
      */
     public func make(structure: KripkeStructure) {
+        structure.states.forEach {
+            $0.forEach {
+                print(self.extractor.extract(from: $0.properties))
+            }
+        }
         /*if true == structure.states.isEmpty {
             return
         }
@@ -407,32 +409,6 @@ public class NuSMVKripkeStructureView: KripkeStructureView {
         d.latestProperties[p.0] = p.1
     }
 
-    func formatLabel(_ label: String) -> String {
-        guard let first = label.characters.first else {
-            return ""
-        }
-        var str = ""
-        if (first < "a" || first > "z") && (first < "A" || first > "Z") {
-            str += "_"
-        }
-        str += label.characters.map({
-            if $0 == "." {
-                return self.delimiter
-            }
-            if ($0 < "a" || $0 > "z")
-                && ($0 < "A" || $0 > "Z")
-                && ($0 < "0" || $0 > "9")
-                && $0 != "#"
-                && $0 != "_"
-                && $0 != "$"
-                && $0 != "-" {
-                return ""
-            }
-            return "\($0)"
-        }).reduce("", +)
-        return str
-    }
-
     private func generateProperties(_ list: [(String, String)], d: Data, addToProperties: Bool) -> String {
         var str: String = ""
         var pre: Bool = false
@@ -461,33 +437,6 @@ public class NuSMVKripkeStructureView: KripkeStructureView {
         }
         str += "\(label)=\(value)"
         return str
-    }
-
-    private func formatPropertyValue(_ p: KripkeStateProperty) -> String {
-        let val: String = "\(p.value)"
-        switch p.type {
-        case .String:
-            return "\"" + val + "\""
-        case .Double, .Float, .Float80:
-            return "F" + String(val.characters.map({ $0 == "." ? "_" : $0 }))
-        case .Collection(let p2):
-            var vals: [String] = p2.map { self.formatPropertyValue($0) }
-            if true == vals.isEmpty {
-                return "C__"
-            }
-            let first = vals.removeFirst()
-            return "C_\(vals.reduce(first) { $0 + "-" + $1})_"
-        case .Compound(let list):
-            let formattedList = self.format(list, self.formatLabel)
-            guard let first = formattedList.first else {
-                return "D____"
-            }
-            return formattedList.dropFirst().reduce("D__\(first.0)\(self.delimiter)\(first.1)") {
-                $0 + "_\($1.0)\(self.delimiter)\($1.1)"
-            } + "__"
-        default:
-            return val
-        }
     }
 
     /*
