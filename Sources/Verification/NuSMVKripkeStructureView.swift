@@ -113,11 +113,7 @@ public class NuSMVKripkeStructureView: KripkeStructureView {
      *  the NuSMV representation.
      */
     public func make(structure: KripkeStructure) {
-        structure.states.forEach {
-            $0.forEach {
-                print(self.extractor.extract(from: $0.properties))
-            }
-        }
+        print(self.createPropertiesList(of: structure.states.flatMap { $0 }))
         /*if true == structure.states.isEmpty {
             return
         }
@@ -126,6 +122,29 @@ public class NuSMVKripkeStructureView: KripkeStructureView {
         data.states = self.states
         self.initializeDefaultProperties(data)
         self.printStructure(self.generateData(data))*/
+    }
+
+    private func createPropertiesList(of states: [KripkeState]) -> String {
+        var props: [String: Set<String>] = [:]
+        states.forEach { (state) in
+            let stateProperties = self.extractor.extract(from: state.properties)
+            stateProperties.forEach { (key, property) in
+                if nil == props[key] {
+                    props[key] = []
+                }
+                props[key]?.insert(property)
+            }
+        }
+        return props.reduce("") {
+            guard let first = $1.1.first else {
+                return $0 + "\n\n" + "\($1.0) : {};"
+            }
+            let preList = $0 + "\n\n" + "\($1.0) : {"
+            let list = preList + $1.1.dropFirst().reduce("\n    " + first) {
+                $0 + ",\n    " + $1
+            }
+            return list + "\n};"
+        }
     }
 /*
     private func initializeDefaultProperties(_ d: Data) {
@@ -273,24 +292,6 @@ public class NuSMVKripkeStructureView: KripkeStructureView {
         self.createPropertiesList(d)
         self.createPCList(d)
         self.createInitList(d)
-    }
-
-    private func createPropertiesList(_ d: Data) {
-        d.properties.forEach {
-            d.vars += "\($0) : {"
-            var pre: Bool = false
-            let arr: [String] = [String]($1).sorted {
-                if let lhs = Double($0), let rhs = Double($1) {
-                    return lhs < rhs
-                }
-                return $0 < $1
-            }
-            arr.forEach {
-                d.vars += (true == pre ? ",\n" : "\n") + $0
-                pre = true
-            }
-            d.vars += "\n};\n\n"
-        }
     }
 
     private func createPCList(_ d: Data) {
