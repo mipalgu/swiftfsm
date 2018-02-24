@@ -161,7 +161,7 @@ public final class MachineKripkeStructureGenerator<
     //swiftlint:disable:next function_body_length
     public func generate() -> KripkeStructure {
         var initialStates: [KripkeState] = []
-        var states: [KripkeState] = []
+        var states: [KripkeStatePropertyList: KripkeState] = [:]
         states.reserveCapacity(500000)
         // Create spinner.
         let machines = self.fetchUniqueMachines(fromMachines: self.machines)
@@ -227,8 +227,8 @@ public final class MachineKripkeStructureGenerator<
                 var added: Bool = false
                 tempStates.forEach {
                     let state = $0
-                    guard let existingState = states.first(where: { $0.properties == state.properties }) else {
-                        states.append(state)
+                    guard let existingState = states[state.properties] else {
+                        states[state.properties] = state
                         added = true
                         return
                     }
@@ -248,14 +248,14 @@ public final class MachineKripkeStructureGenerator<
                     cache: newCache,
                     tokens: clones,
                     executing: executing,
-                    lastState: states.first { lastTempState.properties == $0.properties } ?? lastTempState,
+                    lastState: states[lastTempState.properties] ?? lastTempState,
                     lastRecords: clones.map { $0.map { $0.0.currentRecord } }
                 ))
             }
         }
         let file = URL(fileURLWithPath: "temp.json")
         let worldConverter = KripkeStatePropertyListConverter()
-        let statesProps = states.map { (state) -> [String: Any] in
+        let statesProps = states.map { (_, state) -> [String: Any] in
             let props = worldConverter.convert(fromList: state.properties)
             return [
                 "properties": props,
@@ -270,7 +270,7 @@ public final class MachineKripkeStructureGenerator<
             fatalError("Unable to write file.")
         }
         print("total states: \(states.count)")
-        return KripkeStructure(initialStates: initialStates, states: states)
+        return KripkeStructure(initialStates: initialStates, states: states.map { $1 })
     }
 
     private func execute(
