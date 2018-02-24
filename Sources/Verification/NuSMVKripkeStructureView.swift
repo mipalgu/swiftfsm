@@ -113,7 +113,7 @@ public class NuSMVKripkeStructureView: KripkeStructureView {
      *  the NuSMV representation.
      */
     public func make(structure: KripkeStructure) {
-        print(self.createPropertiesList(of: structure.states.flatMap { $0 }))
+        print(self.createPropertiesList(from: self.extractProperties(of: structure.states.flatMap { $0 })))
         /*if true == structure.states.isEmpty {
             return
         }
@@ -124,7 +124,7 @@ public class NuSMVKripkeStructureView: KripkeStructureView {
         self.printStructure(self.generateData(data))*/
     }
 
-    private func createPropertiesList(of states: [KripkeState]) -> String {
+    private func extractProperties(of states: [KripkeState]) -> [String: Set<String>] {
         var props: [String: Set<String>] = [:]
         states.forEach { (state) in
             let stateProperties = self.extractor.extract(from: state.properties)
@@ -135,15 +135,19 @@ public class NuSMVKripkeStructureView: KripkeStructureView {
                 props[key]?.insert(property)
             }
         }
+        return props
+    }
+
+    private func createPropertiesList(from props: [String: Set<String>]) -> String {
         return props.reduce("") {
             guard let first = $1.1.first else {
                 return $0 + "\n\n" + "\($1.0) : {};"
             }
-            let preList = $0 + "\n\n" + "\($1.0) : {"
-            let list = preList + $1.1.dropFirst().reduce("\n    " + first) {
+            let preList = $0 + "\n\n" + "\($1.0) : {\n"
+            let list = $1.1.dropFirst().reduce("    " + first) {
                 $0 + ",\n    " + $1
             }
-            return list + "\n};"
+            return preList + list + "\n};"
         }
     }
 /*
