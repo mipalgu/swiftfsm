@@ -96,8 +96,9 @@ public class NuSMVKripkeStructureView: KripkeStructureView {
      */
     public func make(structure: KripkeStructure) {
         let plist = self.createPropertiesList(from: self.extractProperties(of: structure.states))
+        let initials = self.createInitial(from: structure.initialStates)
         let trans = self.createTransitions(from: structure.states)
-        self.printStructure(properties: plist, initial: "", transitions: trans)
+        self.printStructure(properties: plist, initial: initials, transitions: trans)
     }
 
     /*
@@ -105,9 +106,22 @@ public class NuSMVKripkeStructureView: KripkeStructureView {
      */
     private func printStructure(properties: String, initial: String, transitions: String) {
         let module = "MODULE main"
-        let contents = module + "\n\n" + properties + "\n\n" + initial + "\n\n" + transitions
+        let contents = module + "\n\n" + properties + "\n\n" + initial + "\n" + transitions
         let printer: Printer = factory.make(id: "main.smv")
         printer.message(str: contents)
+    }
+
+    private func createInitial(from initialStates: [KripkeState]) -> String {
+        let initial = "INIT"
+        guard let firstState = initialStates.first else {
+            return initial
+        }
+        let firstProps = self.extractor.extract(from: firstState.properties)
+        let firstInit = "(" + self.createConditions(of: firstProps) + ")"
+        let list = initialStates.dropFirst().reduce(firstInit) {
+            $0 + " | (" + self.createConditions(of: self.extractor.extract(from: $1.properties)) + ")"
+        }
+        return initial + "\n" + list
     }
 
     private func createTransitions(from states: [KripkeState]) -> String {
@@ -128,17 +142,21 @@ public class NuSMVKripkeStructureView: KripkeStructureView {
         let effects = state.effects.map {
             self.extractor.extract(from: $0)
         }
-        guard let firstProp = props.first else {
-            return ""
-        }
-        let firstCondition = firstProp.0 + "=" + firstProp.1
-        let conditions = props.reduce(firstCondition) {
-            $0 + " & " + $1.0 + "=" + $1.1
-        }
+        let conditions = self.createConditions(of: props)
         let effectsList = effects.reduce("") { (last: String, props: [String: String]) -> String in
             last + "\n    " + self.createEffect(from: props)
         }
         return conditions + ":" + effectsList
+    }
+
+    private func createConditions(of props: [String: String]) -> String {
+        guard let firstProp = props.first else {
+            return ""
+        }
+        let firstCondition = firstProp.0 + "=" + firstProp.1
+        return props.dropFirst().reduce(firstCondition) {
+            $0 + " & " + $1.0 + "=" + $1.1
+        }
     }
 
     private func createEffect(from props: [String: String]) -> String {
@@ -146,7 +164,7 @@ public class NuSMVKripkeStructureView: KripkeStructureView {
             return ""
         }
         let firstEffect = "next(" + firstProp.0 + ")=" + firstProp.1
-        let effects = props.reduce(firstEffect) {
+        let effects = props.dropFirst().reduce(firstEffect) {
             $0 + " & next(" + $1.0 + ")=" + $1.1
         }
         return effects + ";"
