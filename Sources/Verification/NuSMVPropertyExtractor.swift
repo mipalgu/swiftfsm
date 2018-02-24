@@ -89,6 +89,8 @@ public final class NuSMVPropertyExtractor {
 
     fileprivate func convert(_ property: KripkeStateProperty, properties: inout [String: String], label: String) {
         switch property.type {
+        case .EmptyCollection:
+            return
         case .Collection(let props):
             for (index, property) in props.enumerated() {
                 self.convert(property, properties: &properties, label: label + self.delimiter + "\(index)")
@@ -130,7 +132,7 @@ public final class NuSMVPropertyExtractor {
         let val: String = "\(property.value)"
         switch property.type {
         case .String:
-            return "\"" + val + "\""
+            return "\"" + self.formatLabel(val) + "\""
         case .Double, .Float, .Float80:
             return "F" + String(val.characters.map({ $0 == "." ? "_" : $0 }))
         default:
