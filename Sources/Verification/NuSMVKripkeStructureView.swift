@@ -113,7 +113,10 @@ public class NuSMVKripkeStructureView: KripkeStructureView {
      *  the NuSMV representation.
      */
     public func make(structure: KripkeStructure) {
-        print(self.createPropertiesList(from: self.extractProperties(of: structure.states.flatMap { $0 })))
+        let states = structure.states.flatMap { $0 }
+        let plist = self.createPropertiesList(from: self.extractProperties(of: states))
+        let trans = self.createTransitions(from: states)
+        print(trans)
         /*if true == structure.states.isEmpty {
             return
         }
@@ -122,6 +125,48 @@ public class NuSMVKripkeStructureView: KripkeStructureView {
         data.states = self.states
         self.initializeDefaultProperties(data)
         self.printStructure(self.generateData(data))*/
+    }
+
+    private func createTransitions(from states: [KripkeState]) -> String {
+        let trans = "TRANS\ncase"
+        let endTrans = "esac"
+        guard let firstState = states.first else {
+            return trans + "\n" + endTrans
+        }
+        let firstCase = self.createCase(of: firstState)
+        let list = states.dropFirst().reduce(firstCase) {
+            $0 + "\n" + self.createCase(of: $1)
+        }
+        return trans + "\n" + list + "\n" + endTrans
+    }
+
+    private func createCase(of state: KripkeState) -> String {
+        let props = self.extractor.extract(from: state.properties)
+        let effects = state.effects.map {
+            self.extractor.extract(from: $0)
+        }
+        guard let firstProp = props.first else {
+            return ""
+        }
+        let firstCondition = firstProp.0 + "=" + firstProp.1
+        let conditions = props.reduce(firstCondition) {
+            $0 + " & " + $1.0 + "=" + $1.1
+        }
+        let effectsList = effects.reduce("") { (last: String, props: [String: String]) -> String in
+            last + "\n    " + self.createEffect(from: props)
+        }
+        return conditions + ":" + effectsList
+    }
+
+    private func createEffect(from props: [String: String]) -> String {
+        guard let firstProp = props.first else {
+            return ""
+        }
+        let firstEffect = "next(" + firstProp.0 + ")=" + firstProp.1
+        let effects = props.reduce(firstEffect) {
+            $0 + " & next(" + $1.0 + ")=" + $1.1
+        }
+        return effects + ";"
     }
 
     private func extractProperties(of states: [KripkeState]) -> [String: Set<String>] {
