@@ -73,7 +73,7 @@ public final class MachineKripkeStructureGenerator<
     StateGenerator: KripkeStateGeneratorProtocol,
     Tokenizer: SchedulerTokenizer
 >: KripkeStructureGenerator where
-    Detector.Element == World,
+    Detector.Element == KripkeStatePropertyList,
     Tokenizer.Object == Machine,
     Tokenizer.SchedulerToken == AnyScheduleableFiniteStateMachine
 {
@@ -87,8 +87,6 @@ public final class MachineKripkeStructureGenerator<
     private struct Job {
 
         let cache: Detector.Data
-
-        let lastSnapshot: World
 
         let tokens: [[(fsm: AnyScheduleableFiniteStateMachine, machine: Machine)]]
 
@@ -171,7 +169,6 @@ public final class MachineKripkeStructureGenerator<
         let tokens = self.tokenizer.separate(self.machines)
         var jobs = [MachineKripkeStructureGenerator.Job(
             cache: self.cycleDetector.initialData,
-            lastSnapshot: World(externalVariables: [:], variables: [:]),
             tokens: tokens,
             executing: 0,
             lastState: nil,
@@ -200,21 +197,20 @@ public final class MachineKripkeStructureGenerator<
                 let world = self.createWorld(
                     fromExternals: externals,
                     andTokens: clones,
-                    andLastWorld: job.lastSnapshot,
+                    andLastState: job.lastState,
                     andExecuting: job.executing
                 )
                 let (inCycle, newCache) = self.cycleDetector.inCycle(data: job.cache, element: world)
                 if true == inCycle {
                     continue
-                    /*guard let firstClone = clones[job.executing].first else {
-                        continue
-                    }
-                    if true == firstClone.0.hasFinished {
-                        continue
-                    }*/
                 }
                 // Create a `KripkeState` for each ringlet executing in each fsm.
-                let tempStates = execute(withWorld: world, clones: clones[job.executing], withLastState: job.lastState)
+                let tempStates = execute(
+                    clones: clones,
+                    executing: job.executing,
+                    andExternals: externals,
+                    andLastState: job.lastState
+                )
                 guard let lastTempState = tempStates.last else {
                     continue
                 }
@@ -231,8 +227,6 @@ public final class MachineKripkeStructureGenerator<
                 let executing = (job.executing + 1) % clones.count
                 jobs.append(MachineKripkeStructureGenerator.Job(
                     cache: newCache,
-                    //swiftlint:disable line_length
-                    lastSnapshot: self.createWorld(fromExternals: externals, andTokens: clones, andLastWorld: world, andExecuting: executing),
                     tokens: clones,
                     executing: executing,
                     lastState: states.first { lastTempState == $0 } ?? lastTempState,
@@ -261,18 +255,26 @@ public final class MachineKripkeStructureGenerator<
     }
 
     private func execute(
-        withWorld world: World,
-        clones: [(fsm: AnyScheduleableFiniteStateMachine, machine: Machine)],
-        withLastState last: KripkeState?
+        clones: [[(fsm: AnyScheduleableFiniteStateMachine, machine: Machine)]],
+        executing: Int,
+        andExternals externals: [(AnySnapshotController, KripkeStatePropertyList)],
+        andLastState last: KripkeState?
     ) -> [KripkeState] {
         var last = last
-        return clones.flatMap { (fsm: AnyScheduleableFiniteStateMachine, machine: Machine) -> [KripkeState] in
+        //swiftlint:disable:next line_length
+        return clones[executing].flatMap { (fsm: AnyScheduleableFiniteStateMachine, machine: Machine) -> [KripkeState] in
             let stateName = fsm.currentState.name
+            let preWorld = self.createWorld(
+                fromExternals: externals,
+                andTokens: clones,
+                andLastState: last,
+                andExecuting: executing
+            )
             let preState = self.stateGenerator.generateKripkeState(
                 fromFSM: fsm.clone(),
                 withinMachine: machine,
                 withLastState: last,
-                addingProperties: world.variables <| (last?.properties ?? [:]) <| [
+                addingProperties: preWorld <| [
                     "pc": KripkeStateProperty(
                         type: .String,
                         value: "\(machine.name).\(fsm.name).\(stateName).R"
@@ -280,11 +282,17 @@ public final class MachineKripkeStructureGenerator<
                 ]
             )
             fsm.next()
+            let postWorld = self.createWorld(
+                fromExternals: externals,
+                andTokens: clones,
+                andLastState: preState,
+                andExecuting: executing
+            )
             let postState = self.stateGenerator.generateKripkeState(
                 fromFSM: fsm.clone(),
                 withinMachine: machine,
                 withLastState: preState,
-                addingProperties: (last?.properties ?? [:]) <| preState.properties <| [
+                addingProperties: postWorld <| [
                     "pc": KripkeStateProperty(
                         type: .String,
                         value: "\(machine.name).\(fsm.name).\(stateName).W"
@@ -331,16 +339,25 @@ public final class MachineKripkeStructureGenerator<
         return (data, externalCounts)
     }
 
-    private func createWorld(
-        fromExternals externals: [(AnySnapshotController, KripkeStatePropertyList)],
-        andTokens tokens: [[(fsm: AnyScheduleableFiniteStateMachine, machine: Machine)]],
-        andLastWorld lastWorld: World,
-        andExecuting executing: Int
-    ) -> World {
-        var ps: KripkeStatePropertyList = [:]
-        externals.enumerated().forEach {
-            ps["\($0)"] = KripkeStateProperty(type: .Compound($1.1), value: $1.0.val)
+    private func convert(externals: [(AnySnapshotController, KripkeStatePropertyList)]) -> KripkeStatePropertyList {
+        var props: [KripkeStateProperty] = []
+        var values: [Any] = []
+        externals.forEach {
+            props.append(KripkeStateProperty(type: .Compound($0.1), value: $0.0.val))
+            values.append($0.0.val)
         }
+        return [
+            "externalVariables": KripkeStateProperty(
+                type: .Collection(props),
+                value: values
+            )
+        ]
+    }
+
+    private func convert(
+        tokens: [[(fsm: AnyScheduleableFiniteStateMachine, machine: Machine)]],
+        executing: Int
+    ) -> KripkeStatePropertyList {
         var varPs: KripkeStatePropertyList = [:]
         tokens.forEach {
             $0.forEach {
@@ -351,10 +368,18 @@ public final class MachineKripkeStructureGenerator<
             }
         }
         varPs["executing"] = KripkeStateProperty(type: .Int, value: executing)
-        return World(
-            externalVariables: lastWorld.externalVariables <| ps,
-            variables: lastWorld.variables <| varPs
-        )
+        return varPs
+    }
+
+    private func createWorld(
+        fromExternals externals: [(AnySnapshotController, KripkeStatePropertyList)],
+        andTokens tokens: [[(fsm: AnyScheduleableFiniteStateMachine, machine: Machine)]],
+        andLastState lastState: KripkeState?,
+        andExecuting executing: Int
+    ) -> KripkeStatePropertyList {
+        let externalVariables = self.convert(externals: externals)
+        let varPs = self.convert(tokens: tokens, executing: executing)
+        return (lastState?.properties ?? [:]) <| varPs <| externalVariables
     }
 
 }

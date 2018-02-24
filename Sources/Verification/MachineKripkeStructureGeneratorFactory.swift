@@ -69,7 +69,7 @@ public final class MachineKripkeStructureGeneratorFactory: KripkeStructureGenera
         fromMachines machines: [Machine]
     ) -> MachineKripkeStructureGenerator<
         AggregateCloner<Cloner<KripkeStatePropertyListConverter>>,
-        HashTableCycleDetector<World>,
+        HashTableCycleDetector<KripkeStatePropertyList>,
         ExternalsSpinnerDataExtractor<
             MirrorKripkePropertiesRecorder,
             KripkeStatePropertySpinnerConverter
@@ -83,7 +83,7 @@ public final class MachineKripkeStructureGeneratorFactory: KripkeStructureGenera
     > {
         return MachineKripkeStructureGenerator(
             cloner: AggregateCloner(cloner: Cloner(converter: KripkeStatePropertyListConverter())),
-            cycleDetector: HashTableCycleDetector<World>(),
+            cycleDetector: HashTableCycleDetector<KripkeStatePropertyList>(),
             extractor: ExternalsSpinnerDataExtractor(
                 converter: KripkeStatePropertySpinnerConverter(),
                 extractor: MirrorKripkePropertiesRecorder()
