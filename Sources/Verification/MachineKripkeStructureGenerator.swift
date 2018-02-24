@@ -209,7 +209,6 @@ public final class MachineKripkeStructureGenerator<
                 )
                 let (inCycle, newCache) = self.cycleDetector.inCycle(data: job.cache, element: world)
                 if true == inCycle {
-                    print("found cycle")
                 }
                 // Create a `KripkeState` for each ringlet executing in each fsm.
                 let tempStates = execute(
@@ -218,6 +217,9 @@ public final class MachineKripkeStructureGenerator<
                     andExternals: externals,
                     andLastState: job.lastState
                 )
+                if true == job.initial {
+                    tempStates.first.map { initialStates.append($0) }
+                }
                 guard let lastTempState = tempStates.last else {
                     continue
                 }
@@ -227,9 +229,6 @@ public final class MachineKripkeStructureGenerator<
                     let state = $0
                     guard let existingState = states.first(where: { $0.properties == state.properties }) else {
                         states.append(state)
-                        if true == job.initial {
-                            initialStates.append(state)
-                        }
                         added = true
                         return
                     }
