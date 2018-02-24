@@ -157,6 +157,7 @@ public final class MachineKripkeStructureGenerator<
     }
 */
 
+    //swiftlint:disable:next function_body_length
     public func generate() -> KripkeStructure {
         var states: [KripkeState] = []
         states.reserveCapacity(500000)
@@ -214,16 +215,27 @@ public final class MachineKripkeStructureGenerator<
                 }
                 // Create a `KripkeState` for each ringlet executing in each fsm.
                 let tempStates = execute(withWorld: world, clones: clones[job.executing], withLastState: job.lastState)
+                guard let lastTempState = tempStates.last else {
+                    continue
+                }
                 // Append the states to the states array if these are starting states.
-                states.append(contentsOf: tempStates)
+                tempStates.forEach {
+                    let state = $0
+                    guard let existingState = states.first(where: { $0.properties == state.properties }) else {
+                        states.append(state)
+                        return
+                    }
+                    existingState.effects.formUnion(state.effects)
+                }
                 // Create a new job from the clones.
                 let executing = (job.executing + 1) % clones.count
                 jobs.append(MachineKripkeStructureGenerator.Job(
                     cache: newCache,
+                    //swiftlint:disable line_length
                     lastSnapshot: self.createWorld(fromExternals: externals, andTokens: clones, andLastWorld: world, andExecuting: executing),
                     tokens: clones,
                     executing: executing,
-                    lastState: tempStates.last,
+                    lastState: states.first { lastTempState == $0 } ?? lastTempState,
                     lastRecords: clones.map { $0.map { $0.0.currentRecord } }
                 ))
             }
@@ -239,6 +251,7 @@ public final class MachineKripkeStructureGenerator<
         }
         guard
             let tempData = try? JSONSerialization.data(withJSONObject: statesProps, options: []),
+            //swiftlint:disable:next unused_optional_binding
             let _ = try? tempData.write(to: file)
         else {
             fatalError("Unable to write file.")
@@ -271,7 +284,7 @@ public final class MachineKripkeStructureGenerator<
                 fromFSM: fsm.clone(),
                 withinMachine: machine,
                 withLastState: preState,
-                addingProperties: preState.properties <| [
+                addingProperties: (last?.properties ?? [:]) <| preState.properties <| [
                     "pc": KripkeStateProperty(
                         type: .String,
                         value: "\(machine.name).\(fsm.name).\(stateName).W"
@@ -299,6 +312,7 @@ public final class MachineKripkeStructureGenerator<
             guard let fsm = machine.fsms.first else {
                 return []
             }
+            //swiftlint:disable:next identifier_name
             let d = fsm.externalVariables.map { (e: AnySnapshotController) -> ExternalsData in
                 let (defaultValues, spinners) = self.extractor.extract(
                     externalVariables: e

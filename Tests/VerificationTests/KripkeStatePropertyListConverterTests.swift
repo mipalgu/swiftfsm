@@ -71,7 +71,7 @@ public final class KripkeStatePropertyListConverterTests: VerificationTestCase {
 
     //swiftlint:disable:next function_body_length
     public func test_convertsSuccessfully() {
-        let list = [
+        let list: KripkeStatePropertyList = [
             "b": KripkeStateProperty(
                 type: .Bool,
                 value: true

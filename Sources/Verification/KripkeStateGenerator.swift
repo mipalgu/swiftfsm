@@ -62,8 +62,6 @@ import Machines
 
 public final class KripkeStateGenerator: KripkeStateGeneratorProtocol {
 
-    fileprivate var cache: [String: KripkeState] = [:]
-
     public func generateKripkeState(
         fromFSM fsm: AnyScheduleableFiniteStateMachine,
         withinMachine machine: Machine,
@@ -76,17 +74,11 @@ public final class KripkeStateGenerator: KripkeStateGeneratorProtocol {
                 value: fsm
             )
         ]
-        if nil == last?.effects.first(where: { $0 == record }) {
-            last?.effects.append(record)
-        }
-        if let state = self.cache[record.description] {
-            return state
-        }
+        last?.effects.insert(record)
         let state = KripkeState(
             properties: record,
             effects: []
         )
-        cache[record.description] = state
         return state
     }
 
