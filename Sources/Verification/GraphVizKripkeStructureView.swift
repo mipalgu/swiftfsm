@@ -106,7 +106,8 @@ public final class GraphVizKripkeStructureView: KripkeStructureView {
         _ structure: KripkeStructure,
         _ declarations: inout String,
         _ transitions: inout String,
-        _ indent: Int = 1
+        _ indent: Int = 1,
+        _ isInitial: Bool = true
     ) {
         if nil != self.cache[state.properties] {
             return
@@ -116,13 +117,17 @@ public final class GraphVizKripkeStructureView: KripkeStructureView {
         self.cache[state.properties] = (id, state)
         let shape = state.effects.isEmpty ? "doublecircle" : "circle"
         let label = self.formatProperties(state.properties, indent, false)
-        declarations += "node [shape=\(shape), label=\"\(label)\", fontsize=10] s\(id);\n"
+        if true == isInitial {
+            declarations += "node [shape=point] si\(id);"
+            transitions += "si\(id) -> s\(id);"
+       }
+        declarations += "node [shape=\(shape), label=\"\(label)\"]; s\(id);\n"
         state.effects.forEach {
             let effect = $0
             guard let effectState = structure.states.first(where: { $0.properties == effect}) else {
                 fatalError("Structure does not contain effect")
             }
-            self.handleState(effectState, structure, &declarations, &transitions)
+            self.handleState(effectState, structure, &declarations, &transitions, indent, false)
             guard let (effectId, _) = self.cache[effect] else {
                 fatalError("Unable to handle effect")
             }
