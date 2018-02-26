@@ -91,13 +91,13 @@ public class Swiftfsm<
     private let machineFactory: MF
 
     private let machineLoader: MachineLoader
-    
+
     private let parser: HelpableParser
-    
+
     private let schedulerFactory: SF
-    
+
     private let view: View
-    
+
     /**
      *  Create a new `Swiftfsm`.
      *
@@ -138,7 +138,7 @@ public class Swiftfsm<
         self.schedulerFactory = schedulerFactory
         self.view = view
     }
-    
+
     /**
      *  Run everything!
      *
@@ -149,30 +149,30 @@ public class Swiftfsm<
         // Pad the output
         self.view.message(message: "")
         // Print help when we have no input.
-        if (args.count < 2) {
+        if args.count < 2 {
             self.view.message(message: parser.helpText)
             self.handleError(SwiftfsmErrors.parsingError(error: .noPathsFound))
         }
         // Parse the args and get a bunch of tasks.
         let tasks: [Task] = self.parseArgs(self.cleanArgs(args))
         // Show the help message when there are no tasks.
-        if (true == tasks.isEmpty) {
+        if true == tasks.isEmpty {
             self.handleMessage(parser.helpText)
         }
         // Has the user asked to turn on debugging?
         DEBUG = nil != tasks.lazy.filter { $0.enableDebugging }.first
         // Has the user said to print the help message?
-        if let _ = tasks.lazy.filter({ true == $0.printHelpText }).first {
+        if nil != tasks.lazy.filter({ true == $0.printHelpText }).first {
             self.handleMessage(parser.helpText)
         }
         // NoPathsFound when there is only one task and it does not have a path
-        if (1 == tasks.count && nil == tasks[0].path) {
+        if 1 == tasks.count && nil == tasks[0].path {
             self.view.message(message: parser.helpText)
             self.handleError(SwiftfsmErrors.parsingError(error: .noPathsFound))
         }
         // Error when more than one scheduler is specified.
         let schedulers = tasks.filter { $0.scheduler != nil }
-        if (schedulers.count > 1) {
+        if schedulers.count > 1 {
             self.handleError(SwiftfsmErrors.generalError(error: "You cannot define more than 1 scheduler."))
         }
         let scheduler: SchedulerFactory = schedulers.first?.scheduler ?? self.schedulerFactory
@@ -183,38 +183,22 @@ public class Swiftfsm<
     private func cleanArgs(_ args: [String]) -> [String] {
         return args[1 ..< args.count].flatMap { (str: String) -> [String] in
             let cs = Array(str.characters)
-            if (cs.count < 2 || cs.first != "-") {
+            if cs.count < 2 || cs.first != "-" {
                 return [str]
             }
-            if (cs[1] == "-") {
+            if cs[1] == "-" {
                 return [str]
             }
             return cs >>- { $0 == "-" ? nil : "-\($0)" }
         }
     }
-    
+
     private func generateKripkeStructure(_ machines: [Machine]) {
         let generator = self.kripkeStructureGeneratorFactory.make(fromMachines: machines)
         let structure = generator.generate()
         self.kripkeStructureView.make(structure: structure)
-        /*let structures = machines >>- { (machine: Machine) -> [KripkeStructure] in
-            machine.fsms.map { $0.generate(machine: machine.name)  }
-        }
-        var states: [[KripkeState]] = []
-        states.reserveCapacity(structures.reduce(0) { $0 + $1.states.count })
-        let structure = KripkeStructure(
-                states: zip(structures, 0..<structures.count).reduce(states) {
-                    var states = $0
-                    let t: (KripkeStructure, Int) = $1
-                    t.0.states.reversed().forEach {
-                        states.insert($0, at: t.1)
-                    }
-                    return states
-                }
-            )
-        self.kripkeStructureView.make(structure: structure)*/
     }
-    
+
     private func handleError(_ error: SwiftfsmErrors) -> Never {
         self.view.error(error: error)
         exit(EXIT_FAILURE)
@@ -224,7 +208,7 @@ public class Swiftfsm<
         self.view.message(message: message)
         exit(EXIT_SUCCESS)
     }
-    
+
     private func handleTasks(_ tasks: [Task], withScheduler factory: SchedulerFactory) {
         let t: [(schedule: [Machine], kripke: [Machine])] = tasks.map {
             self.handleTask($0)
@@ -233,8 +217,8 @@ public class Swiftfsm<
         self.runMachines(t.flatMap { $0.schedule }, withScheduler: factory)
     }
 
-    private func getMachinesName(_ t: Task) -> String {
-        var name: String = nil == t.name ? "machine" : t.name!
+    private func getMachinesName(_ task: Task) -> String {
+        var name: String = task.name ?? "machine"
         if let count: Int = self.names[name] {
             let temp: String = name
             name += "\(count)"
@@ -246,52 +230,52 @@ public class Swiftfsm<
     }
 
     private func loadFsms(
-        _ t: Task,
+        _ task: Task,
         name: String
     ) -> [AnyScheduleableFiniteStateMachine] {
-        KRIPKE = t.generateKripkeStructure
+        KRIPKE = task.generateKripkeStructure
         let fsms: [AnyScheduleableFiniteStateMachine]
-        if true == t.isClfsmMachine {
-            fsms = self.clfsmMachineLoader.load(path: t.path!)
+        if true == task.isClfsmMachine {
+            fsms = self.clfsmMachineLoader.load(path: task.path!)
         } else {
-            fsms = self.machineLoader.load(path: t.path!)
+            fsms = self.machineLoader.load(path: task.path!)
         }
-        if (fsms.count > 0) {
+        if fsms.count > 0 {
             return fsms
         }
         // Handle when we are unable to load the fsm.
-        self.handleError(.unableToLoad(machineName: name, path: t.path!))
+        self.handleError(.unableToLoad(machineName: name, path: task.path!))
     }
 
-    private func handleTask(_ t: Task) -> ([Machine], [Machine]) {
-        var name: String = self.getMachinesName(t)
+    private func handleTask(_ task: Task) -> ([Machine], [Machine]) {
+        var name: String = self.getMachinesName(task)
         // Handle when there is no path in the Task.
-        if (nil == t.path) {
+        if nil == task.path {
             self.handleError(.parsingError(error: .pathNotFound(machineName: name)))
         }
         var schedule: [Machine] = []
         var kripke: [Machine] = []
-        for _ in 0 ..< t.count  {
+        for _ in 0 ..< task.count {
             // Create the Machine
             let temp: Machine = self.machineFactory.make(
                 name: name,
-                fsms: self.loadFsms(t, name: name),
-                debug: t.enableDebugging
+                fsms: self.loadFsms(task, name: name),
+                debug: task.enableDebugging
             )
             // Remember to generate Kripke Structures.
-            if (true == t.generateKripkeStructure) {
+            if true == task.generateKripkeStructure {
                 kripke.append(temp)
             }
             // Remember to add the machine to the scheduler if need be.
-            if (true == t.addToScheduler) {
+            if true == task.addToScheduler {
                 schedule.append(temp)
             }
             // Generate the next name of the Machine
-            name = self.getMachinesName(t)
+            name = self.getMachinesName(task)
         }
-        return (schedule, kripke) 
+        return (schedule, kripke)
     }
-    
+
     private func parseArgs(_ args: [String]) -> [Task] {
         let tasks: [Task]
         do {
@@ -303,9 +287,9 @@ public class Swiftfsm<
         }
         return tasks
     }
-    
+
     private func runMachines(_ machines: [Machine], withScheduler factory: SchedulerFactory) {
-            factory.make(machines: machines).run()
+        factory.make(machines: machines).run()
     }
-    
+
 }
