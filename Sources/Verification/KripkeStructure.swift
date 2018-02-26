@@ -74,14 +74,14 @@ public struct KripkeStructure: KripkeStructureType {
     /**
      *  All `KripkeState`s in the structure.
      */
-    public let states: [KripkeState]
+    public let states: [KripkeStatePropertyList: KripkeState]
 
     /**
      *  Create a new `KripkeStructure`.
      *
      *  - Parameter states: All `KripkeState`s in the structure.
      */
-    public init(initialStates: [KripkeState] = [], states: [KripkeState] = []) {
+    public init(initialStates: [KripkeState] = [], states: [KripkeStatePropertyList: KripkeState] = [:]) {
         self.initialStates = initialStates
         self.states = states
     }

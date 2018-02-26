@@ -124,7 +124,7 @@ public final class GraphVizKripkeStructureView: KripkeStructureView {
         declarations += "node [shape=\(shape), label=\"\(label)\"]; s\(id);\n"
         state.effects.forEach {
             let effect = $0
-            guard let effectState = structure.states.first(where: { $0.properties == effect}) else {
+            guard let effectState = structure.states[effect] else {
                 fatalError("Structure does not contain effect")
             }
             self.handleState(effectState, structure, &declarations, &transitions, indent, false)

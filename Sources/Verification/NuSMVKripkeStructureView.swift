@@ -124,15 +124,15 @@ public class NuSMVKripkeStructureView: KripkeStructureView {
         return initial + "\n" + list
     }
 
-    private func createTransitions(from states: [KripkeState]) -> String {
+    private func createTransitions(from states: [KripkeStatePropertyList: KripkeState]) -> String {
         let trans = "TRANS\ncase"
         let endTrans = "esac"
-        guard let firstState = states.first else {
+        guard let firstState = states.first?.1 else {
             return trans + "\n" + endTrans
         }
         let firstCase = self.createCase(of: firstState)
         let list = states.dropFirst().reduce(firstCase) {
-            $0 + "\n" + self.createCase(of: $1)
+            $0 + "\n" + self.createCase(of: $1.1)
         }
         return trans + "\n" + list + "\n" + endTrans
     }
@@ -170,9 +170,9 @@ public class NuSMVKripkeStructureView: KripkeStructureView {
         return effects + ";"
     }
 
-    private func extractProperties(of states: [KripkeState]) -> [String: Set<String>] {
+    private func extractProperties(of states: [KripkeStatePropertyList: KripkeState]) -> [String: Set<String>] {
         var props: [String: Set<String>] = [:]
-        states.forEach { (state) in
+        states.forEach { (_, state) in
             let stateProperties = self.extractor.extract(from: state.properties)
             stateProperties.forEach { (key, property) in
                 if nil == props[key] {

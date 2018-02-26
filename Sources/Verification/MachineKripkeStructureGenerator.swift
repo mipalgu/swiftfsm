@@ -166,7 +166,7 @@ public final class MachineKripkeStructureGenerator<
         // Create spinner.
         let machines = self.fetchUniqueMachines(fromMachines: self.machines)
         guard false == machines.isEmpty else {
-            return KripkeStructure(states: [])
+            return KripkeStructure(states: [:])
         }
         let (data, externalCounts) = self.makeExternalsData(forMachines: machines)
         // Create initial jobs.
@@ -270,7 +270,7 @@ public final class MachineKripkeStructureGenerator<
             fatalError("Unable to write file.")
         }
         print("total states: \(states.count)")
-        return KripkeStructure(initialStates: initialStates, states: states.map { $1 })
+        return KripkeStructure(initialStates: initialStates, states: states)
     }
 
     private func execute(
