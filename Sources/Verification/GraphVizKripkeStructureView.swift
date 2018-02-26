@@ -115,7 +115,7 @@ public final class GraphVizKripkeStructureView: KripkeStructureView {
         self.latest += 1
         self.cache[state.properties] = (id, state)
         let shape = state.effects.isEmpty ? "doublecircle" : "circle"
-        let label = self.formatProperties(state.properties, indent)
+        let label = self.formatProperties(state.properties, indent, false)
         declarations += "node [shape=\(shape), label=\"\(label)\", fontsize=10] s\(id);\n"
         state.effects.forEach {
             let effect = $0
@@ -130,22 +130,40 @@ public final class GraphVizKripkeStructureView: KripkeStructureView {
         }
     }
 
-    fileprivate func formatProperties(_ list: KripkeStatePropertyList, _ indent: Int = 0) -> String {
+    fileprivate func formatProperties(
+        _ list: KripkeStatePropertyList,
+        _ indent: Int,
+        _ includeBraces: Bool = true
+    ) -> String {
         let indentStr = Array(repeating: " ", count: (indent + 1) * 2).reduce("", +)
-        let content = list.reduce("\\n") {
-            let str = self.formatProperty($1.1, indent + 1)
-            return $0 + indentStr + $1.0 + " = " + str + "\\n"
+        guard let first = list.first else {
+            return "{}"
+        }
+        let firstStr = indentStr + first.0 + " = " + self.formatProperty(first.1, indent + 1)
+        let content = list.dropFirst().reduce("\\l" + firstStr) {
+            $0 + ",\\l" + indentStr + $1.0 + " = " + self.formatProperty($1.1, indent + 1)
         }
         let indentStr2 = Array(repeating: " ", count: indent * 2).reduce("", +)
-        return "{" + content + indentStr2 + "}"
+        if true == includeBraces {
+            return "{" + content + "\\l" + indentStr2 + "}"
+        }
+        return content + "\\l" + indentStr2
     }
 
-    fileprivate func formatProperty(_ prop: KripkeStateProperty, _ indent: Int = 0) -> String {
+    fileprivate func formatProperty(_ prop: KripkeStateProperty, _ indent: Int) -> String {
         switch prop.type {
         case .EmptyCollection:
             return "[]"
         case .Collection(let collection):
-            return "[" + collection.reduce("") { $0 + ", " + self.formatProperty($1) } + "]"
+            guard let first = collection.first else {
+                return "[]"
+            }
+            let indentStr = Array(repeating: " ", count: indent * 2).reduce("", +)
+            let indentStr2 = Array(repeating: " ", count: (indent + 1) * 2).reduce("", +)
+            let firstStr = "\\l" + indentStr2 + self.formatProperty(first, indent + 1)
+            return "[" + collection.dropFirst().reduce(firstStr) {
+                $0 + ",\\l" + indentStr2 + self.formatProperty($1, indent + 1)
+            } + "\\l" + indentStr + "]"
         case .Compound(let list):
             return self.formatProperties(list, indent + 1)
         default:
