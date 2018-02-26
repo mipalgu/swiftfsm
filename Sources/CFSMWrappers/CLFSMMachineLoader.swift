@@ -173,9 +173,13 @@ public func handleUnloadedMachine(_ fsm: AnyScheduleableFiniteStateMachine) -> B
             var finiteStateMachine: AnyScheduleableFiniteStateMachine
             let suspendStateIndex = Int(refl_getSuspendState(metaMachine, nil))
             if suspendStateIndex < 0 || suspendStateIndex > states.count {
-                finiteStateMachine = FSM(uniqueName, initialState: states[0])
+                finiteStateMachine = FSM(uniqueName, initialState: states[0]).asScheduleableFiniteStateMachine
             } else {
-                finiteStateMachine = FSM(uniqueName, initialState: states[0], suspendState: states[suspendStateIndex])
+                finiteStateMachine = FSM(
+                    uniqueName,
+                    initialState: states[0],
+                    suspendState: states[suspendStateIndex]
+                ).asScheduleableFiniteStateMachine
             }
             finiteStateMachines.append(finiteStateMachine)
             type(of: self).nameToMachineID[uniqueName] = machineID
