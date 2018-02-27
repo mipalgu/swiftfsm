@@ -282,6 +282,9 @@ public final class MachineKripkeStructureGenerator<
         var last = last
         //swiftlint:disable:next line_length
         return clones[executing].flatMap { (fsm: AnyScheduleableFiniteStateMachine, machine: Machine) -> [KripkeState] in
+            if true == fsm.hasFinished {
+                return []
+            }
             let state = fsm.currentState.name
             let preWorld = self.createWorld(
                 fromExternals: externals,
