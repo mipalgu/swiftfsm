@@ -119,7 +119,7 @@ public final class GraphVizKripkeStructureView: KripkeStructureView {
         let label = self.formatProperties(state.properties, indent, false)
         if true == isInitial {
             declarations += "node [shape=point] si\(id);"
-            transitions += "si\(id) -> s\(id);"
+            transitions += "si\(id) -> s\(id);\n"
        }
         declarations += "node [shape=\(shape), label=\"\(label)\"]; s\(id);\n"
         state.effects.forEach {
