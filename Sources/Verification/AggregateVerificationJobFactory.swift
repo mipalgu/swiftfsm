@@ -74,8 +74,7 @@ public final class AggregateVerificationJobFactory<
     //swiftlint:disable line_length
     public func make(
         tokens: [(AnyScheduleableFiniteStateMachine, Machine)],
-        externalVariables: [(AnySnapshotController, KripkeStatePropertyList)],
-        externalCounts: [Machine: (Int, Int)]
+        externalVariables: [(AnySnapshotController, KripkeStatePropertyList)]
     ) -> LazyMapRandomAccessCollection<
         LazyMapRandomAccessCollection<
             [(AnyScheduleableFiniteStateMachine, Machine)],
@@ -85,17 +84,14 @@ public final class AggregateVerificationJobFactory<
     > {
         let lazyCollection = tokens.lazy
         let separated = lazyCollection.map { (arg: (fsm: AnyScheduleableFiniteStateMachine, machine: Machine)) -> (AnyScheduleableFiniteStateMachine, Machine, [AnySnapshotController]) in
-            guard let (index, count) = externalCounts[arg.machine] else {
-                return (arg.fsm, arg.machine, [])
+            var vars: [AnySnapshotController] = []
+            arg.fsm.externalVariables.forEach { ext in
+                guard let first = externalVariables.first(where: { $0.0.name == ext.name }) else {
+                    fatalError("Unable to find external variable for fsm.")
+                }
+                vars.append(first.0)
             }
-            guard var i = arg.machine.fsms.enumerated().first(where: { $1 == arg.fsm}).map({ $0.0 }) else {
-                fatalError("cannot find fsm in machine")
-            }
-            i = arg.machine.fsms.enumerated().filter { $0.0 < i }.reduce(0) { $0 + $1.1.externalVariables.count }
-            let start = index + i
-            let end = index + i + arg.fsm.externalVariables.count
-            let vars = externalVariables[start..<end]
-            return (arg.fsm, arg.machine, Array(vars.lazy.map { $0.0 }))
+            return (arg.fsm, arg.machine, vars)
         }
         return separated.map {
             self.factory.make(

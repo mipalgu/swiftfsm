@@ -66,8 +66,7 @@ public protocol AggregateVerificationJobFactoryProtocol {
 
     func make(
         tokens: [(AnyScheduleableFiniteStateMachine, Machine)],
-        externalVariables: [(AnySnapshotController, KripkeStatePropertyList)],
-        externalCounts: [Machine: (Int, Int)]
+        externalVariables: [(AnySnapshotController, KripkeStatePropertyList)]
     ) -> VerificationJobSequence
 
 }

@@ -137,27 +137,6 @@ public final class MachineKripkeStructureGenerator<
         self.tokenizer = tokenizer
     }
 
-/*
-    fileprivate func gen() -> KripkeStructure {
-        var states: [KripkeState] = []
-        states.reserveCapacity(500000)
-        let machines = self.fetchUniqueMachines(fromMAchines: self.machines)
-        guard false == machines.isEmpty else {
-            return KripkeStructure(states: [])
-        }
-        // 1. Seperate fsms from machines -> array of fsms.
-        // 2. Create jobs -> initial job
-        // 3. While there are jobs
-        // 4. Check if job has been done before
-        // 5. Spin external variables
-        // 6. For each external variable combination -> Verification Job
-        // 7. Clone fsm, execute and generate R and W Kripke States
-        // 8. Check if R and W exist.
-        // 9. Add them if they don't exist.
-        // 10. Convert W to new job.
-    }
-*/
-
     //swiftlint:disable:next function_body_length
     public func generate() -> KripkeStructure {
         var initialStates: [KripkeState] = []
@@ -168,7 +147,7 @@ public final class MachineKripkeStructureGenerator<
         guard false == machines.isEmpty else {
             return KripkeStructure(states: [:])
         }
-        let (data, externalCounts) = self.makeExternalsData(forMachines: machines)
+        let externalVariablesCache = self.makeExternalsData(forMachines: machines)
         // Create initial jobs.
         let tokens = self.tokenizer.separate(self.machines)
         var jobs = [MachineKripkeStructureGenerator.Job(
@@ -183,8 +162,15 @@ public final class MachineKripkeStructureGenerator<
         while false == jobs.isEmpty {
             print(jobs.count)
             let job = jobs.removeFirst()
+            var spinningExternals: [String: ExternalsData] = [:]
+            for (fsm, machine) in job.tokens[job.executing] {
+                let key = machine.name + "." + fsm.name
+                for external in fsm.externalVariables {
+                    spinningExternals[external.name] = externalVariablesCache[key]?[external.name]
+                }
+            }
             // Execute the tokens for the current job for all variations of external variables.
-            let spinner = self.spinnerConstructor.makeSpinner(forExternals: data.flatMap { $0 })
+            let spinner = self.spinnerConstructor.makeSpinner(forExternals: spinningExternals.map { $1 })
             while let externals = spinner() {
                 // Clone all fsms.
                 // swiftlint:disable:next line_length
@@ -192,8 +178,7 @@ public final class MachineKripkeStructureGenerator<
                     Array(self.cloner.clone(
                         jobs: self.factory.make(
                             tokens: arg.element,
-                            externalVariables: externals,
-                            externalCounts: externalCounts
+                            externalVariables: externals
                         ),
                         withLastRecords: job.lastRecords[arg.offset]
                     ))
@@ -328,33 +313,30 @@ public final class MachineKripkeStructureGenerator<
         return uniqueMachines
     }
 
-    private func makeExternalsData(forMachines: Set<Machine>) -> ([ExternalsData], [Machine: (Int, Int)]) {
-        var externalCounts: [Machine: (Int, Int)] = [:]
-        var i = 0
-        var lastCount = 0
-        let data = machines.flatMap { (machine: Machine) -> [ExternalsData] in
+    private func makeExternalsData(forMachines: Set<Machine>) -> [String: [String: ExternalsData]] {
+        var cache: [String: [String: ExternalsData]] = [:]
+        let data = machines.forEach { machine in
             if nil == machine.fsms.first {
-                return []
+                return
             }
-            let d = machine.fsms.flatMap {
-                //swiftlint:disable:next identifier_name
-                $0.externalVariables.flatMap { (e: AnySnapshotController) -> ExternalsData in
+            machine.fsms.forEach { fsm in
+                let key = machine.name + "." + fsm.name
+                if nil == cache[key] {
+                    cache[key] = [:]
+                }
+                fsm.externalVariables.forEach {
                     let (defaultValues, spinners) = self.extractor.extract(
-                        externalVariables: e
+                        externalVariables: $0
                     )
-                    return (
-                        externalVariables: e,
+                    cache[key]?[$0.name] = (
+                        externalVariables: $0,
                         defaultValues: defaultValues,
                         spinners: spinners
                     )
                 }
             }
-            externalCounts[machine] = (i, d.count)
-            lastCount = d.count
-            i += lastCount
-            return d
         }
-        return (data, externalCounts)
+        return cache
     }
 
     private func convert(externals: [(AnySnapshotController, KripkeStatePropertyList)]) -> KripkeStatePropertyList {
@@ -394,6 +376,7 @@ public final class MachineKripkeStructureGenerator<
         return varPs
     }
 
+    //swiftlint:disable:next function_parameter_count
     private func createWorld(
         fromExternals externals: [(AnySnapshotController, KripkeStatePropertyList)],
         andTokens tokens: [[(fsm: AnyScheduleableFiniteStateMachine, machine: Machine)]],
