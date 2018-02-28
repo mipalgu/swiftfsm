@@ -88,7 +88,14 @@ public final class AggregateVerificationJobFactory<
             guard let (index, count) = externalCounts[arg.machine] else {
                 return (arg.fsm, arg.machine, [])
             }
-            return (arg.fsm, arg.machine, Array(externalVariables[index..<(index + count)].lazy.map { $0.0 }))
+            guard var i = arg.machine.fsms.enumerated().first(where: { $1 == arg.fsm}).map({ $0.0 }) else {
+                fatalError("cannot find fsm in machine")
+            }
+            i = arg.machine.fsms.enumerated().filter { $0.0 < i }.reduce(0) { $0 + $1.1.externalVariables.count }
+            let start = index + i
+            let end = index + i + arg.fsm.externalVariables.count
+            let vars = externalVariables[start..<end]
+            return (arg.fsm, arg.machine, Array(vars.lazy.map { $0.0 }))
         }
         return separated.map {
             self.factory.make(

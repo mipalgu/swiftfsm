@@ -333,19 +333,21 @@ public final class MachineKripkeStructureGenerator<
         var i = 0
         var lastCount = 0
         let data = machines.flatMap { (machine: Machine) -> [ExternalsData] in
-            guard let fsm = machine.fsms.first else {
+            if nil == machine.fsms.first {
                 return []
             }
-            //swiftlint:disable:next identifier_name
-            let d = fsm.externalVariables.flatMap { (e: AnySnapshotController) -> ExternalsData in
-                let (defaultValues, spinners) = self.extractor.extract(
-                    externalVariables: e
-                )
-                return (
-                    externalVariables: e,
-                    defaultValues: defaultValues,
-                    spinners: spinners
-                )
+            let d = machine.fsms.flatMap {
+                //swiftlint:disable:next identifier_name
+                $0.externalVariables.flatMap { (e: AnySnapshotController) -> ExternalsData in
+                    let (defaultValues, spinners) = self.extractor.extract(
+                        externalVariables: e
+                    )
+                    return (
+                        externalVariables: e,
+                        defaultValues: defaultValues,
+                        spinners: spinners
+                    )
+                }
             }
             externalCounts[machine] = (i, d.count)
             lastCount = d.count

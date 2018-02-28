@@ -77,6 +77,7 @@ extension AggregateClonerProtocol where Self: ClonerContainer {
         withLastRecords lastRecords: [KripkeStatePropertyList]
     ) -> LazyMapSequence<EnumeratedSequence<LazySequence<S>>, (AnyScheduleableFiniteStateMachine, Machine)> where
         S.Iterator.Element == VerificationJob {
+        //swiftlint:disable:next line_length
         return jobs.lazy.enumerated().lazy.map { (arg: (offset: Int, element: VerificationJob)) -> (AnyScheduleableFiniteStateMachine, Machine) in
             return self.cloner.clone(
                 job: arg.element,
