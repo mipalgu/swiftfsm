@@ -83,7 +83,6 @@ public final class AggregateVerificationJobFactory<
         VerificationJob
     > {
         let lazyCollection = tokens.lazy
-        print(externalVariables.map { $0.0.name })
         let separated = lazyCollection.map { (arg: (fsm: AnyScheduleableFiniteStateMachine, machine: Machine)) -> (AnyScheduleableFiniteStateMachine, Machine, [AnySnapshotController]) in
             var vars: [AnySnapshotController] = []
             arg.fsm.externalVariables.forEach { ext in
