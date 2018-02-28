@@ -64,6 +64,9 @@ import Machines
 import Foundation
 
 //swiftlint:disable opening_brace
+//swiftlint:disable file_length
+//swiftlint:disable cyclomatic_complexity
+
 //swiftlint:disable:next type_body_length
 public final class MachineKripkeStructureGenerator<
     Cloner: AggregateClonerProtocol,
@@ -183,18 +186,6 @@ public final class MachineKripkeStructureGenerator<
                         withLastRecords: job.lastRecords[arg.offset]
                     ))
                 }
-                // Check for cycles.
-                let world = self.createWorld(
-                    fromExternals: externals,
-                    andTokens: clones,
-                    andLastState: job.lastState,
-                    andExecuting: job.executing,
-                    withState: clones[job.executing][0].0.currentState.name,
-                    appendingToPC: "R"
-                )
-                let (inCycle, newCache) = self.cycleDetector.inCycle(data: job.cache, element: world)
-                if true == inCycle {
-                }
                 // Create a `KripkeState` for each ringlet executing in each fsm.
                 let tempStates = execute(
                     clones: clones,
@@ -230,7 +221,7 @@ public final class MachineKripkeStructureGenerator<
                 let executing = (job.executing + 1) % clones.count
                 jobs.append(MachineKripkeStructureGenerator.Job(
                     initial: false,
-                    cache: newCache,
+                    cache: job.cache,
                     tokens: clones,
                     executing: executing,
                     lastState: states[lastTempState.properties] ?? lastTempState,
@@ -265,9 +256,11 @@ public final class MachineKripkeStructureGenerator<
         andLastState last: KripkeState?
     ) -> [KripkeState] {
         var last = last
+        var offset: Int = 0
         //swiftlint:disable:next line_length
         return clones[executing].flatMap { (fsm: AnyScheduleableFiniteStateMachine, machine: Machine) -> [KripkeState] in
             if true == fsm.hasFinished {
+                offset += 1
                 return []
             }
             let state = fsm.currentState.name
@@ -276,6 +269,7 @@ public final class MachineKripkeStructureGenerator<
                 andTokens: clones,
                 andLastState: last,
                 andExecuting: executing,
+                andExecutingToken: offset,
                 withState: state,
                 appendingToPC: "R"
             )
@@ -291,6 +285,7 @@ public final class MachineKripkeStructureGenerator<
                 andTokens: clones,
                 andLastState: preState,
                 andExecuting: executing,
+                andExecutingToken: offset,
                 withState: state,
                 appendingToPC: "W"
             )
@@ -301,6 +296,7 @@ public final class MachineKripkeStructureGenerator<
                 addingProperties: postWorld
             )
             last = postState
+            offset += 1
             return [preState, postState]
         }
     }
@@ -357,6 +353,7 @@ public final class MachineKripkeStructureGenerator<
     private func convert(
         tokens: [[(fsm: AnyScheduleableFiniteStateMachine, machine: Machine)]],
         executing: Int,
+        executingToken token: Int,
         withState state: String,
         appendingToPC str: String
     ) -> KripkeStatePropertyList {
@@ -371,7 +368,7 @@ public final class MachineKripkeStructureGenerator<
         }
         varPs["pc"] = KripkeStateProperty(
             type: .String,
-            value: self.createPC(ofToken: tokens[executing][0], withState: state, appending: str)
+            value: self.createPC(ofToken: tokens[executing][token], withState: state, appending: str)
         )
         return varPs
     }
@@ -382,11 +379,18 @@ public final class MachineKripkeStructureGenerator<
         andTokens tokens: [[(fsm: AnyScheduleableFiniteStateMachine, machine: Machine)]],
         andLastState lastState: KripkeState?,
         andExecuting executing: Int,
+        andExecutingToken token: Int,
         withState state: String,
         appendingToPC str: String
     ) -> KripkeStatePropertyList {
         let externalVariables = self.convert(externals: externals)
-        let varPs = self.convert(tokens: tokens, executing: executing, withState: state, appendingToPC: str)
+        let varPs = self.convert(
+            tokens: tokens,
+            executing: executing,
+            executingToken: token,
+            withState: state,
+            appendingToPC: str
+        )
         return (lastState?.properties ?? [:]) <| varPs <| externalVariables
     }
 
