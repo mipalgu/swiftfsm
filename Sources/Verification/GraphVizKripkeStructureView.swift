@@ -141,6 +141,7 @@ public final class GraphVizKripkeStructureView: KripkeStructureView {
         _ includeBraces: Bool = true
     ) -> String {
         let indentStr = Array(repeating: " ", count: (indent + 1) * 2).reduce("", +)
+        let list = list.sorted { $0.0 < $1.0 }
         guard let first = list.first else {
             return "{}"
         }
