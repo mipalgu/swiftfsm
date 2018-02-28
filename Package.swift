@@ -8,6 +8,11 @@ let package = Package(
         .executable(
             name: "swiftfsm",
             targets: ["swiftfsm"]
+        ),
+        .library(
+            name: "CFSMs",
+            type: .dynamic,
+            targets: ["CFSMs"]
         )
     ],
     dependencies: [

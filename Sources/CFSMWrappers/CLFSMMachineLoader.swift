@@ -82,7 +82,12 @@ public class CLFSMMachineLoader: MachineLoader, MachineUnloader, ScheduleHandler
     private let checkUnloadedMachineFunc = "C_checkDynamicallyUnloadedMachine"
 
     /// Library name for lib that handles C++ machines (CFSM, CLFSM, etc.).
+
+    #if os(Linux)
     private let cfsmPath = "libCFSMs.so"
+    #elseif os(OSX)
+    private let cfsmPath = "libCFSMs.dylib"
+    #endif
 
     public init() {}
 
