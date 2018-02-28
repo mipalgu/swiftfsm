@@ -83,11 +83,13 @@ public final class AggregateVerificationJobFactory<
         VerificationJob
     > {
         let lazyCollection = tokens.lazy
+        print(externalVariables.map { $0.0.name })
         let separated = lazyCollection.map { (arg: (fsm: AnyScheduleableFiniteStateMachine, machine: Machine)) -> (AnyScheduleableFiniteStateMachine, Machine, [AnySnapshotController]) in
             var vars: [AnySnapshotController] = []
             arg.fsm.externalVariables.forEach { ext in
                 guard let first = externalVariables.first(where: { $0.0.name == ext.name }) else {
-                    fatalError("Unable to find external variable for fsm.")
+                    vars.append(ext)
+                    return
                 }
                 vars.append(first.0)
             }

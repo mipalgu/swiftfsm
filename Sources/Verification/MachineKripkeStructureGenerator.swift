@@ -166,6 +166,8 @@ public final class MachineKripkeStructureGenerator<
             print(jobs.count)
             let job = jobs.removeFirst()
             var spinningExternals: [String: ExternalsData] = [:]
+            print("searching for all externals in: ")
+            print(job.tokens[job.executing].map { $0.0.externalVariables.map { $0.name } })
             for (fsm, machine) in job.tokens[job.executing] {
                 let key = machine.name + "." + fsm.name
                 for external in fsm.externalVariables {
@@ -311,7 +313,7 @@ public final class MachineKripkeStructureGenerator<
 
     private func makeExternalsData(forMachines: Set<Machine>) -> [String: [String: ExternalsData]] {
         var cache: [String: [String: ExternalsData]] = [:]
-        let data = machines.forEach { machine in
+        machines.forEach { machine in
             if nil == machine.fsms.first {
                 return
             }
@@ -332,6 +334,8 @@ public final class MachineKripkeStructureGenerator<
                 }
             }
         }
+        print("Finished fetching external variables:")
+        print(cache.map { $1.map { $0.0 } })
         return cache
     }
 
