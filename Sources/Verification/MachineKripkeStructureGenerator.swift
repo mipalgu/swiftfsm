@@ -337,7 +337,7 @@ public final class MachineKripkeStructureGenerator<
                 return []
             }
             //swiftlint:disable:next identifier_name
-            let d = fsm.externalVariables.map { (e: AnySnapshotController) -> ExternalsData in
+            let d = fsm.externalVariables.flatMap { (e: AnySnapshotController) -> ExternalsData in
                 let (defaultValues, spinners) = self.extractor.extract(
                     externalVariables: e
                 )
@@ -356,15 +356,15 @@ public final class MachineKripkeStructureGenerator<
     }
 
     private func convert(externals: [(AnySnapshotController, KripkeStatePropertyList)]) -> KripkeStatePropertyList {
-        var props: [KripkeStateProperty] = []
-        var values: [Any] = []
+        var props: KripkeStatePropertyList = [:]
+        var values: [String: Any] = [:]
         externals.forEach {
-            props.append(KripkeStateProperty(type: .Compound($0.1), value: $0.0.val))
-            values.append($0.0.val)
+            props[$0.0.name] = KripkeStateProperty(type: .Compound($0.1), value: $0.0.val)
+            values[$0.0.name] = $0.0.val
         }
         return [
             "externalVariables": KripkeStateProperty(
-                type: .Collection(props),
+                type: .Compound(props),
                 value: values
             )
         ]
