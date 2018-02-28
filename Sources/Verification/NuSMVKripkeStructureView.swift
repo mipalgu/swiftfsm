@@ -127,6 +127,7 @@ public class NuSMVKripkeStructureView: KripkeStructureView {
     private func createTransitions(from states: [KripkeStatePropertyList: KripkeState]) -> String {
         let trans = "TRANS\ncase"
         let endTrans = "esac"
+        let states = states.filter { false == $1.effects.isEmpty }
         guard let firstState = states.first?.1 else {
             return trans + "\n" + endTrans
         }
@@ -134,7 +135,14 @@ public class NuSMVKripkeStructureView: KripkeStructureView {
         let list = states.dropFirst().reduce(firstCase) {
             $0 + "\n" + self.createCase(of: $1.1)
         }
-        return trans + "\n" + list + "\n" + endTrans
+        let trueCase = self.createTrueCase(with: firstState)
+        return trans + "\n" + list + "\n" + trueCase + "\n" + endTrans
+    }
+
+    private func createTrueCase(with state: KripkeState) -> String {
+        let props = self.extractor.extract(from: state.properties)
+        let effects = self.createEffect(from: props)
+        return "TRUE:" + effects + ";"
     }
 
     private func createCase(of state: KripkeState) -> String {
@@ -143,10 +151,14 @@ public class NuSMVKripkeStructureView: KripkeStructureView {
             self.extractor.extract(from: $0)
         }
         let conditions = self.createConditions(of: props)
-        let effectsList = effects.reduce("") { (last: String, props: [String: String]) -> String in
-            last + "\n    " + self.createEffect(from: props)
+        guard let firstEffect = effects.first else {
+            return ""
         }
-        return conditions + ":" + effectsList
+        let firstEffects = "    (" + self.createEffect(from: firstEffect) + ")"
+        let effectsList = effects.reduce(firstEffects) { (last: String, props: [String: String]) -> String in
+            last + " |\n    (" + self.createEffect(from: props) + ")"
+        }
+        return conditions + ":\n" + effectsList + ";"
     }
 
     private func createConditions(of props: [String: String]) -> String {
@@ -167,7 +179,7 @@ public class NuSMVKripkeStructureView: KripkeStructureView {
         let effects = props.dropFirst().reduce(firstEffect) {
             $0 + " & next(" + $1.0 + ")=" + $1.1
         }
-        return effects + ";"
+        return effects
     }
 
     private func extractProperties(of states: [KripkeStatePropertyList: KripkeState]) -> [String: Set<String>] {
