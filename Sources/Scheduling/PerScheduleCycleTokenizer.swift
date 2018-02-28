@@ -61,6 +61,8 @@ import Machines
 
 public final class PerScheduleCycleTokenizer: SchedulerTokenizer {
 
+    public init() {}
+
     public func separate(_ machines: [Machine]) -> [[(AnyScheduleableFiniteStateMachine, Machine)]] {
         return [machines.flatMap { machine in
             machine.fsms.map { ($0, machine) }
