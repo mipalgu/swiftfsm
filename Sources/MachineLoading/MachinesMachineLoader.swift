@@ -72,8 +72,8 @@ public final class MachinesMachineLoader: MachineLoader {
         compiler: MachineCompiler<MachineAssembler> = MachineCompiler(assembler: MachineAssembler()),
         libraryLoader: MachineLoader,
         parser: MachineParser = MachineParser(),
-        compilerFlags: [String],
-        linkerFlags: [String]
+        compilerFlags: [String] = [],
+        linkerFlags: [String] = []
     ) {
         self.compiler = compiler
         self.libraryLoader = libraryLoader
