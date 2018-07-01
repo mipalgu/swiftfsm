@@ -1,6 +1,5 @@
 #include "cfsm_invoke.h"
 #include <stdio.h>
-#define DEBUG 
 
 /**
  * Calls the CFSM machine loader
