@@ -58,7 +58,7 @@
 
 import FSM
 
-final class MachineLoaderStrategy: MachineLoader {
+public final class MachineLoaderStrategy: MachineLoader {
 
     fileprivate let machineLoader: MachineLoader
     fileprivate let libraryLoader: MachineLoader

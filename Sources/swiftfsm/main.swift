@@ -85,6 +85,8 @@ let roundRobinFactory = RoundRobinSchedulerFactory(
     unloader: clfsmMachineLoader
 )
 
+let libraryLoader = DynamicLibraryMachineLoaderFactory(printer: printer).make()
+
 Swiftfsm(
     clfsmMachineLoader: CLFSMMachineLoader(),
     kripkeStructureGeneratorFactory: MachineKripkeStructureGeneratorFactory(),
@@ -92,7 +94,10 @@ Swiftfsm(
         factory: FilePrinterFactory()
     ),
     machineFactory: SimpleMachineFactory(),
-    machineLoader: DynamicLibraryMachineLoaderFactory(printer: printer).make(),
+    machineLoader: MachineLoaderStrategy(
+        machineLoader: MachinesMachineLoader(libraryLoader: libraryLoader),
+        libraryLoader: libraryLoader
+    ),
     parser: SwiftfsmParser(
         passiveRoundRobinFactory: PassiveRoundRobinSchedulerFactory(
             scheduleHandler: clfsmMachineLoader,
