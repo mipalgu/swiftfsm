@@ -61,7 +61,7 @@ import XCTest
 
 import FSM
 import KripkeStructure
-import Machines
+import MachineStructure
 
 public final class KripkeStateGeneratorTests: XCTestCase {
 
