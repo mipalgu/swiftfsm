@@ -82,7 +82,8 @@ public class DynamicLibraryCreator: LibraryCreator {
     public init(
         printer: Printer = CommandLinePrinter(
             errorStream: StderrOutputStream(),
-            messageStream: StdoutOutputStream()
+            messageStream: StdoutOutputStream(),
+            warningStream: StdoutOutputStream()
         )
     ) {
         self.printer = printer
