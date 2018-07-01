@@ -17,10 +17,11 @@ let package = Package(
     ],
     dependencies: [
         .package(url: "ssh://git.mipal.net/git/swift_wb.git", .branch("master")),
-        .package(url: "ssh://git.mipal.net/git/swift_CLReflect.git", .branch("master"))
+        .package(url: "ssh://git.mipal.net/git/swift_CLReflect.git", .branch("master")),
+        .package(url: "ssh://git.mipal.net/git/Machines.git", .branch("master")),
+        .package(url: "ssh://git.mipal.net/git/swift_helpers.git", .branch("master"))
     ],
     targets: [
-        .target(name: "IO", dependencies: []),
         .target(name: "CFSMs", dependencies: []),
         .target(name: "swiftfsm_helpers", dependencies: []),
         .target(name: "Libraries", dependencies: ["IO"]),
