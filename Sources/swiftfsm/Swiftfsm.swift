@@ -65,7 +65,7 @@
 import FSM
 import Functional
 import KripkeStructure
-import Machines
+import MachineStructure
 import MachineLoading
 import Scheduling
 import Parsing

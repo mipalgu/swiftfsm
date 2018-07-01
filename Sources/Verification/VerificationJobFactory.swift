@@ -57,7 +57,7 @@
  */
 
 import FSM
-import Machines
+import MachineStructure
 
 public final class VerificationJobFactory: VerificationJobFactoryProtocol {
 

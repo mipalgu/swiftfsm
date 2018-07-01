@@ -57,7 +57,7 @@
  */
 
 import FSM
-import Machines
+import MachineStructure
 
 /**
  *  Conforming types are responsible for creating `Scheduler`s.

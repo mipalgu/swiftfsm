@@ -59,7 +59,7 @@
 import KripkeStructure
 import FSM
 import Scheduling
-import Machines
+import MachineStructure
 
 import Foundation
 

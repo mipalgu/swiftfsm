@@ -58,7 +58,7 @@
 
 import FSM
 import KripkeStructure
-import Machines
+import MachineStructure
 import Scheduling
 
 public final class MachineKripkeStructureGeneratorFactory: KripkeStructureGeneratorFactory {

@@ -64,7 +64,7 @@ import Darwin
 
 import FSM
 import IO
-import Machines
+import MachineStructure
 import MachineLoading
 import Scheduling
 import Parsing
@@ -74,7 +74,8 @@ import CFSMWrappers
 let printer: CommandLinePrinter =
     CommandLinePrinter(
         errorStream: StderrOutputStream(),
-        messageStream: StdoutOutputStream()
+        messageStream: StdoutOutputStream(),
+        warningStream: StdoutOutputStream()
     )
 
 let clfsmMachineLoader = CLFSMMachineLoader()
