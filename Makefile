@@ -26,7 +26,7 @@ test:	swift-test-package
 
 .include "../../../mk/mipal.mk"
 
-CFLAGS+=-I/usr/local/include -I/usr/local/include/swiftfsm -I${GUNAO_DIR}/Common -I${GUNAO_DIR}/posix/CLReflect
+CFLAGS+=-I/usr/local/include -I/usr/local/include/gusimplewhiteboard -I/usr/local/include/swiftfsm -I${GUNAO_DIR}/Common -I${GUNAO_DIR}/posix/CLReflect
 SWIFTCFLAGS=-I/usr/local/include -I/usr/local/include/swiftfsm -I${GUNAO_DIR}/Common -I${GUNAO_DIR}/posix/CLReflect
 
 LDFLAGS+=-L/usr/local/lib -L/usr/local/lib/swiftfsm -lFSM -lCLReflect -ldl
