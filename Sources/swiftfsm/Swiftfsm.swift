@@ -239,12 +239,15 @@ public class Swiftfsm<
         _ task: Task,
         name: String
     ) -> [AnyScheduleableFiniteStateMachine] {
+        func combineSubmachines(_ fsm: AnyScheduleableFiniteStateMachine) -> [AnyScheduleableFiniteStateMachine] {
+            return [fsm] + fsm.submachines.flatMap { combineSubmachines($0) }
+        }
         KRIPKE = task.generateKripkeStructure
         let fsms: [AnyScheduleableFiniteStateMachine]
         if true == task.isClfsmMachine {
-            fsms = self.clfsmMachineLoader.load(path: task.path!)
+            fsms = self.clfsmMachineLoader.load(path: task.path!).map(combineSubmachines) ?? []
         } else {
-            fsms = self.machineLoader.load(path: task.path!)
+            fsms = self.machineLoader.load(path: task.path!).map(combineSubmachines) ?? []
         }
         if fsms.count > 0 {
             return fsms

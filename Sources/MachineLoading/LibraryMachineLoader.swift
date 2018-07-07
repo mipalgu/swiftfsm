@@ -123,10 +123,10 @@ public class LibraryMachineLoader: MachineLoader {
      *  - Returns: An array of `AnyScheduleableFiniteStateMachine`s.  If there
      *  was a problem, then the array is empty.
      */
-    public func load(path: String) -> [AnyScheduleableFiniteStateMachine] {
+    public func load(path: String) -> AnyScheduleableFiniteStateMachine? {
         // Ignore empty paths
         if (path.characters.count < 1) {
-            return []
+            return nil
         }
         // Load the factory from the cache if it is there.
         if let factory = type(of: self).cache[path] {
@@ -136,19 +136,19 @@ public class LibraryMachineLoader: MachineLoader {
         if let fsms = self.creator.open(path: path) >>- self.loadMachine {
             return fsms
         }
-        return []
+        return nil
     }
 
     private func loadMachine(
         library: LibraryResource
-    ) -> [AnyScheduleableFiniteStateMachine] {
+    ) -> AnyScheduleableFiniteStateMachine? {
         // Get main method symbol
         let result: (symbol: UnsafeMutableRawPointer?, error: String?) =
             library.getSymbolPointer(symbol: "main")
         // Error with fetching symbol
         if (result.error != nil) {
             self.printer.error(str: result.error!)
-            return [] 
+            return nil
         }
         // How many factories do we have now?
         let count: Int = getFactoryCount() 
@@ -157,7 +157,7 @@ public class LibraryMachineLoader: MachineLoader {
         // Did the factory get added?
         if (getFactoryCount() == count) {
             self.printer.error(str: "Library was loaded but factory was not added")
-            return []
+            return nil
         }
         // Get the factory, add it to the cache, call it and return the result.
         let factory: FSMArrayFactory = getLastFactory()!
