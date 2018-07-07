@@ -67,6 +67,7 @@ import Functional
 import KripkeStructure
 import MachineStructure
 import MachineLoading
+import MachineCompiling
 import Scheduling
 import Parsing
 import Verification
@@ -75,6 +76,7 @@ import Verification
  *  Contains the main logic for swiftfsm.
  */
 public class Swiftfsm<
+    Compiler: MachineCompiler,
     SF: SchedulerFactory,
     MF: MachineFactory,
     KF: KripkeStructureGeneratorFactory
@@ -87,6 +89,8 @@ public class Swiftfsm<
     private let kripkeStructureView: KripkeStructureView
 
     private var names: [String: Int] = [:]
+
+    private let machineCompiler: Compiler
 
     private let machineFactory: MF
 
@@ -123,6 +127,7 @@ public class Swiftfsm<
         clfsmMachineLoader: MachineLoader,
         kripkeStructureGeneratorFactory: KF,
         kripkeStructureView: KripkeStructureView,
+        machineCompiler: Compiler,
         machineFactory: MF,
         machineLoader: MachineLoader,
         parser: HelpableParser,
@@ -132,6 +137,7 @@ public class Swiftfsm<
         self.clfsmMachineLoader = clfsmMachineLoader
         self.kripkeStructureGeneratorFactory = kripkeStructureGeneratorFactory
         self.kripkeStructureView = kripkeStructureView
+        self.machineCompiler = machineCompiler
         self.machineFactory = machineFactory
         self.machineLoader = machineLoader
         self.parser = parser
@@ -250,8 +256,17 @@ public class Swiftfsm<
     private func handleTask(_ task: Task) -> ([Machine], [Machine]) {
         var name: String = self.getMachinesName(task)
         // Handle when there is no path in the Task.
-        if nil == task.path {
+        guard let path = task.path else {
             self.handleError(.parsingError(error: .pathNotFound(machineName: name)))
+        }
+        if true == task.compile {
+            guard true == self.machineCompiler.compileMachine(
+                atPath: path,
+                withCompilerFlags: task.compilerFlags,
+                andLinkerFlags: task.linkerFlags
+            ) else {
+                self.handleError(.generalError(error: "Unable to compile machine at \(path)"))
+            }
         }
         var schedule: [Machine] = []
         var kripke: [Machine] = []

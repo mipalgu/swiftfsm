@@ -66,6 +66,7 @@ import FSM
 import IO
 import MachineStructure
 import MachineLoading
+import MachineCompiling
 import Scheduling
 import Parsing
 import Verification
@@ -93,6 +94,7 @@ Swiftfsm(
     kripkeStructureView: NuSMVKripkeStructureView(
         factory: FilePrinterFactory()
     ),
+    machineCompiler: SwiftMachinesCompiler(),
     machineFactory: SimpleMachineFactory(),
     machineLoader: MachineLoaderStrategy(
         machineLoader: MachinesMachineLoader(libraryLoader: libraryLoader),

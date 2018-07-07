@@ -74,6 +74,8 @@ public struct Task {
      */
     public var compile: Bool = false
 
+    public var compilerFlags: [String] = []
+
     /**
      *  How many times should we repeat this task?
      */
@@ -93,6 +95,8 @@ public struct Task {
      *  Is this `Machine` a clfsm machine?
      */
     public var isClfsmMachine: Bool = false
+
+    public var linkerFlags: [String] = []
 
     /**
      *  The name of the `Machine`.
