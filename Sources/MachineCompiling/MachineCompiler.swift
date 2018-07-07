@@ -58,6 +58,11 @@
 
 public protocol MachineCompiler {
 
-    func compileMachine(atPath: String, withCompilerFlags: [String], andLinkerFlags: [String]) -> Bool
+    func compileMachine(
+        atPath: String,
+        withCCompilerFlags: [String],
+        andLinkerFlags: [String],
+        andSwiftCompilerFlags: [String]
+    ) -> Bool
 
 }

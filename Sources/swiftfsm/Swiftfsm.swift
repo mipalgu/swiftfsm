@@ -262,8 +262,9 @@ public class Swiftfsm<
         if true == task.compile {
             guard true == self.machineCompiler.compileMachine(
                 atPath: path,
-                withCompilerFlags: task.swiftCompilerFlags,
-                andLinkerFlags: task.linkerFlags
+                withCCompilerFlags: task.cCompilerFlags,
+                andLinkerFlags: task.linkerFlags,
+                andSwiftCompilerFlags: task.swiftCompilerFlags
             ) else {
                 self.handleError(.generalError(error: "Unable to compile machine at \(path)"))
             }

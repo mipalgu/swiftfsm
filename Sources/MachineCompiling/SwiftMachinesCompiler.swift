@@ -72,13 +72,19 @@ public final class SwiftMachinesCompiler: MachineCompiler {
 
     public func compileMachine(
         atPath path: String,
-        withCompilerFlags compilerFlags: [String],
-        andLinkerFlags linkerFlags: [String]
+        withCCompilerFlags compilerFlags: [String],
+        andLinkerFlags linkerFlags: [String],
+        andSwiftCompilerFlags swiftCompilerFlags: [String]
     ) -> Bool {
         guard let machine = self.parser.parseMachine(atPath: path) else {
             return false
         }
-        return nil != self.compiler.compile(machine, withCompilerFlags: compilerFlags, andLinkerFlags: linkerFlags)
+        return nil != self.compiler.compile(
+            machine,
+            withCCompilerFlags: compilerFlags,
+            andLinkerFlags: linkerFlags,
+            andSwiftCompilerFlags: swiftCompilerFlags
+        )
     }
 
 }

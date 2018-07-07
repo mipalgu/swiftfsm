@@ -65,21 +65,24 @@ public final class MachinesMachineLoader: MachineLoader {
     fileprivate let libraryLoader: MachineLoader
     fileprivate let parser: MachineParser
 
-    fileprivate let compilerFlags: [String]
+    fileprivate let cCompilerFlags: [String]
     fileprivate let linkerFlags: [String]
+    fileprivate let swiftCompilerFlags: [String]
 
     public init(
         compiler: MachineCompiler<MachineAssembler> = MachineCompiler(assembler: MachineAssembler()),
         libraryLoader: MachineLoader,
         parser: MachineParser = MachineParser(),
-        compilerFlags: [String] = [],
-        linkerFlags: [String] = []
+        cCompilerFlags: [String] = [],
+        linkerFlags: [String] = [],
+        swiftCompilerFlags: [String] = []
     ) {
         self.compiler = compiler
         self.libraryLoader = libraryLoader
         self.parser = parser
-        self.compilerFlags = compilerFlags
+        self.cCompilerFlags = cCompilerFlags
         self.linkerFlags = linkerFlags
+        self.swiftCompilerFlags = swiftCompilerFlags
     }
 
     public func load(path: String) -> [AnyScheduleableFiniteStateMachine] {
@@ -92,8 +95,9 @@ public final class MachinesMachineLoader: MachineLoader {
         guard
             let outputPath = self.compiler.compile(
                 machine,
-                withCompilerFlags: self.compilerFlags,
-                andLinkerFlags: self.linkerFlags
+                withCCompilerFlags: self.cCompilerFlags,
+                andLinkerFlags: self.linkerFlags,
+                andSwiftCompilerFlags: self.swiftCompilerFlags
             )
         else {
             return []
