@@ -74,6 +74,14 @@ public struct Task {
      */
     public var compile: Bool = false
 
+    /**
+     * Flags passed to the C compiler when compiling a machine.
+     */
+    public var cCompilerFlags: [String] = []
+
+    /**
+     * Flags passed to the swift compiler when compiling a machine.
+     */
     public var compilerFlags: [String] = []
 
     /**
@@ -96,6 +104,9 @@ public struct Task {
      */
     public var isClfsmMachine: Bool = false
 
+    /**
+     * Flags which are passed to the linker when compiling a machine.
+     */
     public var linkerFlags: [String] = []
 
     /**
