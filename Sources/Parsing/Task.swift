@@ -80,11 +80,6 @@ public struct Task {
     public var cCompilerFlags: [String] = []
 
     /**
-     * Flags passed to the swift compiler when compiling a machine.
-     */
-    public var compilerFlags: [String] = []
-
-    /**
      *  How many times should we repeat this task?
      */
     public var count: Int = 1
@@ -125,5 +120,10 @@ public struct Task {
     public var printHelpText: Bool = false
 
     public var scheduler: SchedulerFactory?
+
+    /**
+     * Flags passed to the swift compiler when compiling a machine.
+     */
+    public var swiftCompilerFlags: [String] = []
 
 }

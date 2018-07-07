@@ -146,21 +146,34 @@ public class SwiftfsmParser: HelpableParser {
             return try self.handleSchedulerFlag(t, words: &words)
         case "-x", "--repeat":
             return self.handleRepeatFlag(t, words: &words)
+        case "-Xcc":
+            return self.handleCCompilerFlag(t, words: &words)
+        case "-Xlinker":
+            return self.handleLinkerFlag(t, words: &words)
+        case "-Xswiftc":
+            return self.handleSwiftCompilerFlag(t, words: &words)
         default:
             return try self.handlePath(t, words: &words)
         }
     }
-    
-    private func handleClfsmFlag(_ t: Task, words: inout [String]) -> Task {
-        var temp: Task = t
-        temp.isClfsmMachine = true
-        return temp
-    }
-    
-    private func handleCompileFlag(_ t: Task, words: inout [String]) -> Task {
-        var temp: Task = t
-        temp.compile = true
-        return temp
+
+    private func fetchValueAfterFlag(_ t: Task, words: inout [String]) -> String? {
+        if (words.count < 2) {
+            return nil
+        }
+        let n: String = words[1]
+        // Ignore empty strings as names
+        if (true == n.characters.isEmpty) {
+            words.removeFirst()
+            return nil
+        }
+        // Ignore other flags if the user forgets to enter a name after the name
+        // flag.
+        if ("-" == n.characters.first!) {
+            return nil
+        }
+        words.removeFirst()
+        return words.first!
     }
     
     private func handleDebugFlag(_ t: Task, words: inout [String]) -> Task {
@@ -191,42 +204,58 @@ public class SwiftfsmParser: HelpableParser {
     }
     
     private func handleNameFlag(_ t: Task, words: inout [String]) -> Task {
-        if (words.count < 2) {
+        guard let name = self.fetchValueAfterFlag(t, words: &words) else {
             return t
         }
-        let n: String = words[1]
-        // Ignore empty strings as names
-        if (true == n.characters.isEmpty) {
-            words.removeFirst()
-            return t
-        }
-        // Ignore other flags if the user forgets to enter a name after the name
-        // flag.
-        if ("-" == n.characters.first!) {
-            return t
-        }
-        words.removeFirst()
         var temp: Task = t
-        temp.name = words.first!
+        temp.name = name
+        return temp
+    }
+    
+    private func handleClfsmFlag(_ t: Task, words: inout [String]) -> Task {
+        var temp: Task = t
+        temp.isClfsmMachine = true
+        return temp
+    }
+
+    private func handleCCompilerFlag(_ t: Task, words: inout [String]) -> Task {
+        guard let arg = self.fetchValueAfterFlag(t, words: &words) else {
+            return t
+        }
+        var temp: Task = t
+        temp.cCompilerFlags.append(arg)
+        return temp
+    }
+
+    
+    private func handleCompileFlag(_ t: Task, words: inout [String]) -> Task {
+        var temp: Task = t
+        temp.compile = true
+        return temp
+    }
+
+    private func handleLinkerFlag(_ t: Task, words: inout [String]) -> Task {
+        guard let arg = self.fetchValueAfterFlag(t, words: &words) else {
+            return t
+        }
+        var temp: Task = t
+        temp.linkerFlags.append(arg)
+        return temp
+    }
+
+    private func handleSwiftCompilerFlag(_ t: Task, words: inout [String]) -> Task {
+        guard let arg = self.fetchValueAfterFlag(t, words: &words) else {
+            return t
+        }
+        var temp: Task = t
+        temp.swiftCompilerFlags.append(arg)
         return temp
     }
 
     private func handleSchedulerFlag(_ t: Task, words: inout [String]) throws -> Task {
-        if (words.count < 2) {
+        guard let scheduler = self.fetchValueAfterFlag(t, words: &words) else {
             return t
         }
-        let scheduler = words[1]
-        // Ignore empty strings as schedulers.
-        if (true == scheduler.characters.isEmpty) {
-            words.removeFirst()
-            return t
-        }
-        // Ignore other flags if the user forgets to enter a scheduler after the
-        // flag.
-        if ("-" == scheduler.characters.first!) {
-            return t
-        }
-        words.removeFirst()
         switch scheduler {
         case "rr", "RoundRobin":
             print("Using Round Robin Scheduler")
@@ -258,18 +287,15 @@ public class SwiftfsmParser: HelpableParser {
     }
 
     private func handleRepeatFlag(_ t: Task, words: inout [String]) -> Task {
-        if (words.count < 2) {
-            return t
-        }
-        guard let num: Int = Int(words[1]) else {
-            return t
-        }
-        if (num < 0) {
+        guard
+            let numStr = self.fetchValueAfterFlag(t, words: &words),
+            let num: Int = Int(numStr),
+            num >= 0
+        else {
             return t
         }
         var temp: Task = t
         temp.count = num
-        words.removeFirst()
         return temp
     }
     
