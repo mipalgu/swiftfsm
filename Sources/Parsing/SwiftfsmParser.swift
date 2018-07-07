@@ -80,6 +80,11 @@ public class SwiftfsmParser: HelpableParser {
         str += "\t\t\tSpecify which scheduler to use.  Defaults to a round robin scheduler.\n"
         str += "\t-x <value>, --repeat <value>\n"
         str += "\t\t\tSpecify number of times to repeat this command\n"
+        str += "\t-Xcc <value>\tPass a compiler flag to the C compiler when compiling the machine.\n"
+        str += "\t-Xlinker <value>\n"
+        str += "\t\t\tPass a linker flag to the linker when compiling the machine.\n"
+        str += "\t-Xswiftc <value>\n"
+        str += "\t\t\tPass a compiler flag to the swift compiler when compiling the machine.\n"
         return str
     }
 
