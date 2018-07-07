@@ -67,12 +67,13 @@ public class SwiftfsmParser: HelpableParser {
         var str: String = "OVERVIEW: A Finite State Machine Scheduler\n\n"
         str += "USAGE: swiftfsm [options] <machine_path> ...\n\n"
         str += "OPTIONS:\n"
-        str += "\t-c, --clfsm\tSpecifies that this is a machine that has been built using the CLFSM specification.\n"
+        str += "\t-c\t\tCompile the machine.\n"
         str += "\t-d, --debug\tEnables debugging.\n"
         str += "\t-h, --help\tPrint this help message.\n"
         str += "\t-k [-r|--run], --kripke [-r|--run]\n"
         str += "\t\t\tGenerate the Kripke Structure for the machine.\n"
         str += "\t\t\tNote: Optionally specify -r or --run to schedule the machine to run as well as generate the kripke structure.\n"
+        str += "\t-l, --clfsm\tSpecifies that this is a machine that has been built using the CLFSM specification.\n"
         str += "\t-n <value>, --name <value>\n"
         str += "\t\t\tSpecify a name for the machine.\n"
         str += "\t-s <rr|prr>, --scheduler <RoundRobin|PassiveRoundRobin>\n"
@@ -124,14 +125,16 @@ public class SwiftfsmParser: HelpableParser {
     
     private func handleNextFlag(_ t: Task, words: inout [String]) throws -> Task {
         switch (words.first!) {
-        case "-c", "--clfsm":
-            return self.handleClfsmFlag(t, words: &words)
+        case "-c":
+            return self.handleCompileFlag(t, words: &words)
         case "-d", "--debug":
             return self.handleDebugFlag(t, words: &words)
         case "-h", "--help":
             return self.handleHelpFlag(t, words: &words)
         case "-k", "--kripke":
             return self.handleKripkeFlag(t, words: &words)
+        case "-l", "--clfsm":
+            return self.handleClfsmFlag(t, words: &words)
         case "-n", "--name":
             return self.handleNameFlag(t, words: &words)
         case "-s", "--scheduler":
@@ -146,6 +149,12 @@ public class SwiftfsmParser: HelpableParser {
     private func handleClfsmFlag(_ t: Task, words: inout [String]) -> Task {
         var temp: Task = t
         temp.isClfsmMachine = true
+        return temp
+    }
+    
+    private func handleCompileFlag(_ t: Task, words: inout [String]) -> Task {
+        var temp: Task = t
+        temp.compile = true
         return temp
     }
     

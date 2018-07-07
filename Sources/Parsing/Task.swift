@@ -70,6 +70,11 @@ public struct Task {
     public var addToScheduler: Bool = true
 
     /**
+     * Should we compile the machine?
+     */
+    public var compile: Bool = false
+
+    /**
      *  How many times should we repeat this task?
      */
     public var count: Int = 1
