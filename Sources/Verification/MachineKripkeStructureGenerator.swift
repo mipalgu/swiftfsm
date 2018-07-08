@@ -312,10 +312,7 @@ public final class MachineKripkeStructureGenerator<
     private func makeExternalsData(forMachines: Set<Machine>) -> [String: [String: ExternalsData]] {
         var cache: [String: [String: ExternalsData]] = [:]
         machines.forEach { machine in
-            if nil == machine.fsms.first {
-                return
-            }
-            machine.fsms.forEach { fsm in
+            self.flattenSubmachines(machine.fsm).forEach { fsm in
                 let key = machine.name + "." + fsm.name
                 if nil == cache[key] {
                     cache[key] = [:]
@@ -333,6 +330,10 @@ public final class MachineKripkeStructureGenerator<
             }
         }
         return cache
+    }
+
+    fileprivate func flattenSubmachines(_ fsm: AnyScheduleableFiniteStateMachine) -> [AnyScheduleableFiniteStateMachine] {
+        return [fsm] + fsm.submachines.flatMap(self.flattenSubmachines)
     }
 
     private func convert(externals: [(AnySnapshotController, KripkeStatePropertyList)]) -> KripkeStatePropertyList {

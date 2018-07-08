@@ -82,7 +82,7 @@ public class RoundRobinSchedulerFactory: SchedulerFactory {
     public func make(machines: [Machine]) -> Scheduler {
         return RoundRobinScheduler(
             machines: machines,
-            tokenizer: PerRingletTokenizer(),
+            tokenizer: SequentialPerRingletTokenizer(),
             unloader: self.unloader,
             scheduleHandler: self.scheduleHandler
         )

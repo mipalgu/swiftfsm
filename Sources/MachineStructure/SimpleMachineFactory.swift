@@ -70,17 +70,17 @@ public class SimpleMachineFactory: MachineFactory {
      *
      *  - Parameter name: The name of the `Machine`.
      *
-     *  - Parameter fsms: All `AnyScheduleableFiniteStateMachine`s that make up
-     *  the `Machine`.
+     *  - Parameter fsm: The top `AnyScheduleableFiniteStateMachine` that makes
+     *  up the FSM hierarchy of the `Machine`.
      *
      *  - Parameter debug: Should we turn debugging on?
      */
     public func make(
         name: String,
-        fsms: [AnyScheduleableFiniteStateMachine],
+        fsm: AnyScheduleableFiniteStateMachine,
         debug: Bool
     ) -> Machine {
-        return Machine(debug: debug, name: name, fsms: fsms)
+        return Machine(debug: debug, name: name, fsm: fsm)
     }
 
 }

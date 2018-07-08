@@ -79,7 +79,7 @@ public final class MachineKripkeStructureGeneratorFactory: KripkeStructureGenera
             ExternalsSpinnerConstructor<SpinnerRunner>
         >,
         KripkeStateGenerator,
-        PerRingletTokenizer
+        SequentialPerRingletTokenizer
     > {
         return MachineKripkeStructureGenerator(
             cloner: AggregateCloner(cloner: Cloner(converter: KripkeStatePropertyListConverter())),
@@ -98,7 +98,7 @@ public final class MachineKripkeStructureGeneratorFactory: KripkeStructureGenera
                 )
             ),
             stateGenerator: KripkeStateGenerator(),
-            tokenizer: PerRingletTokenizer()
+            tokenizer: SequentialPerRingletTokenizer()
         )
     }
 

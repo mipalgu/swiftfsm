@@ -68,14 +68,14 @@ public protocol MachineFactory {
      *
      *  - Parameter name: The name of the `Machine`.
      *
-     *  - Parameter fsms: All `AnyScheduleableFiniteStateMachine`s that make up
-     *  the `Machine`.
+     *  - Parameter fsm: The top `AnyScheduleableFiniteStateMachine` that makes up
+     *  the FSM hierarchy of the `Machine`.
      *
      *  - Parameter debug: Should we turn debugging on?
      */
     func make(
         name: String,
-        fsms: [AnyScheduleableFiniteStateMachine],
+        fsm: AnyScheduleableFiniteStateMachine,
         debug: Bool
     ) -> Machine
 

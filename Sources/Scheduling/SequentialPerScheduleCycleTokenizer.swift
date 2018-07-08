@@ -1,5 +1,5 @@
 /*
- * PerScheduleCycleTokenizer.swift 
+ * SequentialPerScheduleCycleTokenizer.swift 
  * swiftfsm 
  *
  * Created by Callum McColl on 09/06/2017.
@@ -59,14 +59,18 @@
 import FSM
 import MachineStructure
 
-public final class PerScheduleCycleTokenizer: SchedulerTokenizer {
+public final class SequentialPerScheduleCycleTokenizer: SchedulerTokenizer {
 
     public init() {}
 
     public func separate(_ machines: [Machine]) -> [[(AnyScheduleableFiniteStateMachine, Machine)]] {
         return [machines.flatMap { machine in
-            machine.fsms.map { ($0, machine) }
+            self.flattenSubmachines(machine.fsm).map { ($0, machine) }
         }]
+    }
+
+    fileprivate func flattenSubmachines(_ fsm: AnyScheduleableFiniteStateMachine) -> [AnyScheduleableFiniteStateMachine] {
+        return [fsm] + fsm.submachines.flatMap(self.flattenSubmachines)
     }
 
 }

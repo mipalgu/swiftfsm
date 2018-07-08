@@ -100,7 +100,7 @@ public class RoundRobinScheduler<Tokenizer: SchedulerTokenizer>: Scheduler where
             for job in jobs {
                 var j = 0
                 let machines: Set<Machine> = self.getMachines(fromJob: job)
-                machines.forEach { $0.fsms.first?.takeSnapshot() }
+                machines.forEach { $0.fsm.takeSnapshot() }
                 for (fsm, machine) in job {
                     DEBUG = machine.debug
                     if (true == scheduleHandler.handleUnloadedMachine(fsm)) {
@@ -115,7 +115,7 @@ public class RoundRobinScheduler<Tokenizer: SchedulerTokenizer>: Scheduler where
                     }
                     j += 1
                 }
-                machines.forEach { $0.fsms.first?.saveSnapshot() }
+                machines.forEach { $0.fsm.saveSnapshot() }
                 if (true == jobs[i].isEmpty) {
                     jobs.remove(at: i)
                     continue
