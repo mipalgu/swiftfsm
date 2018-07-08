@@ -18,7 +18,7 @@ let package = Package(
     dependencies: [
         .package(url: "ssh://git.mipal.net/git/swift_wb.git", .branch("swift-4.2")),
         .package(url: "ssh://git.mipal.net/git/swift_CLReflect.git", .branch("master")),
-        .package(url: "ssh://git.mipal.net/git/Machines.git", .branch("trees")),
+        .package(url: "ssh://git.mipal.net/git/Machines.git", .branch("master")),
         .package(url: "ssh://git.mipal.net/git/swift_helpers.git", .branch("master"))
     ],
     targets: [
