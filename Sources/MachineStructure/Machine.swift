@@ -77,9 +77,10 @@ public struct Machine {
     public let name: String
     
     /**
-     *  The `AnyScheduleableFiniteStateMachine`s that make up this `Machine`.
+     * The top `AnyScheduleableFiniteStateMachine` which makes up the fsm
+     * hierarchy.
      */
-    public var fsms: [AnyScheduleableFiniteStateMachine]
+    public var fsm: AnyScheduleableFiniteStateMachine
 
     /**
      *  Create a new `Machine`.
@@ -87,11 +88,11 @@ public struct Machine {
     public init(
         debug: Bool,
         name: String,
-        fsms: [AnyScheduleableFiniteStateMachine]
+        fsm: AnyScheduleableFiniteStateMachine
     ) {
         self.debug = debug
         self.name = name
-        self.fsms = fsms
+        self.fsm = fsm
     }
     
 }

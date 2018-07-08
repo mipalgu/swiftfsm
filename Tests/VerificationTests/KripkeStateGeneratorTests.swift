@@ -87,7 +87,7 @@ public final class KripkeStateGeneratorTests: XCTestCase {
             ],
             effects: []
         )
-        let machine = Machine(debug: false, name: "machine", fsms: [fsm])
+        let machine = Machine(debug: false, name: "machine", fsm: fsm)
         let result = self.stateGenerator.generateKripkeState(
             fromFSM: fsm,
             withinMachine: machine,

@@ -61,6 +61,7 @@ import KripkeStructure
 
 internal final class TempFiniteStateMachine: FiniteStateMachineType,
     Cloneable,
+    ConvertibleToScheduleableFiniteStateMachine,
     StateExecuter,
     Exitable,
     Finishable,
@@ -94,6 +95,8 @@ internal final class TempFiniteStateMachine: FiniteStateMachineType,
     let hasFinished: Bool = true
 
     let isSuspended: Bool = true
+
+    let submachines: [AnyScheduleableFiniteStateMachine] = []
 
     func clone() -> TempFiniteStateMachine {
         return self

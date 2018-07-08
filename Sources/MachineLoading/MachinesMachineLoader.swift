@@ -85,9 +85,9 @@ public final class MachinesMachineLoader: MachineLoader {
         self.swiftCompilerFlags = swiftCompilerFlags
     }
 
-    public func load(path: String) -> [AnyScheduleableFiniteStateMachine] {
+    public func load(path: String) -> AnyScheduleableFiniteStateMachine? {
         guard let machine = self.parser.parseMachine(atPath: path) else {
-            return []
+            return nil
         }
         if false == self.compiler.shouldCompile(machine) {
             return self.libraryLoader.load(path: self.compiler.outputPath(forMachine: machine))
@@ -100,7 +100,7 @@ public final class MachinesMachineLoader: MachineLoader {
                 andSwiftCompilerFlags: self.swiftCompilerFlags
             )
         else {
-            return []
+            return nil
         }
         return self.libraryLoader.load(path: outputPath)
     }

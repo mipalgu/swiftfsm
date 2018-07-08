@@ -149,7 +149,7 @@ public func handleUnloadedMachine(_ fsm: AnyScheduleableFiniteStateMachine) -> B
      * - Parameter path path to the machine library
      * - Return an array of FSMs to be scheduled
      */
-    public func load(path: String) -> [AnyScheduleableFiniteStateMachine] {
+    public func load(path: String) -> AnyScheduleableFiniteStateMachine? {
         // Call load function with path.
         let loadMachinePtr = getFunctionPtr(loadMachineFunc)
         let cPath = path.utf8CString 
@@ -157,7 +157,7 @@ public func handleUnloadedMachine(_ fsm: AnyScheduleableFiniteStateMachine) -> B
         if machineID == -1 {
             fatalError("cfsm_load() - Failed to load machine")
         }
-        return createFiniteStateMachines([Int(machineID)])
+        return createFiniteStateMachine(Int(machineID))
     }
     
     /**
@@ -166,30 +166,26 @@ public func handleUnloadedMachine(_ fsm: AnyScheduleableFiniteStateMachine) -> B
      * - Parameter machineIDs the array of CLFSM machine IDs
      * - Return an array of AnyScheduleableFiniteStateMachines
      */
-    public func createFiniteStateMachines(_ machineIDs: [Int]) -> [AnyScheduleableFiniteStateMachine] {
-        var finiteStateMachines = [AnyScheduleableFiniteStateMachine]()
-        for machineID in machineIDs {
-            guard let metaMachine = refl_getMetaMachine(UInt32(machineID), nil) else {
-                fatalError("Could not get metamachine for machineID = \(machineID)")
-            }
-            let machineName = String(cString: refl_getMetaMachineName(metaMachine, nil))
-            let uniqueName = machineName + String(machineID)
-            let states = createStates(metaMachine)
-            var finiteStateMachine: AnyScheduleableFiniteStateMachine
-            let suspendStateIndex = Int(refl_getSuspendState(metaMachine, nil))
-            if suspendStateIndex < 0 || suspendStateIndex > states.count {
-                finiteStateMachine = FSM(uniqueName, initialState: states[0]).asScheduleableFiniteStateMachine
-            } else {
-                finiteStateMachine = FSM(
-                    uniqueName,
-                    initialState: states[0],
-                    suspendState: states[suspendStateIndex]
-                ).asScheduleableFiniteStateMachine
-            }
-            finiteStateMachines.append(finiteStateMachine)
-            type(of: self).nameToMachineID[uniqueName] = machineID
+    public func createFiniteStateMachine(_ machineID: Int) -> AnyScheduleableFiniteStateMachine? {
+        guard let metaMachine = refl_getMetaMachine(UInt32(machineID), nil) else {
+            fatalError("Could not get metamachine for machineID = \(machineID)")
         }
-        return finiteStateMachines
+        let machineName = String(cString: refl_getMetaMachineName(metaMachine, nil))
+        let uniqueName = machineName + String(machineID)
+        let states = createStates(metaMachine)
+        var finiteStateMachine: AnyScheduleableFiniteStateMachine
+        let suspendStateIndex = Int(refl_getSuspendState(metaMachine, nil))
+        if suspendStateIndex < 0 || suspendStateIndex > states.count {
+            finiteStateMachine = FSM(uniqueName, initialState: states[0]).asScheduleableFiniteStateMachine
+        } else {
+            finiteStateMachine = FSM(
+                uniqueName,
+                initialState: states[0],
+                suspendState: states[suspendStateIndex]
+            ).asScheduleableFiniteStateMachine
+        }
+        type(of: self).nameToMachineID[uniqueName] = machineID
+        return finiteStateMachine
     }
 
     /**

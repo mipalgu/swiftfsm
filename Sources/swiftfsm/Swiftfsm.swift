@@ -235,22 +235,25 @@ public class Swiftfsm<
         return name
     }
 
-    private func loadFsms(
+    private func loadFsm(
         _ task: Task,
         name: String
-    ) -> [AnyScheduleableFiniteStateMachine] {
+    ) -> AnyScheduleableFiniteStateMachine {
+        func combineSubmachines(_ fsm: AnyScheduleableFiniteStateMachine) -> [AnyScheduleableFiniteStateMachine] {
+            return [fsm] + fsm.submachines.flatMap { combineSubmachines($0) }
+        }
         KRIPKE = task.generateKripkeStructure
-        let fsms: [AnyScheduleableFiniteStateMachine]
+        let fsm: AnyScheduleableFiniteStateMachine?
         if true == task.isClfsmMachine {
-            fsms = self.clfsmMachineLoader.load(path: task.path!)
+            fsm = self.clfsmMachineLoader.load(path: task.path!)
         } else {
-            fsms = self.machineLoader.load(path: task.path!)
+            fsm = self.machineLoader.load(path: task.path!)
         }
-        if fsms.count > 0 {
-            return fsms
+        guard let unwrappedFSM = fsm else {
+            // Handle when we are unable to load the fsm.
+            self.handleError(.unableToLoad(machineName: name, path: task.path!))
         }
-        // Handle when we are unable to load the fsm.
-        self.handleError(.unableToLoad(machineName: name, path: task.path!))
+        return unwrappedFSM
     }
 
     private func handleTask(_ task: Task) -> ([Machine], [Machine]) {
@@ -275,7 +278,7 @@ public class Swiftfsm<
             // Create the Machine
             let temp: Machine = self.machineFactory.make(
                 name: name,
-                fsms: self.loadFsms(task, name: name),
+                fsm: self.loadFsm(task, name: name),
                 debug: task.enableDebugging
             )
             // Remember to generate Kripke Structures.
