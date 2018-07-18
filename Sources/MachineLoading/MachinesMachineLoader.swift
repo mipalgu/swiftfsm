@@ -59,6 +59,7 @@
 import FSM
 import SwiftMachines
 
+@available(macOS 10.11, *)
 public final class MachinesMachineLoader: MachineLoader {
 
     fileprivate let compiler: MachineCompiler<MachineAssembler>
@@ -69,6 +70,7 @@ public final class MachinesMachineLoader: MachineLoader {
     fileprivate let linkerFlags: [String]
     fileprivate let swiftCompilerFlags: [String]
 
+    @available(macOS 10.11, *)
     public init(
         compiler: MachineCompiler<MachineAssembler> = MachineCompiler(assembler: MachineAssembler()),
         libraryLoader: MachineLoader,
