@@ -88,25 +88,39 @@ let roundRobinFactory = RoundRobinSchedulerFactory(
 
 let libraryLoader = DynamicLibraryMachineLoaderFactory(printer: printer).make()
 
-Swiftfsm(
-    clfsmMachineLoader: CLFSMMachineLoader(),
-    kripkeStructureGeneratorFactory: MachineKripkeStructureGeneratorFactory(),
-    kripkeStructureView: NuSMVKripkeStructureView(
-        factory: FilePrinterFactory()
-    ),
-    machineCompiler: SwiftMachinesCompiler(),
-    machineFactory: SimpleMachineFactory(),
-    machineLoader: MachineLoaderStrategy(
-        machineLoader: MachinesMachineLoader(libraryLoader: libraryLoader),
-        libraryLoader: libraryLoader
-    ),
-    parser: SwiftfsmParser(
-        passiveRoundRobinFactory: PassiveRoundRobinSchedulerFactory(
-            scheduleHandler: clfsmMachineLoader,
-            unloader: clfsmMachineLoader
+@available(macOS 10.11, *)
+func run() {
+    Swiftfsm(
+        clfsmMachineLoader: CLFSMMachineLoader(),
+        kripkeStructureGeneratorFactory: MachineKripkeStructureGeneratorFactory(),
+        kripkeStructureView: NuSMVKripkeStructureView(
+            factory: FilePrinterFactory()
         ),
-        roundRobinFactory: roundRobinFactory
-    ),
-    schedulerFactory: roundRobinFactory,
-    view: printer
-).run(args: CommandLine.arguments)
+        machineCompiler: SwiftMachinesCompiler(),
+        machineFactory: SimpleMachineFactory(),
+        machineLoader: MachineLoaderStrategy(
+            machineLoader: MachinesMachineLoader(libraryLoader: libraryLoader),
+            libraryLoader: libraryLoader
+        ),
+        parser: SwiftfsmParser(
+            passiveRoundRobinFactory: PassiveRoundRobinSchedulerFactory(
+                scheduleHandler: clfsmMachineLoader,
+                unloader: clfsmMachineLoader
+            ),
+            roundRobinFactory: roundRobinFactory
+        ),
+        schedulerFactory: roundRobinFactory,
+        view: printer
+    ).run(args: CommandLine.arguments)
+}
+
+#if os(macOS)
+if #available(macOS 10.11, *) {
+    run()
+} else {
+    printer.error(str: "You must have at least macOS version 10.11")
+    exit(EXIT_FAILURE)
+}
+#else
+run()
+#endif
