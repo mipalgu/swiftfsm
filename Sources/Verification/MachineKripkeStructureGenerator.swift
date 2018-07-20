@@ -229,22 +229,6 @@ public final class MachineKripkeStructureGenerator<
                 ))
             }
         }
-        let file = URL(fileURLWithPath: "temp.json")
-        let worldConverter = KripkeStatePropertyListConverter()
-        let statesProps = states.map { (_, state) -> [String: Any] in
-            let props = worldConverter.convert(fromList: state.properties)
-            return [
-                "properties": props,
-                "effects": state.effects.map { worldConverter.convert(fromList: $0) }
-            ]
-        }
-        guard
-            let tempData = try? JSONSerialization.data(withJSONObject: statesProps, options: []),
-            //swiftlint:disable:next unused_optional_binding
-            let _ = try? tempData.write(to: file)
-        else {
-            fatalError("Unable to write file.")
-        }
         print("total states: \(states.count)")
         return KripkeStructure(initialStates: initialStates, states: states)
     }
