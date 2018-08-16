@@ -58,6 +58,7 @@
 
 import FSM
 import SwiftMachines
+import swiftfsm
 
 @available(macOS 10.11, *)
 public final class MachinesMachineLoader: MachineLoader {

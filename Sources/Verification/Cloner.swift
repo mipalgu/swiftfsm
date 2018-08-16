@@ -59,6 +59,7 @@
 import FSM
 import KripkeStructure
 import MachineStructure
+import swiftfsm
 
 public final class Cloner<Converter: KripkeStatePropertyListConverter>: ClonerProtocol {
 

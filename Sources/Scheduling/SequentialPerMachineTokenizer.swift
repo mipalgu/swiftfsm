@@ -58,6 +58,7 @@
 
 import FSM
 import MachineStructure
+import swiftfsm
 
 public final class SequentialPerMachineTokenizer: SchedulerTokenizer {
 

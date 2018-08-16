@@ -57,6 +57,7 @@
  */
 
 import FSM
+import swiftfsm
 
 public final class MachineLoaderStrategy: MachineLoader {
 

@@ -59,6 +59,7 @@
 import FSM
 import MachineStructure
 import MachineLoading
+import swiftfsm
 
 /**
  *  Provides a way to create a `RoundRobinScheduler`.

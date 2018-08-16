@@ -7,7 +7,7 @@ let package = Package(
     products: [
         .executable(
             name: "swiftfsm",
-            targets: ["swiftfsm"]
+            targets: ["swiftfsm_bin"]
         ),
         .library(
             name: "CFSMs",
@@ -33,7 +33,7 @@ let package = Package(
         .target(name: "Verification", dependencies: ["IO", "MachineStructure", "Scheduling"]),
         .target(name: "CFSMWrappers", dependencies: ["GUSimpleWhiteboard", "Libraries", "Scheduling"]),
         .target(
-            name: "swiftfsm",
+            name: "swiftfsm_bin",
             dependencies: [
                 "GUSimpleWhiteboard",
                 "IO",
@@ -50,6 +50,6 @@ let package = Package(
             ]
         ),
         .testTarget(name: "VerificationTests", dependencies: [.target(name: "Verification")]),
-        .testTarget(name: "swiftfsmTests", dependencies: [.target(name: "swiftfsm")])
+        .testTarget(name: "swiftfsmTests", dependencies: [.target(name: "swiftfsm_bin")])
     ]
 )

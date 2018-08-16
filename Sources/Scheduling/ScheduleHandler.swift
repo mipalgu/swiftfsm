@@ -57,6 +57,7 @@
  */
 
 import FSM
+import swiftfsm
 
 /**
  * Conforming types are able to check for dynamically loaded and unloaded C++ LLFSMs.

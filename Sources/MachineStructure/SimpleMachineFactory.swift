@@ -57,6 +57,7 @@
  */
 
 import FSM
+import swiftfsm
 
 /**
  *  Provides a bare-bones implementation of a `MachineFactory`.

@@ -57,6 +57,7 @@
  */
 
 import FSM
+import swiftfsm
 
 /**
  *  Conforming types are responsible for creating `Machine`s.

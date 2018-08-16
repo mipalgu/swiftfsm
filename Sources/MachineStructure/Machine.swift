@@ -57,6 +57,7 @@
  */
 
 import FSM
+import swiftfsm
 
 /**
  *  `Machine`s are data structures that contain everything that is needed for

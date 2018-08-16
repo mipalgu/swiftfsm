@@ -59,6 +59,7 @@
 import FSM
 import KripkeStructure
 import MachineStructure
+import swiftfsm
 
 public protocol KripkeStateGeneratorProtocol {
 

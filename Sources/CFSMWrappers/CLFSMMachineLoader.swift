@@ -62,6 +62,7 @@ import swift_CLReflect
 import Libraries
 import MachineLoading
 import Scheduling
+import swiftfsm
 
 /**
  *  Is responsible for loading and unloading CLFSM machines.

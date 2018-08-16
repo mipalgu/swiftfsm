@@ -59,6 +59,7 @@
 import FSM
 import MachineStructure
 import MachineLoading
+import swiftfsm
 
 /**
  *  Responsible for the execution of machines.

@@ -58,6 +58,7 @@
 
 import FSM
 import KripkeStructure
+import swiftfsm
 
 public protocol SchedulerTokenizer {
 

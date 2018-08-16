@@ -71,6 +71,7 @@ import MachineCompiling
 import Scheduling
 import Parsing
 import Verification
+import swiftfsm
 
 /**
  *  Contains the main logic for swiftfsm.

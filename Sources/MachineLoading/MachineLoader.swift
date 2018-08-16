@@ -57,6 +57,7 @@
  */
 
 import FSM
+import swiftfsm
 
 /**
  *  Conforming types are capable of loading machines from a resource path.

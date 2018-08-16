@@ -60,6 +60,7 @@ import KripkeStructure
 import FSM
 import Scheduling
 import MachineStructure
+import swiftfsm
 
 import Foundation
 
