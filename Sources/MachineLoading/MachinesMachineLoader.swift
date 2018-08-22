@@ -88,7 +88,7 @@ public final class MachinesMachineLoader: MachineLoader {
         self.swiftCompilerFlags = swiftCompilerFlags
     }
 
-    public func load(path: String) -> AnyScheduleableFiniteStateMachine? {
+    public func load(path: String) -> (AnyScheduleableFiniteStateMachine, [Dependency])? {
         guard let machine = self.parser.parseMachine(atPath: path) else {
             return nil
         }

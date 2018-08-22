@@ -124,7 +124,7 @@ public class LibraryMachineLoader: MachineLoader {
      *  - Returns: An array of `AnyScheduleableFiniteStateMachine`s.  If there
      *  was a problem, then the array is empty.
      */
-    public func load(path: String) -> AnyScheduleableFiniteStateMachine? {
+    public func load(path: String) -> (AnyScheduleableFiniteStateMachine, [Dependency])? {
         // Ignore empty paths
         if (path.characters.count < 1) {
             return nil
@@ -142,7 +142,7 @@ public class LibraryMachineLoader: MachineLoader {
 
     private func loadMachine(
         library: LibraryResource
-    ) -> AnyScheduleableFiniteStateMachine? {
+    ) -> (AnyScheduleableFiniteStateMachine, [Dependency])? {
         // Get main method symbol
         let result: (symbol: UnsafeMutableRawPointer?, error: String?) =
             library.getSymbolPointer(symbol: "main")
