@@ -59,6 +59,7 @@
 import FSM
 import KripkeStructure
 import swiftfsm
+import ModelChecking
 
 internal final class TempFiniteStateMachine: FiniteStateMachineType,
     Cloneable,

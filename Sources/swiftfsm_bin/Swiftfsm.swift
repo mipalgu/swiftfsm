@@ -246,9 +246,9 @@ public class Swiftfsm<
         KRIPKE = task.generateKripkeStructure
         let fsm: AnyScheduleableFiniteStateMachine?
         if true == task.isClfsmMachine {
-            fsm = self.clfsmMachineLoader.load(path: task.path!)
+            fsm = self.clfsmMachineLoader.load(path: task.path!)?.0
         } else {
-            fsm = self.machineLoader.load(path: task.path!)
+            fsm = self.machineLoader.load(path: task.path!)?.0
         }
         guard let unwrappedFSM = fsm else {
             // Handle when we are unable to load the fsm.
