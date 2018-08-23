@@ -82,6 +82,8 @@ public struct Machine {
      * hierarchy.
      */
     public var fsm: AnyScheduleableFiniteStateMachine
+    
+    public var dependencies: [Dependency]
 
     /**
      *  Create a new `Machine`.
@@ -89,11 +91,13 @@ public struct Machine {
     public init(
         debug: Bool,
         name: String,
-        fsm: AnyScheduleableFiniteStateMachine
+        fsm: AnyScheduleableFiniteStateMachine,
+        dependencies: [Dependency] = []
     ) {
         self.debug = debug
         self.name = name
         self.fsm = fsm
+        self.dependencies = dependencies
     }
     
 }
