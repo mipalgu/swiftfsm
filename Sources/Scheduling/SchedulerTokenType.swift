@@ -62,6 +62,6 @@ public enum SchedulerTokenType {
 
     case fsm(AnyScheduleableFiniteStateMachine)
     
-    case parameterisedFSM(AnyParameterisedFiniteStateMachine)
+    case parameterised(AnyParameterisedFiniteStateMachine)
 
 }
