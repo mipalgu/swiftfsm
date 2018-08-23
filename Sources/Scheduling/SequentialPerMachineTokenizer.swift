@@ -64,12 +64,17 @@ public final class SequentialPerMachineTokenizer: SchedulerTokenizer {
 
     public func separate(_ machines: [Machine]) -> [[(AnyScheduleableFiniteStateMachine, Machine)]] {
         return machines.map { machine in
-            self.flattenSubmachines(machine.fsm).map { ($0, machine) }
+            [(machine.fsm, machine)] + machine.dependencies.flatMap(self.flattenSubmachines).map { ($0, machine) }
         }
     }
 
-    fileprivate func flattenSubmachines(_ fsm: AnyScheduleableFiniteStateMachine) -> [AnyScheduleableFiniteStateMachine] {
-        return [fsm] + fsm.submachines.flatMap(self.flattenSubmachines)
+    fileprivate func flattenSubmachines(_ dependency: Dependency) -> [AnyScheduleableFiniteStateMachine] {
+        switch dependency {
+        case .parameterisedMachine(let fsm, let dependencies):
+            return [fsm.asScheduleableFiniteStateMachine] + dependencies.flatMap { self.flattenSubmachines($0) }
+        case .submachine(let fsm, let dependencies):
+            return [fsm] + dependencies.flatMap { self.flattenSubmachines($0) }
+        }
     }
 
 }
