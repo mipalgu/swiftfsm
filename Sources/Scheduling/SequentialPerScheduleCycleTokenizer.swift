@@ -64,18 +64,22 @@ public final class SequentialPerScheduleCycleTokenizer: SchedulerTokenizer {
 
     public init() {}
 
-    public func separate(_ machines: [Machine]) -> [[(AnyScheduleableFiniteStateMachine, Machine)]] {
+    public func separate(_ machines: [Machine]) -> [[SchedulerToken]] {
         return [machines.flatMap { machine in
-            [(machine.fsm, machine)] + machine.dependencies.flatMap { self.flattenSubmachines($0) }.map { ($0, machine) }
+            let name = machine.name + "." + fsm.name
+            return [SchedulerToken(fullyQualifiedNamed: name, type: .fsm(machine.fsm), machine: machine)]
+            + machine.dependencies.flatMap { self.flattenSubmachines($0, name, machine) }
         }]
     }
 
-    fileprivate func flattenSubmachines(_ dependency: Dependency) -> [AnyScheduleableFiniteStateMachine] {
+    fileprivate func flattenSubmachines(_ dependency: Dependency, _ name: String, _ machine: Machine) -> [SchedulerToken] {
         switch dependency {
         case .parameterisedMachine(let fsm, let dependencies):
-            return [fsm.asScheduleableFiniteStateMachine] + dependencies.flatMap { self.flattenSubmachines($0) }
+            return [SchedulerToken(fullyQualifiedNamed: name + "." + fsm.name, type: .parameterised(fsm), machine: machine)]
+                + dependencies.flatMap { self.flattenSubmachines($0) }
         case .submachine(let fsm, let dependencies):
-            return [fsm] + dependencies.flatMap { self.flattenSubmachines($0) }
+            return [SchedulerToken(fullyQualifiedNamed: name + "." + fsm.name, type: .fsm(fsm), machine: machine)]
+                + dependencies.flatMap { self.flattenSubmachines($0) }
         }
     }
 
