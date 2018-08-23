@@ -66,7 +66,7 @@ import swiftfsm
  */
 public class RoundRobinScheduler<Tokenizer: SchedulerTokenizer>: Scheduler where
     Tokenizer.Object == Machine,
-    Tokenizer.SchedulerToken == AnyScheduleableFiniteStateMachine
+    Tokenizer.SchedulerToken == SchedulerToken
 {
     
     // All the machines that will be executed.
@@ -94,7 +94,8 @@ public class RoundRobinScheduler<Tokenizer: SchedulerTokenizer>: Scheduler where
      *  Start executing all machines.
      */
     public func run() -> Void {
-        var jobs = self.tokenizer.separate(self.machines)
+        let tokens = self.tokenizer.separate(self.machines)
+        var jobs = self.fetchJobs(fromTokens: tokens)
         // Run until all machines are finished.
         while (false == jobs.isEmpty && false == STOP) {
             var i = 0
@@ -125,11 +126,20 @@ public class RoundRobinScheduler<Tokenizer: SchedulerTokenizer>: Scheduler where
             }
         }
     }
+    
+    private func fetchJobs(fromTokens token: [SchedulerToken]) -> [(AnySchedulebleFiniteStateMachine, Machine)] {
+        switch token.type {
+        case .parameterised(let fsm):
+            return (fsm.asScheduleableFiniteStateMachine, token.machine)
+        case .fsm(let fsm):
+            return (fsm, token.machine)
+        }
+    }
 
-    private func getMachines(fromJob job: [(AnyScheduleableFiniteStateMachine, Machine)]) -> Set<Machine> {
+    private func getMachines(fromJob job: [SchedulerToken]) -> Set<Machine> {
         var machines: Set<Machine> = []
         job.forEach {
-            machines.insert($1)
+            machines.insert($0.machine)
         }
         return machines
     }
