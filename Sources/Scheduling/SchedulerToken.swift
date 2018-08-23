@@ -57,13 +57,23 @@
  */
 
 import MachineStructure
+import swiftfsm
 
 public struct SchedulerToken {
 
-    public let fullyQualifiedNamed: String
+    public let fullyQualifiedName: String
 
     public let type: SchedulerTokenType
 
     public let machine: Machine
+
+    public var fsm: AnyScheduleableFiniteStateMachine {
+        switch self.type {
+        case .parameterised(let fsm):
+            return fsm.asScheduleableFiniteStateMachine
+        case .fsm(let fsm):
+            return fsm
+        }
+    }
 
 }
