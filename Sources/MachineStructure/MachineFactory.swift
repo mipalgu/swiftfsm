@@ -77,6 +77,7 @@ public protocol MachineFactory {
     func make(
         name: String,
         fsm: AnyScheduleableFiniteStateMachine,
+        dependencies: [Dependency],
         debug: Bool
     ) -> Machine
 
