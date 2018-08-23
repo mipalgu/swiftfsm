@@ -127,19 +127,23 @@ public class RoundRobinScheduler<Tokenizer: SchedulerTokenizer>: Scheduler where
         }
     }
     
-    private func fetchJobs(fromTokens token: [SchedulerToken]) -> [(AnySchedulebleFiniteStateMachine, Machine)] {
-        switch token.type {
-        case .parameterised(let fsm):
-            return (fsm.asScheduleableFiniteStateMachine, token.machine)
-        case .fsm(let fsm):
-            return (fsm, token.machine)
+    private func fetchJobs(fromTokens tokens: [[SchedulerToken]]) -> [[(AnyScheduleableFiniteStateMachine, Machine)]] {
+        return tokens.map { tokens in
+            tokens.map { token in
+                switch token.type {
+                case .parameterised(let fsm):
+                    return (fsm.asScheduleableFiniteStateMachine, token.machine)
+                case .fsm(let fsm):
+                    return (fsm, token.machine)
+                }
+            }
         }
     }
 
-    private func getMachines(fromJob job: [SchedulerToken]) -> Set<Machine> {
+    private func getMachines(fromJob job: [(AnyScheduleableFiniteStateMachine, Machine)]) -> Set<Machine> {
         var machines: Set<Machine> = []
         job.forEach {
-            machines.insert($0.machine)
+            machines.insert($1)
         }
         return machines
     }
