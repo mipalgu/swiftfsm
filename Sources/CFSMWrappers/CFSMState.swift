@@ -59,6 +59,7 @@
 import FSM
 import KripkeStructure
 import swift_CLReflect
+import swiftfsm
 
 /**
  * An implementation of MiPalState that allows delegation of actions to an underlying CLReflect metamachine.

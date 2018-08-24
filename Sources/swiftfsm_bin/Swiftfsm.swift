@@ -71,6 +71,7 @@ import MachineCompiling
 import Scheduling
 import Parsing
 import Verification
+import swiftfsm
 
 /**
  *  Contains the main logic for swiftfsm.
@@ -238,12 +239,9 @@ public class Swiftfsm<
     private func loadFsm(
         _ task: Task,
         name: String
-    ) -> AnyScheduleableFiniteStateMachine {
-        func combineSubmachines(_ fsm: AnyScheduleableFiniteStateMachine) -> [AnyScheduleableFiniteStateMachine] {
-            return [fsm] + fsm.submachines.flatMap { combineSubmachines($0) }
-        }
+    ) -> (AnyScheduleableFiniteStateMachine, [Dependency]) {
         KRIPKE = task.generateKripkeStructure
-        let fsm: AnyScheduleableFiniteStateMachine?
+        let fsm: (AnyScheduleableFiniteStateMachine, [Dependency])?
         if true == task.isClfsmMachine {
             fsm = self.clfsmMachineLoader.load(path: task.path!)
         } else {
@@ -276,9 +274,11 @@ public class Swiftfsm<
         var kripke: [Machine] = []
         for _ in 0 ..< task.count {
             // Create the Machine
+            let (fsm, dependencies) = self.loadFsm(task, name: name)
             let temp: Machine = self.machineFactory.make(
                 name: name,
-                fsm: self.loadFsm(task, name: name),
+                fsm: fsm,
+                dependencies: dependencies,
                 debug: task.enableDebugging
             )
             // Remember to generate Kripke Structures.

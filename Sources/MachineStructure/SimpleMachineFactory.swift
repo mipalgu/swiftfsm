@@ -57,6 +57,7 @@
  */
 
 import FSM
+import swiftfsm
 
 /**
  *  Provides a bare-bones implementation of a `MachineFactory`.
@@ -78,9 +79,10 @@ public class SimpleMachineFactory: MachineFactory {
     public func make(
         name: String,
         fsm: AnyScheduleableFiniteStateMachine,
+        dependencies: [Dependency],
         debug: Bool
     ) -> Machine {
-        return Machine(debug: debug, name: name, fsm: fsm)
+        return Machine(debug: debug, name: name, fsm: fsm, dependencies: dependencies)
     }
 
 }

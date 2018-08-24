@@ -60,6 +60,9 @@ import KripkeStructure
 import FSM
 import Scheduling
 import MachineStructure
+import ModelChecking
+import FSMVerification
+import swiftfsm
 
 import Foundation
 
@@ -79,7 +82,7 @@ public final class MachineKripkeStructureGenerator<
 >: KripkeStructureGenerator where
     Detector.Element == KripkeStatePropertyList,
     Tokenizer.Object == Machine,
-    Tokenizer.SchedulerToken == AnyScheduleableFiniteStateMachine
+    Tokenizer.SchedulerToken == SchedulerToken
 {
 
     private typealias ExternalsData = (
@@ -152,7 +155,7 @@ public final class MachineKripkeStructureGenerator<
         }
         let externalVariablesCache = self.makeExternalsData(forMachines: machines)
         // Create initial jobs.
-        let tokens = self.tokenizer.separate(self.machines)
+        let tokens = self.tokenizer.separate(self.machines).map { $0.map { ($0.fsm, $0.machine) } }
         var jobs = [MachineKripkeStructureGenerator.Job(
             initial: true,
             cache: self.cycleDetector.initialData,

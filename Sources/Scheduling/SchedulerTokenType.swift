@@ -1,9 +1,9 @@
 /*
- * MachineFactory.swift 
- * swiftfsm 
+ * SchedulerTokenType.swift 
+ * Scheduling 
  *
- * Created by Callum McColl on 13/05/2016.
- * Copyright © 2016 Callum McColl. All rights reserved.
+ * Created by Callum McColl on 23/08/2018.
+ * Copyright © 2018 Callum McColl. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -56,29 +56,12 @@
  *
  */
 
-import FSM
 import swiftfsm
 
-/**
- *  Conforming types are responsible for creating `Machine`s.
- */
-public protocol MachineFactory {
+public enum SchedulerTokenType {
 
-    /**
-     *  Create a `Machine`.
-     *
-     *  - Parameter name: The name of the `Machine`.
-     *
-     *  - Parameter fsm: The top `AnyScheduleableFiniteStateMachine` that makes up
-     *  the FSM hierarchy of the `Machine`.
-     *
-     *  - Parameter debug: Should we turn debugging on?
-     */
-    func make(
-        name: String,
-        fsm: AnyScheduleableFiniteStateMachine,
-        dependencies: [Dependency],
-        debug: Bool
-    ) -> Machine
+    case fsm(AnyScheduleableFiniteStateMachine)
+    
+    case parameterised(AnyParameterisedFiniteStateMachine)
 
 }

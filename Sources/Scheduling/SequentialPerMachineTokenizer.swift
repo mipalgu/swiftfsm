@@ -58,17 +58,29 @@
 
 import FSM
 import MachineStructure
+import swiftfsm
 
 public final class SequentialPerMachineTokenizer: SchedulerTokenizer {
 
-    public func separate(_ machines: [Machine]) -> [[(AnyScheduleableFiniteStateMachine, Machine)]] {
+    public func separate(_ machines: [Machine]) -> [[SchedulerToken]] {
         return machines.map { machine in
-            self.flattenSubmachines(machine.fsm).map { ($0, machine) }
+            let name = machine.name + "." + machine.fsm.name
+            let tokens: [SchedulerToken] = machine.dependencies.flatMap { self.flattenSubmachines($0, name, machine) }
+            return [SchedulerToken(fullyQualifiedName: name, type: .fsm(machine.fsm), machine: machine)] + tokens
         }
     }
 
-    fileprivate func flattenSubmachines(_ fsm: AnyScheduleableFiniteStateMachine) -> [AnyScheduleableFiniteStateMachine] {
-        return [fsm] + fsm.submachines.flatMap(self.flattenSubmachines)
+    fileprivate func flattenSubmachines(_ dependency: Dependency, _ name: String, _ machine: Machine) -> [SchedulerToken] {
+        switch dependency {
+        case .parameterisedMachine(let fsm, let dependencies):
+            let name = name + "." + fsm.name
+            return [SchedulerToken(fullyQualifiedName: name, type: .parameterised(fsm), machine: machine)]
+                + dependencies.flatMap { self.flattenSubmachines($0, name, machine) }
+        case .submachine(let fsm, let dependencies):
+            let name = name + "." + fsm.name
+            return [SchedulerToken(fullyQualifiedName: name + "." + fsm.name, type: .fsm(fsm), machine: machine)]
+                + dependencies.flatMap { self.flattenSubmachines($0, name, machine) }
+        }
     }
 
 }

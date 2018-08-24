@@ -62,6 +62,7 @@ import swift_CLReflect
 import Libraries
 import MachineLoading
 import Scheduling
+import swiftfsm
 
 /**
  *  Is responsible for loading and unloading CLFSM machines.
@@ -149,7 +150,7 @@ public func handleUnloadedMachine(_ fsm: AnyScheduleableFiniteStateMachine) -> B
      * - Parameter path path to the machine library
      * - Return an array of FSMs to be scheduled
      */
-    public func load(path: String) -> AnyScheduleableFiniteStateMachine? {
+    public func load(path: String) -> (AnyScheduleableFiniteStateMachine, [Dependency])? {
         // Call load function with path.
         let loadMachinePtr = getFunctionPtr(loadMachineFunc)
         let cPath = path.utf8CString 
@@ -157,7 +158,7 @@ public func handleUnloadedMachine(_ fsm: AnyScheduleableFiniteStateMachine) -> B
         if machineID == -1 {
             fatalError("cfsm_load() - Failed to load machine")
         }
-        return createFiniteStateMachine(Int(machineID))
+        return createFiniteStateMachine(Int(machineID)).map { ($0, []) }
     }
     
     /**

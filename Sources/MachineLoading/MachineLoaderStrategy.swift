@@ -57,6 +57,7 @@
  */
 
 import FSM
+import swiftfsm
 
 public final class MachineLoaderStrategy: MachineLoader {
 
@@ -68,7 +69,7 @@ public final class MachineLoaderStrategy: MachineLoader {
         self.libraryLoader = libraryLoader
     }
 
-    public func load(path: String) -> AnyScheduleableFiniteStateMachine? {
+    public func load(path: String) -> (AnyScheduleableFiniteStateMachine, [Dependency])? {
         if path.hasSuffix(".machine") || path.hasSuffix(".machine/") {
             return self.machineLoader.load(path: path)
         }

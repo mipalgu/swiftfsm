@@ -57,18 +57,14 @@
  */
 
 import FSM
-import KripkeStructure
+import ModelChecking
+import swiftfsm
 
 public protocol SchedulerTokenizer {
 
     associatedtype Object
-    associatedtype SchedulerToken:
-        IncrementalExecuter,
-        Finishable,
-        Suspendable,
-        Snapshotable,
-        KripkePropertiesRecordable
+    associatedtype SchedulerToken
 
-    func separate(_: [Object]) -> [[(SchedulerToken, Object)]]
+    func separate(_: [Object]) -> [[SchedulerToken]]
 
 }

@@ -60,6 +60,8 @@ import FSM
 import KripkeStructure
 import MachineStructure
 import Scheduling
+import ModelChecking
+import FSMVerification
 
 public final class MachineKripkeStructureGeneratorFactory: KripkeStructureGeneratorFactory {
 

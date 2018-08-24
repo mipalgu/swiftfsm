@@ -57,6 +57,8 @@
  */
 
 import FSM
+import swiftfsm
+
 /**
  * Conforming types are able to unload C++ LLFSMs.
  */
