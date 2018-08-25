@@ -118,6 +118,11 @@ public class RoundRobinScheduler<Tokenizer: SchedulerTokenizer>: Scheduler where
                 let machines: Set<Machine> = self.getMachines(fromJob: job)
                 machines.forEach { $0.fsm.takeSnapshot() }
                 for (fsm, machine) in job {
+                    if let promiseData = self.promises[fsm.name] {
+                        if false == promiseData.running {
+                            continue
+                        }
+                    }
                     DEBUG = machine.debug
                     if (true == scheduleHandler.handleUnloadedMachine(fsm)) {
                         jobs[i].remove(at: j)
@@ -125,9 +130,14 @@ public class RoundRobinScheduler<Tokenizer: SchedulerTokenizer>: Scheduler where
                     }
                     fsm.next()
                     if (true == fsm.hasFinished) {
-                        jobs[i].remove(at: j)
-                        self.unloader.unload(fsm)
-                        continue
+                        if let promiseData = self.promises[fsm.name] {
+                            promiseData.running = false
+                            promiseData.hasFinished = true
+                        } else {
+                            jobs[i].remove(at: j)
+                            self.unloader.unload(fsm)
+                            continue
+                        }
                     }
                     j += 1
                 }
@@ -145,9 +155,11 @@ public class RoundRobinScheduler<Tokenizer: SchedulerTokenizer>: Scheduler where
         guard let promiseData = self.promises[container.name] else {
             fatalError("Attempting to invoke \(container.name) when it has not been scheduled.")
         }
-        guard true == promiseData.hasFinished else {
+        guard false == promiseData.running else {
             fatalError("Attempting to invoke \(container.name) when it is already running.")
         }
+        promiseData.fsm.restart()
+        promiseData.running = true
         return promiseData.makePromise()
     }
     

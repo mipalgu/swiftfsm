@@ -60,7 +60,7 @@ import swiftfsm
 
 public final class PromiseData {
     
-    public let fsm: AnyParameterisedFiniteStateMachine
+    public var fsm: AnyParameterisedFiniteStateMachine
     
     public var running: Bool
     
