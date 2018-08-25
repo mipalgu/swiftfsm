@@ -79,6 +79,8 @@ public class RoundRobinScheduler<Tokenizer: SchedulerTokenizer>: Scheduler where
 
     private let scheduleHandler: ScheduleHandler
     
+    fileprivate var promises: [String: PromiseData] = [:]
+    
     /**
      *  Create a new `RoundRobinScheduler`.
      *
@@ -95,7 +97,18 @@ public class RoundRobinScheduler<Tokenizer: SchedulerTokenizer>: Scheduler where
      *  Start executing all machines.
      */
     public func run(_ machine: [Machine]) -> Void {
+        self.promises = [:]
         let tokens = self.tokenizer.separate(self.machines)
+        tokens.forEach {
+            $0.forEach {
+                switch $0.type {
+                case .parameterised(let fsm):
+                    self.promises[$0.fullyQualifiedName] = PromiseData(fsm: fsm)
+                default:
+                    return
+                }
+            }
+        }
         var jobs = self.fetchJobs(fromTokens: tokens)
         // Run until all machines are finished.
         while (false == jobs.isEmpty && false == STOP) {
@@ -128,8 +141,14 @@ public class RoundRobinScheduler<Tokenizer: SchedulerTokenizer>: Scheduler where
         }
     }
     
-    public func invoke<T: ResultContainer>(_ fsm: T) -> Promise<T.ResultType> where T: Identifiable {
-        return Promise<T.ResultType>(hasFinished: { fsm.hasFinished }, result: { fsm.result! })
+    public func invoke<T: ResultContainer>(_ container: T) -> Promise<T.ResultType> where T: Identifiable {
+        guard let promiseData = self.promises[container.name] else {
+            fatalError("Attempting to invoke \(container.name) when it has not been scheduled.")
+        }
+        guard true == promiseData.hasFinished else {
+            fatalError("Attempting to invoke \(container.name) when it is already running.")
+        }
+        return promiseData.makePromise()
     }
     
     private func fetchJobs(fromTokens tokens: [[SchedulerToken]]) -> [[(AnyScheduleableFiniteStateMachine, Machine)]] {
