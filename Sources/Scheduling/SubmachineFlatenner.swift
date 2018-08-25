@@ -1,9 +1,9 @@
 /*
- * SequentialPerMachineTokenizer.swift 
- * swiftfsm 
+ * SubmachineFlatenner.swift 
+ * Scheduling 
  *
- * Created by Callum McColl on 09/06/2017.
- * Copyright © 2017 Callum McColl. All rights reserved.
+ * Created by Callum McColl on 25/08/2018.
+ * Copyright © 2018 Callum McColl. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -57,23 +57,23 @@
  */
 
 import FSM
-import MachineStructure
 import swiftfsm
+import MachineStructure
 
-public final class SequentialPerMachineTokenizer: SchedulerTokenizer {
+public final class SubmachineFlatenner {
     
-    fileprivate let flatenner: SubmachineFlatenner
+    public init() {}
     
-    public init(flatenner: SubmachineFlatenner = SubmachineFlatenner()) {
-        self.flatenner = flatenner
-    }
-
-    public func separate(_ machines: [Machine]) -> [[SchedulerToken]] {
-        return machines.map { machine in
-            let name = machine.name + "." + machine.fsm.name
-            let tokens: [SchedulerToken] = machine.dependencies.flatMap { self.flatenner.flattenSubmachines($0, name, machine) }
-            return [SchedulerToken(fullyQualifiedName: name, type: .fsm(machine.fsm), machine: machine)] + tokens
+    public func flattenSubmachines(_ dependency: Dependency, _ name: String, _ machine: Machine) -> [SchedulerToken] {
+        switch dependency {
+        case .parameterisedMachine(let fsm, let name, let dependencies):
+            return [SchedulerToken(fullyQualifiedName: name, type: .parameterised(fsm), machine: machine)]
+                + dependencies.flatMap { self.flattenSubmachines($0, name, machine) }
+        case .submachine(let fsm, let dependencies):
+            let name = name + "." + fsm.name
+            return [SchedulerToken(fullyQualifiedName: name, type: .fsm(fsm), machine: machine)]
+                + dependencies.flatMap { self.flattenSubmachines($0, name, machine) }
         }
     }
-
+    
 }
