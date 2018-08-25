@@ -113,16 +113,19 @@ public class RoundRobinScheduler<Tokenizer: SchedulerTokenizer>: Scheduler where
         // Run until all machines are finished.
         while (false == jobs.isEmpty && false == STOP) {
             var i = 0
+            var foundRunningFSM = false
             for job in jobs {
                 var j = 0
                 let machines: Set<Machine> = self.getMachines(fromJob: job)
                 machines.forEach { $0.fsm.takeSnapshot() }
                 for (fsm, machine) in job {
-                    if let promiseData = self.promises[fsm.name] {
+                    let promiseData: PromiseData? = self.promises[fsm.name]
+                    if let promiseData = promiseData {
                         if false == promiseData.running {
                             continue
                         }
                     }
+                    foundRunningFSM = true
                     DEBUG = machine.debug
                     if (true == scheduleHandler.handleUnloadedMachine(fsm)) {
                         jobs[i].remove(at: j)
@@ -130,7 +133,7 @@ public class RoundRobinScheduler<Tokenizer: SchedulerTokenizer>: Scheduler where
                     }
                     fsm.next()
                     if (true == fsm.hasFinished) {
-                        if let promiseData = self.promises[fsm.name] {
+                        if let promiseData = promiseData {
                             promiseData.running = false
                             promiseData.hasFinished = true
                         } else {
@@ -147,6 +150,9 @@ public class RoundRobinScheduler<Tokenizer: SchedulerTokenizer>: Scheduler where
                     continue
                 }
                 i += 1
+            }
+            if false == foundRunningFSM {
+                return
             }
         }
     }
