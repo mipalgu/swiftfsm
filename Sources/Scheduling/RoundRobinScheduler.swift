@@ -102,8 +102,8 @@ public class RoundRobinScheduler<Tokenizer: SchedulerTokenizer>: Scheduler where
         tokens.forEach {
             $0.forEach {
                 switch $0.type {
-                case .parameterised(let fsm):
-                    self.promises[$0.fullyQualifiedName] = PromiseData(fsm: fsm)
+                case .parameterised(_, let promiseData):
+                    self.promises[$0.fullyQualifiedName] = promiseData
                 default:
                     return
                 }
@@ -155,7 +155,7 @@ public class RoundRobinScheduler<Tokenizer: SchedulerTokenizer>: Scheduler where
         return tokens.map { tokens in
             tokens.map { token in
                 switch token.type {
-                case .parameterised(let fsm):
+                case .parameterised(let fsm, _):
                     return (fsm.asScheduleableFiniteStateMachine, token.machine)
                 case .fsm(let fsm):
                     return (fsm, token.machine)

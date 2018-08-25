@@ -69,7 +69,7 @@ public struct SchedulerToken {
 
     public var fsm: AnyScheduleableFiniteStateMachine {
         switch self.type {
-        case .parameterised(let fsm):
+        case .parameterised(let fsm, _):
             return fsm.asScheduleableFiniteStateMachine
         case .fsm(let fsm):
             return fsm

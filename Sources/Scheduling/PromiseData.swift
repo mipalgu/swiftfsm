@@ -62,12 +62,15 @@ public final class PromiseData {
     
     public let fsm: AnyParameterisedFiniteStateMachine
     
+    public var running: Bool
+    
     public var hasFinished: Bool = true
     
     public var result: Any?
     
-    public init(fsm: AnyParameterisedFiniteStateMachine) {
+    public init(fsm: AnyParameterisedFiniteStateMachine, running: Bool = false) {
         self.fsm = fsm
+        self.running = running
     }
     
     public func makePromise<T>() -> Promise<T> {

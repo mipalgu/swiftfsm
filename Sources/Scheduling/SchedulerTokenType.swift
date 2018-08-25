@@ -62,6 +62,6 @@ public enum SchedulerTokenType {
 
     case fsm(AnyScheduleableFiniteStateMachine)
     
-    case parameterised(AnyParameterisedFiniteStateMachine)
+    case parameterised(AnyParameterisedFiniteStateMachine, PromiseData)
 
 }

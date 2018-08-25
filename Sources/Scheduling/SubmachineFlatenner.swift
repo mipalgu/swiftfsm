@@ -67,7 +67,11 @@ public final class SubmachineFlatenner {
     public func flattenSubmachines(_ dependency: Dependency, _ name: String, _ machine: Machine) -> [SchedulerToken] {
         switch dependency {
         case .parameterisedMachine(let fsm, let name, let dependencies):
-            return [SchedulerToken(fullyQualifiedName: name, type: .parameterised(fsm), machine: machine)]
+            return [SchedulerToken(
+                    fullyQualifiedName: name,
+                    type: .parameterised(fsm, PromiseData(fsm: fsm)),
+                    machine: machine
+                )]
                 + dependencies.flatMap { self.flattenSubmachines($0, name, machine) }
         case .submachine(let fsm, let dependencies):
             let name = name + "." + fsm.name
