@@ -60,6 +60,7 @@ import FSM
 import MachineStructure
 import MachineLoading
 import swiftfsm
+import Utilities
 
 /**
  *  Responsible for the execution of machines.
@@ -93,7 +94,7 @@ public class RoundRobinScheduler<Tokenizer: SchedulerTokenizer>: Scheduler where
     /**
      *  Start executing all machines.
      */
-    public func run() -> Void {
+    public func run(_ machine: [Machine]) -> Void {
         let tokens = self.tokenizer.separate(self.machines)
         var jobs = self.fetchJobs(fromTokens: tokens)
         // Run until all machines are finished.
@@ -125,6 +126,10 @@ public class RoundRobinScheduler<Tokenizer: SchedulerTokenizer>: Scheduler where
                 i += 1
             }
         }
+    }
+    
+    public func invoke<T: ResultContainer>(_ fsm: T) -> Promise<T.ResultType> where T: Identifiable {
+        return Promise<T.ResultType>(hasFinished: { fsm.hasFinished }, result: { fsm.result! })
     }
     
     private func fetchJobs(fromTokens tokens: [[SchedulerToken]]) -> [[(AnyScheduleableFiniteStateMachine, Machine)]] {

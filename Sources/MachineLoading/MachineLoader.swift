@@ -72,6 +72,6 @@ public protocol MachineLoader {
      *  - Returns: An array of `AnyScheduleableFiniteStateMachine`s that were
      *  loaded from the resource.
      */
-    func load(name: String, path: String) -> (AnyScheduleableFiniteStateMachine, [Dependency])?
+    func load(name: String, invoker: Invoker, path: String) -> (AnyScheduleableFiniteStateMachine, [Dependency])?
     
 }

@@ -57,16 +57,18 @@
  */
 
 import FSM
+import swiftfsm
+import MachineStructure
 
 /**
  *  A common interfaces for schedulers who are responsible for the execution of
  *  objects.
  */
-public protocol Scheduler {
+public protocol Scheduler: Invoker {
     
     /**
      *  Run the scheduler.
      */
-    func run() -> Void
+    func run(_: [Machine]) -> Void
     
 }

@@ -217,11 +217,12 @@ public class Swiftfsm<
     }
 
     private func handleTasks(_ tasks: [Task], withScheduler factory: SchedulerFactory) {
+        let scheduler = factory.make()
         let t: [(schedule: [Machine], kripke: [Machine])] = tasks.map {
-            self.handleTask($0)
+            self.handleTask($0, invoker: scheduler)
         }
         self.generateKripkeStructure(t.flatMap { $0.kripke })
-        self.runMachines(t.flatMap { $0.schedule }, withScheduler: factory)
+        scheduler.run(t.flatMap { $0.schedule })
     }
 
     private func getMachinesName(_ task: Task) -> String {
@@ -238,14 +239,15 @@ public class Swiftfsm<
 
     private func loadFsm(
         _ task: Task,
-        name: String
+        name: String,
+        invoker: Invoker
     ) -> (AnyScheduleableFiniteStateMachine, [Dependency]) {
         KRIPKE = task.generateKripkeStructure
         let fsm: (AnyScheduleableFiniteStateMachine, [Dependency])?
         if true == task.isClfsmMachine {
-            fsm = self.clfsmMachineLoader.load(name: name, path: task.path!)
+            fsm = self.clfsmMachineLoader.load(name: name, invoker: invoker, path: task.path!)
         } else {
-            fsm = self.machineLoader.load(name: name, path: task.path!)
+            fsm = self.machineLoader.load(name: name, invoker: invoker, path: task.path!)
         }
         guard let unwrappedFSM = fsm else {
             // Handle when we are unable to load the fsm.
@@ -254,7 +256,7 @@ public class Swiftfsm<
         return unwrappedFSM
     }
 
-    private func handleTask(_ task: Task) -> ([Machine], [Machine]) {
+    private func handleTask(_ task: Task, invoker: Invoker) -> ([Machine], [Machine]) {
         var name: String = self.getMachinesName(task)
         // Handle when there is no path in the Task.
         guard let path = task.path else {
@@ -274,7 +276,7 @@ public class Swiftfsm<
         var kripke: [Machine] = []
         for _ in 0 ..< task.count {
             // Create the Machine
-            let (fsm, dependencies) = self.loadFsm(task, name: name)
+            let (fsm, dependencies) = self.loadFsm(task, name: name, invoker: invoker)
             let temp: Machine = self.machineFactory.make(
                 name: name,
                 fsm: fsm,
@@ -305,10 +307,6 @@ public class Swiftfsm<
             exit(EXIT_FAILURE)
         }
         return tasks
-    }
-
-    private func runMachines(_ machines: [Machine], withScheduler factory: SchedulerFactory) {
-        factory.make(machines: machines).run()
     }
 
 }

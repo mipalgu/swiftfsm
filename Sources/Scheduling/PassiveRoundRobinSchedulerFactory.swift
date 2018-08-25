@@ -79,9 +79,8 @@ public class PassiveRoundRobinSchedulerFactory: SchedulerFactory {
      *
      *  - Parameter machines: All the machines that are going to execute.
      */
-    public func make(machines: [Machine]) -> Scheduler {
+    public func make() -> Scheduler {
         return RoundRobinScheduler(
-            machines: machines,
             tokenizer: SequentialPerScheduleCycleTokenizer(),
             unloader: self.unloader,
             scheduleHandler: self.scheduleHandler
