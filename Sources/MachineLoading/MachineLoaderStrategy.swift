@@ -69,11 +69,11 @@ public final class MachineLoaderStrategy: MachineLoader {
         self.libraryLoader = libraryLoader
     }
 
-    public func load(path: String) -> (AnyScheduleableFiniteStateMachine, [Dependency])? {
+    public func load(name: String, path: String) -> (AnyScheduleableFiniteStateMachine, [Dependency])? {
         if path.hasSuffix(".machine") || path.hasSuffix(".machine/") {
-            return self.machineLoader.load(path: path)
+            return self.machineLoader.load(name: name, path: path)
         }
-        return self.libraryLoader.load(path: path)
+        return self.libraryLoader.load(name: name, path: path)
     }
 
 }

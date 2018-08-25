@@ -124,23 +124,24 @@ public class LibraryMachineLoader: MachineLoader {
      *  - Returns: An array of `AnyScheduleableFiniteStateMachine`s.  If there
      *  was a problem, then the array is empty.
      */
-    public func load(path: String) -> (AnyScheduleableFiniteStateMachine, [Dependency])? {
+    public func load(name: String, path: String) -> (AnyScheduleableFiniteStateMachine, [Dependency])? {
         // Ignore empty paths
         if (path.characters.count < 1) {
             return nil
         }
         // Load the factory from the cache if it is there.
         if let factory = type(of: self).cache[path] {
-            return factory()
+            return factory(name)
         }
         // Load the factory from the dynamic library.
-        if let fsms = self.creator.open(path: path) >>- self.loadMachine {
+        if let fsms = self.creator.open(path: path) >>- ({ self.loadMachine(name: name, library: $0) }) {
             return fsms
         }
         return nil
     }
 
     private func loadMachine(
+        name: String,
         library: LibraryResource
     ) -> (AnyScheduleableFiniteStateMachine, [Dependency])? {
         // Get main method symbol
@@ -163,7 +164,7 @@ public class LibraryMachineLoader: MachineLoader {
         // Get the factory, add it to the cache, call it and return the result.
         let factory: FSMArrayFactory = getLastFactory()!
         type(of: self).cache[library.path] = factory
-        return factory()
+        return factory(name)
     }
     
 }
