@@ -69,9 +69,6 @@ public class RoundRobinScheduler<Tokenizer: SchedulerTokenizer>: Scheduler where
     Tokenizer.Object == Machine,
     Tokenizer.SchedulerToken == SchedulerToken
 {
-    
-    // All the machines that will be executed.
-    public private(set) var machines: [Machine]
 
     private let tokenizer: Tokenizer
 
@@ -86,8 +83,7 @@ public class RoundRobinScheduler<Tokenizer: SchedulerTokenizer>: Scheduler where
      *
      *  - Parameter machines: All the `Machine`s that will be executed.
      */
-    public init(machines: [Machine] = [], tokenizer: Tokenizer, unloader: MachineUnloader, scheduleHandler: ScheduleHandler) {
-        self.machines = machines
+    public init(tokenizer: Tokenizer, unloader: MachineUnloader, scheduleHandler: ScheduleHandler) {
         self.tokenizer = tokenizer
         self.unloader = unloader
         self.scheduleHandler = scheduleHandler
@@ -96,9 +92,9 @@ public class RoundRobinScheduler<Tokenizer: SchedulerTokenizer>: Scheduler where
     /**
      *  Start executing all machines.
      */
-    public func run(_ machine: [Machine]) -> Void {
+    public func run(_ machines: [Machine]) -> Void {
         self.promises = [:]
-        let tokens = self.tokenizer.separate(self.machines)
+        let tokens = self.tokenizer.separate(machines)
         tokens.forEach {
             $0.forEach {
                 switch $0.type {
