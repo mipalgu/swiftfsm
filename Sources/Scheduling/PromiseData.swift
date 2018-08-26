@@ -66,7 +66,7 @@ public final class PromiseData {
     
     public var hasFinished: Bool = true
     
-    public var result: Any?
+    public var resultsFetcher: () -> Any? = { nil }
     
     public init(fsm: AnyParameterisedFiniteStateMachine, running: Bool = false) {
         self.fsm = fsm
@@ -76,7 +76,7 @@ public final class PromiseData {
     public func makePromise<T>() -> Promise<T> {
         return Promise(
             hasFinished: { self.hasFinished },
-            result: { self.result as! T }
+            result: { self.resultsFetcher() as! T }
         )
     }
     

@@ -153,15 +153,16 @@ public class RoundRobinScheduler<Tokenizer: SchedulerTokenizer>: Scheduler where
         }
     }
     
-    public func invoke<T: ResultContainer>(_ container: T) -> Promise<T.ResultType> where T: Identifiable {
-        guard let promiseData = self.promises[container.name] else {
-            fatalError("Attempting to invoke \(container.name) when it has not been scheduled.")
+    public func invoke<P: VariablesContainer, RS: VariablesContainer>(_ name: String, with _: P, withResults results: RS) -> Promise<RS.Vars.ResultType> where RS.Vars: ResultContainer {
+        guard let promiseData = self.promises[name] else {
+            fatalError("Attempting to invoke \(name) when it has not been scheduled.")
         }
         guard false == promiseData.running else {
-            fatalError("Attempting to invoke \(container.name) when it is already running.")
+            fatalError("Attempting to invoke \(name) when it is already running.")
         }
         promiseData.fsm.restart()
         promiseData.running = true
+        promiseData.resultsFetcher = { promiseData.hasFinished ? results.vars.result : nil }
         return promiseData.makePromise()
     }
     
