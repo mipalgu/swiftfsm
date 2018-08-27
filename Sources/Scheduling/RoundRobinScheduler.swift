@@ -157,9 +157,10 @@ public class RoundRobinScheduler<Tokenizer: SchedulerTokenizer>: Scheduler where
         guard let promiseData = self.promises[name] else {
             fatalError("Attempting to invoke \(name) when it has not been scheduled.")
         }
-        guard false == promiseData.running else {
+        guard false == promiseData.running, true == promiseData.hasFinished else {
             fatalError("Attempting to invoke \(name) when it is already running.")
         }
+        promiseData.hasFinished = false
         promiseData.fsm.parameters(parameters)
         promiseData.fsm.restart()
         promiseData.running = true
