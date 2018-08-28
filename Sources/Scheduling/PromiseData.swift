@@ -64,19 +64,18 @@ public final class PromiseData {
     
     public var running: Bool
     
-    public var hasFinished: Bool = true
+    public var hasFinished: Bool
     
-    public var resultsFetcher: () -> Any? = { nil }
-    
-    public init(fsm: AnyParameterisedFiniteStateMachine, running: Bool = false) {
+    public init(fsm: AnyParameterisedFiniteStateMachine, running: Bool = false, hasFinished: Bool = true) {
         self.fsm = fsm
         self.running = running
+        self.hasFinished = hasFinished
     }
     
-    public func makePromise<T>() -> Promise<T> {
+    public func makePromise<T>(_ f: @escaping () -> T) -> Promise<T> {
         return Promise(
             hasFinished: { self.hasFinished },
-            result: { self.resultsFetcher() as! T }
+            result: f
         )
     }
     

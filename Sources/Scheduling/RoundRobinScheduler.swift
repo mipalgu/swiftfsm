@@ -161,11 +161,13 @@ public class RoundRobinScheduler<Tokenizer: SchedulerTokenizer>: Scheduler where
             fatalError("Attempting to invoke \(name) when it is already running.")
         }
         promiseData.hasFinished = false
+        print("fsm is running: \(promiseData.running)")
+        print("fsm has finished? \(promiseData.fsm.hasFinished)")
+        print("promiseData has finsihed? \(promiseData.hasFinished)")
         promiseData.fsm.parameters(parameters)
         promiseData.fsm.restart()
         promiseData.running = true
-        promiseData.resultsFetcher = { promiseData.hasFinished ? results.result : nil }
-        return promiseData.makePromise()
+        return promiseData.makePromise { results.result }
     }
     
     private func fetchJobs(fromTokens tokens: [[SchedulerToken]]) -> [[(AnyScheduleableFiniteStateMachine, Machine)]] {
