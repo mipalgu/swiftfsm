@@ -58,6 +58,7 @@
 
 import FSM
 import swiftfsm
+import Timers
 
 /**
  *  `Machine`s are data structures that contain everything that is needed for
@@ -84,6 +85,8 @@ public struct Machine {
     public var fsm: AnyScheduleableFiniteStateMachine
     
     public var dependencies: [Dependency]
+    
+    public let clock: FSMClock
 
     /**
      *  Create a new `Machine`.
@@ -92,12 +95,14 @@ public struct Machine {
         debug: Bool,
         name: String,
         fsm: AnyScheduleableFiniteStateMachine,
-        dependencies: [Dependency] = []
+        dependencies: [Dependency] = [],
+        clock: FSMClock
     ) {
         self.debug = debug
         self.name = name
         self.fsm = fsm
         self.dependencies = dependencies
+        self.clock = clock
     }
     
 }
