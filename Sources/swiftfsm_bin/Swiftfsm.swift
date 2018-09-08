@@ -69,6 +69,7 @@ import MachineStructure
 import MachineLoading
 import MachineCompiling
 import Scheduling
+import Timers
 import Parsing
 import Verification
 import swiftfsm
@@ -241,19 +242,20 @@ public class Swiftfsm<
         _ task: Task,
         name: String,
         invoker: Invoker
-    ) -> (AnyScheduleableFiniteStateMachine, [Dependency]) {
+    ) -> (AnyScheduleableFiniteStateMachine, [Dependency], FSMClock) {
         KRIPKE = task.generateKripkeStructure
+        let clock = FSMClock()
         let fsm: (AnyScheduleableFiniteStateMachine, [Dependency])?
         if true == task.isClfsmMachine {
-            fsm = self.clfsmMachineLoader.load(name: name, invoker: invoker, path: task.path!)
+            fsm = self.clfsmMachineLoader.load(name: name, invoker: invoker, clock: clock, path: task.path!)
         } else {
-            fsm = self.machineLoader.load(name: name, invoker: invoker, path: task.path!)
+            fsm = self.machineLoader.load(name: name, invoker: invoker, clock: clock, path: task.path!)
         }
         guard let unwrappedFSM = fsm else {
             // Handle when we are unable to load the fsm.
             self.handleError(.unableToLoad(machineName: name, path: task.path!))
         }
-        return unwrappedFSM
+        return (unwrappedFSM.0, unwrappedFSM.1, clock)
     }
 
     private func handleTask(_ task: Task, invoker: Invoker) -> ([Machine], [Machine]) {
@@ -276,12 +278,13 @@ public class Swiftfsm<
         var kripke: [Machine] = []
         for _ in 0 ..< task.count {
             // Create the Machine
-            let (fsm, dependencies) = self.loadFsm(task, name: name, invoker: invoker)
+            let (fsm, dependencies, clock) = self.loadFsm(task, name: name, invoker: invoker)
             let temp: Machine = self.machineFactory.make(
                 name: name,
                 fsm: fsm,
                 dependencies: dependencies,
-                debug: task.enableDebugging
+                debug: task.enableDebugging,
+                clock: clock
             )
             // Remember to generate Kripke Structures.
             if true == task.generateKripkeStructure {
