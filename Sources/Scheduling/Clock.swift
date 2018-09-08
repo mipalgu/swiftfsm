@@ -58,7 +58,7 @@
 
 import swiftfsm
 
-public protocol Clock: Timer {
+public protocol Clock: class, Timer {
     
     /**
      *  Reports the values used to the last `Timer` function calls.
@@ -67,6 +67,6 @@ public protocol Clock: Timer {
      */
     var lastClockValues: [UInt] { get }
     
-    mutating func update(fromFSM: AnyScheduleableFiniteStateMachine)
+    func update(fromFSM: AnyScheduleableFiniteStateMachine)
     
 }
