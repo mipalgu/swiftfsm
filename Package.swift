@@ -24,14 +24,15 @@ let package = Package(
     targets: [
         .target(name: "CFSMs", dependencies: []),
         .target(name: "swiftfsm_helpers", dependencies: []),
+        .target(name: "Timers", dependencies: []),
         .target(name: "Libraries", dependencies: ["IO"]),
         .target(name: "MachineStructure", dependencies: ["Libraries", "GUSimpleWhiteboard", "SwiftMachines"]),
         .target(name: "MachineLoading", dependencies: ["GUSimpleWhiteboard", "SwiftMachines"]),
         .target(name: "MachineCompiling", dependencies: ["SwiftMachines"]),
-        .target(name: "Scheduling", dependencies: ["MachineStructure", "MachineLoading", "GUSimpleWhiteboard"]),
-        .target(name: "Parsing", dependencies: ["Scheduling"]),
-        .target(name: "Verification", dependencies: ["IO", "MachineStructure", "Scheduling"]),
-        .target(name: "CFSMWrappers", dependencies: ["GUSimpleWhiteboard", "Libraries", "Scheduling"]),
+        .target(name: "Scheduling", dependencies: ["MachineStructure", "MachineLoading", "Timers", "GUSimpleWhiteboard"]),
+        .target(name: "Parsing", dependencies: ["Scheduling", "Timers"]),
+        .target(name: "Verification", dependencies: ["IO", "MachineStructure", "Scheduling", "Timers"]),
+        .target(name: "CFSMWrappers", dependencies: ["GUSimpleWhiteboard", "Libraries", "Scheduling", "Timers"]),
         .target(
             name: "swiftfsm_bin",
             dependencies: [
@@ -44,6 +45,7 @@ let package = Package(
                 "MachineLoading",
                 "MachineCompiling",
                 "Scheduling",
+                "Timers",
                 "Parsing",
                 "Verification",
                 "CFSMWrappers"
