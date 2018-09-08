@@ -62,7 +62,11 @@ import swiftfsm_helpers
 
 public final class FSMClock: Clock {
     
+    fileprivate var data: [String: (previousState: AnyState, startTime: UInt)] = [:]
+    
     public fileprivate(set) var lastClockValues: [UInt] = []
+    
+    fileprivate var currentFSM: String! = nil
     
     fileprivate var previousState: AnyState? = nil
     
@@ -77,16 +81,25 @@ public final class FSMClock: Clock {
     public func after_ms(_ interval: UInt) -> Bool {
         let interval = interval * 1000
         self.lastClockValues.append(interval)
-        return UInt(microseconds()) - self.startTime > interval
+        guard let data = self.data[self.currentFSM] else {
+            fatalError("Attempting to use clock without first calling update.")
+        }
+        return UInt(microseconds()) - data.startTime > interval
     }
     
     public func update(fromFSM fsm: AnyScheduleableFiniteStateMachine) {
-        if self.previousState == fsm.currentState {
+        self.lastClockValues = []
+        self.currentFSM = fsm.name
+        guard var data = self.data[fsm.name] else {
+            self.data[fsm.name] = (fsm.currentState, UInt(microseconds()))
             return
         }
-        self.lastClockValues = []
-        self.startTime = UInt(microseconds())
-        self.previousState = fsm.currentState
+        if data.previousState == fsm.currentState {
+            return
+        }
+        data.startTime = UInt(microseconds())
+        data.previousState = fsm.currentState
+        self.data[fsm.name] = data
     }
     
 }
