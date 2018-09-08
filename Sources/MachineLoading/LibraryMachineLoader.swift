@@ -124,15 +124,14 @@ public class LibraryMachineLoader: MachineLoader {
      *  - Returns: An array of `AnyScheduleableFiniteStateMachine`s.  If there
      *  was a problem, then the array is empty.
      */
-    public func load(name: String, invoker: Invoker, clock: Timer, path: String) -> (AnyScheduleableFiniteStateMachine, [Dependency], Timer)? {
+    public func load(name: String, invoker: Invoker, clock: Timer, path: String) -> (AnyScheduleableFiniteStateMachine, [Dependency])? {
         // Ignore empty paths
         if (path.characters.count < 1) {
             return nil
         }
         // Load the factory from the cache if it is there.
         if let factory = type(of: self).cache[path] {
-            let data = factory(name, invoker, clock)
-            return (data.0, data.1, clock)
+            return factory(name, invoker, clock)
         }
         // Load the factory from the dynamic library.
         guard
@@ -141,7 +140,7 @@ public class LibraryMachineLoader: MachineLoader {
         else {
             return nil
         }
-        return (fsms.0, fsms.1, clock)
+        return fsms
     }
 
     private func loadMachine(
