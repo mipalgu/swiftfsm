@@ -115,6 +115,7 @@ public class RoundRobinScheduler<Tokenizer: SchedulerTokenizer>: Scheduler where
                 let machines: Set<Machine> = self.getMachines(fromJob: job)
                 machines.forEach { $0.fsm.takeSnapshot() }
                 for (fsm, machine) in job {
+                    machine.clock.update(fromFSM: fsm)
                     let promiseData: PromiseData? = self.promises[fsm.name]
                     if let promiseData = promiseData {
                         if false == promiseData.running {
