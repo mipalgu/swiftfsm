@@ -82,7 +82,7 @@ public final class VerificationCycleKripkeStructureGenerator<Detector: CycleDete
     }
     
     fileprivate func createInitialJobs(fromTokens tokens: [[VerificationToken]]) -> [Job] {
-        return[Job(
+        return [Job(
             cache: self.cycleDetector.initialData,
             tokens: tokens,
             executing: 0,
