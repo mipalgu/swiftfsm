@@ -66,6 +66,7 @@ import swiftfsm
 
 public final class ScheduleCycleKripkeStructureGenerator<
     Detector: CycleDetector,
+    SpinnerConstructor: MultipleExternalsSpinnerConstructorType,
     Tokenizer: SchedulerTokenizer
 >: KripkeStructureGenerator where
     Detector.Element == KripkeStatePropertyList,
@@ -74,17 +75,20 @@ public final class ScheduleCycleKripkeStructureGenerator<
 {
     fileprivate let machines: [Machine]
     fileprivate let cycleDetector: Detector
+    fileprivate let spinnerConstructor: SpinnerConstructor
     fileprivate let tokenizer: Tokenizer
     fileprivate let jobConverter: VerificationJobSequenceGenerator
     
     public init(
         machines: [Machine],
         cycleDetector: Detector,
+        spinnerConstructor: SpinnerConstructor,
         tokenizer: Tokenizer,
         jobConverter: VerificationJobSequenceGenerator = VerificationJobSequenceGenerator()
     ) {
-        self.cycleDetector = cycleDetector
         self.machines = machines
+        self.cycleDetector = cycleDetector
+        self.spinnerConstructor = spinnerConstructor
         self.tokenizer = tokenizer
         self.jobConverter = jobConverter
     }
@@ -94,17 +98,11 @@ public final class ScheduleCycleKripkeStructureGenerator<
         if true == tokens.isEmpty {
             return KripkeStructure(initialStates: [], states: [:])
         }
-        var jobs = [Job(
-            cache: self.cycleDetector.initialData,
-            tokens: tokens,
-            executing: 0,
-            lastState: nil,
-            lastRecords: tokens.map { $0.map { $0.0.currentRecord } }
-        )]
+        var jobs = self.createInitialJobs(fromTokens: tokens)
         var initialStates: [KripkeState] = []
         var states: [KripkeStatePropertyList: KripkeState] = [:]
         // Loop until all jobs are empty.
-        while false == job.isEmpty {
+        while false == jobs.isEmpty {
             let job = jobs.removeFirst()
             // Create spinners
                 // Clone into verification jobs.
@@ -116,18 +114,28 @@ public final class ScheduleCycleKripkeStructureGenerator<
         return KripkeStructure(initialStates: initialStates, states: states)
     }
     
-}
-
-fileprivate struct Job {
+    fileprivate func createInitialJobs(fromTokens tokens: [[SchedulerToken]]) -> [Job] {
+        return [Job(
+            cache: self.cycleDetector.initialData,
+            tokens: tokens,
+            executing: 0,
+            lastState: nil,
+            lastRecords: tokens.map { $0.map { $0.fsm.currentRecord } }
+        )]
+    }
     
-    let cache: Detector.Data
-    
-    let tokens: [[VerificationJob]]
-    
-    let executing: Int
-    
-    let lastState: KripkeState?
-    
-    let lastRecords: [[KripkeStatePropertyList]]
+    fileprivate struct Job {
+        
+        let cache: Detector.Data
+        
+        let tokens: [[SchedulerToken]]
+        
+        let executing: Int
+        
+        let lastState: KripkeState?
+        
+        let lastRecords: [[KripkeStatePropertyList]]
+        
+    }
     
 }
