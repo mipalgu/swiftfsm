@@ -68,11 +68,16 @@ public final class ScheduleCycleKripkeStructureGenerator<Tokenizer: SchedulerTok
     Tokenizer.Object == Machine,
     Tokenizer.SchedulerToken == SchedulerToken
 {
-    
+    fileprivate let machines: [Machine]
     fileprivate let tokenizer: Tokenizer
     fileprivate let jobConverter: VerificationJobSequenceGenerator
     
-    public init(tokenizer: Tokenizer, jobConverter: VerificationJobSequenceGenerator = VerificationJobSequenceGenerator()) {
+    public init(
+        machines: [Machine],
+        tokenizer: Tokenizer,
+        jobConverter: VerificationJobSequenceGenerator = VerificationJobSequenceGenerator()
+    ) {
+        self.machines = machines
         self.tokenizer = tokenizer
         self.jobConverter = jobConverter
     }
@@ -80,6 +85,7 @@ public final class ScheduleCycleKripkeStructureGenerator<Tokenizer: SchedulerTok
     public func generate() -> KripkeStructure {
         var initialStates: [KripkeState] = []
         var states: [KripkeStatePropertyList: KripkeState] = [:]
+        let tokens = self.tokenizer.separate(self.machines)
         return KripkeStructure(initialStates: initialStates, states: states)
     }
     
