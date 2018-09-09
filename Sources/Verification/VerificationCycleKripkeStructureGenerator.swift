@@ -86,6 +86,7 @@ public final class VerificationCycleKripkeStructureGenerator<
         var jobs = self.createInitialJobs(fromTokens: self.tokens)
         while false == jobs.isEmpty {
             let job = jobs.removeFirst()
+            let externals = self.fetchUniqueExternalsData(fromSnapshot: job.tokens[job.executing])
         }
         return KripkeStructure()
     }
@@ -98,6 +99,18 @@ public final class VerificationCycleKripkeStructureGenerator<
             lastState: nil,
             lastRecords: tokens.map { $0.map { $0.fsm.currentRecord } }
         )]
+    }
+    
+    fileprivate func fetchUniqueExternalsData(fromSnapshot tokens: [VerificationToken]) -> [ExternalVariablesData] {
+        var hashTable: Set<String> = []
+        var externals: [ExternalVariablesData] = []
+        tokens.forEach { $0.externalVariables.forEach {
+            if hashTable.contains($0.externalVariables.name) {
+                return
+            }
+            externals.append($0)
+        } }
+        return externals
     }
     
     fileprivate struct Job {
