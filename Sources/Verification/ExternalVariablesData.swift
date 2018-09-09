@@ -1,5 +1,5 @@
 /*
- * VerificationJobSequenceGenerator.swift
+ * ExternalVariablesData.swift
  * Verification
  *
  * Created by Callum McColl on 10/9/18.
@@ -64,12 +64,12 @@ import ModelChecking
 import FSMVerification
 import swiftfsm
 
-public final class VerificationJobSequenceGenerator {
+public struct ExternalVariablesData {
     
-    public init() {}
+    public let externalVariables: AnySnapshotController
     
-    public func convert<S: Sequence>(_ jobs: S) -> [KripkeState] where S.Element == VerificationJob {
-        return []
-    }
+    public let defaultValues: KripkeStatePropertyList
+    
+    public let spinners: [String: (Any) -> Any?]
     
 }

@@ -1,6 +1,6 @@
 /*
  * ScheduleCycleKripkeStructureGenerator.swift
- * CFSMWrappers
+ * Verification
  *
  * Created by Callum McColl on 10/9/18.
  * Copyright © 2018 Callum McColl. All rights reserved.
@@ -149,26 +149,6 @@ public final class ScheduleCycleKripkeStructureGenerator<
         let lastState: KripkeState?
         
         let lastRecords: [[KripkeStatePropertyList]]
-        
-    }
-    
-    fileprivate struct VerificationToken {
-        
-        let fsm: AnyScheduleableFiniteStateMachine
-        
-        let machine: Machine
-        
-        let externalVariables: [ExternalVariablesData]
-        
-    }
-    
-    fileprivate struct ExternalVariablesData {
-        
-        let externalVariables: AnySnapshotController
-        
-        let defaultValues: KripkeStatePropertyList
-        
-        let spinners: [String: (Any) -> Any?]
         
     }
     

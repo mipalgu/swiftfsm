@@ -1,5 +1,5 @@
 /*
- * VerificationJobSequenceGenerator.swift
+ * VerificationToken.swift
  * Verification
  *
  * Created by Callum McColl on 10/9/18.
@@ -56,20 +56,15 @@
  *
  */
 
-import KripkeStructure
-import FSM
-import Scheduling
-import MachineStructure
-import ModelChecking
-import FSMVerification
 import swiftfsm
+import MachineStructure
 
-public final class VerificationJobSequenceGenerator {
+public struct VerificationToken {
     
-    public init() {}
+    public let fsm: AnyScheduleableFiniteStateMachine
     
-    public func convert<S: Sequence>(_ jobs: S) -> [KripkeState] where S.Element == VerificationJob {
-        return []
-    }
+    public let machine: Machine
+    
+    public let externalVariables: [ExternalVariablesData]
     
 }
