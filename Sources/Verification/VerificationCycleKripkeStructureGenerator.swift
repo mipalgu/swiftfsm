@@ -75,7 +75,20 @@ public final class VerificationCycleKripkeStructureGenerator<Detector: CycleDete
     }
     
     public func generate() -> KripkeStructure {
+        var initialStates: [KripkeState] = []
+        var states: [KripkeStatePropertyList: KripkeState] = [:]
+        var jobs = self.createInitialJobs(fromTokens: self.tokens)
         return KripkeStructure()
+    }
+    
+    fileprivate func createInitialJobs(fromTokens tokens: [[VerificationToken]]) -> [Job] {
+        return[Job(
+            cache: self.cycleDetector.initialData,
+            tokens: tokens,
+            executing: 0,
+            lastState: nil,
+            lastRecords: tokens.map { $0.map { $0.fsm.currentRecord } }
+        )]
     }
     
     fileprivate struct Job {
