@@ -86,7 +86,12 @@ public final class VerificationCycleKripkeStructureGenerator<
         var jobs = self.createInitialJobs(fromTokens: self.tokens)
         while false == jobs.isEmpty {
             let job = jobs.removeFirst()
-            let externals = self.fetchUniqueExternalsData(fromSnapshot: job.tokens[job.executing])
+            let externalsData = self.fetchUniqueExternalsData(fromSnapshot: job.tokens[job.executing])
+            let spinner = self.spinnerConstructor.makeSpinner(forExternals: externalsData.map { ($0.externalVariables, $0.defaultValues, $0.spinners) })
+            while let externals = spinner() {
+                
+            }
+            
         }
         return KripkeStructure()
     }
