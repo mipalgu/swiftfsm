@@ -58,6 +58,7 @@
 
 import swiftfsm
 import MachineStructure
+import FSMVerification
 
 public struct VerificationToken {
     
@@ -65,6 +66,6 @@ public struct VerificationToken {
     
     public let machine: Machine
     
-    public let externalVariables: [ExternalVariablesData]
+    public let externalVariables: [ExternalVariablesVerificationData]
     
 }

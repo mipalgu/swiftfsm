@@ -87,7 +87,7 @@ public final class VerificationCycleKripkeStructureGenerator<
         while false == jobs.isEmpty {
             let job = jobs.removeFirst()
             let externalsData = self.fetchUniqueExternalsData(fromSnapshot: job.tokens[job.executing])
-            let spinner = self.spinnerConstructor.makeSpinner(forExternals: externalsData.map { ($0.externalVariables, $0.defaultValues, $0.spinners) })
+            let spinner = self.spinnerConstructor.makeSpinner(forExternals: externalsData)
             while let externals = spinner() {
                 
             }
@@ -106,9 +106,9 @@ public final class VerificationCycleKripkeStructureGenerator<
         )]
     }
     
-    fileprivate func fetchUniqueExternalsData(fromSnapshot tokens: [VerificationToken]) -> [ExternalVariablesData] {
+    fileprivate func fetchUniqueExternalsData(fromSnapshot tokens: [VerificationToken]) -> [ExternalVariablesVerificationData] {
         var hashTable: Set<String> = []
-        var externals: [ExternalVariablesData] = []
+        var externals: [ExternalVariablesVerificationData] = []
         tokens.forEach { $0.externalVariables.forEach {
             if hashTable.contains($0.externalVariables.name) {
                 return

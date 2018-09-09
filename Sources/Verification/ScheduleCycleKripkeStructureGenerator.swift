@@ -99,9 +99,9 @@ public final class ScheduleCycleKripkeStructureGenerator<
         // Convert SchedulerTokens to VerificationTokens.
         return tokens.map { (arr: [SchedulerToken]) in
             arr.map { (token: SchedulerToken) -> VerificationToken in
-                let externals = token.fsm.externalVariables.map { (external: AnySnapshotController) -> ExternalVariablesData in
+                let externals = token.fsm.externalVariables.map { (external: AnySnapshotController) -> ExternalVariablesVerificationData in
                     let (defaultValues, spinners) = self.extractor.extract(externalVariables: external)
-                    return ExternalVariablesData(externalVariables: external, defaultValues: defaultValues, spinners: spinners)
+                    return ExternalVariablesVerificationData(externalVariables: external, defaultValues: defaultValues, spinners: spinners)
                 }
                 return VerificationToken(fsm: token.fsm, machine: token.machine, externalVariables: externals)
             }

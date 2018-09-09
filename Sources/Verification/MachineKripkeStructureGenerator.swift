@@ -168,11 +168,18 @@ public final class MachineKripkeStructureGenerator<
         while false == jobs.isEmpty {
             print(jobs.count)
             let job = jobs.removeFirst()
-            var spinningExternals: [String: ExternalsData] = [:]
+            var spinningExternals: [String: ExternalVariablesVerificationData] = [:]
             for (fsm, machine) in job.tokens[job.executing] {
                 let key = machine.name + "." + fsm.name
                 for external in fsm.externalVariables {
-                    spinningExternals[external.name] = externalVariablesCache[key]?[external.name]
+                    guard let data = externalVariablesCache[key]?[external.name] else {
+                        continue
+                    }
+                    spinningExternals[key] = ExternalVariablesVerificationData(
+                        externalVariables: data.0,
+                        defaultValues: data.1,
+                        spinners: data.2
+                    )
                 }
             }
             // Execute the tokens for the current job for all variations of external variables.
