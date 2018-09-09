@@ -64,10 +64,17 @@ import ModelChecking
 import FSMVerification
 import swiftfsm
 
-public final class ScheduleCycleKripkeStructureGenerator: KripkeStructureGenerator {
+public final class ScheduleCycleKripkeStructureGenerator<Tokenizer: SchedulerTokenizer>: KripkeStructureGenerator where
+    Tokenizer.Object == Machine,
+    Tokenizer.SchedulerToken == SchedulerToken
+{
     
-    public init() {
-        
+    fileprivate let tokenizer: Tokenizer
+    fileprivate let jobConverter: VerificationJobSequenceGenerator
+    
+    public init(tokenizer: Tokenizer, jobConverter: VerificationJobSequenceGenerator = VerificationJobSequenceGenerator()) {
+        self.tokenizer = tokenizer
+        self.jobConverter = jobConverter
     }
     
     public func generate() -> KripkeStructure {
