@@ -1,5 +1,5 @@
 /*
- * ScheduleCycleKripkeStructureGenerator.swift
+ * VerificationCycleKripkeStructureGeneratorFactoryType.swift
  * Verification
  *
  * Created by Callum McColl on 10/9/18.
@@ -56,56 +56,12 @@
  *
  */
 
-import KripkeStructure
-import FSM
-import Scheduling
-import MachineStructure
 import ModelChecking
-import FSMVerification
-import swiftfsm
 
-public final class ScheduleCycleKripkeStructureGenerator<
-    Extractor: ExternalsSpinnerDataExtractorType,
-    Factory: VerificationCycleKripkeStructureGeneratorFactoryType,
-    Tokenizer: SchedulerTokenizer
->: KripkeStructureGenerator where
-    Tokenizer.Object == Machine,
-    Tokenizer.SchedulerToken == SchedulerToken
-{
-    fileprivate let machines: [Machine]
-    fileprivate let extractor: Extractor
-    fileprivate let factory: Factory
-    fileprivate let tokenizer: Tokenizer
+public protocol VerificationCycleKripkeStructureGeneratorFactoryType {
     
-    public init(
-        machines: [Machine],
-        extractor: Extractor,
-        factory: Factory,
-        tokenizer: Tokenizer
-    ) {
-        self.machines = machines
-        self.extractor = extractor
-        self.factory = factory
-        self.tokenizer = tokenizer
-    }
+    associatedtype Generator: KripkeStructureGenerator
     
-    public func generate() -> Factory.Generator.KripkeStructure {
-        let tokens = self.tokenizer.separate(self.machines)
-        let verificationTokens = self.convert(tokens: tokens)
-        return self.factory.make(tokens: verificationTokens).generate()
-    }
-    
-    fileprivate func convert(tokens: [[SchedulerToken]]) -> [[VerificationToken]] {
-        // Convert SchedulerTokens to VerificationTokens.
-        return tokens.map { (arr: [SchedulerToken]) in
-            arr.map { (token: SchedulerToken) -> VerificationToken in
-                let externals = token.fsm.externalVariables.map { (external: AnySnapshotController) -> ExternalVariablesData in
-                    let (defaultValues, spinners) = self.extractor.extract(externalVariables: external)
-                    return ExternalVariablesData(externalVariables: external, defaultValues: defaultValues, spinners: spinners)
-                }
-                return VerificationToken(fsm: token.fsm, machine: token.machine, externalVariables: externals)
-            }
-        }
-    }
+    func make(tokens: [[VerificationToken]]) -> Generator
     
 }

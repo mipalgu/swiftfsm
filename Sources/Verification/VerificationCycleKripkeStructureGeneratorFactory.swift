@@ -1,5 +1,5 @@
 /*
- * ScheduleCycleKripkeStructureGenerator.swift
+ * VerificationCycleKripkeStructureGeneratorFactory.swift
  * Verification
  *
  * Created by Callum McColl on 10/9/18.
@@ -56,56 +56,24 @@
  *
  */
 
-import KripkeStructure
-import FSM
-import Scheduling
-import MachineStructure
 import ModelChecking
-import FSMVerification
-import swiftfsm
 
-public final class ScheduleCycleKripkeStructureGenerator<
-    Extractor: ExternalsSpinnerDataExtractorType,
-    Factory: VerificationCycleKripkeStructureGeneratorFactoryType,
-    Tokenizer: SchedulerTokenizer
->: KripkeStructureGenerator where
-    Tokenizer.Object == Machine,
-    Tokenizer.SchedulerToken == SchedulerToken
+public final class VerificationCycleKripkeStructureGeneratorFactory<
+    Detector: CycleDetector
+>: VerificationCycleKripkeStructureGeneratorFactoryType
 {
-    fileprivate let machines: [Machine]
-    fileprivate let extractor: Extractor
-    fileprivate let factory: Factory
-    fileprivate let tokenizer: Tokenizer
     
-    public init(
-        machines: [Machine],
-        extractor: Extractor,
-        factory: Factory,
-        tokenizer: Tokenizer
-    ) {
-        self.machines = machines
-        self.extractor = extractor
-        self.factory = factory
-        self.tokenizer = tokenizer
+    fileprivate let cycleDetector: Detector
+    
+    public init(cycleDetector: Detector) {
+        self.cycleDetector = cycleDetector
     }
     
-    public func generate() -> Factory.Generator.KripkeStructure {
-        let tokens = self.tokenizer.separate(self.machines)
-        let verificationTokens = self.convert(tokens: tokens)
-        return self.factory.make(tokens: verificationTokens).generate()
-    }
-    
-    fileprivate func convert(tokens: [[SchedulerToken]]) -> [[VerificationToken]] {
-        // Convert SchedulerTokens to VerificationTokens.
-        return tokens.map { (arr: [SchedulerToken]) in
-            arr.map { (token: SchedulerToken) -> VerificationToken in
-                let externals = token.fsm.externalVariables.map { (external: AnySnapshotController) -> ExternalVariablesData in
-                    let (defaultValues, spinners) = self.extractor.extract(externalVariables: external)
-                    return ExternalVariablesData(externalVariables: external, defaultValues: defaultValues, spinners: spinners)
-                }
-                return VerificationToken(fsm: token.fsm, machine: token.machine, externalVariables: externals)
-            }
-        }
+    public func make(tokens: [[VerificationToken]]) -> VerificationCycleKripkeStructureGenerator<Detector> {
+        return VerificationCycleKripkeStructureGenerator(
+            tokens: tokens,
+            cycleDetector: self.cycleDetector
+        )
     }
     
 }
