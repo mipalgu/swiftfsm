@@ -71,6 +71,7 @@ public final class VerificationCycleKripkeStructureGeneratorFactory<
     }
     
     public func make(tokens: [[VerificationToken]]) -> VerificationCycleKripkeStructureGenerator<
+        AggregateCloner<Cloner<KripkeStatePropertyListConverter>>,
         Detector,
         MultipleExternalsSpinnerConstructor<
             ExternalsSpinnerConstructor<SpinnerRunner>
@@ -78,6 +79,7 @@ public final class VerificationCycleKripkeStructureGeneratorFactory<
     > {
         return VerificationCycleKripkeStructureGenerator(
             tokens: tokens,
+            cloner: AggregateCloner(cloner: Cloner(converter: KripkeStatePropertyListConverter())),
             cycleDetector: self.cycleDetector,
             spinnerConstructor: MultipleExternalsSpinnerConstructor(
                 constructor: ExternalsSpinnerConstructor(

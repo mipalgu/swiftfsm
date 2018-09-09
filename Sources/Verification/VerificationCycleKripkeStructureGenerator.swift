@@ -65,17 +65,25 @@ import FSMVerification
 import swiftfsm
 
 public final class VerificationCycleKripkeStructureGenerator<
+    Cloner: AggregateClonerProtocol,
     Detector: CycleDetector,
     SpinnerConstructor: MultipleExternalsSpinnerConstructorType
 >: KripkeStructureGenerator
 {
     
     fileprivate let tokens: [[VerificationToken]]
+    fileprivate let cloner: Cloner
     fileprivate let cycleDetector: Detector
     fileprivate let spinnerConstructor: SpinnerConstructor
     
-    public init(tokens: [[VerificationToken]], cycleDetector: Detector, spinnerConstructor: SpinnerConstructor) {
+    public init(
+        tokens: [[VerificationToken]],
+        cloner: Cloner,
+        cycleDetector: Detector,
+        spinnerConstructor: SpinnerConstructor
+    ) {
         self.tokens = tokens
+        self.cloner = cloner
         self.cycleDetector = cycleDetector
         self.spinnerConstructor = spinnerConstructor
     }
@@ -89,7 +97,10 @@ public final class VerificationCycleKripkeStructureGenerator<
             let externalsData = self.fetchUniqueExternalsData(fromSnapshot: job.tokens[job.executing])
             let spinner = self.spinnerConstructor.makeSpinner(forExternals: externalsData)
             while let externals = spinner() {
-                
+                // Clone.
+                //let clones = self.cloner.clone(job.tokens)
+                // Execute.
+                // Assign.
             }
             
         }
