@@ -119,9 +119,19 @@ public final class ScheduleCycleKripkeStructureGenerator<
     }
     
     fileprivate func createInitialJobs(fromTokens tokens: [[SchedulerToken]]) -> [Job] {
+        // Convert SchedulerTokens to VerificationTokens.
+        let verificationTokens = tokens.map { (arr: [SchedulerToken]) in
+            arr.map { (token: SchedulerToken) -> VerificationToken in
+                let externals = token.fsm.externalVariables.map { (external: AnySnapshotController) -> ExternalVariablesData in
+                    let (defaultValues, spinners) = self.extractor.extract(externalVariables: external)
+                    return ExternalVariablesData(externalVariables: external, defaultValues: defaultValues, spinners: spinners)
+                }
+                return VerificationToken(fsm: token.fsm, machine: token.machine, externalVariables: externals)
+            }
+        }
         return [Job(
             cache: self.cycleDetector.initialData,
-            tokens: tokens,
+            tokens: verificationTokens,
             executing: 0,
             lastState: nil,
             lastRecords: tokens.map { $0.map { $0.fsm.currentRecord } }
