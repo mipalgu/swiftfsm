@@ -64,20 +64,29 @@ import ModelChecking
 import FSMVerification
 import swiftfsm
 
-public final class VerificationCycleKripkeStructureGenerator<Detector: CycleDetector>: KripkeStructureGenerator {
+public final class VerificationCycleKripkeStructureGenerator<
+    Detector: CycleDetector,
+    SpinnerConstructor: MultipleExternalsSpinnerConstructorType
+>: KripkeStructureGenerator
+{
     
     fileprivate let tokens: [[VerificationToken]]
     fileprivate let cycleDetector: Detector
+    fileprivate let spinnerConstructor: SpinnerConstructor
     
-    public init(tokens: [[VerificationToken]], cycleDetector: Detector) {
+    public init(tokens: [[VerificationToken]], cycleDetector: Detector, spinnerConstructor: SpinnerConstructor) {
         self.tokens = tokens
         self.cycleDetector = cycleDetector
+        self.spinnerConstructor = spinnerConstructor
     }
     
     public func generate() -> KripkeStructure {
         var initialStates: [KripkeState] = []
         var states: [KripkeStatePropertyList: KripkeState] = [:]
         var jobs = self.createInitialJobs(fromTokens: self.tokens)
+        while false == jobs.isEmpty {
+            let job = jobs.removeFirst()
+        }
         return KripkeStructure()
     }
     

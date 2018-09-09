@@ -57,6 +57,7 @@
  */
 
 import ModelChecking
+import FSMVerification
 
 public final class VerificationCycleKripkeStructureGeneratorFactory<
     Detector: CycleDetector
@@ -69,10 +70,20 @@ public final class VerificationCycleKripkeStructureGeneratorFactory<
         self.cycleDetector = cycleDetector
     }
     
-    public func make(tokens: [[VerificationToken]]) -> VerificationCycleKripkeStructureGenerator<Detector> {
+    public func make(tokens: [[VerificationToken]]) -> VerificationCycleKripkeStructureGenerator<
+        Detector,
+        MultipleExternalsSpinnerConstructor<
+            ExternalsSpinnerConstructor<SpinnerRunner>
+        >
+    > {
         return VerificationCycleKripkeStructureGenerator(
             tokens: tokens,
-            cycleDetector: self.cycleDetector
+            cycleDetector: self.cycleDetector,
+            spinnerConstructor: MultipleExternalsSpinnerConstructor(
+                constructor: ExternalsSpinnerConstructor(
+                    runner: SpinnerRunner()
+                )
+            )
         )
     }
     
