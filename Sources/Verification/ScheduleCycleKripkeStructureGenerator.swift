@@ -128,13 +128,33 @@ public final class ScheduleCycleKripkeStructureGenerator<
         
         let cache: Detector.Data
         
-        let tokens: [[SchedulerToken]]
+        let tokens: [[VerificationToken]]
         
         let executing: Int
         
         let lastState: KripkeState?
         
         let lastRecords: [[KripkeStatePropertyList]]
+        
+    }
+    
+    fileprivate struct VerificationToken {
+        
+        let fsm: AnyScheduleableFiniteStateMachine
+        
+        let machine: Machine
+        
+        let externalVariables: [ExternalVariablesData]
+        
+    }
+    
+    fileprivate struct ExternalVariablesData {
+        
+        let externalVariables: AnySnapshotController
+        
+        let defaultValues: KripkeStatePropertyList
+        
+        let spinners: [String: (Any) -> Any?]
         
     }
     
