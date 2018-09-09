@@ -86,6 +86,9 @@ public final class ScheduleCycleKripkeStructureGenerator<Tokenizer: SchedulerTok
         var initialStates: [KripkeState] = []
         var states: [KripkeStatePropertyList: KripkeState] = [:]
         let tokens = self.tokenizer.separate(self.machines)
+        while nil != tokens.first(where: { nil != $0.first(where: { !$0.fsm.hasFinished })}) {
+            
+        }
         return KripkeStructure(initialStates: initialStates, states: states)
     }
     
