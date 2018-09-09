@@ -66,6 +66,7 @@ import swiftfsm
 
 public final class ScheduleCycleKripkeStructureGenerator<
     Detector: CycleDetector,
+    Extractor: ExternalsSpinnerDataExtractorType,
     SpinnerConstructor: MultipleExternalsSpinnerConstructorType,
     Tokenizer: SchedulerTokenizer
 >: KripkeStructureGenerator where
@@ -75,6 +76,7 @@ public final class ScheduleCycleKripkeStructureGenerator<
 {
     fileprivate let machines: [Machine]
     fileprivate let cycleDetector: Detector
+    fileprivate let extractor: Extractor
     fileprivate let spinnerConstructor: SpinnerConstructor
     fileprivate let tokenizer: Tokenizer
     fileprivate let jobConverter: VerificationJobSequenceGenerator
@@ -82,12 +84,14 @@ public final class ScheduleCycleKripkeStructureGenerator<
     public init(
         machines: [Machine],
         cycleDetector: Detector,
+        extractor: Extractor,
         spinnerConstructor: SpinnerConstructor,
         tokenizer: Tokenizer,
         jobConverter: VerificationJobSequenceGenerator = VerificationJobSequenceGenerator()
     ) {
         self.machines = machines
         self.cycleDetector = cycleDetector
+        self.extractor = extractor
         self.spinnerConstructor = spinnerConstructor
         self.tokenizer = tokenizer
         self.jobConverter = jobConverter
