@@ -58,6 +58,7 @@
 
 import FSM
 import swiftfsm
+import Timers
 
 /**
  *  Provides a bare-bones implementation of a `MachineFactory`.
@@ -80,9 +81,10 @@ public class SimpleMachineFactory: MachineFactory {
         name: String,
         fsm: AnyScheduleableFiniteStateMachine,
         dependencies: [Dependency],
-        debug: Bool
+        debug: Bool,
+        clock: FSMClock
     ) -> Machine {
-        return Machine(debug: debug, name: name, fsm: fsm, dependencies: dependencies)
+        return Machine(debug: debug, name: name, fsm: fsm, dependencies: dependencies, clock: clock)
     }
 
 }

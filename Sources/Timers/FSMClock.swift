@@ -1,8 +1,8 @@
 /*
- * MachineLoaderStrategy.swift 
- * MachineLoading 
+ * FSMClock.swift
+ * Timers
  *
- * Created by Callum McColl on 02/07/2018.
+ * Created by Callum McColl on 9/9/18.
  * Copyright © 2018 Callum McColl. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -58,22 +58,48 @@
 
 import FSM
 import swiftfsm
+import swiftfsm_helpers
 
-public final class MachineLoaderStrategy: MachineLoader {
-
-    fileprivate let machineLoader: MachineLoader
-    fileprivate let libraryLoader: MachineLoader
-
-    public init(machineLoader: MachineLoader, libraryLoader: MachineLoader) {
-        self.machineLoader = machineLoader
-        self.libraryLoader = libraryLoader
+public final class FSMClock: Clock {
+    
+    fileprivate var data: [String: (previousState: AnyState, startTime: UInt)] = [:]
+    
+    public fileprivate(set) var lastClockValues: [UInt] = []
+    
+    fileprivate var currentFSM: String! = nil
+    
+    fileprivate var previousState: AnyState? = nil
+    
+    fileprivate var startTime: UInt! = nil
+    
+    public init() {}
+    
+    public func after(_ interval: UInt) -> Bool {
+        return self.after_ms(interval * 1000)
     }
-
-    public func load(name: String, invoker: Invoker, clock: Timer, path: String) -> (AnyScheduleableFiniteStateMachine, [Dependency])? {
-        if path.hasSuffix(".machine") || path.hasSuffix(".machine/") {
-            return self.machineLoader.load(name: name, invoker: invoker, clock: clock, path: path)
+    
+    public func after_ms(_ interval: UInt) -> Bool {
+        let interval = interval * 1000
+        self.lastClockValues.append(interval)
+        guard let data = self.data[self.currentFSM] else {
+            fatalError("Attempting to use clock without first calling update.")
         }
-        return self.libraryLoader.load(name: name, invoker: invoker, clock: clock, path: path)
+        return UInt(microseconds()) - data.startTime > interval
     }
-
+    
+    public func update(fromFSM fsm: AnyScheduleableFiniteStateMachine) {
+        self.lastClockValues = []
+        self.currentFSM = fsm.name
+        guard var data = self.data[fsm.name] else {
+            self.data[fsm.name] = (fsm.currentState, UInt(microseconds()))
+            return
+        }
+        if data.previousState == fsm.currentState {
+            return
+        }
+        data.startTime = UInt(microseconds())
+        data.previousState = fsm.currentState
+        self.data[fsm.name] = data
+    }
+    
 }

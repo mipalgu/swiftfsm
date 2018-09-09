@@ -63,6 +63,7 @@ import FSM
 import KripkeStructure
 import MachineStructure
 import swiftfsm
+import Timers
 
 public final class KripkeStateGeneratorTests: XCTestCase {
 
@@ -88,7 +89,7 @@ public final class KripkeStateGeneratorTests: XCTestCase {
             ],
             effects: []
         )
-        let machine = Machine(debug: false, name: "machine", fsm: fsm)
+        let machine = Machine(debug: false, name: "machine", fsm: fsm, clock: FSMClock())
         let result = self.stateGenerator.generateKripkeState(
             fromFSM: fsm,
             withinMachine: machine,

@@ -1,8 +1,8 @@
 /*
- * MachineLoaderStrategy.swift 
- * MachineLoading 
+ * Clock.swift
+ * Scheduling
  *
- * Created by Callum McColl on 02/07/2018.
+ * Created by Callum McColl on 9/9/18.
  * Copyright © 2018 Callum McColl. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -56,24 +56,17 @@
  *
  */
 
-import FSM
 import swiftfsm
 
-public final class MachineLoaderStrategy: MachineLoader {
-
-    fileprivate let machineLoader: MachineLoader
-    fileprivate let libraryLoader: MachineLoader
-
-    public init(machineLoader: MachineLoader, libraryLoader: MachineLoader) {
-        self.machineLoader = machineLoader
-        self.libraryLoader = libraryLoader
-    }
-
-    public func load(name: String, invoker: Invoker, clock: Timer, path: String) -> (AnyScheduleableFiniteStateMachine, [Dependency])? {
-        if path.hasSuffix(".machine") || path.hasSuffix(".machine/") {
-            return self.machineLoader.load(name: name, invoker: invoker, clock: clock, path: path)
-        }
-        return self.libraryLoader.load(name: name, invoker: invoker, clock: clock, path: path)
-    }
-
+public protocol Clock: class, Timer {
+    
+    /**
+     *  Reports the values used to the last `Timer` function calls.
+     *
+     *  This allows other classes to query how an object is using the timer.
+     */
+    var lastClockValues: [UInt] { get }
+    
+    func update(fromFSM: AnyScheduleableFiniteStateMachine)
+    
 }

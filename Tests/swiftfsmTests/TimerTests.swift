@@ -75,7 +75,7 @@ public class TimerTests: SwiftFSMTestCase {
     }
     
     private var running: Bool = false
-    private var timer: Timer!
+    private var timer: swiftfsm.Timer!
     
     public override func setUp() {
         self.running = false

@@ -58,6 +58,7 @@
 
 import FSM
 import swiftfsm
+import Timers
 
 /**
  *  Conforming types are responsible for creating `Machine`s.
@@ -78,7 +79,8 @@ public protocol MachineFactory {
         name: String,
         fsm: AnyScheduleableFiniteStateMachine,
         dependencies: [Dependency],
-        debug: Bool
+        debug: Bool,
+        clock: FSMClock
     ) -> Machine
 
 }

@@ -88,12 +88,12 @@ public final class MachinesMachineLoader: MachineLoader {
         self.swiftCompilerFlags = swiftCompilerFlags
     }
 
-    public func load(name: String, invoker: swiftfsm.Invoker, path: String) -> (AnyScheduleableFiniteStateMachine, [Dependency])? {
+    public func load(name: String, invoker: swiftfsm.Invoker, clock: Timer, path: String) -> (AnyScheduleableFiniteStateMachine, [Dependency])? {
         guard let machine = self.parser.parseMachine(atPath: path) else {
             return nil
         }
         if false == self.compiler.shouldCompile(machine) {
-            return self.libraryLoader.load(name: name, invoker: invoker, path: self.compiler.outputPath(forMachine: machine))
+            return self.libraryLoader.load(name: name, invoker: invoker, clock: clock, path: self.compiler.outputPath(forMachine: machine))
         }
         guard
             let outputPath = self.compiler.compile(
@@ -105,7 +105,7 @@ public final class MachinesMachineLoader: MachineLoader {
         else {
             return nil
         }
-        return self.libraryLoader.load(name: name, invoker: invoker, path: outputPath)
+        return self.libraryLoader.load(name: name, invoker: invoker, clock: clock, path: outputPath)
     }
 
 }
