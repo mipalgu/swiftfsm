@@ -120,9 +120,10 @@ public final class VerificationCycleKripkeStructureGenerator<
                     andExecuting: job.executing,
                     andExecutingToken: 0,
                     withState: clones[job.executing][0].fsm.currentState.name,
-                    appendingToPC: "R"
+                    worldType: .beforeExecution
                 )
                 if nil != states.value[world] {
+                    job.lastState?.effects.insert(world)
                     continue
                 }
                 // Execute and generate kripke states.
@@ -154,8 +155,8 @@ public final class VerificationCycleKripkeStructureGenerator<
                     lastRecords: clones.map { $0.map { $0.fsm.currentRecord } }
                 ))
             }
-            
         }
+        print("number of states: \(states.value.count)")
         return KripkeStructure(initialStates: initialStates, states: states.value)
     }
     

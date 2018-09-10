@@ -90,7 +90,7 @@ public final class VerificationTokenExecuter<StateGenerator: KripkeStateGenerato
             andExecuting: executing,
             andExecutingToken: offset,
             withState: state,
-            appendingToPC: "R"
+            worldType: .beforeExecution
         )
         let preState = self.stateGenerator.generateKripkeState(
             fromFSM: token.fsm.clone(),
@@ -106,7 +106,7 @@ public final class VerificationTokenExecuter<StateGenerator: KripkeStateGenerato
             andExecuting: executing,
             andExecutingToken: offset,
             withState: state,
-            appendingToPC: "W"
+            worldType: .afterExecution
         )
         let postState = self.stateGenerator.generateKripkeState(
             fromFSM: token.fsm.clone(),
