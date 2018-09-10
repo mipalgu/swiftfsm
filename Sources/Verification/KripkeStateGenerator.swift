@@ -63,6 +63,8 @@ import swiftfsm
 
 public final class KripkeStateGenerator: KripkeStateGeneratorProtocol {
 
+    public init() {}
+    
     public func generateKripkeState(
         fromFSM fsm: AnyScheduleableFiniteStateMachine,
         withinMachine machine: Machine,

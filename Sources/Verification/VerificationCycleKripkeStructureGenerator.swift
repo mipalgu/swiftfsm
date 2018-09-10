@@ -75,14 +75,14 @@ public final class VerificationCycleKripkeStructureGenerator<
     fileprivate let tokens: [[VerificationToken]]
     fileprivate let cloner: Cloner
     fileprivate let cycleDetector: Detector
-    fileprivate let executer: VerificationCycleExecuter
+    fileprivate let executer: VerificationCycleExecuter<KripkeStateGenerator>
     fileprivate let spinnerConstructor: SpinnerConstructor
     
     public init(
         tokens: [[VerificationToken]],
         cloner: Cloner,
         cycleDetector: Detector,
-        executer: VerificationCycleExecuter = VerificationCycleExecuter(),
+        executer: VerificationCycleExecuter<KripkeStateGenerator> = VerificationCycleExecuter(stateGenerator: KripkeStateGenerator()),
         spinnerConstructor: SpinnerConstructor
     ) {
         self.tokens = tokens
