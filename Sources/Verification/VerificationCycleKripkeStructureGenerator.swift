@@ -97,7 +97,13 @@ public final class VerificationCycleKripkeStructureGenerator<
             let externalsData = self.fetchUniqueExternalsData(fromSnapshot: job.tokens[job.executing])
             let spinner = self.spinnerConstructor.makeSpinner(forExternals: externalsData)
             while let externals = spinner() {
-                // Clone.
+                // Clone all fsms.
+                let clones = job.tokens.enumerated().map {
+                    self.cloner.clone(
+                        jobs: $1,
+                        withLastRecords: job.lastRecords[$0]
+                    )
+                }
                 //let clones = self.cloner.clone(job.tokens)
                 // Execute.
                 // Assign.
