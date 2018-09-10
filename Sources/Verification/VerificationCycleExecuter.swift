@@ -79,6 +79,7 @@ public final class VerificationCycleExecuter {
         var offset: Int = 0
         //swiftlint:disable:next line_length
         return tokens[executing].flatMap { (token: VerificationToken) -> [KripkeState] in
+            token.machine.clock.forcedRunningTime = 0
             let states = self.executer.execute(
                 token: token,
                 inTokens: tokens,
