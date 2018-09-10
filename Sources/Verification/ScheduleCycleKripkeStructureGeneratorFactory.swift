@@ -64,6 +64,8 @@ import MachineStructure
 
 public final class ScheduleCycleKripkeStructureGeneratorFactory: KripkeStructureGeneratorFactory {
     
+    public init() {}
+    
     public func make(fromMachines machines: [Machine]) -> ScheduleCycleKripkeStructureGenerator<
         ExternalsSpinnerDataExtractor<
             MirrorKripkePropertiesRecorder,
