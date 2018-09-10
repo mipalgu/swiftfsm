@@ -136,20 +136,4 @@ open class CFSMState: MiPalState
         return self
     }
 
-    /**
-     *  Update `self` from a dictionary.
-     *
-     *  Since `MiPalState` contains no mutable properties, it does not bother
-     *  to update itself based on anything in the dictionary. 
-     *
-     *  - Parameter fromDictionary: The dictionary of properties where the keys
-     *  represents the properties labels and the values are the values of the
-     *  properties.
-     *
-     *  - Attention: Child classes should override this method when they add
-     *  mutable properties.
-     */
-    open override func update(fromDictionary dictionary: [String: Any]) {
-        fatalError("CFSMState.update() not implemented")
-    }
 }
