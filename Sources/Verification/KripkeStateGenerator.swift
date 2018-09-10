@@ -66,23 +66,14 @@ public final class KripkeStateGenerator: KripkeStateGeneratorProtocol {
     public init() {}
     
     public func generateKripkeState(
-        fromFSM fsm: AnyScheduleableFiniteStateMachine,
-        withinMachine machine: Machine,
-        withLastState last: KripkeState? = nil,
-        addingProperties props: KripkeStatePropertyList = [:]
+        fromWorld world: KripkeStatePropertyList,
+        withLastState last: KripkeState? = nil
     ) -> KripkeState {
-        let record: KripkeStatePropertyList = props <| [
-            "\(fsm.name)": KripkeStateProperty(
-                type: .Compound(fsm.currentRecord),
-                value: fsm
-            )
-        ]
-        last?.effects.insert(record)
-        let state = KripkeState(
-            properties: record,
+        last?.effects.insert(world)
+        return KripkeState(
+            properties: world,
             effects: []
         )
-        return state
     }
 
 }

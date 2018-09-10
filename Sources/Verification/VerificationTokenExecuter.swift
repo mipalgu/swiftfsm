@@ -93,10 +93,8 @@ public final class VerificationTokenExecuter<StateGenerator: KripkeStateGenerato
             worldType: .beforeExecution
         )
         let preState = self.stateGenerator.generateKripkeState(
-            fromFSM: token.fsm.clone(),
-            withinMachine: token.machine,
-            withLastState: lastState,
-            addingProperties: preWorld
+            fromWorld: preWorld,
+            withLastState: lastState
         )
         token.fsm.next()
         let postWorld = self.worldCreator.createWorld(
@@ -109,10 +107,8 @@ public final class VerificationTokenExecuter<StateGenerator: KripkeStateGenerato
             worldType: .afterExecution
         )
         let postState = self.stateGenerator.generateKripkeState(
-            fromFSM: token.fsm.clone(),
-            withinMachine: token.machine,
-            withLastState: preState,
-            addingProperties: postWorld
+            fromWorld: postWorld,
+            withLastState: preState
         )
         return [preState, postState]
     }

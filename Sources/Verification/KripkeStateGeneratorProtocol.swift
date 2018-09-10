@@ -64,9 +64,7 @@ import swiftfsm
 public protocol KripkeStateGeneratorProtocol {
 
     func generateKripkeState(
-        fromFSM: AnyScheduleableFiniteStateMachine,
-        withinMachine: Machine,
-        withLastState: KripkeState?,
-        addingProperties: KripkeStatePropertyList
+        fromWorld: KripkeStatePropertyList,
+        withLastState: KripkeState?
     ) -> KripkeState
 }
