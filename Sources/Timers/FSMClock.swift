@@ -72,6 +72,8 @@ public final class FSMClock: Clock {
     
     fileprivate var startTime: UInt! = nil
     
+    public var forcedRunningTime: UInt? = nil
+    
     public init() {}
     
     public func after(_ interval: UInt) -> Bool {
@@ -81,6 +83,9 @@ public final class FSMClock: Clock {
     public func after_ms(_ interval: UInt) -> Bool {
         let interval = interval * 1000
         self.lastClockValues.append(interval)
+        if let runningTime = forcedRunningTime {
+            return runningTime > interval
+        }
         guard let data = self.data[self.currentFSM] else {
             fatalError("Attempting to use clock without first calling update.")
         }
