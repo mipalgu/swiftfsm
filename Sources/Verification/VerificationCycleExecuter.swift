@@ -61,12 +61,12 @@ import KripkeStructure
 import MachineStructure
 import swiftfsm
 
-public final class VerificationCycleExecuter<StateGenerator: KripkeStateGeneratorProtocol> {
+public final class VerificationCycleExecuter {
     
-    fileprivate let stateGenerator: StateGenerator
+    fileprivate let executer: VerificationTokenExecuter<KripkeStateGenerator>
     
-    public init(stateGenerator: StateGenerator) {
-        self.stateGenerator = stateGenerator
+    public init(executer: VerificationTokenExecuter<KripkeStateGenerator> = VerificationTokenExecuter(stateGenerator: KripkeStateGenerator())) {
+        self.executer = executer
     }
     
     public func execute(
@@ -79,113 +79,21 @@ public final class VerificationCycleExecuter<StateGenerator: KripkeStateGenerato
         var offset: Int = 0
         //swiftlint:disable:next line_length
         return tokens[executing].flatMap { (token: VerificationToken) -> [KripkeState] in
-            if true == token.fsm.hasFinished {
-                offset += 1
+            let states = self.executer.execute(
+                token: token,
+                inTokens: tokens,
+                executing: executing,
+                atOffset: offset,
+                withExternals: externals,
+                andLastState: last
+            )
+            offset += 1
+            guard let lastState = states.last else {
                 return []
             }
-            let state = token.fsm.currentState.name
-            let preWorld = self.createWorld(
-                fromExternals: externals,
-                andTokens: tokens,
-                andLastState: last,
-                andExecuting: executing,
-                andExecutingToken: offset,
-                withState: state,
-                appendingToPC: "R"
-            )
-            let preState = self.stateGenerator.generateKripkeState(
-                fromFSM: token.fsm.clone(),
-                withinMachine: token.machine,
-                withLastState: last,
-                addingProperties: preWorld
-            )
-            token.fsm.next()
-            let postWorld = self.createWorld(
-                fromExternals: externals,
-                andTokens: tokens,
-                andLastState: preState,
-                andExecuting: executing,
-                andExecutingToken: offset,
-                withState: state,
-                appendingToPC: "W"
-            )
-            let postState = self.stateGenerator.generateKripkeState(
-                fromFSM: token.fsm.clone(),
-                withinMachine: token.machine,
-                withLastState: preState,
-                addingProperties: postWorld
-            )
-            last = postState
-            offset += 1
-            return [preState, postState]
+            last = lastState
+            return states
         }
-    }
-    
-    //swiftlint:disable:next function_parameter_count
-    fileprivate func createWorld(
-        fromExternals externals: [(AnySnapshotController, KripkeStatePropertyList)],
-        andTokens tokens: [[VerificationToken]],
-        andLastState lastState: KripkeState?,
-        andExecuting executing: Int,
-        andExecutingToken token: Int,
-        withState state: String,
-        appendingToPC str: String
-    ) -> KripkeStatePropertyList {
-        let externalVariables = self.convert(externals: externals)
-        let varPs = self.convert(
-            tokens: tokens,
-            executing: executing,
-            executingToken: token,
-            withState: state,
-            appendingToPC: str
-        )
-        return (lastState?.properties ?? [:]) <| varPs <| externalVariables
-    }
-    
-    private func convert(externals: [(AnySnapshotController, KripkeStatePropertyList)]) -> KripkeStatePropertyList {
-        var props: KripkeStatePropertyList = [:]
-        var values: [String: Any] = [:]
-        externals.forEach {
-            props[$0.0.name] = KripkeStateProperty(type: .Compound($0.1), value: $0.0.val)
-            values[$0.0.name] = $0.0.val
-        }
-        return [
-            "externalVariables": KripkeStateProperty(
-                type: .Compound(props),
-                value: values
-            )
-        ]
-    }
-    
-    private func convert(
-        tokens: [[VerificationToken]],
-        executing: Int,
-        executingToken token: Int,
-        withState state: String,
-        appendingToPC str: String
-    ) -> KripkeStatePropertyList {
-        var varPs: KripkeStatePropertyList = [:]
-        tokens.forEach {
-            $0.forEach {
-                varPs["\($0.machine.name).\($0.fsm.name)"] = KripkeStateProperty(
-                    type: .Compound($0.fsm.currentRecord),
-                    value: $0.fsm
-                )
-            }
-        }
-        varPs["pc"] = KripkeStateProperty(
-            type: .String,
-            value: self.createPC(ofToken: tokens[executing][token], withState: state, appending: str)
-        )
-        return varPs
-    }
-    
-    fileprivate func createPC(
-        ofToken token: VerificationToken,
-        withState state: String,
-        appending str: String
-    ) -> String {
-        return "\(token.machine.name).\(token.fsm.name).\(state).\(str)"
     }
     
 }
