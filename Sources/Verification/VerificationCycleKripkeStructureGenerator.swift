@@ -99,12 +99,8 @@ public final class VerificationCycleKripkeStructureGenerator<
             while let externals = spinner() {
                 // Clone all fsms.
                 let clones = job.tokens.enumerated().map {
-                    Array(self.cloner.clone(
-                        jobs: $1,
-                        withLastRecords: job.lastRecords[$0]
-                    ))
+                    Array(self.cloner.clone(jobs: $1, withLastRecords: job.lastRecords[$0]))
                 }
-                //let clones = self.cloner.clone(job.tokens)
                 // Execute.
                 // Assign.
             }
