@@ -60,6 +60,7 @@ import FSM
 import KripkeStructure
 import MachineStructure
 import swiftfsm
+import FSMVerification
 
 public final class Cloner<Converter: KripkeStatePropertyListConverter>: ClonerProtocol {
 
@@ -70,14 +71,27 @@ public final class Cloner<Converter: KripkeStatePropertyListConverter>: ClonerPr
     }
 
     public func clone(
-        job: VerificationJob,
+        job: VerificationToken,
         withLastRecord lastRecord: KripkeStatePropertyList
-    ) -> (AnyScheduleableFiniteStateMachine, Machine) {
+    ) -> VerificationToken {
         var clone = job.fsm.clone()
-        clone.update(fromDictionary: self.converter.convert(fromList: lastRecord))
+        //clone.update(fromDictionary: self.converter.convert(fromList: lastRecord))
+        var newExternals: [ExternalVariablesVerificationData] = []
+        newExternals.reserveCapacity(job.externalVariables.count)
         for i in 0..<job.externalVariables.count {
-            clone.externalVariables[i].val = job.externalVariables[i].val
+            clone.externalVariables[i].val = job.externalVariables[i].externalVariables.val
+            newExternals.append(
+                ExternalVariablesVerificationData(
+                    externalVariables: clone.externalVariables[i],
+                    defaultValues: job.externalVariables[i].defaultValues,
+                    spinners: job.externalVariables[i].spinners
+                )
+            )
         }
-        return (clone, job.machine)
+        return VerificationToken(
+            fsm: clone,
+            machine: job.machine,
+            externalVariables: newExternals
+        )
     }
 }

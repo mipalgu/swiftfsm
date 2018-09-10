@@ -1,8 +1,8 @@
 /*
- * KripkeStateGenerator.swift 
- * Verification 
+ * ScheduleCycleKripkeStructureGeneratorFactory.swift
+ * Verification
  *
- * Created by Callum McColl on 17/02/2018.
+ * Created by Callum McColl on 10/9/18.
  * Copyright © 2018 Callum McColl. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -56,24 +56,35 @@
  *
  */
 
-import FSM
+import ModelChecking
+import FSMVerification
 import KripkeStructure
+import Scheduling
 import MachineStructure
-import swiftfsm
 
-public final class KripkeStateGenerator: KripkeStateGeneratorProtocol {
-
+public final class ScheduleCycleKripkeStructureGeneratorFactory: KripkeStructureGeneratorFactory {
+    
     public init() {}
     
-    public func generateKripkeState(
-        fromWorld world: KripkeStatePropertyList,
-        withLastState last: KripkeState? = nil
-    ) -> KripkeState {
-        last?.effects.insert(world)
-        return KripkeState(
-            properties: world,
-            effects: []
+    public func make(fromMachines machines: [Machine]) -> ScheduleCycleKripkeStructureGenerator<
+        ExternalsSpinnerDataExtractor<
+            MirrorKripkePropertiesRecorder,
+            KripkeStatePropertySpinnerConverter
+        >,
+        VerificationCycleKripkeStructureGeneratorFactory<HashTableCycleDetector<KripkeStatePropertyList>>,
+        SequentialPerScheduleCycleTokenizer
+    > {
+        return ScheduleCycleKripkeStructureGenerator(
+            machines: machines,
+            extractor: ExternalsSpinnerDataExtractor(
+                converter: KripkeStatePropertySpinnerConverter(),
+                extractor: MirrorKripkePropertiesRecorder()
+            ),
+            factory: VerificationCycleKripkeStructureGeneratorFactory(
+                cycleDetector: HashTableCycleDetector<KripkeStatePropertyList>()
+            ),
+            tokenizer: SequentialPerScheduleCycleTokenizer()
         )
     }
-
+    
 }

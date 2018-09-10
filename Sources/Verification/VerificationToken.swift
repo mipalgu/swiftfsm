@@ -1,8 +1,8 @@
 /*
- * KripkeStateGenerator.swift 
- * Verification 
+ * VerificationToken.swift
+ * Verification
  *
- * Created by Callum McColl on 17/02/2018.
+ * Created by Callum McColl on 10/9/18.
  * Copyright © 2018 Callum McColl. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -56,24 +56,16 @@
  *
  */
 
-import FSM
-import KripkeStructure
-import MachineStructure
 import swiftfsm
+import MachineStructure
+import FSMVerification
 
-public final class KripkeStateGenerator: KripkeStateGeneratorProtocol {
-
-    public init() {}
+public struct VerificationToken {
     
-    public func generateKripkeState(
-        fromWorld world: KripkeStatePropertyList,
-        withLastState last: KripkeState? = nil
-    ) -> KripkeState {
-        last?.effects.insert(world)
-        return KripkeState(
-            properties: world,
-            effects: []
-        )
-    }
-
+    public let fsm: AnyScheduleableFiniteStateMachine
+    
+    public let machine: Machine
+    
+    public let externalVariables: [ExternalVariablesVerificationData]
+    
 }

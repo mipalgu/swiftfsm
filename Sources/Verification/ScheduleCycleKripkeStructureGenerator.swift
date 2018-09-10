@@ -1,8 +1,8 @@
 /*
- * KripkeStateGenerator.swift 
- * Verification 
+ * ScheduleCycleKripkeStructureGenerator.swift
+ * Verification
  *
- * Created by Callum McColl on 17/02/2018.
+ * Created by Callum McColl on 10/9/18.
  * Copyright © 2018 Callum McColl. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -56,24 +56,56 @@
  *
  */
 
-import FSM
 import KripkeStructure
+import FSM
+import Scheduling
 import MachineStructure
+import ModelChecking
+import FSMVerification
 import swiftfsm
 
-public final class KripkeStateGenerator: KripkeStateGeneratorProtocol {
-
-    public init() {}
+public final class ScheduleCycleKripkeStructureGenerator<
+    Extractor: ExternalsSpinnerDataExtractorType,
+    Factory: VerificationCycleKripkeStructureGeneratorFactoryType,
+    Tokenizer: SchedulerTokenizer
+>: KripkeStructureGenerator where
+    Tokenizer.Object == Machine,
+    Tokenizer.SchedulerToken == SchedulerToken
+{
+    fileprivate let machines: [Machine]
+    fileprivate let extractor: Extractor
+    fileprivate let factory: Factory
+    fileprivate let tokenizer: Tokenizer
     
-    public func generateKripkeState(
-        fromWorld world: KripkeStatePropertyList,
-        withLastState last: KripkeState? = nil
-    ) -> KripkeState {
-        last?.effects.insert(world)
-        return KripkeState(
-            properties: world,
-            effects: []
-        )
+    public init(
+        machines: [Machine],
+        extractor: Extractor,
+        factory: Factory,
+        tokenizer: Tokenizer
+    ) {
+        self.machines = machines
+        self.extractor = extractor
+        self.factory = factory
+        self.tokenizer = tokenizer
     }
-
+    
+    public func generate() -> Factory.Generator.KripkeStructure {
+        let tokens = self.tokenizer.separate(self.machines)
+        let verificationTokens = self.convert(tokens: tokens)
+        return self.factory.make(tokens: verificationTokens).generate()
+    }
+    
+    fileprivate func convert(tokens: [[SchedulerToken]]) -> [[VerificationToken]] {
+        // Convert SchedulerTokens to VerificationTokens.
+        return tokens.map { (arr: [SchedulerToken]) in
+            arr.map { (token: SchedulerToken) -> VerificationToken in
+                let externals = token.fsm.externalVariables.map { (external: AnySnapshotController) -> ExternalVariablesVerificationData in
+                    let (defaultValues, spinners) = self.extractor.extract(externalVariables: external)
+                    return ExternalVariablesVerificationData(externalVariables: external, defaultValues: defaultValues, spinners: spinners)
+                }
+                return VerificationToken(fsm: token.fsm, machine: token.machine, externalVariables: externals)
+            }
+        }
+    }
+    
 }

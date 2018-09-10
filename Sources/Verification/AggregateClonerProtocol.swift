@@ -66,8 +66,8 @@ public protocol AggregateClonerProtocol {
     func clone<S: Sequence>(
         jobs: S,
         withLastRecords: [KripkeStatePropertyList]
-    ) -> LazyMapSequence<EnumeratedSequence<LazySequence<S>>, (AnyScheduleableFiniteStateMachine, Machine)> where
-        S.Iterator.Element == VerificationJob
+    ) -> LazyMapSequence<EnumeratedSequence<LazySequence<S>>, VerificationToken> where
+        S.Iterator.Element == VerificationToken
 
 }
 
@@ -76,10 +76,10 @@ extension AggregateClonerProtocol where Self: ClonerContainer {
     public func clone<S: Sequence>(
         jobs: S,
         withLastRecords lastRecords: [KripkeStatePropertyList]
-    ) -> LazyMapSequence<EnumeratedSequence<LazySequence<S>>, (AnyScheduleableFiniteStateMachine, Machine)> where
-        S.Iterator.Element == VerificationJob {
+    ) -> LazyMapSequence<EnumeratedSequence<LazySequence<S>>, VerificationToken> where
+        S.Iterator.Element == VerificationToken {
         //swiftlint:disable:next line_length
-        return jobs.lazy.enumerated().lazy.map { (arg: (offset: Int, element: VerificationJob)) -> (AnyScheduleableFiniteStateMachine, Machine) in
+        return jobs.lazy.enumerated().lazy.map { (arg: (offset: Int, element: VerificationToken)) -> VerificationToken in
             return self.cloner.clone(
                 job: arg.element,
                 withLastRecord: lastRecords[arg.offset]

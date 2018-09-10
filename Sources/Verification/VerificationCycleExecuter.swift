@@ -1,8 +1,8 @@
 /*
- * KripkeStateGenerator.swift 
- * Verification 
+ * VerificationCycleExecuter.swift
+ * Verification
  *
- * Created by Callum McColl on 17/02/2018.
+ * Created by Callum McColl on 10/9/18.
  * Copyright © 2018 Callum McColl. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -61,19 +61,49 @@ import KripkeStructure
 import MachineStructure
 import swiftfsm
 
-public final class KripkeStateGenerator: KripkeStateGeneratorProtocol {
-
-    public init() {}
+public final class VerificationCycleExecuter {
     
-    public func generateKripkeState(
-        fromWorld world: KripkeStatePropertyList,
-        withLastState last: KripkeState? = nil
-    ) -> KripkeState {
-        last?.effects.insert(world)
-        return KripkeState(
-            properties: world,
-            effects: []
-        )
+    fileprivate let executer: VerificationTokenExecuter<KripkeStateGenerator>
+    
+    public init(executer: VerificationTokenExecuter<KripkeStateGenerator> = VerificationTokenExecuter(stateGenerator: KripkeStateGenerator())) {
+        self.executer = executer
     }
-
+    
+    public func execute(
+        tokens: [[VerificationToken]],
+        executing: Int,
+        withExternals externals: [(AnySnapshotController, KripkeStatePropertyList)],
+        andLastState last: KripkeState?
+    ) -> [KripkeState] {
+        var last = last
+        var offset: Int = 0
+        //swiftlint:disable:next line_length
+        tokens[executing].forEach {
+            var fsm = $0.fsm
+            fsm.externalVariables.enumerated().forEach { (offset, externalVariables) in
+                guard let external = externals.first(where: { $0.0.name == externalVariables.name }) else {
+                    return
+                }
+                fsm.externalVariables[offset].val = external.0.val
+            }
+        }
+        return tokens[executing].flatMap { (token: VerificationToken) -> [KripkeState] in
+            token.machine.clock.forcedRunningTime = 0
+            let states = self.executer.execute(
+                token: token,
+                inTokens: tokens,
+                executing: executing,
+                atOffset: offset,
+                withExternals: externals,
+                andLastState: last
+            )
+            offset += 1
+            guard let lastState = states.last else {
+                return []
+            }
+            last = lastState
+            return states
+        }
+    }
+    
 }

@@ -1,8 +1,8 @@
 /*
- * KripkeStateGenerator.swift 
- * Verification 
+ * VerificationCycleKripkeStructureGeneratorFactoryType.swift
+ * Verification
  *
- * Created by Callum McColl on 17/02/2018.
+ * Created by Callum McColl on 10/9/18.
  * Copyright © 2018 Callum McColl. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -56,24 +56,12 @@
  *
  */
 
-import FSM
-import KripkeStructure
-import MachineStructure
-import swiftfsm
+import ModelChecking
 
-public final class KripkeStateGenerator: KripkeStateGeneratorProtocol {
-
-    public init() {}
+public protocol VerificationCycleKripkeStructureGeneratorFactoryType {
     
-    public func generateKripkeState(
-        fromWorld world: KripkeStatePropertyList,
-        withLastState last: KripkeState? = nil
-    ) -> KripkeState {
-        last?.effects.insert(world)
-        return KripkeState(
-            properties: world,
-            effects: []
-        )
-    }
-
+    associatedtype Generator: KripkeStructureGenerator
+    
+    func make(tokens: [[VerificationToken]]) -> Generator
+    
 }

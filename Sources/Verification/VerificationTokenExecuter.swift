@@ -1,8 +1,8 @@
 /*
- * KripkeStateGenerator.swift 
- * Verification 
+ * VerificationTokenExecuter.swift
+ * Verification
  *
- * Created by Callum McColl on 17/02/2018.
+ * Created by Callum McColl on 10/9/18.
  * Copyright © 2018 Callum McColl. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -61,19 +61,50 @@ import KripkeStructure
 import MachineStructure
 import swiftfsm
 
-public final class KripkeStateGenerator: KripkeStateGeneratorProtocol {
-
-    public init() {}
+public final class VerificationTokenExecuter<StateGenerator: KripkeStateGeneratorProtocol> {
     
-    public func generateKripkeState(
-        fromWorld world: KripkeStatePropertyList,
-        withLastState last: KripkeState? = nil
-    ) -> KripkeState {
-        last?.effects.insert(world)
-        return KripkeState(
-            properties: world,
-            effects: []
-        )
+    fileprivate let stateGenerator: StateGenerator
+    fileprivate let worldCreator: WorldCreator
+    
+    public init(stateGenerator: StateGenerator, worldCreator: WorldCreator = WorldCreator()) {
+        self.stateGenerator = stateGenerator
+        self.worldCreator = worldCreator
     }
-
+    
+    public func execute(
+        token: VerificationToken,
+        inTokens tokens: [[VerificationToken]],
+        executing: Int,
+        atOffset offset: Int,
+        withExternals externals: [(AnySnapshotController, KripkeStatePropertyList)],
+        andLastState lastState: KripkeState?
+    ) -> [KripkeState] {
+        if true == token.fsm.hasFinished {
+            return []
+        }
+        let state = token.fsm.currentState.name
+        let preWorld = self.worldCreator.createWorld(
+            fromExternals: externals,
+            andTokens: tokens,
+            andLastState: lastState,
+            andExecuting: executing,
+            andExecutingToken: offset,
+            withState: state,
+            worldType: .beforeExecution
+        )
+        let preState = self.stateGenerator.generateKripkeState(fromWorld: preWorld, withLastState: lastState)
+        token.fsm.next()
+        let postWorld = self.worldCreator.createWorld(
+            fromExternals: externals,
+            andTokens: tokens,
+            andLastState: preState,
+            andExecuting: executing,
+            andExecutingToken: offset,
+            withState: state,
+            worldType: .afterExecution
+        )
+        let postState = self.stateGenerator.generateKripkeState(fromWorld: postWorld, withLastState: preState)
+        return [preState, postState]
+    }
+    
 }

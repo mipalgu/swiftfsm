@@ -1,8 +1,8 @@
 /*
- * KripkeStateGenerator.swift 
- * Verification 
+ * VerificationCycleKripkeStructureGeneratorFactory.swift
+ * Verification
  *
- * Created by Callum McColl on 17/02/2018.
+ * Created by Callum McColl on 10/9/18.
  * Copyright © 2018 Callum McColl. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -56,24 +56,37 @@
  *
  */
 
-import FSM
-import KripkeStructure
-import MachineStructure
-import swiftfsm
+import ModelChecking
+import FSMVerification
 
-public final class KripkeStateGenerator: KripkeStateGeneratorProtocol {
-
-    public init() {}
+public final class VerificationCycleKripkeStructureGeneratorFactory<
+    Detector: CycleDetector
+>: VerificationCycleKripkeStructureGeneratorFactoryType
+{
     
-    public func generateKripkeState(
-        fromWorld world: KripkeStatePropertyList,
-        withLastState last: KripkeState? = nil
-    ) -> KripkeState {
-        last?.effects.insert(world)
-        return KripkeState(
-            properties: world,
-            effects: []
+    fileprivate let cycleDetector: Detector
+    
+    public init(cycleDetector: Detector) {
+        self.cycleDetector = cycleDetector
+    }
+    
+    public func make(tokens: [[VerificationToken]]) -> VerificationCycleKripkeStructureGenerator<
+        AggregateCloner<Cloner<KripkeStatePropertyListConverter>>,
+        Detector,
+        MultipleExternalsSpinnerConstructor<
+            ExternalsSpinnerConstructor<SpinnerRunner>
+        >
+    > {
+        return VerificationCycleKripkeStructureGenerator(
+            tokens: tokens,
+            cloner: AggregateCloner(cloner: Cloner(converter: KripkeStatePropertyListConverter())),
+            cycleDetector: self.cycleDetector,
+            spinnerConstructor: MultipleExternalsSpinnerConstructor(
+                constructor: ExternalsSpinnerConstructor(
+                    runner: SpinnerRunner()
+                )
+            )
         )
     }
-
+    
 }
