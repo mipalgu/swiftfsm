@@ -63,6 +63,7 @@ import MachineStructure
 import ModelChecking
 import FSMVerification
 import swiftfsm
+import Utilities
 
 public final class VerificationCycleKripkeStructureGenerator<
     Cloner: AggregateClonerProtocol,
@@ -90,7 +91,7 @@ public final class VerificationCycleKripkeStructureGenerator<
     
     public func generate() -> KripkeStructure {
         var initialStates: [KripkeState] = []
-        var states: [KripkeStatePropertyList: KripkeState] = [:]
+        var states: Ref<[KripkeStatePropertyList: KripkeState]> = Ref(value: [:])
         var jobs = self.createInitialJobs(fromTokens: self.tokens)
         while false == jobs.isEmpty {
             let job = jobs.removeFirst()
@@ -110,25 +111,9 @@ public final class VerificationCycleKripkeStructureGenerator<
                 guard let lastTempState = tempStates.last else {
                     continue
                 }
-                // Append the states to the states array if these are starting states.
-                var added: Bool = false
-                tempStates.forEach {
-                    let state = $0
-                    // If this is the first time seeing this state then just add it.
-                    guard let existingState = states[state.properties] else {
-                        states[state.properties] = state
-                        added = true
-                        return
-                    }
-                    // Attempt to add any new transitions/effects to the kripke state.
-                    let oldCount = existingState.effects.count
-                    existingState.effects.formUnion(state.effects)
-                    if false == added {
-                        added = oldCount < existingState.effects.count
-                    }
-                }
-                // Do not process duplicate states again.
-                if false == added {
+                // Append the states to the states array.
+                // Do not process duplicate states again if nothing has changed.
+                if false == self.add(tempStates, to: states) {
                     continue
                 }
                 // Create a new job from the clones.
@@ -137,13 +122,13 @@ public final class VerificationCycleKripkeStructureGenerator<
                     cache: job.cache,
                     tokens: clones,
                     executing: executing,
-                    lastState: states[lastTempState.properties] ?? lastTempState,
+                    lastState: states.value[lastTempState.properties] ?? lastTempState,
                     lastRecords: clones.map { $0.map { $0.fsm.currentRecord } }
                 ))
             }
             
         }
-        return KripkeStructure()
+        return KripkeStructure(initialStates: initialStates, states: states.value)
     }
     
     fileprivate func createInitialJobs(fromTokens tokens: [[VerificationToken]]) -> [Job] {
@@ -166,6 +151,26 @@ public final class VerificationCycleKripkeStructureGenerator<
             externals.append($0)
         } }
         return externals
+    }
+    
+    fileprivate func add(_ newStates: [KripkeState], to states: Ref<[KripkeStatePropertyList: KripkeState]>) -> Bool {
+        var added: Bool = false
+        newStates.forEach {
+            let state = $0
+            // If this is the first time seeing this state then just add it.
+            guard let existingState = states.value[state.properties] else {
+                states.value[state.properties] = state
+                added = true
+                return
+            }
+            // Attempt to add any new transitions/effects to the kripke state.
+            let oldCount = existingState.effects.count
+            existingState.effects.formUnion(state.effects)
+            if false == added {
+                added = oldCount < existingState.effects.count
+            }
+        }
+        return added
     }
     
     fileprivate struct Job {
