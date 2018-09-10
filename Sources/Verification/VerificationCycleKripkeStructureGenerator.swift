@@ -96,19 +96,14 @@ public final class VerificationCycleKripkeStructureGenerator<
     }
     
     public func generate() -> KripkeStructure {
-        var initialStates: [KripkeState] = []
+        var initialStates: Set<KripkeState> = []
         var states: Ref<[KripkeStatePropertyList: KripkeState]> = Ref(value: [:])
         var jobs = self.createInitialJobs(fromTokens: self.tokens)
-        var i = 0
         while false == jobs.isEmpty {
             let job = jobs.removeFirst()
             let externalsData = self.fetchUniqueExternalsData(fromSnapshot: job.tokens[job.executing])
             let spinner = self.spinnerConstructor.makeSpinner(forExternals: externalsData)
             while let externals = spinner() {
-                if i == 0 {
-                    print("\n\n\(jobs.count)\n")
-                }
-                i = (i + 1) % 10
                 // Clone all fsms.
                 let clones = job.tokens.enumerated().map {
                     Array(self.cloner.clone(jobs: $1, withLastRecords: job.lastRecords[$0]))
@@ -138,8 +133,8 @@ public final class VerificationCycleKripkeStructureGenerator<
                     continue
                 }
                 // Add first new state to initial states if necessary.
-                if nil == job.lastState {
-                    newStates.first.map { initialStates.append($0) }
+                if true == job.initial {
+                    newStates.first.map { initialStates.insert($0) }
                 }
                 // Append the states to the states array.
                 // Do not process duplicate states again if nothing has changed.
@@ -148,6 +143,7 @@ public final class VerificationCycleKripkeStructureGenerator<
                 }
                 // Create a new job from the clones.
                 jobs.append(Job(
+                    initial: false,
                     cache: job.cache,
                     tokens: clones,
                     executing: (job.executing + 1) % clones.count,
@@ -156,13 +152,12 @@ public final class VerificationCycleKripkeStructureGenerator<
                 ))
             }
         }
-        print("number of initial states: \(initialStates.count)")
-        print("number of states: \(states.value.count)")
-        return KripkeStructure(initialStates: initialStates, states: states.value)
+        return KripkeStructure(initialStates: Array(initialStates), states: states.value)
     }
     
     fileprivate func createInitialJobs(fromTokens tokens: [[VerificationToken]]) -> [Job] {
         return [Job(
+            initial: true,
             cache: self.cycleDetector.initialData,
             tokens: tokens,
             executing: 0,
@@ -179,6 +174,7 @@ public final class VerificationCycleKripkeStructureGenerator<
                 return
             }
             externals.append($0)
+            hashTable.insert($0.externalVariables.name)
         } }
         return externals
     }
@@ -204,6 +200,8 @@ public final class VerificationCycleKripkeStructureGenerator<
     }
     
     fileprivate struct Job {
+        
+        let initial: Bool
         
         let cache: Detector.Data
         

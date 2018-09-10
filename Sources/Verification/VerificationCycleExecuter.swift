@@ -78,6 +78,15 @@ public final class VerificationCycleExecuter {
         var last = last
         var offset: Int = 0
         //swiftlint:disable:next line_length
+        tokens[executing].forEach {
+            var fsm = $0.fsm
+            fsm.externalVariables.enumerated().forEach { (offset, externalVariables) in
+                guard let external = externals.first(where: { $0.0.name == externalVariables.name }) else {
+                    return
+                }
+                fsm.externalVariables[offset].val = external.0.val
+            }
+        }
         return tokens[executing].flatMap { (token: VerificationToken) -> [KripkeState] in
             token.machine.clock.forcedRunningTime = 0
             let states = self.executer.execute(

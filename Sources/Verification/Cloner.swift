@@ -75,7 +75,7 @@ public final class Cloner<Converter: KripkeStatePropertyListConverter>: ClonerPr
         withLastRecord lastRecord: KripkeStatePropertyList
     ) -> VerificationToken {
         var clone = job.fsm.clone()
-        clone.update(fromDictionary: self.converter.convert(fromList: lastRecord))
+        //clone.update(fromDictionary: self.converter.convert(fromList: lastRecord))
         var newExternals: [ExternalVariablesVerificationData] = []
         newExternals.reserveCapacity(job.externalVariables.count)
         for i in 0..<job.externalVariables.count {

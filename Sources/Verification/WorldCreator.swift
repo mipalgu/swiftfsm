@@ -90,7 +90,15 @@ public final class WorldCreator {
             withState: state,
             appendingToPC: str
         )
-        return (lastState?.properties ?? [:]) <| varPs <| externalVariables
+        var total: [String: KripkeStateProperty] = lastState?.properties.properties ?? [:]
+        for (key, val) in varPs.properties {
+            total[key] = val
+        }
+        for (key, val) in externalVariables.properties {
+            total[key] = val
+        }
+        return KripkeStatePropertyList(total)
+        //return (lastState?.properties ?? [:]) <| varPs <| externalVariables
     }
     
     private func convert(externals: [(AnySnapshotController, KripkeStatePropertyList)]) -> KripkeStatePropertyList {
