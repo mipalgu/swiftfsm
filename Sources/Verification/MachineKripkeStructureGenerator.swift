@@ -187,7 +187,7 @@ public final class MachineKripkeStructureGenerator<
             while let externals = spinner() {
                 // Clone all fsms.
                 // swiftlint:disable:next line_length
-                let clones = job.tokens.enumerated().map { (arg: (offset: Int, element: [(fsm: AnyScheduleableFiniteStateMachine, machine: Machine)])) in
+                /*let clones = job.tokens.enumerated().map { (arg: (offset: Int, element: [(fsm: AnyScheduleableFiniteStateMachine, machine: Machine)])) in
                     Array(self.cloner.clone(
                         jobs: self.factory.make(
                             tokens: arg.element,
@@ -236,7 +236,7 @@ public final class MachineKripkeStructureGenerator<
                     executing: executing,
                     lastState: states[lastTempState.properties] ?? lastTempState,
                     lastRecords: clones.map { $0.map { $0.0.currentRecord } }
-                ))
+                ))*/
             }
         }
         print("total states: \(states.count)")

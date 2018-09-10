@@ -64,8 +64,8 @@ import swiftfsm
 public protocol ClonerProtocol {
 
     func clone(
-        job: VerificationJob,
+        job: VerificationToken,
         withLastRecord: KripkeStatePropertyList
-    ) -> (AnyScheduleableFiniteStateMachine, Machine)
+    ) -> VerificationToken
 
 }
