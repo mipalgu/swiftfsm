@@ -202,6 +202,9 @@ public class Swiftfsm<
     }
 
     private func generateKripkeStructure(_ machines: [Machine]) {
+        if machines.isEmpty {
+            return
+        }
         let generator = self.kripkeStructureGeneratorFactory.make(fromMachines: machines)
         let structure = generator.generate()
         self.kripkeStructureView.make(structure: structure)
