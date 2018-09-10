@@ -103,17 +103,18 @@ public final class VerificationCycleKripkeStructureGenerator<
                     Array(self.cloner.clone(jobs: $1, withLastRecords: job.lastRecords[$0]))
                 }
                 // Execute.
-                let tempStates: [KripkeState] = []
-                // Add to initial states if necessary.
-                if nil == job.lastState {
-                    tempStates.first.map { initialStates.append($0) }
-                }
-                guard let lastTempState = tempStates.last else {
+                let newStates: [KripkeState] = []
+                // Do not generate more jobs if newStates is empty.
+                guard let lastNewState = newStates.last else {
                     continue
+                }
+                // Add first new state to initial states if necessary.
+                if nil == job.lastState {
+                    newStates.first.map { initialStates.append($0) }
                 }
                 // Append the states to the states array.
                 // Do not process duplicate states again if nothing has changed.
-                if false == self.add(tempStates, to: states) {
+                if false == self.add(newStates, to: states) {
                     continue
                 }
                 // Create a new job from the clones.
@@ -122,7 +123,7 @@ public final class VerificationCycleKripkeStructureGenerator<
                     cache: job.cache,
                     tokens: clones,
                     executing: executing,
-                    lastState: states.value[lastTempState.properties] ?? lastTempState,
+                    lastState: states.value[lastNewState.properties] ?? lastNewState,
                     lastRecords: clones.map { $0.map { $0.fsm.currentRecord } }
                 ))
             }
