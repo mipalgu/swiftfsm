@@ -102,7 +102,44 @@ public final class VerificationCycleKripkeStructureGenerator<
                     Array(self.cloner.clone(jobs: $1, withLastRecords: job.lastRecords[$0]))
                 }
                 // Execute.
-                // Assign.
+                let tempStates: [KripkeState] = []
+                // Add to initial states if necessary.
+                if nil == job.lastState {
+                    tempStates.first.map { initialStates.append($0) }
+                }
+                guard let lastTempState = tempStates.last else {
+                    continue
+                }
+                // Append the states to the states array if these are starting states.
+                var added: Bool = false
+                tempStates.forEach {
+                    let state = $0
+                    // If this is the first time seeing this state then just add it.
+                    guard let existingState = states[state.properties] else {
+                        states[state.properties] = state
+                        added = true
+                        return
+                    }
+                    // Attempt to add any new transitions/effects to the kripke state.
+                    let oldCount = existingState.effects.count
+                    existingState.effects.formUnion(state.effects)
+                    if false == added {
+                        added = oldCount < existingState.effects.count
+                    }
+                }
+                // Do not process duplicate states again.
+                if false == added {
+                    continue
+                }
+                // Create a new job from the clones.
+                let executing = (job.executing + 1) % clones.count
+                jobs.append(Job(
+                    cache: job.cache,
+                    tokens: clones,
+                    executing: executing,
+                    lastState: states[lastTempState.properties] ?? lastTempState,
+                    lastRecords: clones.map { $0.map { $0.fsm.currentRecord } }
+                ))
             }
             
         }
