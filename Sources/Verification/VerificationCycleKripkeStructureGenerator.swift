@@ -75,17 +75,20 @@ public final class VerificationCycleKripkeStructureGenerator<
     fileprivate let tokens: [[VerificationToken]]
     fileprivate let cloner: Cloner
     fileprivate let cycleDetector: Detector
+    fileprivate let executer: VerificationCycleExecuter
     fileprivate let spinnerConstructor: SpinnerConstructor
     
     public init(
         tokens: [[VerificationToken]],
         cloner: Cloner,
         cycleDetector: Detector,
+        executer: VerificationCycleExecuter = VerificationCycleExecuter(),
         spinnerConstructor: SpinnerConstructor
     ) {
         self.tokens = tokens
         self.cloner = cloner
         self.cycleDetector = cycleDetector
+        self.executer = executer
         self.spinnerConstructor = spinnerConstructor
     }
     
@@ -102,8 +105,13 @@ public final class VerificationCycleKripkeStructureGenerator<
                 let clones = job.tokens.enumerated().map {
                     Array(self.cloner.clone(jobs: $1, withLastRecords: job.lastRecords[$0]))
                 }
-                // Execute.
-                let newStates: [KripkeState] = []
+                // Execute and generate kripke states.
+                let newStates: [KripkeState] = self.executer.execute(
+                    tokens: clones,
+                    executing: job.executing,
+                    withExternals: externals,
+                    andLastState: job.lastState
+                )
                 // Do not generate more jobs if newStates is empty.
                 guard let lastNewState = newStates.last else {
                     continue
@@ -118,11 +126,10 @@ public final class VerificationCycleKripkeStructureGenerator<
                     continue
                 }
                 // Create a new job from the clones.
-                let executing = (job.executing + 1) % clones.count
                 jobs.append(Job(
                     cache: job.cache,
                     tokens: clones,
-                    executing: executing,
+                    executing: (job.executing + 1) % clones.count,
                     lastState: states.value[lastNewState.properties] ?? lastNewState,
                     lastRecords: clones.map { $0.map { $0.fsm.currentRecord } }
                 ))
