@@ -156,6 +156,7 @@ public final class VerificationCycleKripkeStructureGenerator<
                 ))
             }
         }
+        print("number of initial states: \(initialStates.count)")
         print("number of states: \(states.value.count)")
         return KripkeStructure(initialStates: initialStates, states: states.value)
     }
