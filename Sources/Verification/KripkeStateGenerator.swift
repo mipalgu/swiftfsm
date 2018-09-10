@@ -72,7 +72,7 @@ public final class KripkeStateGenerator: KripkeStateGeneratorProtocol {
         addingProperties props: KripkeStatePropertyList = [:]
     ) -> KripkeState {
         let record: KripkeStatePropertyList = props <| [
-            "\(machine.name).\(fsm.name)": KripkeStateProperty(
+            "\(fsm.name)": KripkeStateProperty(
                 type: .Compound(fsm.currentRecord),
                 value: fsm
             )
