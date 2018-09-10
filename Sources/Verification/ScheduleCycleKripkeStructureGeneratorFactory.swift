@@ -72,7 +72,7 @@ public final class ScheduleCycleKripkeStructureGeneratorFactory: KripkeStructure
             KripkeStatePropertySpinnerConverter
         >,
         VerificationCycleKripkeStructureGeneratorFactory<HashTableCycleDetector<KripkeStatePropertyList>>,
-        SequentialPerRingletTokenizer
+        SequentialPerScheduleCycleTokenizer
     > {
         return ScheduleCycleKripkeStructureGenerator(
             machines: machines,
@@ -83,7 +83,7 @@ public final class ScheduleCycleKripkeStructureGeneratorFactory: KripkeStructure
             factory: VerificationCycleKripkeStructureGeneratorFactory(
                 cycleDetector: HashTableCycleDetector<KripkeStatePropertyList>()
             ),
-            tokenizer: SequentialPerRingletTokenizer()
+            tokenizer: SequentialPerScheduleCycleTokenizer()
         )
     }
     

@@ -77,33 +77,53 @@ public final class VerificationCycleKripkeStructureGenerator<
     fileprivate let cycleDetector: Detector
     fileprivate let executer: VerificationCycleExecuter
     fileprivate let spinnerConstructor: SpinnerConstructor
+    fileprivate let worldCreator: WorldCreator
     
     public init(
         tokens: [[VerificationToken]],
         cloner: Cloner,
         cycleDetector: Detector,
         executer: VerificationCycleExecuter = VerificationCycleExecuter(),
-        spinnerConstructor: SpinnerConstructor
+        spinnerConstructor: SpinnerConstructor,
+        worldCreator: WorldCreator = WorldCreator()
     ) {
         self.tokens = tokens
         self.cloner = cloner
         self.cycleDetector = cycleDetector
         self.executer = executer
         self.spinnerConstructor = spinnerConstructor
+        self.worldCreator = worldCreator
     }
     
     public func generate() -> KripkeStructure {
         var initialStates: [KripkeState] = []
         var states: Ref<[KripkeStatePropertyList: KripkeState]> = Ref(value: [:])
         var jobs = self.createInitialJobs(fromTokens: self.tokens)
+        var i = 0
         while false == jobs.isEmpty {
             let job = jobs.removeFirst()
             let externalsData = self.fetchUniqueExternalsData(fromSnapshot: job.tokens[job.executing])
             let spinner = self.spinnerConstructor.makeSpinner(forExternals: externalsData)
             while let externals = spinner() {
+                if i == 0 {
+                    print("\n\n\(jobs.count)\n")
+                }
+                i = (i + 1) % 10
                 // Clone all fsms.
                 let clones = job.tokens.enumerated().map {
                     Array(self.cloner.clone(jobs: $1, withLastRecords: job.lastRecords[$0]))
+                }
+                let world = self.worldCreator.createWorld(
+                    fromExternals: externals,
+                    andTokens: clones,
+                    andLastState: job.lastState,
+                    andExecuting: job.executing,
+                    andExecutingToken: 0,
+                    withState: clones[job.executing][0].fsm.currentState.name,
+                    appendingToPC: "R"
+                )
+                if nil != states.value[world] {
+                    continue
                 }
                 // Execute and generate kripke states.
                 let newStates: [KripkeState] = self.executer.execute(
