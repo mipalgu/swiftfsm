@@ -59,6 +59,7 @@
 import FSM
 import SwiftMachines
 import swiftfsm
+import IO
 
 @available(macOS 10.11, *)
 public final class MachinesMachineLoader: MachineLoader {
@@ -66,6 +67,7 @@ public final class MachinesMachineLoader: MachineLoader {
     fileprivate let compiler: MachineCompiler<MachineAssembler>
     fileprivate let libraryLoader: MachineLoader
     fileprivate let parser: MachineParser
+    fileprivate let printer: Printer
 
     fileprivate let cCompilerFlags: [String]
     fileprivate let linkerFlags: [String]
@@ -76,6 +78,7 @@ public final class MachinesMachineLoader: MachineLoader {
         compiler: MachineCompiler<MachineAssembler> = MachineCompiler(assembler: MachineAssembler()),
         libraryLoader: MachineLoader,
         parser: MachineParser = MachineParser(),
+        printer: Printer = CommandLinePrinter(errorStream: StderrOutputStream(), messageStream: StdoutOutputStream(), warningStream: StdoutOutputStream()),
         cCompilerFlags: [String] = [],
         linkerFlags: [String] = [],
         swiftCompilerFlags: [String] = []
@@ -83,6 +86,7 @@ public final class MachinesMachineLoader: MachineLoader {
         self.compiler = compiler
         self.libraryLoader = libraryLoader
         self.parser = parser
+        self.printer = printer
         self.cCompilerFlags = cCompilerFlags
         self.linkerFlags = linkerFlags
         self.swiftCompilerFlags = swiftCompilerFlags
@@ -90,6 +94,7 @@ public final class MachinesMachineLoader: MachineLoader {
 
     public func load(name: String, invoker: swiftfsm.Invoker, clock: Timer, path: String) -> (AnyScheduleableFiniteStateMachine, [Dependency])? {
         guard let machine = self.parser.parseMachine(atPath: path) else {
+            self.parser.errors.forEach(self.printer.error)
             return nil
         }
         if false == self.compiler.shouldCompile(machine) {
@@ -103,6 +108,7 @@ public final class MachinesMachineLoader: MachineLoader {
                 andSwiftCompilerFlags: self.swiftCompilerFlags
             )
         else {
+            self.compiler.errors.forEach(self.printer.error)
             return nil
         }
         return self.libraryLoader.load(name: name, invoker: invoker, clock: clock, path: outputPath)
