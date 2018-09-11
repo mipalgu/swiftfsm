@@ -56,6 +56,7 @@
  *
  */
 
+import IO
 import SwiftMachines
 
 @available(macOS 10.11, *)
@@ -63,12 +64,17 @@ public final class SwiftMachinesCompiler: MachineCompiler {
 
     fileprivate let compiler: SwiftMachines.MachineCompiler<MachineAssembler>
     fileprivate let parser: MachineParser
+    fileprivate let printer: Printer
 
-    public init(compiler: SwiftMachines.MachineCompiler<MachineAssembler> = SwiftMachines.MachineCompiler(assembler: MachineAssembler()),
-    parser: MachineParser = MachineParser()
+    public init(
+        compiler: SwiftMachines.MachineCompiler<MachineAssembler> = SwiftMachines.MachineCompiler(assembler: MachineAssembler()
+        ),
+        parser: MachineParser = MachineParser(),
+        printer: Printer = CommandLinePrinter(errorStream: StderrOutputStream(), messageStream: StdoutOutputStream(), warningStream: StdoutOutputStream())
     ) {
         self.compiler = compiler
         self.parser = parser
+        self.printer = printer
     }
 
     public func compileMachine(
@@ -78,14 +84,19 @@ public final class SwiftMachinesCompiler: MachineCompiler {
         andSwiftCompilerFlags swiftCompilerFlags: [String]
     ) -> Bool {
         guard let machine = self.parser.parseMachine(atPath: path) else {
+            self.parser.errors.forEach(self.printer.error)
             return false
         }
-        return nil != self.compiler.compile(
+        guard nil != self.compiler.compile(
             machine,
             withCCompilerFlags: compilerFlags,
             andLinkerFlags: linkerFlags,
             andSwiftCompilerFlags: swiftCompilerFlags
-        )
+        ) else {
+            self.compiler.errors.forEach(self.printer.error)
+            return false
+        }
+        return true
     }
 
 }
