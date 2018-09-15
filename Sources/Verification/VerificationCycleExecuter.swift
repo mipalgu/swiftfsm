@@ -60,6 +60,7 @@ import FSM
 import KripkeStructure
 import MachineStructure
 import swiftfsm
+import swiftfsm_helpers
 
 public final class VerificationCycleExecuter {
     
@@ -87,6 +88,8 @@ public final class VerificationCycleExecuter {
                 fsm.externalVariables[offset].val = external.0.val
             }
         }
+        print("Generating with externals: \(externals.map { $1 })")
+        print("")
         return tokens[executing].flatMap { (token: VerificationToken) -> [KripkeState] in
             token.machine.clock.forcedRunningTime = 0
             let states = self.executer.execute(
@@ -97,6 +100,34 @@ public final class VerificationCycleExecuter {
                 withExternals: externals,
                 andLastState: last
             )
+            func out(_ plist: KripkeStatePropertyList, _ level: Int = 0) -> String? {
+                func propOut(_ key: String, _ prop: KripkeStateProperty, _ level: Int) -> String? {
+                    let indent = Array(repeating: " ", count: level * 2).combine("", +)
+                    switch prop.type {
+                    case .EmptyCollection:
+                        return indent + key + ": []"
+                    case .Collection(let collection):
+                        let props = collection.enumerated().compactMap { propOut("\($0)", $1, level + 1) }.combine("") { $0 + ",\n" + $1 }
+                        if props.isEmpty {
+                            return nil
+                        }
+                        return indent + key + ": [\n" + props  + "\n" + indent + "]"
+                    case .Compound(let newPlist):
+                        guard let list = out(newPlist, level + 1) else {
+                            return nil
+                        }
+                        return indent + key + ": [\n" + list + "\n" + indent + "]"
+                    default:
+                        return indent + key + ": " + "\(prop.value)"
+                    }
+                }
+                let list = plist.properties.sorted { $0.key < $1.key }.compactMap {
+                    return propOut($0, $1, level + 1)
+                }.combine("") {$0 + ",\n" + $1 }
+                return list.isEmpty ? nil : list
+            }
+            //states.forEach { print(out($0.properties) ?? "nothing"); print("") }
+            //_ = getchar()
             offset += 1
             guard let lastState = states.last else {
                 return []
