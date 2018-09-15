@@ -116,7 +116,9 @@ public final class GraphVizKripkeStructureView: KripkeStructureView {
         self.latest += 1
         self.cache[state.properties] = (id, state)
         let shape = state.effects.isEmpty ? "doublecircle" : "circle"
-        let label = self.formatProperties(state.properties, indent, false)
+        guard let label = self.formatProperties(state.properties, indent, false) else {
+            return
+        }
         if true == isInitial {
             declarations += "node [shape=point] si\(id);"
             transitions += "si\(id) -> s\(id);\n"
@@ -139,37 +141,43 @@ public final class GraphVizKripkeStructureView: KripkeStructureView {
         _ list: KripkeStatePropertyList,
         _ indent: Int,
         _ includeBraces: Bool = true
-    ) -> String {
+    ) -> String? {
         let indentStr = Array(repeating: " ", count: (indent + 1) * 2).reduce("", +)
         let list = list.sorted { $0.0 < $1.0 }
-        guard let first = list.first else {
-            return "{}"
+        let props = list.compactMap { (key: String, val: KripkeStateProperty) -> String? in
+            guard let prop = self.formatProperty(val, indent + 1) else {
+                return nil
+            }
+            return "\\l" + indentStr + key + " = " + prop
         }
-        let firstStr = indentStr + first.0 + " = " + self.formatProperty(first.1, indent + 1)
-        let content = list.dropFirst().reduce("\\l" + firstStr) {
-            $0 + ",\\l" + indentStr + $1.0 + " = " + self.formatProperty($1.1, indent + 1)
+        if props.isEmpty {
+            return nil
         }
-        let indentStr2 = Array(repeating: " ", count: indent * 2).reduce("", +)
+        let content = props.combine("") { $0 + "," + $1 }
+        let indentStr2 = Array(repeating: " ", count: indent * 2).combine("", +)
         if true == includeBraces {
             return "{" + content + "\\l" + indentStr2 + "}"
         }
         return content + "\\l" + indentStr2
     }
 
-    fileprivate func formatProperty(_ prop: KripkeStateProperty, _ indent: Int) -> String {
+    fileprivate func formatProperty(_ prop: KripkeStateProperty, _ indent: Int) -> String? {
         switch prop.type {
         case .EmptyCollection:
             return "[]"
         case .Collection(let collection):
-            guard let first = collection.first else {
+            if collection.isEmpty {
                 return "[]"
             }
             let indentStr = Array(repeating: " ", count: indent * 2).reduce("", +)
             let indentStr2 = Array(repeating: " ", count: (indent + 1) * 2).reduce("", +)
-            let firstStr = "\\l" + indentStr2 + self.formatProperty(first, indent + 1)
-            return "[" + collection.dropFirst().reduce(firstStr) {
-                $0 + ",\\l" + indentStr2 + self.formatProperty($1, indent + 1)
-            } + "\\l" + indentStr + "]"
+            let props = collection.compactMap { (val: KripkeStateProperty) -> String? in
+                self.formatProperty(val, indent + 1)
+            }
+            if props.isEmpty {
+                return nil
+            }
+            return "[\\l" + indentStr2 + props.combine("") { $0 + ",\\l" + indentStr2 + $1 } + "\\l" + indentStr + "]"
         case .Compound(let list):
             return self.formatProperties(list, indent + 1)
         default:
