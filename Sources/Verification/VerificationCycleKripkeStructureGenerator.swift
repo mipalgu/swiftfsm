@@ -79,6 +79,8 @@ public final class VerificationCycleKripkeStructureGenerator<
     fileprivate let spinnerConstructor: SpinnerConstructor
     fileprivate let worldCreator: WorldCreator
     
+    fileprivate let recorder = MirrorKripkePropertiesRecorder()
+    
     public init(
         tokens: [[VerificationToken]],
         cloner: Cloner,
@@ -148,7 +150,7 @@ public final class VerificationCycleKripkeStructureGenerator<
                     tokens: clones,
                     executing: (job.executing + 1) % clones.count,
                     lastState: states.value[lastNewState.properties] ?? lastNewState,
-                    lastRecords: clones.map { $0.map { $0.fsm.currentRecord } }
+                    lastRecords: clones.map { $0.map { self.recorder.takeRecord(of: $0.fsm.base) } }
                 ))
             }
         }
@@ -164,7 +166,7 @@ public final class VerificationCycleKripkeStructureGenerator<
             tokens: tokens,
             executing: 0,
             lastState: nil,
-            lastRecords: tokens.map { $0.map { $0.fsm.currentRecord } }
+            lastRecords: tokens.map { $0.map { self.recorder.takeRecord(of: $0.fsm.base) } }
         )]
     }
     

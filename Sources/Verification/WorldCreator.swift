@@ -59,9 +59,12 @@
 import FSM
 import KripkeStructure
 import MachineStructure
+import ModelChecking
 import swiftfsm
 
 public final class WorldCreator {
+    
+    fileprivate let recorder = MirrorKripkePropertiesRecorder()
     
     public init() {}
     
@@ -127,7 +130,7 @@ public final class WorldCreator {
         tokens.forEach {
             $0.forEach {
                 varPs[$0.fsm.name] = KripkeStateProperty(
-                    type: .Compound($0.fsm.currentRecord),
+                    type: .Compound(self.recorder.takeRecord(of: $0.fsm.base)),
                     value: $0.fsm
                 )
             }
