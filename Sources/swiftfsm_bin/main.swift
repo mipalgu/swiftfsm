@@ -93,9 +93,10 @@ func run() {
     Swiftfsm(
         clfsmMachineLoader: CLFSMMachineLoader(),
         kripkeStructureGeneratorFactory: ScheduleCycleKripkeStructureGeneratorFactory(),
-        kripkeStructureView: NuSMVKripkeStructureView(
+        /*kripkeStructureView: NuSMVKripkeStructureView(
             factory: FilePrinterFactory()
-        ),
+        ),*/
+        kripkeStructureView: GraphVizKripkeStructureView(factory: FilePrinterFactory()),
         machineCompiler: SwiftMachinesCompiler(),
         machineFactory: SimpleMachineFactory(),
         machineLoader: MachineLoaderStrategy(
