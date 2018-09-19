@@ -59,12 +59,15 @@
 import FSM
 import KripkeStructure
 import MachineStructure
+import ModelChecking
 import swiftfsm
 import swiftfsm_helpers
 
 public final class VerificationCycleExecuter {
     
     fileprivate let executer: VerificationTokenExecuter<KripkeStateGenerator>
+    
+    fileprivate let recorder = MirrorKripkePropertiesRecorder()
     
     public init(executer: VerificationTokenExecuter<KripkeStateGenerator> = VerificationTokenExecuter(stateGenerator: KripkeStateGenerator())) {
         self.executer = executer
@@ -78,6 +81,8 @@ public final class VerificationCycleExecuter {
         
         let externals: [(AnySnapshotController, KripkeStatePropertyList)]
         
+        let initialState: KripkeState?
+        
         let lastState: KripkeState?
         
         let clock: UInt
@@ -89,14 +94,18 @@ public final class VerificationCycleExecuter {
         executing: Int,
         withExternals externals: [(AnySnapshotController, KripkeStatePropertyList)],
         andLastState last: KripkeState?
-    ) -> [KripkeState] {
+    ) -> ([KripkeState], [(KripkeState?, KripkeState?, [[VerificationToken]])]) {
         var last = last
         //swiftlint:disable:next line_length
-        var jobs = [Job(index: 0, tokens: tokens, externals: externals, lastState: last, clock: 0)]
+        var jobs = [Job(index: 0, tokens: tokens, externals: externals, initialState: nil, lastState: last, clock: 0)]
         var states: [KripkeState] = []
+        var runs: [(KripkeState?, KripkeState?, [[VerificationToken]])] = []
         while false == jobs.isEmpty {
             let job = jobs.removeFirst()
-            job.tokens[executing].forEach {
+            let clone = job.tokens[executing][job.index].fsm.clone()
+            var newTokens = job.tokens
+            newTokens[executing][job.index] = VerificationToken(fsm: clone, machine: job.tokens[executing][job.index].machine, externalVariables: job.tokens[executing][job.index].externalVariables)
+            newTokens[executing].forEach {
                 var fsm = $0.fsm
                 fsm.externalVariables.enumerated().forEach { (offset, externalVariables) in
                     guard let (external, props) = externals.first(where: { $0.0.name == externalVariables.name }) else {
@@ -105,28 +114,29 @@ public final class VerificationCycleExecuter {
                     fsm.externalVariables[offset].val = fsm.externalVariables[offset].create(fromDictionary: self.convert(props))
                 }
             }
-            let clone = job.tokens[executing][job.index].fsm.clone()
             let (generatedStates, clockValues, newExternals) = self.executer.execute(
                 fsm: clone,
-                inTokens: job.tokens,
+                inTokens: newTokens,
                 executing: executing,
                 atOffset: job.index,
                 withExternals: job.externals,
                 andClock: job.clock,
                 andLastState: job.lastState
             )
+            print(generatedStates)
+            print(self.recorder.takeRecord(of: job.tokens[executing][job.index].fsm.base))
+            print(self.recorder.takeRecord(of: newTokens[executing][job.index].fsm.base))
             states.append(contentsOf: generatedStates)
             jobs.append(contentsOf: clockValues.map {
-                Job(index: job.index, tokens: job.tokens, externals: externals, lastState: job.lastState, clock: $0 + 1)
+                Job(index: job.index, tokens: job.tokens, externals: job.externals, initialState: job.initialState, lastState: job.lastState, clock: $0 + 1)
             })
             if job.index + 1 >= tokens[executing].count {
+                runs.append((job.initialState ?? generatedStates.first, generatedStates.last, newTokens))
                 continue
             }
-            var newTokens = job.tokens
-            newTokens[executing][job.index] = VerificationToken(fsm: clone, machine: job.tokens[executing][job.index].machine, externalVariables: job.tokens[executing][job.index].externalVariables)
-            jobs.append(Job(index: job.index + 1, tokens: newTokens, externals: newExternals, lastState: generatedStates.last, clock: 0))
+            jobs.append(Job(index: job.index + 1, tokens: newTokens, externals: newExternals, initialState: job.initialState ?? generatedStates.first, lastState: generatedStates.last, clock: 0))
         }
-        return states
+        return (states, runs)
     }
     
     fileprivate func convert(_ props: KripkeStatePropertyList) -> [String: Any] {

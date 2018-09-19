@@ -124,34 +124,36 @@ public final class VerificationCycleKripkeStructureGenerator<
                     continue
                 }
                 // Execute and generate kripke states.
-                let newStates: [KripkeState] = self.executer.execute(
+                let (newStates, runs) = self.executer.execute(
                     tokens: clones,
                     executing: job.executing,
                     withExternals: externals,
                     andLastState: job.lastState
                 )
-                // Do not generate more jobs if newStates is empty.
-                guard let lastNewState = newStates.last else {
-                    continue
-                }
-                // Add first new state to initial states if necessary.
-                if true == job.initial {
-                    newStates.first.map { initialStates.insert($0) }
-                }
                 // Append the states to the states array.
                 // Do not process duplicate states again if nothing has changed.
                 if false == self.add(newStates, to: states) {
                     continue
                 }
-                // Create a new job from the clones.
-                jobs.append(Job(
-                    initial: false,
-                    cache: job.cache,
-                    tokens: clones,
-                    executing: (job.executing + 1) % clones.count,
-                    lastState: states.value[lastNewState.properties] ?? lastNewState,
-                    lastRecords: clones.map { $0.map { self.recorder.takeRecord(of: $0.fsm.base) } }
-                ))
+                for (initialState, lastState, newTokens) in runs {
+                    // Add first new state to initial states if necessary.
+                    if true == job.initial {
+                        _ = initialState.map { initialStates.insert($0) }
+                    }
+                    // Do not generate more jobs if we do not have a last state.
+                    guard let lastNewState = lastState else {
+                        continue
+                    }
+                    // Create a new job from the clones.
+                    jobs.append(Job(
+                        initial: false,
+                        cache: job.cache,
+                        tokens: newTokens,
+                        executing: (job.executing + 1) % newTokens.count,
+                        lastState: states.value[lastNewState.properties] ?? lastNewState,
+                        lastRecords: newTokens.map { $0.map { self.recorder.takeRecord(of: $0.fsm.base) } }
+                    ))
+                }
             }
         }
         print("number of initial states: \(initialStates.count)")

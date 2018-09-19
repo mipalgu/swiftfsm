@@ -84,9 +84,6 @@ public final class VerificationTokenExecuter<StateGenerator: KripkeStateGenerato
         andLastState lastState: KripkeState?
     ) -> ([KripkeState], [UInt], [(AnySnapshotController, KripkeStatePropertyList)]) {
         let token = tokens[executing][offset]
-        if true == token.fsm.hasFinished {
-            return ([], [], externals)
-        }
         token.machine.clock.forcedRunningTime = clock
         var externals = externals
         let state = fsm.currentState.name
