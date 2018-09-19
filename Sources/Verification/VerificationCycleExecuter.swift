@@ -70,6 +70,20 @@ public final class VerificationCycleExecuter {
         self.executer = executer
     }
     
+    fileprivate struct Job {
+        
+        let index: Int
+        
+        let tokens: [[VerificationToken]]
+        
+        let externals: [(AnySnapshotController, KripkeStatePropertyList)]
+        
+        let lastState: KripkeState?
+        
+        let clock: UInt
+        
+    }
+    
     public func execute(
         tokens: [[VerificationToken]],
         executing: Int,
@@ -77,64 +91,90 @@ public final class VerificationCycleExecuter {
         andLastState last: KripkeState?
     ) -> [KripkeState] {
         var last = last
-        var offset: Int = 0
         //swiftlint:disable:next line_length
-        tokens[executing].forEach {
-            var fsm = $0.fsm
-            fsm.externalVariables.enumerated().forEach { (offset, externalVariables) in
-                guard let external = externals.first(where: { $0.0.name == externalVariables.name }) else {
-                    return
-                }
-                fsm.externalVariables[offset].val = external.0.val
-            }
-        }
-        print("Generating with externals: \(externals.map { $1 })")
-        print("")
-        return tokens[executing].flatMap { (token: VerificationToken) -> [KripkeState] in
-            token.machine.clock.forcedRunningTime = 0
-            let states = self.executer.execute(
-                token: token,
-                inTokens: tokens,
-                executing: executing,
-                atOffset: offset,
-                withExternals: externals,
-                andLastState: last
-            )
-            func out(_ plist: KripkeStatePropertyList, _ level: Int = 0) -> String? {
-                func propOut(_ key: String, _ prop: KripkeStateProperty, _ level: Int) -> String? {
-                    let indent = Array(repeating: " ", count: level * 2).combine("", +)
-                    switch prop.type {
-                    case .EmptyCollection:
-                        return indent + key + ": []"
-                    case .Collection(let collection):
-                        let props = collection.enumerated().compactMap { propOut("\($0)", $1, level + 1) }.combine("") { $0 + ",\n" + $1 }
-                        if props.isEmpty {
-                            return nil
-                        }
-                        return indent + key + ": [\n" + props  + "\n" + indent + "]"
-                    case .Compound(let newPlist):
-                        guard let list = out(newPlist, level + 1) else {
-                            return nil
-                        }
-                        return indent + key + ": [\n" + list + "\n" + indent + "]"
-                    default:
-                        return indent + key + ": " + "\(prop.value)"
+        var jobs = [Job(index: 0, tokens: tokens, externals: externals, lastState: last, clock: 0)]
+        var states: [KripkeState] = []
+        while false == jobs.isEmpty {
+            let job = jobs.removeFirst()
+            job.tokens[executing].forEach {
+                var fsm = $0.fsm
+                fsm.externalVariables.enumerated().forEach { (offset, externalVariables) in
+                    guard let (external, props) = externals.first(where: { $0.0.name == externalVariables.name }) else {
+                        return
                     }
+                    fsm.externalVariables[offset].val = fsm.externalVariables[offset].create(fromDictionary: self.convert(props))
                 }
-                let list = plist.properties.sorted { $0.key < $1.key }.compactMap {
-                    return propOut($0, $1, level + 1)
-                }.combine("") {$0 + ",\n" + $1 }
-                return list.isEmpty ? nil : list
             }
-            //states.forEach { print(out($0.properties) ?? "nothing"); print("") }
-            //_ = getchar()
-            offset += 1
-            guard let lastState = states.last else {
-                return []
+            let clone = job.tokens[executing][job.index].fsm.clone()
+            let (generatedStates, clockValues, newExternals) = self.executer.execute(
+                fsm: clone,
+                inTokens: job.tokens,
+                executing: executing,
+                atOffset: job.index,
+                withExternals: job.externals,
+                andClock: job.clock,
+                andLastState: job.lastState
+            )
+            states.append(contentsOf: generatedStates)
+            jobs.append(contentsOf: clockValues.map {
+                Job(index: job.index, tokens: job.tokens, externals: externals, lastState: job.lastState, clock: $0 + 1)
+            })
+            if job.index + 1 >= tokens[executing].count {
+                continue
             }
-            last = lastState
-            return states
+            var newTokens = job.tokens
+            newTokens[executing][job.index] = VerificationToken(fsm: clone, machine: job.tokens[executing][job.index].machine, externalVariables: job.tokens[executing][job.index].externalVariables)
+            jobs.append(Job(index: job.index + 1, tokens: newTokens, externals: newExternals, lastState: generatedStates.last, clock: 0))
+        }
+        return states
+    }
+    
+    fileprivate func convert(_ props: KripkeStatePropertyList) -> [String: Any] {
+        var dict: [String: Any] = [:]
+        props.properties.forEach {
+            dict[$0] = self.convert($1)
+        }
+        return dict
+    }
+    
+    fileprivate func convert(_ property: KripkeStateProperty) -> Any {
+        switch property.type {
+        case .EmptyCollection:
+            return []
+        case .Collection(let arr):
+            return arr.map { self.convert($0) }
+        case .Compound(let props):
+            return self.convert(props)
+        default:
+            return property.value
         }
     }
     
+    fileprivate func out(_ plist: KripkeStatePropertyList, _ level: Int = 0) -> String? {
+        func propOut(_ key: String, _ prop: KripkeStateProperty, _ level: Int) -> String? {
+            let indent = Array(repeating: " ", count: level * 2).combine("", +)
+            switch prop.type {
+            case .EmptyCollection:
+                return indent + key + ": []"
+            case .Collection(let collection):
+                let props = collection.enumerated().compactMap { propOut("\($0)", $1, level + 1) }.combine("") { $0 + ",\n" + $1 }
+                if props.isEmpty {
+                    return nil
+                }
+                return indent + key + ": [\n" + props  + "\n" + indent + "]"
+            case .Compound(let newPlist):
+                guard let list = out(newPlist, level + 1) else {
+                    return nil
+                }
+                return indent + key + ": [\n" + list + "\n" + indent + "]"
+            default:
+                return indent + key + ": " + "\(prop.value)"
+            }
+        }
+        let list = plist.properties.sorted { $0.key < $1.key }.compactMap {
+            return propOut($0, $1, level + 1)
+            }.combine("") {$0 + ",\n" + $1 }
+        return list.isEmpty ? nil : list
+    }
+
 }
