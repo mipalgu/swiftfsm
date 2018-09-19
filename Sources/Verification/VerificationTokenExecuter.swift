@@ -59,12 +59,15 @@
 import FSM
 import KripkeStructure
 import MachineStructure
+import ModelChecking
 import swiftfsm
 
 public final class VerificationTokenExecuter<StateGenerator: KripkeStateGeneratorProtocol> {
     
     fileprivate let stateGenerator: StateGenerator
     fileprivate let worldCreator: WorldCreator
+    
+    fileprivate let recorder = MirrorKripkePropertiesRecorder()
     
     public init(stateGenerator: StateGenerator, worldCreator: WorldCreator = WorldCreator()) {
         self.stateGenerator = stateGenerator
@@ -82,6 +85,7 @@ public final class VerificationTokenExecuter<StateGenerator: KripkeStateGenerato
         if true == token.fsm.hasFinished {
             return []
         }
+        var externals = externals
         let state = token.fsm.currentState.name
         let preWorld = self.worldCreator.createWorld(
             fromExternals: externals,
@@ -94,6 +98,12 @@ public final class VerificationTokenExecuter<StateGenerator: KripkeStateGenerato
         )
         let preState = self.stateGenerator.generateKripkeState(fromWorld: preWorld, withLastState: lastState)
         token.fsm.next()
+        token.fsm.externalVariables.forEach { external in
+            for var (i, (e, _)) in externals.enumerated() where e.name == external.name {
+                e.val = external.val
+                externals[i] = (e, self.recorder.takeRecord(of: e.val))
+            }
+        }
         let postWorld = self.worldCreator.createWorld(
             fromExternals: externals,
             andTokens: tokens,
