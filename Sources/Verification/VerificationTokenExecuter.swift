@@ -85,6 +85,7 @@ public final class VerificationTokenExecuter<StateGenerator: KripkeStateGenerato
     ) -> ([KripkeState], [UInt], [(AnySnapshotController, KripkeStatePropertyList)]) {
         let token = tokens[executing][offset]
         token.machine.clock.forcedRunningTime = clock
+        token.machine.clock.lastClockValues = []
         var externals = externals
         let state = fsm.currentState.name
         let preWorld = self.worldCreator.createWorld(

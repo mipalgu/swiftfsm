@@ -64,7 +64,7 @@ public final class FSMClock: Clock {
     
     fileprivate var data: [String: (previousState: AnyState, startTime: UInt)] = [:]
     
-    public fileprivate(set) var lastClockValues: [UInt] = []
+    public var lastClockValues: [UInt] = []
     
     fileprivate var currentFSM: String! = nil
     
