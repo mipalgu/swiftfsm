@@ -75,18 +75,19 @@ public final class VerificationTokenExecuter<StateGenerator: KripkeStateGenerato
     }
     
     public func execute(
-        token: VerificationToken,
+        fsm: AnyScheduleableFiniteStateMachine,
         inTokens tokens: [[VerificationToken]],
         executing: Int,
         atOffset offset: Int,
         withExternals externals: [(AnySnapshotController, KripkeStatePropertyList)],
+        andClock clock: UInt,
         andLastState lastState: KripkeState?
-    ) -> [KripkeState] {
-        if true == token.fsm.hasFinished {
-            return []
-        }
+    ) -> ([KripkeState], [UInt], [(AnySnapshotController, KripkeStatePropertyList)]) {
+        let token = tokens[executing][offset]
+        token.machine.clock.forcedRunningTime = clock
+        token.machine.clock.lastClockValues = []
         var externals = externals
-        let state = token.fsm.currentState.name
+        let state = fsm.currentState.name
         let preWorld = self.worldCreator.createWorld(
             fromExternals: externals,
             andTokens: tokens,
@@ -97,8 +98,8 @@ public final class VerificationTokenExecuter<StateGenerator: KripkeStateGenerato
             worldType: .beforeExecution
         )
         let preState = self.stateGenerator.generateKripkeState(fromWorld: preWorld, withLastState: lastState)
-        token.fsm.next()
-        token.fsm.externalVariables.forEach { external in
+        fsm.next()
+        fsm.externalVariables.forEach { external in
             for var (i, (e, _)) in externals.enumerated() where e.name == external.name {
                 e.val = external.val
                 externals[i] = (e, self.recorder.takeRecord(of: e.val))
@@ -114,7 +115,7 @@ public final class VerificationTokenExecuter<StateGenerator: KripkeStateGenerato
             worldType: .afterExecution
         )
         let postState = self.stateGenerator.generateKripkeState(fromWorld: postWorld, withLastState: preState)
-        return [preState, postState]
+        return ([preState, postState], token.machine.clock.lastClockValues.filter { $0 > clock }, externals)
     }
     
 }

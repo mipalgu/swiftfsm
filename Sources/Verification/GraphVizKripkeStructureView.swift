@@ -96,7 +96,16 @@ public final class GraphVizKripkeStructureView: KripkeStructureView {
         let pre = "digraph finite_state_machine {\n"
         var declarations: String = ""
         var transitions: String = ""
-        structure.initialStates.forEach { self.handleState($0, structure, &declarations, &transitions) }
+        structure.states.lazy.map { $1 }.forEach { state in
+            self.handleState(
+                state,
+                structure,
+                &declarations,
+                &transitions,
+                1,
+                nil != structure.initialStates.first(where: { $0.properties == state.properties })
+            )
+        }
         let printer: Printer = factory.make(id: "kripke.gv")
         printer.message(str: pre + declarations + transitions + "}")
     }
@@ -129,7 +138,7 @@ public final class GraphVizKripkeStructureView: KripkeStructureView {
             guard let effectState = structure.states[effect] else {
                 fatalError("Structure does not contain effect")
             }
-            self.handleState(effectState, structure, &declarations, &transitions, indent, false)
+            self.handleState(effectState, structure, &declarations, &transitions, indent, nil != structure.initialStates.first(where: { $0.properties == effectState.properties }))
             guard let (effectId, _) = self.cache[effect] else {
                 fatalError("Unable to handle effect")
             }

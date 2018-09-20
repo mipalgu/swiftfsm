@@ -59,15 +59,37 @@
 import FSM
 import KripkeStructure
 import MachineStructure
+import ModelChecking
 import swiftfsm
 import swiftfsm_helpers
 
 public final class VerificationCycleExecuter {
     
+    fileprivate let converter: KripkeStatePropertyListConverter
     fileprivate let executer: VerificationTokenExecuter<KripkeStateGenerator>
     
-    public init(executer: VerificationTokenExecuter<KripkeStateGenerator> = VerificationTokenExecuter(stateGenerator: KripkeStateGenerator())) {
+    public init(
+        converter: KripkeStatePropertyListConverter = KripkeStatePropertyListConverter(),
+        executer: VerificationTokenExecuter<KripkeStateGenerator> = VerificationTokenExecuter(stateGenerator: KripkeStateGenerator())
+    ) {
+        self.converter = converter
         self.executer = executer
+    }
+    
+    fileprivate struct Job {
+        
+        let index: Int
+        
+        let tokens: [[VerificationToken]]
+        
+        let externals: [(AnySnapshotController, KripkeStatePropertyList)]
+        
+        let initialState: KripkeState?
+        
+        let lastState: KripkeState?
+        
+        let clock: UInt
+        
     }
     
     public func execute(
@@ -75,66 +97,53 @@ public final class VerificationCycleExecuter {
         executing: Int,
         withExternals externals: [(AnySnapshotController, KripkeStatePropertyList)],
         andLastState last: KripkeState?
-    ) -> [KripkeState] {
-        var last = last
-        var offset: Int = 0
+    ) -> ([KripkeState], [(KripkeState?, KripkeState?, [[VerificationToken]])]) {
         //swiftlint:disable:next line_length
-        tokens[executing].forEach {
-            var fsm = $0.fsm
-            fsm.externalVariables.enumerated().forEach { (offset, externalVariables) in
-                guard let external = externals.first(where: { $0.0.name == externalVariables.name }) else {
-                    return
-                }
-                fsm.externalVariables[offset].val = external.0.val
-            }
-        }
-        print("Generating with externals: \(externals.map { $1 })")
-        print("")
-        return tokens[executing].flatMap { (token: VerificationToken) -> [KripkeState] in
-            token.machine.clock.forcedRunningTime = 0
-            let states = self.executer.execute(
-                token: token,
-                inTokens: tokens,
+        var jobs = [Job(index: 0, tokens: tokens, externals: externals, initialState: nil, lastState: last, clock: 0)]
+        var states: [KripkeState] = []
+        var runs: [(KripkeState?, KripkeState?, [[VerificationToken]])] = []
+        while false == jobs.isEmpty {
+            let job = jobs.removeFirst()
+            let newTokens = self.prepareTokens(job.tokens, executing: (executing, job.index), fromExternals: job.externals)
+            let (generatedStates, clockValues, newExternals) = self.executer.execute(
+                fsm: newTokens[executing][job.index].fsm,
+                inTokens: newTokens,
                 executing: executing,
-                atOffset: offset,
-                withExternals: externals,
-                andLastState: last
+                atOffset: job.index,
+                withExternals: job.externals,
+                andClock: job.clock,
+                andLastState: job.lastState
             )
-            func out(_ plist: KripkeStatePropertyList, _ level: Int = 0) -> String? {
-                func propOut(_ key: String, _ prop: KripkeStateProperty, _ level: Int) -> String? {
-                    let indent = Array(repeating: " ", count: level * 2).combine("", +)
-                    switch prop.type {
-                    case .EmptyCollection:
-                        return indent + key + ": []"
-                    case .Collection(let collection):
-                        let props = collection.enumerated().compactMap { propOut("\($0)", $1, level + 1) }.combine("") { $0 + ",\n" + $1 }
-                        if props.isEmpty {
-                            return nil
-                        }
-                        return indent + key + ": [\n" + props  + "\n" + indent + "]"
-                    case .Compound(let newPlist):
-                        guard let list = out(newPlist, level + 1) else {
-                            return nil
-                        }
-                        return indent + key + ": [\n" + list + "\n" + indent + "]"
-                    default:
-                        return indent + key + ": " + "\(prop.value)"
-                    }
-                }
-                let list = plist.properties.sorted { $0.key < $1.key }.compactMap {
-                    return propOut($0, $1, level + 1)
-                }.combine("") {$0 + ",\n" + $1 }
-                return list.isEmpty ? nil : list
+            states.append(contentsOf: generatedStates)
+            // When the clock has been used - try the same token again with new clock values.
+            jobs.append(contentsOf: clockValues.map {
+                Job(index: job.index, tokens: job.tokens, externals: job.externals, initialState: job.initialState, lastState: job.lastState, clock: $0 + 1)
+            })
+            // Add tokens to runs when we have finished executing all of the tokens in a run.
+            if job.index + 1 >= tokens[executing].count {
+                runs.append((job.initialState ?? generatedStates.first, generatedStates.last, newTokens))
+                continue
             }
-            //states.forEach { print(out($0.properties) ?? "nothing"); print("") }
-            //_ = getchar()
-            offset += 1
-            guard let lastState = states.last else {
-                return []
-            }
-            last = lastState
-            return states
+            // Add a Job for the next token to execute.
+            jobs.append(Job(index: job.index + 1, tokens: newTokens, externals: newExternals, initialState: job.initialState ?? generatedStates.first, lastState: generatedStates.last, clock: 0))
         }
+        return (states, runs)
     }
     
+    fileprivate func prepareTokens(_ tokens: [[VerificationToken]], executing: (Int, Int), fromExternals externals: [(AnySnapshotController, KripkeStatePropertyList)]) -> [[VerificationToken]] {
+        let clone = tokens[executing.0][executing.1].fsm.clone()
+        var newTokens = tokens
+        newTokens[executing.0][executing.1] = VerificationToken(fsm: clone, machine: tokens[executing.0][executing.1].machine, externalVariables: tokens[executing.0][executing.1].externalVariables)
+        newTokens[executing.0].forEach {
+            var fsm = $0.fsm
+            fsm.externalVariables.enumerated().forEach { (offset, externalVariables) in
+                guard let (external, props) = externals.first(where: { $0.0.name == externalVariables.name }) else {
+                    return
+                }
+                fsm.externalVariables[offset].val = fsm.externalVariables[offset].create(fromDictionary: self.converter.convert(fromList: props))
+            }
+        }
+        return newTokens
+    }
+
 }
