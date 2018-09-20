@@ -66,6 +66,8 @@ public final class PromiseData {
     
     public var hasFinished: Bool
     
+    fileprivate var result: Any? = nil
+    
     public init(fsm: AnyParameterisedFiniteStateMachine, running: Bool = false, hasFinished: Bool = true) {
         self.fsm = fsm
         self.running = running
@@ -75,7 +77,14 @@ public final class PromiseData {
     public func makePromise<T>(_ f: @escaping () -> T) -> Promise<T> {
         return Promise(
             hasFinished: { self.hasFinished },
-            result: f
+            result: {
+                if let result = self.result {
+                    return result as! T
+                }
+                let result = f()
+                self.result = result
+                return result
+            }
         )
     }
     
