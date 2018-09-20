@@ -138,7 +138,7 @@ public final class GraphVizKripkeStructureView: KripkeStructureView {
             guard let effectState = structure.states[effect] else {
                 fatalError("Structure does not contain effect")
             }
-            self.handleState(effectState, structure, &declarations, &transitions, indent, false)
+            self.handleState(effectState, structure, &declarations, &transitions, indent, nil != structure.initialStates.first(where: { $0.properties == effectState.properties }))
             guard let (effectId, _) = self.cache[effect] else {
                 fatalError("Unable to handle effect")
             }
