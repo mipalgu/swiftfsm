@@ -98,7 +98,7 @@ public final class VerificationCycleKripkeStructureGenerator<
     }
     
     public func generate() -> KripkeStructure {
-        var initialStates: Set<KripkeState> = []
+        var initialStates: Ref<[KripkeStatePropertyList: KripkeState]> = Ref(value: [:])
         var states: Ref<[KripkeStatePropertyList: KripkeState]> = Ref(value: [:])
         var jobs = self.createInitialJobs(fromTokens: self.tokens)
         while false == jobs.isEmpty {
@@ -138,7 +138,7 @@ public final class VerificationCycleKripkeStructureGenerator<
                 for (initialState, lastState, newTokens) in runs {
                     // Add first new state to initial states if necessary.
                     if true == job.initial {
-                        _ = initialState.map { initialStates.insert($0) }
+                        _ = initialState.map { _ = self.add([$0], to: initialStates) }
                     }
                     // Do not generate more jobs if we do not have a last state.
                     guard let lastNewState = lastState else {
@@ -156,9 +156,9 @@ public final class VerificationCycleKripkeStructureGenerator<
                 }
             }
         }
-        print("number of initial states: \(initialStates.count)")
+        print("number of initial states: \(initialStates.value.count)")
         print("number of state: \(states.value.count)")
-        return KripkeStructure(initialStates: Array(initialStates), states: states.value)
+        return KripkeStructure(initialStates: Array(initialStates.value.lazy.map { $1 }), states: states.value)
     }
     
     fileprivate func createInitialJobs(fromTokens tokens: [[VerificationToken]]) -> [Job] {
