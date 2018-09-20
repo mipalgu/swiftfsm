@@ -154,7 +154,7 @@ public class RoundRobinScheduler<Tokenizer: SchedulerTokenizer>: Scheduler where
         }
     }
     
-    public func invoke<P: Variables, RS: ResultContainer>(_ name: String, with parameters: P, withResults results: RS) -> Promise<RS.ResultType> {
+    public func invoke<P: Variables, R>(_ name: String, with parameters: P, withResults results: AnyResultContainer<R>) -> Promise<R> {
         guard let existingPromiseData = self.promises[name] else {
             fatalError("Attempting to invoke \(name) when it has not been scheduled.")
         }
