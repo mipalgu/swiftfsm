@@ -96,7 +96,16 @@ public final class GraphVizKripkeStructureView: KripkeStructureView {
         let pre = "digraph finite_state_machine {\n"
         var declarations: String = ""
         var transitions: String = ""
-        structure.states.forEach { self.handleState($1, structure, &declarations, &transitions) }
+        structure.states.lazy.map { $1 }.forEach { state in
+            self.handleState(
+                state,
+                structure,
+                &declarations,
+                &transitions,
+                1,
+                nil != structure.initialStates.first(where: { $0.properties == state.properties })
+            )
+        }
         let printer: Printer = factory.make(id: "kripke.gv")
         printer.message(str: pre + declarations + transitions + "}")
     }
