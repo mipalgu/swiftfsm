@@ -101,7 +101,7 @@ public final class GexfKripkeStructureView: KripkeStructureView {
         self.latest = 0
         let start = """
             <?xml version="1.0" encoding="UTF-8"?>
-            <gexf xmlns="http://www.gexf.net/1.2draft" version="1.2">
+            <gexf xmlns="http://www.gexf.net/1.2draft" version="1.2" xmlns:viz=\"http://www.gexf.net/1.2draft/viz\">
                 <graph mode="static" defaultedgetype="directed">
                     <nodes>\n
             """
@@ -144,36 +144,39 @@ public final class GexfKripkeStructureView: KripkeStructureView {
         if true == isInitial {
             let initialId = self.latest
             self.latest += 1
-            content.value += "            <node id=\"\(initialId)\"><viz:color r=\"0\" g=\"0\" b=\"0\"/><viz:size value=\"0.25\"/></node>\n"
+            content.value += "            <node id=\"\(initialId)\"><viz:color r=\"0\" g=\"0\" b=\"0\" /><viz:size value=\"0.25\" /></node>\n"
             self.initials.append((self.latest, initialId))
         }
         let id = self.latest
         self.latest += 1
         self.cache[state.properties] = id
-        content.value += "            <node id=\"\(id)\" label=\"\(label)\"><viz:color r=\"255\" g=\"255\" b=\"255\"/><viz:size value=\"1.0\"/></node>\n"
+        content.value += "            <node id=\"\(id)\" label=\"\(label)\"><viz:color r=\"255\" g=\"255\" b=\"255\" /><viz:size value=\"1.0\" /></node>\n"
     }
     
     fileprivate func handleInitials(content: Ref<String>) {
         self.initials.forEach {
             let id = self.latest
             self.latest += 1
-            content.value += "            <edge id=\"\(id)\" source=\"\($1)\" target=\"\($0)\" />\n"
+            content.value += self.createEdge(id: id, source: $1, target: $0)
         }
     }
     
     fileprivate func handleEffects(state: KripkeState, content: Ref<String>) {
-        guard let id = self.cache[state.properties] else {
+        guard let source = self.cache[state.properties] else {
             fatalError("Unable to fetch state id when handling effect.")
         }
         state.effects.forEach {
-            let edgeId = self.latest
-            self.latest += 1
-            let effect = $0
-            guard let effectId = self.cache[effect] else {
+            guard let target = self.cache[$0] else {
                 fatalError("Unable to handle effect")
             }
-            content.value += "            <edge id=\"\(edgeId)\" source=\"\(id)\" target=\"\(effectId)\" />\n"
+            let id = self.latest
+            self.latest += 1
+            content.value += self.createEdge(id: id, source: source, target: target)
         }
+    }
+    
+    fileprivate func createEdge(id: Int, source: Int, target: Int) -> String {
+        return "            <edge id=\"\(id)\" source=\"\(source)\" target=\"\(target)\"><viz:color r=\"0\" g=\"0\" b=\"0\" /><viz:shape value=\"solid\" /></edge>\n"
     }
     
     fileprivate func formatProperties(list: KripkeStatePropertyList, indent: Int, includeBraces: Bool = true) -> String? {
