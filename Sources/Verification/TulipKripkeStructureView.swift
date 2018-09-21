@@ -104,6 +104,7 @@ public final class TulipKripkeStructureView: KripkeStructureView {
         content += self.createEdges(fromInitialStates: structure.initialStates)
         content += "\n" + self.createEdgeList(forStates: states, inStructure: structure)
         content += "\n" + self.createPropertyList(forStates: states, inStructure: structure)
+        content += "\n" + self.createSizeList(forStates: states, inStructure: structure)
         content += "\n)"
         let printer: Printer = factory.make(id: "kripke.tlp")
         printer.message(str: content)
@@ -148,6 +149,14 @@ public final class TulipKripkeStructureView: KripkeStructureView {
         let mapped = states.enumerated().lazy.map { (offset, state) -> String in
             return "(node \(offset + structure.initialStates.count) \"\(self.formatProperties(list: state.properties, indent: 1, includeBraces: false) ?? "")\")"
         }
+        return start + mapped.combine("") { $0 + "\n" + $1 } + "\n" + end
+    }
+    
+    fileprivate func createSizeList(forStates states: [KripkeState], inStructure structure: KripkeStructure) -> String {
+        let start = "(property 0 size \"viewSize\"\n  (default \"(0,0,0)\" \"(1,1,1)\")\n"
+        let end = ")"
+        let total = states.count + structure.initialStates.count - 1
+        let mapped = Array(0...total).lazy.map { "  (node \($0) \"(10000,10000,10000)\")" }
         return start + mapped.combine("") { $0 + "\n" + $1 } + "\n" + end
     }
     
