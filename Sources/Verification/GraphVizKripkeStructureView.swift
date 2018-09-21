@@ -59,6 +59,7 @@
 import FSM
 import IO
 import KripkeStructure
+import Utilities
 
 public final class GraphVizKripkeStructureView: KripkeStructureView {
 
@@ -67,7 +68,9 @@ public final class GraphVizKripkeStructureView: KripkeStructureView {
      */
     private var factory: PrinterFactory
 
-    fileprivate var cache: [KripkeStatePropertyList: (Int, KripkeState)] = [:]
+    fileprivate var cache: [KripkeStatePropertyList: Int] = [:]
+    
+    fileprivate var initials: [Int] = []
 
     fileprivate var latest: Int = 0
 
@@ -93,64 +96,64 @@ public final class GraphVizKripkeStructureView: KripkeStructureView {
      *  the NuSMV representation.
      */
     public func make(structure: KripkeStructure) {
-        let pre = "digraph finite_state_machine {\n"
-        var declarations: String = ""
-        var transitions: String = ""
+        self.cache = [:]
+        self.initials = []
+        self.latest = 0
+        var content: Ref<String> = Ref(value: "digraph finite_state_machine {\n")
         structure.states.lazy.map { $1 }.forEach { state in
             self.handleState(
-                state,
-                structure,
-                &declarations,
-                &transitions,
-                1,
-                nil != structure.initialStates.first(where: { $0.properties == state.properties })
+                state: state,
+                content: content,
+                isInitial: nil != structure.initialStates.first(where: { $0.properties == state.properties })
             )
         }
+        self.handleInitials(content: content)
+        structure.states.lazy.map { $1 }.forEach { state in
+            self.handleEffects(state: state, content: content)
+        }
+        content.value += "}"
         let printer: Printer = factory.make(id: "kripke.gv")
-        printer.message(str: pre + declarations + transitions + "}")
+        printer.message(str: content.value)
     }
 
-    fileprivate func handleState(
-        _ state: KripkeState,
-        _ structure: KripkeStructure,
-        _ declarations: inout String,
-        _ transitions: inout String,
-        _ indent: Int = 1,
-        _ isInitial: Bool = true
-    ) {
+    fileprivate func handleState(state: KripkeState, content: Ref<String>, isInitial: Bool) {
         if nil != self.cache[state.properties] {
             return
         }
         let id = self.latest
         self.latest += 1
-        self.cache[state.properties] = (id, state)
+        self.cache[state.properties] = id
         let shape = state.effects.isEmpty ? "doublecircle" : "circle"
-        guard let label = self.formatProperties(state.properties, indent, false) else {
+        guard let label = self.formatProperties(list: state.properties, indent: 1, includeBraces: false) else {
             return
         }
         if true == isInitial {
-            declarations += "node [shape=point] si\(id);"
-            transitions += "si\(id) -> s\(id);\n"
-       }
-        declarations += "node [shape=\(shape), label=\"\(label)\"]; s\(id);\n"
+            content.value += "node [shape=point] si\(id);"
+            self.initials.append(id)
+        }
+        content.value += "node [shape=\(shape), label=\"\(label)\"]; s\(id);\n"
+    }
+    
+    fileprivate func handleInitials(content: Ref<String>) {
+        self.initials.forEach {
+            content.value += "si\($0) -> s\($0);\n"
+        }
+    }
+    
+    fileprivate func handleEffects(state: KripkeState, content: Ref<String>) {
+        guard let id = self.cache[state.properties] else {
+            fatalError("Unable to fetch state id when handling effect.")
+        }
         state.effects.forEach {
             let effect = $0
-            guard let effectState = structure.states[effect] else {
-                fatalError("Structure does not contain effect")
-            }
-            self.handleState(effectState, structure, &declarations, &transitions, indent, nil != structure.initialStates.first(where: { $0.properties == effectState.properties }))
-            guard let (effectId, _) = self.cache[effect] else {
+            guard let effectId = self.cache[effect] else {
                 fatalError("Unable to handle effect")
             }
-            transitions += "s\(id) -> s\(effectId);\n"
+            content.value += "s\(id) -> s\(effectId);\n"
         }
     }
 
-    fileprivate func formatProperties(
-        _ list: KripkeStatePropertyList,
-        _ indent: Int,
-        _ includeBraces: Bool = true
-    ) -> String? {
+    fileprivate func formatProperties(list: KripkeStatePropertyList, indent: Int, includeBraces: Bool = true) -> String? {
         let indentStr = Array(repeating: " ", count: (indent + 1) * 2).reduce("", +)
         let list = list.sorted { $0.0 < $1.0 }
         let props = list.compactMap { (key: String, val: KripkeStateProperty) -> String? in
@@ -188,7 +191,7 @@ public final class GraphVizKripkeStructureView: KripkeStructureView {
             }
             return "[\\l" + indentStr2 + props.combine("") { $0 + ",\\l" + indentStr2 + $1 } + "\\l" + indentStr + "]"
         case .Compound(let list):
-            return self.formatProperties(list, indent + 1)
+            return self.formatProperties(list: list, indent: indent + 1)
         default:
             return "\(prop.value)"
         }
