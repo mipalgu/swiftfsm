@@ -138,7 +138,7 @@ public final class GexfKripkeStructureView: KripkeStructureView {
             return
         }
         let shape = state.effects.isEmpty ? "doublecircle" : "circle"
-        guard let label = self.formatProperties(list: state.properties, indent: 1, includeBraces: false) else {
+        guard let label = self.formatProperties(list: state.properties, includeBraces: false) else {
             return
         }
         if true == isInitial {
@@ -179,27 +179,25 @@ public final class GexfKripkeStructureView: KripkeStructureView {
         return "            <edge id=\"\(id)\" source=\"\(source)\" target=\"\(target)\"><viz:color r=\"0\" g=\"0\" b=\"0\" /><viz:shape value=\"solid\" /></edge>\n"
     }
     
-    fileprivate func formatProperties(list: KripkeStatePropertyList, indent: Int, includeBraces: Bool = true) -> String? {
-        let indentStr = Array(repeating: " ", count: (indent + 1) * 2).reduce("", +)
+    fileprivate func formatProperties(list: KripkeStatePropertyList, includeBraces: Bool = true) -> String? {
         let list = list.sorted { $0.0 < $1.0 }
         let props = list.compactMap { (key: String, val: KripkeStateProperty) -> String? in
-            guard let prop = self.formatProperty(val, indent + 1) else {
+            guard let prop = self.formatProperty(val) else {
                 return nil
             }
-            return "\\n" + indentStr + key + " = " + prop
+            return key + " = " + prop
         }
         if props.isEmpty {
             return nil
         }
         let content = props.combine("") { $0 + "," + $1 }
-        let indentStr2 = Array(repeating: " ", count: indent * 2).combine("", +)
         if true == includeBraces {
-            return "{" + content + "\\n" + indentStr2 + "}"
+            return "{" + content + "}"
         }
-        return content + "\\n" + indentStr2
+        return content
     }
     
-    fileprivate func formatProperty(_ prop: KripkeStateProperty, _ indent: Int) -> String? {
+    fileprivate func formatProperty(_ prop: KripkeStateProperty) -> String? {
         switch prop.type {
         case .EmptyCollection:
             return "[]"
@@ -207,17 +205,15 @@ public final class GexfKripkeStructureView: KripkeStructureView {
             if collection.isEmpty {
                 return "[]"
             }
-            let indentStr = Array(repeating: " ", count: indent * 2).reduce("", +)
-            let indentStr2 = Array(repeating: " ", count: (indent + 1) * 2).reduce("", +)
             let props = collection.compactMap { (val: KripkeStateProperty) -> String? in
-                self.formatProperty(val, indent + 1)
+                self.formatProperty(val)
             }
             if props.isEmpty {
                 return nil
             }
-            return "[\\n" + indentStr2 + props.combine("") { $0 + ",\\n" + indentStr2 + $1 } + "\\n" + indentStr + "]"
+            return "[" + props.combine("") { $0 + ", " + $1 } + "]"
         case .Compound(let list):
-            return self.formatProperties(list: list, indent: indent + 1)
+            return self.formatProperties(list: list)
         default:
             return "\(prop.value)"
         }
