@@ -69,6 +69,7 @@ public final class TulipKripkeStructureView: KripkeStructureView {
     private var factory: PrinterFactory
     
     fileprivate var cache: [KripkeStatePropertyList: Int] = [:]
+    fileprivate var latest: Int = 0
     
     /**
      *  Create a new `NuSMVKripkeStructureView`.
@@ -93,9 +94,10 @@ public final class TulipKripkeStructureView: KripkeStructureView {
      */
     public func make(structure: KripkeStructure) {
         self.cache = [:]
+        self.latest = 0
         var content: String = "(tlp \"2.3\"\n"
         let nodeCount = structure.initialStates.count + structure.states.count
-        content += "(nb_nodes \(nodeCount)\n"
+        content += "(nb_nodes \(nodeCount))\n"
         content += "(nodes 0..\(nodeCount - 1))\n"
         let states = Array(structure.states.lazy.map { $1 })
         self.populateCache(withStates: states, inStructure: structure)
@@ -122,11 +124,16 @@ public final class TulipKripkeStructureView: KripkeStructureView {
     }
     
     fileprivate func createEdgeList(forStates states: [KripkeState], inStructure structure: KripkeStructure) -> String {
-        let mapped = states.enumerated().lazy.map { (offset, state) -> String in
-            guard let target = self.cache[state.properties] else {
-                fatalError("Unable to fetch target id of state from cache when creating tulip file.")
+        let mapped = states.enumerated().lazy.flatMap { (offset, state) -> [String] in
+            let source = offset + structure.initialStates.count
+            return state.effects.map {
+                guard let target = self.cache[$0] else {
+                    fatalError("Unable to fetch target id of state from cache when creating tulip file.")
+                }
+                let id = self.latest + structure.initialStates.count
+                self.latest += 1
+                return self.createEdge(id: id, source: source, target: target)
             }
-            return self.createEdge(id: structure.initialStates.count + offset, source: structure.initialStates.count + offset, target: target)
         }
         return mapped.combine("") { $0 + "\n" + $1 }
     }
@@ -136,7 +143,7 @@ public final class TulipKripkeStructureView: KripkeStructureView {
     }
     
     fileprivate func createPropertyList(forStates states: [KripkeState], inStructure structure: KripkeStructure) -> String {
-        let start = "(property 0 string \"properties\"\n  (default \"\" \"\")\n"
+        let start = "(property 0 string \"viewLabel\"\n  (default \"\" \"\")\n"
         let end = ")"
         let mapped = states.enumerated().lazy.map { (offset, state) -> String in
             return "(node \(offset + structure.initialStates.count) \"\(self.formatProperties(list: state.properties, indent: 1, includeBraces: false) ?? "")\")"
