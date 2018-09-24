@@ -56,12 +56,13 @@
  *
  */
 
+import KripkeStructure
 import ModelChecking
 import FSMVerification
 
 public final class VerificationCycleKripkeStructureGeneratorFactory<
     Detector: CycleDetector
->: VerificationCycleKripkeStructureGeneratorFactoryType
+>: VerificationCycleKripkeStructureGeneratorFactoryType where Detector.Element == KripkeStatePropertyList
 {
     
     fileprivate let cycleDetector: Detector

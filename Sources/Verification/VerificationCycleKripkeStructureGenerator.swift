@@ -69,7 +69,7 @@ public final class VerificationCycleKripkeStructureGenerator<
     Cloner: AggregateClonerProtocol,
     Detector: CycleDetector,
     SpinnerConstructor: MultipleExternalsSpinnerConstructorType
->: KripkeStructureGenerator
+>: KripkeStructureGenerator where Detector.Element == KripkeStatePropertyList
 {
     
     fileprivate let tokens: [[VerificationToken]]
@@ -110,6 +110,7 @@ public final class VerificationCycleKripkeStructureGenerator<
                 let clones = job.tokens.enumerated().map {
                     Array(self.cloner.clone(jobs: $1, withLastRecords: job.lastRecords[$0]))
                 }
+                // Check for cycles.
                 let world = self.worldCreator.createWorld(
                     fromExternals: externals,
                     andTokens: clones,
@@ -119,7 +120,8 @@ public final class VerificationCycleKripkeStructureGenerator<
                     withState: clones[job.executing][0].fsm.currentState.name,
                     worldType: .beforeExecution
                 )
-                if nil != states.value[world] {
+                let (inCycle, newCache) = self.cycleDetector.inCycle(data: job.cache, element: world)
+                if true == inCycle {
                     job.lastState?.effects.insert(world)
                     continue
                 }
