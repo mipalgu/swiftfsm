@@ -92,7 +92,7 @@ let libraryLoader = DynamicLibraryMachineLoaderFactory(printer: printer).make()
 func run() {
     Swiftfsm(
         clfsmMachineLoader: CLFSMMachineLoader(),
-        kripkeStructureGeneratorFactory: ScheduleCycleKripkeStructureGeneratorFactory(),
+        kripkeStructureGeneratorFactory: RoundRobinKripkeStructureGeneratorFactory(),
         /*kripkeStructureView: NuSMVKripkeStructureView(
             factory: FilePrinterFactory()
         ),*/
