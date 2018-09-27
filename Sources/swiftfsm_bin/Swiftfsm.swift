@@ -183,9 +183,17 @@ public class Swiftfsm<
         if schedulers.count > 1 {
             self.handleError(SwiftfsmErrors.generalError(error: "You cannot define more than 1 scheduler."))
         }
-        let scheduler: SchedulerFactory = schedulers.first?.scheduler ?? self.schedulerFactory
         // Run the tasks.
-        self.handleTasks(tasks, withScheduler: scheduler)
+        guard let supportedScheduler = schedulers.first?.scheduler else {
+            self.handleTasks(tasks, withScheduler: self.schedulerFactory, andGenerator: self.kripkeStructureGeneratorFactory)
+            return
+        }
+        switch supportedScheduler {
+        case .roundRobin(let scheduler, let generator):
+            self.handleTasks(tasks, withScheduler: scheduler, andGenerator: generator)
+        case .passiveRoundRobin(let scheduler, let generator):
+            self.handleTasks(tasks, withScheduler: scheduler, andGenerator: generator)
+        }
     }
 
     private func cleanArgs(_ args: [String]) -> [String] {
@@ -201,11 +209,14 @@ public class Swiftfsm<
         }
     }
 
-    private func generateKripkeStructure(_ machines: [Machine]) {
+    private func generateKripkeStructure<KGF: KripkeStructureGeneratorFactory>(
+        _ machines: [Machine],
+        withGenerator generatorFactory: KGF
+    ) where KGF.Generator.KripkeStructure == KripkeStructure {
         if machines.isEmpty {
             return
         }
-        let generator = self.kripkeStructureGeneratorFactory.make(fromMachines: machines)
+        let generator = generatorFactory.make(fromMachines: machines)
         let structure = generator.generate()
         self.kripkeStructureView.make(structure: structure)
     }
@@ -220,12 +231,16 @@ public class Swiftfsm<
         exit(EXIT_SUCCESS)
     }
 
-    private func handleTasks(_ tasks: [Task], withScheduler factory: SchedulerFactory) {
-        let scheduler = factory.make()
+    private func handleTasks<SF: SchedulerFactory, KGF: KripkeStructureGeneratorFactory>(
+        _ tasks: [Task],
+        withScheduler schedulerFactory: SF,
+        andGenerator generator: KGF
+    ) where KGF.Generator.KripkeStructure == KripkeStructure {
+        let scheduler = schedulerFactory.make()
         let t: [(schedule: [Machine], kripke: [Machine])] = tasks.map {
             self.handleTask($0, invoker: scheduler)
         }
-        self.generateKripkeStructure(t.flatMap { $0.kripke })
+        self.generateKripkeStructure(t.flatMap { $0.kripke }, withGenerator: generator)
         scheduler.run(t.flatMap { $0.schedule })
     }
 

@@ -57,6 +57,7 @@
  */
 
 import Scheduling
+import Verification
 
 /**
  *  The standard `Parser`.
@@ -88,11 +89,11 @@ public class SwiftfsmParser: HelpableParser {
         return str
     }
 
-    fileprivate let passiveRoundRobinFactory: SchedulerFactory
+    fileprivate let passiveRoundRobinFactory: PassiveRoundRobinSchedulerFactory
 
-    fileprivate let roundRobinFactory: SchedulerFactory
+    fileprivate let roundRobinFactory: RoundRobinSchedulerFactory
 
-    public init(passiveRoundRobinFactory: SchedulerFactory, roundRobinFactory: SchedulerFactory) {
+    public init(passiveRoundRobinFactory: PassiveRoundRobinSchedulerFactory, roundRobinFactory: RoundRobinSchedulerFactory) {
         self.passiveRoundRobinFactory = passiveRoundRobinFactory
         self.roundRobinFactory = roundRobinFactory
     }
@@ -260,12 +261,12 @@ public class SwiftfsmParser: HelpableParser {
         case "rr", "RoundRobin":
             print("Using Round Robin Scheduler")
             var temp: Task = t
-            temp.scheduler = self.roundRobinFactory 
+            temp.scheduler = .roundRobin(self.roundRobinFactory, RoundRobinKripkeStructureGeneratorFactory()) 
             return temp
         case "prr", "PassiveRoundRobin":
             print("Using Passive Scheduler")
             var temp: Task = t
-            temp.scheduler = passiveRoundRobinFactory
+            temp.scheduler = .passiveRoundRobin(self.passiveRoundRobinFactory, PassiveRoundRobinKripkeStructureGeneratorFactory())
             return temp
         default:
             throw ParsingErrors.generalError(error: "Unknown value for scheduler flag")

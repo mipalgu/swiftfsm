@@ -1,9 +1,9 @@
 /*
- * Task.swift
- * swiftfsm
+ * SupportedSchedulers.swift 
+ * Parsing 
  *
- * Created by Callum McColl on 15/12/2015.
- * Copyright © 2015 Callum McColl. All rights reserved.
+ * Created by Callum McColl on 26/09/2018.
+ * Copyright © 2018 Callum McColl. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -57,73 +57,11 @@
  */
 
 import Scheduling
+import Verification
 
-/**
- *  A data structure that represent all the possible tasks that swiftfsm can
- *  perform.
- */
-public struct Task {
+public enum SupportedSchedulers {
 
-    /**
-     *  Should we add this `Machine` to the scheduler?
-     */
-    public var addToScheduler: Bool = true
-
-    /**
-     * Should we compile the machine?
-     */
-    public var compile: Bool = false
-
-    /**
-     * Flags passed to the C compiler when compiling a machine.
-     */
-    public var cCompilerFlags: [String] = []
-
-    /**
-     *  How many times should we repeat this task?
-     */
-    public var count: Int = 1
-
-    /**
-     *  Should we enable debugging for this `Machine`.
-     */
-    public var enableDebugging: Bool = false
-
-    /**
-     *  Should we generate a `KripkeStructure` for this `Machine`.
-     */
-    public var generateKripkeStructure: Bool = false
-
-    /**
-     *  Is this `Machine` a clfsm machine?
-     */
-    public var isClfsmMachine: Bool = false
-
-    /**
-     * Flags which are passed to the linker when compiling a machine.
-     */
-    public var linkerFlags: [String] = []
-
-    /**
-     *  The name of the `Machine`.
-     */
-    public var name: String?
-
-    /**
-     *  The path to load the `Machine`.
-     */
-    public var path: String?
-
-    /**
-     *  Should we print the help text?
-     */
-    public var printHelpText: Bool = false
-
-    public var scheduler: SupportedSchedulers?
-
-    /**
-     * Flags passed to the swift compiler when compiling a machine.
-     */
-    public var swiftCompilerFlags: [String] = []
+    case passiveRoundRobin(PassiveRoundRobinSchedulerFactory, PassiveRoundRobinKripkeStructureGeneratorFactory)
+    case roundRobin(RoundRobinSchedulerFactory, RoundRobinKripkeStructureGeneratorFactory)
 
 }
