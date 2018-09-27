@@ -149,7 +149,7 @@ public final class VerificationCycleKripkeStructureGenerator<
                     // Create a new job from the clones.
                     jobs.append(Job(
                         initial: false,
-                        cache: job.cache,
+                        cache: newCache,
                         tokens: newTokens,
                         executing: (job.executing + 1) % newTokens.count,
                         lastState: states.value[lastNewState.properties] ?? lastNewState,
@@ -160,6 +160,7 @@ public final class VerificationCycleKripkeStructureGenerator<
         }
         print("number of initial states: \(initialStates.value.count)")
         print("number of state: \(states.value.count)")
+        print("number of transitions: \(states.value.reduce(0) { $0 + $1.1.effects.count })")
         return KripkeStructure(initialStates: Array(initialStates.value.lazy.map { $1 }), states: states.value)
     }
     
