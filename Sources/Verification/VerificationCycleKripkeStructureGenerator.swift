@@ -142,17 +142,16 @@ public final class VerificationCycleKripkeStructureGenerator<
                     if true == job.initial {
                         _ = initialState.map { _ = self.add([$0], to: initialStates) }
                     }
-                    if let lastState = lastState,
-                        nil == newTokens.first(where: { nil != $0.first { !$0.fsm.hasFinished } })
-                    {
-                        guard let state = states.value[lastState.properties] else {
+                    // Do not generate more jobs if we do not have a last state.
+                    guard let lastNewState = lastState else {
+                        continue
+                    }
+                    // Get rid of any effects on states where all fsms have finished.
+                    if nil == newTokens.first(where: { nil != $0.first { !$0.fsm.hasFinished } }) {
+                        guard let state = states.value[lastNewState.properties] else {
                             continue
                         }
                         state.effects = []
-                        continue
-                    }
-                    // Do not generate more jobs if we do not have a last state.
-                    guard let lastNewState = lastState else {
                         continue
                     }
                     // Create a new job from the clones.
