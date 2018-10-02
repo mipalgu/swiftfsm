@@ -143,7 +143,7 @@ public final class VerificationCycleKripkeStructureGenerator<
                         _ = initialState.map { _ = self.add([$0], to: initialStates) }
                     }
                     if let lastState = lastState,
-                        newTokens.filter({ !$0.filter { !$0.fsm.hasFinished }.isEmpty }).isEmpty
+                        nil == newTokens.first(where: { nil != $0.first { !$0.fsm.hasFinished } })
                     {
                         guard let state = states.value[lastState.properties] else {
                             continue
