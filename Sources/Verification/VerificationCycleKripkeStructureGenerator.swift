@@ -142,6 +142,15 @@ public final class VerificationCycleKripkeStructureGenerator<
                     if true == job.initial {
                         _ = initialState.map { _ = self.add([$0], to: initialStates) }
                     }
+                    if let lastState = lastState,
+                        newTokens.filter({ !$0.filter { !$0.fsm.hasFinished }.isEmpty }).isEmpty
+                    {
+                        guard let state = states.value[lastState.properties] else {
+                            continue
+                        }
+                        state.effects = []
+                        continue
+                    }
                     // Do not generate more jobs if we do not have a last state.
                     guard let lastNewState = lastState else {
                         continue
