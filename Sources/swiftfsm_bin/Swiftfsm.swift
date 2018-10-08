@@ -161,39 +161,20 @@ public class Swiftfsm<
             self.view.message(message: parser.helpText)
             self.handleError(SwiftfsmErrors.parsingError(error: .noPathsFound))
         }
-        // Parse the args and get a bunch of tasks.
-        let tasks: [Task] = self.parseArgs(self.cleanArgs(args))
+        // Parse the args and get a `Task`.
+        let task = self.parseArgs(self.cleanArgs(args))
         // Show the help message when there are no tasks.
-        if true == tasks.isEmpty {
+        if true == task.jobs.isEmpty {
             self.handleMessage(parser.helpText)
         }
         // Has the user asked to turn on debugging?
-        DEBUG = nil != tasks.lazy.filter { $0.enableDebugging }.first
+        DEBUG = task.enableDebugging
         // Has the user said to print the help message?
-        if nil != tasks.lazy.filter({ true == $0.printHelpText }).first {
+        if task.printHelpText {
             self.handleMessage(parser.helpText)
         }
-        // NoPathsFound when there is only one task and it does not have a path
-        if 1 == tasks.count && nil == tasks[0].path {
-            self.view.message(message: parser.helpText)
-            self.handleError(SwiftfsmErrors.parsingError(error: .noPathsFound))
-        }
-        // Error when more than one scheduler is specified.
-        let schedulers = tasks.filter { $0.scheduler != nil }
-        if schedulers.count > 1 {
-            self.handleError(SwiftfsmErrors.generalError(error: "You cannot define more than 1 scheduler."))
-        }
         // Run the tasks.
-        guard let supportedScheduler = schedulers.first?.scheduler else {
-            self.handleTasks(tasks, withScheduler: self.schedulerFactory, andGenerator: self.kripkeStructureGeneratorFactory)
-            return
-        }
-        switch supportedScheduler {
-        case .roundRobin(let scheduler, let generator):
-            self.handleTasks(tasks, withScheduler: scheduler, andGenerator: generator)
-        case .passiveRoundRobin(let scheduler, let generator):
-            self.handleTasks(tasks, withScheduler: scheduler, andGenerator: generator)
-        }
+        self.handleJobs(inTask: task)
     }
 
     private func cleanArgs(_ args: [String]) -> [String] {
@@ -211,14 +192,15 @@ public class Swiftfsm<
 
     private func generateKripkeStructure<KGF: KripkeStructureGeneratorFactory>(
         _ machines: [Machine],
-        withGenerator generatorFactory: KGF
+        withGenerator generatorFactory: KGF,
+        andViews views: [KripkeStructureView]
     ) where KGF.Generator.KripkeStructure == KripkeStructure {
         if machines.isEmpty {
             return
         }
         let generator = generatorFactory.make(fromMachines: machines)
         let structure = generator.generate()
-        self.kripkeStructureView.make(structure: structure)
+        views.forEach { $0.make(structure: structure) }
     }
 
     private func handleError(_ error: SwiftfsmErrors) -> Never {
@@ -231,21 +213,62 @@ public class Swiftfsm<
         exit(EXIT_SUCCESS)
     }
 
-    private func handleTasks<SF: SchedulerFactory, KGF: KripkeStructureGeneratorFactory>(
-        _ tasks: [Task],
-        withScheduler schedulerFactory: SF,
-        andGenerator generator: KGF
-    ) where KGF.Generator.KripkeStructure == KripkeStructure {
-        let scheduler = schedulerFactory.make()
-        let t: [(schedule: [Machine], kripke: [Machine])] = tasks.map {
-            self.handleTask($0, invoker: scheduler)
+    private func handleJobs(inTask task: Task) {
+        KRIPKE = task.generateKripkeStructure
+        let views = task.kripkeStructureViews ?? [self.kripkeStructureView]
+        guard let supportedScheduler = task.scheduler else {
+            let scheduler = self.schedulerFactory.make()
+            let machines: [Machine] = task.jobs.flatMap { self.handleJob($0, invoker: scheduler) }
+            self.handleMachines(
+                machines,
+                task: task,
+                generator: self.kripkeStructureGeneratorFactory,
+                scheduler: scheduler,
+                views: views
+            )
+            return
         }
-        self.generateKripkeStructure(t.flatMap { $0.kripke }, withGenerator: generator)
-        scheduler.run(t.flatMap { $0.schedule })
+        switch supportedScheduler {
+        case .roundRobin(let schedulerFactory, let generator):
+            let scheduler = schedulerFactory.make()
+            let machines: [Machine] = task.jobs.flatMap { self.handleJob($0, invoker: scheduler) }
+            self.handleMachines(
+                machines,
+                task: task,
+                generator: generator,
+                scheduler: scheduler,
+                views: views
+            )
+        case .passiveRoundRobin(let schedulerFactory, let generator):
+            let scheduler = schedulerFactory.make()
+            let machines: [Machine] = task.jobs.flatMap { self.handleJob($0, invoker: scheduler) }
+            self.handleMachines(
+                machines,
+                task: task,
+                generator: generator,
+                scheduler: scheduler,
+                views: views
+            )
+        }
+    }
+    
+    private func handleMachines<KGF: KripkeStructureGeneratorFactory>(
+        _ machines: [Machine],
+        task: Task,
+        generator: KGF,
+        scheduler: Scheduler,
+        views: [KripkeStructureView]
+    ) where KGF.Generator.KripkeStructure == KripkeStructure {
+        if task.generateKripkeStructure {
+            self.generateKripkeStructure(machines, withGenerator: generator, andViews: views)
+        }
+        if task.addToScheduler {
+            scheduler.run(machines)
+        }
     }
 
-    private func getMachinesName(_ task: Task) -> String {
-        var name: String = task.name ?? "machine"
+    private func getMachinesName(_ job: Job) -> String {
+        var name: String = job.name ?? "machine"
         if let count: Int = self.names[name] {
             let temp: String = name
             name += "\(count)"
@@ -257,77 +280,68 @@ public class Swiftfsm<
     }
 
     private func loadFsm(
-        _ task: Task,
+        _ job: Job,
         name: String,
         invoker: Invoker
     ) -> (AnyScheduleableFiniteStateMachine, [Dependency], FSMClock) {
-        KRIPKE = task.generateKripkeStructure
         let clock = FSMClock()
         let fsm: (AnyScheduleableFiniteStateMachine, [Dependency])?
-        if true == task.isClfsmMachine {
-            fsm = self.clfsmMachineLoader.load(name: name, invoker: invoker, clock: clock, path: task.path!)
+        if true == job.isClfsmMachine {
+            fsm = self.clfsmMachineLoader.load(name: name, invoker: invoker, clock: clock, path: job.path!)
         } else {
-            fsm = self.machineLoader.load(name: name, invoker: invoker, clock: clock, path: task.path!)
+            fsm = self.machineLoader.load(name: name, invoker: invoker, clock: clock, path: job.path!)
         }
         guard let unwrappedFSM = fsm else {
             // Handle when we are unable to load the fsm.
-            self.handleError(.unableToLoad(machineName: name, path: task.path!))
+            self.handleError(.unableToLoad(machineName: name, path: job.path!))
         }
         return (unwrappedFSM.0, unwrappedFSM.1, clock)
     }
 
-    private func handleTask(_ task: Task, invoker: Invoker) -> ([Machine], [Machine]) {
-        var name: String = self.getMachinesName(task)
+    private func handleJob(_ job: Job, invoker: Invoker) -> [Machine] {
+        var name: String = self.getMachinesName(job)
         // Handle when there is no path in the Task.
-        guard let path = task.path else {
+        guard let path = job.path else {
             self.handleError(.parsingError(error: .pathNotFound(machineName: name)))
         }
-        if true == task.compile {
+        if true == job.compile {
             guard true == self.machineCompiler.compileMachine(
                 atPath: path,
-                withCCompilerFlags: task.cCompilerFlags,
-                andLinkerFlags: task.linkerFlags,
-                andSwiftCompilerFlags: task.swiftCompilerFlags
+                withCCompilerFlags: job.cCompilerFlags,
+                andLinkerFlags: job.linkerFlags,
+                andSwiftCompilerFlags: job.swiftCompilerFlags
             ) else {
                 self.handleError(.generalError(error: "Unable to compile machine at \(path)"))
             }
         }
-        var schedule: [Machine] = []
-        var kripke: [Machine] = []
-        for _ in 0 ..< task.count {
+        var machines: [Machine] = []
+        for _ in 0 ..< job.count {
             // Create the Machine
-            let (fsm, dependencies, clock) = self.loadFsm(task, name: name, invoker: invoker)
+            let (fsm, dependencies, clock) = self.loadFsm(job, name: name, invoker: invoker)
             let temp: Machine = self.machineFactory.make(
                 name: name,
                 fsm: fsm,
                 dependencies: dependencies,
-                debug: task.enableDebugging,
+                debug: DEBUG,
                 clock: clock
             )
-            // Remember to generate Kripke Structures.
-            if true == task.generateKripkeStructure {
-                kripke.append(temp)
-            }
-            // Remember to add the machine to the scheduler if need be.
-            if true == task.addToScheduler {
-                schedule.append(temp)
-            }
+            machines.append(temp)
             // Generate the next name of the Machine
-            name = self.getMachinesName(task)
+            name = self.getMachinesName(job)
         }
-        return (schedule, kripke)
+        return machines
     }
 
-    private func parseArgs(_ args: [String]) -> [Task] {
-        let tasks: [Task]
+    private func parseArgs(_ args: [String]) -> Task {
+        let task: Task
         do {
-            tasks = try parser.parse(words: args)
+            task = try parser.parse(words: args)
         } catch(let error as SwiftfsmErrors) {
             self.handleError(error)
         } catch {
             exit(EXIT_FAILURE)
         }
-        return tasks
+        return task
     }
 
 }
