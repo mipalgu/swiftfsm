@@ -56,6 +56,7 @@
  *
  */
 
+import Darwin
 import IO
 import Scheduling
 import Verification
@@ -141,13 +142,13 @@ public class SwiftfsmParser: HelpableParser {
         while let str = words.first {
             switch str {
             case "-d", "--debug":
-                return self.handleDebugFlag(task, words: &words)
+                task = self.handleDebugFlag(task, words: &words)
             case "-h", "--help":
-                return self.handleHelpFlag(task, words: &words)
+                task = self.handleHelpFlag(task, words: &words)
             case "-k", "--kripke":
-                return try self.handleKripkeFlag(task, words: &words)
+                try task = self.handleKripkeFlag(task, words: &words)
             case "-s", "--scheduler":
-                return try self.handleSchedulerFlag(task, words: &words)
+                try task = self.handleSchedulerFlag(task, words: &words)
             default:
                 return task
             }
@@ -224,10 +225,10 @@ public class SwiftfsmParser: HelpableParser {
                 temp.kripkeStructureViews = try words[2].compactMap(self.convertCharToView)
             case "-r", "--run":
                 temp.addToScheduler = true
-                words.removeFirst()
             default:
-                break
+                return temp
             }
+            words.removeFirst()
         }
         return temp
     }
@@ -301,12 +302,10 @@ public class SwiftfsmParser: HelpableParser {
         }
         switch scheduler {
         case "rr", "RoundRobin":
-            print("Using Round Robin Scheduler")
             var temp: Task = t
             temp.scheduler = .roundRobin(self.roundRobinFactory, RoundRobinKripkeStructureGeneratorFactory()) 
             return temp
         case "prr", "PassiveRoundRobin":
-            print("Using Passive Scheduler")
             var temp: Task = t
             temp.scheduler = .passiveRoundRobin(self.passiveRoundRobinFactory, PassiveRoundRobinKripkeStructureGeneratorFactory())
             return temp
