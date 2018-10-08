@@ -104,10 +104,8 @@ public struct Task {
     /**
      *  The list of kripke structure views which will output a `KripkeStructure`
      *  into a specific format.
-     *
-     *  The default is a NuSMV file.
      */
-    public var kripkeStructureViews: [KripkeStructureView] = [NuSMVKripkeStructureView(factory: FilePrinterFactory())]
+    public var kripkeStructureViews: [KripkeStructureView]?
 
     /**
      * Flags which are passed to the linker when compiling a machine.

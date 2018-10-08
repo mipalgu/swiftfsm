@@ -125,7 +125,11 @@ public class SwiftfsmParser: HelpableParser {
             if (nil == tasks[tasks.count - 1].path || true == wds.isEmpty) {
                 continue
             }
-            tasks.append(Task())
+            var newTask = Task()
+            newTask.generateKripkeStructure = tasks.last?.generateKripkeStructure ?? false
+            newTask.addToScheduler = tasks.last?.addToScheduler ?? true
+            newTask.kripkeStructureViews = tasks.last?.kripkeStructureViews
+            tasks.append(newTask)
         }
         return tasks
     }
@@ -191,6 +195,9 @@ public class SwiftfsmParser: HelpableParser {
     }
     
     private func handleKripkeFlag(_ t: Task, words: inout [String]) throws -> Task {
+        if true == t.generateKripkeStructure {
+            throw ParsingErrors.generalError(error: "You can only specify the -k option once.")
+        }
         var temp: Task = t
         temp.generateKripkeStructure = true
         temp.addToScheduler = false
