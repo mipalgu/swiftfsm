@@ -336,8 +336,8 @@ public class Swiftfsm<
         let task: Task
         do {
             task = try parser.parse(words: args)
-        } catch(let error as SwiftfsmErrors) {
-            self.handleError(error)
+        } catch(let error as ParsingErrors) {
+            self.handleError(.parsingError(error: error))
         } catch {
             exit(EXIT_FAILURE)
         }
