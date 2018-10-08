@@ -67,8 +67,10 @@ public class SwiftfsmParser: HelpableParser {
     
     public var helpText: String {
         var str: String = "OVERVIEW: A Finite State Machine Scheduler\n\n"
-        str += "USAGE: swiftfsm [options] [machine_options] <machine_path> ...\n\n"
+        str += "USAGE: swiftfsm [options] ([machine_options] <machine_path>)...\n\n"
         str += "OPTIONS:\n"
+        str += "\t-d, --debug\tEnables debugging.\n"
+        str += "\t-h, --help\tPrint this help message.\n"
         str += "\t-k [-r|--run], --kripke [-r|--run]\n"
         str += "\t\t\tGenerate the Kripke Structure for all machines.\n"
         str += "\t\t\tNote: Optionally specify -r or --run to schedule the machine to run as well as generate the kripke structure.\n"
@@ -77,8 +79,6 @@ public class SwiftfsmParser: HelpableParser {
         str += "\n"
         str += "MACHINE OPTIONS:\n"
         str += "\t-c\t\tCompile the machine.\n"
-        str += "\t-d, --debug\tEnables debugging.\n"
-        str += "\t-h, --help\tPrint this help message.\n"
         str += "\t-l, --clfsm\tSpecifies that this is a machine that has been built using the CLFSM specification.\n"
         str += "\t-n <value>, --name <value>\n"
         str += "\t\t\tSpecify a name for the machine.\n"
