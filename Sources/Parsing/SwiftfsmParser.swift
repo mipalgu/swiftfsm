@@ -218,11 +218,15 @@ public class SwiftfsmParser: HelpableParser {
         temp.addToScheduler = false
         while words.count > 1 {
             switch words[1] {
-            case "-o":
+            case "-o", "--output":
                 if words.count < 3 {
                     throw ParsingErrors.generalError(error: "No value for Kripke Structure output flag.")
                 }
-                temp.kripkeStructureViews = try words[2].compactMap(self.convertCharToView)
+                temp.kripkeStructureViews = try words[2].map(self.convertCharToView)
+                if true == temp.kripkeStructureViews?.isEmpty {
+                    throw ParsingErrors.generalError(error: "No valid values for Kripke Structure output flag.")
+                }
+                words.removeFirst()
             case "-r", "--run":
                 temp.addToScheduler = true
             default:
@@ -233,7 +237,7 @@ public class SwiftfsmParser: HelpableParser {
         return temp
     }
     
-    private func convertCharToView(_ c: Character) throws -> KripkeStructureView? {
+    private func convertCharToView(_ c: Character) throws -> KripkeStructureView {
         switch c {
         case "n":
             return NuSMVKripkeStructureView(factory: FilePrinterFactory())
