@@ -129,6 +129,7 @@ public class SwiftfsmParser: HelpableParser {
             newTask.generateKripkeStructure = tasks.last?.generateKripkeStructure ?? false
             newTask.addToScheduler = tasks.last?.addToScheduler ?? true
             newTask.kripkeStructureViews = tasks.last?.kripkeStructureViews
+            newTask.scheduler = tasks.last?.scheduler
             tasks.append(newTask)
         }
         return tasks
@@ -279,6 +280,9 @@ public class SwiftfsmParser: HelpableParser {
     }
 
     private func handleSchedulerFlag(_ t: Task, words: inout [String]) throws -> Task {
+        if nil != t.scheduler {
+            throw ParsingErrors.generalError(error: "You can only specify the -s option once.")
+        }
         guard let scheduler = self.fetchValueAfterFlag(t, words: &words) else {
             return t
         }
