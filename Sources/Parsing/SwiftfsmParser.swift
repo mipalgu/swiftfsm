@@ -66,32 +66,72 @@ import Verification
 public class SwiftfsmParser: HelpableParser {
     
     public var helpText: String {
-        var str: String = "OVERVIEW: A Finite State Machine Scheduler\n\n"
-        str += "USAGE: swiftfsm [options] ([machine_options] <machine_path>)...\n\n"
-        str += "OPTIONS:\n"
-        str += "\t-d, --debug\tEnables debugging.\n"
-        str += "\t-h, --help\tPrint this help message.\n"
-        str += "\t-k [-o|--output (g|n)...] [-r|--run], --kripke [-o|--output (g|n)...] [-r|--run]\n"
-        str += "\t\t\tGenerate the Kripke Structure for all machines.\n"
-        str += "\t\t\tNote: Optionally use -o or --ouput to specify 1 or more output formats of the kripke structure.\n"
-        str += "\t\t\tThe default is a single NuSMV file.\n"
-        str += "\t\t\tNote: Optionally specify -r or --run to schedule the machine to run after generating kripke structures.\n"
-        str += "\t-s <rr|prr>, --scheduler <RoundRobin|PassiveRoundRobin>\n"
-        str += "\t\t\tSpecify which scheduler to use.  Defaults to a round robin scheduler.\n"
-        str += "\n"
-        str += "MACHINE OPTIONS:\n"
-        str += "\t-c\t\tCompile the machine.\n"
-        str += "\t-l, --clfsm\tSpecifies that this is a machine that has been built using the CLFSM specification.\n"
-        str += "\t-n <value>, --name <value>\n"
-        str += "\t\t\tSpecify a name for the machine.\n"
-        str += "\t-x <value>, --repeat <value>\n"
-        str += "\t\t\tSpecify number of times to repeat this command\n"
-        str += "\t-Xcc <value>\tPass a compiler flag to the C compiler when compiling the machine.\n"
-        str += "\t-Xlinker <value>\n"
-        str += "\t\t\tPass a linker flag to the linker when compiling the machine.\n"
-        str += "\t-Xswiftc <value>\n"
-        str += "\t\t\tPass a compiler flag to the swift compiler when compiling the machine.\n"
-        return str
+        return """
+        OVERVIEW: A Finite State Machine Scheduler.
+        
+        USAGE: swiftfsm [options] ([machine_options] <machine_path>)...
+        
+        OPTIONS:
+                -d, --debug     Enables debugging.
+                -h, --help      Print this help message.
+                -k|--kripke [-o|--output <gntx>...] [-r|--run]
+                                Generate the Kripke Structures for all machines.
+                                Note: Optionally use -o or --output tp specify 1
+                                or more output fromats for the Kripke
+                                Structures. The default is a single NuSMV
+                                file (n).
+                                Available Formats:
+                                    g: GraphViz dot format. Outputs
+                                       kripke_structure.gv.
+                                    n: NuSMV format. Outputs main.smv.
+                                    t: Tulip format. Used by the Tulip graph
+                                       visualiser. Outputs kripke_structure.tlp.
+                                    x: Gexf format. Used by the Gephi graph
+                                       visualiser. Outputs
+                                       kripke_structure.gexf.
+                                Note: Optionally specify -r or --run to
+                                schedule the machines to run after generating
+                                the Kripke Structures.
+                -s <rr|prr>, --scheduler <RoundRobin|PassiveRoundRobin>
+                                Specify which scheduler to use. Default to a
+                                round-robin scheduler (rr).
+                                Available Schedulers:
+                                    prr: Passive Round-Robin. Takes a snapshot
+                                         of the external variables before
+                                         executing each entire schedule cycle.
+                                         The snapshot is saved at the end of
+                                         each schedule cycle, after all LLFSMs
+                                         have executed a single ringlet.
+                                     rr: Round-Robin. Takes a snapshot of the
+                                         external variables before executing
+                                         each ringlet in each LLFSM. The
+                                         snapshot is saved after executing each
+                                         ringlet in each LLFSM.
+        
+        MACHINE OPTIONS:
+                -c              Compile this machine.
+                -l, --clfsm
+                                Specifies that this is a machine that has been
+                                built using the CLFSM specification.
+                -n <value>, --name <value>
+                                Specify a name for this machine.
+                -x <value>, --repeat <value>
+                                Specify number of times to schedule this
+                                machine. This flag allows the creation of more
+                                than a single instance of a particular machine.
+                                Each instance will have a unique name and be
+                                treated as a separate machine for the purposes
+                                of scheduling.
+                -Xcc <value>
+                                Pass a compiler flag to the C compiler when
+                                compiling this machine.
+                -Xlinker <value>
+                                Pass a linker flag to the linker when compiling
+                                this machine.
+                -Xswiftc <value>
+                                Pass a compiler flag to the swift compiler when
+                                compiling this machine.
+        """
     }
 
     fileprivate let passiveRoundRobinFactory: PassiveRoundRobinSchedulerFactory
