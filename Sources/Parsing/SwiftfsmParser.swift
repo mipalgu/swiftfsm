@@ -72,9 +72,11 @@ public class SwiftfsmParser: HelpableParser {
         str += "OPTIONS:\n"
         str += "\t-d, --debug\tEnables debugging.\n"
         str += "\t-h, --help\tPrint this help message.\n"
-        str += "\t-k [-r|--run], --kripke [-r|--run]\n"
+        str += "\t-k [-o|--output (g|n)...] [-r|--run], --kripke [-o|--output (g|n)...] [-r|--run]\n"
         str += "\t\t\tGenerate the Kripke Structure for all machines.\n"
-        str += "\t\t\tNote: Optionally specify -r or --run to schedule the machine to run as well as generate the kripke structure.\n"
+        str += "\t\t\tNote: Optionally use -o or --ouput to specify 1 or more output formats of the kripke structure.\n"
+        str += "\t\t\tThe default is a single NuSMV file.\n"
+        str += "\t\t\tNote: Optionally specify -r or --run to schedule the machine to run after generating kripke structures.\n"
         str += "\t-s <rr|prr>, --scheduler <RoundRobin|PassiveRoundRobin>\n"
         str += "\t\t\tSpecify which scheduler to use.  Defaults to a round robin scheduler.\n"
         str += "\n"
@@ -131,7 +133,7 @@ public class SwiftfsmParser: HelpableParser {
             jobs.append(Job())
         }
         task.jobs = jobs
-        if nil == task.jobs[0].path {
+        if nil == task.jobs[0].path && false == task.printHelpText {
             throw ParsingErrors.noPathsFound
         }
         return task
