@@ -56,6 +56,7 @@
  *
  */
 
+import IO
 import Scheduling
 import Verification
 
@@ -138,7 +139,7 @@ public class SwiftfsmParser: HelpableParser {
         case "-h", "--help":
             return self.handleHelpFlag(t, words: &words)
         case "-k", "--kripke":
-            return self.handleKripkeFlag(t, words: &words)
+            return try self.handleKripkeFlag(t, words: &words)
         case "-l", "--clfsm":
             return self.handleClfsmFlag(t, words: &words)
         case "-n", "--name":
@@ -189,19 +190,36 @@ public class SwiftfsmParser: HelpableParser {
         return temp
     }
     
-    private func handleKripkeFlag(_ t: Task, words: inout [String]) -> Task {
+    private func handleKripkeFlag(_ t: Task, words: inout [String]) throws -> Task {
         var temp: Task = t
         temp.generateKripkeStructure = true
         temp.addToScheduler = false
-        if (words.count < 2) {
-            return temp
+        while words.count > 1 {
+            switch words[1] {
+            case "-o":
+                if words.count < 3 {
+                    throw ParsingErrors.generalError(error: "No value for Kripke Structure output flag.")
+                }
+                temp.kripkeStructureViews = try words[2].compactMap(self.convertCharToView)
+            case "-r", "--run":
+                temp.addToScheduler = true
+                words.removeFirst()
+            default:
+                break
+            }
         }
-        if ("-r" != words[1] && "--run" != words[1]) {
-            return temp
-        }
-        temp.addToScheduler = true
-        words.removeFirst()
         return temp
+    }
+    
+    private func convertCharToView(_ c: Character) throws -> KripkeStructureView? {
+        switch c {
+        case "n":
+            return NuSMVKripkeStructureView(factory: FilePrinterFactory())
+        case "g":
+            return GraphVizKripkeStructureView(factory: FilePrinterFactory())
+        default:
+            throw ParsingErrors.generalError(error: "Unknown value for Kripke Structure output flag.")
+        }
     }
     
     private func handleNameFlag(_ t: Task, words: inout [String]) -> Task {

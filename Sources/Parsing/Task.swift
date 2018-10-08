@@ -56,7 +56,9 @@
  *
  */
 
+import IO
 import Scheduling
+import Verification
 
 /**
  *  A data structure that represent all the possible tasks that swiftfsm can
@@ -98,6 +100,14 @@ public struct Task {
      *  Is this `Machine` a clfsm machine?
      */
     public var isClfsmMachine: Bool = false
+    
+    /**
+     *  The list of kripke structure views which will output a `KripkeStructure`
+     *  into a specific format.
+     *
+     *  The default is a NuSMV file.
+     */
+    public var kripkeStructureViews: [KripkeStructureView] = [NuSMVKripkeStructureView(factory: FilePrinterFactory())]
 
     /**
      * Flags which are passed to the linker when compiling a machine.
