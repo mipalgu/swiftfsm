@@ -106,7 +106,7 @@ public final class TulipKripkeStructureView: KripkeStructureView {
         content += "\n" + self.createPropertyList(forStates: states, inStructure: structure)
         content += "\n" + self.createSizeList(forStates: states, inStructure: structure)
         content += "\n)"
-        let printer: Printer = factory.make(id: "kripke.tlp")
+        let printer: Printer = factory.make(id: "kripke_structure.tlp")
         printer.message(str: content)
     }
     

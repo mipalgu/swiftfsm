@@ -56,7 +56,6 @@
  *
  */
 
-import Darwin
 import IO
 import Scheduling
 import Verification
@@ -241,10 +240,14 @@ public class SwiftfsmParser: HelpableParser {
     
     private func convertCharToView(_ c: Character) throws -> KripkeStructureView {
         switch c {
-        case "n":
-            return NuSMVKripkeStructureView(factory: FilePrinterFactory())
         case "g":
             return GraphVizKripkeStructureView(factory: FilePrinterFactory())
+        case "n":
+            return NuSMVKripkeStructureView(factory: FilePrinterFactory())
+        case "t":
+            return TulipKripkeStructureView(factory: FilePrinterFactory())
+        case "x":
+            return GexfKripkeStructureView(factory: FilePrinterFactory())
         default:
             throw ParsingErrors.generalError(error: "Unknown value for Kripke Structure output flag.")
         }

@@ -112,7 +112,7 @@ public final class GraphVizKripkeStructureView: KripkeStructureView {
             self.handleEffects(state: state, content: content)
         }
         content.value += "}"
-        let printer: Printer = factory.make(id: "kripke.gv")
+        let printer: Printer = factory.make(id: "kripke_structure.gv")
         printer.message(str: content.value)
     }
 

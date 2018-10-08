@@ -129,7 +129,7 @@ public final class GexfKripkeStructureView: KripkeStructureView {
             self.handleEffects(state: state, content: content)
         }
         content.value += end
-        let printer: Printer = factory.make(id: "kripke.gexf")
+        let printer: Printer = factory.make(id: "kripke_structure.gexf")
         printer.message(str: content.value)
     }
     
