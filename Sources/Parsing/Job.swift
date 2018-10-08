@@ -1,9 +1,9 @@
 /*
- * Task.swift
- * swiftfsm
+ * Job.swift
+ * Parsing
  *
- * Created by Callum McColl on 15/12/2015.
- * Copyright © 2015 Callum McColl. All rights reserved.
+ * Created by Callum McColl on 8/10/18.
+ * Copyright © 2018 Callum McColl. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -56,50 +56,50 @@
  *
  */
 
-import IO
-import Scheduling
-import Verification
-
 /**
- *  A data structure that represent all the possible tasks that swiftfsm can
- *  perform.
+ *  Represents all data passed through the command line about how to load a
+ *  machine.
  */
-public struct Task {
-
-    /**
-     *  Should we add this `Machine` to the scheduler?
-     */
-    public var addToScheduler: Bool = true
-
-    /**
-     *  Should we enable debugging?.
-     */
-    public var enableDebugging: Bool = false
-
-    /**
-     *  Should we generate a `KripkeStructure`s?.
-     */
-    public var generateKripkeStructure: Bool = false
+public struct Job {
     
     /**
-     *  A list of data for each machine that needs to be loaded.
+     * Should we compile the machine?
      */
-    public var jobs: [Job] = []
+    public var compile: Bool = false
     
     /**
-     *  The list of kripke structure views which will output a `KripkeStructure`
-     *  into a specific format.
+     * Flags passed to the C compiler when compiling a machine.
      */
-    public var kripkeStructureViews: [KripkeStructureView]?
-
+    public var cCompilerFlags: [String] = []
+    
     /**
-     *  Should we print the help text?
+     *  How many times should we repeat this task?
      */
-    public var printHelpText: Bool = false
-
+    public var count: Int = 1
+    
     /**
-     *  Which scheduler should we use?
+     *  Is this `Machine` a clfsm machine?
      */
-    public var scheduler: SupportedSchedulers?
-
+    public var isClfsmMachine: Bool = false
+    
+    /**
+     * Flags which are passed to the linker when compiling a machine.
+     */
+    public var linkerFlags: [String] = []
+    
+    /**
+     *  The name of the `Machine`.
+     */
+    public var name: String?
+    
+    /**
+     *  The path to load the `Machine`.
+     */
+    public var path: String?
+    
+    /**
+     * Flags passed to the swift compiler when compiling a machine.
+     */
+    public var swiftCompilerFlags: [String] = []
+    
 }

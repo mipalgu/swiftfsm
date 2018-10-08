@@ -109,64 +109,75 @@ public class SwiftfsmParser: HelpableParser {
      *  - Returns: An array of `Task`s that were created based on the command
      *  line arguments.
      */
-    public func parse(words: [String]) throws -> [Task] {
+    public func parse(words: [String]) throws -> Task {
         var wds: [String] = words
-        var tasks: [Task] = []
-        let t: Task = Task()
-        tasks.append(t)
+        var task = try self.parseTask(words: &wds)
+        var jobs: [Job] = []
+        jobs.append(Job())
         // Keep looping while we still have input
         while (false == wds.isEmpty) {
-            tasks[tasks.count - 1] = try self.handleNextFlag(
-                tasks[tasks.count - 1],
+            jobs[jobs.count - 1] = try self.handleNextFlag(
+                jobs[jobs.count - 1],
                 words: &wds
             )
             // Remove words that we are finished with
             wds.removeFirst()
             // Only create a new task if we have found the path to the current
             // task and we have more words to come.
-            if (nil == tasks[tasks.count - 1].path || true == wds.isEmpty) {
+            if (nil == jobs[jobs.count - 1].path || true == wds.isEmpty) {
                 continue
             }
-            var newTask = Task()
-            newTask.generateKripkeStructure = tasks.last?.generateKripkeStructure ?? false
-            newTask.addToScheduler = tasks.last?.addToScheduler ?? true
-            newTask.kripkeStructureViews = tasks.last?.kripkeStructureViews
-            newTask.scheduler = tasks.last?.scheduler
-            tasks.append(newTask)
+            jobs.append(Job())
         }
-        return tasks
+        task.jobs = jobs
+        if nil == task.jobs[0].path {
+            throw ParsingErrors.noPathsFound
+        }
+        return task
     }
     
-    private func handleNextFlag(_ t: Task, words: inout [String]) throws -> Task {
+    private func parseTask(words: inout [String]) throws -> Task {
+        var task = Task()
+        while let str = words.first {
+            switch str {
+            case "-d", "--debug":
+                return self.handleDebugFlag(task, words: &words)
+            case "-h", "--help":
+                return self.handleHelpFlag(task, words: &words)
+            case "-k", "--kripke":
+                return try self.handleKripkeFlag(task, words: &words)
+            case "-s", "--scheduler":
+                return try self.handleSchedulerFlag(task, words: &words)
+            default:
+                return task
+            }
+            words.removeFirst()
+        }
+        return task
+    }
+    
+    private func handleNextFlag(_ j: Job, words: inout [String]) throws -> Job {
         switch (words.first!) {
         case "-c":
-            return self.handleCompileFlag(t, words: &words)
-        case "-d", "--debug":
-            return self.handleDebugFlag(t, words: &words)
-        case "-h", "--help":
-            return self.handleHelpFlag(t, words: &words)
-        case "-k", "--kripke":
-            return try self.handleKripkeFlag(t, words: &words)
+            return self.handleCompileFlag(j, words: &words)
         case "-l", "--clfsm":
-            return self.handleClfsmFlag(t, words: &words)
+            return self.handleClfsmFlag(j, words: &words)
         case "-n", "--name":
-            return self.handleNameFlag(t, words: &words)
-        case "-s", "--scheduler":
-            return try self.handleSchedulerFlag(t, words: &words)
+            return self.handleNameFlag(j, words: &words)
         case "-x", "--repeat":
-            return self.handleRepeatFlag(t, words: &words)
+            return self.handleRepeatFlag(j, words: &words)
         case "-Xcc":
-            return self.handleCCompilerFlag(t, words: &words)
+            return self.handleCCompilerFlag(j, words: &words)
         case "-Xlinker":
-            return self.handleLinkerFlag(t, words: &words)
+            return self.handleLinkerFlag(j, words: &words)
         case "-Xswiftc":
-            return self.handleSwiftCompilerFlag(t, words: &words)
+            return self.handleSwiftCompilerFlag(j, words: &words)
         default:
-            return try self.handlePath(t, words: &words)
+            return try self.handlePath(j, words: &words)
         }
     }
 
-    private func fetchValueAfterFlag(_ t: Task, words: inout [String]) -> String? {
+    private func fetchValueAfterFlag(words: inout [String]) -> String? {
         if (words.count < 2) {
             return nil
         }
@@ -232,51 +243,51 @@ public class SwiftfsmParser: HelpableParser {
         }
     }
     
-    private func handleNameFlag(_ t: Task, words: inout [String]) -> Task {
-        guard let name = self.fetchValueAfterFlag(t, words: &words) else {
-            return t
+    private func handleNameFlag(_ j: Job, words: inout [String]) -> Job {
+        guard let name = self.fetchValueAfterFlag(words: &words) else {
+            return j
         }
-        var temp: Task = t
+        var temp = j
         temp.name = name
         return temp
     }
     
-    private func handleClfsmFlag(_ t: Task, words: inout [String]) -> Task {
-        var temp: Task = t
+    private func handleClfsmFlag(_ j: Job, words: inout [String]) -> Job {
+        var temp = j
         temp.isClfsmMachine = true
         return temp
     }
 
-    private func handleCCompilerFlag(_ t: Task, words: inout [String]) -> Task {
-        guard let arg = self.fetchValueAfterFlag(t, words: &words) else {
-            return t
+    private func handleCCompilerFlag(_ j: Job, words: inout [String]) -> Job {
+        guard let arg = self.fetchValueAfterFlag(words: &words) else {
+            return j
         }
-        var temp: Task = t
+        var temp = j
         temp.cCompilerFlags.append(arg)
         return temp
     }
 
     
-    private func handleCompileFlag(_ t: Task, words: inout [String]) -> Task {
-        var temp: Task = t
+    private func handleCompileFlag(_ j: Job, words: inout [String]) -> Job {
+        var temp = j
         temp.compile = true
         return temp
     }
 
-    private func handleLinkerFlag(_ t: Task, words: inout [String]) -> Task {
-        guard let arg = self.fetchValueAfterFlag(t, words: &words) else {
-            return t
+    private func handleLinkerFlag(_ j: Job, words: inout [String]) -> Job {
+        guard let arg = self.fetchValueAfterFlag(words: &words) else {
+            return j
         }
-        var temp: Task = t
+        var temp = j
         temp.linkerFlags.append(arg)
         return temp
     }
 
-    private func handleSwiftCompilerFlag(_ t: Task, words: inout [String]) -> Task {
-        guard let arg = self.fetchValueAfterFlag(t, words: &words) else {
-            return t
+    private func handleSwiftCompilerFlag(_ j: Job, words: inout [String]) -> Job {
+        guard let arg = self.fetchValueAfterFlag(words: &words) else {
+            return j
         }
-        var temp: Task = t
+        var temp = j
         temp.swiftCompilerFlags.append(arg)
         return temp
     }
@@ -285,7 +296,7 @@ public class SwiftfsmParser: HelpableParser {
         if nil != t.scheduler {
             throw ParsingErrors.generalError(error: "You can only specify the -s option once.")
         }
-        guard let scheduler = self.fetchValueAfterFlag(t, words: &words) else {
+        guard let scheduler = self.fetchValueAfterFlag(words: &words) else {
             return t
         }
         switch scheduler {
@@ -304,29 +315,29 @@ public class SwiftfsmParser: HelpableParser {
         }
     }
     
-    private func handlePath(_ t: Task, words: inout [String]) throws -> Task {
+    private func handlePath(_ j: Job, words: inout [String]) throws -> Job {
         // Ignore empty strings
         if (true == words.first!.isEmpty) {
-            return t
+            return j
         }
         // Ignore unknown flags
         if ("-" == words.first!.characters.first) {
             throw ParsingErrors.unknownFlag(flag: words.first!)
         }
-        var temp: Task = t
+        var temp = j
         temp.path = words.first!
         return temp
     }
 
-    private func handleRepeatFlag(_ t: Task, words: inout [String]) -> Task {
+    private func handleRepeatFlag(_ j: Job, words: inout [String]) -> Job {
         guard
-            let numStr = self.fetchValueAfterFlag(t, words: &words),
+            let numStr = self.fetchValueAfterFlag(words: &words),
             let num: Int = Int(numStr),
             num >= 0
         else {
-            return t
+            return j
         }
-        var temp: Task = t
+        var temp = j
         temp.count = num
         return temp
     }
