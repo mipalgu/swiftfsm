@@ -74,6 +74,10 @@ public class SwiftfsmParser: HelpableParser {
         OPTIONS:
                 -d, --debug     Enables debugging.
                 -h, --help      Print this help message.
+                -g, --generate-schedule-map
+                                Generates a scheduler map file. This file is
+                                used by the scheduler to determine when to run
+                                each finite state machine.
                 -k|--kripke [-o|--output <gntx>...] [-r|--run]
                                 Generate the Kripke Structures for all machines.
                                 Note: Optionally use -o or --output tp specify 1
@@ -184,6 +188,8 @@ public class SwiftfsmParser: HelpableParser {
             switch str {
             case "-d", "--debug":
                 task = self.handleDebugFlag(task, words: &words)
+            case "-g", "--generate-scheduler-map":
+                task = self.handleGenerateSchedulerMapFlag(task, words: &words)
             case "-h", "--help":
                 task = self.handleHelpFlag(task, words: &words)
             case "-k", "--kripke":
@@ -247,6 +253,13 @@ public class SwiftfsmParser: HelpableParser {
     private func handleHelpFlag(_ t: Task, words: inout [String]) -> Task {
         var temp: Task = t
         temp.printHelpText = true
+        return temp
+    }
+    
+    private func handleGenerateSchedulerMapFlag(_ t: Task, words: inout [String]) -> Task {
+        var temp = t
+        temp.generateSchedulerMap = true
+        temp.addToScheduler = false
         return temp
     }
     
