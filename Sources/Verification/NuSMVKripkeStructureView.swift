@@ -70,7 +70,7 @@ public class NuSMVKripkeStructureView: KripkeStructureView {
     /*
      *  Used to create the printer that will output the kripke structures.
      */
-    private var factory: PrinterFactory
+    private var factory: OutputStreamFactory
 
     /**
      *  Create a new `NuSMVKripkeStructureView`.
@@ -83,7 +83,7 @@ public class NuSMVKripkeStructureView: KripkeStructureView {
      *  <machine_name>-<fsm_name>-<state_name>-<snapshot_count> where "-" is the
      *  delimiter.
      */
-    public init(extractor: NuSMVPropertyExtractor = NuSMVPropertyExtractor(), factory: PrinterFactory) {
+    public init(extractor: NuSMVPropertyExtractor = NuSMVPropertyExtractor(), factory: OutputStreamFactory) {
         self.extractor = extractor
         self.factory = factory
     }
@@ -95,45 +95,47 @@ public class NuSMVKripkeStructureView: KripkeStructureView {
      *  the NuSMV representation.
      */
     public func make(structure: KripkeStructure) {
-        let printer = self.factory.make(id: "main.smv")
-        printer.message(str: "MODULE main\n\n")
-        self.createPropertiesList(from: self.extractProperties(of: structure.states), usingPrinter: printer)
-        self.createInitial(from: structure.initialStates, usingPrinter: printer)
-        self.createTransitions(from: structure.states, usingPrinter: printer)
+        var stream = self.factory.make(id: "main.smv")
+        stream.write("MODULE main\n\n")
+        self.createPropertiesList(from: self.extractProperties(of: structure.states), usingStream: stream)
+        self.createInitial(from: structure.initialStates, usingStream: stream)
+        self.createTransitions(from: structure.states, usingStream: stream)
     }
 
-    private func createInitial(from initialStates: [KripkeState], usingPrinter printer: Printer) {
+    private func createInitial(from initialStates: [KripkeState], usingStream stream: TextOutputStream) {
+        var stream = stream
         guard let firstState = initialStates.first else {
-            printer.message(str: "INIT\n\n")
+            stream.write("INIT\n\n")
             return
         }
-        printer.message(str: "INIT")
-        printer.message(str: "(")
-        printer.message(str: self.createConditions(of: self.extractor.extract(from: firstState.properties)))
-        printer.message(str: ")")
+        stream.write("INIT")
+        stream.write("(")
+        stream.write(self.createConditions(of: self.extractor.extract(from: firstState.properties)))
+        stream.write(")")
         initialStates.dropFirst().forEach {
-            printer.message(str: " | (")
-            printer.message(str: self.createConditions(of: self.extractor.extract(from: $0.properties)))
-            printer.message(str: ")")
+            stream.write(" | (")
+            stream.write(self.createConditions(of: self.extractor.extract(from: $0.properties)))
+            stream.write(")")
         }
-        printer.message(str: "\n\n")
+        stream.write("\n\n")
     }
 
-    private func createTransitions(from states: [KripkeStatePropertyList: KripkeState], usingPrinter printer: Printer) {
+    private func createTransitions(from states: [KripkeStatePropertyList: KripkeState], usingStream stream: TextOutputStream) {
+        var stream = stream
         let trans = "TRANS\ncase"
         let endTrans = "esac"
         let states = states.lazy.filter { false == $1.effects.isEmpty }
         guard let firstState = states.first?.1 else {
-            printer.message(str: trans + "\n" + endTrans)
+            stream.write(trans + "\n" + endTrans)
             return
         }
         states.forEach {
-            printer.message(str: self.createCase(of: $0.1))
-            printer.message(str: "\n")
+            stream.write(self.createCase(of: $0.1))
+            stream.write("\n")
         }
-        printer.message(str: self.createTrueCase(with: firstState))
-        printer.message(str: "\n")
-        printer.message(str: endTrans)
+        stream.write(self.createTrueCase(with: firstState))
+        stream.write("\n")
+        stream.write(endTrans)
     }
 
     private func createTrueCase(with state: KripkeState) -> String {
@@ -193,19 +195,20 @@ public class NuSMVKripkeStructureView: KripkeStructureView {
         return props
     }
 
-    private func createPropertiesList(from props: [String: Set<String>], usingPrinter printer: Printer) {
-        printer.message(str: "VAR\n\n")
+    private func createPropertiesList(from props: [String: Set<String>], usingStream stream: TextOutputStream) {
+        var stream = stream
+        stream.write("VAR\n\n")
         props.forEach {
             guard let first = $1.first else {
-                printer.message(str: "\($0) : {};\n\n")
+                stream.write("\($0) : {};\n\n")
                 return
             }
-            printer.message(str: "\($0) : {\n")
-            printer.message(str: "    " + first)
+            stream.write("\($0) : {\n")
+            stream.write("    " + first)
             $1.forEach {
-                printer.message(str: ",\n    " + $0)
+                stream.write(",\n    " + $0)
             }
-            printer.message(str: "\n};\n\n")
+            stream.write("\n};\n\n")
         }
     }
 
