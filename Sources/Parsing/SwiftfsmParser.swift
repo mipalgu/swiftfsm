@@ -69,7 +69,7 @@ public class SwiftfsmParser: HelpableParser {
         return """
         OVERVIEW: A Finite State Machine Scheduler.
         
-        USAGE: swiftfsm [options] ([machine_options] <machine_path>)...
+        USAGE: swiftfsm [options] [--] ([machine_options] <machine_path>)...
         
         OPTIONS:
                 -d, --debug     Enables debugging.
@@ -196,6 +196,9 @@ public class SwiftfsmParser: HelpableParser {
                 try task = self.handleKripkeFlag(task, words: &words)
             case "-s", "--scheduler":
                 try task = self.handleSchedulerFlag(task, words: &words)
+            case "--":
+                words.removeFirst()
+                return task
             default:
                 return task
             }
