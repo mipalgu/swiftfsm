@@ -105,10 +105,10 @@ public class NuSMVKripkeStructureView: KripkeStructureView {
     private func createInitial(from initialStates: [KripkeState], usingStream stream: TextOutputStream) {
         var stream = stream
         guard let firstState = initialStates.first else {
-            stream.write("INIT\n\n")
+            stream.write("INIT()\n")
             return
         }
-        stream.write("INIT")
+        stream.write("INIT\n")
         stream.write("(")
         stream.write(self.createConditions(of: self.extractor.extract(from: firstState.properties)))
         stream.write(")")
@@ -117,16 +117,17 @@ public class NuSMVKripkeStructureView: KripkeStructureView {
             stream.write(self.createConditions(of: self.extractor.extract(from: $0.properties)))
             stream.write(")")
         }
-        stream.write("\n\n")
+        stream.write("\n")
     }
 
     private func createTransitions(from states: [KripkeStatePropertyList: KripkeState], usingStream stream: TextOutputStream) {
         var stream = stream
-        let trans = "TRANS\ncase"
+        let trans = "TRANS\ncase\n"
         let endTrans = "esac"
+        stream.write(trans)
         let states = states.lazy.filter { false == $1.effects.isEmpty }
         guard let firstState = states.first?.1 else {
-            stream.write(trans + "\n" + endTrans)
+            stream.write(endTrans)
             return
         }
         states.forEach {
@@ -205,7 +206,7 @@ public class NuSMVKripkeStructureView: KripkeStructureView {
             }
             stream.write("\($0) : {\n")
             stream.write("    " + first)
-            $1.forEach {
+            $1.dropFirst().forEach {
                 stream.write(",\n    " + $0)
             }
             stream.write("\n};\n\n")
