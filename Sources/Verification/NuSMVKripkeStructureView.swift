@@ -95,48 +95,45 @@ public class NuSMVKripkeStructureView: KripkeStructureView {
      *  the NuSMV representation.
      */
     public func make(structure: KripkeStructure) {
-        let plist = self.createPropertiesList(from: self.extractProperties(of: structure.states))
-        let initials = self.createInitial(from: structure.initialStates)
-        let trans = self.createTransitions(from: structure.states)
-        self.printStructure(properties: plist, initial: initials, transitions: trans)
+        let printer = self.factory.make(id: "main.smv")
+        printer.message(str: "MODULE main\n\n")
+        self.createPropertiesList(from: self.extractProperties(of: structure.states), usingPrinter: printer)
+        self.createInitial(from: structure.initialStates, usingPrinter: printer)
+        self.createTransitions(from: structure.states, usingPrinter: printer)
     }
 
-    /*
-     *  Create a printer using the factory provided and print the structure.
-     */
-    private func printStructure(properties: String, initial: String, transitions: String) {
-        let module = "MODULE main"
-        let contents = module + "\n\n" + properties + "\n\n" + initial + "\n" + transitions
-        let printer: Printer = factory.make(id: "main.smv")
-        printer.message(str: contents)
-    }
-
-    private func createInitial(from initialStates: [KripkeState]) -> String {
-        let initial = "INIT"
+    private func createInitial(from initialStates: [KripkeState], usingPrinter printer: Printer) {
         guard let firstState = initialStates.first else {
-            return initial
+            printer.message(str: "INIT\n\n")
+            return
         }
-        let firstProps = self.extractor.extract(from: firstState.properties)
-        let firstInit = "(" + self.createConditions(of: firstProps) + ")"
-        let list = initialStates.dropFirst().reduce(firstInit) {
-            $0 + " | (" + self.createConditions(of: self.extractor.extract(from: $1.properties)) + ")"
+        printer.message(str: "INIT")
+        printer.message(str: "(")
+        printer.message(str: self.createConditions(of: self.extractor.extract(from: firstState.properties)))
+        printer.message(str: ")")
+        initialStates.dropFirst().forEach {
+            printer.message(str: " | (")
+            printer.message(str: self.createConditions(of: self.extractor.extract(from: $0.properties)))
+            printer.message(str: ")")
         }
-        return initial + "\n" + list
+        printer.message(str: "\n\n")
     }
 
-    private func createTransitions(from states: [KripkeStatePropertyList: KripkeState]) -> String {
+    private func createTransitions(from states: [KripkeStatePropertyList: KripkeState], usingPrinter printer: Printer) {
         let trans = "TRANS\ncase"
         let endTrans = "esac"
-        let states = states.filter { false == $1.effects.isEmpty }
+        let states = states.lazy.filter { false == $1.effects.isEmpty }
         guard let firstState = states.first?.1 else {
-            return trans + "\n" + endTrans
+            printer.message(str: trans + "\n" + endTrans)
+            return
         }
-        let firstCase = self.createCase(of: firstState)
-        let list = states.dropFirst().reduce(firstCase) {
-            $0 + "\n" + self.createCase(of: $1.1)
+        states.forEach {
+            printer.message(str: self.createCase(of: $0.1))
+            printer.message(str: "\n")
         }
-        let trueCase = self.createTrueCase(with: firstState)
-        return trans + "\n" + list + "\n" + trueCase + "\n" + endTrans
+        printer.message(str: self.createTrueCase(with: firstState))
+        printer.message(str: "\n")
+        printer.message(str: endTrans)
     }
 
     private func createTrueCase(with state: KripkeState) -> String {
@@ -196,16 +193,19 @@ public class NuSMVKripkeStructureView: KripkeStructureView {
         return props
     }
 
-    private func createPropertiesList(from props: [String: Set<String>]) -> String {
-        return props.reduce("VAR") {
-            guard let first = $1.1.first else {
-                return $0 + "\n\n" + "\($1.0) : {};"
+    private func createPropertiesList(from props: [String: Set<String>], usingPrinter printer: Printer) {
+        printer.message(str: "VAR\n\n")
+        props.forEach {
+            guard let first = $1.first else {
+                printer.message(str: "\($0) : {};\n\n")
+                return
             }
-            let preList = $0 + "\n\n" + "\($1.0) : {\n"
-            let list = $1.1.dropFirst().reduce("    " + first) {
-                $0 + ",\n    " + $1
+            printer.message(str: "\($0) : {\n")
+            printer.message(str: "    " + first)
+            $1.forEach {
+                printer.message(str: ",\n    " + $0)
             }
-            return preList + list + "\n};"
+            printer.message(str: "\n};\n\n")
         }
     }
 
