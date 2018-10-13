@@ -94,7 +94,7 @@ func run() {
         clfsmMachineLoader: CLFSMMachineLoader(),
         kripkeStructureGeneratorFactory: RoundRobinKripkeStructureGeneratorFactory(),
         kripkeStructureView: NuSMVKripkeStructureView(
-            factory: FilePrinterFactory()
+            factory: FileOutputStreamFactory()
         ),
         machineCompiler: SwiftMachinesCompiler(),
         machineFactory: SimpleMachineFactory(),

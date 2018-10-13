@@ -296,7 +296,7 @@ public class SwiftfsmParser: HelpableParser {
         case "g":
             return GraphVizKripkeStructureView(factory: FilePrinterFactory())
         case "n":
-            return NuSMVKripkeStructureView(factory: FilePrinterFactory())
+            return NuSMVKripkeStructureView(factory: FileOutputStreamFactory())
         case "t":
             return TulipKripkeStructureView(factory: FilePrinterFactory())
         case "x":
