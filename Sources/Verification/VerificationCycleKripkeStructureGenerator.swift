@@ -68,8 +68,9 @@ import Utilities
 public final class VerificationCycleKripkeStructureGenerator<
     Cloner: AggregateClonerProtocol,
     Detector: CycleDetector,
-    SpinnerConstructor: MultipleExternalsSpinnerConstructorType
->: KripkeStructureGenerator where Detector.Element == KripkeStatePropertyList
+    SpinnerConstructor: MultipleExternalsSpinnerConstructorType,
+    View: KripkeStructureView
+>: KripkeStructureGenerator where Detector.Element == KripkeStatePropertyList, View.State == KripkeState
 {
     
     fileprivate let tokens: [[VerificationToken]]
@@ -77,6 +78,7 @@ public final class VerificationCycleKripkeStructureGenerator<
     fileprivate let cycleDetector: Detector
     fileprivate let executer: VerificationCycleExecuter
     fileprivate let spinnerConstructor: SpinnerConstructor
+    fileprivate let view: View
     fileprivate let worldCreator: WorldCreator
     
     fileprivate let recorder = MirrorKripkePropertiesRecorder()
@@ -87,6 +89,7 @@ public final class VerificationCycleKripkeStructureGenerator<
         cycleDetector: Detector,
         executer: VerificationCycleExecuter = VerificationCycleExecuter(),
         spinnerConstructor: SpinnerConstructor,
+        view: View,
         worldCreator: WorldCreator = WorldCreator()
     ) {
         self.tokens = tokens
@@ -94,13 +97,13 @@ public final class VerificationCycleKripkeStructureGenerator<
         self.cycleDetector = cycleDetector
         self.executer = executer
         self.spinnerConstructor = spinnerConstructor
+        self.view = view
         self.worldCreator = worldCreator
     }
     
     public func generate() -> KripkeStructure {
         var jobs = self.createInitialJobs(fromTokens: self.tokens)
-        let view = NuSMVKripkeStructureView<KripkeState>()
-        view.start()
+        view.reset()
         while false == jobs.isEmpty {
             let job = jobs.removeFirst()
             let externalsData = self.fetchUniqueExternalsData(fromSnapshot: job.tokens[job.executing])

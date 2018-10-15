@@ -56,6 +56,7 @@
  *
  */
 
+import KripkeStructure
 import ModelChecking
 
 public protocol VerificationCycleKripkeStructureGeneratorFactoryType {

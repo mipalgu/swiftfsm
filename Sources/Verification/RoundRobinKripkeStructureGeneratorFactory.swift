@@ -64,15 +64,17 @@ import Scheduling
 import MachineStructure
 
 public final class RoundRobinKripkeStructureGeneratorFactory: KripkeStructureGeneratorFactory {
-
-    public init() {}
     
-    public func make(fromMachines machines: [Machine]) -> ScheduleCycleKripkeStructureGenerator<
+    public typealias View = AggregateKripkeStructureView<KripkeState>
+    
+    public init () {}
+    
+    public func make(fromMachines machines: [Machine], usingView view: AggregateKripkeStructureView<KripkeState>) -> ScheduleCycleKripkeStructureGenerator<
         ExternalsSpinnerDataExtractor<
             MirrorKripkePropertiesRecorder,
             KripkeStatePropertySpinnerConverter
         >,
-        VerificationCycleKripkeStructureGeneratorFactory<HashTableCycleDetector<KripkeStatePropertyList>>,
+        VerificationCycleKripkeStructureGeneratorFactory<HashTableCycleDetector<KripkeStatePropertyList>, View>,
         SequentialPerRingletTokenizer
     > {
         return ScheduleCycleKripkeStructureGenerator(
@@ -82,7 +84,8 @@ public final class RoundRobinKripkeStructureGeneratorFactory: KripkeStructureGen
                 extractor: MirrorKripkePropertiesRecorder()
             ),
             factory: VerificationCycleKripkeStructureGeneratorFactory(
-                cycleDetector: HashTableCycleDetector<KripkeStatePropertyList>()
+                cycleDetector: HashTableCycleDetector<KripkeStatePropertyList>(),
+                view: view
             ),
             tokenizer: SequentialPerRingletTokenizer()
         )

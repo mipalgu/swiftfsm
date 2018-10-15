@@ -56,6 +56,8 @@
  *
  */
 
+import KripkeStructure
+import ModelChecking
 import Scheduling
 import Verification
 

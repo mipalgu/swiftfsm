@@ -67,6 +67,7 @@ import IO
 import MachineStructure
 import MachineLoading
 import MachineCompiling
+import ModelChecking
 import Scheduling
 import Parsing
 import Verification
@@ -93,9 +94,7 @@ func run() {
     Swiftfsm(
         clfsmMachineLoader: CLFSMMachineLoader(),
         kripkeStructureGeneratorFactory: RoundRobinKripkeStructureGeneratorFactory(),
-        kripkeStructureView: NuSMVKripkeStructureView(
-            factory: FileOutputStreamFactory()
-        ),
+        kripkeStructureView: AnyKripkeStructureView(NuSMVKripkeStructureView()),
         machineCompiler: SwiftMachinesCompiler(),
         machineFactory: SimpleMachineFactory(),
         machineLoader: MachineLoaderStrategy(

@@ -57,6 +57,8 @@
  */
 
 import IO
+import KripkeStructure
+import ModelChecking
 import Scheduling
 import Verification
 
@@ -95,7 +97,7 @@ public struct Task {
      *  The list of kripke structure views which will output a `KripkeStructure`
      *  into a specific format.
      */
-    public var kripkeStructureViews: [KripkeStructureView]?
+    public var kripkeStructureViews: [AnyKripkeStructureView<KripkeState>]?
 
     /**
      *  Should we print the help text?
