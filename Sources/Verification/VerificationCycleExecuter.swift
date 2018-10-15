@@ -135,7 +135,7 @@ public final class VerificationCycleExecuter {
             // Add tokens to runs when we have finished executing all of the tokens in a run.
             if job.index + 1 >= tokens[executing].count {
                 _ = generatedStates.last.map { lastStates.insert($0.properties) }
-                runs.append((generatedStates.last, newTokens))
+                runs.append((generatedStates.last.map { states.value[$0.properties] ?? $0 }, newTokens))
                 continue
             }
             // Add a Job for the next token to execute.
