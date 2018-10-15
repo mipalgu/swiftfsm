@@ -107,6 +107,7 @@ public final class VerificationCycleExecuter {
         var jobs = [Job(index: 0, tokens: tokens, externals: externals, initialState: nil, lastState: last, clock: 0)]
         var states: Ref<[KripkeStatePropertyList: KripkeState]> = Ref(value: [:])
         var initialStates: HashSink<KripkeStatePropertyList> = HashSink()
+        var lastStates: HashSink<KripkeStatePropertyList> = HashSink()
         var runs: [(KripkeState?, [[VerificationToken]])] = []
         while false == jobs.isEmpty {
             let job = jobs.removeFirst()
@@ -133,13 +134,17 @@ public final class VerificationCycleExecuter {
             })
             // Add tokens to runs when we have finished executing all of the tokens in a run.
             if job.index + 1 >= tokens[executing].count {
+                _ = generatedStates.last.map { lastStates.insert($0.properties) }
                 runs.append((generatedStates.last, newTokens))
                 continue
             }
             // Add a Job for the next token to execute.
             jobs.append(Job(index: job.index + 1, tokens: newTokens, externals: newExternals, initialState: job.initialState ?? generatedStates.first, lastState: generatedStates.last, clock: 0))
         }
-        states.value.dropLast().forEach { (arg: (key: KripkeStatePropertyList, value: KripkeState)) in
+        states.value.forEach { (arg: (key: KripkeStatePropertyList, value: KripkeState)) in
+            if lastStates.contains(arg.key) {
+                return
+            }
             view.commit(state: arg.value, isInitial: initial && initialStates.contains(arg.value.properties))
         }
         return runs
