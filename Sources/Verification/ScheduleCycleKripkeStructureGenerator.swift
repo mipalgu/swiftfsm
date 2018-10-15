@@ -89,10 +89,10 @@ public final class ScheduleCycleKripkeStructureGenerator<
         self.tokenizer = tokenizer
     }
     
-    public func generate() -> Factory.Generator.KripkeStructure {
+    public func generate() {
         let tokens = self.tokenizer.separate(self.machines)
         let verificationTokens = self.convert(tokens: tokens)
-        return self.factory.make(tokens: verificationTokens).generate()
+        self.factory.make(tokens: verificationTokens).generate()
     }
     
     fileprivate func convert(tokens: [[SchedulerToken]]) -> [[VerificationToken]] {

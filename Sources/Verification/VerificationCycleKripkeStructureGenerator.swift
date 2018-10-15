@@ -101,7 +101,7 @@ public final class VerificationCycleKripkeStructureGenerator<
         self.worldCreator = worldCreator
     }
     
-    public func generate() -> KripkeStructure {
+    public func generate() {
         var jobs = self.createInitialJobs(fromTokens: self.tokens)
         view.reset()
         while false == jobs.isEmpty {
@@ -165,7 +165,6 @@ public final class VerificationCycleKripkeStructureGenerator<
         print("number of state: \(states.value.count)")
         print("number of transitions: \(states.value.reduce(0) { $0 + $1.1.effects.count })")
         return KripkeStructure(initialStates: Array(initialStates.value.lazy.map { $1 }), states: states.value)*/
-        return KripkeStructure(initialStates: [], states: [:])
     }
     
     fileprivate func createInitialJobs(fromTokens tokens: [[VerificationToken]]) -> [Job] {

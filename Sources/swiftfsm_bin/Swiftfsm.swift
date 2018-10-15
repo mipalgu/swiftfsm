@@ -83,7 +83,7 @@ public class Swiftfsm<
     SF: SchedulerFactory,
     MF: MachineFactory,
     KF: KripkeStructureGeneratorFactory
-> where KF.Generator.KripkeStructure == KripkeStructure, KF.View == AggregateKripkeStructureView<KripkeState> {
+> where KF.View == AggregateKripkeStructureView<KripkeState> {
 
     private let clfsmMachineLoader: MachineLoader
 
@@ -195,7 +195,7 @@ public class Swiftfsm<
         _ machines: [Machine],
         withGenerator generatorFactory: KGF,
         andViews views: [AnyKripkeStructureView<KripkeState>]
-    ) where KGF.Generator.KripkeStructure == KripkeStructure, KGF.View == AggregateKripkeStructureView<KripkeState> {
+    ) where KGF.View == AggregateKripkeStructureView<KripkeState> {
         if machines.isEmpty {
             return
         }
@@ -258,7 +258,7 @@ public class Swiftfsm<
         generator: KGF,
         scheduler: Scheduler,
         views: [AnyKripkeStructureView<KripkeState>]
-    ) where KGF.Generator.KripkeStructure == KripkeStructure, KGF.View == AggregateKripkeStructureView<KripkeState> {
+    ) where KGF.View == AggregateKripkeStructureView<KripkeState> {
         if task.generateKripkeStructure {
             self.generateKripkeStructure(machines, withGenerator: generator, andViews: views)
         }
