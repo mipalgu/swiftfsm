@@ -133,7 +133,7 @@ public final class VerificationCycleKripkeStructureGenerator<
                     andLastState: job.lastState,
                     isInitial: job.initial
                 )
-                for (initialState, lastState, newTokens) in runs {
+                for (lastState, newTokens) in runs {
                     // Do not generate more jobs if we do not have a last state.
                     guard let lastNewState = lastState else {
                         continue
