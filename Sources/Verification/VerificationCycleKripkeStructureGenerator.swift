@@ -98,8 +98,6 @@ public final class VerificationCycleKripkeStructureGenerator<
     }
     
     public func generate() -> KripkeStructure {
-        var initialStates: Ref<[KripkeStatePropertyList: KripkeState]> = Ref(value: [:])
-        var states: Ref<[KripkeStatePropertyList: KripkeState]> = Ref(value: [:])
         var jobs = self.createInitialJobs(fromTokens: self.tokens)
         while false == jobs.isEmpty {
             let job = jobs.removeFirst()
@@ -139,29 +137,30 @@ public final class VerificationCycleKripkeStructureGenerator<
                         continue
                     }
                     // Get rid of any effects on states where all fsms have finished.
-                    if nil == newTokens.first(where: { nil != $0.first { !$0.fsm.hasFinished } }) {
+                    /*if nil == newTokens.first(where: { nil != $0.first { !$0.fsm.hasFinished } }) {
                         guard let state = states.value[lastNewState.properties] else {
                             continue
                         }
                         state.effects = []
                         continue
-                    }
+                    }*/
                     // Create a new job from the clones.
                     jobs.append(Job(
                         initial: false,
                         cache: newCache,
                         tokens: newTokens,
                         executing: (job.executing + 1) % newTokens.count,
-                        lastState: states.value[lastNewState.properties] ?? lastNewState,
+                        lastState: lastNewState,
                         lastRecords: newTokens.map { $0.map { self.recorder.takeRecord(of: $0.fsm.base) } }
                     ))
                 }
             }
         }
-        print("number of initial states: \(initialStates.value.count)")
+        /*print("number of initial states: \(initialStates.value.count)")
         print("number of state: \(states.value.count)")
         print("number of transitions: \(states.value.reduce(0) { $0 + $1.1.effects.count })")
-        return KripkeStructure(initialStates: Array(initialStates.value.lazy.map { $1 }), states: states.value)
+        return KripkeStructure(initialStates: Array(initialStates.value.lazy.map { $1 }), states: states.value)*/
+        return KripkeStructure(initialStates: [], states: [:])
     }
     
     fileprivate func createInitialJobs(fromTokens tokens: [[VerificationToken]]) -> [Job] {
