@@ -299,8 +299,7 @@ public class SwiftfsmParser: HelpableParser {
     private func convertCharToView(_ c: Character) throws -> AnyKripkeStructureView<KripkeState> {
         switch c {
         case "g":
-            throw ParsingErrors.generalError(error: "g view currently Not Implemented")
-            //return GraphVizKripkeStructureView(factory: FilePrinterFactory())
+            return AnyKripkeStructureView(GraphVizKripkeStructureView<KripkeState>())
         case "n":
             return AnyKripkeStructureView(NuSMVKripkeStructureView<KripkeState>())
         case "t":
