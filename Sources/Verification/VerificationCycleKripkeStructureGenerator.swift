@@ -126,22 +126,14 @@ public final class VerificationCycleKripkeStructureGenerator<
                     continue
                 }
                 // Execute and generate kripke states.
-                let (newStates, runs) = self.executer.execute(
+                let runs = self.executer.execute(
                     tokens: clones,
                     executing: job.executing,
                     withExternals: externals,
-                    andLastState: job.lastState
+                    andLastState: job.lastState,
+                    isInitial: job.initial
                 )
-                // Append the states to the states array.
-                // Do not process duplicate states again if nothing has changed.
-                if false == self.add(newStates, to: states) {
-                    continue
-                }
                 for (initialState, lastState, newTokens) in runs {
-                    // Add first new state to initial states if necessary.
-                    if true == job.initial {
-                        _ = initialState.map { _ = self.add([$0], to: initialStates) }
-                    }
                     // Do not generate more jobs if we do not have a last state.
                     guard let lastNewState = lastState else {
                         continue
@@ -194,26 +186,6 @@ public final class VerificationCycleKripkeStructureGenerator<
             hashTable.insert($0.externalVariables.name)
         } }
         return externals
-    }
-    
-    fileprivate func add(_ newStates: [KripkeState], to states: Ref<[KripkeStatePropertyList: KripkeState]>) -> Bool {
-        var added: Bool = false
-        newStates.forEach {
-            let state = $0
-            // If this is the first time seeing this state then just add it.
-            guard let existingState = states.value[state.properties] else {
-                states.value[state.properties] = state
-                added = true
-                return
-            }
-            // Attempt to add any new transitions/effects to the kripke state.
-            let oldCount = existingState.effects.count
-            existingState.effects.formUnion(state.effects)
-            if false == added {
-                added = oldCount < existingState.effects.count
-            }
-        }
-        return added
     }
     
     fileprivate struct Job {

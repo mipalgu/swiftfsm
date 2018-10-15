@@ -57,16 +57,19 @@
  */
 
 import FSM
+import Hashing
 import KripkeStructure
 import MachineStructure
 import ModelChecking
 import swiftfsm
 import swiftfsm_helpers
+import Utilities
 
 public final class VerificationCycleExecuter {
     
     fileprivate let converter: KripkeStatePropertyListConverter
     fileprivate let executer: VerificationTokenExecuter<KripkeStateGenerator>
+    fileprivate let view: ModelChecking.NuSMVKripkeStructureView<KripkeState> = ModelChecking.NuSMVKripkeStructureView()
     
     public init(
         converter: KripkeStatePropertyListConverter = KripkeStatePropertyListConverter(),
@@ -96,11 +99,13 @@ public final class VerificationCycleExecuter {
         tokens: [[VerificationToken]],
         executing: Int,
         withExternals externals: [(AnySnapshotController, KripkeStatePropertyList)],
-        andLastState last: KripkeState?
-    ) -> ([KripkeState], [(KripkeState?, KripkeState?, [[VerificationToken]])]) {
+        andLastState last: KripkeState?,
+        isInitial initial: Bool
+    ) -> [(KripkeState?, KripkeState?, [[VerificationToken]])] {
         //swiftlint:disable:next line_length
         var jobs = [Job(index: 0, tokens: tokens, externals: externals, initialState: nil, lastState: last, clock: 0)]
-        var states: [KripkeState] = []
+        var states: Ref<[KripkeStatePropertyList: KripkeState]> = Ref(value: [:])
+        var initialStates: HashSink<KripkeStatePropertyList> = HashSink()
         var runs: [(KripkeState?, KripkeState?, [[VerificationToken]])] = []
         while false == jobs.isEmpty {
             let job = jobs.removeFirst()
@@ -114,7 +119,13 @@ public final class VerificationCycleExecuter {
                 andClock: job.clock,
                 andLastState: job.lastState
             )
-            states.append(contentsOf: generatedStates)
+            guard let first = generatedStates.first else {
+                continue
+            }
+            self.add(generatedStates, to: states)
+            if true == initial, nil == job.initialState {
+                initialStates.insert(first.properties)
+            }
             // When the clock has been used - try the same token again with new clock values.
             jobs.append(contentsOf: clockValues.map {
                 Job(index: job.index, tokens: job.tokens, externals: job.externals, initialState: job.initialState, lastState: job.lastState, clock: $0 + 1)
@@ -127,7 +138,30 @@ public final class VerificationCycleExecuter {
             // Add a Job for the next token to execute.
             jobs.append(Job(index: job.index + 1, tokens: newTokens, externals: newExternals, initialState: job.initialState ?? generatedStates.first, lastState: generatedStates.last, clock: 0))
         }
-        return (states, runs)
+        states.value.forEach { (arg: (key: KripkeStatePropertyList, value: KripkeState)) in
+            self.view.commit(state: arg.value, isInitial: initial && initialStates.contains(arg.value.properties))
+        }
+        return runs
+    }
+    
+    fileprivate func add(_ newStates: [KripkeState], to states: Ref<[KripkeStatePropertyList: KripkeState]>) -> Bool {
+        var added: Bool = false
+        newStates.forEach {
+            let state = $0
+            // If this is the first time seeing this state then just add it.
+            guard let existingState = states.value[state.properties] else {
+                states.value[state.properties] = state
+                added = true
+                return
+            }
+            // Attempt to add any new transitions/effects to the kripke state.
+            let oldCount = existingState.effects.count
+            existingState.effects.formUnion(state.effects)
+            if false == added {
+                added = oldCount < existingState.effects.count
+            }
+        }
+        return added
     }
     
     fileprivate func prepareTokens(_ tokens: [[VerificationToken]], executing: (Int, Int), fromExternals externals: [(AnySnapshotController, KripkeStatePropertyList)]) -> [[VerificationToken]] {
