@@ -145,24 +145,16 @@ public final class VerificationCycleExecuter {
         return runs
     }
     
-    fileprivate func add(_ newStates: [KripkeState], to states: Ref<[KripkeStatePropertyList: KripkeState]>) -> Bool {
-        var added: Bool = false
+    fileprivate func add(_ newStates: [KripkeState], to states: Ref<[KripkeStatePropertyList: KripkeState]>) {
         newStates.forEach {
-            let state = $0
             // If this is the first time seeing this state then just add it.
-            guard let existingState = states.value[state.properties] else {
-                states.value[state.properties] = state
-                added = true
+            guard let existingState = states.value[$0.properties] else {
+                states.value[$0.properties] = $0
                 return
             }
             // Attempt to add any new transitions/effects to the kripke state.
-            let oldCount = existingState.effects.count
-            existingState.effects.formUnion(state.effects)
-            if false == added {
-                added = oldCount < existingState.effects.count
-            }
+            existingState.effects.formUnion($0.effects)
         }
-        return added
     }
     
     fileprivate func prepareTokens(_ tokens: [[VerificationToken]], executing: (Int, Int), fromExternals externals: [(AnySnapshotController, KripkeStatePropertyList)]) -> [[VerificationToken]] {
