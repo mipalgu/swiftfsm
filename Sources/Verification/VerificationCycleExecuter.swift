@@ -69,7 +69,7 @@ public final class VerificationCycleExecuter {
     
     fileprivate let converter: KripkeStatePropertyListConverter
     fileprivate let executer: VerificationTokenExecuter<KripkeStateGenerator>
-    fileprivate let view: ModelChecking.NuSMVKripkeStructureView<KripkeState> = ModelChecking.NuSMVKripkeStructureView()
+    fileprivate let worldCreator: WorldCreator = WorldCreator()
     
     public init(
         converter: KripkeStatePropertyListConverter = KripkeStatePropertyListConverter(),
@@ -95,13 +95,14 @@ public final class VerificationCycleExecuter {
         
     }
     
-    public func execute(
+    public func execute<View: KripkeStructureView>(
         tokens: [[VerificationToken]],
         executing: Int,
         withExternals externals: [(AnySnapshotController, KripkeStatePropertyList)],
         andLastState last: KripkeState?,
-        isInitial initial: Bool
-    ) -> [(KripkeState?, [[VerificationToken]])] {
+        isInitial initial: Bool,
+        usingView view: View
+    ) -> [(KripkeState?, [[VerificationToken]])] where View.State == KripkeState {
         //swiftlint:disable:next line_length
         var jobs = [Job(index: 0, tokens: tokens, externals: externals, initialState: nil, lastState: last, clock: 0)]
         var states: Ref<[KripkeStatePropertyList: KripkeState]> = Ref(value: [:])
@@ -138,8 +139,8 @@ public final class VerificationCycleExecuter {
             // Add a Job for the next token to execute.
             jobs.append(Job(index: job.index + 1, tokens: newTokens, externals: newExternals, initialState: job.initialState ?? generatedStates.first, lastState: generatedStates.last, clock: 0))
         }
-        states.value.forEach { (arg: (key: KripkeStatePropertyList, value: KripkeState)) in
-            self.view.commit(state: arg.value, isInitial: initial && initialStates.contains(arg.value.properties))
+        states.value.dropLast().forEach { (arg: (key: KripkeStatePropertyList, value: KripkeState)) in
+            view.commit(state: arg.value, isInitial: initial && initialStates.contains(arg.value.properties))
         }
         return runs
     }

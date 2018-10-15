@@ -99,6 +99,8 @@ public final class VerificationCycleKripkeStructureGenerator<
     
     public func generate() -> KripkeStructure {
         var jobs = self.createInitialJobs(fromTokens: self.tokens)
+        let view = NuSMVKripkeStructureView<KripkeState>()
+        view.start()
         while false == jobs.isEmpty {
             let job = jobs.removeFirst()
             let externalsData = self.fetchUniqueExternalsData(fromSnapshot: job.tokens[job.executing])
@@ -129,7 +131,8 @@ public final class VerificationCycleKripkeStructureGenerator<
                     executing: job.executing,
                     withExternals: externals,
                     andLastState: job.lastState,
-                    isInitial: job.initial
+                    isInitial: job.initial,
+                    usingView: view
                 )
                 for (lastState, newTokens) in runs {
                     // Do not generate more jobs if we do not have a last state.
@@ -137,13 +140,10 @@ public final class VerificationCycleKripkeStructureGenerator<
                         continue
                     }
                     // Get rid of any effects on states where all fsms have finished.
-                    /*if nil == newTokens.first(where: { nil != $0.first { !$0.fsm.hasFinished } }) {
-                        guard let state = states.value[lastNewState.properties] else {
-                            continue
-                        }
-                        state.effects = []
+                    if nil == newTokens.first(where: { nil != $0.first { !$0.fsm.hasFinished } }) {
+                        view.commit(state: lastNewState, isInitial: false)
                         continue
-                    }*/
+                    }
                     // Create a new job from the clones.
                     jobs.append(Job(
                         initial: false,
@@ -155,7 +155,9 @@ public final class VerificationCycleKripkeStructureGenerator<
                     ))
                 }
             }
+            _ = job.lastState.map { view.commit(state: $0, isInitial: false) }
         }
+        view.finish()
         /*print("number of initial states: \(initialStates.value.count)")
         print("number of state: \(states.value.count)")
         print("number of transitions: \(states.value.reduce(0) { $0 + $1.1.effects.count })")
