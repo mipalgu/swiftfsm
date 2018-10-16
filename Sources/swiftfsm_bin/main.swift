@@ -64,6 +64,7 @@ import Darwin
 
 import FSM
 import IO
+import KripkeStructureViews
 import MachineStructure
 import MachineLoading
 import MachineCompiling

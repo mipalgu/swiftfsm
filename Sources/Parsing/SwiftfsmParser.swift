@@ -58,6 +58,7 @@
 
 import IO
 import KripkeStructure
+import KripkeStructureViews
 import ModelChecking
 import Scheduling
 import Verification
@@ -306,8 +307,7 @@ public class SwiftfsmParser: HelpableParser {
             throw ParsingErrors.generalError(error: "t view currently Not Implemented")
             //return TulipKripkeStructureView(factory: FilePrinterFactory())
         case "x":
-            throw ParsingErrors.generalError(error: "x view currently Not Implemented")
-            //return GexfKripkeStructureView(factory: FilePrinterFactory())
+            return AnyKripkeStructureView(GexfKripkeStructureView<KripkeState>())
         default:
             throw ParsingErrors.generalError(error: "Unknown value for Kripke Structure output flag.")
         }

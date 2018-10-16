@@ -59,6 +59,7 @@
 import FSM
 import Hashing
 import KripkeStructure
+import KripkeStructureViews
 import MachineStructure
 import ModelChecking
 import swiftfsm

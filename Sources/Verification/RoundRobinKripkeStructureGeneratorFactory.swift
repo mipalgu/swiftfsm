@@ -60,6 +60,7 @@
 import ModelChecking
 import FSMVerification
 import KripkeStructure
+import KripkeStructureViews
 import Scheduling
 import MachineStructure
 

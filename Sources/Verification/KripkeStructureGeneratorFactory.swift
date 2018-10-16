@@ -56,6 +56,7 @@
  *
  */
 
+import KripkeStructureViews
 import MachineStructure
 import ModelChecking
 

@@ -65,6 +65,7 @@
 import FSM
 import Functional
 import KripkeStructure
+import KripkeStructureViews
 import MachineStructure
 import MachineLoading
 import MachineCompiling
