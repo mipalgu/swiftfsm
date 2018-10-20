@@ -62,8 +62,6 @@ import MachineLoading
 import swiftfsm
 import Utilities
 
-import Darwin
-
 /**
  *  Responsible for the execution of machines.
  */
@@ -129,15 +127,11 @@ public class RoundRobinScheduler<Tokenizer: SchedulerTokenizer>: Scheduler where
                         jobs[i].remove(at: j)
                         continue
                     }
-                    print("executing: \(fsm.name).\(fsm.currentState.name)")
                     fsm.next()
                     finish = finish && (fsm.hasFinished || fsm.isSuspended)
                     if true == fsm.hasFinished, nil != self.promises[fsm.name] {
-                        print(self.promises[fsm.name]?.stack)
                         self.promises[fsm.name]?.stack.first?.hasFinished = true
-                        print("before")
                         self.promises[fsm.name]?.stack.removeFirst()
-                        print("after")
                     }
                     j += 1
                 }
