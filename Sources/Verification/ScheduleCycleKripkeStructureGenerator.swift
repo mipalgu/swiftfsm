@@ -91,6 +91,16 @@ public final class ScheduleCycleKripkeStructureGenerator<
     
     public func generate() {
         let tokens = self.tokenizer.separate(self.machines)
+        tokens.forEach {
+            $0.forEach {
+                switch $0.type {
+                case .parameterised(let fsm):
+                    fsm.suspend()
+                default:
+                    return
+                }
+            }
+        }
         let verificationTokens = self.convert(tokens: tokens)
         self.factory.make(tokens: verificationTokens).generate()
     }

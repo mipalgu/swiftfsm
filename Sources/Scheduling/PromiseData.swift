@@ -62,15 +62,12 @@ public final class PromiseData {
     
     public var fsm: AnyParameterisedFiniteStateMachine
     
-    public var running: Bool
-    
     public var hasFinished: Bool
     
     fileprivate var result: Any? = nil
     
-    public init(fsm: AnyParameterisedFiniteStateMachine, running: Bool = false, hasFinished: Bool = true) {
+    public init(fsm: AnyParameterisedFiniteStateMachine, hasFinished: Bool = true) {
         self.fsm = fsm
-        self.running = running
         self.hasFinished = hasFinished
     }
     

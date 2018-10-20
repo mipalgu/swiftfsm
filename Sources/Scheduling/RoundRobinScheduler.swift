@@ -62,6 +62,8 @@ import MachineLoading
 import swiftfsm
 import Utilities
 
+import Darwin
+
 /**
  *  Responsible for the execution of machines.
  */
@@ -76,17 +78,20 @@ public class RoundRobinScheduler<Tokenizer: SchedulerTokenizer>: Scheduler where
 
     private let scheduleHandler: ScheduleHandler
     
-    fileprivate var promises: [String: PromiseData] = [:]
+    private let stackLimit: Int
+    
+    fileprivate var promises: [String: (fsm: AnyParameterisedFiniteStateMachine, stack: [PromiseData])] = [:]
     
     /**
      *  Create a new `RoundRobinScheduler`.
      *
      *  - Parameter machines: All the `Machine`s that will be executed.
      */
-    public init(tokenizer: Tokenizer, unloader: MachineUnloader, scheduleHandler: ScheduleHandler) {
+    public init(tokenizer: Tokenizer, unloader: MachineUnloader, scheduleHandler: ScheduleHandler, stackLimit: Int = 8192) {
         self.tokenizer = tokenizer
         self.unloader = unloader
         self.scheduleHandler = scheduleHandler
+        self.stackLimit = stackLimit
     }
     
     /**
@@ -98,8 +103,8 @@ public class RoundRobinScheduler<Tokenizer: SchedulerTokenizer>: Scheduler where
         tokens.forEach {
             $0.forEach {
                 switch $0.type {
-                case .parameterised(let fsm, let promiseData):
-                    self.promises[$0.fullyQualifiedName] = promiseData
+                case .parameterised(let fsm):
+                    self.promises[$0.fullyQualifiedName] = (fsm, [])
                     fsm.suspend()
                 default:
                     return
@@ -117,17 +122,22 @@ public class RoundRobinScheduler<Tokenizer: SchedulerTokenizer>: Scheduler where
                 let machines: Set<Machine> = self.getMachines(fromJob: job)
                 machines.forEach { $0.fsm.takeSnapshot() }
                 for (fsm, machine) in job {
+                    let fsm = self.promises[fsm.name]?.stack.first?.fsm.asScheduleableFiniteStateMachine ?? fsm
                     machine.clock.update(fromFSM: fsm)
                     DEBUG = machine.debug
                     if (true == scheduleHandler.handleUnloadedMachine(fsm)) {
                         jobs[i].remove(at: j)
                         continue
                     }
+                    print("executing: \(fsm.name).\(fsm.currentState.name)")
                     fsm.next()
                     finish = finish && (fsm.hasFinished || fsm.isSuspended)
-                    if true == fsm.hasFinished, let promiseData = self.promises[fsm.name] {
-                        promiseData.running = false
-                        promiseData.hasFinished = true
+                    if true == fsm.hasFinished, nil != self.promises[fsm.name] {
+                        print(self.promises[fsm.name]?.stack)
+                        self.promises[fsm.name]?.stack.first?.hasFinished = true
+                        print("before")
+                        self.promises[fsm.name]?.stack.removeFirst()
+                        print("after")
                     }
                     j += 1
                 }
@@ -145,13 +155,27 @@ public class RoundRobinScheduler<Tokenizer: SchedulerTokenizer>: Scheduler where
         guard let existingPromiseData = self.promises[name] else {
             fatalError("Attempting to invoke \(name) when it has not been scheduled.")
         }
-        guard false == existingPromiseData.running, true == existingPromiseData.hasFinished else {
+        guard true == existingPromiseData.stack.isEmpty else {
             fatalError("Attempting to invoke \(name) when it is already running.")
         }
-        let promiseData = PromiseData(fsm: existingPromiseData.fsm, running: true, hasFinished: false)
+        return self.handleInvocation(existingPromiseData.fsm, with: parameters, withResults: results)
+    }
+    
+    public func invokeSelf<P: Variables, R>(_ name: String, with parameters: P, withResults results: AnyResultContainer<R>) -> Promise<R> {
+        guard let existingPromiseData = self.promises[name] else {
+            fatalError("Attempting to invoke \(name) when it has not been scheduled.")
+        }
+        guard existingPromiseData.stack.count <= self.stackLimit else {
+            fatalError("Stack Overflow: Attempting to call \(name) more times than the current stack limit.")
+        }
+        return self.handleInvocation(existingPromiseData.fsm, with: parameters, withResults: results)
+    }
+    
+    fileprivate func handleInvocation<P: Variables, R>(_ fsm: AnyParameterisedFiniteStateMachine, with parameters: P, withResults results: AnyResultContainer<R>) -> Promise<R> {
+        let promiseData = PromiseData(fsm: fsm.clone(), hasFinished: false)
         promiseData.fsm.parameters(parameters)
         promiseData.fsm.restart()
-        self.promises[name] = promiseData
+        self.promises[fsm.name]?.stack.append(promiseData)
         return promiseData.makePromise { results.result }
     }
     
@@ -159,7 +183,7 @@ public class RoundRobinScheduler<Tokenizer: SchedulerTokenizer>: Scheduler where
         return tokens.map { tokens in
             tokens.map { token in
                 switch token.type {
-                case .parameterised(let fsm, _):
+                case .parameterised(let fsm):
                     return (fsm.asScheduleableFiniteStateMachine, token.machine)
                 case .fsm(let fsm):
                     return (fsm, token.machine)
