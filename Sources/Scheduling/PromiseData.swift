@@ -71,16 +71,16 @@ public final class PromiseData {
         self.hasFinished = hasFinished
     }
     
-    public func makePromise<T>(_ f: @escaping () -> T) -> Promise<T> {
+    public func makePromise<T>() -> Promise<T> {
         return Promise(
             hasFinished: { self.hasFinished },
             result: {
                 if let result = self.result {
                     return result as! T
                 }
-                let result = f()
+                let result = self.fsm.resultContainer.result
                 self.result = result
-                return result
+                return result as! T
             }
         )
     }

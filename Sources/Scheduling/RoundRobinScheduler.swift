@@ -151,32 +151,32 @@ public class RoundRobinScheduler<Tokenizer: SchedulerTokenizer>: Scheduler where
         }
     }
     
-    public func invoke<P: Variables, R>(_ name: String, with parameters: P, withResults results: AnyResultContainer<R>) -> Promise<R> {
+    public func invoke<P: Variables, R>(_ name: String, with parameters: P) -> Promise<R> {
         guard let existingPromiseData = self.promises[name] else {
             fatalError("Attempting to invoke \(name) when it has not been scheduled.")
         }
         guard true == existingPromiseData.stack.isEmpty else {
             fatalError("Attempting to invoke \(name) when it is already running.")
         }
-        return self.handleInvocation(existingPromiseData.fsm, with: parameters, withResults: results)
+        return self.handleInvocation(existingPromiseData.fsm, with: parameters)
     }
     
-    public func invokeSelf<P: Variables, R>(_ name: String, with parameters: P, withResults results: AnyResultContainer<R>) -> Promise<R> {
+    public func invokeSelf<P: Variables, R>(_ name: String, with parameters: P) -> Promise<R> {
         guard let existingPromiseData = self.promises[name] else {
             fatalError("Attempting to invoke \(name) when it has not been scheduled.")
         }
         guard existingPromiseData.stack.count <= self.stackLimit else {
             fatalError("Stack Overflow: Attempting to call \(name) more times than the current stack limit.")
         }
-        return self.handleInvocation(existingPromiseData.fsm, with: parameters, withResults: results)
+        return self.handleInvocation(existingPromiseData.fsm, with: parameters)
     }
     
-    fileprivate func handleInvocation<P: Variables, R>(_ fsm: AnyParameterisedFiniteStateMachine, with parameters: P, withResults results: AnyResultContainer<R>) -> Promise<R> {
+    fileprivate func handleInvocation<P: Variables, R>(_ fsm: AnyParameterisedFiniteStateMachine, with parameters: P) -> Promise<R> {
         let promiseData = PromiseData(fsm: fsm.clone(), hasFinished: false)
         promiseData.fsm.parameters(parameters)
         promiseData.fsm.restart()
         self.promises[fsm.name]?.stack.append(promiseData)
-        return promiseData.makePromise { results.result }
+        return promiseData.makePromise()
     }
     
     private func fetchJobs(fromTokens tokens: [[SchedulerToken]]) -> [[(AnyScheduleableFiniteStateMachine, Machine)]] {
