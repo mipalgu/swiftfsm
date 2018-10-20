@@ -169,7 +169,7 @@ public class RoundRobinScheduler<Tokenizer: SchedulerTokenizer>: Scheduler where
         let promiseData = PromiseData(fsm: fsm.clone(), hasFinished: false)
         promiseData.fsm.parameters(parameters)
         promiseData.fsm.restart()
-        self.promises[fsm.name]?.stack.append(promiseData)
+        self.promises[fsm.name]?.stack.insert(promiseData, at: 0)
         return promiseData.makePromise()
     }
     
