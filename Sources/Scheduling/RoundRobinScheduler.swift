@@ -98,46 +98,36 @@ public class RoundRobinScheduler<Tokenizer: SchedulerTokenizer>: Scheduler where
         tokens.forEach {
             $0.forEach {
                 switch $0.type {
-                case .parameterised(_, let promiseData):
+                case .parameterised(let fsm, let promiseData):
                     self.promises[$0.fullyQualifiedName] = promiseData
+                    fsm.suspend()
                 default:
                     return
                 }
             }
         }
         var jobs = self.fetchJobs(fromTokens: tokens)
+        var finish: Bool = false
         // Run until all machines are finished.
-        while (false == jobs.isEmpty && false == STOP) {
+        while (false == jobs.isEmpty && false == STOP && false == finish) {
+            finish = true
             var i = 0
-            var foundRunningFSM = false
             for job in jobs {
                 var j = 0
                 let machines: Set<Machine> = self.getMachines(fromJob: job)
                 machines.forEach { $0.fsm.takeSnapshot() }
                 for (fsm, machine) in job {
                     machine.clock.update(fromFSM: fsm)
-                    let promiseData: PromiseData? = self.promises[fsm.name]
-                    if let promiseData = promiseData {
-                        if false == promiseData.running {
-                            continue
-                        }
-                    }
-                    foundRunningFSM = true
                     DEBUG = machine.debug
                     if (true == scheduleHandler.handleUnloadedMachine(fsm)) {
                         jobs[i].remove(at: j)
                         continue
                     }
                     fsm.next()
-                    if (true == fsm.hasFinished) {
-                        if let promiseData = promiseData {
-                            promiseData.running = false
-                            promiseData.hasFinished = true
-                        } else {
-                            jobs[i].remove(at: j)
-                            self.unloader.unload(fsm)
-                            continue
-                        }
+                    finish = finish && (fsm.hasFinished || fsm.isSuspended)
+                    if true == fsm.hasFinished, let promiseData = self.promises[fsm.name] {
+                        promiseData.running = false
+                        promiseData.hasFinished = true
                     }
                     j += 1
                 }
@@ -147,9 +137,6 @@ public class RoundRobinScheduler<Tokenizer: SchedulerTokenizer>: Scheduler where
                     continue
                 }
                 i += 1
-            }
-            if false == foundRunningFSM {
-                return
             }
         }
     }
