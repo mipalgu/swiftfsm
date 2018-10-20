@@ -169,6 +169,10 @@ public class Swiftfsm<
         if true == task.jobs.isEmpty {
             self.handleMessage(parser.helpText)
         }
+        // Has the user attempted to verify C++ machines?
+        if true == task.generateKripkeStructure && nil != task.jobs.first(where: { $0.isClfsmMachine }) {
+            self.handleError(.verifyingCppMachines)
+        }
         // Has the user asked to turn on debugging?
         DEBUG = task.enableDebugging
         // Has the user said to print the help message?

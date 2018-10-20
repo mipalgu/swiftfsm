@@ -86,6 +86,8 @@ extension GenericPrinter: View {
             }
         case .unableToLoad(let machineName, let path):
             str = "Unable to load '\(machineName)' at '\(path)'"
+        case .verifyingCppMachines:
+            str = "Cannot perform a verification on clfsm machines."
         }
         self.error(str: str)
     }

@@ -77,5 +77,7 @@ public enum SwiftfsmErrors: Error {
      *  For when there was no way to load the `Machine` from the path.
      */
     case unableToLoad(machineName: String, path: String)
+    
+    case verifyingCppMachines
 
 }
