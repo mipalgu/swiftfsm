@@ -122,6 +122,9 @@ public class SwiftfsmParser: HelpableParser {
                                 built using the CLFSM specification.
                 -n <value>, --name <value>
                                 Specify a name for this machine.
+                -p <key>=<value>, --parameter <key>=<value>
+                                Specify that the parameter <key> should receive
+                                the value <value>.
                 -x <value>, --repeat <value>
                                 Specify number of times to schedule this
                                 machine. This flag allows the creation of more
@@ -218,6 +221,8 @@ public class SwiftfsmParser: HelpableParser {
             return self.handleClfsmFlag(j, words: &words)
         case "-n", "--name":
             return self.handleNameFlag(j, words: &words)
+        case "-p", "--parameter":
+            return try self.handleParameterFlag(j, words: &words)
         case "-x", "--repeat":
             return self.handleRepeatFlag(j, words: &words)
         case "-Xcc":
@@ -319,6 +324,23 @@ public class SwiftfsmParser: HelpableParser {
         }
         var temp = j
         temp.name = name
+        return temp
+    }
+    
+    private func handleParameterFlag(_ j: Job, words: inout [String]) throws -> Job {
+        guard let keyAndValue = self.fetchValueAfterFlag(words: &words) else {
+            throw ParsingErrors.generalError(error: "No parameters specified.")
+            return j
+        }
+        let split = keyAndValue.split(separator: "=").filter { !$0.isEmpty }
+        if split.count > 2 {
+            throw ParsingErrors.generalError(error: "Found multiple '=' characters when attempting to parse key and value from a parameter")
+        }
+        if split.count < 2 {
+            throw ParsingErrors.generalError(error: "Did not find a viable key=value pair when attempting to parse a parameter")
+        }
+        var temp = j
+        temp.parameters[String(split[0])] = String(split[1])
         return temp
     }
     

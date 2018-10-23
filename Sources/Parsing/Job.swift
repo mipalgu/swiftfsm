@@ -93,6 +93,13 @@ public struct Job {
     public var name: String?
     
     /**
+     *  Contains a list of parameters and their associated values.
+     *
+     *  This allows the user to give values to parameters from the command line.
+     */
+    public var parameters: [String: String] = [:]
+    
+    /**
      *  The path to load the `Machine`.
      */
     public var path: String?
