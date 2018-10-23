@@ -287,7 +287,8 @@ public class Swiftfsm<
     private func loadFsm(
         _ job: Job,
         name: String,
-        invoker: Invoker
+        invoker: Invoker,
+        parameters: [String: String]
     ) -> (AnyScheduleableFiniteStateMachine, [Dependency], FSMClock) {
         let clock = FSMClock()
         let fsm: (AnyScheduleableFiniteStateMachine, [Dependency])?
@@ -299,6 +300,15 @@ public class Swiftfsm<
         guard let unwrappedFSM = fsm else {
             // Handle when we are unable to load the fsm.
             self.handleError(.unableToLoad(machineName: name, path: job.path!))
+        }
+        if parameters.isEmpty {
+            return (unwrappedFSM.0, unwrappedFSM.1, clock)
+        }
+        guard let parameterisedFSM = unwrappedFSM.0.asParameterisedFiniteStateMachine else {
+            self.handleError(SwiftfsmErrors.generalError(error: "Unable to load parameters for \(name) as it is not a parameterised machine."))
+        }
+        guard true == parameterisedFSM.parametersFromDictionary(parameters) else {
+            self.handleError(SwiftfsmErrors.generalError(error: "Unable to set parameters for \(name). Please make sure all parameters conform to 'LosslessStringConvertible'"))
         }
         return (unwrappedFSM.0, unwrappedFSM.1, clock)
     }
@@ -322,7 +332,7 @@ public class Swiftfsm<
         var machines: [Machine] = []
         for _ in 0 ..< job.count {
             // Create the Machine
-            let (fsm, dependencies, clock) = self.loadFsm(job, name: name, invoker: invoker)
+            let (fsm, dependencies, clock) = self.loadFsm(job, name: name, invoker: invoker, parameters: job.parameters)
             let temp: Machine = self.machineFactory.make(
                 name: name,
                 fsm: fsm,
