@@ -79,10 +79,9 @@ public struct Machine {
     public let name: String
     
     /**
-     * The top `AnyScheduleableFiniteStateMachine` which makes up the fsm
-     * hierarchy.
+     * The top FSM which makes up the fsm hierarchy.
      */
-    public var fsm: AnyScheduleableFiniteStateMachine
+    public var fsm: FSMType
     
     public var dependencies: [Dependency]
     
@@ -94,7 +93,7 @@ public struct Machine {
     public init(
         debug: Bool,
         name: String,
-        fsm: AnyScheduleableFiniteStateMachine,
+        fsm: FSMType,
         dependencies: [Dependency] = [],
         clock: FSMClock
     ) {
