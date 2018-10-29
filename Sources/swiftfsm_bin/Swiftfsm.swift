@@ -289,9 +289,9 @@ public class Swiftfsm<
         name: String,
         invoker: Invoker,
         parameters: [String: String]
-    ) -> (AnyScheduleableFiniteStateMachine, [Dependency], FSMClock) {
+    ) -> (FSMType, [Dependency], FSMClock) {
         let clock = FSMClock()
-        let fsm: (AnyScheduleableFiniteStateMachine, [Dependency])?
+        let fsm: (FSMType, [Dependency])?
         if true == job.isClfsmMachine {
             fsm = self.clfsmMachineLoader.load(name: name, invoker: invoker, clock: clock, path: job.path!)
         } else {
