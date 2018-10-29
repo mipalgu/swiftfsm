@@ -94,7 +94,7 @@ public final class ScheduleCycleKripkeStructureGenerator<
         tokens.forEach {
             $0.forEach {
                 switch $0.type {
-                case .parameterised(let fsm):
+                case .parameterisedFSM(let fsm):
                     fsm.suspend()
                 default:
                     return
