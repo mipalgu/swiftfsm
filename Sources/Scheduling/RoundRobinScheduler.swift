@@ -100,13 +100,17 @@ public class RoundRobinScheduler<Tokenizer: SchedulerTokenizer>: Scheduler where
         let tokens = self.tokenizer.separate(machines)
         tokens.forEach {
             $0.forEach {
-                switch $0.type {
-                case .parameterisedFSM(let fsm):
-                    self.promises[$0.fullyQualifiedName] = (fsm, [])
-                    fsm.suspend()
-                default:
+                guard let parameterisedFSM = $0.type.asParameterisedFiniteStateMachine else {
                     return
                 }
+                parameterisedFSM.suspend()
+                if false == $0.isRootFSM {
+                    self.promises[parameterisedFSM.name] = (parameterisedFSM, [])
+                    return
+                }
+                let clone = parameterisedFSM.clone()
+                clone.restart()
+                self.promises[parameterisedFSM.name] = (parameterisedFSM, [PromiseData(fsm: clone, hasFinished: false)])
             }
         }
         var jobs = self.fetchJobs(fromTokens: tokens)
@@ -132,6 +136,7 @@ public class RoundRobinScheduler<Tokenizer: SchedulerTokenizer>: Scheduler where
                     if true == fsm.hasFinished, nil != self.promises[fsm.name] {
                         self.promises[fsm.name]?.stack.first?.hasFinished = true
                         self.promises[fsm.name]?.stack.removeFirst()
+                        finish = false
                     }
                     j += 1
                 }
