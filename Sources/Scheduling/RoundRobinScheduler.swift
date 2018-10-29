@@ -56,7 +56,14 @@
  *
  */
 
+#if os(OSX)
+import Darwin
+#elseif os(Linux)
+import Glibc
+#endif
+
 import FSM
+import IO
 import MachineStructure
 import MachineLoading
 import swiftfsm
@@ -78,6 +85,8 @@ public class RoundRobinScheduler<Tokenizer: SchedulerTokenizer>: Scheduler where
     
     private let stackLimit: Int
     
+    private let printer: Printer
+    
     fileprivate var promises: [String: (fsm: AnyParameterisedFiniteStateMachine, stack: [PromiseData])] = [:]
     
     /**
@@ -85,11 +94,12 @@ public class RoundRobinScheduler<Tokenizer: SchedulerTokenizer>: Scheduler where
      *
      *  - Parameter machines: All the `Machine`s that will be executed.
      */
-    public init(tokenizer: Tokenizer, unloader: MachineUnloader, scheduleHandler: ScheduleHandler, stackLimit: Int = 8192) {
+    public init(tokenizer: Tokenizer, unloader: MachineUnloader, scheduleHandler: ScheduleHandler, stackLimit: Int = 8192, printer: Printer = CommandLinePrinter(errorStream: StderrOutputStream(), messageStream: StdoutOutputStream(), warningStream: StdoutOutputStream())) {
         self.tokenizer = tokenizer
         self.unloader = unloader
         self.scheduleHandler = scheduleHandler
         self.stackLimit = stackLimit
+        self.printer = printer
     }
     
     /**
@@ -152,20 +162,20 @@ public class RoundRobinScheduler<Tokenizer: SchedulerTokenizer>: Scheduler where
     
     public func invoke<P: Variables, R>(_ name: String, with parameters: P) -> Promise<R> {
         guard let existingPromiseData = self.promises[name] else {
-            fatalError("Attempting to invoke \(name) when it has not been scheduled.")
+            self.error("Attempting to invoke \(name) when it has not been scheduled.")
         }
         guard true == existingPromiseData.stack.isEmpty else {
-            fatalError("Attempting to invoke \(name) when it is already running.")
+            self.error("Attempting to invoke \(name) when it is already running.")
         }
         return self.handleInvocation(existingPromiseData.fsm, with: parameters)
     }
     
     public func invokeSelf<P: Variables, R>(_ name: String, with parameters: P) -> Promise<R> {
         guard let existingPromiseData = self.promises[name] else {
-            fatalError("Attempting to invoke \(name) when it has not been scheduled.")
+            self.error("Attempting to invoke \(name) when it has not been scheduled.")
         }
         guard existingPromiseData.stack.count <= self.stackLimit else {
-            fatalError("Stack Overflow: Attempting to call \(name) more times than the current stack limit.")
+            self.error("Stack Overflow: Attempting to call \(name) more times than the current stack limit (\(self.stackLimit)).")
         }
         return self.handleInvocation(existingPromiseData.fsm, with: parameters)
     }
@@ -192,6 +202,11 @@ public class RoundRobinScheduler<Tokenizer: SchedulerTokenizer>: Scheduler where
             machines.insert($1)
         }
         return machines
+    }
+    
+    fileprivate func error(_ str: String) -> Never {
+        self.printer.error(str: str)
+        exit(EXIT_FAILURE)
     }
     
 }
