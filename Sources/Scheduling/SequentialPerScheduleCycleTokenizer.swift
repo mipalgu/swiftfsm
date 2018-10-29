@@ -72,7 +72,7 @@ public final class SequentialPerScheduleCycleTokenizer: SchedulerTokenizer {
         let tokens = machines.flatMap { (machine) -> [SchedulerToken] in
             let name = machine.name + "." + machine.fsm.name
             let tokens: [SchedulerToken] = machine.dependencies.flatMap { self.flatenner.flattenSubmachines($0, name, machine) }
-            return [SchedulerToken(fullyQualifiedName: name, type: .fsm(machine.fsm), machine: machine)] + tokens
+            return [SchedulerToken(fullyQualifiedName: name, type: machine.fsm, machine: machine)] + tokens
         }
         return [tokens]
     }

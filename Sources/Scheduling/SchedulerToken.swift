@@ -63,17 +63,12 @@ public struct SchedulerToken {
 
     public let fullyQualifiedName: String
 
-    public let type: SchedulerTokenType
+    public let type: FSMType
 
     public let machine: Machine
 
     public var fsm: AnyScheduleableFiniteStateMachine {
-        switch self.type {
-        case .parameterised(let fsm):
-            return fsm.asScheduleableFiniteStateMachine
-        case .fsm(let fsm):
-            return fsm
-        }
+        return self.type.asScheduleableFiniteStateMachine
     }
 
 }
