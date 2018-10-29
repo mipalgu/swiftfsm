@@ -79,7 +79,7 @@ public class SimpleMachineFactory: MachineFactory {
      */
     public func make(
         name: String,
-        fsm: AnyScheduleableFiniteStateMachine,
+        fsm: FSMType,
         dependencies: [Dependency],
         debug: Bool,
         clock: FSMClock
