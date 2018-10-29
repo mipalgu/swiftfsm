@@ -89,6 +89,8 @@ public class RoundRobinScheduler<Tokenizer: SchedulerTokenizer>: Scheduler where
     
     fileprivate var promises: [String: (fsm: AnyParameterisedFiniteStateMachine, stack: [PromiseData])] = [:]
     
+    fileprivate var invocations: Bool = false
+    
     /**
      *  Create a new `RoundRobinScheduler`.
      *
@@ -141,8 +143,9 @@ public class RoundRobinScheduler<Tokenizer: SchedulerTokenizer>: Scheduler where
                         jobs[i].remove(at: j)
                         continue
                     }
+                    self.invocations = false
                     fsm.next()
-                    finish = finish && (fsm.hasFinished || fsm.isSuspended)
+                    finish = finish && (fsm.hasFinished || fsm.isSuspended) && (false == self.invocations)
                     if true == fsm.hasFinished, nil != self.promises[fsm.name] {
                         self.promises[fsm.name]?.stack.first?.hasFinished = true
                         self.promises[fsm.name]?.stack.removeFirst()
@@ -185,6 +188,7 @@ public class RoundRobinScheduler<Tokenizer: SchedulerTokenizer>: Scheduler where
         promiseData.fsm.parameters(parameters)
         promiseData.fsm.restart()
         self.promises[fsm.name]?.stack.insert(promiseData, at: 0)
+        self.invocations = true
         return promiseData.makePromise()
     }
     
