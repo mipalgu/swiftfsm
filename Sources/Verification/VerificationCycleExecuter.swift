@@ -107,8 +107,8 @@ public final class VerificationCycleExecuter {
         //swiftlint:disable:next line_length
         var jobs = [Job(index: 0, tokens: tokens, externals: externals, initialState: nil, lastState: last, clock: 0)]
         var states: Ref<[KripkeStatePropertyList: KripkeState]> = Ref(value: [:])
-        var initialStates: HashSink<KripkeStatePropertyList> = HashSink()
-        var lastStates: HashSink<KripkeStatePropertyList> = HashSink()
+        var initialStates: HashSink<KripkeStatePropertyList, KripkeStatePropertyList> = HashSink()
+        var lastStates: HashSink<KripkeStatePropertyList, KripkeStatePropertyList> = HashSink()
         var runs: [(KripkeState?, [[VerificationToken]])] = []
         while false == jobs.isEmpty {
             let job = jobs.removeFirst()
