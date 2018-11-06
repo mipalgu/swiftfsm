@@ -22,11 +22,17 @@ install:
 	cp .build/${SWIFT_BUILD_CONFIG}/*.swift* /usr/local/include/swiftfsm
 	cp .build/${SWIFT_BUILD_CONFIG}/swiftfsm /usr/local/bin/
 
+generate-xcodeproj:
+	$Ecp config.sh.in config.sh
+	$Eecho "CCFLAGS=\"${CFLAGS:C,(.*),-Xcc \1,g}\"" >> config.sh
+	$Eecho "LINKFLAGS=\"${LDFLAGS:C,(.*),-Xlinker \1,g}\"" >> config.sh
+	$Eecho "SWIFTCFLAGS=\"${SWIFTCFLAGS:C,(.*),-Xswiftc \1,g}\"" >> config.sh
+	$E./xcodegen.sh
+
 test:	swift-test-package
 
 .include "../../../mk/mipal.mk"
 
-CFLAGS+=-I/usr/local/include -I/usr/local/include/gusimplewhiteboard -I/usr/local/include/swiftfsm -I${GUNAO_DIR}/Common -I${GUNAO_DIR}/posix/CLReflect
-SWIFTCFLAGS=-I/usr/local/include -I/usr/local/include/swiftfsm -I${GUNAO_DIR}/Common -I${GUNAO_DIR}/posix/CLReflect
-
+CFLAGS+=-I/usr/local/include -I/usr/local/include/gusimplewhiteboard -I/usr/local/include/swiftfsm -I/usr/local/include/CLReflect -I${GUNAO_DIR}/Common
+SWIFTCFLAGS=-I/usr/local/include -I/usr/local/include/swiftfsm
 LDFLAGS+=-L/usr/local/lib -L/usr/local/lib/swiftfsm -lFSM -lCLReflect -ldl

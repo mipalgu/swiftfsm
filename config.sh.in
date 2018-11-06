@@ -16,6 +16,3 @@ RESOURCES_DIR=`pwd`/Resources
 BUILD_DIR=`pwd`/.build
 BUILD_BIN=${BUILD_DIR}/debug
 BUILT_PRODUCTS_DIR=${BUILD_DIR}/app
-LINKFLAGS="-Xlinker -L/usr/local/lib -Xlinker -lFSM -Xlinker -lCLReflect"
-CCFLAGS="-Xcc -I/usr/local/include -Xcc -I/usr/local/include/swiftfsm -Xcc -I/usr/local/include/CLReflect"
-SWIFTCFLAGS="-Xswiftc -I/usr/local/include/swiftfsm"
