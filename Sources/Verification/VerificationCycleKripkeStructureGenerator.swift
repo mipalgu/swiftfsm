@@ -105,11 +105,13 @@ public final class VerificationCycleKripkeStructureGenerator<
     public func generate() {
         var jobs = self.createInitialJobs(fromTokens: self.tokens)
         view.reset()
+        let defaultExternals = self.createExternals(fromTokens: self.tokens)
         while false == jobs.isEmpty {
             let job = jobs.removeFirst()
-            let externalsData = self.fetchUniqueExternalsData(fromSnapshot: job.tokens[job.executing])
+            let externalsData = self.fetchUniqueExternalsData(fromTokens: [job.tokens[job.executing]])
             let spinner = self.spinnerConstructor.makeSpinner(forExternals: externalsData)
             while let externals = spinner() {
+                let externals = nil == job.lastState ? self.mergeExternals(externals, with: defaultExternals) : externals
                 // Clone all fsms.
                 let clones = job.tokens.enumerated().map {
                     Array(self.cloner.clone(jobs: $1, withLastRecords: job.lastRecords[$0]))
@@ -168,6 +170,23 @@ public final class VerificationCycleKripkeStructureGenerator<
         return KripkeStructure(initialStates: Array(initialStates.value.lazy.map { $1 }), states: states.value)*/
     }
     
+    fileprivate func mergeExternals(_ externals: [(AnySnapshotController, KripkeStatePropertyList)], with dict: [String: (AnySnapshotController, KripkeStatePropertyList)]) -> [(AnySnapshotController, KripkeStatePropertyList)] {
+        var dict = dict
+        for (external, ps) in externals {
+            dict[external.name] = (external, ps)
+        }
+        return Array(dict.values)
+    }
+    
+    fileprivate func createExternals(fromTokens tokens: [[VerificationToken]]) -> [String: (AnySnapshotController, KripkeStatePropertyList)] {
+        let allExternalsData = self.fetchUniqueExternalsData(fromTokens: tokens)
+        var d = [String: (AnySnapshotController, KripkeStatePropertyList)](minimumCapacity: allExternalsData.count)
+        allExternalsData.forEach {
+            d[$0.externalVariables.name] = ($0.externalVariables, $0.defaultValues)
+        }
+        return d
+    }
+    
     fileprivate func createInitialJobs(fromTokens tokens: [[VerificationToken]]) -> [Job] {
         return [Job(
             initial: true,
@@ -179,16 +198,18 @@ public final class VerificationCycleKripkeStructureGenerator<
         )]
     }
     
-    fileprivate func fetchUniqueExternalsData(fromSnapshot tokens: [VerificationToken]) -> [ExternalVariablesVerificationData] {
+    fileprivate func fetchUniqueExternalsData(fromTokens tokens: [[VerificationToken]]) -> [ExternalVariablesVerificationData] {
         var hashTable: Set<String> = []
         var externals: [ExternalVariablesVerificationData] = []
-        tokens.forEach { $0.externalVariables.forEach {
-            if hashTable.contains($0.externalVariables.name) {
-                return
-            }
-            externals.append($0)
-            hashTable.insert($0.externalVariables.name)
-        } }
+        for tokens in tokens {
+            tokens.forEach { $0.externalVariables.forEach {
+                if hashTable.contains($0.externalVariables.name) {
+                    return
+                }
+                externals.append($0)
+                hashTable.insert($0.externalVariables.name)
+            } }
+        }
         return externals
     }
     

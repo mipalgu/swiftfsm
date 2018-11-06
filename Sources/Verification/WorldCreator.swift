@@ -78,7 +78,7 @@ public final class WorldCreator {
         withState state: String,
         worldType: WorldType
     ) -> KripkeStatePropertyList {
-        let externalVariables = self.convert(externals: externals)
+        let externalVariables = self.convert(externals: externals, withLastState: lastState)
         let str: String
         switch worldType {
         case .beforeExecution:
@@ -104,7 +104,20 @@ public final class WorldCreator {
         //return (lastState?.properties ?? [:]) <| varPs <| externalVariables
     }
     
-    private func convert(externals: [(AnySnapshotController, KripkeStatePropertyList)]) -> KripkeStatePropertyList {
+    fileprivate func fetchLastExternals(fromLastState lastState: KripkeState?) -> KripkeStatePropertyList {
+        guard let externalsProperty = lastState?.properties.properties["externalVariables"] else {
+            return [:]
+        }
+        switch externalsProperty.type {
+        case .Compound(let props):
+            return props
+        default:
+            return [:]
+        }
+    }
+    
+    private func convert(externals: [(AnySnapshotController, KripkeStatePropertyList)], withLastState lastState: KripkeState?) -> KripkeStatePropertyList {
+        let lastExternals = self.fetchLastExternals(fromLastState: lastState)
         var props: KripkeStatePropertyList = [:]
         var values: [String: Any] = [:]
         externals.forEach {
@@ -113,7 +126,7 @@ public final class WorldCreator {
         }
         return [
             "externalVariables": KripkeStateProperty(
-                type: .Compound(props),
+                type: .Compound(lastExternals.merged(props)),
                 value: values
             )
         ]
