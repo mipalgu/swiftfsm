@@ -133,23 +133,7 @@ public final class VerificationCycleExecuter {
             }
             let lastState = generatedStates.last.map { states.value[$0.properties] ?? $0 }
             // When the clock has been used - try the same token again with new clock values.
-            let newJobs = clockValues.lazy.flatMap { (value: UInt) -> [Job] in
-                if true == job.usedClockValues.contains(value) {
-                    return []
-                }
-                var arr: [UInt] = []
-                arr.reserveCapacity(2)
-                if value != UInt.max {
-                    arr.append(value + 1)
-                }
-                if value != UInt.min {
-                    arr.append(value - 1)
-                }
-                return arr.map {
-                    Job(index: job.index, tokens: job.tokens, externals: job.externals, initialState: job.initialState, lastState: job.lastState, clock: $0, usedClockValues: job.usedClockValues + clockValues)
-                }
-            }
-            jobs.append(contentsOf: newJobs)
+            jobs.append(contentsOf: jobsFromClockValues(lastJob: job, clockValues: clockValues))
             // Add tokens to runs when we have finished executing all of the tokens in a run.
             if job.index + 1 >= tokens[executing].count {
                 _ = lastState.map { lastStates.insert($0.properties) }
@@ -166,6 +150,33 @@ public final class VerificationCycleExecuter {
             view.commit(state: arg.value, isInitial: initial && initialStates.contains(arg.value.properties))
         }
         return runs
+    }
+    
+    fileprivate func jobsFromClockValues(lastJob: Job, clockValues: [UInt]) -> [Job] {
+        return clockValues.flatMap { (value: UInt) -> [Job] in
+            if true == lastJob.usedClockValues.contains(value) {
+                return []
+            }
+            var arr: [UInt] = []
+            arr.reserveCapacity(2)
+            if value != UInt.max {
+                arr.append(value + 1)
+            }
+            if value != UInt.min {
+                arr.append(value - 1)
+            }
+            return arr.map {
+                Job(
+                    index: lastJob.index,
+                    tokens: lastJob.tokens,
+                    externals: lastJob.externals,
+                    initialState: lastJob.initialState,
+                    lastState: lastJob.lastState,
+                    clock: $0,
+                    usedClockValues: lastJob.usedClockValues + clockValues
+                )
+            }
+        }
     }
     
     fileprivate func add(_ newStates: [KripkeState], to states: Ref<[KripkeStatePropertyList: KripkeState]>) {
