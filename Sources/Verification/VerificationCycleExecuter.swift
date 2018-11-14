@@ -94,6 +94,8 @@ public final class VerificationCycleExecuter {
         
         let clock: UInt
         
+        let usedClockValues: [UInt]
+        
     }
     
     public func execute<View: KripkeStructureView>(
@@ -105,8 +107,8 @@ public final class VerificationCycleExecuter {
         usingView view: View
     ) -> [(KripkeState?, [[VerificationToken]])] where View.State == KripkeState {
         //swiftlint:disable:next line_length
-        var jobs = [Job(index: 0, tokens: tokens, externals: externals, initialState: nil, lastState: last, clock: 0)]
-        var states: Ref<[KripkeStatePropertyList: KripkeState]> = Ref(value: [:])
+        var jobs = [Job(index: 0, tokens: tokens, externals: externals, initialState: nil, lastState: last, clock: 0, usedClockValues: [])]
+        let states: Ref<[KripkeStatePropertyList: KripkeState]> = Ref(value: [:])
         var initialStates: HashSink<KripkeStatePropertyList, KripkeStatePropertyList> = HashSink()
         var lastStates: HashSink<KripkeStatePropertyList, KripkeStatePropertyList> = HashSink()
         var runs: [(KripkeState?, [[VerificationToken]])] = []
@@ -131,9 +133,23 @@ public final class VerificationCycleExecuter {
             }
             let lastState = generatedStates.last.map { states.value[$0.properties] ?? $0 }
             // When the clock has been used - try the same token again with new clock values.
-            jobs.append(contentsOf: clockValues.map {
-                Job(index: job.index, tokens: job.tokens, externals: job.externals, initialState: job.initialState, lastState: job.lastState, clock: $0 + 1)
-            })
+            let newJobs = clockValues.lazy.flatMap { (value: UInt) -> [Job] in
+                if true == job.usedClockValues.contains(value) {
+                    return []
+                }
+                var arr: [UInt] = []
+                arr.reserveCapacity(2)
+                if value != UInt.max {
+                    arr.append(value + 1)
+                }
+                if value != UInt.min {
+                    arr.append(value - 1)
+                }
+                return arr.map {
+                    Job(index: job.index, tokens: job.tokens, externals: job.externals, initialState: job.initialState, lastState: job.lastState, clock: $0, usedClockValues: job.usedClockValues + clockValues)
+                }
+            }
+            jobs.append(contentsOf: newJobs)
             // Add tokens to runs when we have finished executing all of the tokens in a run.
             if job.index + 1 >= tokens[executing].count {
                 _ = lastState.map { lastStates.insert($0.properties) }
@@ -141,7 +157,7 @@ public final class VerificationCycleExecuter {
                 continue
             }
             // Add a Job for the next token to execute.
-            jobs.append(Job(index: job.index + 1, tokens: newTokens, externals: newExternals, initialState: job.initialState ?? generatedStates.first, lastState: lastState, clock: 0))
+            jobs.append(Job(index: job.index + 1, tokens: newTokens, externals: newExternals, initialState: job.initialState ?? generatedStates.first, lastState: lastState, clock: 0, usedClockValues: []))
         }
         states.value.forEach { (arg: (key: KripkeStatePropertyList, value: KripkeState)) in
             if lastStates.contains(arg.key) {

@@ -115,7 +115,7 @@ public final class VerificationTokenExecuter<StateGenerator: KripkeStateGenerato
             worldType: .afterExecution
         )
         let postState = self.stateGenerator.generateKripkeState(fromWorld: postWorld, withLastState: preState)
-        return ([preState, postState], token.machine.clock.lastClockValues.filter { $0 > clock }, externals)
+        return ([preState, postState], token.machine.clock.lastClockValues, externals)
     }
     
 }
