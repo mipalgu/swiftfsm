@@ -2,6 +2,27 @@
 
 import PackageDescription
 
+let normalDependencies: [Package.Dependency] = [
+    .package(url: "ssh://git.mipal.net/git/swift_wb.git", .branch("swift-4.2")),
+    .package(url: "ssh://git.mipal.net/git/swift_CLReflect.git", .branch("master")),
+    .package(url: "ssh://git.mipal.net/git/swift_helpers.git", .branch("master"))
+]
+
+#if canImport(Foundation)
+let foundationDeps: [Target.Dependency] = [.byName(name: "Machines")]
+let deps = [
+    .package(url: "ssh://git.mipal.net/git/Machines.git", .branch("master")),
+] + normalDependencies
+#else
+let foundationDeps: [Target.Dependency] = []
+let deps = normalDependencies
+#endif
+
+func convert(_ arr: [String]) -> [Target.Dependency] {
+    return arr.map {.byName(name: $0) }
+}
+
+
 let package = Package(
     name: "swiftfsm",
     products: [
@@ -15,20 +36,15 @@ let package = Package(
             targets: ["CFSMs"]
         )
     ],
-    dependencies: [
-        .package(url: "ssh://git.mipal.net/git/swift_wb.git", .branch("swift-4.2")),
-        .package(url: "ssh://git.mipal.net/git/swift_CLReflect.git", .branch("master")),
-        .package(url: "ssh://git.mipal.net/git/Machines.git", .branch("master")),
-        .package(url: "ssh://git.mipal.net/git/swift_helpers.git", .branch("master"))
-    ],
+    dependencies: deps,
     targets: [
         .target(name: "CFSMs", dependencies: []),
         .target(name: "swiftfsm_helpers", dependencies: []),
         .target(name: "Timers", dependencies: ["swiftfsm_helpers"]),
         .target(name: "Libraries", dependencies: ["IO"]),
-        .target(name: "MachineStructure", dependencies: ["Libraries", "GUSimpleWhiteboard", "Machines", "Timers"]),
-        .target(name: "MachineLoading", dependencies: ["Libraries", "GUSimpleWhiteboard", "Machines", "IO", "swift_helpers", "swiftfsm_helpers"]),
-        .target(name: "MachineCompiling", dependencies: ["Machines", "IO"]),
+        .target(name: "MachineStructure", dependencies: convert(["Libraries", "GUSimpleWhiteboard", "Timers"]) + foundationDeps),
+        .target(name: "MachineLoading", dependencies: convert(["Libraries", "GUSimpleWhiteboard", "IO", "swift_helpers", "swiftfsm_helpers"]) + foundationDeps),
+        .target(name: "MachineCompiling", dependencies: convert(["IO"]) + foundationDeps),
         .target(name: "Scheduling", dependencies: ["MachineStructure", "MachineLoading", "Timers", "GUSimpleWhiteboard"]),
         .target(name: "Verification", dependencies: ["IO", "MachineStructure", "Scheduling", "Timers"]),
         .target(name: "Parsing", dependencies: ["Scheduling", "Timers", "Verification"]),

@@ -56,6 +56,8 @@
  *
  */
 
+#if canImport(SwiftMachines)
+
 import FSM
 import SwiftMachines
 import swiftfsm
@@ -115,3 +117,5 @@ public final class MachinesMachineLoader: MachineLoader {
     }
 
 }
+
+#endif
