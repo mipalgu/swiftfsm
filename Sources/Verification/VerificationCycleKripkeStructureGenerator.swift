@@ -81,7 +81,6 @@ public final class VerificationCycleKripkeStructureGenerator<
     fileprivate let spinnerConstructor: SpinnerConstructor
     fileprivate let view: View
     fileprivate let worldCreator: WorldCreator
-    
     fileprivate let recorder = MirrorKripkePropertiesRecorder()
     
     public init(
@@ -112,24 +111,24 @@ public final class VerificationCycleKripkeStructureGenerator<
             let spinner = self.spinnerConstructor.makeSpinner(forExternals: externalsData)
             while let externals = spinner() {
                 let externals = nil == job.lastState ? self.mergeExternals(externals, with: defaultExternals) : externals
-                // Clone all fsms.
-                let clones = job.tokens.enumerated().map {
-                    Array(self.cloner.clone(jobs: $1, withLastRecords: job.lastRecords[$0]))
-                }
                 // Check for cycles.
                 let world = self.worldCreator.createWorld(
                     fromExternals: externals,
-                    andTokens: clones,
+                    andTokens: job.tokens,
                     andLastState: job.lastState,
                     andExecuting: job.executing,
                     andExecutingToken: 0,
-                    withState: clones[job.executing][0].fsm.currentState.name,
+                    withState: job.tokens[job.executing][0].fsm.currentState.name,
                     worldType: .beforeExecution
                 )
                 let (inCycle, newCache) = self.cycleDetector.inCycle(data: job.cache, element: world)
                 if true == inCycle {
                     job.lastState?.effects.insert(world)
                     continue
+                }
+                // Clone all fsms.
+                let clones = job.tokens.enumerated().map {
+                    Array(self.cloner.clone(jobs: $1, withLastRecords: job.lastRecords[$0]))
                 }
                 // Execute and generate kripke states.
                 let runs = self.executer.execute(

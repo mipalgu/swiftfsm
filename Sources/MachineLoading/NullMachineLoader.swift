@@ -1,9 +1,9 @@
 /*
- * main.swift
- * swiftfsm
+ * NullMachineLoader.swift
+ * CFSMWrappers
  *
- * Created by Callum McColl on 14/08/2015.
- * Copyright © 2015 Callum McColl. All rights reserved.
+ * Created by Callum McColl on 20/11/18.
+ * Copyright © 2018 Callum McColl. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -56,78 +56,15 @@
  *
  */
 
-#if os(Linux)
-import Glibc
-#elseif os(OSX)
-import Darwin
-#endif
-
 import FSM
-import IO
-import KripkeStructureViews
-import MachineStructure
-import MachineLoading
-import MachineCompiling
-import ModelChecking
-import Scheduling
-import Parsing
-import Verification
-import CFSMWrappers
+import swiftfsm
 
-let printer: CommandLinePrinter =
-    CommandLinePrinter(
-        errorStream: StderrOutputStream(),
-        messageStream: StdoutOutputStream(),
-        warningStream: StdoutOutputStream()
-    )
-
-let clfsmMachineLoader = CLFSMMachineLoader()
-
-let roundRobinFactory = RoundRobinSchedulerFactory(
-    scheduleHandler: clfsmMachineLoader,
-    unloader: clfsmMachineLoader
-)
-
-let libraryLoader = DynamicLibraryMachineLoaderFactory(printer: printer).make()
-
-@available(macOS 10.11, *)
-func run() {
-    #if NO_FOUNDATION
-    let compiler = NullMachineCompiler()
-    let machineLoader = NullMachineLoader()
-    #else
-    let compiler = SwiftMachinesCompiler()
-    let machineLoader = MachinesMachineLoader(libraryLoader: libraryLoader)
-    #endif
-    Swiftfsm(
-        clfsmMachineLoader: CLFSMMachineLoader(),
-        kripkeStructureGeneratorFactory: RoundRobinKripkeStructureGeneratorFactory(),
-        kripkeStructureView: AnyKripkeStructureView(NuSMVKripkeStructureView()),
-        machineCompiler: compiler,
-        machineFactory: SimpleMachineFactory(),
-        machineLoader: MachineLoaderStrategy(
-            machineLoader: machineLoader,
-            libraryLoader: libraryLoader
-        ),
-        parser: SwiftfsmParser(
-            passiveRoundRobinFactory: PassiveRoundRobinSchedulerFactory(
-                scheduleHandler: clfsmMachineLoader,
-                unloader: clfsmMachineLoader
-            ),
-            roundRobinFactory: roundRobinFactory
-        ),
-        schedulerFactory: roundRobinFactory,
-        view: printer
-    ).run(args: CommandLine.arguments)
+public final class NullMachineLoader: MachineLoader {
+    
+    public init() {}
+    
+    public func load(name _: String, invoker _: Invoker, clock _: Timer, path _: String) -> (FSMType, [Dependency])? {
+        return nil
+    }
+    
 }
-
-#if os(macOS)
-if #available(macOS 10.11, *) {
-    run()
-} else {
-    printer.error(str: "You must have at least macOS version 10.11")
-    exit(EXIT_FAILURE)
-}
-#else
-run()
-#endif
