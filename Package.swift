@@ -8,7 +8,7 @@ let normalDependencies: [Package.Dependency] = [
     .package(url: "ssh://git.mipal.net/git/swift_helpers.git", .branch("master"))
 ]
 
-#if canImport(Foundation)
+#if !canImport(Foundation)
 let foundationDeps: [Target.Dependency] = [.byName(name: "Machines")]
 let deps = [
     .package(url: "ssh://git.mipal.net/git/Machines.git", .branch("master")),

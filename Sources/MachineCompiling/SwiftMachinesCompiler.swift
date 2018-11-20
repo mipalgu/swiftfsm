@@ -56,6 +56,8 @@
  *
  */
 
+#if canImport(SwiftMachines)
+
 import IO
 import SwiftMachines
 
@@ -100,3 +102,5 @@ public final class SwiftMachinesCompiler: MachineCompiler {
     }
 
 }
+
+#endif
