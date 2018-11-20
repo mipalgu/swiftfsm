@@ -27,6 +27,20 @@ generate-xcodeproj:
 	$Eecho "SWIFTCFLAGS=\"${SWIFTCFLAGS:C,(.*),-Xswiftc \1,g}\"" >> config.sh
 	$E./xcodegen.sh
 
+enable-foundation:
+	$Ecat Package.start.swift > Package.swift
+	$Eecho "" >> Package.swift
+	$Ecat Package.foundation.swift >> Package.swift
+	$Eecho "" >> Package.swift
+	$Ecat Package.in.swift >> Package.swift
+
+disable-foundation:
+	$Ecat Package.start.swift > Package.swift
+	$Eecho "" >> Package.swift
+	$Ecat Package.slim.swift >> Package.swift
+	$Eecho "" >> Package.swift
+	$Ecat Package.in.swift >> Package.swift
+
 test:	swift-test-package
 
 .include "../../../mk/mipal.mk"
