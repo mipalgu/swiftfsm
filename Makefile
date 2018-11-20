@@ -12,8 +12,6 @@ EXT=dylib
 EXT=so
 .endif
 
-SWIFTCFLAGS+=-I/usr/local/include/swiftfsm
-
 all:	all-real
 
 install:
@@ -34,5 +32,5 @@ test:	swift-test-package
 .include "../../../mk/mipal.mk"
 
 CFLAGS+=-I/usr/local/include -I/usr/local/include/gusimplewhiteboard -I/usr/local/include/swiftfsm -I/usr/local/include/CLReflect -I${GUNAO_DIR}/Common
-SWIFTCFLAGS=-I/usr/local/include -I/usr/local/include/swiftfsm
+SWIFTCFLAGS=-I/usr/local/include -I/usr/local/include/swiftfsm -DNO_FOUNDATION
 LDFLAGS+=-L/usr/local/lib -L/usr/local/lib/swiftfsm -lFSM -lCLReflect -ldl

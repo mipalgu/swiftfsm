@@ -92,12 +92,12 @@ let libraryLoader = DynamicLibraryMachineLoaderFactory(printer: printer).make()
 
 @available(macOS 10.11, *)
 func run() {
-    #if !canImport(SwiftMachines) && !NO_FOUNDATION
-    let compiler = SwiftMachinesCompiler()
-    let machineLoader = MachinesMachineLoader(libraryLoader: libraryLoader)
-    #else
+    #if NO_FOUNDATION
     let compiler = NullMachineCompiler()
     let machineLoader = NullMachineLoader()
+    #else
+    let compiler = SwiftMachinesCompiler()
+    let machineLoader = MachinesMachineLoader(libraryLoader: libraryLoader)
     #endif
     Swiftfsm(
         clfsmMachineLoader: CLFSMMachineLoader(),
