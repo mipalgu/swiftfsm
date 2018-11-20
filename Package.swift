@@ -8,12 +8,7 @@ let normalDependencies: [Package.Dependency] = [
     .package(url: "ssh://git.mipal.net/git/swift_helpers.git", .branch("master"))
 ]
 
-#if NO_FOUNDATION
-let foundationDeps: [Target.Dependency] = [.byName(name: "Machines")]
-let deps = [
-    .package(url: "ssh://git.mipal.net/git/Machines.git", .branch("master")),
-] + normalDependencies
-#elseif canImport(Foundation)
+/*#if NO_FOUNDATION
 let foundationDeps: [Target.Dependency] = []
 let deps = normalDependencies
 #else
@@ -21,7 +16,12 @@ let foundationDeps: [Target.Dependency] = [.byName(name: "Machines")]
 let deps = [
     .package(url: "ssh://git.mipal.net/git/Machines.git", .branch("master")),
 ] + normalDependencies
-#endif
+#endif*/
+
+let foundationDeps: [Target.Dependency] = [.byName(name: "Machines")]
+let deps = [
+    .package(url: "ssh://git.mipal.net/git/Machines.git", .branch("master")),
+] + normalDependencies
 
 func convert(_ arr: [String]) -> [Target.Dependency] {
     return arr.map {.byName(name: $0) }

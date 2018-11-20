@@ -32,5 +32,8 @@ test:	swift-test-package
 .include "../../../mk/mipal.mk"
 
 CFLAGS+=-I/usr/local/include -I/usr/local/include/gusimplewhiteboard -I/usr/local/include/swiftfsm -I/usr/local/include/CLReflect -I${GUNAO_DIR}/Common
-SWIFTCFLAGS=-I/usr/local/include -I/usr/local/include/swiftfsm -DNO_FOUNDATION
+SWIFTCFLAGS=-I/usr/local/include -I/usr/local/include/swiftfsm
+.ifdef NO_FOUNDATION
+SWIFTCFLAGS+=-DNO_FOUNDATION
+.endif
 LDFLAGS+=-L/usr/local/lib -L/usr/local/lib/swiftfsm -lFSM -lCLReflect -ldl
