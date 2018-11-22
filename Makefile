@@ -6,10 +6,21 @@
 
 ALL_TARGETS=host-local
 
+.ifdef SYSROOT
+ROOT=$SYSROOT
+.else
+ROOT=
+.endif
+
 .if ${OS} == Darwin
 EXT=dylib
 .else
 EXT=so
+.endif
+
+SWIFTCFLAGS+=-I${ROOT}/usr/local/include/swiftfsm
+.ifdef SYSROOT
+SWIFT_BUILD_FLAGS=--destination destination.json
 .endif
 
 all:	all-real
@@ -45,9 +56,9 @@ test:	swift-test-package
 
 .include "../../../mk/mipal.mk"
 
-CFLAGS+=-I/usr/local/include -I/usr/local/include/gusimplewhiteboard -I/usr/local/include/swiftfsm -I/usr/local/include/CLReflect -I${GUNAO_DIR}/Common
-SWIFTCFLAGS=-I/usr/local/include -I/usr/local/include/swiftfsm
+CFLAGS+=-I${ROOT}/usr/local/include -I${ROOT}/usr/local/include/gusimplewhiteboard -I${ROOT}/usr/local/include/swiftfsm -I${ROOT}/usr/local/include/CLReflect -I${GUNAO_DIR}/Common
+SWIFTCFLAGS=-I${ROOT}/usr/local/include -I${ROOT}/usr/local/include/swiftfsm
 .ifdef NO_FOUNDATION
 SWIFTCFLAGS+=-DNO_FOUNDATION
 .endif
-LDFLAGS+=-L/usr/local/lib -L/usr/local/lib/swiftfsm -lFSM -lCLReflect -ldl
+LDFLAGS+=-L${ROOT}/usr/local/lib -L${ROOT}/usr/local/lib/swiftfsm -lFSM -lCLReflect -ldl
