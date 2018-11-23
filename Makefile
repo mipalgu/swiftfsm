@@ -7,7 +7,8 @@
 ALL_TARGETS=host-local
 
 .ifdef SYSROOT
-ROOT=$SYSROOT
+export LANG=/usr/lib/locale/en_US
+ROOT=${SYSROOT}
 .else
 ROOT=
 .endif
@@ -26,10 +27,10 @@ SWIFT_BUILD_FLAGS=--destination destination.json
 all:	all-real
 
 install:
-	mkdir -p /usr/local/include/swiftfsm
-	cp .build/${SWIFT_BUILD_CONFIG}/lib*.${EXT} /usr/local/lib
-	cp .build/${SWIFT_BUILD_CONFIG}/*.swift* /usr/local/include/swiftfsm
-	cp .build/${SWIFT_BUILD_CONFIG}/swiftfsm /usr/local/bin/
+	mkdir -p ${ROOT}/usr/local/include/swiftfsm
+	cp .build/${SWIFT_BUILD_CONFIG}/lib*.${EXT} ${ROOT}/usr/local/lib
+	cp .build/${SWIFT_BUILD_CONFIG}/*.swift* ${ROOT}/usr/local/include/swiftfsm
+	cp .build/${SWIFT_BUILD_CONFIG}/swiftfsm ${ROOT}/usr/local/bin/
 
 generate-xcodeproj:
 	$Ecp config.sh.in config.sh
@@ -61,4 +62,8 @@ SWIFTCFLAGS=-I${ROOT}/usr/local/include -I${ROOT}/usr/local/include/swiftfsm
 .ifdef NO_FOUNDATION
 SWIFTCFLAGS+=-DNO_FOUNDATION
 .endif
-LDFLAGS+=-L${ROOT}/usr/local/lib -L${ROOT}/usr/local/lib/swiftfsm -lFSM -lCLReflect -ldl
+LDFLAGS+=-L${ROOT}/lib -L${ROOT}/usr/local/lib -L${ROOT}/lib/swift/linux -lgusimplewhiteboard -lFSM -ldl -lCLReflect -lgu_util
+
+.ifdef SYSROOT
+LDFLAGS+=-fuse-ld=/home/user/src/swift-tc/ctc-linux64-atom-2.5.2.74/bin/i686-aldebaran-linux-gnu-ld 
+.endif
