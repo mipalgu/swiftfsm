@@ -332,7 +332,21 @@ public class SwiftfsmParser: HelpableParser {
             throw ParsingErrors.generalError(error: "No parameters specified.")
             return j
         }
-        let split = keyAndValue.split(separator: "=").filter { !$0.isEmpty }
+        var split: [String] = []
+        var splitIndex = keyAndValue.startIndex
+        var index = keyAndValue.startIndex
+        for c in keyAndValue {
+            guard "=" == c else {
+                index = keyAndValue.index(after: index)
+                continue
+            }
+            split.append(String(keyAndValue[splitIndex..<index]))
+            splitIndex = keyAndValue.index(after: index)
+            index = splitIndex
+        }
+        split.append(String(keyAndValue[splitIndex..<keyAndValue.endIndex]))
+        split = split.filter { !$0.isEmpty }
+        //let split = keyAndValue.split(separator: "=").filter { !$0.isEmpty }
         if split.count > 2 {
             throw ParsingErrors.generalError(error: "Found multiple '=' characters when attempting to parse key and value from a parameter")
         }
