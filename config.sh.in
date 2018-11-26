@@ -3,7 +3,7 @@
 ID=au.edu.griffith.ict.mipal
 modver=1.0
 ver=3.0
-Mod=`grep name: Package.swift | head -n1 | cut -d'"' -f2`
+Mod=swiftfsm
 Module=${Mod}-$ver
 mod=`echo "${Mod}" | tr '[:upper:]' '[:lower:]'`+
 module="${mod}-${modver}"
