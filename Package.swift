@@ -42,7 +42,7 @@ let package = Package(
         .target(name: "Scheduling", dependencies: ["MachineStructure", "MachineLoading", "Timers", "GUSimpleWhiteboard"]),
         .target(name: "Verification", dependencies: ["IO", "MachineStructure", "Scheduling", "Timers"]),
         .target(name: "Parsing", dependencies: ["Scheduling", "Timers", "Verification"]),
-        .target(name: "CFSMWrappers", dependencies: ["GUSimpleWhiteboard", "Libraries", "Scheduling", "Timers"]),
+        .target(name: "CFSMWrappers", dependencies: ["GUSimpleWhiteboard", "Libraries", "Scheduling", "Timers", "Trees"]),
         .target(
             name: "swiftfsm_bin",
             dependencies: [
