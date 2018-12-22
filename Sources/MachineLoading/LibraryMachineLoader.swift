@@ -62,6 +62,7 @@ import IO
 import swiftfsm_helpers
 import Libraries
 import swiftfsm
+import Trees
 
 /**
  *  Load a `Machine` from a library.
@@ -115,18 +116,19 @@ public class LibraryMachineLoader: MachineLoader {
     /**
      *  Load the machines from the library specified from the path.
      *
-     *  To accomplish this the main method is called on the library.  Therefore
-     *  the library is responsible for adding itself to the factories array in
-     *  `FSM.Factories`.
+     *  To accomplish this the machines factory function is executed which
+     *  returns the necessary machine data.
      *
      *  - Parameter path: The path to the library.
      *
-     *  - Returns: An array of `AnyScheduleableFiniteStateMachine`s.  If there
-     *  was a problem, then the array is empty.
+     *  - Returns: A tuple containing the FSM and all of its dependencies.
      */
-    public func load(name: String, invoker: Invoker, clock: Timer, path: String) -> (FSMType, [Dependency])? {
+    public func load(name: String, fsms: Node<String>?, invoker: Invoker, clock: Timer, path: String) -> (FSMType, [Dependency])? {
         // Ignore empty paths
-        if (path.characters.count < 1) {
+        guard
+            false == path.isEmpty,
+            let fsms = fsms ?? self.fetchFSMName(fromLibraryPath: path).map({ Node($0) })
+        else {
             return nil
         }
         // Load the factory from the cache if it is there.
@@ -136,40 +138,48 @@ public class LibraryMachineLoader: MachineLoader {
         // Load the factory from the dynamic library.
         guard
             let resource = self.creator.open(path: path),
-            let fsms = self.loadMachine(name: name, invoker: invoker, clock: clock, library: resource)
+            let data = self.loadMachine(name: name, fsms: fsms, invoker: invoker, clock: clock, library: resource)
         else {
             return nil
         }
-        return fsms
+        return data
     }
 
     private func loadMachine(
         name: String,
+        fsms: Node<String>,
         invoker: Invoker,
         clock: Timer,
         library: LibraryResource
     ) -> (FSMType, [Dependency])? {
         // Get main method symbol
+        let symbolName = "create_" + fsms.content
         let result: (symbol: UnsafeMutableRawPointer?, error: String?) =
-            library.getSymbolPointer(symbol: "main")
+            library.getSymbolPointer(symbol: symbolName)
         // Error with fetching symbol
-        if (result.error != nil) {
-            self.printer.error(str: result.error!)
+        if let error = result.error {
+            self.printer.error(str: error)
             return nil
         }
-        // How many factories do we have now?
-        let count: Int = getFactoryCount() 
-        // Call the method
-        invoke_func(result.symbol!)
-        // Did the factory get added?
-        if (getFactoryCount() == count) {
-            self.printer.error(str: "Library was loaded but factory was not added")
+        // Convert the sybmol to a factory function.
+        guard let factory = result.symbol.flatMap({ unsafeBitCast($0, to: FSMArrayFactory.self) }) else {
+            self.printer.error(str: "Unable to fetch symbol '\(symbolName)' for machine \(name)")
             return nil
         }
-        // Get the factory, add it to the cache, call it and return the result.
-        let factory: FSMArrayFactory = getLastFactory()!
+        // Add the factory to the cache, call it and return the result.
         type(of: self).cache[library.path] = factory
         return factory(name, invoker, clock)
+    }
+    
+    fileprivate func fetchFSMName(fromLibraryPath path: String) -> String? {
+        guard
+            let lastComponent = path.split(separator: "/").last,
+            let name = lastComponent.split(separator: ".").first?.trimmingCharacters(in: .whitespaces),
+            false == name.isEmpty
+            else {
+                return nil
+        }
+        return true == name.hasPrefix("lib") ? String(name.dropFirst(3)) : String(name)
     }
     
 }

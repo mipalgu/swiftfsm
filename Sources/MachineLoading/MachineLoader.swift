@@ -58,6 +58,7 @@
 
 import FSM
 import swiftfsm
+import Trees
 
 /**
  *  Conforming types are capable of loading machines from a resource path.
@@ -72,6 +73,6 @@ public protocol MachineLoader {
      *  - Returns: An array of `AnyScheduleableFiniteStateMachine`s that were
      *  loaded from the resource.
      */
-    func load(name: String, invoker: Invoker, clock: Timer, path: String) -> (FSMType, [Dependency])?
+    func load(name: String, fsms: Node<String>?, invoker: Invoker, clock: Timer, path: String) -> (FSMType, [Dependency])?
     
 }
