@@ -293,9 +293,9 @@ public class Swiftfsm<
         let clock = FSMClock()
         let fsm: (FSMType, [Dependency])?
         if true == job.isClfsmMachine {
-            fsm = self.clfsmMachineLoader.load(name: name, invoker: invoker, clock: clock, path: job.path!)
+            fsm = self.clfsmMachineLoader.load(name: name, fsms: nil, invoker: invoker, clock: clock, path: job.path!)
         } else {
-            fsm = self.machineLoader.load(name: name, invoker: invoker, clock: clock, path: job.path!)
+            fsm = self.machineLoader.load(name: name, fsms: nil, invoker: invoker, clock: clock, path: job.path!)
         }
         guard let unwrappedFSM = fsm else {
             // Handle when we are unable to load the fsm.
