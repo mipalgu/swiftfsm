@@ -60,6 +60,31 @@ import swiftfsm
 
 public protocol ModifiableFSMGateway: FSMGateway {
     
-    var fsms: [Int: FSMType] { get set }
+    var fsms: [FSM_ID: FSMType] { get set }
+    
+    var ids: [String: FSM_ID] { get set }
+    
+}
+
+extension ModifiableFSMGateway {
+    
+    public func fsm(fromID id: FSM_ID) -> AnyScheduleableFiniteStateMachine {
+        guard let fsm = self.fsms[id] else {
+            fatalError("FSM with id '\(id)' does not exist.")
+        }
+        switch fsm {
+        case .parameterisedFSM:
+            fatalError("Unable to fetch FSM with id '\(id)' as it is a parameterised machine.")
+        case .scheduleableFSM(let fsm):
+            return fsm
+        }
+    }
+    
+    public func id(of name: String) -> FSM_ID {
+        guard let id = self.ids[name] else {
+            fatalError("Unable to fetch id for FSM named '\(name)'")
+        }
+        return id
+    }
     
 }
