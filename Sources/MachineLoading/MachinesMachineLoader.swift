@@ -62,7 +62,6 @@ import FSM
 import SwiftMachines
 import swiftfsm
 import IO
-import Trees
 
 @available(macOS 10.11, *)
 public final class MachinesMachineLoader: MachineLoader {
@@ -95,20 +94,13 @@ public final class MachinesMachineLoader: MachineLoader {
         self.swiftCompilerFlags = swiftCompilerFlags
     }
 
-    public func load(name: String, fsms: Node<String>?, invoker: swiftfsm.Invoker, clock: Timer, path: String) -> (FSMType, [Dependency])? {
+    public func load(name: String, invoker: swiftfsm.Invoker, clock: Timer, path: String) -> (FSMType, [Dependency])? {
         guard let machine = self.parser.parseMachine(atPath: path) else {
             self.parser.errors.forEach(self.printer.error)
             return nil
         }
-        func convert(_ machine: Machine) -> Node<String> {
-            var node = Node(machine.name)
-            machine.submachines.forEach { node.children.append(convert($0)) }
-            machine.parameterisedMachines.forEach { node.children.append(convert($0)) }
-            return node
-        }
-        let fsms = fsms ?? convert(machine)
         if false == self.compiler.shouldCompile(machine) {
-            return self.libraryLoader.load(name: name, fsms: fsms, invoker: invoker, clock: clock, path: self.compiler.outputPath(forMachine: machine))
+            return self.libraryLoader.load(name: name, invoker: invoker, clock: clock, path: self.compiler.outputPath(forMachine: machine))
         }
         guard
             let outputPath = self.compiler.compile(
@@ -121,7 +113,7 @@ public final class MachinesMachineLoader: MachineLoader {
             self.compiler.errors.forEach(self.printer.error)
             return nil
         }
-        return self.libraryLoader.load(name: name, fsms: fsms, invoker: invoker, clock: clock, path: outputPath)
+        return self.libraryLoader.load(name: name, invoker: invoker, clock: clock, path: outputPath)
     }
 
 }

@@ -62,7 +62,6 @@ import IO
 import swiftfsm_helpers
 import Libraries
 import swiftfsm
-import Trees
 
 /**
  *  Load a `Machine` from a library.
@@ -125,12 +124,9 @@ public class LibraryMachineLoader: MachineLoader {
      *
      *  - Returns: A tuple containing the FSM and all of its dependencies.
      */
-    public func load(name: String, fsms: Node<String>?, invoker: Invoker, clock: Timer, path: String) -> (FSMType, [Dependency])? {
+    public func load(name: String, invoker: Invoker, clock: Timer, path: String) -> (FSMType, [Dependency])? {
         // Ignore empty paths
-        guard
-            false == path.isEmpty,
-            let fsms = fsms ?? self.fetchFSMName(fromLibraryPath: path).map({ Node($0) })
-        else {
+        guard false == path.isEmpty else {
             return nil
         }
         // Load the factory from the cache if it is there.
@@ -140,7 +136,7 @@ public class LibraryMachineLoader: MachineLoader {
         // Load the factory from the dynamic library.
         guard
             let resource = self.creator.open(path: path),
-            let data = self.loadMachine(name: name, fsms: fsms, invoker: invoker, clock: clock, library: resource)
+            let data = self.loadMachine(name: name, invoker: invoker, clock: clock, library: resource)
         else {
             return nil
         }
@@ -149,13 +145,12 @@ public class LibraryMachineLoader: MachineLoader {
 
     private func loadMachine(
         name: String,
-        fsms: Node<String>,
         invoker: Invoker,
         clock: Timer,
         library: LibraryResource
     ) -> (FSMType, [Dependency])? {
         // Get main method symbol
-        let symbolName = "make_" + fsms.content
+        let symbolName = "make_" + name
         let result: (symbol: UnsafeMutableRawPointer?, error: String?) =
             library.getSymbolPointer(symbol: symbolName)
         // Error with fetching symbol
@@ -172,17 +167,6 @@ public class LibraryMachineLoader: MachineLoader {
             return nil
         }
         return data
-    }
-    
-    fileprivate func fetchFSMName(fromLibraryPath path: String) -> String? {
-        guard
-            let lastComponent = path.split(separator: "/").last,
-            let name = lastComponent.split(separator: ".").first?.trimmingCharacters(in: .whitespaces),
-            false == name.isEmpty
-            else {
-                return nil
-        }
-        return true == name.hasPrefix("lib") ? String(name.dropFirst(3)) : String(name)
     }
     
 }
