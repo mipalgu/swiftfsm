@@ -34,6 +34,7 @@ let package = Package(
     targets: [
         .target(name: "CFSMs", dependencies: []),
         .target(name: "swiftfsm_helpers", dependencies: []),
+        .target(name: "Gateways", dependencies: []),
         .target(name: "Timers", dependencies: ["swiftfsm_helpers"]),
         .target(name: "Libraries", dependencies: ["IO"]),
         .target(name: "MachineStructure", dependencies: convert(["Libraries", "GUSimpleWhiteboard", "Timers"]) + foundationDeps),
