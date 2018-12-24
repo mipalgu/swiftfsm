@@ -71,11 +71,13 @@ import Trees
  */
 public class LibraryMachineLoader: MachineLoader {
     
+    fileprivate typealias SymbolSignature = @convention(c) (Any, Any, Any) -> Any
+    
     /*
      *  This is used to remember factories for paths, therefore allowing us to
      *  just use this instead of loading it from the file system.
      */
-    private static var cache: [String: FSMArrayFactory] = [:]
+    private static var cache: [String: SymbolSignature] = [:]
 
     /**
      *  Used to create the libraries.
@@ -133,7 +135,7 @@ public class LibraryMachineLoader: MachineLoader {
         }
         // Load the factory from the cache if it is there.
         if let factory = type(of: self).cache[path] {
-            return factory(name, invoker, clock)
+            return factory(name, invoker, clock) as? (FSMType, [Dependency])
         }
         // Load the factory from the dynamic library.
         guard
@@ -153,22 +155,23 @@ public class LibraryMachineLoader: MachineLoader {
         library: LibraryResource
     ) -> (FSMType, [Dependency])? {
         // Get main method symbol
-        let symbolName = "create_" + fsms.content
+        let symbolName = "make_" + fsms.content
         let result: (symbol: UnsafeMutableRawPointer?, error: String?) =
             library.getSymbolPointer(symbol: symbolName)
         // Error with fetching symbol
-        if let error = result.error {
-            self.printer.error(str: error)
+        guard let symbol = result.symbol else {
+            self.printer.error(str: result.error ?? "Unable to fetch symbol '\(symbolName)' for machine \(name)")
             return nil
         }
         // Convert the sybmol to a factory function.
-        guard let factory = result.symbol.flatMap({ unsafeBitCast($0, to: FSMArrayFactory.self) }) else {
-            self.printer.error(str: "Unable to fetch symbol '\(symbolName)' for machine \(name)")
-            return nil
-        }
+        let factory = unsafeBitCast(symbol, to: SymbolSignature.self)
         // Add the factory to the cache, call it and return the result.
         type(of: self).cache[library.path] = factory
-        return factory(name, invoker, clock)
+        guard let data = factory(name, invoker, clock) as? (FSMType, [Dependency]) else {
+            self.printer.error(str: "Unable to call factory function '\(symbolName)' for machine \(name)")
+            return nil
+        }
+        return data
     }
     
     fileprivate func fetchFSMName(fromLibraryPath path: String) -> String? {
