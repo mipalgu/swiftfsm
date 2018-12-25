@@ -60,18 +60,36 @@ import FSM
 import swiftfsm
 import Utilities
 
-public final class RestrictiveFSMGateway<Gateway: FSMGateway, Formatter: Formatter>: FSMGateway {
+public final class RestrictiveFSMGateway<Gateway: FSMGateway, _Formatter: Formatter>: FSMGateway {
     
     fileprivate let gateway: Gateway
     
     fileprivate let whitelist: Set<FSM_ID>
     
-    fileprivate let formatter: Formatter
+    fileprivate let formatter: _Formatter
     
-    public init(gateway: Gateway, whitelist: Set<FSM_ID>, formatter: Formatter) {
+    public init(gateway: Gateway, whitelist: Set<FSM_ID>, formatter: _Formatter) {
         self.gateway = gateway
         self.whitelist = whitelist
         self.formatter = formatter
+    }
+    
+    public func invokeSelf<P, R>(_ name: String, with parameters: P) -> Promise<R> where P : Variables {
+        let name = self.formatter.format(name)
+        let id = self.gateway.id(of: name)
+        guard true == self.whitelist.contains(id) else {
+            fatalError("Unable to fetch id of fsm named \(name)")
+        }
+        return self.invokeSelf(id, with: parameters)
+    }
+    
+    public func invoke<P, R>(_ name: String, with parameters: P) -> Promise<R> where P : Variables {
+        let name = self.formatter.format(name)
+        let id = self.gateway.id(of: name)
+        guard true == self.whitelist.contains(id) else {
+            fatalError("Unable to fetch id of fsm named \(name)")
+        }
+        return self.invoke(id, with: parameters)
     }
     
     public func invoke<P: Variables, R>(_ id: FSM_ID, with parameters: P) -> Promise<R> {
@@ -106,7 +124,7 @@ public final class RestrictiveFSMGateway<Gateway: FSMGateway, Formatter: Formatt
     
 }
 
-extension RestrictiveFSMGateway where Formatter == NullFormatter {
+extension RestrictiveFSMGateway where _Formatter == NullFormatter {
     
     public convenience init(gateway: Gateway, whitelist: Set<FSM_ID>) {
         self.init(gateway: gateway, whitelist: whitelist, formatter: NullFormatter())
