@@ -114,19 +114,27 @@ public class RoundRobinScheduler<Tokenizer: SchedulerTokenizer>: Scheduler where
     public func run(_ machines: [Machine]) -> Void {
         self.promises = [:]
         let tokens = self.tokenizer.separate(machines)
+        var latestID: FSM_ID = 0
         tokens.forEach {
             $0.forEach {
+                // Create id's for all fsms.
+                if nil == self.ids[$0.fullyQualifiedName] {
+                    self.ids[$0.fullyQualifiedName] = latestID
+                    self.fsms[latestID] = $0.type
+                    latestID += 1
+                }
                 guard let parameterisedFSM = $0.type.asParameterisedFiniteStateMachine else {
                     return
                 }
                 parameterisedFSM.suspend()
+                let id = self.id(of: $0.fullyQualifiedName)
                 if false == $0.isRootFSM {
-                    self.promises[parameterisedFSM.name] = (parameterisedFSM, [])
+                    self.promises[id] = (parameterisedFSM, [])
                     return
                 }
                 let clone = parameterisedFSM.clone()
                 clone.restart()
-                self.promises[parameterisedFSM.name] = (parameterisedFSM, [PromiseData(fsm: clone, hasFinished: false)])
+                self.promises[id] = (parameterisedFSM, [PromiseData(fsm: clone, hasFinished: false)])
             }
         }
         var jobs = self.fetchJobs(fromTokens: tokens)
@@ -139,8 +147,8 @@ public class RoundRobinScheduler<Tokenizer: SchedulerTokenizer>: Scheduler where
                 var j = 0
                 let machines: Set<Machine> = self.getMachines(fromJob: job)
                 machines.forEach { $0.fsm.takeSnapshot() }
-                for (fsm, machine) in job {
-                    let fsm = self.promises[fsm.name]?.stack.first?.fsm.asScheduleableFiniteStateMachine ?? fsm
+                for (id, fsm, machine) in job {
+                    let fsm = self.promises[id]?.stack.first?.fsm.asScheduleableFiniteStateMachine ?? fsm
                     machine.clock.update(fromFSM: fsm)
                     DEBUG = machine.debug
                     if (true == scheduleHandler.handleUnloadedMachine(fsm)) {
@@ -150,9 +158,9 @@ public class RoundRobinScheduler<Tokenizer: SchedulerTokenizer>: Scheduler where
                     self.invocations = false
                     fsm.next()
                     finish = finish && (fsm.hasFinished || fsm.isSuspended) && (false == self.invocations)
-                    if true == fsm.hasFinished, nil != self.promises[fsm.name] {
-                        self.promises[fsm.name]?.stack.first?.hasFinished = true
-                        self.promises[fsm.name]?.stack.removeFirst()
+                    if true == fsm.hasFinished, nil != self.promises[id] {
+                        self.promises[id]?.stack.first?.hasFinished = true
+                        self.promises[id]?.stack.removeFirst()
                         finish = false
                     }
                     j += 1
@@ -196,18 +204,18 @@ public class RoundRobinScheduler<Tokenizer: SchedulerTokenizer>: Scheduler where
         return promiseData.makePromise()
     }
     
-    private func fetchJobs(fromTokens tokens: [[SchedulerToken]]) -> [[(AnyScheduleableFiniteStateMachine, Machine)]] {
+    private func fetchJobs(fromTokens tokens: [[SchedulerToken]]) -> [[(FSM_ID, AnyScheduleableFiniteStateMachine, Machine)]] {
         return tokens.map { tokens in
             tokens.map { token in
-                return (token.fsm, token.machine)
+                return (self.id(of: token.fullyQualifiedName), token.fsm, token.machine)
             }
         }
     }
 
-    private func getMachines(fromJob job: [(AnyScheduleableFiniteStateMachine, Machine)]) -> Set<Machine> {
+    private func getMachines(fromJob job: [(FSM_ID, AnyScheduleableFiniteStateMachine, Machine)]) -> Set<Machine> {
         var machines: Set<Machine> = []
         job.forEach {
-            machines.insert($1)
+            machines.insert($2)
         }
         return machines
     }
