@@ -70,6 +70,14 @@ public protocol InvokerDelegator: Invoker {
 
 extension InvokerDelegator {
     
+    public func invoke<P, R>(_ name: String, with parameters: P) -> Promise<R> where P : Variables {
+        return self.invoker.invokeSelf(name, with: parameters)
+    }
+    
+    public func invokeSelf<P, R>(_ name: String, with parameters: P) -> Promise<R> where P : Variables {
+        return self.invoker.invoke(name, with: parameters)
+    }
+    
     public func invoke<P, R>(_ id: FSM_ID, with parameters: P) -> Promise<R> where P : Variables {
         return self.invoker.invoke(id, with: parameters)
     }
