@@ -87,9 +87,13 @@ public class RoundRobinScheduler<Tokenizer: SchedulerTokenizer>: Scheduler where
     
     private let printer: Printer
     
-    fileprivate var promises: [String: (fsm: AnyParameterisedFiniteStateMachine, stack: [PromiseData])] = [:]
+    fileprivate var promises: [FSM_ID: (fsm: AnyParameterisedFiniteStateMachine, stack: [PromiseData])] = [:]
     
     fileprivate var invocations: Bool = false
+    
+    public var fsms: [FSM_ID : FSMType] = [:]
+    
+    public var ids: [String: FSM_ID] = [:]
     
     /**
      *  Create a new `RoundRobinScheduler`.
@@ -163,31 +167,31 @@ public class RoundRobinScheduler<Tokenizer: SchedulerTokenizer>: Scheduler where
         }
     }
     
-    public func invoke<P: Variables, R>(_ name: String, with parameters: P) -> Promise<R> {
-        guard let existingPromiseData = self.promises[name] else {
-            self.error("Attempting to invoke \(name) when it has not been scheduled.")
+    public func invoke<P: Variables, R>(_ id: FSM_ID, with parameters: P) -> Promise<R> {
+        guard let existingPromiseData = self.promises[id] else {
+            self.error("Attempting to invoke FSM with id \(id) when it has not been scheduled.")
         }
         guard true == existingPromiseData.stack.isEmpty else {
-            self.error("Attempting to invoke \(name) when it is already running.")
+            self.error("Attempting to invoke FSM with id \(id) when it is already running.")
         }
-        return self.handleInvocation(existingPromiseData.fsm, with: parameters)
+        return self.handleInvocation(id: id, fsm: existingPromiseData.fsm, with: parameters)
     }
     
-    public func invokeSelf<P: Variables, R>(_ name: String, with parameters: P) -> Promise<R> {
-        guard let existingPromiseData = self.promises[name] else {
-            self.error("Attempting to invoke \(name) when it has not been scheduled.")
+    public func invokeSelf<P: Variables, R>(_ id: FSM_ID, with parameters: P) -> Promise<R> {
+        guard let existingPromiseData = self.promises[id] else {
+            self.error("Attempting to invoke FSM with id \(id) when it has not been scheduled.")
         }
         guard existingPromiseData.stack.count <= self.stackLimit else {
-            self.error("Stack Overflow: Attempting to call \(name) more times than the current stack limit (\(self.stackLimit)).")
+            self.error("Stack Overflow: Attempting to call FSM with id \(id) more times than the current stack limit (\(self.stackLimit)).")
         }
-        return self.handleInvocation(existingPromiseData.fsm, with: parameters)
+        return self.handleInvocation(id: id, fsm: existingPromiseData.fsm, with: parameters)
     }
     
-    fileprivate func handleInvocation<P: Variables, R>(_ fsm: AnyParameterisedFiniteStateMachine, with parameters: P) -> Promise<R> {
+    fileprivate func handleInvocation<P: Variables, R>(id: FSM_ID, fsm: AnyParameterisedFiniteStateMachine, with parameters: P) -> Promise<R> {
         let promiseData = PromiseData(fsm: fsm.clone(), hasFinished: false)
         promiseData.fsm.parameters(parameters)
         promiseData.fsm.restart()
-        self.promises[fsm.name]?.stack.insert(promiseData, at: 0)
+        self.promises[id]?.stack.insert(promiseData, at: 0)
         self.invocations = true
         return promiseData.makePromise()
     }
