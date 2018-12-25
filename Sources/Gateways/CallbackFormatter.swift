@@ -1,8 +1,8 @@
 /*
- * RestrictiveFSMGateway.swift 
- * Gateways 
+ * CallbackFormatter.swift
+ * Gateways
  *
- * Created by Callum McColl on 25/12/2018.
+ * Created by Callum McColl on 26/12/18.
  * Copyright © 2018 Callum McColl. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -56,60 +56,16 @@
  *
  */
 
-import FSM
-import swiftfsm
-import Utilities
-
-public final class RestrictiveFSMGateway<Gateway: FSMGateway, Formatter: Formatter>: FSMGateway {
+public final class CallbackFormatter: Formatter {
     
-    fileprivate let gateway: Gateway
+    fileprivate var _format: (String) -> String
     
-    fileprivate let whitelist: Set<FSM_ID>
-    
-    fileprivate let formatter: Formatter
-    
-    public init(gateway: Gateway, whitelist: Set<FSM_ID>, formatter: Formatter) {
-        self.gateway = gateway
-        self.whitelist = whitelist
-        self.formatter = formatter
+    public init(_ _format: @escaping (String) -> String) {
+        self._format = _format
     }
     
-    public func invoke<P: Variables, R>(_ id: FSM_ID, with parameters: P) -> Promise<R> {
-        guard true == self.whitelist.contains(id) else {
-            fatalError("Unable to invoke fsm with id \(id)")
-        }
-        return self.gateway.invoke(id, with: parameters)
-    }
-    
-    public func invokeSelf<P: Variables, R>(_ id: FSM_ID, with parameters: P) -> Promise<R> {
-        guard true == self.whitelist.contains(id) else {
-            fatalError("Unable to invoke fsm with id \(id)")
-        }
-        return self.gateway.invokeSelf(id, with: parameters)
-    }
-    
-    public func fsm(fromID id: FSM_ID) -> AnyScheduleableFiniteStateMachine {
-        guard true == self.whitelist.contains(id) else {
-            fatalError("Unable to fetch fsm with id \(id)")
-        }
-        return self.gateway.fsm(fromID: id)
-    }
-    
-    public func id(of name: String) -> FSM_ID {
-        let name = self.formatter.format(name)
-        let id = self.gateway.id(of: name)
-        guard true == self.whitelist.contains(id) else {
-            fatalError("Unable to fetch id of fsm named \(name)")
-        }
-        return id
-    }
-    
-}
-
-extension RestrictiveFSMGateway where Formatter == NullFormatter {
-    
-    public convenience init(gateway: Gateway, whitelist: Set<FSM_ID>) {
-        self.init(gateway: gateway, whitelist: whitelist, formatter: NullFormatter())
+    public func format(_ str: String) -> String {
+        return self._format(str)
     }
     
 }
