@@ -124,19 +124,19 @@ public class LibraryMachineLoader: MachineLoader {
      *
      *  - Returns: A tuple containing the FSM and all of its dependencies.
      */
-    public func load(name: String, invoker: Invoker, clock: Timer, path: String) -> (FSMType, [Dependency])? {
+    public func load(name: String, gateway: FSMGateway, clock: Timer, path: String) -> (FSMType, [Dependency])? {
         // Ignore empty paths
         guard false == path.isEmpty else {
             return nil
         }
         // Load the factory from the cache if it is there.
         if let factory = type(of: self).cache[path] {
-            return factory(name, invoker, clock) as? (FSMType, [Dependency])
+            return factory(name, gateway, clock) as? (FSMType, [Dependency])
         }
         // Load the factory from the dynamic library.
         guard
             let resource = self.creator.open(path: path),
-            let data = self.loadMachine(name: name, invoker: invoker, clock: clock, library: resource)
+            let data = self.loadMachine(name: name, gateway: gateway, clock: clock, library: resource)
         else {
             return nil
         }
@@ -145,7 +145,7 @@ public class LibraryMachineLoader: MachineLoader {
 
     private func loadMachine(
         name: String,
-        invoker: Invoker,
+        gateway: FSMGateway,
         clock: Timer,
         library: LibraryResource
     ) -> (FSMType, [Dependency])? {
@@ -162,7 +162,7 @@ public class LibraryMachineLoader: MachineLoader {
         let factory = unsafeBitCast(symbol, to: SymbolSignature.self)
         // Add the factory to the cache, call it and return the result.
         type(of: self).cache[library.path] = factory
-        guard let data = factory(name, invoker, clock) as? (FSMType, [Dependency]) else {
+        guard let data = factory(name, gateway, clock) as? (FSMType, [Dependency]) else {
             self.printer.error(str: "Unable to call factory function '\(symbolName)' for machine \(name)")
             return nil
         }

@@ -64,7 +64,7 @@ public final class NullMachineLoader: MachineLoader {
     
     public init() {}
     
-    public func load(name _: String, invoker _: Invoker, clock _: Timer, path _: String) -> (FSMType, [Dependency])? {
+    public func load(name _: String, gateway _: FSMGateway, clock _: Timer, path _: String) -> (FSMType, [Dependency])? {
         return nil
     }
     

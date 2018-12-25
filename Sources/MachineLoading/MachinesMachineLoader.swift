@@ -94,13 +94,13 @@ public final class MachinesMachineLoader: MachineLoader {
         self.swiftCompilerFlags = swiftCompilerFlags
     }
 
-    public func load(name: String, invoker: swiftfsm.Invoker, clock: Timer, path: String) -> (FSMType, [Dependency])? {
+    public func load(name: String, gateway: FSMGateway, clock: Timer, path: String) -> (FSMType, [Dependency])? {
         guard let machine = self.parser.parseMachine(atPath: path) else {
             self.parser.errors.forEach(self.printer.error)
             return nil
         }
         if false == self.compiler.shouldCompile(machine) {
-            return self.libraryLoader.load(name: name, invoker: invoker, clock: clock, path: self.compiler.outputPath(forMachine: machine))
+            return self.libraryLoader.load(name: name, gateway: gateway, clock: clock, path: self.compiler.outputPath(forMachine: machine))
         }
         guard
             let outputPath = self.compiler.compile(
@@ -113,7 +113,7 @@ public final class MachinesMachineLoader: MachineLoader {
             self.compiler.errors.forEach(self.printer.error)
             return nil
         }
-        return self.libraryLoader.load(name: name, invoker: invoker, clock: clock, path: outputPath)
+        return self.libraryLoader.load(name: name, gateway: gateway, clock: clock, path: outputPath)
     }
 
 }

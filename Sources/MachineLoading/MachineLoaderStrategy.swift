@@ -69,11 +69,11 @@ public final class MachineLoaderStrategy: MachineLoader {
         self.libraryLoader = libraryLoader
     }
 
-    public func load(name: String, invoker: Invoker, clock: Timer, path: String) -> (FSMType, [Dependency])? {
+    public func load(name: String, gateway: FSMGateway, clock: Timer, path: String) -> (FSMType, [Dependency])? {
         if path.hasSuffix(".machine") || path.hasSuffix(".machine/") {
-            return self.machineLoader.load(name: name, invoker: invoker, clock: clock, path: path)
+            return self.machineLoader.load(name: name, gateway: gateway, clock: clock, path: path)
         }
-        return self.libraryLoader.load(name: name, invoker: invoker, clock: clock, path: path)
+        return self.libraryLoader.load(name: name, gateway: gateway, clock: clock, path: path)
     }
 
 }
