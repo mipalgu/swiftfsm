@@ -61,6 +61,8 @@ import swiftfsm
 
 public protocol ModifiableFSMGateway: FSMGateway {
     
+    var latestID: FSM_ID { get set }
+    
     var fsms: [FSM_ID: FSMType] { get set }
     
     var ids: [String: FSM_ID] { get set }
@@ -81,7 +83,10 @@ extension ModifiableFSMGateway {
     
     public func id(of name: String) -> FSM_ID {
         guard let id = self.ids[name] else {
-            fatalError("Unable to fetch id for FSM named '\(name)'")
+            let id = self.latestID
+            self.ids[name] = id
+            self.latestID = self.latestID.advanced(by: 1)
+            return id
         }
         return id
     }

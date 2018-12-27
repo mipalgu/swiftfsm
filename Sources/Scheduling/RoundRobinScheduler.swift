@@ -91,6 +91,8 @@ public class RoundRobinScheduler<Tokenizer: SchedulerTokenizer>: Scheduler where
     
     fileprivate var invocations: Bool = false
     
+    public var latestID: FSM_ID = 0
+    
     public var fsms: [FSM_ID : FSMType] = [:]
     
     public var ids: [String: FSM_ID] = [:]
@@ -114,14 +116,13 @@ public class RoundRobinScheduler<Tokenizer: SchedulerTokenizer>: Scheduler where
     public func run(_ machines: [Machine]) -> Void {
         self.promises = [:]
         let tokens = self.tokenizer.separate(machines)
-        var latestID: FSM_ID = 0
         tokens.forEach {
             $0.forEach {
                 // Create id's for all fsms.
                 if nil == self.ids[$0.fullyQualifiedName] {
                     self.ids[$0.fullyQualifiedName] = latestID
-                    self.fsms[latestID] = $0.type
-                    latestID += 1
+                    self.fsms[self.latestID] = $0.type
+                    self.latestID += 1
                 }
                 guard let parameterisedFSM = $0.type.asParameterisedFiniteStateMachine else {
                     return
