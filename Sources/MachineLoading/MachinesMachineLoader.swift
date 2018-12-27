@@ -100,7 +100,7 @@ public final class MachinesMachineLoader: MachineLoader {
             return nil
         }
         if false == self.compiler.shouldCompile(machine) {
-            return self.libraryLoader.load(name: name, gateway: gateway, clock: clock, path: self.compiler.outputPath(forMachine: machine))
+            return self.libraryLoader.load(name: machine.name, gateway: gateway, clock: clock, path: self.compiler.outputPath(forMachine: machine))
         }
         guard
             let outputPath = self.compiler.compile(
@@ -113,7 +113,7 @@ public final class MachinesMachineLoader: MachineLoader {
             self.compiler.errors.forEach(self.printer.error)
             return nil
         }
-        return self.libraryLoader.load(name: name, gateway: gateway, clock: clock, path: outputPath)
+        return self.libraryLoader.load(name: machine.name, gateway: gateway, clock: clock, path: outputPath)
     }
 
 }

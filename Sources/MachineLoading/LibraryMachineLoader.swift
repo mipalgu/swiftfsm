@@ -140,7 +140,7 @@ public class LibraryMachineLoader: MachineLoader {
         else {
             return nil
         }
-        return data
+        return (data, [])
     }
 
     private func loadMachine(
@@ -148,7 +148,7 @@ public class LibraryMachineLoader: MachineLoader {
         gateway: FSMGateway,
         clock: Timer,
         library: LibraryResource
-    ) -> (FSMType, [Dependency])? {
+    ) -> FSMType? {
         // Get main method symbol
         let symbolName = "make_" + name
         let result: (symbol: UnsafeMutableRawPointer?, error: String?) =
@@ -162,7 +162,7 @@ public class LibraryMachineLoader: MachineLoader {
         let factory = unsafeBitCast(symbol, to: SymbolSignature.self)
         // Add the factory to the cache, call it and return the result.
         type(of: self).cache[library.path] = factory
-        guard let data = factory(name, gateway, clock) as? (FSMType, [Dependency]) else {
+        guard let data = factory(name, gateway, clock) as? FSMType else {
             self.printer.error(str: "Unable to call factory function '\(symbolName)' for machine \(name)")
             return nil
         }
