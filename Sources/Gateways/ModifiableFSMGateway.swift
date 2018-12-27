@@ -69,16 +69,14 @@ public protocol ModifiableFSMGateway: FSMGateway {
 
 extension ModifiableFSMGateway {
     
-    public func fsm(fromID id: FSM_ID) -> AnyScheduleableFiniteStateMachine {
+    public func fsm(fromID id: FSM_ID) -> AnyControllableFiniteStateMachine {
         guard let fsm = self.fsms[id] else {
             fatalError("FSM with id '\(id)' does not exist.")
         }
-        switch fsm {
-        case .parameterisedFSM:
-            fatalError("Unable to fetch FSM with id '\(id)' as it is a parameterised machine.")
-        case .scheduleableFSM(let fsm):
-            return fsm
+        guard let controllableFSM = fsm.asControllableFiniteStateMachine else {
+            fatalError("Unable to fetch FSM with id '\(id)' as it is not a controllable FSM.")
         }
+        return controllableFSM
     }
     
     public func id(of name: String) -> FSM_ID {

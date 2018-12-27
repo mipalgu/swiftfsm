@@ -106,7 +106,7 @@ public final class RestrictiveFSMGateway<Gateway: FSMGateway, _Formatter: Format
         return self.gateway.invokeSelf(id, with: parameters)
     }
     
-    public func fsm(fromID id: FSM_ID) -> AnyScheduleableFiniteStateMachine {
+    public func fsm(fromID id: FSM_ID) -> AnyControllableFiniteStateMachine {
         guard true == self.whitelist.contains(id) else {
             fatalError("Unable to fetch fsm with id \(id)")
         }
