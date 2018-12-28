@@ -119,16 +119,12 @@ public class RoundRobinScheduler<Tokenizer: SchedulerTokenizer>: Scheduler where
         tokens.forEach {
             $0.forEach {
                 // Create id's for all fsms.
-                if nil == self.ids[$0.fullyQualifiedName] {
-                    self.ids[$0.fullyQualifiedName] = latestID
-                    self.fsms[self.latestID] = $0.type
-                    self.latestID += 1
-                }
+                let id = self.id(of: $0.fullyQualifiedName)
+                self.fsms[id] = $0.type
                 guard let parameterisedFSM = $0.type.asParameterisedFiniteStateMachine else {
                     return
                 }
                 parameterisedFSM.suspend()
-                let id = self.id(of: $0.fullyQualifiedName)
                 if false == $0.isRootFSM {
                     self.promises[id] = (parameterisedFSM, [])
                     return
