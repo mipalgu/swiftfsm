@@ -150,7 +150,7 @@ public func handleUnloadedMachine(_ fsm: AnyScheduleableFiniteStateMachine) -> B
      * - Parameter path path to the machine library
      * - Return an array of FSMs to be scheduled
      */
-    public func load(name _: String, gateway _: FSMGateway, clock _: Timer, path: String) -> (FSMType, [Dependency])? {
+    public func load<Gateway: FSMGateway>(name _: String, gateway _: Gateway, clock _: Timer, path: String) -> (FSMType, [Dependency])? {
         // Call load function with path.
         let loadMachinePtr = getFunctionPtr(loadMachineFunc)
         let cPath = path.utf8CString 

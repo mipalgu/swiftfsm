@@ -284,10 +284,10 @@ public class Swiftfsm<
         return name
     }
 
-    private func loadFsm(
+    private func loadFsm<Gateway: FSMGateway>(
         _ job: Job,
         name: String,
-        gateway: FSMGateway,
+        gateway: Gateway,
         parameters: [String: String]
     ) -> (FSMType, [Dependency], FSMClock) {
         let clock = FSMClock()
@@ -313,7 +313,7 @@ public class Swiftfsm<
         return (unwrappedFSM.0, unwrappedFSM.1, clock)
     }
 
-    private func handleJob(_ job: Job, gateway: FSMGateway) -> [Machine] {
+    private func handleJob<Gateway: FSMGateway>(_ job: Job, gateway: Gateway) -> [Machine] {
         var name: String = self.getMachinesName(job)
         // Handle when there is no path in the Task.
         guard let path = job.path else {

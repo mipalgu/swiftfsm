@@ -62,6 +62,7 @@ import FSM
 import SwiftMachines
 import swiftfsm
 import IO
+import Gateways
 
 @available(macOS 10.11, *)
 public final class MachinesMachineLoader: MachineLoader {
@@ -94,7 +95,7 @@ public final class MachinesMachineLoader: MachineLoader {
         self.swiftCompilerFlags = swiftCompilerFlags
     }
 
-    public func load(name: String, gateway: FSMGateway, clock: Timer, path: String) -> (FSMType, [Dependency])? {
+    public func load<Gateway: FSMGateway>(name: String, gateway: Gateway, clock: Timer, path: String) -> (FSMType, [Dependency])? {
         guard let machine = self.parser.parseMachine(atPath: path) else {
             self.parser.errors.forEach(self.printer.error)
             return nil

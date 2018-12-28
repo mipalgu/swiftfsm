@@ -124,7 +124,7 @@ public class LibraryMachineLoader: MachineLoader {
      *
      *  - Returns: A tuple containing the FSM and all of its dependencies.
      */
-    public func load(name: String, gateway: FSMGateway, clock: Timer, path: String) -> (FSMType, [Dependency])? {
+    public func load<Gateway: FSMGateway>(name: String, gateway: Gateway, clock: Timer, path: String) -> (FSMType, [Dependency])? {
         // Ignore empty paths
         guard false == path.isEmpty else {
             return nil
@@ -143,9 +143,9 @@ public class LibraryMachineLoader: MachineLoader {
         return (data, [])
     }
 
-    private func loadMachine(
+    private func loadMachine<Gateway: FSMGateway>(
         name: String,
-        gateway: FSMGateway,
+        gateway: Gateway,
         clock: Timer,
         library: LibraryResource
     ) -> FSMType? {

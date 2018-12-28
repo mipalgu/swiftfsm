@@ -72,6 +72,6 @@ public protocol MachineLoader {
      *  - Returns: An array of `AnyScheduleableFiniteStateMachine`s that were
      *  loaded from the resource.
      */
-    func load(name: String, gateway: FSMGateway, clock: Timer, path: String) -> (FSMType, [Dependency])?
+    func load<Gateway: FSMGateway>(name: String, gateway: Gateway, clock: Timer, path: String) -> (FSMType, [Dependency])?
     
 }
