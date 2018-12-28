@@ -91,18 +91,12 @@ extension ModifiableFSMGateway {
         return id
     }
     
-    public func invokeSelf<P, R>(_ name: String, with parameters: P) -> Promise<R> where P : Variables {
-        guard let id = self.ids[name] else {
-            fatalError("Unable to fetch id for FSM named '\(name)'")
-        }
-        return self.invokeSelf(id, with: parameters)
+    public func invokeSelf<P, R>(_ name: String, with parameters: P) -> Promise<R> where P: Variables {
+        return self.invokeSelf(self.id(of: name), with: parameters)
     }
     
-    public func invoke<P, R>(_ name: String, with parameters: P) -> Promise<R> where P : Variables {
-        guard let id = self.ids[name] else {
-            fatalError("Unable to fetch id for FSM named '\(name)'")
-        }
-        return self.invoke(id, with: parameters)
+    public func invoke<P, R>(_ name: String, with parameters: P) -> Promise<R> where P: Variables {
+        return self.invoke(self.id(of: name), with: parameters)
     }
     
 }
