@@ -146,11 +146,9 @@ public final class MachinesMachineLoader: MachineLoader {
     fileprivate func convert(_ fsm: FSMType, dependencies: [Dependency]) -> Dependency {
         switch fsm {
         case .controllableFSM(let fsm):
-            return .submachine(fsm.asScheduleableFiniteStateMachine, dependencies)
+            return .submachine(fsm, dependencies)
         case .parameterisedFSM(let fsm):
             return .parameterisedMachine(fsm, fsm.name, dependencies)
-        case .scheduleableFSM(let fsm):
-            return .submachine(fsm, dependencies)
         }
     }
 
