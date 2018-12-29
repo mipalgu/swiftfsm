@@ -112,8 +112,13 @@ public final class MachinesMachineLoader: MachineLoader {
         let dependantIds = dependantMachines.map { gateway.id(of: format($0.name)) }
         let newGateway = RestrictiveFSMGateway(
             gateway: gateway,
-            whitelist: Set(dependantIds),
-            formatter: CallbackFormatter(format)
+            whitelist: Set(dependantIds + [gateway.id(of: prefix + "." + machine.name)]),
+            formatter: CallbackFormatter {
+                if $0 == machine.name {
+                    return prefix + "." + machine.name
+                }
+                return format($0)
+            }
         )
         guard let recursed = dependantMachines.failMap({
             load(machine: $0, gateway: gateway, clock: clock, prefix: prefix + "." + machine.name).map {
