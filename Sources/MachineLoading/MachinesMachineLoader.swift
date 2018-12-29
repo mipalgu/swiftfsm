@@ -101,12 +101,12 @@ public final class MachinesMachineLoader: MachineLoader {
             self.parser.errors.forEach(self.printer.error)
             return nil
         }
-        return load(machine: machine, gateway: gateway, clock: clock)
+        return load(machine: machine, gateway: gateway, clock: clock, prefix: name)
     }
     
-    fileprivate func load<Gateway: FSMGateway>(machine: Machine, gateway: Gateway, clock: Timer, prefix: String = "") -> (FSMType, [Dependency])? {
+    fileprivate func load<Gateway: FSMGateway>(machine: Machine, gateway: Gateway, clock: Timer, prefix: String) -> (FSMType, [Dependency])? {
         let dependantMachines = machine.submachines + machine.parameterisedMachines
-        let format = { prefix + machine.name + "." + $0 }
+        let format = { prefix + "." + machine.name + "." + $0 }
         let dependantIds = dependantMachines.map { gateway.id(of: format($0.name)) }
         let newGateway = RestrictiveFSMGateway(
             gateway: gateway,
@@ -114,7 +114,7 @@ public final class MachinesMachineLoader: MachineLoader {
             formatter: CallbackFormatter(format)
         )
         guard let recursed = dependantMachines.failMap({
-            load(machine: $0, gateway: gateway, clock: clock, prefix: prefix + machine.name + ".").map {
+            load(machine: $0, gateway: gateway, clock: clock, prefix: prefix + machine.name).map {
                 convert($0, dependencies: $1)
             }
         }) else {
