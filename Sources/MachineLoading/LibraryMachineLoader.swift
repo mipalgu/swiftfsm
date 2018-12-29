@@ -70,7 +70,7 @@ import swiftfsm
  */
 public class LibraryMachineLoader: MachineLoader {
     
-    fileprivate typealias SymbolSignature = @convention(c) (Any, Any, Any) -> Any
+    fileprivate typealias SymbolSignature = @convention(c) (Any, Any) -> Any
     
     /*
      *  This is used to remember factories for paths, therefore allowing us to
@@ -131,7 +131,7 @@ public class LibraryMachineLoader: MachineLoader {
         }
         // Load the factory from the cache if it is there.
         if let factory = type(of: self).cache[path] {
-            return factory(name, gateway, clock) as? (FSMType, [Dependency])
+            return (factory(gateway, clock) as? FSMType).map { ($0, []) }
         }
         // Load the factory from the dynamic library.
         guard
@@ -162,7 +162,7 @@ public class LibraryMachineLoader: MachineLoader {
         let factory = unsafeBitCast(symbol, to: SymbolSignature.self)
         // Add the factory to the cache, call it and return the result.
         type(of: self).cache[library.path] = factory
-        guard let data = factory(name, gateway, clock) as? FSMType else {
+        guard let data = factory(gateway, clock) as? FSMType else {
             self.printer.error(str: "Unable to call factory function '\(symbolName)' for machine \(name)")
             return nil
         }
