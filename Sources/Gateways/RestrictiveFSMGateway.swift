@@ -74,36 +74,36 @@ public final class RestrictiveFSMGateway<Gateway: FSMGateway, _Formatter: Format
         self.formatter = formatter
     }
     
-    public func invokeSelf<P, R>(_ name: String, with parameters: P) -> Promise<R> where P : Variables {
+    public func invokeSelf<R>(_ name: String, withParameters parameters: [String: Any]) -> Promise<R> {
         let name = self.formatter.format(name)
         let id = self.gateway.id(of: name)
         guard true == self.whitelist.contains(id) else {
             fatalError("Unable to fetch id of fsm named \(name)")
         }
-        return self.invokeSelf(id, with: parameters)
+        return self.invokeSelf(id, withParameters: parameters)
     }
     
-    public func invoke<P, R>(_ name: String, with parameters: P) -> Promise<R> where P : Variables {
+    public func invoke<R>(_ name: String, withParameters parameters: [String: Any]) -> Promise<R> {
         let name = self.formatter.format(name)
         let id = self.gateway.id(of: name)
         guard true == self.whitelist.contains(id) else {
             fatalError("Unable to fetch id of fsm named \(name)")
         }
-        return self.invoke(id, with: parameters)
+        return self.invoke(id, withParameters: parameters)
     }
     
-    public func invoke<P: Variables, R>(_ id: FSM_ID, with parameters: P) -> Promise<R> {
+    public func invoke<R>(_ id: FSM_ID, withParameters parameters: [String: Any]) -> Promise<R> {
         guard true == self.whitelist.contains(id) else {
             fatalError("Unable to invoke fsm with id \(id)")
         }
-        return self.gateway.invoke(id, with: parameters)
+        return self.gateway.invoke(id, withParameters: parameters)
     }
     
-    public func invokeSelf<P: Variables, R>(_ id: FSM_ID, with parameters: P) -> Promise<R> {
+    public func invokeSelf<R>(_ id: FSM_ID, withParameters parameters: [String: Any]) -> Promise<R> {
         guard true == self.whitelist.contains(id) else {
             fatalError("Unable to invoke fsm with id \(id)")
         }
-        return self.gateway.invokeSelf(id, with: parameters)
+        return self.gateway.invokeSelf(id, withParameters: parameters)
     }
     
     public func fsm(fromID id: FSM_ID) -> AnyControllableFiniteStateMachine {

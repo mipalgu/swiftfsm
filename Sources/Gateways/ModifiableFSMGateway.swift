@@ -72,6 +72,7 @@ public protocol ModifiableFSMGateway: FSMGateway {
 extension ModifiableFSMGateway {
     
     public func fsm(fromID id: FSM_ID) -> AnyControllableFiniteStateMachine {
+        dprint("fetch fsm from id \(id)")
         guard let fsm = self.fsms[id] else {
             fatalError("FSM with id '\(id)' does not exist.")
         }
@@ -86,17 +87,19 @@ extension ModifiableFSMGateway {
             let id = self.latestID
             self.ids[name] = id
             self.latestID = self.latestID.advanced(by: 1)
+            dprint("fetch id \(id) of \(name)")
             return id
         }
+        dprint("id \(id) of \(name)")
         return id
     }
     
-    public func invokeSelf<P, R>(_ name: String, with parameters: P) -> Promise<R> where P: Variables {
-        return self.invokeSelf(self.id(of: name), with: parameters)
+    public func invokeSelf<R>(_ name: String, withParameters parameters: [String: Any]) -> Promise<R> {
+        return self.invokeSelf(self.id(of: name), withParameters: parameters)
     }
     
-    public func invoke<P, R>(_ name: String, with parameters: P) -> Promise<R> where P: Variables {
-        return self.invoke(self.id(of: name), with: parameters)
+    public func invoke<R>(_ name: String, withParameters parameters: [String: Any]) -> Promise<R> {
+        return self.invoke(self.id(of: name), withParameters: parameters)
     }
     
 }
