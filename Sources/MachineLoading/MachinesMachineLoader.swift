@@ -116,7 +116,7 @@ public final class MachinesMachineLoader: MachineLoader {
             formatter: CallbackFormatter(format)
         )
         guard let recursed = dependantMachines.failMap({
-            load(machine: $0, gateway: gateway, clock: clock, prefix: prefix + machine.name).map {
+            load(machine: $0, gateway: gateway, clock: clock, prefix: prefix + "." + machine.name).map {
                 convert($0, dependencies: $1)
             }
         }) else {
