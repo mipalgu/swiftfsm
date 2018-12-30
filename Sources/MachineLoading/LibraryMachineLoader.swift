@@ -158,17 +158,14 @@ public class LibraryMachineLoader: MachineLoader {
             self.printer.error(str: result.error ?? "Unable to fetch symbol '\(symbolName)' for machine \(name)")
             return nil
         }
-        dprint("before cast")
         // Convert the sybmol to a factory function.
         let factory = unsafeBitCast(symbol, to: SymbolSignature.self)
-        dprint("after cast")
         // Add the factory to the cache, call it and return the result.
         type(of: self).cache[library.path] = factory
         guard let data = factory(gateway, clock) as? FSMType else {
             self.printer.error(str: "Unable to call factory function '\(symbolName)' for machine \(name)")
             return nil
         }
-        dprint("after invocation")
         return data
     }
     

@@ -114,7 +114,6 @@ public class RoundRobinScheduler<Tokenizer: SchedulerTokenizer>: Scheduler where
      *  Start executing all machines.
      */
     public func run(_ machines: [Machine]) -> Void {
-        dprint("run")
         self.promises = [:]
         let tokens = self.tokenizer.separate(machines)
         tokens.forEach {

@@ -97,7 +97,6 @@ public final class MachinesMachineLoader: MachineLoader {
     }
 
     public func load<Gateway: FSMGateway>(name: String, gateway: Gateway, clock: Timer, path: String) -> (FSMType, [Dependency])? {
-        dprint("load")
         guard let machine = self.parser.parseMachine(atPath: path) else {
             self.parser.errors.forEach(self.printer.error)
             return nil
@@ -106,7 +105,6 @@ public final class MachinesMachineLoader: MachineLoader {
     }
     
     fileprivate func load<Gateway: FSMGateway>(machine: Machine, gateway: Gateway, clock: Timer, prefix: String) -> (FSMType, [Dependency])? {
-        dprint("load \(machine.name)")
         let dependantMachines = machine.submachines + machine.parameterisedMachines
         let format = { prefix + "." + machine.name + "." + $0 }
         let dependantIds = dependantMachines.map { gateway.id(of: format($0.name)) }
@@ -128,11 +126,9 @@ public final class MachinesMachineLoader: MachineLoader {
             return nil
         }
         if false == self.compiler.shouldCompile(machine) {
-            dprint("\(machine.name) has been compiled")
             guard let (fsm, _) = self.libraryLoader.load(name: machine.name, gateway: newGateway, clock: clock, path: self.compiler.outputPath(forMachine: machine)) else {
                 return nil
             }
-            dprint("have received \(machine.name)")
             return (fsm, recursed)
         }
         guard
@@ -146,7 +142,6 @@ public final class MachinesMachineLoader: MachineLoader {
                 self.compiler.errors.forEach(self.printer.error)
                 return nil
         }
-        dprint("\(machine.name) has been compiled2")
         guard let (fsm, _) = self.libraryLoader.load(name: machine.name, gateway: newGateway, clock: clock, path: outputPath) else {
             return nil
         }
