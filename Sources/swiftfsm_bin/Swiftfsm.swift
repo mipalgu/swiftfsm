@@ -307,7 +307,7 @@ public class Swiftfsm<
         guard let parameterisedFSM = unwrappedFSM.0.asParameterisedFiniteStateMachine else {
             self.handleError(SwiftfsmErrors.generalError(error: "Unable to load parameters for \(name) as it is not a parameterised machine."))
         }
-        guard true == parameterisedFSM.parametersFromDictionary(parameters) else {
+        guard true == parameterisedFSM.parametersFromStringDictionary(parameters) else {
             self.handleError(SwiftfsmErrors.generalError(error: "Unable to set parameters for \(name). Please make sure all parameters conform to 'LosslessStringConvertible'"))
         }
         return (unwrappedFSM.0, unwrappedFSM.1, clock)
