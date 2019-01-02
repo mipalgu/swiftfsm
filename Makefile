@@ -62,8 +62,8 @@ SWIFTCFLAGS=-I${ROOT}/usr/local/include -I${ROOT}/usr/local/include/swiftfsm
 .ifdef NO_FOUNDATION
 SWIFTCFLAGS+=-DNO_FOUNDATION
 .endif
-LDFLAGS+=-L${ROOT}/lib -L${ROOT}/usr/local/lib -L${ROOT}/lib/swift/linux -lgusimplewhiteboard -lFSM -ldl -lCLReflect -lgu_util
+LDFLAGS+=-lgusimplewhiteboard -lFSM -ldl -lCLReflect -lgu_util
 
 .ifdef SYSROOT
-LDFLAGS+=-fuse-ld=/home/user/src/swift-tc/ctc-linux64-atom-2.5.2.74/bin/i686-aldebaran-linux-gnu-ld 
+LDFLAGS+=-L${ROOT}/lib -L${ROOT}/usr/local/lib -L${ROOT}/lib/swift/linux-fuse-ld=/home/user/src/swift-tc/ctc-linux64-atom-2.5.2.74/bin/i686-aldebaran-linux-gnu-ld 
 .endif
