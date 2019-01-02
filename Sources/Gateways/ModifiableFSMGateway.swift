@@ -80,6 +80,7 @@ extension ModifiableFSMGateway {
         guard let controllableFSM = fsm.asControllableFiniteStateMachine else {
             fatalError("Unable to fetch FSM with id '\(id)' as it is not a controllable FSM.")
         }
+        self.delegate?.hasFetchedFsm(inGateway: self, fsm: controllableFSM, withId: id)
         return controllableFSM
     }
     
