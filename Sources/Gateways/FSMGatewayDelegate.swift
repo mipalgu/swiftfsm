@@ -1,9 +1,9 @@
 /*
- * ModifiableFSMGateway.swift
+ * FSMGatewayDelegate.swift
  * Gateways
  *
- * Created by Callum McColl on 25/12/18.
- * Copyright © 2018 Callum McColl. All rights reserved.
+ * Created by Callum McColl on 2/1/19.
+ * Copyright © 2019 Callum McColl. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -56,49 +56,4 @@
  *
  */
 
-import FSM
-import swiftfsm
-
-public protocol ModifiableFSMGateway: FSMGateway {
-    
-    var delegate: FSMGatewayDelegate? { get set }
-    
-    var latestID: FSM_ID { get set }
-    
-    var fsms: [FSM_ID: FSMType] { get set }
-    
-    var ids: [String: FSM_ID] { get set }
-    
-}
-
-extension ModifiableFSMGateway {
-    
-    public func fsm(fromID id: FSM_ID) -> AnyControllableFiniteStateMachine {
-        guard let fsm = self.fsms[id] else {
-            fatalError("FSM with id '\(id)' does not exist.")
-        }
-        guard let controllableFSM = fsm.asControllableFiniteStateMachine else {
-            fatalError("Unable to fetch FSM with id '\(id)' as it is not a controllable FSM.")
-        }
-        return controllableFSM
-    }
-    
-    public func id(of name: String) -> FSM_ID {
-        guard let id = self.ids[name] else {
-            let id = self.latestID
-            self.ids[name] = id
-            self.latestID = self.latestID.advanced(by: 1)
-            return id
-        }
-        return id
-    }
-    
-    public func invokeSelf<R>(_ name: String, withParameters parameters: [String: Any]) -> Promise<R> {
-        return self.invokeSelf(self.id(of: name), withParameters: parameters)
-    }
-    
-    public func invoke<R>(_ name: String, withParameters parameters: [String: Any]) -> Promise<R> {
-        return self.invoke(self.id(of: name), withParameters: parameters)
-    }
-    
-}
+public protocol FSMGatewayDelegate: class {}

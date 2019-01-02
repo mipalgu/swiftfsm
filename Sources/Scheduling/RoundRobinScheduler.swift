@@ -63,6 +63,7 @@ import Glibc
 #endif
 
 import FSM
+import Gateways
 import IO
 import MachineStructure
 import MachineLoading
@@ -90,6 +91,8 @@ public class RoundRobinScheduler<Tokenizer: SchedulerTokenizer>: Scheduler where
     fileprivate var promises: [FSM_ID: (fsm: AnyParameterisedFiniteStateMachine, stack: [PromiseData])] = [:]
     
     fileprivate var invocations: Bool = false
+    
+    public var delegate: FSMGatewayDelegate?
     
     public var latestID: FSM_ID = 0
     
