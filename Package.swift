@@ -41,7 +41,7 @@ let package = Package(
         .target(name: "MachineLoading", dependencies: convert(["Libraries", "GUSimpleWhiteboard", "IO", "swift_helpers", "swiftfsm_helpers"]) + foundationDeps),
         .target(name: "MachineCompiling", dependencies: convert(["IO"]) + foundationDeps),
         .target(name: "Scheduling", dependencies: ["MachineStructure", "MachineLoading", "Timers", "GUSimpleWhiteboard", "Gateways"]),
-        .target(name: "Verification", dependencies: ["IO", "MachineStructure", "Scheduling", "Timers"]),
+        .target(name: "Verification", dependencies: ["IO", "MachineStructure", "Scheduling", "Timers", "Gateways"]),
         .target(name: "Parsing", dependencies: ["Scheduling", "Timers", "Verification"]),
         .target(name: "CFSMWrappers", dependencies: ["GUSimpleWhiteboard", "Libraries", "Scheduling", "Timers"]),
         .target(
