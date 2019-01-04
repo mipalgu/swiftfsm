@@ -94,12 +94,4 @@ extension ModifiableFSMGateway {
         return id
     }
     
-    public func invokeSelf<R>(_ name: String, withParameters parameters: [String: Any]) -> Promise<R> {
-        return self.invokeSelf(self.id(of: name), withParameters: parameters)
-    }
-    
-    public func invoke<R>(_ name: String, withParameters parameters: [String: Any]) -> Promise<R> {
-        return self.invoke(self.id(of: name), withParameters: parameters)
-    }
-    
 }
