@@ -73,7 +73,7 @@ import Utilities
 /**
  *  Responsible for the execution of machines.
  */
-public class RoundRobinScheduler<Tokenizer: SchedulerTokenizer>: Scheduler where
+public class RoundRobinScheduler<Tokenizer: SchedulerTokenizer>: Scheduler, ModifiableFSMGatewayDefaults where
     Tokenizer.Object == Machine,
     Tokenizer.SchedulerToken == SchedulerToken
 {
