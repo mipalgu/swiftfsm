@@ -59,7 +59,8 @@ let package = Package(
                 "Timers",
                 "Parsing",
                 "Verification",
-                "CFSMWrappers"
+                "CFSMWrappers",
+                "Gateways"
             ]
         ),
         .testTarget(name: "VerificationTests", dependencies: [.target(name: "Verification")]),
