@@ -64,46 +64,54 @@ public final class RestrictiveFSMGateway<Gateway: FSMGateway, _Formatter: Format
     
     fileprivate let gateway: Gateway
     
+    fileprivate let selfID: FSM_ID
+    
     fileprivate let whitelist: Set<FSM_ID>
+    
+    fileprivate let callables: Set<FSM_ID>
+    
+    fileprivate let invocables: Set<FSM_ID>
     
     fileprivate let formatter: _Formatter
     
-    public init(gateway: Gateway, whitelist: Set<FSM_ID>, formatter: _Formatter) {
+    public init(
+        gateway: Gateway,
+        selfID: FSM_ID,
+        callables: Set<FSM_ID>,
+        invocables: Set<FSM_ID>,
+        whitelist: Set<FSM_ID>,
+        formatter: _Formatter
+    ) {
         self.gateway = gateway
+        self.selfID = selfID
+        self.callables = callables
+        self.invocables = invocables
         self.whitelist = whitelist
         self.formatter = formatter
     }
     
-    public func invokeSelf<R>(_ name: String, withParameters parameters: [String: Any]) -> Promise<R> {
-        let name = self.formatter.format(name)
-        let id = self.gateway.id(of: name)
-        guard true == self.whitelist.contains(id) else {
-            fatalError("Unable to fetch id of fsm named \(name)")
+    public func call<R>(_ id: FSM_ID, withParameters parameters: [String : Any], caller: FSM_ID) -> Promise<R> {
+        guard
+            caller == self.selfID,
+            true == self.callables.contains(id)
+        else {
+            fatalError("Unable to call fsm with id \(id)")
         }
-        return self.invokeSelf(id, withParameters: parameters)
+        return self.gateway.call(id, withParameters: parameters, caller: caller)
     }
     
-    public func invoke<R>(_ name: String, withParameters parameters: [String: Any]) -> Promise<R> {
-        let name = self.formatter.format(name)
-        let id = self.gateway.id(of: name)
-        guard true == self.whitelist.contains(id) else {
-            fatalError("Unable to fetch id of fsm named \(name)")
+    public func callSelf<R>(_ id: FSM_ID, withParameters parameters: [String: Any]) -> Promise<R> {
+        guard id == self.selfID else {
+            fatalError("Unable to invoke fsm with id \(id)")
         }
-        return self.invoke(id, withParameters: parameters)
+        return self.gateway.callSelf(id, withParameters: parameters)
     }
     
     public func invoke<R>(_ id: FSM_ID, withParameters parameters: [String: Any]) -> Promise<R> {
-        guard true == self.whitelist.contains(id) else {
+        guard true == self.invocables.contains(id) else {
             fatalError("Unable to invoke fsm with id \(id)")
         }
         return self.gateway.invoke(id, withParameters: parameters)
-    }
-    
-    public func invokeSelf<R>(_ id: FSM_ID, withParameters parameters: [String: Any]) -> Promise<R> {
-        guard true == self.whitelist.contains(id) else {
-            fatalError("Unable to invoke fsm with id \(id)")
-        }
-        return self.gateway.invokeSelf(id, withParameters: parameters)
     }
     
     public func fsm(fromID id: FSM_ID) -> AnyControllableFiniteStateMachine {
@@ -126,8 +134,21 @@ public final class RestrictiveFSMGateway<Gateway: FSMGateway, _Formatter: Format
 
 extension RestrictiveFSMGateway where _Formatter == NullFormatter {
     
-    public convenience init(gateway: Gateway, whitelist: Set<FSM_ID>) {
-        self.init(gateway: gateway, whitelist: whitelist, formatter: NullFormatter())
+    public convenience init(
+        gateway: Gateway,
+        selfID: FSM_ID,
+        callables: Set<FSM_ID>,
+        invocables: Set<FSM_ID>,
+        whitelist: Set<FSM_ID>
+    ) {
+        self.init(
+            gateway: gateway,
+            selfID: selfID,
+            callables: callables,
+            invocables: invocables,
+            whitelist: whitelist,
+            formatter: NullFormatter()
+        )
     }
     
 }
