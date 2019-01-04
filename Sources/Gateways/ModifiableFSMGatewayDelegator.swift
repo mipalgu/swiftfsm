@@ -68,7 +68,7 @@ public protocol ModifiableFSMGatewayDelegator: ModifiableFSMGateway {
 
 extension ModifiableFSMGateway where Self: ModifiableFSMGatewayDelegator {
     
-    var delegate: FSMGatewayDelegate? {
+    public var delegate: FSMGatewayDelegate? {
         get {
             return self.gateway.delegate
         } set {
@@ -76,7 +76,7 @@ extension ModifiableFSMGateway where Self: ModifiableFSMGatewayDelegator {
         }
     }
     
-    var latestID: FSM_ID {
+    public var latestID: FSM_ID {
         get {
             return self.gateway.latestID
         } set {
@@ -84,7 +84,7 @@ extension ModifiableFSMGateway where Self: ModifiableFSMGatewayDelegator {
         }
     }
     
-    var fsms: [FSM_ID: FSMType] {
+    public var fsms: [FSM_ID: FSMType] {
         get {
             return self.gateway.fsms
         } set {
@@ -92,7 +92,7 @@ extension ModifiableFSMGateway where Self: ModifiableFSMGatewayDelegator {
         }
     }
     
-    var ids: [String: FSM_ID] {
+    public var ids: [String: FSM_ID] {
         get {
             return self.gateway.ids
         } set {
