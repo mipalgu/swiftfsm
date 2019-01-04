@@ -58,6 +58,7 @@
 
 import KripkeStructure
 import FSM
+import Gateways
 import Scheduling
 import MachineStructure
 import ModelChecking
@@ -89,7 +90,7 @@ public final class ScheduleCycleKripkeStructureGenerator<
         self.tokenizer = tokenizer
     }
     
-    public func generate() {
+    public func generate<Gateway: ModifiableFSMGateway>(usingGateway gateway: Gateway) {
         let tokens = self.tokenizer.separate(self.machines)
         tokens.forEach {
             $0.forEach {
@@ -102,7 +103,7 @@ public final class ScheduleCycleKripkeStructureGenerator<
             }
         }
         let verificationTokens = self.convert(tokens: tokens)
-        self.factory.make(tokens: verificationTokens).generate()
+        self.factory.make(tokens: verificationTokens).generate(usingGateway: gateway)
     }
     
     fileprivate func convert(tokens: [[SchedulerToken]]) -> [[VerificationToken]] {

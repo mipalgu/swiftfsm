@@ -59,6 +59,7 @@
 import KripkeStructure
 import KripkeStructureViews
 import FSM
+import Gateways
 import Scheduling
 import MachineStructure
 import ModelChecking
@@ -101,7 +102,7 @@ public final class VerificationCycleKripkeStructureGenerator<
         self.worldCreator = worldCreator
     }
     
-    public func generate() {
+    public func generate<Gateway: ModifiableFSMGateway>(usingGateway gateway: Gateway) {
         var jobs = self.createInitialJobs(fromTokens: self.tokens)
         view.reset()
         let defaultExternals = self.createExternals(fromTokens: self.tokens)

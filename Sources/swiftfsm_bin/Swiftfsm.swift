@@ -64,6 +64,7 @@
 
 import FSM
 import Functional
+import Gateways
 import KripkeStructure
 import KripkeStructureViews
 import MachineStructure
@@ -196,16 +197,17 @@ public class Swiftfsm<
         }
     }
 
-    private func generateKripkeStructure<KGF: KripkeStructureGeneratorFactory>(
+    private func generateKripkeStructure<KGF: KripkeStructureGeneratorFactory, Gateway: ModifiableFSMGateway>(
         _ machines: [Machine],
         withGenerator generatorFactory: KGF,
-        andViews views: [AnyKripkeStructureView<KripkeState>]
+        andViews views: [AnyKripkeStructureView<KripkeState>],
+        usingGateway gateway: Gateway
     ) where KGF.View == AggregateKripkeStructureView<KripkeState> {
         if machines.isEmpty {
             return
         }
         let generator = generatorFactory.make(fromMachines: machines, usingView: AggregateKripkeStructureView(views: views))
-        generator.generate()
+        generator.generate(usingGateway: gateway)
     }
 
     private func handleError(_ error: SwiftfsmErrors) -> Never {
@@ -257,15 +259,15 @@ public class Swiftfsm<
         }
     }
     
-    private func handleMachines<KGF: KripkeStructureGeneratorFactory>(
+    private func handleMachines<KGF: KripkeStructureGeneratorFactory, S: Scheduler>(
         _ machines: [Machine],
         task: Task,
         generator: KGF,
-        scheduler: Scheduler,
+        scheduler: S,
         views: [AnyKripkeStructureView<KripkeState>]
     ) where KGF.View == AggregateKripkeStructureView<KripkeState> {
         if task.generateKripkeStructure {
-            self.generateKripkeStructure(machines, withGenerator: generator, andViews: views)
+            self.generateKripkeStructure(machines, withGenerator: generator, andViews: views, usingGateway: scheduler)
         }
         if task.addToScheduler {
             scheduler.run(machines)

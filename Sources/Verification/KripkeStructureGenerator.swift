@@ -57,6 +57,7 @@
  */
 
 import KripkeStructure
+import Gateways
 
 /**
  *  Conforming types are responsible for generating `KripkeStructure`s.
@@ -66,6 +67,6 @@ public protocol KripkeStructureGenerator {
     /**
      *  Generate the `KripkeStructure`.
      */
-    func generate()
+    func generate<Gateway: ModifiableFSMGateway>(usingGateway: Gateway)
     
 }
