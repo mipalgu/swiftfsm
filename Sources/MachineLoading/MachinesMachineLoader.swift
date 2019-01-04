@@ -109,11 +109,12 @@ public final class MachinesMachineLoader: MachineLoader {
         let format = { prefix + "." + machine.name + "." + $0 }
         let selfID: FSM_ID = gateway.id(of: prefix + "." + machine.name)
         let dependantIds: [FSM_ID] = dependantMachines.map { gateway.id(of: format($0.name)) }
-        let invocableIds = machine.parameterisedMachines.map { gateway.id(of: format($0.name)) }
+        let callableIds = machine.callableMachines.map { gateway.id(of: format($0.name)) }
+        let invocableIds = machine.invocableMachines.map { gateway.id(of: format($0.name)) }
         let newGateway = RestrictiveFSMGateway(
             gateway: gateway,
             selfID: selfID,
-            callables: Set(),
+            callables: Set(callableIds),
             invocables: Set(invocableIds),
             whitelist: Set(dependantIds + [selfID]),
             formatter: CallbackFormatter {
@@ -125,7 +126,7 @@ public final class MachinesMachineLoader: MachineLoader {
         )
         guard let recursed = dependantMachines.failMap({
             load(machine: $0, gateway: gateway, clock: clock, prefix: prefix + "." + machine.name).map {
-                convert($0, dependencies: $1)
+                convert($0, dependencies: $1, inMachine: machine)
             }
         }) else {
             return nil
@@ -153,11 +154,14 @@ public final class MachinesMachineLoader: MachineLoader {
         return (fsm, recursed)
     }
     
-    fileprivate func convert(_ fsm: FSMType, dependencies: [Dependency]) -> Dependency {
+    fileprivate func convert(_ fsm: FSMType, dependencies: [Dependency], inMachine machine: Machine) -> Dependency {
         switch fsm {
         case .controllableFSM(let fsm):
             return .submachine(fsm, dependencies)
         case .parameterisedFSM(let fsm):
+            if machine.callableMachines.contains(where: { $0.name == fsm.name }) {
+                return .callableParameterisedMachine(fsm, dependencies)
+            }
             return .invokableParameterisedMachine(fsm, dependencies)
         }
     }

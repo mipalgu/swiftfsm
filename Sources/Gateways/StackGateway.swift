@@ -101,7 +101,7 @@ public final class StackGateway: ModifiableFSMGateway, ModifiableFSMGatewayDefau
     
     public func call<R>(_ id: FSM_ID, withParameters parameters: [String : Any], caller: FSM_ID) -> Promise<R> {
         guard let fsm = self.fsms[id]?.asParameterisedFiniteStateMachine else {
-            self.error("Attempting to invoke FSM with id \(id) when it has not been scheduled.")
+            self.error("Attempting to call FSM with id \(id) when it has not been scheduled.")
         }
         guard let stackSize = self.stacks[caller]?.count else {
             self.error("Unable to fetch stack of fsm with id \(caller)")
