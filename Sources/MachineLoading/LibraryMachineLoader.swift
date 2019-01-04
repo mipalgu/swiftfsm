@@ -70,11 +70,13 @@ import swiftfsm
  */
 public class LibraryMachineLoader: MachineLoader {
     
+    fileprivate typealias SymbolSignature = @convention(c) (Any, Any) -> Any
+    
     /*
      *  This is used to remember factories for paths, therefore allowing us to
      *  just use this instead of loading it from the file system.
      */
-    private static var cache: [String: FSMArrayFactory] = [:]
+    private static var cache: [String: SymbolSignature] = [:]
 
     /**
      *  Used to create the libraries.
@@ -115,61 +117,56 @@ public class LibraryMachineLoader: MachineLoader {
     /**
      *  Load the machines from the library specified from the path.
      *
-     *  To accomplish this the main method is called on the library.  Therefore
-     *  the library is responsible for adding itself to the factories array in
-     *  `FSM.Factories`.
+     *  To accomplish this the machines factory function is executed which
+     *  returns the necessary machine data.
      *
      *  - Parameter path: The path to the library.
      *
-     *  - Returns: An array of `AnyScheduleableFiniteStateMachine`s.  If there
-     *  was a problem, then the array is empty.
+     *  - Returns: A tuple containing the FSM and all of its dependencies.
      */
-    public func load(name: String, invoker: Invoker, clock: Timer, path: String) -> (FSMType, [Dependency])? {
+    public func load<Gateway: FSMGateway>(name: String, gateway: Gateway, clock: Timer, path: String) -> (FSMType, [Dependency])? {
         // Ignore empty paths
-        if (path.characters.count < 1) {
+        guard false == path.isEmpty else {
             return nil
         }
         // Load the factory from the cache if it is there.
         if let factory = type(of: self).cache[path] {
-            return factory(name, invoker, clock)
+            return (factory(gateway, clock) as? FSMType).map { ($0, []) }
         }
         // Load the factory from the dynamic library.
         guard
             let resource = self.creator.open(path: path),
-            let fsms = self.loadMachine(name: name, invoker: invoker, clock: clock, library: resource)
+            let data = self.loadMachine(name: name, gateway: gateway, clock: clock, library: resource)
         else {
             return nil
         }
-        return fsms
+        return (data, [])
     }
 
-    private func loadMachine(
+    private func loadMachine<Gateway: FSMGateway>(
         name: String,
-        invoker: Invoker,
+        gateway: Gateway,
         clock: Timer,
         library: LibraryResource
-    ) -> (FSMType, [Dependency])? {
+    ) -> FSMType? {
         // Get main method symbol
+        let symbolName = "make_" + name
         let result: (symbol: UnsafeMutableRawPointer?, error: String?) =
-            library.getSymbolPointer(symbol: "main")
+            library.getSymbolPointer(symbol: symbolName)
         // Error with fetching symbol
-        if (result.error != nil) {
-            self.printer.error(str: result.error!)
+        guard let symbol = result.symbol else {
+            self.printer.error(str: result.error ?? "Unable to fetch symbol '\(symbolName)' for machine \(name)")
             return nil
         }
-        // How many factories do we have now?
-        let count: Int = getFactoryCount() 
-        // Call the method
-        invoke_func(result.symbol!)
-        // Did the factory get added?
-        if (getFactoryCount() == count) {
-            self.printer.error(str: "Library was loaded but factory was not added")
-            return nil
-        }
-        // Get the factory, add it to the cache, call it and return the result.
-        let factory: FSMArrayFactory = getLastFactory()!
+        // Convert the sybmol to a factory function.
+        let factory = unsafeBitCast(symbol, to: SymbolSignature.self)
+        // Add the factory to the cache, call it and return the result.
         type(of: self).cache[library.path] = factory
-        return factory(name, invoker, clock)
+        guard let data = factory(gateway, clock) as? FSMType else {
+            self.printer.error(str: "Unable to call factory function '\(symbolName)' for machine \(name)")
+            return nil
+        }
+        return data
     }
     
 }

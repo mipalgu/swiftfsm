@@ -58,12 +58,13 @@
 
 import FSM
 import swiftfsm
+import Trees
 
 public final class NullMachineLoader: MachineLoader {
     
     public init() {}
     
-    public func load(name _: String, invoker _: Invoker, clock _: Timer, path _: String) -> (FSMType, [Dependency])? {
+    public func load<Gateway: FSMGateway>(name _: String, gateway _: Gateway, clock _: Timer, path _: String) -> (FSMType, [Dependency])? {
         return nil
     }
     

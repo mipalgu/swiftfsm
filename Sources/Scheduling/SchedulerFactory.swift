@@ -64,10 +64,12 @@ import MachineStructure
  */
 public protocol SchedulerFactory {
 
+    associatedtype _Scheduler: Scheduler
+    
     /**
      *  Create a `Scheduler`.
      *
      *  - Returns: A newly created `Scheduler`.
      */
-    func make() -> Scheduler
+    func make() -> _Scheduler
 }

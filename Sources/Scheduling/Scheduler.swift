@@ -59,12 +59,13 @@
 import FSM
 import swiftfsm
 import MachineStructure
+import Gateways
 
 /**
  *  A common interfaces for schedulers who are responsible for the execution of
  *  objects.
  */
-public protocol Scheduler: Invoker {
+public protocol Scheduler: ModifiableFSMGateway {
     
     /**
      *  Run the scheduler.

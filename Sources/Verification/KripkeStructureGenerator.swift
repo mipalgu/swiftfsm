@@ -1,8 +1,8 @@
 /*
- * PassiveRoundRobinSchedulerFactory.swift
+ * KripkeStructureGenerator.swift
  * swiftfsm
  *
- * Created by Callum McColl on 08/06/2017.
+ * Created by Callum McColl on 11/11/2015.
  * Copyright © 2015 Callum McColl. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -56,35 +56,17 @@
  *
  */
 
-import FSM
-import MachineStructure
-import MachineLoading
+import KripkeStructure
+import Gateways
 
 /**
- *  Provides a way to create a `PassiveRoundRobinScheduler`.
+ *  Conforming types are responsible for generating `KripkeStructure`s.
  */
-public class PassiveRoundRobinSchedulerFactory: SchedulerFactory {
-
-    fileprivate let scheduleHandler: ScheduleHandler
-
-    fileprivate let unloader: MachineUnloader
-
-    public init(scheduleHandler: ScheduleHandler, unloader: MachineUnloader) {
-        self.scheduleHandler = scheduleHandler
-        self.unloader = unloader
-    }
-
+public protocol KripkeStructureGenerator {
+    
     /**
-     *  Create a new `PassiveRoundRobinScheduler`.
-     *
-     *  - Parameter machines: All the machines that are going to execute.
+     *  Generate the `KripkeStructure`.
      */
-    public func make() -> RoundRobinScheduler<SequentialPerScheduleCycleTokenizer> {
-        return RoundRobinScheduler(
-            tokenizer: SequentialPerScheduleCycleTokenizer(),
-            unloader: self.unloader,
-            scheduleHandler: self.scheduleHandler
-        )
-    }
-
+    func generate<Gateway: ModifiableFSMGateway>(usingGateway: Gateway)
+    
 }

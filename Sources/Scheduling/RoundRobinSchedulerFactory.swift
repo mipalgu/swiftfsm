@@ -80,7 +80,7 @@ public class RoundRobinSchedulerFactory: SchedulerFactory {
      *
      *  - Parameter machines: All the machines that are going to execute.
      */
-    public func make() -> Scheduler {
+    public func make() -> RoundRobinScheduler<SequentialPerRingletTokenizer> {
         return RoundRobinScheduler(
             tokenizer: SequentialPerRingletTokenizer(),
             unloader: self.unloader,

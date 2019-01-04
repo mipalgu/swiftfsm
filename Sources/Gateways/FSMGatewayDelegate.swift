@@ -1,9 +1,9 @@
 /*
- * PassiveRoundRobinSchedulerFactory.swift
- * swiftfsm
+ * FSMGatewayDelegate.swift
+ * Gateways
  *
- * Created by Callum McColl on 08/06/2017.
- * Copyright © 2015 Callum McColl. All rights reserved.
+ * Created by Callum McColl on 2/1/19.
+ * Copyright © 2019 Callum McColl. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -56,35 +56,24 @@
  *
  */
 
-import FSM
-import MachineStructure
-import MachineLoading
+import swiftfsm
 
-/**
- *  Provides a way to create a `PassiveRoundRobinScheduler`.
- */
-public class PassiveRoundRobinSchedulerFactory: SchedulerFactory {
+public protocol FSMGatewayDelegate: class {
+    
+    func hasFetchedFsm(inGateway: ModifiableFSMGateway, fsm: AnyControllableFiniteStateMachine, withId: FSM_ID)
+    
+    func hasInvokedSelf(inGateway: ModifiableFSMGateway, fsm: AnyParameterisedFiniteStateMachine, withId: FSM_ID, storingResultsIn: PromiseData)
+    
+    func hasInvoked(inGateway: ModifiableFSMGateway, fsm: AnyParameterisedFiniteStateMachine, withId: FSM_ID, storingResultsIn: PromiseData)
+    
+}
 
-    fileprivate let scheduleHandler: ScheduleHandler
-
-    fileprivate let unloader: MachineUnloader
-
-    public init(scheduleHandler: ScheduleHandler, unloader: MachineUnloader) {
-        self.scheduleHandler = scheduleHandler
-        self.unloader = unloader
-    }
-
-    /**
-     *  Create a new `PassiveRoundRobinScheduler`.
-     *
-     *  - Parameter machines: All the machines that are going to execute.
-     */
-    public func make() -> RoundRobinScheduler<SequentialPerScheduleCycleTokenizer> {
-        return RoundRobinScheduler(
-            tokenizer: SequentialPerScheduleCycleTokenizer(),
-            unloader: self.unloader,
-            scheduleHandler: self.scheduleHandler
-        )
-    }
-
+extension FSMGatewayDelegate {
+    
+    public func hasFetchedFsm(inGateway _: ModifiableFSMGateway, fsm _: AnyControllableFiniteStateMachine, withId _: FSM_ID) {}
+    
+    public func hasInvokedSelf(inGateway _: ModifiableFSMGateway, fsm _: AnyParameterisedFiniteStateMachine, withId _: FSM_ID, storingResultsIn _: PromiseData) {}
+    
+    public func hasInvoked(inGateway _: ModifiableFSMGateway, fsm _: AnyParameterisedFiniteStateMachine, withId _: FSM_ID, storingResultsIn _: PromiseData) {}
+    
 }

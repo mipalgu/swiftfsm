@@ -1,9 +1,9 @@
 /*
- * PassiveRoundRobinSchedulerFactory.swift
- * swiftfsm
+ * ModifiableFSMGateway.swift
+ * Gateways
  *
- * Created by Callum McColl on 08/06/2017.
- * Copyright © 2015 Callum McColl. All rights reserved.
+ * Created by Callum McColl on 25/12/18.
+ * Copyright © 2018 Callum McColl. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -57,34 +57,49 @@
  */
 
 import FSM
-import MachineStructure
-import MachineLoading
+import swiftfsm
 
-/**
- *  Provides a way to create a `PassiveRoundRobinScheduler`.
- */
-public class PassiveRoundRobinSchedulerFactory: SchedulerFactory {
+public protocol ModifiableFSMGateway: FSMGateway {
+    
+    var delegate: FSMGatewayDelegate? { get set }
+    
+    var latestID: FSM_ID { get set }
+    
+    var fsms: [FSM_ID: FSMType] { get set }
+    
+    var ids: [String: FSM_ID] { get set }
+    
+}
 
-    fileprivate let scheduleHandler: ScheduleHandler
-
-    fileprivate let unloader: MachineUnloader
-
-    public init(scheduleHandler: ScheduleHandler, unloader: MachineUnloader) {
-        self.scheduleHandler = scheduleHandler
-        self.unloader = unloader
+extension ModifiableFSMGateway {
+    
+    public func fsm(fromID id: FSM_ID) -> AnyControllableFiniteStateMachine {
+        guard let fsm = self.fsms[id] else {
+            fatalError("FSM with id '\(id)' does not exist.")
+        }
+        guard let controllableFSM = fsm.asControllableFiniteStateMachine else {
+            fatalError("Unable to fetch FSM with id '\(id)' as it is not a controllable FSM.")
+        }
+        self.delegate?.hasFetchedFsm(inGateway: self, fsm: controllableFSM, withId: id)
+        return controllableFSM
     }
-
-    /**
-     *  Create a new `PassiveRoundRobinScheduler`.
-     *
-     *  - Parameter machines: All the machines that are going to execute.
-     */
-    public func make() -> RoundRobinScheduler<SequentialPerScheduleCycleTokenizer> {
-        return RoundRobinScheduler(
-            tokenizer: SequentialPerScheduleCycleTokenizer(),
-            unloader: self.unloader,
-            scheduleHandler: self.scheduleHandler
-        )
+    
+    public func id(of name: String) -> FSM_ID {
+        guard let id = self.ids[name] else {
+            let id = self.latestID
+            self.ids[name] = id
+            self.latestID = self.latestID.advanced(by: 1)
+            return id
+        }
+        return id
     }
-
+    
+    public func invokeSelf<R>(_ name: String, withParameters parameters: [String: Any]) -> Promise<R> {
+        return self.invokeSelf(self.id(of: name), withParameters: parameters)
+    }
+    
+    public func invoke<R>(_ name: String, withParameters parameters: [String: Any]) -> Promise<R> {
+        return self.invoke(self.id(of: name), withParameters: parameters)
+    }
+    
 }

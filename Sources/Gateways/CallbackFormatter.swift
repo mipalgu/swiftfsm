@@ -1,9 +1,9 @@
 /*
- * PassiveRoundRobinSchedulerFactory.swift
- * swiftfsm
+ * CallbackFormatter.swift
+ * Gateways
  *
- * Created by Callum McColl on 08/06/2017.
- * Copyright © 2015 Callum McColl. All rights reserved.
+ * Created by Callum McColl on 26/12/18.
+ * Copyright © 2018 Callum McColl. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -56,35 +56,16 @@
  *
  */
 
-import FSM
-import MachineStructure
-import MachineLoading
-
-/**
- *  Provides a way to create a `PassiveRoundRobinScheduler`.
- */
-public class PassiveRoundRobinSchedulerFactory: SchedulerFactory {
-
-    fileprivate let scheduleHandler: ScheduleHandler
-
-    fileprivate let unloader: MachineUnloader
-
-    public init(scheduleHandler: ScheduleHandler, unloader: MachineUnloader) {
-        self.scheduleHandler = scheduleHandler
-        self.unloader = unloader
+public final class CallbackFormatter: Formatter {
+    
+    fileprivate var _format: (String) -> String
+    
+    public init(_ _format: @escaping (String) -> String) {
+        self._format = _format
     }
-
-    /**
-     *  Create a new `PassiveRoundRobinScheduler`.
-     *
-     *  - Parameter machines: All the machines that are going to execute.
-     */
-    public func make() -> RoundRobinScheduler<SequentialPerScheduleCycleTokenizer> {
-        return RoundRobinScheduler(
-            tokenizer: SequentialPerScheduleCycleTokenizer(),
-            unloader: self.unloader,
-            scheduleHandler: self.scheduleHandler
-        )
+    
+    public func format(_ str: String) -> String {
+        return self._format(str)
     }
-
+    
 }

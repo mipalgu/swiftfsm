@@ -89,7 +89,7 @@ public final class SwiftMachinesCompiler: MachineCompiler {
             self.parser.errors.forEach(self.printer.error)
             return false
         }
-        guard nil != self.compiler.compile(
+        guard nil != self.compiler.compileTree(
             machine,
             withCCompilerFlags: compilerFlags,
             andLinkerFlags: linkerFlags,

@@ -1,8 +1,8 @@
 /*
- * ScheduleCycleKripkeStructureGenerator.swift
- * Verification
+ * RestrictiveFSMGateway.swift 
+ * Gateways 
  *
- * Created by Callum McColl on 10/9/18.
+ * Created by Callum McColl on 25/12/2018.
  * Copyright © 2018 Callum McColl. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -56,67 +56,78 @@
  *
  */
 
-import KripkeStructure
 import FSM
-import Gateways
-import Scheduling
-import MachineStructure
-import ModelChecking
-import FSMVerification
 import swiftfsm
+import Utilities
 
-public final class ScheduleCycleKripkeStructureGenerator<
-    Extractor: ExternalsSpinnerDataExtractorType,
-    Factory: VerificationCycleKripkeStructureGeneratorFactoryType,
-    Tokenizer: SchedulerTokenizer
->: KripkeStructureGenerator where
-    Tokenizer.Object == Machine,
-    Tokenizer.SchedulerToken == SchedulerToken
-{
-    fileprivate let machines: [Machine]
-    fileprivate let extractor: Extractor
-    fileprivate let factory: Factory
-    fileprivate let tokenizer: Tokenizer
+public final class RestrictiveFSMGateway<Gateway: FSMGateway, _Formatter: Formatter>: FSMGateway {
     
-    public init(
-        machines: [Machine],
-        extractor: Extractor,
-        factory: Factory,
-        tokenizer: Tokenizer
-    ) {
-        self.machines = machines
-        self.extractor = extractor
-        self.factory = factory
-        self.tokenizer = tokenizer
+    fileprivate let gateway: Gateway
+    
+    fileprivate let whitelist: Set<FSM_ID>
+    
+    fileprivate let formatter: _Formatter
+    
+    public init(gateway: Gateway, whitelist: Set<FSM_ID>, formatter: _Formatter) {
+        self.gateway = gateway
+        self.whitelist = whitelist
+        self.formatter = formatter
     }
     
-    public func generate<Gateway: ModifiableFSMGateway>(usingGateway gateway: Gateway) {
-        let tokens = self.tokenizer.separate(self.machines)
-        tokens.forEach {
-            $0.forEach {
-                switch $0.type {
-                case .parameterisedFSM(let fsm):
-                    fsm.suspend()
-                default:
-                    return
-                }
-            }
+    public func invokeSelf<R>(_ name: String, withParameters parameters: [String: Any]) -> Promise<R> {
+        let name = self.formatter.format(name)
+        let id = self.gateway.id(of: name)
+        guard true == self.whitelist.contains(id) else {
+            fatalError("Unable to fetch id of fsm named \(name)")
         }
-        let verificationTokens = self.convert(tokens: tokens)
-        self.factory.make(tokens: verificationTokens).generate(usingGateway: gateway)
+        return self.invokeSelf(id, withParameters: parameters)
     }
     
-    fileprivate func convert(tokens: [[SchedulerToken]]) -> [[VerificationToken]] {
-        // Convert SchedulerTokens to VerificationTokens.
-        return tokens.map { (arr: [SchedulerToken]) in
-            arr.map { (token: SchedulerToken) -> VerificationToken in
-                let externals = token.fsm.externalVariables.map { (external: AnySnapshotController) -> ExternalVariablesVerificationData in
-                    let (defaultValues, spinners) = self.extractor.extract(externalVariables: external)
-                    return ExternalVariablesVerificationData(externalVariables: external, defaultValues: defaultValues, spinners: spinners)
-                }
-                return VerificationToken(fsm: token.fsm, machine: token.machine, externalVariables: externals)
-            }
+    public func invoke<R>(_ name: String, withParameters parameters: [String: Any]) -> Promise<R> {
+        let name = self.formatter.format(name)
+        let id = self.gateway.id(of: name)
+        guard true == self.whitelist.contains(id) else {
+            fatalError("Unable to fetch id of fsm named \(name)")
         }
+        return self.invoke(id, withParameters: parameters)
+    }
+    
+    public func invoke<R>(_ id: FSM_ID, withParameters parameters: [String: Any]) -> Promise<R> {
+        guard true == self.whitelist.contains(id) else {
+            fatalError("Unable to invoke fsm with id \(id)")
+        }
+        return self.gateway.invoke(id, withParameters: parameters)
+    }
+    
+    public func invokeSelf<R>(_ id: FSM_ID, withParameters parameters: [String: Any]) -> Promise<R> {
+        guard true == self.whitelist.contains(id) else {
+            fatalError("Unable to invoke fsm with id \(id)")
+        }
+        return self.gateway.invokeSelf(id, withParameters: parameters)
+    }
+    
+    public func fsm(fromID id: FSM_ID) -> AnyControllableFiniteStateMachine {
+        guard true == self.whitelist.contains(id) else {
+            fatalError("Unable to fetch fsm with id \(id)")
+        }
+        return self.gateway.fsm(fromID: id)
+    }
+    
+    public func id(of name: String) -> FSM_ID {
+        let name = self.formatter.format(name)
+        let id = self.gateway.id(of: name)
+        guard true == self.whitelist.contains(id) else {
+            fatalError("Unable to fetch id of fsm named \(name)")
+        }
+        return id
+    }
+    
+}
+
+extension RestrictiveFSMGateway where _Formatter == NullFormatter {
+    
+    public convenience init(gateway: Gateway, whitelist: Set<FSM_ID>) {
+        self.init(gateway: gateway, whitelist: whitelist, formatter: NullFormatter())
     }
     
 }

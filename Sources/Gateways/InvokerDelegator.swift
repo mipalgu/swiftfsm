@@ -1,9 +1,9 @@
 /*
- * PassiveRoundRobinSchedulerFactory.swift
- * swiftfsm
+ * InvokerDelegator.swift
+ * CFSMWrappers
  *
- * Created by Callum McColl on 08/06/2017.
- * Copyright © 2015 Callum McColl. All rights reserved.
+ * Created by Callum McColl on 25/12/18.
+ * Copyright © 2018 Callum McColl. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -57,34 +57,33 @@
  */
 
 import FSM
-import MachineStructure
-import MachineLoading
+import swiftfsm
+import Utilities
 
-/**
- *  Provides a way to create a `PassiveRoundRobinScheduler`.
- */
-public class PassiveRoundRobinSchedulerFactory: SchedulerFactory {
+public protocol InvokerDelegator: Invoker {
+ 
+    associatedtype Delegate: Invoker
+    
+    var invoker: Delegate { get }
+    
+}
 
-    fileprivate let scheduleHandler: ScheduleHandler
-
-    fileprivate let unloader: MachineUnloader
-
-    public init(scheduleHandler: ScheduleHandler, unloader: MachineUnloader) {
-        self.scheduleHandler = scheduleHandler
-        self.unloader = unloader
+extension InvokerDelegator {
+    
+    public func invoke<R>(_ name: String, withParameters parameters: [String: Any]) -> Promise<R> {
+        return self.invoker.invokeSelf(name, withParameters: parameters)
     }
-
-    /**
-     *  Create a new `PassiveRoundRobinScheduler`.
-     *
-     *  - Parameter machines: All the machines that are going to execute.
-     */
-    public func make() -> RoundRobinScheduler<SequentialPerScheduleCycleTokenizer> {
-        return RoundRobinScheduler(
-            tokenizer: SequentialPerScheduleCycleTokenizer(),
-            unloader: self.unloader,
-            scheduleHandler: self.scheduleHandler
-        )
+    
+    public func invokeSelf<R>(_ name: String, withParameters parameters: [String: Any]) -> Promise<R> {
+        return self.invoker.invoke(name, withParameters: parameters)
     }
-
+    
+    public func invoke<R>(_ id: FSM_ID, withParameters parameters: [String: Any]) -> Promise<R> {
+        return self.invoker.invoke(id, withParameters: parameters)
+    }
+    
+    public func invokeSelf<R>(_ id: FSM_ID, withParameters parameters: [String: Any]) -> Promise<R> {
+        return self.invoker.invokeSelf(id, withParameters: parameters)
+    }
+    
 }

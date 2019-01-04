@@ -64,6 +64,7 @@
 
 import FSM
 import Functional
+import Gateways
 import KripkeStructure
 import KripkeStructureViews
 import MachineStructure
@@ -196,16 +197,17 @@ public class Swiftfsm<
         }
     }
 
-    private func generateKripkeStructure<KGF: KripkeStructureGeneratorFactory>(
+    private func generateKripkeStructure<KGF: KripkeStructureGeneratorFactory, Gateway: ModifiableFSMGateway>(
         _ machines: [Machine],
         withGenerator generatorFactory: KGF,
-        andViews views: [AnyKripkeStructureView<KripkeState>]
+        andViews views: [AnyKripkeStructureView<KripkeState>],
+        usingGateway gateway: Gateway
     ) where KGF.View == AggregateKripkeStructureView<KripkeState> {
         if machines.isEmpty {
             return
         }
         let generator = generatorFactory.make(fromMachines: machines, usingView: AggregateKripkeStructureView(views: views))
-        generator.generate()
+        generator.generate(usingGateway: gateway)
     }
 
     private func handleError(_ error: SwiftfsmErrors) -> Never {
@@ -223,7 +225,7 @@ public class Swiftfsm<
         let views = task.kripkeStructureViews ?? [self.kripkeStructureView]
         guard let supportedScheduler = task.scheduler else {
             let scheduler = self.schedulerFactory.make()
-            let machines: [Machine] = task.jobs.flatMap { self.handleJob($0, invoker: scheduler) }
+            let machines: [Machine] = task.jobs.flatMap { self.handleJob($0, gateway: scheduler) }
             self.handleMachines(
                 machines,
                 task: task,
@@ -236,7 +238,7 @@ public class Swiftfsm<
         switch supportedScheduler {
         case .roundRobin(let schedulerFactory, let generator):
             let scheduler = schedulerFactory.make()
-            let machines: [Machine] = task.jobs.flatMap { self.handleJob($0, invoker: scheduler) }
+            let machines: [Machine] = task.jobs.flatMap { self.handleJob($0, gateway: scheduler) }
             self.handleMachines(
                 machines,
                 task: task,
@@ -246,7 +248,7 @@ public class Swiftfsm<
             )
         case .passiveRoundRobin(let schedulerFactory, let generator):
             let scheduler = schedulerFactory.make()
-            let machines: [Machine] = task.jobs.flatMap { self.handleJob($0, invoker: scheduler) }
+            let machines: [Machine] = task.jobs.flatMap { self.handleJob($0, gateway: scheduler) }
             self.handleMachines(
                 machines,
                 task: task,
@@ -257,15 +259,15 @@ public class Swiftfsm<
         }
     }
     
-    private func handleMachines<KGF: KripkeStructureGeneratorFactory>(
+    private func handleMachines<KGF: KripkeStructureGeneratorFactory, S: Scheduler>(
         _ machines: [Machine],
         task: Task,
         generator: KGF,
-        scheduler: Scheduler,
+        scheduler: S,
         views: [AnyKripkeStructureView<KripkeState>]
     ) where KGF.View == AggregateKripkeStructureView<KripkeState> {
         if task.generateKripkeStructure {
-            self.generateKripkeStructure(machines, withGenerator: generator, andViews: views)
+            self.generateKripkeStructure(machines, withGenerator: generator, andViews: views, usingGateway: scheduler)
         }
         if task.addToScheduler {
             scheduler.run(machines)
@@ -284,18 +286,18 @@ public class Swiftfsm<
         return name
     }
 
-    private func loadFsm(
+    private func loadFsm<Gateway: FSMGateway>(
         _ job: Job,
         name: String,
-        invoker: Invoker,
+        gateway: Gateway,
         parameters: [String: String]
     ) -> (FSMType, [Dependency], FSMClock) {
         let clock = FSMClock()
         let fsm: (FSMType, [Dependency])?
         if true == job.isClfsmMachine {
-            fsm = self.clfsmMachineLoader.load(name: name, invoker: invoker, clock: clock, path: job.path!)
+            fsm = self.clfsmMachineLoader.load(name: name, gateway: gateway, clock: clock, path: job.path!)
         } else {
-            fsm = self.machineLoader.load(name: name, invoker: invoker, clock: clock, path: job.path!)
+            fsm = self.machineLoader.load(name: name, gateway: gateway, clock: clock, path: job.path!)
         }
         guard let unwrappedFSM = fsm else {
             // Handle when we are unable to load the fsm.
@@ -307,13 +309,13 @@ public class Swiftfsm<
         guard let parameterisedFSM = unwrappedFSM.0.asParameterisedFiniteStateMachine else {
             self.handleError(SwiftfsmErrors.generalError(error: "Unable to load parameters for \(name) as it is not a parameterised machine."))
         }
-        guard true == parameterisedFSM.parametersFromDictionary(parameters) else {
+        guard true == parameterisedFSM.parametersFromStringDictionary(parameters) else {
             self.handleError(SwiftfsmErrors.generalError(error: "Unable to set parameters for \(name). Please make sure all parameters conform to 'LosslessStringConvertible'"))
         }
         return (unwrappedFSM.0, unwrappedFSM.1, clock)
     }
 
-    private func handleJob(_ job: Job, invoker: Invoker) -> [Machine] {
+    private func handleJob<Gateway: FSMGateway>(_ job: Job, gateway: Gateway) -> [Machine] {
         var name: String = self.getMachinesName(job)
         // Handle when there is no path in the Task.
         guard let path = job.path else {
@@ -332,7 +334,7 @@ public class Swiftfsm<
         var machines: [Machine] = []
         for _ in 0 ..< job.count {
             // Create the Machine
-            let (fsm, dependencies, clock) = self.loadFsm(job, name: name, invoker: invoker, parameters: job.parameters)
+            let (fsm, dependencies, clock) = self.loadFsm(job, name: name, gateway: gateway, parameters: job.parameters)
             let temp: Machine = self.machineFactory.make(
                 name: name,
                 fsm: fsm,
