@@ -90,8 +90,6 @@ public class RoundRobinScheduler<Tokenizer: SchedulerTokenizer>: Scheduler where
     
     fileprivate var promises: [FSM_ID: (fsm: AnyParameterisedFiniteStateMachine, stack: [PromiseData])] = [:]
     
-    fileprivate var invocations: Bool = false
-    
     public var delegate: FSMGatewayDelegate?
     
     public var latestID: FSM_ID = 0
@@ -155,9 +153,8 @@ public class RoundRobinScheduler<Tokenizer: SchedulerTokenizer>: Scheduler where
                         jobs[i].remove(at: j)
                         continue
                     }
-                    self.invocations = false
                     fsm.next()
-                    finish = finish && (fsm.hasFinished || fsm.isSuspended) && (false == self.invocations)
+                    finish = finish && (fsm.hasFinished || fsm.isSuspended)
                     if true == fsm.hasFinished, nil != self.promises[id] {
                         self.promises[id]?.stack.first?.hasFinished = true
                         self.promises[id]?.stack.removeFirst()
@@ -209,7 +206,6 @@ public class RoundRobinScheduler<Tokenizer: SchedulerTokenizer>: Scheduler where
         let promiseData = PromiseData(fsm: fsm.clone(), hasFinished: false)
         promiseData.fsm.parametersFromDictionary(parameters)
         promiseData.fsm.restart()
-        self.invocations = true
         return promiseData
     }
     
