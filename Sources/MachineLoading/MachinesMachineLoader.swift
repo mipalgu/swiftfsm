@@ -153,7 +153,7 @@ public final class MachinesMachineLoader: MachineLoader {
         case .controllableFSM(let fsm):
             return .submachine(fsm, dependencies)
         case .parameterisedFSM(let fsm):
-            return .parameterisedMachine(fsm, fsm.name, dependencies)
+            return .invokableParameterisedMachine(fsm, dependencies)
         }
     }
 
