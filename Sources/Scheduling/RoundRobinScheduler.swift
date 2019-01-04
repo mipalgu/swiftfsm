@@ -88,7 +88,7 @@ public class RoundRobinScheduler<Tokenizer: SchedulerTokenizer>: Scheduler where
     
     private let printer: Printer
     
-    fileprivate var promises: [FSM_ID: (fsm: AnyParameterisedFiniteStateMachine, stack: [PromiseData])] = [:]
+    fileprivate var stacks: [FSM_ID: [PromiseData]] = [:]
     
     public var delegate: FSMGatewayDelegate?
     
@@ -115,7 +115,7 @@ public class RoundRobinScheduler<Tokenizer: SchedulerTokenizer>: Scheduler where
      *  Start executing all machines.
      */
     public func run(_ machines: [Machine]) -> Void {
-        self.promises = [:]
+        self.stacks = [:]
         let tokens = self.tokenizer.separate(machines)
         tokens.forEach {
             $0.forEach {
@@ -127,12 +127,12 @@ public class RoundRobinScheduler<Tokenizer: SchedulerTokenizer>: Scheduler where
                 }
                 parameterisedFSM.suspend()
                 if false == $0.isRootFSM {
-                    self.promises[id] = (parameterisedFSM, [])
+                    self.stacks[id] = []
                     return
                 }
                 let clone = parameterisedFSM.clone()
                 clone.restart()
-                self.promises[id] = (parameterisedFSM, [PromiseData(fsm: clone, hasFinished: false)])
+                self.stacks[id] = [PromiseData(fsm: clone, hasFinished: false)]
             }
         }
         var jobs = self.fetchJobs(fromTokens: tokens)
@@ -146,7 +146,7 @@ public class RoundRobinScheduler<Tokenizer: SchedulerTokenizer>: Scheduler where
                 let machines: Set<Machine> = self.getMachines(fromJob: job)
                 machines.forEach { $0.fsm.takeSnapshot() }
                 for (id, fsm, machine) in job {
-                    let fsm = self.promises[id]?.stack.first?.fsm.asScheduleableFiniteStateMachine ?? fsm
+                    let fsm = self.stacks[id]?.first?.fsm.asScheduleableFiniteStateMachine ?? fsm
                     machine.clock.update(fromFSM: fsm)
                     DEBUG = machine.debug
                     if (true == scheduleHandler.handleUnloadedMachine(fsm)) {
@@ -155,9 +155,9 @@ public class RoundRobinScheduler<Tokenizer: SchedulerTokenizer>: Scheduler where
                     }
                     fsm.next()
                     finish = finish && (fsm.hasFinished || fsm.isSuspended)
-                    if true == fsm.hasFinished, nil != self.promises[id] {
-                        self.promises[id]?.stack.first?.hasFinished = true
-                        self.promises[id]?.stack.removeFirst()
+                    if true == fsm.hasFinished, nil != self.stacks[id] {
+                        self.stacks[id]?.first?.hasFinished = true
+                        self.stacks[id]?.removeFirst()
                         finish = false
                     }
                     j += 1
@@ -173,28 +173,31 @@ public class RoundRobinScheduler<Tokenizer: SchedulerTokenizer>: Scheduler where
     }
     
     public func invoke<R>(_ id: FSM_ID, withParameters parameters: [String: Any]) -> Promise<R> {
-        guard let existingPromiseData = self.promises[id] else {
+        guard let fsm = self.fetchParameterisedMachine(id) else {
             self.error("Attempting to invoke FSM with id \(id) when it has not been scheduled.")
         }
-        guard true == existingPromiseData.stack.isEmpty else {
+        guard true == self.stacks[id]?.isEmpty else {
             self.error("Attempting to invoke FSM with id \(id) when it is already running.")
         }
-        let promiseData = self.handleInvocation(id: id, fsm: existingPromiseData.fsm, withParameters: parameters)
-        self.promises[id]?.stack.insert(promiseData, at: 0)
-        self.delegate?.hasInvoked(inGateway: self, fsm: existingPromiseData.fsm, withId: id, storingResultsIn: promiseData)
+        let promiseData = self.handleInvocation(id: id, fsm: fsm, withParameters: parameters)
+        self.stacks[id]?.insert(promiseData, at: 0)
+        self.delegate?.hasInvoked(inGateway: self, fsm: fsm, withId: id, storingResultsIn: promiseData)
         return promiseData.makePromise()
     }
     
     public func call<R>(_ id: FSM_ID, withParameters parameters: [String : Any], caller: FSM_ID) -> Promise<R> {
-        guard let existingPromiseData = self.promises[id] else {
+        guard let fsm = self.fetchParameterisedMachine(id) else {
             self.error("Attempting to invoke FSM with id \(id) when it has not been scheduled.")
         }
-        guard existingPromiseData.stack.count <= self.stackLimit else {
+        guard let stackSize = self.stacks[caller]?.count else {
+            self.error("Unable to fetch stack of fsm with id \(caller)")
+        }
+        guard stackSize <= self.stackLimit else {
             self.error("Stack Overflow: Attempting to call FSM with id \(id) more times than the current stack limit (\(self.stackLimit)).")
         }
-        let promiseData = self.handleInvocation(id: id, fsm: existingPromiseData.fsm, withParameters: parameters)
-        self.promises[caller]?.stack.insert(promiseData, at: 0)
-        self.delegate?.hasInvokedSelf(inGateway: self, fsm: existingPromiseData.fsm, withId: id, storingResultsIn: promiseData)
+        let promiseData = self.handleInvocation(id: id, fsm: fsm, withParameters: parameters)
+        self.stacks[caller]?.insert(promiseData, at: 0)
+        self.delegate?.hasInvokedSelf(inGateway: self, fsm: fsm, withId: id, storingResultsIn: promiseData)
         return promiseData.makePromise()
     }
     
@@ -204,7 +207,9 @@ public class RoundRobinScheduler<Tokenizer: SchedulerTokenizer>: Scheduler where
     
     fileprivate func handleInvocation(id: FSM_ID, fsm: AnyParameterisedFiniteStateMachine, withParameters parameters: [String: Any]) -> PromiseData {
         let promiseData = PromiseData(fsm: fsm.clone(), hasFinished: false)
-        promiseData.fsm.parametersFromDictionary(parameters)
+        guard true == promiseData.fsm.parametersFromDictionary(parameters) else {
+            self.error("Unable to initial parameterised fsm \(fsm.name) with id \(id) from its parameters dictionary.")
+        }
         promiseData.fsm.restart()
         return promiseData
     }
@@ -228,6 +233,10 @@ public class RoundRobinScheduler<Tokenizer: SchedulerTokenizer>: Scheduler where
     fileprivate func error(_ str: String) -> Never {
         self.printer.error(str: str)
         exit(EXIT_FAILURE)
+    }
+    
+    fileprivate func fetchParameterisedMachine(_ id: FSM_ID) -> AnyParameterisedFiniteStateMachine? {
+        return self.fsms[id]?.asParameterisedFiniteStateMachine
     }
     
 }
