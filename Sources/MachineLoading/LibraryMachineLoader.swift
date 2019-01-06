@@ -137,7 +137,10 @@ public class LibraryMachineLoader: MachineLoader {
         path: String
     ) -> FSMType? {
         // Get main method symbol
-        let symbolName = "make_" + name
+        guard let symbolName = self.fetchSymbolName(fromPath: path) else {
+            self.printer.error(str: "Unable to synthesize the factory function symbol name from path '\(path)'")
+            return nil
+        }
         do {
             return try self.loader.load(symbol: symbolName, inLibrary: path) { (factory: SymbolSignature) -> FSMType? in
                 guard let data = factory(gateway, clock) as? FSMType else {
@@ -156,6 +159,26 @@ public class LibraryMachineLoader: MachineLoader {
             self.printer.error(str: "Unable to load machine \(name)")
             return nil
         }
+    }
+    
+    fileprivate func fetchSymbolName(fromPath path: String) -> String? {
+        let components = path.split(separator: "/")
+        guard var file = components.last else {
+            return nil
+        }
+        if file.hasPrefix("lib") {
+            file.removeFirst(3)
+        }
+        if file.hasSuffix(".dylib") {
+            file.removeLast(6)
+        }
+        if file.hasSuffix(".so") {
+            file.removeLast(3)
+        }
+        if true == file.isEmpty {
+            return nil
+        }
+        return "make_" + file
     }
     
 }
