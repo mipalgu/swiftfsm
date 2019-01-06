@@ -59,6 +59,7 @@
 #if !NO_FOUNDATION
 
 import FSM
+import Libraries
 import SwiftMachines
 import swiftfsm
 import IO
@@ -68,8 +69,10 @@ import swift_helpers
 @available(macOS 10.11, *)
 public final class MachinesMachineLoader: MachineLoader {
 
+    fileprivate typealias SymbolSignature = @convention(c) (Any, Any) -> Any
+    
     fileprivate let compiler: MachineCompiler<MachineAssembler>
-    fileprivate let libraryLoader: MachineLoader
+    fileprivate let libraryLoader: LibrarySymbolLoader
     fileprivate let parser: MachineParser
     fileprivate let printer: Printer
 
@@ -80,7 +83,7 @@ public final class MachinesMachineLoader: MachineLoader {
     @available(macOS 10.11, *)
     public init(
         compiler: MachineCompiler<MachineAssembler> = MachineCompiler(assembler: MachineAssembler()),
-        libraryLoader: MachineLoader,
+        libraryLoader: LibrarySymbolLoader,
         parser: MachineParser = MachineParser(),
         printer: Printer = CommandLinePrinter(errorStream: StderrOutputStream(), messageStream: StdoutOutputStream(), warningStream: StdoutOutputStream()),
         cCompilerFlags: [String] = [],
@@ -131,8 +134,10 @@ public final class MachinesMachineLoader: MachineLoader {
         }) else {
             return nil
         }
+        
         if false == self.compiler.shouldCompile(machine) {
-            guard let (fsm, _) = self.libraryLoader.load(name: machine.name, gateway: newGateway, clock: clock, path: self.compiler.outputPath(forMachine: machine)) else {
+            let outputPath = self.compiler.outputPath(forMachine: machine)
+            guard let fsm = self.loadSymbol(inMachine: machine.name, gateway: newGateway, clock: clock, path: outputPath) else {
                 return nil
             }
             return (fsm, recursed)
@@ -144,14 +149,37 @@ public final class MachinesMachineLoader: MachineLoader {
                 andLinkerFlags: self.linkerFlags,
                 andSwiftCompilerFlags: self.swiftCompilerFlags
             )
-            else {
-                self.compiler.errors.forEach(self.printer.error)
-                return nil
+        else {
+            self.compiler.errors.forEach(self.printer.error)
+            return nil
         }
-        guard let (fsm, _) = self.libraryLoader.load(name: machine.name, gateway: newGateway, clock: clock, path: outputPath) else {
+        guard let fsm = self.loadSymbol(inMachine: machine.name, gateway: newGateway, clock: clock, path: outputPath) else {
             return nil
         }
         return (fsm, recursed)
+    }
+    
+    fileprivate func loadSymbol<G: FSMGateway>(inMachine name: String, gateway: G, clock: Timer, path: String) -> FSMType? {
+        let symbolName = "make_" + name
+        do {
+            return try self.libraryLoader.load(
+                symbol: symbolName,
+                inLibrary: path,
+                { (factory: SymbolSignature) -> FSMType? in
+                    guard let fsm = factory(gateway, clock) as? FSMType else {
+                        self.printer.error(str: "Unable to call factory function \(symbolName) for machine \(name)")
+                        return nil
+                    }
+                    return fsm
+                }
+            )
+        } catch (let error as LibrarySymbolLoader.Errors) {
+            self.printer.error(str: error.message)
+            return nil
+        } catch {
+            self.printer.error(str: "Unable to load machine \(name)")
+            return nil
+        }
     }
     
     fileprivate func convert(_ fsm: FSMType, dependencies: [Dependency], inMachine machine: Machine) -> Dependency {
