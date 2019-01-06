@@ -169,16 +169,13 @@ public class LibraryMachineLoader: MachineLoader {
         if file.hasPrefix("lib") {
             file.removeFirst(3)
         }
-        if file.hasSuffix(".dylib") {
-            file.removeLast(6)
-        }
-        if file.hasSuffix(".so") {
-            file.removeLast(3)
-        }
-        if true == file.isEmpty {
+        guard let name = file.split(separator: ".").first else {
             return nil
         }
-        return "make_" + file
+        if true == name.isEmpty {
+            return nil
+        }
+        return "make_" + name
     }
     
 }
