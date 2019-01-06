@@ -107,13 +107,15 @@ public class RoundRobinScheduler<Tokenizer: SchedulerTokenizer>: Scheduler where
         let tokens = self.tokenizer.separate(machines)
         tokens.forEach {
             $0.forEach {
-                let id = self.gateway.id(of: $0.fullyQualifiedName)
-                self.gateway.stacks[id] = []
                 guard let parameterisedFSM = $0.type.asParameterisedFiniteStateMachine else {
                     return
                 }
                 parameterisedFSM.suspend()
-                if false == $0.isRootFSM { return }
+                let id = self.gateway.id(of: $0.fullyQualifiedName)
+                if false == $0.isRootFSM {
+                    self.gateway.stacks[id] = []
+                    return
+                }
                 let clone = parameterisedFSM.clone()
                 clone.restart()
                 self.gateway.stacks[id] = [PromiseData(fsm: clone, hasFinished: false)]
@@ -175,10 +177,19 @@ public class RoundRobinScheduler<Tokenizer: SchedulerTokenizer>: Scheduler where
     fileprivate func addToGateway(_ fsm: FSMType, dependencies: [Dependency], prefix: String) {
         let id = self.gateway.id(of: prefix + fsm.name)
         self.gateway.fsms[id] = fsm
+        print("fsm \(prefix + fsm.name), id: \(id)")
         for dependency in dependencies {
             let subprefix = prefix + fsm.name + "."
             switch dependency {
-            case .callableParameterisedMachine(let subfsm, let subdependencies), .invokableParameterisedMachine(let subfsm, let subdependencies):
+            case .callableParameterisedMachine(let subfsm, let subdependencies):
+                switch fsm {
+                case .controllableFSM:
+                    self.gateway.stacks[id] = []
+                default:
+                    break
+                }
+                self.addToGateway(.parameterisedFSM(subfsm), dependencies: subdependencies, prefix: subprefix)
+            case .invokableParameterisedMachine(let subfsm, let subdependencies):
                 self.addToGateway(.parameterisedFSM(subfsm), dependencies: subdependencies, prefix: subprefix)
             case .submachine(let subfsm, let subdependencies):
                 self.addToGateway(.controllableFSM(subfsm), dependencies: subdependencies, prefix: subprefix)
