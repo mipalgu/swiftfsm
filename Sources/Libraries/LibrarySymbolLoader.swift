@@ -62,8 +62,42 @@ public final class LibrarySymbolLoader {
         case error(message: String)
     }
     
-    public func load<T, U>(symbol: String, inLibrary path: String, _ callback: (T) throws -> U) throws -> U {
-        throw Errors.error(message: "Error message")
+    /*
+     *  Used to create the libraries.
+     *
+     *  - Note: It would be a good idea for the LibraryCreator to leverage the
+     *      strategy pattern as it would then be able to decide which library
+     *      creator to use from the path.  This is not yet implemented, but
+     *      would allow multiple types of paths to be used instead of just file
+     *      paths.  For instance it could allow the loading of a library from a
+     *      url or a network stream.
+     */
+    fileprivate let creator: LibraryCreator
+    
+    /**
+     *  Create a new `LibrarySymbolLoader`.
+     *
+     *  - Parameter creator: Used to create the `LibraryResource`s.
+     */
+    public init(creator: LibraryCreator) {
+        self.creator = creator
+    }
+    
+    public func load<T, U>(symbol symbolName: String, inLibrary path: String, _ callback: (T) throws -> U) throws -> U {
+        // Ignore empty paths
+        let path = path.trimmingCharacters(in: .whitespacesAndNewlines)
+        // Load the factory from the dynamic library.
+        guard let resource = self.creator.open(path: path) else {
+            throw Errors.error(message: "Unable to create a resource for libray at path '\(path)'")
+        }
+        let result: (symbol: UnsafeMutableRawPointer?, error: String?) = resource.getSymbolPointer(symbol: symbolName)
+        // Error with fetching symbol
+        guard let symbol = result.symbol else {
+            throw Errors.error(message: result.error ?? "Unable to fetch symbol '\(symbolName)' in library at path '\(path)'")
+        }
+        // Convert the symbol to the specified type.
+        let type = unsafeBitCast(symbol, to: T.self)
+        return try callback(type)
     }
     
 }
