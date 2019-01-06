@@ -78,17 +78,7 @@ public class LibraryMachineLoader: MachineLoader {
      */
     private static var cache: [String: SymbolSignature] = [:]
 
-    /**
-     *  Used to create the libraries.
-     *
-     *  - Note: It would be a good idea for the LibraryCreator to leverage the
-     *      strategy pattern as it would then be able to decide which library
-     *      creator to use from the path.  This is not yet implemented, but
-     *      would allow multiple types of paths to be used instead of just file
-     *      paths.  For instance it could allow the loading of a library from a
-     *      url or a network stream.
-     */
-    public let creator: LibraryCreator
+    public let loader: LibrarySymbolLoader
 
     /**
      *  Used to print error messages.
@@ -98,12 +88,12 @@ public class LibraryMachineLoader: MachineLoader {
     /**
      *  Create a new `LibraryMachineLoader`.
      *
-     *  - Parameter creator: Used to create the `LibraryResource`s.
+     *  - Parameter loader: Used to load the symbols.
      *
      *  - Parameter printer: Error messages get sent here.
      */
-    public init(creator: LibraryCreator, printer: Printer) {
-        self.creator = creator
+    public init(loader: LibrarySymbolLoader, printer: Printer) {
+        self.loader = loader
         self.printer = printer
     }
 
@@ -134,10 +124,7 @@ public class LibraryMachineLoader: MachineLoader {
             return (factory(gateway, clock) as? FSMType).map { ($0, []) }
         }
         // Load the factory from the dynamic library.
-        guard
-            let resource = self.creator.open(path: path),
-            let data = self.loadMachine(name: name, gateway: gateway, clock: clock, library: resource)
-        else {
+        guard let data = self.loadMachine(name: name, gateway: gateway, clock: clock, path: path) else {
             return nil
         }
         return (data, [])
@@ -147,26 +134,28 @@ public class LibraryMachineLoader: MachineLoader {
         name: String,
         gateway: Gateway,
         clock: Timer,
-        library: LibraryResource
+        path: String
     ) -> FSMType? {
         // Get main method symbol
         let symbolName = "make_" + name
-        let result: (symbol: UnsafeMutableRawPointer?, error: String?) =
-            library.getSymbolPointer(symbol: symbolName)
-        // Error with fetching symbol
-        guard let symbol = result.symbol else {
-            self.printer.error(str: result.error ?? "Unable to fetch symbol '\(symbolName)' for machine \(name)")
+        do {
+            return try self.loader.load(symbol: symbolName, inLibrary: path) { (factory: SymbolSignature) -> FSMType? in
+                guard let data = factory(gateway, clock) as? FSMType else {
+                    self.printer.error(str: "Unable to call factory function '\(symbolName)' for machine \(name)")
+                    return nil
+                }
+                return data
+            }
+        } catch (let error as LibrarySymbolLoader.Errors) {
+            switch error {
+            case .error(let message):
+                self.printer.error(str: message)
+            }
+            return nil
+        } catch {
+            self.printer.error(str: "Unable to load machine \(name)")
             return nil
         }
-        // Convert the sybmol to a factory function.
-        let factory = unsafeBitCast(symbol, to: SymbolSignature.self)
-        // Add the factory to the cache, call it and return the result.
-        type(of: self).cache[library.path] = factory
-        guard let data = factory(gateway, clock) as? FSMType else {
-            self.printer.error(str: "Unable to call factory function '\(symbolName)' for machine \(name)")
-            return nil
-        }
-        return data
     }
     
 }

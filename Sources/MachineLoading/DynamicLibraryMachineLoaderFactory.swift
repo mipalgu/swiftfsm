@@ -86,7 +86,7 @@ public class DynamicLibraryMachineLoaderFactory: MachineLoaderFactory {
      */
     public func make() -> MachineLoader {
         return LibraryMachineLoader(
-            creator: DynamicLibraryCreator(),
+            loader: LibrarySymbolLoader(creator: DynamicLibraryCreator()),
             printer: self.printer 
         )
     }
