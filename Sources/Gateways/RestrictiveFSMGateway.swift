@@ -95,7 +95,8 @@ public final class RestrictiveFSMGateway<Gateway: FSMGateway, _Formatter: Format
             caller == self.selfID,
             true == self.callables.contains(id)
         else {
-            fatalError("Unable to call fsm with id \(id)")
+            print(self.callables)
+            fatalError("Unable to call fsm with id \(id) with caller \(caller)")
         }
         return self.gateway.call(id, withParameters: parameters, caller: caller)
     }

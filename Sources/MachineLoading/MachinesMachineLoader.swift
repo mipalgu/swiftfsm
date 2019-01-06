@@ -69,7 +69,7 @@ import swift_helpers
 @available(macOS 10.11, *)
 public final class MachinesMachineLoader: MachineLoader {
 
-    fileprivate typealias SymbolSignature = @convention(c) (Any, Any) -> Any
+    fileprivate typealias SymbolSignature = @convention(c) (Any, Any, Any) -> Any
     
     fileprivate let compiler: MachineCompiler<MachineAssembler>
     fileprivate let libraryLoader: LibrarySymbolLoader
@@ -107,17 +107,18 @@ public final class MachinesMachineLoader: MachineLoader {
         return load(machine: machine, gateway: gateway, clock: clock, prefix: name)
     }
     
-    fileprivate func load<Gateway: FSMGateway>(machine: Machine, gateway: Gateway, clock: Timer, prefix: String) -> (FSMType, [Dependency])? {
+    fileprivate func load<Gateway: FSMGateway>(machine: Machine, gateway: Gateway, clock: Timer, prefix: String, caller: FSM_ID? = nil) -> (FSMType, [Dependency])? {
         let dependantMachines = machine.submachines + machine.parameterisedMachines
         let format = { prefix + "." + machine.name + "." + $0 }
         let selfID: FSM_ID = gateway.id(of: prefix + "." + machine.name)
         let dependantIds: [FSM_ID] = dependantMachines.map { gateway.id(of: format($0.name)) }
         let callableIds = machine.callableMachines.map { gateway.id(of: format($0.name)) }
         let invocableIds = machine.invocableMachines.map { gateway.id(of: format($0.name)) }
+        let caller = caller ?? selfID
         let newGateway = RestrictiveFSMGateway(
             gateway: gateway,
-            selfID: selfID,
-            callables: Set(callableIds),
+            selfID: caller,
+            callables: Set(callableIds + [selfID]),
             invocables: Set(invocableIds),
             whitelist: Set(dependantIds + [selfID]),
             formatter: CallbackFormatter {
@@ -127,17 +128,23 @@ public final class MachinesMachineLoader: MachineLoader {
                 return format($0)
             }
         )
-        guard let recursed = dependantMachines.failMap({
-            load(machine: $0, gateway: gateway, clock: clock, prefix: prefix + "." + machine.name).map {
-                convert($0, dependencies: $1, inMachine: machine)
-            }
+        guard let recursed = dependantMachines.failMap({ (m: Machine) -> Dependency? in
+            let id = gateway.id(of: format(m.name))
+            let caller = true == callableIds.contains(id) ? caller : id
+            return load(
+                machine: m,
+                gateway: gateway,
+                clock: clock,
+                prefix: prefix + "." + machine.name,
+                caller: caller
+            ).map { convert($0, dependencies: $1, inMachine: machine) }
         }) else {
             return nil
         }
         
         if false == self.compiler.shouldCompile(machine) {
             let outputPath = self.compiler.outputPath(forMachine: machine)
-            guard let fsm = self.loadSymbol(inMachine: machine.name, gateway: newGateway, clock: clock, path: outputPath) else {
+            guard let fsm = self.loadSymbol(inMachine: machine.name, gateway: newGateway, clock: clock, path: outputPath, caller: caller) else {
                 return nil
             }
             return (fsm, recursed)
@@ -153,20 +160,21 @@ public final class MachinesMachineLoader: MachineLoader {
             self.compiler.errors.forEach(self.printer.error)
             return nil
         }
-        guard let fsm = self.loadSymbol(inMachine: machine.name, gateway: newGateway, clock: clock, path: outputPath) else {
+        guard let fsm = self.loadSymbol(inMachine: machine.name, gateway: newGateway, clock: clock, path: outputPath, caller: caller) else {
             return nil
         }
         return (fsm, recursed)
     }
     
-    fileprivate func loadSymbol<G: FSMGateway>(inMachine name: String, gateway: G, clock: Timer, path: String) -> FSMType? {
+    fileprivate func loadSymbol<G: FSMGateway>(inMachine name: String, gateway: G, clock: Timer, path: String, caller: FSM_ID) -> FSMType? {
+        print("load machine \(name), caller: \(caller)")
         let symbolName = "make_" + name
         do {
             return try self.libraryLoader.load(
                 symbol: symbolName,
                 inLibrary: path,
                 { (factory: SymbolSignature) -> FSMType? in
-                    guard let fsm = factory(gateway, clock) as? FSMType else {
+                    guard let fsm = factory(gateway, clock, caller) as? FSMType else {
                         self.printer.error(str: "Unable to call factory function \(symbolName) for machine \(name)")
                         return nil
                     }
