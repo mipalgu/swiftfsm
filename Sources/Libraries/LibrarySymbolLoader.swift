@@ -59,6 +59,14 @@
 public final class LibrarySymbolLoader {
  
     public enum Errors: Error {
+        
+        public var message: String {
+            switch self {
+            case .error(let message):
+                return message
+            }
+        }
+        
         case error(message: String)
     }
     
