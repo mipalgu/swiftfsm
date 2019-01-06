@@ -100,7 +100,6 @@ public class RoundRobinScheduler<Tokenizer: SchedulerTokenizer>: Scheduler where
      *  Start executing all machines.
      */
     public func run(_ machines: [Machine]) -> Void {
-        print("run")
         self.gateway.stacks = [:]
         machines.forEach { self.addToGateway($0.fsm, dependencies: $0.dependencies, prefix: $0.name
             + ".") }
@@ -177,7 +176,6 @@ public class RoundRobinScheduler<Tokenizer: SchedulerTokenizer>: Scheduler where
     fileprivate func addToGateway(_ fsm: FSMType, dependencies: [Dependency], prefix: String) {
         let id = self.gateway.id(of: prefix + fsm.name)
         self.gateway.fsms[id] = fsm
-        print("fsm \(prefix + fsm.name), id: \(id)")
         for dependency in dependencies {
             let subprefix = prefix + fsm.name + "."
             switch dependency {

@@ -167,7 +167,6 @@ public final class MachinesMachineLoader: MachineLoader {
     }
     
     fileprivate func loadSymbol<G: FSMGateway>(inMachine name: String, gateway: G, clock: Timer, path: String, caller: FSM_ID) -> FSMType? {
-        print("load machine \(name), caller: \(caller)")
         let symbolName = "make_" + name
         do {
             return try self.libraryLoader.load(
