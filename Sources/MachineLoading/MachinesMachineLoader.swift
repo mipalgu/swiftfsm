@@ -141,7 +141,6 @@ public final class MachinesMachineLoader: MachineLoader {
         }) else {
             return nil
         }
-        
         if false == self.compiler.shouldCompile(machine) {
             let outputPath = self.compiler.outputPath(forMachine: machine)
             guard let fsm = self.loadSymbol(inMachine: machine.name, gateway: newGateway, clock: clock, path: outputPath, caller: caller) else {
