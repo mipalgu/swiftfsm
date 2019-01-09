@@ -111,7 +111,7 @@ public final class StackGateway: ModifiableFSMGateway, ModifiableFSMGatewayDefau
         }
         let promiseData = self.handleInvocation(id: id, fsm: fsm, withParameters: parameters)
         self.stacks[caller]?.insert(promiseData, at: 0)
-        self.delegate?.hasInvokedSelf(inGateway: self, fsm: fsm, withId: id, storingResultsIn: promiseData)
+        self.delegate?.hasCalled(inGateway: self, fsm: fsm, withId: id, caller: caller, storingResultsIn: promiseData)
         return promiseData.makePromise()
     }
     
