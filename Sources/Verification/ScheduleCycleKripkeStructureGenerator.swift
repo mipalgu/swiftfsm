@@ -102,19 +102,33 @@ public final class ScheduleCycleKripkeStructureGenerator<
                 }
             }
         }
-        let verificationTokens = self.convert(tokens: tokens)
-        self.factory.make(tokens: verificationTokens).generate(usingGateway: gateway)
+        let verificationTokens = self.convert(tokens: tokens, forMachines: self.machines)
+        verificationTokens.forEach {
+            self.factory.make(tokens: $0).generate(usingGateway: gateway)
+        }
     }
     
-    fileprivate func convert(tokens: [[SchedulerToken]]) -> [[VerificationToken]] {
-        // Convert SchedulerTokens to VerificationTokens.
-        return tokens.map { (arr: [SchedulerToken]) in
-            arr.map { (token: SchedulerToken) -> VerificationToken in
-                let externals = token.fsm.externalVariables.map { (external: AnySnapshotController) -> ExternalVariablesVerificationData in
-                    let (defaultValues, spinners) = self.extractor.extract(externalVariables: external)
-                    return ExternalVariablesVerificationData(externalVariables: external, defaultValues: defaultValues, spinners: spinners)
+    /*
+     *  Creates an list of schedules where each list only contains fsms for a
+     *  particular machine.
+     *
+     *  This allows us to create a Kripke Structure for each machine. This is
+     *  possible because an FSM may only manipulate or control other FSM's
+     *  within the same machine.
+     */
+    fileprivate func convert(tokens: [[SchedulerToken]], forMachines machines: [Machine]) -> [[[VerificationToken]]] {
+        return machines.map { machine in
+            tokens.map { (arr: [SchedulerToken]) in
+                arr.map { (token: SchedulerToken) -> VerificationToken in
+                    if token.machine != machine {
+                        return .skip
+                    }
+                    let externals = token.fsm.externalVariables.map { (external: AnySnapshotController) -> ExternalVariablesVerificationData in
+                        let (defaultValues, spinners) = self.extractor.extract(externalVariables: external)
+                        return ExternalVariablesVerificationData(externalVariables: external, defaultValues: defaultValues, spinners: spinners)
+                    }
+                    return .verify(data: VerificationToken.Data(fsm: token.fsm, machine: token.machine, externalVariables: externals))
                 }
-                return VerificationToken(fsm: token.fsm, machine: token.machine, externalVariables: externals)
             }
         }
     }
