@@ -107,6 +107,8 @@ public final class VerificationCycleExecuter {
         usingView view: View
     ) -> [(KripkeState?, [[VerificationToken]])] where View.State == KripkeState {
         //swiftlint:disable:next line_length
+        var tokens = tokens
+        tokens[executing] = tokens[executing].filter { nil != $0.data } // Ignore all skip tokens.
         var jobs = [Job(index: 0, tokens: tokens, externals: externals, initialState: nil, lastState: last, clock: 0, usedClockValues: [])]
         let states: Ref<[KripkeStatePropertyList: KripkeState]> = Ref(value: [:])
         var initialStates: HashSink<KripkeStatePropertyList, KripkeStatePropertyList> = HashSink()
@@ -116,7 +118,7 @@ public final class VerificationCycleExecuter {
             let job = jobs.removeFirst()
             let newTokens = self.prepareTokens(job.tokens, executing: (executing, job.index), fromExternals: job.externals)
             let (generatedStates, clockValues, newExternals) = self.executer.execute(
-                fsm: newTokens[executing][job.index].fsm,
+                fsm: newTokens[executing][job.index].data!.fsm,
                 inTokens: newTokens,
                 executing: executing,
                 atOffset: job.index,
@@ -192,11 +194,11 @@ public final class VerificationCycleExecuter {
     }
     
     fileprivate func prepareTokens(_ tokens: [[VerificationToken]], executing: (Int, Int), fromExternals externals: [(AnySnapshotController, KripkeStatePropertyList)]) -> [[VerificationToken]] {
-        let clone = tokens[executing.0][executing.1].fsm.clone()
+        let clone = tokens[executing.0][executing.1].data!.fsm.clone()
         var newTokens = tokens
-        newTokens[executing.0][executing.1] = VerificationToken(fsm: clone, machine: tokens[executing.0][executing.1].machine, externalVariables: tokens[executing.0][executing.1].externalVariables)
+        newTokens[executing.0][executing.1] = .verify(data: VerificationToken.Data(fsm: clone, machine: tokens[executing.0][executing.1].data!.machine, externalVariables: tokens[executing.0][executing.1].data!.externalVariables))
         newTokens[executing.0].forEach {
-            var fsm = $0.fsm
+            var fsm = $0.data!.fsm
             fsm.externalVariables.enumerated().forEach { (offset, externalVariables) in
                 guard let (external, props) = externals.first(where: { $0.0.name == externalVariables.name }) else {
                     return

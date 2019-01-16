@@ -84,8 +84,9 @@ public final class VerificationTokenExecuter<StateGenerator: KripkeStateGenerato
         andLastState lastState: KripkeState?
     ) -> ([KripkeState], [UInt], [(AnySnapshotController, KripkeStatePropertyList)]) {
         let token = tokens[executing][offset]
-        token.machine.clock.forcedRunningTime = clock
-        token.machine.clock.lastClockValues = []
+        let data = token.data!
+        data.machine.clock.forcedRunningTime = clock
+        data.machine.clock.lastClockValues = []
         var externals = externals
         let state = fsm.currentState.name
         let preWorld = self.worldCreator.createWorld(
@@ -115,7 +116,7 @@ public final class VerificationTokenExecuter<StateGenerator: KripkeStateGenerato
             worldType: .afterExecution
         )
         let postState = self.stateGenerator.generateKripkeState(fromWorld: postWorld, withLastState: preState)
-        return ([preState, postState], token.machine.clock.lastClockValues, externals)
+        return ([preState, postState], data.machine.clock.lastClockValues, externals)
     }
     
 }
