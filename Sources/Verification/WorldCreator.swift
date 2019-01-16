@@ -140,27 +140,33 @@ public final class WorldCreator {
         appendingToPC str: String
     ) -> KripkeStatePropertyList {
         var varPs: KripkeStatePropertyList = [:]
+        guard let pcTokenData = tokens[executing][token].data else {
+            return varPs
+        }
         tokens.forEach {
             $0.forEach {
-                varPs[$0.fsm.name] = KripkeStateProperty(
-                    type: .Compound(self.recorder.takeRecord(of: $0.fsm.base)),
-                    value: $0.fsm
+                guard let data = $0.data else {
+                    return
+                }
+                varPs[data.fsm.name] = KripkeStateProperty(
+                    type: .Compound(self.recorder.takeRecord(of: data.fsm.base)),
+                    value: data.fsm
                 )
             }
         }
         varPs["pc"] = KripkeStateProperty(
             type: .String,
-            value: self.createPC(ofToken: tokens[executing][token], withState: state, appending: str)
+            value: self.createPC(ofTokenData: pcTokenData, withState: state, appending: str)
         )
         return varPs
     }
     
     fileprivate func createPC(
-        ofToken token: VerificationToken,
+        ofTokenData data: VerificationToken.Data,
         withState state: String,
         appending str: String
     ) -> String {
-        return "\(token.fsm.name).\(state).\(str)"
+        return "\(data.fsm.name).\(state).\(str)"
     }
     
 }
