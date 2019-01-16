@@ -110,8 +110,22 @@ public final class VerificationCycleKripkeStructureGenerator<
             let job = jobs.removeFirst()
             let externalsData = self.fetchUniqueExternalsData(fromTokens: [job.tokens[job.executing]])
             let spinner = self.spinnerConstructor.makeSpinner(forExternals: externalsData)
+            if nil == job.tokens[job.executing].first(where: { nil != $0.data }) {
+                jobs.append(Job(
+                    initial: job.initial,
+                    cache: job.cache,
+                    tokens: job.tokens,
+                    executing: (job.executing + 1) % job.tokens.count,
+                    lastState: job.lastState,
+                    lastRecords: job.lastRecords
+                ))
+                continue
+            }
             while let externals = spinner() {
                 let externals = nil == job.lastState ? self.mergeExternals(externals, with: defaultExternals) : externals
+                guard let firstData = job.tokens[job.executing].first(where: { nil != $0.data })?.data else {
+                    break
+                }
                 // Check for cycles.
                 let world = self.worldCreator.createWorld(
                     fromExternals: externals,
@@ -119,7 +133,7 @@ public final class VerificationCycleKripkeStructureGenerator<
                     andLastState: job.lastState,
                     andExecuting: job.executing,
                     andExecutingToken: 0,
-                    withState: job.tokens[job.executing][0].fsm.currentState.name,
+                    withState: firstData.fsm.currentState.name,
                     worldType: .beforeExecution
                 )
                 let (inCycle, newCache) = self.cycleDetector.inCycle(data: job.cache, element: world)
@@ -146,7 +160,7 @@ public final class VerificationCycleKripkeStructureGenerator<
                         continue
                     }
                     // Get rid of any effects on states where all fsms have finished.
-                    if nil == newTokens.first(where: { nil != $0.first { !$0.fsm.hasFinished } }) {
+                    if nil == newTokens.first(where: { nil != $0.first { !($0.data?.fsm.hasFinished ?? true) } }) {
                         view.commit(state: lastNewState, isInitial: false)
                         continue
                     }
@@ -157,7 +171,9 @@ public final class VerificationCycleKripkeStructureGenerator<
                         tokens: newTokens,
                         executing: (job.executing + 1) % newTokens.count,
                         lastState: lastNewState,
-                        lastRecords: newTokens.map { $0.map { self.recorder.takeRecord(of: $0.fsm.base) } }
+                        lastRecords: newTokens.map { $0.map {
+                            ($0.data?.fsm.base).map(self.recorder.takeRecord) ?? KripkeStatePropertyList()
+                        } }
                     ))
                 }
             }
@@ -194,7 +210,7 @@ public final class VerificationCycleKripkeStructureGenerator<
             tokens: tokens,
             executing: 0,
             lastState: nil,
-            lastRecords: tokens.map { $0.map { self.recorder.takeRecord(of: $0.fsm.base) } }
+            lastRecords: tokens.map { $0.map { ($0.data?.fsm.base).map(self.recorder.takeRecord) ?? KripkeStatePropertyList() } }
         )]
     }
     
@@ -202,7 +218,7 @@ public final class VerificationCycleKripkeStructureGenerator<
         var hashTable: Set<String> = []
         var externals: [ExternalVariablesVerificationData] = []
         for tokens in tokens {
-            tokens.forEach { $0.externalVariables.forEach {
+            tokens.forEach { ($0.data?.externalVariables ?? []).forEach {
                 if hashTable.contains($0.externalVariables.name) {
                     return
                 }
