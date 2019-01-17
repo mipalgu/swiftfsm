@@ -70,9 +70,8 @@ import Utilities
 public final class VerificationCycleKripkeStructureGenerator<
     Cloner: AggregateClonerProtocol,
     Detector: CycleDetector,
-    SpinnerConstructor: MultipleExternalsSpinnerConstructorType,
-    View: KripkeStructureView
->: KripkeStructureGenerator where Detector.Element == KripkeStatePropertyList, View.State == KripkeState
+    SpinnerConstructor: MultipleExternalsSpinnerConstructorType
+>: LazyKripkeStructureGenerator where Detector.Element == KripkeStatePropertyList
 {
     
     fileprivate let tokens: [[VerificationToken]]
@@ -80,7 +79,6 @@ public final class VerificationCycleKripkeStructureGenerator<
     fileprivate let cycleDetector: Detector
     fileprivate let executer: VerificationCycleExecuter
     fileprivate let spinnerConstructor: SpinnerConstructor
-    fileprivate let view: View
     fileprivate let worldCreator: WorldCreator
     fileprivate let recorder = MirrorKripkePropertiesRecorder()
     
@@ -90,7 +88,6 @@ public final class VerificationCycleKripkeStructureGenerator<
         cycleDetector: Detector,
         executer: VerificationCycleExecuter = VerificationCycleExecuter(),
         spinnerConstructor: SpinnerConstructor,
-        view: View,
         worldCreator: WorldCreator = WorldCreator()
     ) {
         self.tokens = tokens
@@ -98,11 +95,10 @@ public final class VerificationCycleKripkeStructureGenerator<
         self.cycleDetector = cycleDetector
         self.executer = executer
         self.spinnerConstructor = spinnerConstructor
-        self.view = view
         self.worldCreator = worldCreator
     }
     
-    public func generate<Gateway: ModifiableFSMGateway>(usingGateway gateway: Gateway) {
+    public func generate<Gateway: ModifiableFSMGateway, View: KripkeStructureView>(usingGateway gateway: Gateway, andView view: View) where View.State == KripkeState {
         var jobs = self.createInitialJobs(fromTokens: self.tokens)
         view.reset()
         let defaultExternals = self.createExternals(fromTokens: self.tokens)

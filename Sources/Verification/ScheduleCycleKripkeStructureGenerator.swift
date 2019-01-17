@@ -68,26 +68,31 @@ import swiftfsm
 public final class ScheduleCycleKripkeStructureGenerator<
     Extractor: ExternalsSpinnerDataExtractorType,
     Factory: VerificationCycleKripkeStructureGeneratorFactoryType,
-    Tokenizer: SchedulerTokenizer
+    Tokenizer: SchedulerTokenizer,
+    ViewFactory: KripkeStructureViewFactory
 >: KripkeStructureGenerator where
     Tokenizer.Object == Machine,
-    Tokenizer.SchedulerToken == SchedulerToken
+    Tokenizer.SchedulerToken == SchedulerToken,
+    ViewFactory.View.State == KripkeState
 {
     fileprivate let machines: [Machine]
     fileprivate let extractor: Extractor
     fileprivate let factory: Factory
     fileprivate let tokenizer: Tokenizer
+    fileprivate let viewFactory: ViewFactory
     
     public init(
         machines: [Machine],
         extractor: Extractor,
         factory: Factory,
-        tokenizer: Tokenizer
+        tokenizer: Tokenizer,
+        viewFactory: ViewFactory
     ) {
         self.machines = machines
         self.extractor = extractor
         self.factory = factory
         self.tokenizer = tokenizer
+        self.viewFactory = viewFactory
     }
     
     public func generate<Gateway: ModifiableFSMGateway>(usingGateway gateway: Gateway) {
@@ -103,8 +108,8 @@ public final class ScheduleCycleKripkeStructureGenerator<
             }
         }
         let verificationTokens = self.convert(tokens: tokens, forMachines: self.machines)
-        verificationTokens.forEach {
-            self.factory.make(tokens: $0).generate(usingGateway: gateway)
+        verificationTokens.forEach { (tokens: [[VerificationToken]], view: ViewFactory.View) in
+            self.factory.make(tokens: tokens).generate(usingGateway: gateway, andView: view)
         }
     }
     
@@ -116,9 +121,9 @@ public final class ScheduleCycleKripkeStructureGenerator<
      *  possible because an FSM may only manipulate or control other FSM's
      *  within the same machine.
      */
-    fileprivate func convert(tokens: [[SchedulerToken]], forMachines machines: [Machine]) -> [[[VerificationToken]]] {
+    fileprivate func convert(tokens: [[SchedulerToken]], forMachines machines: [Machine]) -> [([[VerificationToken]], ViewFactory.View)] {
         return machines.map { machine in
-            tokens.map { (arr: [SchedulerToken]) in
+            let verificationTokens = tokens.map { (arr: [SchedulerToken]) in
                 arr.map { (token: SchedulerToken) -> VerificationToken in
                     if token.machine != machine {
                         return .skip
@@ -130,6 +135,8 @@ public final class ScheduleCycleKripkeStructureGenerator<
                     return .verify(data: VerificationToken.Data(fsm: token.fsm, machine: token.machine, externalVariables: externals))
                 }
             }
+            let view = self.viewFactory.make(identifier: machine.name)
+            return (verificationTokens, view)
         }
     }
     

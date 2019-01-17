@@ -63,8 +63,8 @@ import ModelChecking
 public protocol KripkeStructureGeneratorFactory {
 
     associatedtype Generator: KripkeStructureGenerator
-    associatedtype View: KripkeStructureView
+    associatedtype ViewFactory: KripkeStructureViewFactory
 
-    func make(fromMachines: [Machine], usingView: View) -> Generator
+    func make(fromMachines: [Machine], usingViewFactory: ViewFactory) -> Generator
 
 }
