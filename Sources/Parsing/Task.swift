@@ -98,7 +98,7 @@ public struct Task {
      *  The list of kripke structure views which will output a `KripkeStructure`
      *  into a specific format.
      */
-    public var kripkeStructureViews: [AnyKripkeStructureView<KripkeState>]?
+    public var kripkeStructureViews: [AnyKripkeStructureViewFactory<KripkeState>]?
 
     /**
      *  Should we print the help text?

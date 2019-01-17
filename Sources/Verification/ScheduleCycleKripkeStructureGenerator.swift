@@ -57,6 +57,7 @@
  */
 
 import KripkeStructure
+import KripkeStructureViews
 import FSM
 import Gateways
 import Scheduling

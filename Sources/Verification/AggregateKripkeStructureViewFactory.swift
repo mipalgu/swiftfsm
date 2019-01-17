@@ -61,14 +61,14 @@ import KripkeStructureViews
 
 public final class AggregateKripkeStructureViewFactory<State: KripkeStateType>: KripkeStructureViewFactory {
     
-    fileprivate let views: [AnyKripkeStructureView<State>]
+    fileprivate let views: [AnyKripkeStructureViewFactory<State>]
     
-    public init(views: [AnyKripkeStructureView<State>]) {
+    public init(views: [AnyKripkeStructureViewFactory<State>]) {
         self.views = views
     }
     
     public func make(identifier: String) -> AggregateKripkeStructureView<State> {
-        return AggregateKripkeStructureView(views: self.views)
+        return AggregateKripkeStructureView(views: self.views.map { $0.make(identifier: identifier) })
     }
     
 }

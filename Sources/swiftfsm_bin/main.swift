@@ -64,6 +64,7 @@ import Darwin
 
 import FSM
 import IO
+import KripkeStructure
 import KripkeStructureViews
 import MachineStructure
 import MachineLoading
@@ -103,7 +104,7 @@ func run() {
     Swiftfsm(
         clfsmMachineLoader: CLFSMMachineLoader(),
         kripkeStructureGeneratorFactory: RoundRobinKripkeStructureGeneratorFactory(),
-        kripkeStructureView: AnyKripkeStructureView(NuSMVKripkeStructureView()),
+        kripkeStructureViewFactory: AnyKripkeStructureViewFactory(NuSMVKripkeStructureViewFactory<KripkeState>()),
         machineCompiler: compiler,
         machineFactory: SimpleMachineFactory(),
         machineLoader: MachineLoaderStrategy(
