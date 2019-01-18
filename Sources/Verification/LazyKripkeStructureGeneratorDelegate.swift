@@ -1,5 +1,5 @@
 /*
- * VerificationCycleKripkeStructureGeneratorDelegate.swift
+ * LazyKripkeStructureGeneratorDelegate.swift
  * Verification
  *
  * Created by Callum McColl on 18/1/19.
@@ -59,12 +59,12 @@
 import KripkeStructure
 import swiftfsm
 
-public protocol VerificationCycleKripkeStructureGeneratorDelegate: class {
+public protocol LazyKripkeStructureGeneratorDelegate: class {
     
     /**
      *  Fetch the initial states and finish states of a parameterised machine.
      *
-     *  This information is used by `VerificationCycleKripkeStructureGenerator`s
+     *  This information is used by `LazyKripkeStructureGenerator`s
      *  in order to easily generate states for when an fsm invokes or calls
      *  another fsm.
      */

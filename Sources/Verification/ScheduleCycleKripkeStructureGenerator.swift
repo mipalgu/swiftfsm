@@ -110,7 +110,9 @@ public final class ScheduleCycleKripkeStructureGenerator<
         }
         let verificationTokens = self.convert(tokens: tokens, forMachines: self.machines)
         verificationTokens.forEach { (tokens: [[VerificationToken]], view: ViewFactory.View) in
-            self.factory.make(tokens: tokens).generate(usingGateway: gateway, andView: view)
+            var generator = self.factory.make(tokens: tokens)
+            generator.delegate = self
+            generator.generate(usingGateway: gateway, andView: view)
         }
     }
     
@@ -139,6 +141,14 @@ public final class ScheduleCycleKripkeStructureGenerator<
             let view = self.viewFactory.make(identifier: machine.name)
             return (verificationTokens, view)
         }
+    }
+    
+}
+
+extension ScheduleCycleKripkeStructureGenerator: LazyKripkeStructureGeneratorDelegate {
+    
+    public func statesForParameterisedMachine(_ generator: LazyKripkeStructureGenerator, fsm: AnyParameterisedFiniteStateMachine) -> ([KripkeState], [KripkeState]?) {
+        return ([], [])
     }
     
 }

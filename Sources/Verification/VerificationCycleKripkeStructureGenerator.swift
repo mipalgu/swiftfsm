@@ -82,6 +82,8 @@ public final class VerificationCycleKripkeStructureGenerator<
     fileprivate let worldCreator: WorldCreator
     fileprivate let recorder = MirrorKripkePropertiesRecorder()
     
+    public weak var delegate: LazyKripkeStructureGeneratorDelegate?
+    
     public init(
         tokens: [[VerificationToken]],
         cloner: Cloner,
