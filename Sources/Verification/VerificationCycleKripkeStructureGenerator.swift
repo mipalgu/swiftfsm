@@ -104,8 +104,7 @@ public final class VerificationCycleKripkeStructureGenerator<
         let defaultExternals = self.createExternals(fromTokens: self.tokens)
         while false == jobs.isEmpty {
             let job = jobs.removeFirst()
-            let externalsData = self.fetchUniqueExternalsData(fromTokens: [job.tokens[job.executing]])
-            let spinner = self.spinnerConstructor.makeSpinner(forExternals: externalsData)
+            // Skip this job if all tokens are .skip tokens.
             if nil == job.tokens[job.executing].first(where: { nil != $0.data }) {
                 jobs.append(Job(
                     initial: job.initial,
@@ -117,6 +116,10 @@ public final class VerificationCycleKripkeStructureGenerator<
                 ))
                 continue
             }
+            // Create a spinner for the external variables.
+            let externalsData = self.fetchUniqueExternalsData(fromTokens: [job.tokens[job.executing]])
+            let spinner = self.spinnerConstructor.makeSpinner(forExternals: externalsData)
+            // Generate kirpke states for each variation of external variables.
             while let externals = spinner() {
                 let externals = nil == job.lastState ? self.mergeExternals(externals, with: defaultExternals) : externals
                 guard let firstData = job.tokens[job.executing].first(where: { nil != $0.data })?.data else {
@@ -150,8 +153,9 @@ public final class VerificationCycleKripkeStructureGenerator<
                     isInitial: job.initial,
                     usingView: view
                 )
+                // Create jobs for each different 'run' possible.
                 for (lastState, newTokens) in runs {
-                    // Do not generate more jobs if we do not have a last state.
+                    // Do not generate more jobs if we do not have a last state - means that nothing was executed, should never happen.
                     guard let lastNewState = lastState else {
                         continue
                     }
