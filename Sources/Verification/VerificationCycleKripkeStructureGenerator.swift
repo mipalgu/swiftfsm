@@ -115,7 +115,8 @@ public final class VerificationCycleKripkeStructureGenerator<
                     tokens: job.tokens,
                     executing: (job.executing + 1) % job.tokens.count,
                     lastState: job.lastState,
-                    lastRecords: job.lastRecords
+                    lastRecords: job.lastRecords,
+                    runs: job.runs
                 ))
                 continue
             }
@@ -169,21 +170,23 @@ public final class VerificationCycleKripkeStructureGenerator<
                     if nil == newTokens.first(where: { nil != $0.first { !($0.data?.fsm.hasFinished ?? true) } }) {
                         if false == finishingStatesLookup.contains(lastNewState.properties) {
                             finishingStatesLookup.insert(lastNewState.properties)
-                            finishingStates.append((0, lastNewState.properties))
+                            finishingStates.append((job.runs, lastNewState.properties))
                         }
                         view.commit(state: lastNewState, isInitial: false)
                         continue
                     }
+                    let newExecutingIndex = (job.executing + 1) % newTokens.count
                     // Create a new job from the clones.
                     jobs.append(Job(
                         initial: false,
                         cache: newCache,
                         tokens: newTokens,
-                        executing: (job.executing + 1) % newTokens.count,
+                        executing: newExecutingIndex,
                         lastState: lastNewState,
                         lastRecords: newTokens.map { $0.map {
                             ($0.data?.fsm.base).map(self.recorder.takeRecord) ?? KripkeStatePropertyList()
-                        } }
+                        } },
+                        runs: 0 == newExecutingIndex ? job.runs + 1 : job.runs
                     ))
                 }
             }
@@ -221,7 +224,8 @@ public final class VerificationCycleKripkeStructureGenerator<
             tokens: tokens,
             executing: 0,
             lastState: nil,
-            lastRecords: tokens.map { $0.map { ($0.data?.fsm.base).map(self.recorder.takeRecord) ?? KripkeStatePropertyList() } }
+            lastRecords: tokens.map { $0.map { ($0.data?.fsm.base).map(self.recorder.takeRecord) ?? KripkeStatePropertyList() } },
+            runs: 0
         )]
     }
     
@@ -253,6 +257,8 @@ public final class VerificationCycleKripkeStructureGenerator<
         let lastState: KripkeState?
         
         let lastRecords: [[KripkeStatePropertyList]]
+        
+        let runs: UInt
         
     }
     
