@@ -98,10 +98,13 @@ public final class VerificationCycleKripkeStructureGenerator<
         self.worldCreator = worldCreator
     }
     
-    public func generate<Gateway: ModifiableFSMGateway, View: KripkeStructureView>(usingGateway gateway: Gateway, andView view: View) where View.State == KripkeState {
+    public func generate<Gateway: ModifiableFSMGateway, View: KripkeStructureView>(usingGateway gateway: Gateway, andView view: View) -> ([KripkeStatePropertyList], [(UInt, KripkeStatePropertyList)]) where View.State == KripkeState {
         var jobs = self.createInitialJobs(fromTokens: self.tokens)
         view.reset()
         let defaultExternals = self.createExternals(fromTokens: self.tokens)
+        var initials: Set<KripkeStatePropertyList> = []
+        var finishingStatesLookup: Set<KripkeStatePropertyList> = []
+        var finishingStates: [(UInt, KripkeStatePropertyList)] = []
         while false == jobs.isEmpty {
             let job = jobs.removeFirst()
             // Skip this job if all tokens are .skip tokens.
@@ -135,6 +138,9 @@ public final class VerificationCycleKripkeStructureGenerator<
                     withState: firstData.fsm.currentState.name,
                     worldType: .beforeExecution
                 )
+                if true == job.initial {
+                    initials.insert(world)
+                }
                 let (inCycle, newCache) = self.cycleDetector.inCycle(data: job.cache, element: world)
                 if true == inCycle {
                     job.lastState?.effects.insert(world)
@@ -161,6 +167,10 @@ public final class VerificationCycleKripkeStructureGenerator<
                     }
                     // Get rid of any effects on states where all fsms have finished.
                     if nil == newTokens.first(where: { nil != $0.first { !($0.data?.fsm.hasFinished ?? true) } }) {
+                        if false == finishingStatesLookup.contains(lastNewState.properties) {
+                            finishingStatesLookup.insert(lastNewState.properties)
+                            finishingStates.append((0, lastNewState.properties))
+                        }
                         view.commit(state: lastNewState, isInitial: false)
                         continue
                     }
@@ -180,6 +190,7 @@ public final class VerificationCycleKripkeStructureGenerator<
             _ = job.lastState.map { view.commit(state: $0, isInitial: false) }
         }
         view.finish()
+        return (Array(initials), Array(finishingStates))
         /*print("number of initial states: \(initialStates.value.count)")
         print("number of state: \(states.value.count)")
         print("number of transitions: \(states.value.reduce(0) { $0 + $1.1.effects.count })")
