@@ -72,7 +72,7 @@ public final class SequentialPerRingletTokenizer: SchedulerTokenizer {
         return machines.lazy.flatMap { (machine) -> [SchedulerToken] in
             let name = machine.name + "." + machine.fsm.name
             let tokens: [SchedulerToken] = machine.dependencies.flatMap { self.flatenner.flattenSubmachines($0, name, machine) }
-            return [SchedulerToken(fullyQualifiedName: name, type: machine.fsm, machine: machine, isRootFSM: true)] + tokens
+            return [SchedulerToken(fullyQualifiedName: name, type: machine.fsm, machine: machine, dependencies: machine.dependencies, isRootFSM: true)] + tokens
         }.map { [$0] }
     }
 

@@ -95,7 +95,8 @@ public final class Cloner<Converter: KripkeStatePropertyListConverter>: ClonerPr
             data: VerificationToken.Data(
                 fsm: clone,
                 machine: data.machine,
-                externalVariables: newExternals
+                externalVariables: newExternals,
+                dependencies: data.dependencies
             )
         )
     }
