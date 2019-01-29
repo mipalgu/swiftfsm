@@ -69,14 +69,16 @@ public final class SubmachineFlatenner {
         case .callableParameterisedMachine:
             return []
         case .invokableParameterisedMachine(let fsm, let dependencies):
+            let name = name + "." + fsm.name
             return [SchedulerToken(
-                fullyQualifiedName: name + "." + fsm.name,
+                fullyQualifiedName: name,
                 type: .parameterisedFSM(fsm),
-                machine: machine
+                machine: machine,
+                dependee: name
             )] + dependencies.flatMap { self.flattenSubmachines($0, name, machine) }
         case .submachine(let fsm, let dependencies):
             let name = name + "." + fsm.name
-            return [SchedulerToken(fullyQualifiedName: name, type: .controllableFSM(fsm), machine: machine)]
+            return [SchedulerToken(fullyQualifiedName: name, type: .controllableFSM(fsm), machine: machine, dependee: name)]
                 + dependencies.flatMap { self.flattenSubmachines($0, name, machine) }
         }
     }
