@@ -100,14 +100,16 @@ public final class VerificationCycleKripkeStructureGenerator<
         self.worldCreator = worldCreator
     }
     
-    public func generate<Gateway: ModifiableFSMGateway, View: KripkeStructureView>(usingGateway gateway: Gateway, andView view: View) where View.State == KripkeState {
+    public func generate<Gateway: ModifiableFSMGateway, View: KripkeStructureView>(usingGateway gateway: Gateway, andView view: View) -> ([KripkeStatePropertyList], [(UInt, KripkeStatePropertyList)]) where View.State == KripkeState {
         var jobs = self.createInitialJobs(fromTokens: self.tokens)
         view.reset()
         let defaultExternals = self.createExternals(fromTokens: self.tokens)
+        var initials: Set<KripkeStatePropertyList> = []
+        var finishingStatesLookup: Set<KripkeStatePropertyList> = []
+        var finishingStates: [(UInt, KripkeStatePropertyList)] = []
         while false == jobs.isEmpty {
             let job = jobs.removeFirst()
-            let externalsData = self.fetchUniqueExternalsData(fromTokens: [job.tokens[job.executing]])
-            let spinner = self.spinnerConstructor.makeSpinner(forExternals: externalsData)
+            // Skip this job if all tokens are .skip tokens.
             if nil == job.tokens[job.executing].first(where: { nil != $0.data }) {
                 jobs.append(Job(
                     initial: job.initial,
@@ -115,10 +117,15 @@ public final class VerificationCycleKripkeStructureGenerator<
                     tokens: job.tokens,
                     executing: (job.executing + 1) % job.tokens.count,
                     lastState: job.lastState,
-                    lastRecords: job.lastRecords
+                    lastRecords: job.lastRecords,
+                    runs: job.runs
                 ))
                 continue
             }
+            // Create a spinner for the external variables.
+            let externalsData = self.fetchUniqueExternalsData(fromTokens: [job.tokens[job.executing]])
+            let spinner = self.spinnerConstructor.makeSpinner(forExternals: externalsData)
+            // Generate kirpke states for each variation of external variables.
             while let externals = spinner() {
                 let externals = nil == job.lastState ? self.mergeExternals(externals, with: defaultExternals) : externals
                 guard let firstData = job.tokens[job.executing].first(where: { nil != $0.data })?.data else {
@@ -134,6 +141,9 @@ public final class VerificationCycleKripkeStructureGenerator<
                     withState: firstData.fsm.currentState.name,
                     worldType: .beforeExecution
                 )
+                if true == job.initial {
+                    initials.insert(world)
+                }
                 let (inCycle, newCache) = self.cycleDetector.inCycle(data: job.cache, element: world)
                 if true == inCycle {
                     job.lastState?.effects.insert(world)
@@ -152,32 +162,40 @@ public final class VerificationCycleKripkeStructureGenerator<
                     isInitial: job.initial,
                     usingView: view
                 )
+                // Create jobs for each different 'run' possible.
                 for (lastState, newTokens) in runs {
-                    // Do not generate more jobs if we do not have a last state.
+                    // Do not generate more jobs if we do not have a last state - means that nothing was executed, should never happen.
                     guard let lastNewState = lastState else {
                         continue
                     }
                     // Get rid of any effects on states where all fsms have finished.
                     if nil == newTokens.first(where: { nil != $0.first { !($0.data?.fsm.hasFinished ?? true) } }) {
+                        if false == finishingStatesLookup.contains(lastNewState.properties) {
+                            finishingStatesLookup.insert(lastNewState.properties)
+                            finishingStates.append((job.runs, lastNewState.properties))
+                        }
                         view.commit(state: lastNewState, isInitial: false)
                         continue
                     }
+                    let newExecutingIndex = (job.executing + 1) % newTokens.count
                     // Create a new job from the clones.
                     jobs.append(Job(
                         initial: false,
                         cache: newCache,
                         tokens: newTokens,
-                        executing: (job.executing + 1) % newTokens.count,
+                        executing: newExecutingIndex,
                         lastState: lastNewState,
                         lastRecords: newTokens.map { $0.map {
                             ($0.data?.fsm.base).map(self.recorder.takeRecord) ?? KripkeStatePropertyList()
-                        } }
+                        } },
+                        runs: 0 == newExecutingIndex ? job.runs + 1 : job.runs
                     ))
                 }
             }
             _ = job.lastState.map { view.commit(state: $0, isInitial: false) }
         }
         view.finish()
+        return (Array(initials), Array(finishingStates))
         /*print("number of initial states: \(initialStates.value.count)")
         print("number of state: \(states.value.count)")
         print("number of transitions: \(states.value.reduce(0) { $0 + $1.1.effects.count })")
@@ -208,7 +226,8 @@ public final class VerificationCycleKripkeStructureGenerator<
             tokens: tokens,
             executing: 0,
             lastState: nil,
-            lastRecords: tokens.map { $0.map { ($0.data?.fsm.base).map(self.recorder.takeRecord) ?? KripkeStatePropertyList() } }
+            lastRecords: tokens.map { $0.map { ($0.data?.fsm.base).map(self.recorder.takeRecord) ?? KripkeStatePropertyList() } },
+            runs: 0
         )]
     }
     
@@ -240,6 +259,8 @@ public final class VerificationCycleKripkeStructureGenerator<
         let lastState: KripkeState?
         
         let lastRecords: [[KripkeStatePropertyList]]
+        
+        let runs: UInt
         
     }
     
