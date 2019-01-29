@@ -61,6 +61,8 @@ import KripkeStructure
 import KripkeStructureViews
 
 public protocol LazyKripkeStructureGenerator {
+
+    weak var delegate: LazyKripkeStructureGeneratorDelegate? { get set }
     
     func generate<Gateway: ModifiableFSMGateway, View: KripkeStructureView>(usingGateway gateway: Gateway, andView view: View) -> ([KripkeStatePropertyList], [(UInt, KripkeStatePropertyList)]) where View.State == KripkeState
     
