@@ -117,8 +117,8 @@ public final class ScheduleCycleKripkeStructureGenerator<
     }
     
     /*
-     *  Creates an list of schedules where each list only contains fsms for a
-     *  particular machine.
+     *  Creates an list of schedules where each schedule only contains fsms for
+     *  a particular machine.
      *
      *  This allows us to create a Kripke Structure for each machine. This is
      *  possible because an FSM may only manipulate or control other FSM's
@@ -143,6 +143,18 @@ public final class ScheduleCycleKripkeStructureGenerator<
         }
     }
     
+    /**
+     *  Should we skip this token if we are generating a `KripkeStructure` for
+     *  `machine`?
+     *
+     *  - Parameter token: The `SchedulerToken` which we are asking whether we
+     *  should skip it or not.
+     *
+     *  - Parameter machine: The `Machine` that the `KripkeStructure` is being
+     *  generated for.
+     *
+     *  - Returns: Returns true if `token` should be skipped.
+     */
     fileprivate func shouldSkip(token: SchedulerToken, forMachine machine: Machine) -> Bool {
         if token.machine != machine {
             return true
@@ -150,11 +162,13 @@ public final class ScheduleCycleKripkeStructureGenerator<
         if machine.name + "." + machine.fsm.name == token.fullyQualifiedName {
             return false
         }
-        let dependency = self.findDependency(forToken: token, inDependencies: machine.dependencies, machine.name + "." + machine.fsm.name)
-        if true == dependency.isEmpty {
+        let dependencyPath = self.findDependency(forToken: token, inDependencies: machine.dependencies, machine.name + "." + machine.fsm.name)
+        if true == dependencyPath.isEmpty {
             return false
         }
-        let isCallableMachine = nil == dependency.first {
+        // Skip if the token represents a machine which is a callable parameterised machine or has parents
+        // which are callable parameterised machines.
+        let isCallableMachine = nil == dependencyPath.first {
             switch $0 {
             case .callableParameterisedMachine:
                 return true
@@ -168,6 +182,21 @@ public final class ScheduleCycleKripkeStructureGenerator<
         return false
     }
     
+    /**
+     *  Finds the dependency path leading to the dependency represented by the
+     *  token.
+     *
+     *  - Parameter token: The `SchedulerToken` that we are trying to find in
+     *  the dependency tree.
+     *
+     *  - Parameter dependencies: All dependencies at a particular level of the
+     *  dependency tree.
+     *
+     *  - Returns: An array where the first element is the root node of the
+     *  dependency tree where each subsequent element is the dependency of the
+     *  element preceeding it. The last element is therefore the dependency
+     *  represented by the token.
+     */
     fileprivate func findDependency(forToken token: SchedulerToken, inDependencies dependencies: [Dependency], _ name: String = "") -> [Dependency] {
         for dep in dependencies {
             let fsmName: String
