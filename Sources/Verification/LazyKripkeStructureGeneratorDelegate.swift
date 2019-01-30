@@ -1,8 +1,8 @@
 /*
- * LazyKripkeStructureGenerator.swift
+ * LazyKripkeStructureGeneratorDelegate.swift
  * Verification
  *
- * Created by Callum McColl on 17/1/19.
+ * Created by Callum McColl on 18/1/19.
  * Copyright © 2019 Callum McColl. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -56,14 +56,18 @@
  *
  */
 
-import Gateways
 import KripkeStructure
-import KripkeStructureViews
+import swiftfsm
 
-public protocol LazyKripkeStructureGenerator {
-
-    weak var delegate: LazyKripkeStructureGeneratorDelegate? { get set }
+public protocol LazyKripkeStructureGeneratorDelegate: class {
     
-    func generate<Gateway: ModifiableFSMGateway, View: KripkeStructureView>(usingGateway gateway: Gateway, andView view: View) -> ([KripkeStatePropertyList], [(UInt, KripkeStatePropertyList)]) where View.State == KripkeState
+    /**
+     *  Fetch the initial states and finish states of a parameterised machine.
+     *
+     *  This information is used by `LazyKripkeStructureGenerator`s
+     *  in order to easily generate states for when an fsm invokes or calls
+     *  another fsm.
+     */
+    func statesForParameterisedMachine(_: LazyKripkeStructureGenerator, fsm: AnyParameterisedFiniteStateMachine) -> ([KripkeState], [KripkeState]?)
     
 }

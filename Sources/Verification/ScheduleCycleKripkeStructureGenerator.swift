@@ -110,7 +110,9 @@ public final class ScheduleCycleKripkeStructureGenerator<
         }
         let verificationTokens = self.convert(tokens: tokens, forMachines: self.machines)
         verificationTokens.forEach { (tokens: [[VerificationToken]], view: ViewFactory.View) in
-            self.factory.make(tokens: tokens).generate(usingGateway: gateway, andView: view)
+            var generator = self.factory.make(tokens: tokens)
+            generator.delegate = self
+            generator.generate(usingGateway: gateway, andView: view)
         }
     }
     
@@ -126,7 +128,7 @@ public final class ScheduleCycleKripkeStructureGenerator<
         return machines.map { machine in
             let verificationTokens = tokens.map { (arr: [SchedulerToken]) in
                 arr.map { (token: SchedulerToken) -> VerificationToken in
-                    if token.machine != machine {
+                    if true == self.shouldSkip(token: token, forMachine: machine) {
                         return .skip
                     }
                     let externals = token.fsm.externalVariables.map { (external: AnySnapshotController) -> ExternalVariablesVerificationData in
@@ -139,6 +141,68 @@ public final class ScheduleCycleKripkeStructureGenerator<
             let view = self.viewFactory.make(identifier: machine.name)
             return (verificationTokens, view)
         }
+    }
+    
+    fileprivate func shouldSkip(token: SchedulerToken, forMachine machine: Machine) -> Bool {
+        if token.machine != machine {
+            return true
+        }
+        if machine.name + "." + machine.fsm.name == token.fullyQualifiedName {
+            return false
+        }
+        let dependency = self.findDependency(forToken: token, inDependencies: machine.dependencies, machine.name + "." + machine.fsm.name)
+        if true == dependency.isEmpty {
+            return false
+        }
+        let isCallableMachine = nil == dependency.first {
+            switch $0 {
+            case .callableParameterisedMachine:
+                return true
+            default:
+                return false
+            }
+        }
+        if true == isCallableMachine {
+            return true
+        }
+        return false
+    }
+    
+    fileprivate func findDependency(forToken token: SchedulerToken, inDependencies dependencies: [Dependency], _ name: String = "") -> [Dependency] {
+        for dep in dependencies {
+            let fsmName: String
+            switch dep {
+            case .callableParameterisedMachine(let fsm, _):
+                fsmName = fsm.name
+            case .invokableParameterisedMachine(let fsm, _):
+                fsmName = fsm.name
+            case .submachine(let fsm, _):
+                fsmName = fsm.name
+            }
+            if name + "." + fsmName == token.fullyQualifiedName {
+                return [dep]
+            }
+        }
+        for dep in dependencies {
+            switch dep {
+            case .callableParameterisedMachine(let fsm, let dependencies):
+                return [dep] + findDependency(forToken: token, inDependencies: dependencies, name + "." + fsm.name)
+            case .invokableParameterisedMachine(let fsm, let dependencies):
+                return [dep] + findDependency(forToken: token, inDependencies: dependencies, name + "." + fsm.name)
+            case .submachine(let fsm, let dependencies):
+                return [dep] + findDependency(forToken: token, inDependencies: dependencies, name + "." + fsm.name)
+            }
+            
+        }
+        return []
+    }
+    
+}
+
+extension ScheduleCycleKripkeStructureGenerator: LazyKripkeStructureGeneratorDelegate {
+    
+    public func statesForParameterisedMachine(_ generator: LazyKripkeStructureGenerator, fsm: AnyParameterisedFiniteStateMachine) -> ([KripkeState], [KripkeState]?) {
+        return ([], [])
     }
     
 }
