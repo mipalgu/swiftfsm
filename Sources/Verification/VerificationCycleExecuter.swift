@@ -196,7 +196,7 @@ public final class VerificationCycleExecuter {
     fileprivate func prepareTokens(_ tokens: [[VerificationToken]], executing: (Int, Int), fromExternals externals: [(AnySnapshotController, KripkeStatePropertyList)]) -> [[VerificationToken]] {
         let clone = tokens[executing.0][executing.1].data!.fsm.clone()
         var newTokens = tokens
-        newTokens[executing.0][executing.1] = .verify(data: VerificationToken.Data(fsm: clone, machine: tokens[executing.0][executing.1].data!.machine, externalVariables: tokens[executing.0][executing.1].data!.externalVariables))
+        newTokens[executing.0][executing.1] = .verify(data: VerificationToken.Data(fsm: clone, machine: tokens[executing.0][executing.1].data!.machine, externalVariables: tokens[executing.0][executing.1].data!.externalVariables, callableMachines: tokens[executing.0][executing.1].data!.callableMachines))
         newTokens[executing.0].forEach {
             var fsm = $0.data!.fsm
             fsm.externalVariables.enumerated().forEach { (offset, externalVariables) in
