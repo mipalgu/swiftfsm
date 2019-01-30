@@ -109,7 +109,7 @@ public final class ScheduleCycleKripkeStructureGenerator<
             }
         }
         let verificationTokens = self.convert(tokens: tokens, forMachines: self.machines)
-        verificationTokens.forEach { (tokens: [[VerificationToken]], view: ViewFactory.View) in
+        verificationTokens.forEach { (tokens: [[VerificationToken]], view: AnyKripkeStructureView<KripkeState>) in
             var generator = self.factory.make(tokens: tokens)
             generator.delegate = self
             generator.generate(usingGateway: gateway, andView: view)
@@ -124,23 +124,54 @@ public final class ScheduleCycleKripkeStructureGenerator<
      *  possible because an FSM may only manipulate or control other FSM's
      *  within the same machine.
      */
-    fileprivate func convert(tokens: [[SchedulerToken]], forMachines machines: [Machine]) -> [([[VerificationToken]], ViewFactory.View)] {
+    fileprivate func convert(tokens: [[SchedulerToken]], forMachines machines: [Machine]) -> [([[VerificationToken]], AnyKripkeStructureView<KripkeState>)] {
         return machines.map { machine in
-            let verificationTokens = tokens.map { (arr: [SchedulerToken]) in
-                arr.map { (token: SchedulerToken) -> VerificationToken in
-                    if true == self.shouldSkip(token: token, forMachine: machine) {
-                        return .skip
-                    }
-                    let externals = token.fsm.externalVariables.map { (external: AnySnapshotController) -> ExternalVariablesVerificationData in
-                        let (defaultValues, spinners) = self.extractor.extract(externalVariables: external)
-                        return ExternalVariablesVerificationData(externalVariables: external, defaultValues: defaultValues, spinners: spinners)
-                    }
-                    return .verify(data: VerificationToken.Data(fsm: token.fsm, machine: token.machine, externalVariables: externals))
-                }
+            switch machine.fsm {
+            case .parameterisedFSM(let fsm):
+                return self.schedule(forDependency: .invokableParameterisedMachine(fsm, machine.dependencies), inMachine: machine, usingTokens: tokens)
+            case .controllableFSM(let fsm):
+                return self.schedule(forDependency: .submachine(fsm, machine.dependencies), inMachine: machine, usingTokens: tokens)
             }
-            let view = self.viewFactory.make(identifier: machine.name)
-            return (verificationTokens, view)
         }
+    }
+    
+    fileprivate func schedule(forDependency dependency: Dependency, inMachine machine: Machine, usingTokens tokens: [[SchedulerToken]]) -> ([[VerificationToken]], AnyKripkeStructureView<KripkeState>) {
+        let verificationTokens = tokens.map { (arr: [SchedulerToken]) in
+            arr.map { (token: SchedulerToken) -> VerificationToken in
+                // Check to see if we can skip this token.
+                if token.machine != machine {
+                    return .skip
+                }
+                let dependencyPath = self.fetchDependencyPath(forToken: token, inDependencies: machine.dependencies)
+                if machine.name + "." + machine.fsm.name != token.fullyQualifiedName && true == self.shouldSkip(token: token, inDependencyPath: dependencyPath) {
+                    return .skip
+                }
+                // Create the token data since we cannot skip this token.
+                let externals = token.fsm.externalVariables.map { (external: AnySnapshotController) -> ExternalVariablesVerificationData in
+                    let (defaultValues, spinners) = self.extractor.extract(externalVariables: external)
+                    return ExternalVariablesVerificationData(externalVariables: external, defaultValues: defaultValues, spinners: spinners)
+                }
+                let callableTokens = self.createCallableTokens(forToken: token, inDependencies: dependency.dependencies, inMachine: machine, withTokens: tokens)
+                return .verify(data: VerificationToken.Data(fsm: token.fsm, machine: token.machine, externalVariables: externals, callableMachines: callableTokens))
+            }
+        }
+        let view = self.viewFactory.make(identifier: machine.name)
+        return (verificationTokens, AnyKripkeStructureView(view))
+    }
+    
+    fileprivate func createCallableTokens(forToken token: SchedulerToken, inDependencies dependencies: [Dependency], inMachine machine: Machine, withTokens tokens: [[SchedulerToken]]) -> [String: ([[VerificationToken]], AnyKripkeStructureView<KripkeState>)] {
+        let callableDependencies = dependencies.lazy.filter {
+            switch $0 {
+            case .callableParameterisedMachine:
+                return true
+            default:
+                return false
+            }
+        }
+        let callableDependenciesTokens = callableDependencies.map { self.schedule(forDependency: $0, inMachine: machine, usingTokens: tokens) }
+        return Dictionary(uniqueKeysWithValues: zip(callableDependencies, callableDependenciesTokens).map {
+            (token.fullyQualifiedName + "." + $0.fsm.name, $1)
+        })
     }
     
     /**
@@ -155,19 +186,11 @@ public final class ScheduleCycleKripkeStructureGenerator<
      *
      *  - Returns: Returns true if `token` should be skipped.
      */
-    fileprivate func shouldSkip(token: SchedulerToken, forMachine machine: Machine) -> Bool {
-        if token.machine != machine {
-            return true
-        }
-        if machine.name + "." + machine.fsm.name == token.fullyQualifiedName {
-            return false
-        }
-        let dependencyPath = self.findDependency(forToken: token, inDependencies: machine.dependencies, machine.name + "." + machine.fsm.name)
+    fileprivate func shouldSkip(token: SchedulerToken, inDependencyPath dependencyPath: [Dependency]) -> Bool {
         if true == dependencyPath.isEmpty {
             return false
         }
-        // Skip if the token represents a machine which is a callable parameterised machine or has parents
-        // which are callable parameterised machines.
+        // Skip if the token represents a machine that has parants that are callable parameterised machines.
         let isCallableMachine = nil == dependencyPath.first {
             switch $0 {
             case .callableParameterisedMachine:
@@ -197,31 +220,17 @@ public final class ScheduleCycleKripkeStructureGenerator<
      *  element preceeding it. The last element is therefore the dependency
      *  represented by the token.
      */
-    fileprivate func findDependency(forToken token: SchedulerToken, inDependencies dependencies: [Dependency], _ name: String = "") -> [Dependency] {
+    fileprivate func fetchDependencyPath(forToken token: SchedulerToken, inDependencies dependencies: [Dependency], _ name: String = "") -> [Dependency] {
         for dep in dependencies {
-            let fsmName: String
-            switch dep {
-            case .callableParameterisedMachine(let fsm, _):
-                fsmName = fsm.name
-            case .invokableParameterisedMachine(let fsm, _):
-                fsmName = fsm.name
-            case .submachine(let fsm, _):
-                fsmName = fsm.name
-            }
-            if name + "." + fsmName == token.fullyQualifiedName {
+            if name + "." + dep.fsm.name == token.fullyQualifiedName {
                 return [dep]
             }
         }
         for dep in dependencies {
-            switch dep {
-            case .callableParameterisedMachine(let fsm, let dependencies):
-                return [dep] + findDependency(forToken: token, inDependencies: dependencies, name + "." + fsm.name)
-            case .invokableParameterisedMachine(let fsm, let dependencies):
-                return [dep] + findDependency(forToken: token, inDependencies: dependencies, name + "." + fsm.name)
-            case .submachine(let fsm, let dependencies):
-                return [dep] + findDependency(forToken: token, inDependencies: dependencies, name + "." + fsm.name)
+            let subpath = self.fetchDependencyPath(forToken: token, inDependencies: dep.dependencies, name + "." + dep.fsm.name)
+            if false == subpath.isEmpty {
+                return [dep] + subpath
             }
-            
         }
         return []
     }

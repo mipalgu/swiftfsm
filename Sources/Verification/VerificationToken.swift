@@ -59,6 +59,8 @@
 import swiftfsm
 import MachineStructure
 import FSMVerification
+import KripkeStructureViews
+import KripkeStructure
 
 public enum VerificationToken {
     
@@ -82,6 +84,8 @@ public enum VerificationToken {
         public let machine: Machine
         
         public let externalVariables: [ExternalVariablesVerificationData]
+        
+        public let callableMachines: [String: ([[VerificationToken]], AnyKripkeStructureView<KripkeState>)]
         
     }
     
