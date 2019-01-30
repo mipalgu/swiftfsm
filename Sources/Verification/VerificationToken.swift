@@ -83,8 +83,6 @@ public enum VerificationToken {
         
         public let externalVariables: [ExternalVariablesVerificationData]
         
-        public let dependencies: [Dependency]
-        
     }
     
 }
