@@ -79,6 +79,8 @@ public enum VerificationToken {
     
     public struct Data {
         
+        public let id: FSM_ID
+        
         public let fsm: AnyScheduleableFiniteStateMachine
         
         public let machine: Machine

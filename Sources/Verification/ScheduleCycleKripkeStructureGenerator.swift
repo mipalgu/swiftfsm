@@ -108,7 +108,7 @@ public final class ScheduleCycleKripkeStructureGenerator<
                 }
             }
         }
-        let verificationTokens = self.convert(tokens: tokens, forMachines: self.machines)
+        let verificationTokens = self.convert(tokens: tokens, forMachines: self.machines, usingGateway: gateway)
         verificationTokens.forEach { (tokens: [[VerificationToken]], view: AnyKripkeStructureView<KripkeState>) in
             var generator = self.factory.make(tokens: tokens)
             generator.delegate = self
@@ -124,18 +124,18 @@ public final class ScheduleCycleKripkeStructureGenerator<
      *  possible because an FSM may only manipulate or control other FSM's
      *  within the same machine.
      */
-    fileprivate func convert(tokens: [[SchedulerToken]], forMachines machines: [Machine]) -> [([[VerificationToken]], AnyKripkeStructureView<KripkeState>)] {
+    fileprivate func convert<Gateway: FSMGateway>(tokens: [[SchedulerToken]], forMachines machines: [Machine], usingGateway gateway: Gateway) -> [([[VerificationToken]], AnyKripkeStructureView<KripkeState>)] {
         return machines.map { machine in
             switch machine.fsm {
             case .parameterisedFSM(let fsm):
-                return self.schedule(forDependency: .invokableParameterisedMachine(fsm, machine.dependencies), inMachine: machine, usingTokens: tokens)
+                return self.schedule(forDependency: .invokableParameterisedMachine(fsm, machine.dependencies), inMachine: machine, usingTokens: tokens, andGateway: gateway)
             case .controllableFSM(let fsm):
-                return self.schedule(forDependency: .submachine(fsm, machine.dependencies), inMachine: machine, usingTokens: tokens)
+                return self.schedule(forDependency: .submachine(fsm, machine.dependencies), inMachine: machine, usingTokens: tokens, andGateway: gateway)
             }
         }
     }
     
-    fileprivate func schedule(forDependency dependency: Dependency, inMachine machine: Machine, usingTokens tokens: [[SchedulerToken]]) -> ([[VerificationToken]], AnyKripkeStructureView<KripkeState>) {
+    fileprivate func schedule<Gateway: FSMGateway>(forDependency dependency: Dependency, inMachine machine: Machine, usingTokens tokens: [[SchedulerToken]], andGateway gateway: Gateway) -> ([[VerificationToken]], AnyKripkeStructureView<KripkeState>) {
         let verificationTokens = tokens.map { (arr: [SchedulerToken]) in
             arr.map { (token: SchedulerToken) -> VerificationToken in
                 // Check to see if we can skip this token.
@@ -151,15 +151,15 @@ public final class ScheduleCycleKripkeStructureGenerator<
                     let (defaultValues, spinners) = self.extractor.extract(externalVariables: external)
                     return ExternalVariablesVerificationData(externalVariables: external, defaultValues: defaultValues, spinners: spinners)
                 }
-                let callableTokens = self.createCallableTokens(forToken: token, inDependencies: dependency.dependencies, inMachine: machine, withTokens: tokens)
-                return .verify(data: VerificationToken.Data(fsm: token.fsm, machine: token.machine, externalVariables: externals, callableMachines: callableTokens))
+                let callableTokens = self.createCallableTokens(forToken: token, inDependencies: dependency.dependencies, inMachine: machine, withTokens: tokens, usingGateway: gateway)
+                return .verify(data: VerificationToken.Data(id: gateway.id(of: token.fullyQualifiedName), fsm: token.fsm, machine: token.machine, externalVariables: externals, callableMachines: callableTokens))
             }
         }
         let view = self.viewFactory.make(identifier: machine.name)
         return (verificationTokens, AnyKripkeStructureView(view))
     }
     
-    fileprivate func createCallableTokens(forToken token: SchedulerToken, inDependencies dependencies: [Dependency], inMachine machine: Machine, withTokens tokens: [[SchedulerToken]]) -> [String: ([[VerificationToken]], AnyKripkeStructureView<KripkeState>)] {
+    fileprivate func createCallableTokens<Gateway: FSMGateway>(forToken token: SchedulerToken, inDependencies dependencies: [Dependency], inMachine machine: Machine, withTokens tokens: [[SchedulerToken]], usingGateway gateway: Gateway) -> [String: ([[VerificationToken]], AnyKripkeStructureView<KripkeState>)] {
         let callableDependencies = dependencies.lazy.filter {
             switch $0 {
             case .callableParameterisedMachine:
@@ -168,7 +168,7 @@ public final class ScheduleCycleKripkeStructureGenerator<
                 return false
             }
         }
-        let callableDependenciesTokens = callableDependencies.map { self.schedule(forDependency: $0, inMachine: machine, usingTokens: tokens) }
+        let callableDependenciesTokens = callableDependencies.map { self.schedule(forDependency: $0, inMachine: machine, usingTokens: tokens, andGateway: gateway) }
         return Dictionary(uniqueKeysWithValues: zip(callableDependencies, callableDependenciesTokens).map {
             (token.fullyQualifiedName + "." + $0.fsm.name, $1)
         })

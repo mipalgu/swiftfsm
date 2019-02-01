@@ -93,6 +93,7 @@ public final class Cloner<Converter: KripkeStatePropertyListConverter>: ClonerPr
         }
         return .verify(
             data: VerificationToken.Data(
+                id: data.id,
                 fsm: clone,
                 machine: data.machine,
                 externalVariables: newExternals,
