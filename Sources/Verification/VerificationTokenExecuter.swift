@@ -105,6 +105,7 @@ public final class VerificationTokenExecuter<StateGenerator: KripkeStateGenerato
             worldType: .beforeExecution
         )
         let preState = self.stateGenerator.generateKripkeState(fromWorld: preWorld, withLastState: lastState)
+        var newCallStack: [FSM_ID: [CallData]] = callStack
         if false == (callStack[data.id]?.last?.inPlace ?? false) {
             fsm.next()
             fsm.externalVariables.forEach { external in
@@ -113,6 +114,10 @@ public final class VerificationTokenExecuter<StateGenerator: KripkeStateGenerato
                     externals[i] = (e, self.recorder.takeRecord(of: e.val))
                 }
             }
+            // Create a new call stack if we detect that the fsm has invoked or called another fsm.
+            newCallStack = self.mergeStacks(callStack, self.calls)
+        } else if let callData = callStack[data.id]?.last {
+            newCallStack[data.id] = Array((newCallStack[data.id] ?? []).dropLast()) + [CallData(id: callData.id, fsm: callData.fsm, fullyQualifiedName: callData.fullyQualifiedName, parameters: callData.parameters, promiseData: callData.promiseData, inPlace: callData.inPlace, runs: callData.runs + 1)]
         }
         let postWorld = self.worldCreator.createWorld(
             fromExternals: externals,
@@ -121,12 +126,10 @@ public final class VerificationTokenExecuter<StateGenerator: KripkeStateGenerato
             andExecuting: executing,
             andExecutingToken: offset,
             withState: state,
-            usingCallStack: callStack,
+            usingCallStack: newCallStack,
             worldType: .afterExecution
         )
         let postState = self.stateGenerator.generateKripkeState(fromWorld: postWorld, withLastState: preState)
-        // Create a new call stack if we detect that the fsm has invoked or called another fsm.
-        let newCallStack = self.mergeStacks(callStack, self.calls)
         return ([preState, postState], data.machine.clock.lastClockValues, externals, callStack)
     }
     
