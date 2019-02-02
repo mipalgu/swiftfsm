@@ -143,12 +143,12 @@ public final class VerificationTokenExecuter<StateGenerator: KripkeStateGenerato
 extension VerificationTokenExecuter: FSMGatewayDelegate {
     
     
-    public func hasCalled(inGateway gateway: ModifiableFSMGateway, fsm: AnyParameterisedFiniteStateMachine, withId _: FSM_ID, caller: FSM_ID, storingResultsIn promiseData: PromiseData) {
-        self.addCall(CallData(id: caller, fsm: fsm, promiseData: promiseData, inPlace: true, runs: 0))
+    public func hasCalled(inGateway gateway: ModifiableFSMGateway, fsm: AnyParameterisedFiniteStateMachine, withId _: FSM_ID, withParameters parameters: [String: Any], caller: FSM_ID, storingResultsIn promiseData: PromiseData) {
+        self.addCall(CallData(id: caller, fsm: fsm, parameters: parameters, promiseData: promiseData, inPlace: true, runs: 0))
     }
     
-    public func hasInvoked(inGateway gateway: ModifiableFSMGateway, fsm: AnyParameterisedFiniteStateMachine, withId id: FSM_ID, storingResultsIn promiseData: PromiseData) {
-        self.addCall(CallData(id: id, fsm: fsm, promiseData: promiseData, inPlace: false, runs: 0))
+    public func hasInvoked(inGateway gateway: ModifiableFSMGateway, fsm: AnyParameterisedFiniteStateMachine, withId id: FSM_ID, withParameters parameters: [String: Any], storingResultsIn promiseData: PromiseData) {
+        self.addCall(CallData(id: id, fsm: fsm, parameters: parameters, promiseData: promiseData, inPlace: false, runs: 0))
     }
     
     fileprivate func addCall(_ data: CallData) {

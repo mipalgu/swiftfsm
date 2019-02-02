@@ -65,6 +65,8 @@ public struct CallData {
     
     public let fsm: AnyParameterisedFiniteStateMachine
     
+    public let parameters: [String: Any]
+    
     public let promiseData: PromiseData
     
     public let inPlace: Bool
