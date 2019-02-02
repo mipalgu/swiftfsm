@@ -143,12 +143,18 @@ public final class VerificationTokenExecuter<StateGenerator: KripkeStateGenerato
 extension VerificationTokenExecuter: FSMGatewayDelegate {
     
     
-    public func hasCalled(inGateway gateway: ModifiableFSMGateway, fsm: AnyParameterisedFiniteStateMachine, withId _: FSM_ID, withParameters parameters: [String: Any], caller: FSM_ID, storingResultsIn promiseData: PromiseData) {
-        self.addCall(CallData(id: caller, fsm: fsm, parameters: parameters, promiseData: promiseData, inPlace: true, runs: 0))
+    public func hasCalled(inGateway gateway: ModifiableFSMGateway, fsm: AnyParameterisedFiniteStateMachine, withId id: FSM_ID, withParameters parameters: [String: Any], caller: FSM_ID, storingResultsIn promiseData: PromiseData) {
+        guard let (name, _) = gateway.ids.first(where: { $1 == id }) else {
+            fatalError("Unable to fetch fully qualified name from id.")
+        }
+        self.addCall(CallData(id: caller, fsm: fsm, fullyQualifiedName: name, parameters: parameters, promiseData: promiseData, inPlace: true, runs: 0))
     }
     
     public func hasInvoked(inGateway gateway: ModifiableFSMGateway, fsm: AnyParameterisedFiniteStateMachine, withId id: FSM_ID, withParameters parameters: [String: Any], storingResultsIn promiseData: PromiseData) {
-        self.addCall(CallData(id: id, fsm: fsm, parameters: parameters, promiseData: promiseData, inPlace: false, runs: 0))
+        guard let (name, _) = gateway.ids.first(where: { $1 == id }) else {
+            fatalError("Unable to fetch fully qualified name from id.")
+        }
+        self.addCall(CallData(id: id, fsm: fsm, fullyQualifiedName: name, parameters: parameters, promiseData: promiseData, inPlace: false, runs: 0))
     }
     
     fileprivate func addCall(_ data: CallData) {
