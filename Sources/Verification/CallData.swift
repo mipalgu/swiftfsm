@@ -1,8 +1,8 @@
 /*
- * VerificationTokenExecuter.swift
+ * CallData.swift
  * Verification
  *
- * Created by Callum McColl on 10/9/18.
+ * Created by Callum McColl on 02/02/18.
  * Copyright © 2018 Callum McColl. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -56,70 +56,19 @@
  *
  */
 
-import FSM
-import KripkeStructure
-import MachineStructure
-import ModelChecking
+import Gateways
 import swiftfsm
 
-public final class VerificationTokenExecuter<StateGenerator: KripkeStateGeneratorProtocol> {
+public struct CallData {
     
-    fileprivate let stateGenerator: StateGenerator
-    fileprivate let worldCreator: WorldCreator
+    public let id: FSM_ID
     
-    fileprivate let recorder = MirrorKripkePropertiesRecorder()
+    public let fsm: AnyParameterisedFiniteStateMachine
     
-    public init(stateGenerator: StateGenerator, worldCreator: WorldCreator = WorldCreator()) {
-        self.stateGenerator = stateGenerator
-        self.worldCreator = worldCreator
-    }
+    public let promiseData: PromiseData
     
-    public func execute(
-        fsm: AnyScheduleableFiniteStateMachine,
-        inTokens tokens: [[VerificationToken]],
-        executing: Int,
-        atOffset offset: Int,
-        withExternals externals: [(AnySnapshotController, KripkeStatePropertyList)],
-        andClock clock: UInt,
-        andLastState lastState: KripkeState?,
-        usingCallStack callStack: [FSM_ID: [CallData]]
-    ) -> ([KripkeState], [UInt], [(AnySnapshotController, KripkeStatePropertyList)]) {
-        let token = tokens[executing][offset]
-        let data = token.data!
-        data.machine.clock.forcedRunningTime = clock
-        data.machine.clock.lastClockValues = []
-        var externals = externals
-        let state = fsm.currentState.name
-        let preWorld = self.worldCreator.createWorld(
-            fromExternals: externals,
-            andTokens: tokens,
-            andLastState: lastState,
-            andExecuting: executing,
-            andExecutingToken: offset,
-            withState: state,
-            usingCallStack: callStack,
-            worldType: .beforeExecution
-        )
-        let preState = self.stateGenerator.generateKripkeState(fromWorld: preWorld, withLastState: lastState)
-        fsm.next()
-        fsm.externalVariables.forEach { external in
-            for var (i, (e, _)) in externals.enumerated() where e.name == external.name {
-                e.val = external.val
-                externals[i] = (e, self.recorder.takeRecord(of: e.val))
-            }
-        }
-        let postWorld = self.worldCreator.createWorld(
-            fromExternals: externals,
-            andTokens: tokens,
-            andLastState: preState,
-            andExecuting: executing,
-            andExecutingToken: offset,
-            withState: state,
-            usingCallStack: callStack,
-            worldType: .afterExecution
-        )
-        let postState = self.stateGenerator.generateKripkeState(fromWorld: postWorld, withLastState: preState)
-        return ([preState, postState], data.machine.clock.lastClockValues, externals)
-    }
+    public let inPlace: Bool
+    
+    public let runs: UInt
     
 }

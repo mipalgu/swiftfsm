@@ -73,8 +73,7 @@ public final class VerificationCycleExecuter {
     fileprivate let executer: VerificationTokenExecuter<KripkeStateGenerator>
     fileprivate let worldCreator: WorldCreator = WorldCreator()
     
-    fileprivate var calls: [FSM_ID: [(AnyParameterisedFiniteStateMachine, PromiseData)]] = [:]
-    fileprivate var invocations: [FSM_ID: [(AnyParameterisedFiniteStateMachine, PromiseData)]] = [:]
+    fileprivate var calls: [FSM_ID: [CallData]] = [:]
     
     public init(
         converter: KripkeStatePropertyListConverter = KripkeStatePropertyListConverter(),
@@ -100,6 +99,8 @@ public final class VerificationCycleExecuter {
         
         let usedClockValues: [UInt]
         
+        let callStack: [FSM_ID: [CallData]]
+        
     }
     
     public func execute<View: KripkeStructureView>(
@@ -108,20 +109,20 @@ public final class VerificationCycleExecuter {
         withExternals externals: [(AnySnapshotController, KripkeStatePropertyList)],
         andLastState last: KripkeState?,
         isInitial initial: Bool,
-        usingView view: View
-    ) -> [(KripkeState?, [[VerificationToken]])] where View.State == KripkeState {
+        usingView view: View,
+        andCallStack callStack: [FSM_ID: [CallData]]
+    ) -> [(KripkeState?, [[VerificationToken]], [FSM_ID: [CallData]])] where View.State == KripkeState {
         //swiftlint:disable:next line_length
         var tokens = tokens
         tokens[executing] = tokens[executing].filter { nil != $0.data } // Ignore all skip tokens.
-        var jobs = [Job(index: 0, tokens: tokens, externals: externals, initialState: nil, lastState: last, clock: 0, usedClockValues: [])]
+        var jobs = [Job(index: 0, tokens: tokens, externals: externals, initialState: nil, lastState: last, clock: 0, usedClockValues: [], callStack: callStack)]
         let states: Ref<[KripkeStatePropertyList: KripkeState]> = Ref(value: [:])
         var initialStates: HashSink<KripkeStatePropertyList, KripkeStatePropertyList> = HashSink()
         var lastStates: HashSink<KripkeStatePropertyList, KripkeStatePropertyList> = HashSink()
-        var runs: [(KripkeState?, [[VerificationToken]])] = []
+        var runs: [(KripkeState?, [[VerificationToken]], [FSM_ID: [CallData]])] = []
         while false == jobs.isEmpty {
             let job = jobs.removeFirst()
             self.calls = [:]
-            self.invocations = [:]
             let newTokens = self.prepareTokens(job.tokens, executing: (executing, job.index), fromExternals: job.externals)
             let (generatedStates, clockValues, newExternals) = self.executer.execute(
                 fsm: newTokens[executing][job.index].data!.fsm,
@@ -130,7 +131,8 @@ public final class VerificationCycleExecuter {
                 atOffset: job.index,
                 withExternals: job.externals,
                 andClock: job.clock,
-                andLastState: job.lastState
+                andLastState: job.lastState,
+                usingCallStack: job.callStack
             )
             guard let first = generatedStates.first else {
                 continue
@@ -141,15 +143,17 @@ public final class VerificationCycleExecuter {
             }
             let lastState = generatedStates.last.map { states.value[$0.properties] ?? $0 }
             // When the clock has been used - try the same token again with new clock values.
-            jobs.append(contentsOf: jobsFromClockValues(lastJob: job, clockValues: clockValues))
+            jobs.append(contentsOf: jobsFromClockValues(lastJob: job, clockValues: clockValues, andCallStack: job.callStack))
+            // Create a new call stack if we detect that the fsm has invoked or called another fsm.
+            let newCallStack = self.mergeStacks(job.callStack, self.calls)
             // Add tokens to runs when we have finished executing all of the tokens in a run.
             if job.index + 1 >= tokens[executing].count {
                 _ = lastState.map { lastStates.insert($0.properties) }
-                runs.append((lastState, newTokens))
+                runs.append((lastState, newTokens, newCallStack))
                 continue
             }
             // Add a Job for the next token to execute.
-            jobs.append(Job(index: job.index + 1, tokens: newTokens, externals: newExternals, initialState: job.initialState ?? generatedStates.first, lastState: lastState, clock: 0, usedClockValues: []))
+            jobs.append(Job(index: job.index + 1, tokens: newTokens, externals: newExternals, initialState: job.initialState ?? generatedStates.first, lastState: lastState, clock: 0, usedClockValues: [], callStack: newCallStack))
         }
         states.value.forEach { (arg: (key: KripkeStatePropertyList, value: KripkeState)) in
             if lastStates.contains(arg.key) {
@@ -160,7 +164,15 @@ public final class VerificationCycleExecuter {
         return runs
     }
     
-    fileprivate func jobsFromClockValues(lastJob: Job, clockValues: [UInt]) -> [Job] {
+    fileprivate func mergeStacks(_ lhs: [FSM_ID: [CallData]], _ rhs: [FSM_ID: [CallData]]) -> [FSM_ID: [CallData]] {
+        var newStack: [FSM_ID: [CallData]] = lhs
+        for (id, stack) in rhs {
+            newStack[id] = (lhs[id] ?? []) + stack
+        }
+        return newStack
+    }
+    
+    fileprivate func jobsFromClockValues(lastJob: Job, clockValues: [UInt], andCallStack callStack: [FSM_ID: [CallData]]) -> [Job] {
         return clockValues.flatMap { (value: UInt) -> [Job] in
             if true == lastJob.usedClockValues.contains(value) {
                 return []
@@ -181,7 +193,8 @@ public final class VerificationCycleExecuter {
                     initialState: lastJob.initialState,
                     lastState: lastJob.lastState,
                     clock: $0,
-                    usedClockValues: lastJob.usedClockValues + clockValues
+                    usedClockValues: lastJob.usedClockValues + clockValues,
+                    callStack: callStack
                 )
             }
         }
@@ -199,12 +212,21 @@ public final class VerificationCycleExecuter {
         }
     }
     
-    fileprivate func prepareTokens(_ tokens: [[VerificationToken]], executing: (Int, Int), fromExternals externals: [(AnySnapshotController, KripkeStatePropertyList)]) -> [[VerificationToken]] {
-        let clone = tokens[executing.0][executing.1].data!.fsm.clone()
+    fileprivate func prepareTokens(
+        _ tokens: [[VerificationToken]],
+        executing: (Int, Int),
+        fromExternals externals: [(AnySnapshotController, KripkeStatePropertyList)]
+    ) -> [[VerificationToken]] {
+        guard let data = tokens[executing.0][executing.1].data else {
+            fatalError("Unable to fetch data from executing token.")
+        }
+        let clone = data.fsm.clone()
         var newTokens = tokens
-        newTokens[executing.0][executing.1] = .verify(data: VerificationToken.Data(id: tokens[executing.0][executing.1].data!.id, fsm: clone, machine: tokens[executing.0][executing.1].data!.machine, externalVariables: tokens[executing.0][executing.1].data!.externalVariables, callableMachines: tokens[executing.0][executing.1].data!.callableMachines))
+        newTokens[executing.0][executing.1] = .verify(data: VerificationToken.Data(id: data.id, fsm: clone, machine: data.machine, externalVariables: data.externalVariables, callableMachines: data.callableMachines))
         newTokens[executing.0].forEach {
-            var fsm = $0.data!.fsm
+            guard var fsm = $0.data?.fsm else {
+                return
+            }
             fsm.externalVariables.enumerated().forEach { (offset, externalVariables) in
                 guard let (external, props) = externals.first(where: { $0.0.name == externalVariables.name }) else {
                     return
@@ -221,18 +243,20 @@ public final class VerificationCycleExecuter {
 extension VerificationCycleExecuter: FSMGatewayDelegate {
     
     
-    public func hasCalled(inGateway gateway: ModifiableFSMGateway, fsm: AnyParameterisedFiniteStateMachine, withId id: FSM_ID, caller: FSM_ID, storingResultsIn promiseData: PromiseData) {
-        if nil == self.invocations[id] {
-            self.calls[caller] = []
-        }
-        self.calls[caller]?.append((fsm, promiseData))
+    public func hasCalled(inGateway gateway: ModifiableFSMGateway, fsm: AnyParameterisedFiniteStateMachine, withId _: FSM_ID, caller: FSM_ID, storingResultsIn promiseData: PromiseData) {
+        self.addCall(CallData(id: caller, fsm: fsm, promiseData: promiseData, inPlace: true, runs: 0))
     }
     
     public func hasInvoked(inGateway gateway: ModifiableFSMGateway, fsm: AnyParameterisedFiniteStateMachine, withId id: FSM_ID, storingResultsIn promiseData: PromiseData) {
-        if nil == self.invocations[id] {
-            self.invocations[id] = []
+        self.addCall(CallData(id: id, fsm: fsm, promiseData: promiseData, inPlace: false, runs: 0))
+    }
+    
+    fileprivate func addCall(_ data: CallData) {
+        if nil == self.calls[data.id] {
+            self.calls[data.id] = [data]
+            return
         }
-        self.invocations[id]?.append((fsm, promiseData))
+        self.calls[data.id]?.append(data)
     }
     
 }

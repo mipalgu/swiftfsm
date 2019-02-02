@@ -76,6 +76,7 @@ public final class WorldCreator {
         andExecuting executing: Int,
         andExecutingToken token: Int,
         withState state: String,
+        usingCallStack callStack: [FSM_ID: [CallData]],
         worldType: WorldType
     ) -> KripkeStatePropertyList {
         let externalVariables = self.convert(externals: externals, withLastState: lastState)

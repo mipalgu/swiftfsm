@@ -117,7 +117,8 @@ public final class VerificationCycleKripkeStructureGenerator<
                     executing: (job.executing + 1) % job.tokens.count,
                     lastState: job.lastState,
                     lastRecords: job.lastRecords,
-                    runs: job.runs
+                    runs: job.runs,
+                    callStack: job.callStack
                 ))
                 continue
             }
@@ -138,6 +139,7 @@ public final class VerificationCycleKripkeStructureGenerator<
                     andExecuting: job.executing,
                     andExecutingToken: 0,
                     withState: firstData.fsm.currentState.name,
+                    usingCallStack: job.callStack,
                     worldType: .beforeExecution
                 )
                 if true == job.initial {
@@ -159,10 +161,11 @@ public final class VerificationCycleKripkeStructureGenerator<
                     withExternals: externals,
                     andLastState: job.lastState,
                     isInitial: job.initial,
-                    usingView: view
+                    usingView: view,
+                    andCallStack: job.callStack
                 )
                 // Create jobs for each different 'run' possible.
-                for (lastState, newTokens) in runs {
+                for (lastState, newTokens, newCallStack) in runs {
                     // Do not generate more jobs if we do not have a last state - means that nothing was executed, should never happen.
                     guard let lastNewState = lastState else {
                         continue
@@ -187,7 +190,8 @@ public final class VerificationCycleKripkeStructureGenerator<
                         lastRecords: newTokens.map { $0.map {
                             ($0.data?.fsm.base).map(self.recorder.takeRecord) ?? KripkeStatePropertyList()
                         } },
-                        runs: 0 == newExecutingIndex ? job.runs + 1 : job.runs
+                        runs: 0 == newExecutingIndex ? job.runs + 1 : job.runs,
+                        callStack: newCallStack
                     ))
                 }
             }
@@ -226,7 +230,8 @@ public final class VerificationCycleKripkeStructureGenerator<
             executing: 0,
             lastState: nil,
             lastRecords: tokens.map { $0.map { ($0.data?.fsm.base).map(self.recorder.takeRecord) ?? KripkeStatePropertyList() } },
-            runs: 0
+            runs: 0,
+            callStack: [:]
         )]
     }
     
@@ -260,6 +265,8 @@ public final class VerificationCycleKripkeStructureGenerator<
         let lastRecords: [[KripkeStatePropertyList]]
         
         let runs: UInt
+        
+        let callStack: [FSM_ID: [CallData]]
         
     }
     
