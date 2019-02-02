@@ -123,6 +123,8 @@ public final class WorldCreator {
             let (type, value) = self.recorder.getKripkeStatePropertyType(callData.promiseData.result)
             inner["result"] = KripkeStateProperty(type: type, value: value)
             innerValues["result"] = value
+            inner["runCount"] = KripkeStateProperty(type: .UInt, value: callData.runs)
+            innerValues["runCount"] = callData.runs
             props[callData.fullyQualifiedName] = KripkeStateProperty(type: .Compound(inner), value: innerValues)
             values[callData.fullyQualifiedName] = innerValues
         }
