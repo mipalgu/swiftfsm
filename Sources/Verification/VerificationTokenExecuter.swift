@@ -57,6 +57,7 @@
  */
 
 import FSM
+import Gateways
 import KripkeStructure
 import MachineStructure
 import ModelChecking
@@ -68,6 +69,8 @@ public final class VerificationTokenExecuter<StateGenerator: KripkeStateGenerato
     fileprivate let worldCreator: WorldCreator
     
     fileprivate let recorder = MirrorKripkePropertiesRecorder()
+    
+    fileprivate var calls: [FSM_ID: [CallData]] = [:]
     
     public init(stateGenerator: StateGenerator, worldCreator: WorldCreator = WorldCreator()) {
         self.stateGenerator = stateGenerator
@@ -83,7 +86,8 @@ public final class VerificationTokenExecuter<StateGenerator: KripkeStateGenerato
         andClock clock: UInt,
         andLastState lastState: KripkeState?,
         usingCallStack callStack: [FSM_ID: [CallData]]
-    ) -> ([KripkeState], [UInt], [(AnySnapshotController, KripkeStatePropertyList)]) {
+    ) -> ([KripkeState], [UInt], [(AnySnapshotController, KripkeStatePropertyList)], [FSM_ID: [CallData]]) {
+        self.calls = [:]
         let token = tokens[executing][offset]
         let data = token.data!
         data.machine.clock.forcedRunningTime = clock
@@ -119,7 +123,38 @@ public final class VerificationTokenExecuter<StateGenerator: KripkeStateGenerato
             worldType: .afterExecution
         )
         let postState = self.stateGenerator.generateKripkeState(fromWorld: postWorld, withLastState: preState)
-        return ([preState, postState], data.machine.clock.lastClockValues, externals)
+        // Create a new call stack if we detect that the fsm has invoked or called another fsm.
+        let newCallStack = self.mergeStacks(callStack, self.calls)
+        return ([preState, postState], data.machine.clock.lastClockValues, externals, callStack)
+    }
+    
+    fileprivate func mergeStacks(_ lhs: [FSM_ID: [CallData]], _ rhs: [FSM_ID: [CallData]]) -> [FSM_ID: [CallData]] {
+        var newStack: [FSM_ID: [CallData]] = lhs
+        for (id, stack) in rhs {
+            newStack[id] = (lhs[id] ?? []) + stack
+        }
+        return newStack
+    }
+    
+}
+
+extension VerificationTokenExecuter: FSMGatewayDelegate {
+    
+    
+    public func hasCalled(inGateway gateway: ModifiableFSMGateway, fsm: AnyParameterisedFiniteStateMachine, withId _: FSM_ID, caller: FSM_ID, storingResultsIn promiseData: PromiseData) {
+        self.addCall(CallData(id: caller, fsm: fsm, promiseData: promiseData, inPlace: true, runs: 0))
+    }
+    
+    public func hasInvoked(inGateway gateway: ModifiableFSMGateway, fsm: AnyParameterisedFiniteStateMachine, withId id: FSM_ID, storingResultsIn promiseData: PromiseData) {
+        self.addCall(CallData(id: id, fsm: fsm, promiseData: promiseData, inPlace: false, runs: 0))
+    }
+    
+    fileprivate func addCall(_ data: CallData) {
+        if nil == self.calls[data.id] {
+            self.calls[data.id] = [data]
+            return
+        }
+        self.calls[data.id]?.append(data)
     }
     
 }
