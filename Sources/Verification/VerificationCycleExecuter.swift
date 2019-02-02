@@ -57,6 +57,7 @@
  */
 
 import FSM
+import Gateways
 import Hashing
 import KripkeStructure
 import KripkeStructureViews
@@ -71,6 +72,9 @@ public final class VerificationCycleExecuter {
     fileprivate let converter: KripkeStatePropertyListConverter
     fileprivate let executer: VerificationTokenExecuter<KripkeStateGenerator>
     fileprivate let worldCreator: WorldCreator = WorldCreator()
+    
+    fileprivate var calls: [FSM_ID: [(AnyParameterisedFiniteStateMachine, PromiseData)]] = [:]
+    fileprivate var invocations: [FSM_ID: [(AnyParameterisedFiniteStateMachine, PromiseData)]] = [:]
     
     public init(
         converter: KripkeStatePropertyListConverter = KripkeStatePropertyListConverter(),
@@ -116,6 +120,8 @@ public final class VerificationCycleExecuter {
         var runs: [(KripkeState?, [[VerificationToken]])] = []
         while false == jobs.isEmpty {
             let job = jobs.removeFirst()
+            self.calls = [:]
+            self.invocations = [:]
             let newTokens = self.prepareTokens(job.tokens, executing: (executing, job.index), fromExternals: job.externals)
             let (generatedStates, clockValues, newExternals) = self.executer.execute(
                 fsm: newTokens[executing][job.index].data!.fsm,
@@ -209,4 +215,24 @@ public final class VerificationCycleExecuter {
         return newTokens
     }
 
+}
+
+
+extension VerificationCycleExecuter: FSMGatewayDelegate {
+    
+    
+    public func hasCalled(inGateway gateway: ModifiableFSMGateway, fsm: AnyParameterisedFiniteStateMachine, withId id: FSM_ID, caller: FSM_ID, storingResultsIn promiseData: PromiseData) {
+        if nil == self.invocations[id] {
+            self.calls[caller] = []
+        }
+        self.calls[caller]?.append((fsm, promiseData))
+    }
+    
+    public func hasInvoked(inGateway gateway: ModifiableFSMGateway, fsm: AnyParameterisedFiniteStateMachine, withId id: FSM_ID, storingResultsIn promiseData: PromiseData) {
+        if nil == self.invocations[id] {
+            self.invocations[id] = []
+        }
+        self.invocations[id]?.append((fsm, promiseData))
+    }
+    
 }
