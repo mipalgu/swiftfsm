@@ -120,9 +120,12 @@ public final class VerificationCycleExecuter {
         var runs: [(KripkeState?, [[VerificationToken]], [FSM_ID: [CallData]])] = []
         while false == jobs.isEmpty {
             let job = jobs.removeFirst()
-            let newTokens = self.prepareTokens(job.tokens, executing: (executing, job.index), fromExternals: job.externals)
+            let newTokens = self.prepareTokens(job.tokens, executing: (executing, job.index), fromExternals: job.externals, usingCallStack: job.callStack)
+            guard let data = newTokens[executing][job.index].data else {
+                fatalError("Unable to fetch data of verification token.")
+            }
             let (generatedStates, clockValues, newExternals, newCallStack) = self.executer.execute(
-                fsm: newTokens[executing][job.index].data!.fsm,
+                fsm: data.fsm,
                 inTokens: newTokens,
                 executing: executing,
                 atOffset: job.index,
@@ -202,12 +205,19 @@ public final class VerificationCycleExecuter {
     fileprivate func prepareTokens(
         _ tokens: [[VerificationToken]],
         executing: (Int, Int),
-        fromExternals externals: [(AnySnapshotController, KripkeStatePropertyList)]
+        fromExternals externals: [(AnySnapshotController, KripkeStatePropertyList)],
+        usingCallStack callStack: [FSM_ID: [CallData]]
     ) -> [[VerificationToken]] {
         guard let data = tokens[executing.0][executing.1].data else {
             fatalError("Unable to fetch data from executing token.")
         }
-        let clone = data.fsm.clone()
+        let fsm: AnyScheduleableFiniteStateMachine
+        if let callData = callStack[data.id]?.last {
+            fsm = callData.fsm.asScheduleableFiniteStateMachine
+        } else {
+            fsm = data.fsm
+        }
+        let clone = fsm.clone()
         var newTokens = tokens
         newTokens[executing.0][executing.1] = .verify(data: VerificationToken.Data(id: data.id, fsm: clone, machine: data.machine, externalVariables: data.externalVariables, callableMachines: data.callableMachines))
         newTokens[executing.0].forEach {

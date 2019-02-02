@@ -105,11 +105,13 @@ public final class VerificationTokenExecuter<StateGenerator: KripkeStateGenerato
             worldType: .beforeExecution
         )
         let preState = self.stateGenerator.generateKripkeState(fromWorld: preWorld, withLastState: lastState)
-        fsm.next()
-        fsm.externalVariables.forEach { external in
-            for var (i, (e, _)) in externals.enumerated() where e.name == external.name {
-                e.val = external.val
-                externals[i] = (e, self.recorder.takeRecord(of: e.val))
+        if false == (callStack[data.id]?.last?.inPlace ?? false) {
+            fsm.next()
+            fsm.externalVariables.forEach { external in
+                for var (i, (e, _)) in externals.enumerated() where e.name == external.name {
+                    e.val = external.val
+                    externals[i] = (e, self.recorder.takeRecord(of: e.val))
+                }
             }
         }
         let postWorld = self.worldCreator.createWorld(
