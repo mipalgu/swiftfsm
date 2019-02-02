@@ -101,8 +101,34 @@ public final class WorldCreator {
         for (key, val) in externalVariables.properties {
             total[key] = val
         }
+        for (key, val) in self.createCallProperties(forCallStack: callStack) {
+            total[key] = val
+        }
         return KripkeStatePropertyList(total)
         //return (lastState?.properties ?? [:]) <| varPs <| externalVariables
+    }
+    
+    fileprivate func createCallProperties(forCallStack callStack: [FSM_ID: [CallData]]) -> KripkeStatePropertyList {
+        let lasts = callStack.lazy.compactMap { nil == $1.last ? nil : $1.last! }
+        let inPlaceLasts = lasts.filter { $0.inPlace }
+        var props: KripkeStatePropertyList = [:]
+        var values: [String: Any] = [:]
+        for callData in inPlaceLasts {
+            var inner: KripkeStatePropertyList = [:]
+            var innerValues: [String: Any] = [:]
+            inner["parameters"] = KripkeStateProperty(type: .Compound(self.recorder.takeRecord(of: callData.parameters)), value: callData.parameters)
+            innerValues["parameters"] = callData.parameters
+            inner["hasFinished"] = KripkeStateProperty(type: .Bool, value: callData.promiseData.hasFinished)
+            innerValues["hasFinished"] = callData.promiseData.hasFinished
+            let (type, value) = self.recorder.getKripkeStatePropertyType(callData.promiseData.result)
+            inner["result"] = KripkeStateProperty(type: type, value: value)
+            innerValues["result"] = value
+            props[callData.fullyQualifiedName] = KripkeStateProperty(type: .Compound(inner), value: innerValues)
+            values[callData.fullyQualifiedName] = innerValues
+        }
+        var out: KripkeStatePropertyList = [:]
+        out["parameterisedMachines"] = KripkeStateProperty(type: .Compound(props), value: values)
+        return out
     }
     
     fileprivate func fetchLastExternals(fromLastState lastState: KripkeState?) -> KripkeStatePropertyList {
