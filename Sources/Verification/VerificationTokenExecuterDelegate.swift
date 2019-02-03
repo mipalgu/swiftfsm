@@ -58,13 +58,14 @@
 
 import KripkeStructure
 import KripkeStructureViews
+import swiftfsm
 
-public protocol VerificationTokenExecuterDelegate {
+public protocol VerificationTokenExecuterDelegate: class {
     
-    func edges(in: VerificationTokenExecuter, of: CallData) -> (Set<KripkeStatePropertyList>, [KripkeStatePropertyList: Set<UInt>])
+    func edges(of: CallData) -> (Set<KripkeStatePropertyList>, [KripkeStatePropertyList: Set<UInt>])
     
-    func scheduleInfo(in: VerificationTokenExecuter, of: FSM_ID) -> ([[VerificationToken]], AnyKripkeStructureView<KripkeState>)
+    func scheduleInfo(of: FSM_ID) -> ([[VerificationToken]], AnyKripkeStructureView<KripkeState>)
     
-    func shouldInline(in: VerificationTokenExecuter, call: CallData) -> Bool
+    func shouldInline(call: CallData) -> Bool
     
 }

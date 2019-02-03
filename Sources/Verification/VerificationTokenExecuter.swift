@@ -72,6 +72,8 @@ public final class VerificationTokenExecuter<StateGenerator: KripkeStateGenerato
     
     fileprivate var calls: [FSM_ID: [CallData]] = [:]
     
+    public weak var delegate: VerificationTokenExecuterDelegate?
+    
     public init(stateGenerator: StateGenerator, worldCreator: WorldCreator = WorldCreator()) {
         self.stateGenerator = stateGenerator
         self.worldCreator = worldCreator
@@ -117,7 +119,7 @@ public final class VerificationTokenExecuter<StateGenerator: KripkeStateGenerato
             // Create a new call stack if we detect that the fsm has invoked or called another fsm.
             newCallStack = self.mergeStacks(callStack, self.calls)
         } else if let callData = callStack[data.id]?.last {
-            newCallStack[data.id] = Array((newCallStack[data.id] ?? []).dropLast()) + [CallData(id: callData.id, fsm: callData.fsm, fullyQualifiedName: callData.fullyQualifiedName, parameters: callData.parameters, promiseData: callData.promiseData, inPlace: callData.inPlace, runs: callData.runs + 1)]
+            newCallStack[data.id] = Array((newCallStack[data.id] ?? []).dropLast()) + [CallData(id: callData.id, fsm: callData.fsm, fullyQualifiedName: callData.fullyQualifiedName, parameters: callData.parameters, promiseData: callData.promiseData, inPlace: callData.inPlace, runs: callData.runs + 1, tokens: callData.tokens, view: callData.view)]
         }
         let postWorld = self.worldCreator.createWorld(
             fromExternals: externals,
@@ -147,17 +149,27 @@ extension VerificationTokenExecuter: FSMGatewayDelegate {
     
     
     public func hasCalled(inGateway gateway: ModifiableFSMGateway, fsm: AnyParameterisedFiniteStateMachine, withId id: FSM_ID, withParameters parameters: [String: Any], caller: FSM_ID, storingResultsIn promiseData: PromiseData) {
+        guard let delegate = self.delegate else {
+            fatalError("delegate has not been set.")
+            return
+        }
         guard let (name, _) = gateway.ids.first(where: { $1 == id }) else {
             fatalError("Unable to fetch fully qualified name from id.")
         }
-        self.addCall(CallData(id: caller, fsm: fsm, fullyQualifiedName: name, parameters: parameters, promiseData: promiseData, inPlace: true, runs: 0))
+        let (tokens, view) = delegate.scheduleInfo(of: id)
+        self.addCall(CallData(id: caller, fsm: fsm, fullyQualifiedName: name, parameters: parameters, promiseData: promiseData, inPlace: true, runs: 0, tokens: tokens, view: view))
     }
     
     public func hasInvoked(inGateway gateway: ModifiableFSMGateway, fsm: AnyParameterisedFiniteStateMachine, withId id: FSM_ID, withParameters parameters: [String: Any], storingResultsIn promiseData: PromiseData) {
+        guard let delegate = self.delegate else {
+            fatalError("delegate has not been set.")
+            return
+        }
         guard let (name, _) = gateway.ids.first(where: { $1 == id }) else {
             fatalError("Unable to fetch fully qualified name from id.")
         }
-        self.addCall(CallData(id: id, fsm: fsm, fullyQualifiedName: name, parameters: parameters, promiseData: promiseData, inPlace: false, runs: 0))
+        let (tokens, view) = delegate.scheduleInfo(of: id)
+        self.addCall(CallData(id: id, fsm: fsm, fullyQualifiedName: name, parameters: parameters, promiseData: promiseData, inPlace: false, runs: 0, tokens: tokens, view: view))
     }
     
     fileprivate func addCall(_ data: CallData) {

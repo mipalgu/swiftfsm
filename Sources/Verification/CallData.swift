@@ -58,6 +58,8 @@
 
 import Gateways
 import swiftfsm
+import KripkeStructureViews
+import KripkeStructure
 
 public struct CallData {
     
@@ -74,5 +76,9 @@ public struct CallData {
     public let inPlace: Bool
     
     public let runs: UInt
+    
+    public let tokens: [[VerificationToken]]
+    
+    public let view: AnyKripkeStructureView<KripkeState>
     
 }
