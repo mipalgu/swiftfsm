@@ -108,9 +108,11 @@ public final class VerificationCycleExecuter {
         andLastState last: KripkeState?,
         isInitial initial: Bool,
         usingView view: View,
-        andCallStack callStack: [FSM_ID: [CallData]]
+        andCallStack callStack: [FSM_ID: [CallData]],
+        withDelegate delegate: VerificationTokenExecuterDelegate
     ) -> [(KripkeState?, [[VerificationToken]], [FSM_ID: [CallData]])] where View.State == KripkeState {
         //swiftlint:disable:next line_length
+        self.executer.delegate = delegate
         var tokens = tokens
         tokens[executing] = tokens[executing].filter { nil != $0.data } // Ignore all skip tokens.
         var jobs = [Job(index: 0, tokens: tokens, externals: externals, initialState: nil, lastState: last, clock: 0, usedClockValues: [], callStack: callStack)]

@@ -87,7 +87,7 @@ public enum VerificationToken {
         
         public let externalVariables: [ExternalVariablesVerificationData]
         
-        public let callableMachines: [String: ([[VerificationToken]], AnyKripkeStructureView<KripkeState>)]
+        public let callableMachines: [FSM_ID: (String, [[VerificationToken]], AnyKripkeStructureView<KripkeState>)]
         
     }
     

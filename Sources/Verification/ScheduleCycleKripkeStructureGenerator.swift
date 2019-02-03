@@ -82,6 +82,8 @@ public final class ScheduleCycleKripkeStructureGenerator<
     fileprivate let tokenizer: Tokenizer
     fileprivate let viewFactory: ViewFactory
     
+    fileprivate var edgeCache: [String: (Set<KripkeStatePropertyList>, [KripkeStatePropertyList : Set<UInt>])] = [:]
+    
     public init(
         machines: [Machine],
         extractor: Extractor,
@@ -159,7 +161,7 @@ public final class ScheduleCycleKripkeStructureGenerator<
         return (verificationTokens, AnyKripkeStructureView(view))
     }
     
-    fileprivate func createCallableTokens<Gateway: FSMGateway>(forToken token: SchedulerToken, inDependencies dependencies: [Dependency], inMachine machine: Machine, withTokens tokens: [[SchedulerToken]], usingGateway gateway: Gateway) -> [String: ([[VerificationToken]], AnyKripkeStructureView<KripkeState>)] {
+    fileprivate func createCallableTokens<Gateway: FSMGateway>(forToken token: SchedulerToken, inDependencies dependencies: [Dependency], inMachine machine: Machine, withTokens tokens: [[SchedulerToken]], usingGateway gateway: Gateway) -> [FSM_ID: (String, [[VerificationToken]], AnyKripkeStructureView<KripkeState>)] {
         let callableDependencies = dependencies.lazy.filter {
             switch $0 {
             case .callableParameterisedMachine:
@@ -170,7 +172,8 @@ public final class ScheduleCycleKripkeStructureGenerator<
         }
         let callableDependenciesTokens = callableDependencies.map { self.schedule(forDependency: $0, inMachine: machine, usingTokens: tokens, andGateway: gateway) }
         return Dictionary(uniqueKeysWithValues: zip(callableDependencies, callableDependenciesTokens).map {
-            (token.fullyQualifiedName + "." + $0.fsm.name, $1)
+            let fullyQualifiedName = token.fullyQualifiedName + "." + $0.fsm.name
+            return (gateway.id(of: fullyQualifiedName), (fullyQualifiedName, $1.0, $1.1))
         })
     }
     
@@ -239,8 +242,16 @@ public final class ScheduleCycleKripkeStructureGenerator<
 
 extension ScheduleCycleKripkeStructureGenerator: LazyKripkeStructureGeneratorDelegate {
     
-    public func statesForParameterisedMachine(_ generator: LazyKripkeStructureGenerator, fsm: AnyParameterisedFiniteStateMachine) -> ([KripkeState], [KripkeState]?) {
-        return ([], [])
+    public func statesForCall<Gateway: ModifiableFSMGateway>(_ generator: LazyKripkeStructureGenerator, call callData: CallData, withGateway gateway: Gateway) -> (Set<KripkeStatePropertyList>, [KripkeStatePropertyList : Set<UInt>]) {
+        let key = "id: \(callData.id), parameters: \(callData.parameters)"
+        if let edges = self.edgeCache[key] {
+            return edges
+        }
+        var generator = self.factory.make(tokens: callData.tokens)
+        generator.delegate = self
+        let edges = generator.generate(usingGateway: gateway, andView: callData.view)
+        self.edgeCache[key] = edges
+        return edges
     }
     
 }

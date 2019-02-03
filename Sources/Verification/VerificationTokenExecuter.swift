@@ -156,7 +156,7 @@ extension VerificationTokenExecuter: FSMGatewayDelegate {
         guard let (name, _) = gateway.ids.first(where: { $1 == id }) else {
             fatalError("Unable to fetch fully qualified name from id.")
         }
-        let (tokens, view) = delegate.scheduleInfo(of: id)
+        let (tokens, view) = delegate.scheduleInfo(of: id, caller: caller)
         self.addCall(CallData(id: caller, fsm: fsm, fullyQualifiedName: name, parameters: parameters, promiseData: promiseData, inPlace: true, runs: 0, tokens: tokens, view: view))
     }
     
@@ -168,7 +168,7 @@ extension VerificationTokenExecuter: FSMGatewayDelegate {
         guard let (name, _) = gateway.ids.first(where: { $1 == id }) else {
             fatalError("Unable to fetch fully qualified name from id.")
         }
-        let (tokens, view) = delegate.scheduleInfo(of: id)
+        let (tokens, view) = delegate.scheduleInfo(of: id, caller: id)
         self.addCall(CallData(id: id, fsm: fsm, fullyQualifiedName: name, parameters: parameters, promiseData: promiseData, inPlace: false, runs: 0, tokens: tokens, view: view))
     }
     

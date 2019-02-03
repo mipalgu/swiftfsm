@@ -84,6 +84,8 @@ public final class VerificationCycleKripkeStructureGenerator<
     
     public weak var delegate: LazyKripkeStructureGeneratorDelegate?
     
+    fileprivate var tokensLookup: [FSM_ID: VerificationToken] = [:]
+    
     public init(
         tokens: [[VerificationToken]],
         cloner: Cloner,
@@ -98,6 +100,14 @@ public final class VerificationCycleKripkeStructureGenerator<
         self.executer = executer
         self.spinnerConstructor = spinnerConstructor
         self.worldCreator = worldCreator
+        self.tokens.forEach {
+            $0.forEach {
+                guard let data = $0.data else {
+                    return
+                }
+                self.tokensLookup[data.id] = $0
+            }
+        }
     }
     
     public func generate<Gateway: ModifiableFSMGateway, View: KripkeStructureView>(usingGateway gateway: Gateway, andView view: View) -> (Set<KripkeStatePropertyList>, [KripkeStatePropertyList: Set<UInt>]) where View.State == KripkeState {
@@ -163,7 +173,8 @@ public final class VerificationCycleKripkeStructureGenerator<
                     andLastState: job.lastState,
                     isInitial: job.initial,
                     usingView: view,
-                    andCallStack: callStack
+                    andCallStack: callStack,
+                    withDelegate: self
                 )
                 // Create jobs for each different 'run' possible.
                 for (lastState, newTokens, newCallStack) in runs {
@@ -269,6 +280,38 @@ public final class VerificationCycleKripkeStructureGenerator<
         
         let callStack: [FSM_ID: [CallData]]
         
+    }
+    
+}
+
+extension VerificationCycleKripkeStructureGenerator: VerificationTokenExecuterDelegate {
+    
+    public func edges<Gateway: ModifiableFSMGateway>(of callData: CallData, caller: FSM_ID, withGateway gateway: Gateway) -> (Set<KripkeStatePropertyList>, [KripkeStatePropertyList : Set<UInt>]) {
+        guard let edges = self.delegate?.statesForCall(self, call: callData, withGateway: gateway) else {
+            fatalError("Unable to generate kripke structure for call \(callData)")
+        }
+        return edges
+    }
+    
+    public func scheduleInfo(of id: FSM_ID, caller: FSM_ID) -> ([[VerificationToken]], AnyKripkeStructureView<KripkeState>) {
+        guard let callerToken = self.tokensLookup[caller], let callerData = callerToken.data else {
+            fatalError("Unable to fetch caller token from caller id.")
+        }
+        guard let (_, tokens, view) = callerData.callableMachines[id] else {
+            fatalError("Unable to fetch schedule info of '\(id)'")
+        }
+        return (tokens, view)
+    }
+    
+    public func shouldInclude(call callData: CallData, forCaller caller: FSM_ID) -> Bool {
+        guard let callerToken = self.tokensLookup[caller], let callerData = callerToken.data else {
+            return false
+        }
+        return nil != callerData.callableMachines[callData.id]
+    }
+    
+    public func shouldInline(call callData: CallData, caller: FSM_ID) -> Bool {
+        return callData.id == caller
     }
     
 }
