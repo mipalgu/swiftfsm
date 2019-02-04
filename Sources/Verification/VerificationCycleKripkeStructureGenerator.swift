@@ -133,7 +133,7 @@ public final class VerificationCycleKripkeStructureGenerator<
                 continue
             }
             // Create results for all parameterised machines that are finished.
-            var allResults: [FSM_ID: [Any?]] = [:]
+            var allResults: [FSM_ID: LazyMapCollection<ArraySlice<(UInt, Any?)>, Any?>] = [:]
             allResults.reserveCapacity(job.callStack.count)
             for (id, calls) in job.callStack {
                 guard let callData = calls.last else {
@@ -142,7 +142,7 @@ public final class VerificationCycleKripkeStructureGenerator<
                 guard let callResults = self.delegate?.resultsForCall(self, call: callData, withGateway: gateway) else {
                     fatalError("Unable to fetch results for call: \(callData)")
                 }
-                allResults[id] = Array(callResults.binarySearch {
+                allResults[id] = callResults.binarySearch {
                     if $0.0 == callData.runs {
                         return .orderedSame
                     }
@@ -150,7 +150,7 @@ public final class VerificationCycleKripkeStructureGenerator<
                         return .orderedAscending
                     }
                     return .orderedDescending
-                }.lazy.map { $0.1 })
+                }.lazy.map { $0.1 }
             }
             // Create a spinner for the external variables.
             let externalsData = self.fetchUniqueExternalsData(fromTokens: [job.tokens[job.executing]])
