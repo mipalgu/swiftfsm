@@ -110,12 +110,11 @@ public final class VerificationCycleKripkeStructureGenerator<
         }
     }
     
-    public func generate<Gateway: ModifiableFSMGateway, View: KripkeStructureView>(usingGateway gateway: Gateway, andView view: View) -> (Set<KripkeStatePropertyList>, [KripkeStatePropertyList: Set<UInt>]) where View.State == KripkeState {
+    public func generate<Gateway: ModifiableFSMGateway, View: KripkeStructureView>(usingGateway gateway: Gateway, andView view: View) -> [(UInt, Any?)] where View.State == KripkeState {
         var jobs = self.createInitialJobs(fromTokens: self.tokens)
         view.reset()
         let defaultExternals = self.createExternals(fromTokens: self.tokens)
-        var initials: Set<KripkeStatePropertyList> = []
-        var finishingStates: [KripkeStatePropertyList: Set<UInt>] = [:]
+        var results: [(UInt, Any?)] = []
         while false == jobs.isEmpty {
             let job = jobs.removeFirst()
             // Skip this job if all tokens are .skip tokens.
@@ -152,9 +151,6 @@ public final class VerificationCycleKripkeStructureGenerator<
                     usingCallStack: job.callStack,
                     worldType: .beforeExecution
                 )
-                if true == job.initial {
-                    initials.insert(world)
-                }
                 let (inCycle, newCache) = self.cycleDetector.inCycle(data: job.cache, element: world)
                 if true == inCycle {
                     job.lastState?.effects.insert(world)
@@ -184,10 +180,7 @@ public final class VerificationCycleKripkeStructureGenerator<
                     }
                     // Add the lastNewState as a finishing state if all fsms have finished -- don't bother to generate more jobs.
                     if nil == newTokens.first(where: { nil != $0.first { !($0.data?.fsm.hasFinished ?? true) } }) {
-                        if nil == finishingStates[lastNewState.properties] {
-                            finishingStates[lastNewState.properties] = []
-                        }
-                        finishingStates[lastNewState.properties]?.insert(job.runs)
+                        results.append((job.runs, nil))
                         view.commit(state: lastNewState, isInitial: false)
                         continue
                     }
@@ -210,7 +203,7 @@ public final class VerificationCycleKripkeStructureGenerator<
             _ = job.lastState.map { view.commit(state: $0, isInitial: false) }
         }
         view.finish()
-        return (initials, finishingStates)
+        return results.sorted { $0.0 < $1.0 }
         /*print("number of initial states: \(initialStates.value.count)")
         print("number of state: \(states.value.count)")
         print("number of transitions: \(states.value.reduce(0) { $0 + $1.1.effects.count })")
@@ -286,11 +279,11 @@ public final class VerificationCycleKripkeStructureGenerator<
 
 extension VerificationCycleKripkeStructureGenerator: VerificationTokenExecuterDelegate {
     
-    public func edges<Gateway: ModifiableFSMGateway>(of callData: CallData, caller: FSM_ID, withGateway gateway: Gateway) -> (Set<KripkeStatePropertyList>, [KripkeStatePropertyList : Set<UInt>]) {
-        guard let edges = self.delegate?.statesForCall(self, call: callData, withGateway: gateway) else {
+    public func results<Gateway: ModifiableFSMGateway>(of callData: CallData, caller: FSM_ID, withGateway gateway: Gateway) -> [(UInt, Any?)] {
+        guard let results = self.delegate?.resultsForCall(self, call: callData, withGateway: gateway) else {
             fatalError("Unable to generate kripke structure for call \(callData)")
         }
-        return edges
+        return results
     }
     
     public func scheduleInfo(of id: FSM_ID, caller: FSM_ID) -> ([[VerificationToken]], AnyKripkeStructureView<KripkeState>) {
