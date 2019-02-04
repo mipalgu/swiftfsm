@@ -82,7 +82,7 @@ public final class ScheduleCycleKripkeStructureGenerator<
     fileprivate let tokenizer: Tokenizer
     fileprivate let viewFactory: ViewFactory
     
-    fileprivate var edgeCache: [String: (Set<KripkeStatePropertyList>, [KripkeStatePropertyList : Set<UInt>])] = [:]
+    fileprivate var resultsCache: [String: [(UInt, Any?)]] = [:]
     
     public init(
         machines: [Machine],
@@ -242,16 +242,16 @@ public final class ScheduleCycleKripkeStructureGenerator<
 
 extension ScheduleCycleKripkeStructureGenerator: LazyKripkeStructureGeneratorDelegate {
     
-    public func statesForCall<Gateway: ModifiableFSMGateway>(_ generator: LazyKripkeStructureGenerator, call callData: CallData, withGateway gateway: Gateway) -> (Set<KripkeStatePropertyList>, [KripkeStatePropertyList : Set<UInt>]) {
+    public func resultsForCall<Gateway: ModifiableFSMGateway>(_ generator: LazyKripkeStructureGenerator, call callData: CallData, withGateway gateway: Gateway) -> [(UInt, Any?)] {
         let key = "id: \(callData.id), parameters: \(callData.parameters)"
-        if let edges = self.edgeCache[key] {
-            return edges
+        if let results = self.resultsCache[key] {
+            return results
         }
         var generator = self.factory.make(tokens: callData.tokens)
         generator.delegate = self
-        let edges = generator.generate(usingGateway: gateway, andView: callData.view)
-        self.edgeCache[key] = edges
-        return edges
+        let results = generator.generate(usingGateway: gateway, andView: callData.view)
+        self.resultsCache[key] = results
+        return results
     }
     
 }
