@@ -65,6 +65,7 @@ import MachineStructure
 import ModelChecking
 import FSMVerification
 import swiftfsm
+import swift_helpers
 import Utilities
 
 public final class VerificationCycleKripkeStructureGenerator<
@@ -130,6 +131,26 @@ public final class VerificationCycleKripkeStructureGenerator<
                     callStack: job.callStack
                 ))
                 continue
+            }
+            // Create results for all parameterised machines that are finished.
+            var allResults: [FSM_ID: [Any?]] = [:]
+            allResults.reserveCapacity(job.callStack.count)
+            for (id, calls) in job.callStack {
+                guard let callData = calls.last else {
+                    continue
+                }
+                guard let callResults = self.delegate?.resultsForCall(self, call: callData, withGateway: gateway) else {
+                    fatalError("Unable to fetch results for call: \(callData)")
+                }
+                allResults[id] = Array(callResults.binarySearch {
+                    if $0.0 == callData.runs {
+                        return .orderedSame
+                    }
+                    if $0.0 < callData.runs {
+                        return .orderedAscending
+                    }
+                    return .orderedDescending
+                }.lazy.map { $0.1 })
             }
             // Create a spinner for the external variables.
             let externalsData = self.fetchUniqueExternalsData(fromTokens: [job.tokens[job.executing]])
