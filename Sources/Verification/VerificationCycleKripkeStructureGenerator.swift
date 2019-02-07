@@ -152,73 +152,85 @@ public final class VerificationCycleKripkeStructureGenerator<
                     return .orderedDescending
                 }.lazy.map { $0.1 }
             }
-            // Create a spinner for the external variables.
-            let externalsData = self.fetchUniqueExternalsData(fromTokens: [job.tokens[job.executing]])
-            let spinner = self.spinnerConstructor.makeSpinner(forExternals: externalsData)
-            // Generate kirpke states for each variation of external variables.
-            while let externals = spinner() {
-                let externals = nil == job.lastState ? self.mergeExternals(externals, with: defaultExternals) : externals
-                guard let firstData = job.tokens[job.executing].first(where: { nil != $0.data })?.data else {
-                    break
-                }
-                // Check for cycles.
-                let world = self.worldCreator.createWorld(
-                    fromExternals: externals,
-                    andTokens: job.tokens,
-                    andLastState: job.lastState,
-                    andExecuting: job.executing,
-                    andExecutingToken: 0,
-                    withState: firstData.fsm.currentState.name,
-                    usingCallStack: job.callStack,
-                    worldType: .beforeExecution
-                )
-                let (inCycle, newCache) = self.cycleDetector.inCycle(data: job.cache, element: world)
-                if true == inCycle {
-                    job.lastState?.effects.insert(world)
-                    continue
-                }
-                // Clone all fsms.
-                let clones = job.tokens.enumerated().map {
-                    Array(self.cloner.clone(jobs: $1, withLastRecords: job.lastRecords[$0]))
-                }
-                let callStack = job.callStack.mapValues { $0.map { CallData(id: $0.id, fsm: $0.fsm.clone(), fullyQualifiedName: $0.fullyQualifiedName, parameters: $0.parameters, promiseData: $0.promiseData, inPlace: $0.inPlace, runs: $0.runs, tokens: $0.tokens, view: $0.view) } }
-                // Execute and generate kripke states.
-                let runs = self.executer.execute(
-                    tokens: clones,
-                    executing: job.executing,
-                    withExternals: externals,
-                    andLastState: job.lastState,
-                    isInitial: job.initial,
-                    usingView: view,
-                    andCallStack: callStack,
-                    withDelegate: self
-                )
-                // Create jobs for each different 'run' possible.
-                for (lastState, newTokens, newCallStack) in runs {
-                    // Do not generate more jobs if we do not have a last state - means that nothing was executed, should never happen.
-                    guard let lastNewState = lastState else {
+            // Create spinner for results.
+            let resultsSpinner = self.createSpinner(forValues: allResults)
+            while let parameterisedResults = resultsSpinner() {
+                // Create a spinner for the external variables.
+                let externalsData = self.fetchUniqueExternalsData(fromTokens: [job.tokens[job.executing]])
+                let spinner = self.spinnerConstructor.makeSpinner(forExternals: externalsData)
+                // Generate kirpke states for each variation of external variables.
+                while let externals = spinner() {
+                    let externals = nil == job.lastState ? self.mergeExternals(externals, with: defaultExternals) : externals
+                    guard let firstData = job.tokens[job.executing].first(where: { nil != $0.data })?.data else {
+                        break
+                    }
+                    // Clone callStack
+                    let callStack = job.callStack.mapValues { $0.map { CallData(id: $0.id, fsm: $0.fsm.clone(), fullyQualifiedName: $0.fullyQualifiedName, parameters: $0.parameters, promiseData: $0.promiseData, inPlace: $0.inPlace, runs: $0.runs, tokens: $0.tokens, view: $0.view) } }
+                    // Assign results to promises.
+                    for (id, calls) in callStack {
+                        guard let callData = calls.last else {
+                            continue
+                        }
+                        callData.promiseData.result = parameterisedResults[id]
+                    }
+                    // Check for cycles.
+                    let world = self.worldCreator.createWorld(
+                        fromExternals: externals,
+                        andTokens: job.tokens,
+                        andLastState: job.lastState,
+                        andExecuting: job.executing,
+                        andExecutingToken: 0,
+                        withState: firstData.fsm.currentState.name,
+                        usingCallStack: job.callStack,
+                        worldType: .beforeExecution
+                    )
+                    let (inCycle, newCache) = self.cycleDetector.inCycle(data: job.cache, element: world)
+                    if true == inCycle {
+                        job.lastState?.effects.insert(world)
                         continue
                     }
-                    // Add the lastNewState as a finishing state if all fsms have finished -- don't bother to generate more jobs.
-                    if nil == newTokens.first(where: { nil != $0.first { !($0.data?.fsm.hasFinished ?? true) } }) {
-                        results.append((job.runs, nil))
-                        view.commit(state: lastNewState, isInitial: false)
-                        continue
+                    // Clone all fsms.
+                    let clones = job.tokens.enumerated().map {
+                        Array(self.cloner.clone(jobs: $1, withLastRecords: job.lastRecords[$0]))
                     }
-                    let newExecutingIndex = (job.executing + 1) % newTokens.count
-                    // Create a new job from the clones.
-                    jobs.append(Job(
-                        initial: false,
-                        cache: newCache,
-                        tokens: newTokens,
-                        executing: newExecutingIndex,
-                        lastState: lastNewState,
-                        lastRecords: newTokens.map { $0.map {
-                            ($0.data?.fsm.base).map(self.recorder.takeRecord) ?? KripkeStatePropertyList()
-                        } },
-                        runs: 0 == newExecutingIndex ? job.runs + 1 : job.runs,
-                        callStack: newCallStack
-                    ))
+                    // Execute and generate kripke states.
+                    let runs = self.executer.execute(
+                        tokens: clones,
+                        executing: job.executing,
+                        withExternals: externals,
+                        andLastState: job.lastState,
+                        isInitial: job.initial,
+                        usingView: view,
+                        andCallStack: callStack,
+                        withDelegate: self
+                    )
+                    // Create jobs for each different 'run' possible.
+                    for (lastState, newTokens, newCallStack) in runs {
+                        // Do not generate more jobs if we do not have a last state - means that nothing was executed, should never happen.
+                        guard let lastNewState = lastState else {
+                            continue
+                        }
+                        // Add the lastNewState as a finishing state if all fsms have finished -- don't bother to generate more jobs.
+                        if nil == newTokens.first(where: { nil != $0.first { !($0.data?.fsm.hasFinished ?? true) } }) {
+                            results.append((job.runs, nil))
+                            view.commit(state: lastNewState, isInitial: false)
+                            continue
+                        }
+                        let newExecutingIndex = (job.executing + 1) % newTokens.count
+                        // Create a new job from the clones.
+                        jobs.append(Job(
+                            initial: false,
+                            cache: newCache,
+                            tokens: newTokens,
+                            executing: newExecutingIndex,
+                            lastState: lastNewState,
+                            lastRecords: newTokens.map { $0.map {
+                                ($0.data?.fsm.base).map(self.recorder.takeRecord) ?? KripkeStatePropertyList()
+                            } },
+                            runs: 0 == newExecutingIndex ? job.runs + 1 : job.runs,
+                            callStack: newCallStack
+                        ))
+                    }
                 }
             }
             _ = job.lastState.map { view.commit(state: $0, isInitial: false) }
@@ -276,40 +288,47 @@ public final class VerificationCycleKripkeStructureGenerator<
         return externals
     }
     
-    fileprivate func createSpinner<T>(forValues values: [[T]]) -> () -> [T]? {
-        func newSpinner(_ values: [T]) -> () -> T? {
-            var i = 0
+    fileprivate func createSpinner<Key, Value, C: Collection>(forValues values: [Key: C]) -> () -> [Key: Value]? where C.Iterator.Element == Value {
+        func newSpinner(_ values: C) -> () -> Value? {
+            var i = values.startIndex
             return {
-                guard i < values.count else {
+                guard i != values.endIndex else {
                     return nil
                 }
-                defer { i += 1 }
+                defer { i = values.index(after: i) }
                 return values[i]
             }
         }
-        var spinners = values.map(newSpinner)
-        guard var currentValues = spinners.failMap({ $0() }) else {
+        var spinners = values.mapValues(newSpinner)
+        guard var currentValues: [Key: Value] = spinners.failMap({
+            if let value = $1() {
+                return ($0, value)
+            }
+            return nil
+        }).map({ Dictionary(uniqueKeysWithValues: $0) })
+        else {
             return { nil }
         }
-        func handleSpinner(index: Int) -> [T]? {
-            if index >= spinners.count {
+        func handleSpinner(index: Dictionary<Key, () -> Value?>.Index) -> [Key: Value]? {
+            if index == spinners.endIndex {
                 return nil
             }
-            if let value = spinners[index]() {
-                currentValues[index] = value
+            let (key, spinner) = spinners[index]
+            if let value = spinner() {
+                currentValues[key] = value
                 return currentValues
             }
-            spinners[index] = newSpinner(values[index])
-            guard let value = spinners[index]() else {
+            spinners[key] = newSpinner(values[key]!)
+            guard let value = spinners[index].value() else {
                 return nil
             }
-            currentValues[index] = value
-            return handleSpinner(index: index + 1)
+            currentValues[key] = value
+            return handleSpinner(index: spinners.index(after: index))
         }
         var first = true
         return {
             defer { first = false }
-            return first ? currentValues : handleSpinner(index: 0)
+            return first ? currentValues : handleSpinner(index: spinners.startIndex)
         }
     }
     
