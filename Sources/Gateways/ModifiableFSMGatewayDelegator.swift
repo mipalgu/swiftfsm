@@ -120,4 +120,8 @@ extension ModifiableFSMGateway where Self: ModifiableFSMGatewayDelegator {
         return self.gateway.invoke(id, withParameters: parameters)
     }
     
+    public func setup(_ id: FSM_ID) {
+        self.gateway.setup(id)
+    }
+    
 }

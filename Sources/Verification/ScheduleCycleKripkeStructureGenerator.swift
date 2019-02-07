@@ -103,16 +103,6 @@ public final class ScheduleCycleKripkeStructureGenerator<
             self.add(fsm: $0.fsm, toGateway: gateway, withDependencies: $0.dependencies, name: $0.name)
         }
         let tokens = self.tokenizer.separate(self.machines)
-        tokens.forEach {
-            $0.forEach {
-                switch $0.type {
-                case .parameterisedFSM(let fsm):
-                    fsm.suspend()
-                default:
-                    return
-                }
-            }
-        }
         let verificationTokens = self.convert(tokens: tokens, forMachines: self.machines, usingGateway: gateway)
         verificationTokens.forEach { (tokens: [[VerificationToken]], view: AnyKripkeStructureView<KripkeState>) in
             var generator = self.factory.make(tokens: tokens)
@@ -124,9 +114,11 @@ public final class ScheduleCycleKripkeStructureGenerator<
     fileprivate func add<Gateway: ModifiableFSMGateway>(fsm: FSMType, toGateway gateway: Gateway, withDependencies dependencies: [Dependency], name: String) {
         let name = name + "." + fsm.name
         gateway.fsms[gateway.id(of: name)] = fsm
+        gateway.setup(gateway.id(of: name))
         dependencies.forEach {
             switch $0 {
             case .callableParameterisedMachine(let fsm, let dependencies), .invokableParameterisedMachine(let fsm, let dependencies):
+                fsm.suspend()
                 self.add(fsm: .parameterisedFSM(fsm), toGateway: gateway, withDependencies: dependencies, name: name)
             case .submachine(let fsm, let dependencies):
                 self.add(fsm: .controllableFSM(fsm), toGateway: gateway, withDependencies: dependencies, name: name)
