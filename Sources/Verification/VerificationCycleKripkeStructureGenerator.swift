@@ -276,6 +276,43 @@ public final class VerificationCycleKripkeStructureGenerator<
         return externals
     }
     
+    fileprivate func createSpinner<T>(forValues values: [[T]]) -> () -> [T]? {
+        func newSpinner(_ values: [T]) -> () -> T? {
+            var i = 0
+            return {
+                guard i < values.count else {
+                    return nil
+                }
+                defer { i += 1 }
+                return values[i]
+            }
+        }
+        var spinners = values.map(newSpinner)
+        guard var currentValues = spinners.failMap({ $0() }) else {
+            return { nil }
+        }
+        func handleSpinner(index: Int) -> [T]? {
+            if index >= spinners.count {
+                return nil
+            }
+            if let value = spinners[index]() {
+                currentValues[index] = value
+                return currentValues
+            }
+            spinners[index] = newSpinner(values[index])
+            guard let value = spinners[index]() else {
+                return nil
+            }
+            currentValues[index] = value
+            return handleSpinner(index: index + 1)
+        }
+        var first = true
+        return {
+            defer { first = false }
+            return first ? currentValues : handleSpinner(index: 0)
+        }
+    }
+    
     fileprivate struct Job {
         
         let initial: Bool
