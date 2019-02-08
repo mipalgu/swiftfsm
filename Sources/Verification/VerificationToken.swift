@@ -81,7 +81,7 @@ public enum VerificationToken {
         
         public let id: FSM_ID
         
-        public let fsm: AnyScheduleableFiniteStateMachine
+        public let fsm: FSMType
         
         public let machine: Machine
         

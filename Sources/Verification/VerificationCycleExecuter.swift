@@ -127,7 +127,7 @@ public final class VerificationCycleExecuter {
                 fatalError("Unable to fetch data of verification token.")
             }
             let (generatedStates, clockValues, newExternals, newCallStack) = self.executer.execute(
-                fsm: data.fsm,
+                fsm: data.fsm.asScheduleableFiniteStateMachine,
                 inTokens: newTokens,
                 executing: executing,
                 atOffset: job.index,
@@ -213,9 +213,9 @@ public final class VerificationCycleExecuter {
         guard let data = tokens[executing.0][executing.1].data else {
             fatalError("Unable to fetch data from executing token.")
         }
-        let fsm: AnyScheduleableFiniteStateMachine
+        let fsm: FSMType
         if let callData = callStack[data.id]?.last {
-            fsm = callData.fsm.asScheduleableFiniteStateMachine
+            fsm = .parameterisedFSM(callData.fsm)
         } else {
             fsm = data.fsm
         }

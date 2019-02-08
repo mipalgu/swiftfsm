@@ -163,7 +163,7 @@ public final class ScheduleCycleKripkeStructureGenerator<
                     return ExternalVariablesVerificationData(externalVariables: external, defaultValues: defaultValues, spinners: spinners)
                 }
                 let callableTokens = self.createCallableTokens(forToken: token, inDependencies: dependency.dependencies, inMachine: machine, withTokens: tokens, usingGateway: gateway)
-                return .verify(data: VerificationToken.Data(id: gateway.id(of: token.fullyQualifiedName), fsm: token.fsm, machine: token.machine, externalVariables: externals, callableMachines: callableTokens))
+                return .verify(data: VerificationToken.Data(id: gateway.id(of: token.fullyQualifiedName), fsm: dependencyPath.last!.fsm, machine: token.machine, externalVariables: externals, callableMachines: callableTokens))
             }
         }
         let view = self.viewFactory.make(identifier: machine.name)

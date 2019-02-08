@@ -178,7 +178,7 @@ public final class WorldCreator {
                     return
                 }
                 varPs[data.fsm.name] = KripkeStateProperty(
-                    type: .Compound(self.recorder.takeRecord(of: data.fsm.base)),
+                    type: .Compound(self.recorder.takeRecord(of: data.fsm.asScheduleableFiniteStateMachine.base)),
                     value: data.fsm
                 )
             }
