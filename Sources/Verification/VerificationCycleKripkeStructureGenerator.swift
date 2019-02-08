@@ -230,7 +230,7 @@ public final class VerificationCycleKripkeStructureGenerator<
                                             continue
                                         }
                                         if data.id == resultID {
-                                            //results.insert((job.runs, data.fsm.resultsContainer.results))
+                                            results.insert((job.runs, data.fsm.resultContainer?.result))
                                         }
                                     }
                                 }
