@@ -59,12 +59,13 @@
 import Gateways
 import KripkeStructure
 import KripkeStructureViews
+import swiftfsm
 import swift_helpers
 
 public protocol LazyKripkeStructureGenerator {
 
     weak var delegate: LazyKripkeStructureGeneratorDelegate? { get set }
     
-    func generate<Gateway: ModifiableFSMGateway, View: KripkeStructureView>(usingGateway gateway: Gateway, andView view: View) -> SortedCollection<(UInt, Any?)> where View.State == KripkeState
+    func generate<Gateway: ModifiableFSMGateway, View: KripkeStructureView>(usingGateway gateway: Gateway, andView view: View, storingResultsFor: FSM_ID?) -> SortedCollection<(UInt, Any?)>? where View.State == KripkeState
     
 }

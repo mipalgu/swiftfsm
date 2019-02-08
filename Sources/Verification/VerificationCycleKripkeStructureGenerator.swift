@@ -117,10 +117,12 @@ public final class VerificationCycleKripkeStructureGenerator<
         }
     }
     
-    public func generate<Gateway: ModifiableFSMGateway, View: KripkeStructureView>(usingGateway gateway: Gateway, andView view: View) -> SortedCollection<(UInt, Any?)> where View.State == KripkeState {
+    public func generate<Gateway: ModifiableFSMGateway, View: KripkeStructureView>(usingGateway gateway: Gateway, andView view: View, storingResultsFor resultID: FSM_ID?) -> SortedCollection<(UInt, Any?)>? where View.State == KripkeState {
         var jobs = self.createInitialJobs(fromTokens: self.tokens)
         view.reset()
         let defaultExternals = self.createExternals(fromTokens: self.tokens)
+        var globalDetectorCache = self.cycleDetector.initialData
+        var foundCycle = false
         var results: SortedCollection<(UInt, Any?)> = SortedCollection(comparator: AnyComparator {
             if $0.0 < $1.0 {
                 return .orderedAscending
@@ -188,8 +190,11 @@ public final class VerificationCycleKripkeStructureGenerator<
                         usingCallStack: job.callStack,
                         worldType: .beforeExecution
                     )
-                    let (inCycle, newCache) = self.cycleDetector.inCycle(data: job.cache, element: world)
-                    if true == inCycle {
+                    let (inLocalCycle, newCache) = self.cycleDetector.inCycle(data: job.cache, element: world)
+                    foundCycle = foundCycle || inLocalCycle
+                    let (inGlobalCycle, newGlobalCache) = self.cycleDetector.inCycle(data: globalDetectorCache, element: world)
+                    globalDetectorCache = newGlobalCache
+                    if true == inGlobalCycle {
                         job.lastState?.effects.insert(world)
                         continue
                     }
@@ -218,7 +223,19 @@ public final class VerificationCycleKripkeStructureGenerator<
                         }
                         // Add the lastNewState as a finishing state if all fsms have finished -- don't bother to generate more jobs.
                         if nil == newTokens.first(where: { nil != $0.first { !($0.data?.fsm.hasFinished ?? true) } }) {
-                            results.insert((job.runs, nil))
+                            if false == foundCycle {
+                                for tokens in newTokens {
+                                    for token in tokens {
+                                        guard let data = token.data else {
+                                            continue
+                                        }
+                                        if data.id == resultID {
+                                            //results.insert((job.runs, data.fsm.resultsContainer.results))
+                                        }
+                                    }
+                                }
+                                results.insert((job.runs, nil))
+                            }
                             view.commit(state: lastNewState, isInitial: false)
                             continue
                         }
@@ -242,6 +259,9 @@ public final class VerificationCycleKripkeStructureGenerator<
             _ = job.lastState.map { view.commit(state: $0, isInitial: false) }
         }
         view.finish()
+        if true == foundCycle {
+            return nil
+        }
         return results
         /*print("number of initial states: \(initialStates.value.count)")
         print("number of state: \(states.value.count)")
