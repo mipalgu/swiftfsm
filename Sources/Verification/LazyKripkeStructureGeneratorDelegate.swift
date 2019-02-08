@@ -59,6 +59,7 @@
 import Gateways
 import KripkeStructure
 import swiftfsm
+import swift_helpers
 
 public protocol LazyKripkeStructureGeneratorDelegate: class {
     
@@ -69,6 +70,6 @@ public protocol LazyKripkeStructureGeneratorDelegate: class {
      *  in order to easily generate states for when an fsm invokes or calls
      *  another fsm.
      */
-    func resultsForCall<Gateway: ModifiableFSMGateway>(_: LazyKripkeStructureGenerator, call: CallData, withGateway: Gateway) -> [(UInt, Any?)]
+    func resultsForCall<Gateway: ModifiableFSMGateway>(_: LazyKripkeStructureGenerator, call: CallData, withGateway: Gateway) -> SortedCollection<(UInt, Any?)>
     
 }

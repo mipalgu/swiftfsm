@@ -65,6 +65,7 @@ import MachineStructure
 import ModelChecking
 import FSMVerification
 import swiftfsm
+import swift_helpers
 
 public final class ScheduleCycleKripkeStructureGenerator<
     Extractor: ExternalsSpinnerDataExtractorType,
@@ -82,7 +83,7 @@ public final class ScheduleCycleKripkeStructureGenerator<
     fileprivate let tokenizer: Tokenizer
     fileprivate let viewFactory: ViewFactory
     
-    fileprivate var resultsCache: [String: [(UInt, Any?)]] = [:]
+    fileprivate var resultsCache: [String: SortedCollection<(UInt, Any?)>] = [:]
     
     public init(
         machines: [Machine],
@@ -250,7 +251,7 @@ public final class ScheduleCycleKripkeStructureGenerator<
 
 extension ScheduleCycleKripkeStructureGenerator: LazyKripkeStructureGeneratorDelegate {
     
-    public func resultsForCall<Gateway: ModifiableFSMGateway>(_ generator: LazyKripkeStructureGenerator, call callData: CallData, withGateway gateway: Gateway) -> [(UInt, Any?)] {
+    public func resultsForCall<Gateway: ModifiableFSMGateway>(_ generator: LazyKripkeStructureGenerator, call callData: CallData, withGateway gateway: Gateway) -> SortedCollection<(UInt, Any?)> {
         let key = "id: \(callData.id), parameters: \(callData.parameters)"
         if let results = self.resultsCache[key] {
             return results

@@ -56,6 +56,12 @@
  *
  */
 
+#if !NO_FOUNDATION
+#if canImport(Foundation)
+import Foundation
+#endif
+#endif
+
 import KripkeStructure
 import KripkeStructureViews
 import FSM
@@ -111,11 +117,19 @@ public final class VerificationCycleKripkeStructureGenerator<
         }
     }
     
-    public func generate<Gateway: ModifiableFSMGateway, View: KripkeStructureView>(usingGateway gateway: Gateway, andView view: View) -> [(UInt, Any?)] where View.State == KripkeState {
+    public func generate<Gateway: ModifiableFSMGateway, View: KripkeStructureView>(usingGateway gateway: Gateway, andView view: View) -> SortedCollection<(UInt, Any?)> where View.State == KripkeState {
         var jobs = self.createInitialJobs(fromTokens: self.tokens)
         view.reset()
         let defaultExternals = self.createExternals(fromTokens: self.tokens)
-        var results: [(UInt, Any?)] = []
+        var results: SortedCollection<(UInt, Any?)> = SortedCollection(comparator: AnyComparator {
+            if $0.0 < $1.0 {
+                return .orderedAscending
+            }
+            if $0.0 > $1.0 {
+                return .orderedDescending
+            }
+            return .orderedSame
+        })
         while false == jobs.isEmpty {
             let job = jobs.removeFirst()
             // Skip this job if all tokens are .skip tokens.
@@ -133,7 +147,7 @@ public final class VerificationCycleKripkeStructureGenerator<
                 continue
             }
             // Create results for all parameterised machines that are finished.
-            var allResults: [FSM_ID: LazyMapCollection<ArraySlice<(UInt, Any?)>, Any?>] = [:]
+            var allResults: [FSM_ID: LazyMapCollection<SortedCollectionSlice<(UInt, Any?)>, Any?>] = [:]
             allResults.reserveCapacity(job.callStack.count)
             for (id, calls) in job.callStack {
                 guard let callData = calls.last else {
@@ -142,15 +156,7 @@ public final class VerificationCycleKripkeStructureGenerator<
                 guard let callResults = self.delegate?.resultsForCall(self, call: callData, withGateway: gateway) else {
                     fatalError("Unable to fetch results for call: \(callData)")
                 }
-                allResults[id] = callResults.binarySearch {
-                    if $0.0 == callData.runs {
-                        return .orderedSame
-                    }
-                    if $0.0 < callData.runs {
-                        return .orderedAscending
-                    }
-                    return .orderedDescending
-                }.lazy.map { $0.1 }
+                allResults[id] = callResults.find((callData.runs, nil)).lazy.map { $0.1 }
             }
             // Create spinner for results.
             let resultsSpinner = self.createSpinner(forValues: allResults)
@@ -212,7 +218,7 @@ public final class VerificationCycleKripkeStructureGenerator<
                         }
                         // Add the lastNewState as a finishing state if all fsms have finished -- don't bother to generate more jobs.
                         if nil == newTokens.first(where: { nil != $0.first { !($0.data?.fsm.hasFinished ?? true) } }) {
-                            results.append((job.runs, nil))
+                            results.insert((job.runs, nil))
                             view.commit(state: lastNewState, isInitial: false)
                             continue
                         }
@@ -236,7 +242,7 @@ public final class VerificationCycleKripkeStructureGenerator<
             _ = job.lastState.map { view.commit(state: $0, isInitial: false) }
         }
         view.finish()
-        return results.sorted { $0.0 < $1.0 }
+        return results
         /*print("number of initial states: \(initialStates.value.count)")
         print("number of state: \(states.value.count)")
         print("number of transitions: \(states.value.reduce(0) { $0 + $1.1.effects.count })")
@@ -360,7 +366,7 @@ extension VerificationCycleKripkeStructureGenerator: VerificationTokenExecuterDe
         guard let results = self.delegate?.resultsForCall(self, call: callData, withGateway: gateway) else {
             fatalError("Unable to generate kripke structure for call \(callData)")
         }
-        return results
+        return Array(results)
     }
     
     public func scheduleInfo(of id: FSM_ID, caller: FSM_ID) -> ([[VerificationToken]], AnyKripkeStructureView<KripkeState>) {
