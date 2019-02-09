@@ -190,13 +190,15 @@ public final class VerificationCycleKripkeStructureGenerator<
                         usingCallStack: job.callStack,
                         worldType: .beforeExecution
                     )
-                    let (inLocalCycle, newCache) = self.cycleDetector.inCycle(data: job.cache, element: world)
-                    foundCycle = foundCycle || inLocalCycle
-                    let (inGlobalCycle, newGlobalCache) = self.cycleDetector.inCycle(data: globalDetectorCache, element: world)
-                    globalDetectorCache = newGlobalCache
-                    if true == inGlobalCycle {
-                        job.lastState?.effects.insert(world)
-                        continue
+                    var newCache: Detector.Data = job.cache
+                    foundCycle = foundCycle || self.cycleDetector.inCycle(data: &newCache, element: world)
+                    if true == self.cycleDetector.inCycle(data: &globalDetectorCache, element: world) {
+                        if nil == resultID {
+                            job.lastState?.effects.insert(world)
+                            continue
+                        } else if foundCycle {
+                            return nil
+                        }
                     }
                     // Clone all fsms.
                     let clones = job.tokens.enumerated().map {
