@@ -92,6 +92,7 @@ public final class VerificationCycleKripkeStructureGenerator<
     public weak var delegate: LazyKripkeStructureGeneratorDelegate?
     
     fileprivate var tokensLookup: [FSM_ID: VerificationToken] = [:]
+    fileprivate var view: AnyKripkeStructureView<KripkeState>!
     
     public init(
         tokens: [[VerificationToken]],
@@ -118,8 +119,9 @@ public final class VerificationCycleKripkeStructureGenerator<
     }
     
     public func generate<Gateway: ModifiableFSMGateway, View: KripkeStructureView>(usingGateway gateway: Gateway, andView view: View, storingResultsFor resultID: FSM_ID?) -> SortedCollection<(UInt, Any?)>? where View.State == KripkeState {
+        self.view = AnyKripkeStructureView(view)
         var jobs = self.createInitialJobs(fromTokens: self.tokens)
-        view.reset()
+        self.view.reset()
         let defaultExternals = self.createExternals(fromTokens: self.tokens)
         var globalDetectorCache = self.cycleDetector.initialData
         var foundCycle = false
@@ -220,7 +222,7 @@ public final class VerificationCycleKripkeStructureGenerator<
                         andGateway: gateway,
                         andLastState: job.lastState,
                         isInitial: job.initial,
-                        usingView: view,
+                        usingView: self.view,
                         andCallStack: callStack,
                         andPreviousResults: job.results,
                         withDelegate: self
@@ -246,7 +248,7 @@ public final class VerificationCycleKripkeStructureGenerator<
                                 }
                                 results.insert((job.runs, nil))
                             }
-                            view.commit(state: lastNewState, isInitial: false)
+                            self.view.commit(state: lastNewState, isInitial: false)
                             continue
                         }
                         let newExecutingIndex = (job.executing + 1) % newTokens.count
@@ -267,9 +269,9 @@ public final class VerificationCycleKripkeStructureGenerator<
                     }
                 }
             }
-            _ = job.lastState.map { view.commit(state: $0, isInitial: false) }
+            _ = job.lastState.map { self.view.commit(state: $0, isInitial: false) }
         }
-        view.finish()
+        self.view.finish()
         if true == foundCycle {
             return nil
         }
@@ -407,8 +409,11 @@ extension VerificationCycleKripkeStructureGenerator: VerificationTokenExecuterDe
         guard let callerToken = self.tokensLookup[caller], let callerData = callerToken.data else {
             fatalError("Unable to fetch caller token from caller id.")
         }
+        if callerData.id == id {
+            return (self.tokens, self.view)
+        }
         guard let (_, tokens, view) = callerData.callableMachines[id] else {
-            fatalError("Unable to fetch schedule info of '\(id)'")
+            fatalError("FSM with id '\(id)' is not callable by this FSM.")
         }
         return (tokens, view)
     }
