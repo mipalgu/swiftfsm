@@ -99,6 +99,8 @@ public final class VerificationCycleExecuter {
         
         let callStack: [FSM_ID: [CallData]]
         
+        let results: [FSM_ID: Any?]
+        
     }
     
     public func execute<View: KripkeStructureView>(
@@ -116,7 +118,7 @@ public final class VerificationCycleExecuter {
         self.executer.delegate = delegate
         var tokens = tokens
         tokens[executing] = tokens[executing].filter { nil != $0.data } // Ignore all skip tokens.
-        var jobs = [Job(index: 0, tokens: tokens, externals: externals, initialState: nil, lastState: last, clock: 0, usedClockValues: [], callStack: callStack)]
+        var jobs = [Job(index: 0, tokens: tokens, externals: externals, initialState: nil, lastState: last, clock: 0, usedClockValues: [], callStack: callStack, results: results)]
         let states: Ref<[KripkeStatePropertyList: KripkeState]> = Ref(value: [:])
         var initialStates: HashSink<KripkeStatePropertyList, KripkeStatePropertyList> = HashSink()
         var lastStates: HashSink<KripkeStatePropertyList, KripkeStatePropertyList> = HashSink()
@@ -127,7 +129,7 @@ public final class VerificationCycleExecuter {
             guard let data = newTokens[executing][job.index].data else {
                 fatalError("Unable to fetch data of verification token.")
             }
-            let (generatedStates, clockValues, newExternals, newCallStack) = self.executer.execute(
+            let (generatedStates, clockValues, newExternals, newCallStack, newResults) = self.executer.execute(
                 fsm: data.fsm.asScheduleableFiniteStateMachine,
                 inTokens: newTokens,
                 executing: executing,
@@ -135,7 +137,8 @@ public final class VerificationCycleExecuter {
                 withExternals: job.externals,
                 andClock: job.clock,
                 andLastState: job.lastState,
-                usingCallStack: job.callStack
+                usingCallStack: job.callStack,
+                andPreviousResults: job.results
             )
             guard let first = generatedStates.first else {
                 continue
@@ -146,15 +149,15 @@ public final class VerificationCycleExecuter {
             }
             let lastState = generatedStates.last.map { states.value[$0.properties] ?? $0 }
             // When the clock has been used - try the same token again with new clock values.
-            jobs.append(contentsOf: jobsFromClockValues(lastJob: job, clockValues: clockValues, andCallStack: job.callStack))
+            jobs.append(contentsOf: jobsFromClockValues(lastJob: job, clockValues: clockValues))
             // Add tokens to runs when we have finished executing all of the tokens in a run.
             if job.index + 1 >= tokens[executing].count {
                 _ = lastState.map { lastStates.insert($0.properties) }
-                runs.append((lastState, newTokens, newCallStack, [:]))
+                runs.append((lastState, newTokens, newCallStack, newResults))
                 continue
             }
             // Add a Job for the next token to execute.
-            jobs.append(Job(index: job.index + 1, tokens: newTokens, externals: newExternals, initialState: job.initialState ?? generatedStates.first, lastState: lastState, clock: 0, usedClockValues: [], callStack: newCallStack))
+            jobs.append(Job(index: job.index + 1, tokens: newTokens, externals: newExternals, initialState: job.initialState ?? generatedStates.first, lastState: lastState, clock: 0, usedClockValues: [], callStack: newCallStack, results: newResults))
         }
         states.value.forEach { (arg: (key: KripkeStatePropertyList, value: KripkeState)) in
             if lastStates.contains(arg.key) {
@@ -165,7 +168,7 @@ public final class VerificationCycleExecuter {
         return runs
     }
     
-    fileprivate func jobsFromClockValues(lastJob: Job, clockValues: [UInt], andCallStack callStack: [FSM_ID: [CallData]]) -> [Job] {
+    fileprivate func jobsFromClockValues(lastJob: Job, clockValues: [UInt]) -> [Job] {
         return clockValues.flatMap { (value: UInt) -> [Job] in
             if true == lastJob.usedClockValues.contains(value) {
                 return []
@@ -187,7 +190,8 @@ public final class VerificationCycleExecuter {
                     lastState: lastJob.lastState,
                     clock: $0,
                     usedClockValues: lastJob.usedClockValues + clockValues,
-                    callStack: callStack
+                    callStack: lastJob.callStack,
+                    results: lastJob.results
                 )
             }
         }

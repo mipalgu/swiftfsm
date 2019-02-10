@@ -87,9 +87,11 @@ public final class VerificationTokenExecuter<StateGenerator: KripkeStateGenerato
         withExternals externals: [(AnySnapshotController, KripkeStatePropertyList)],
         andClock clock: UInt,
         andLastState lastState: KripkeState?,
-        usingCallStack callStack: [FSM_ID: [CallData]]
-    ) -> ([KripkeState], [UInt], [(AnySnapshotController, KripkeStatePropertyList)], [FSM_ID: [CallData]]) {
+        usingCallStack callStack: [FSM_ID: [CallData]],
+        andPreviousResults results: [FSM_ID: Any?]
+    ) -> ([KripkeState], [UInt], [(AnySnapshotController, KripkeStatePropertyList)], [FSM_ID: [CallData]], [FSM_ID: Any?]) {
         self.calls = [:]
+        var results = results
         let token = tokens[executing][offset]
         let data = token.data!
         data.machine.clock.forcedRunningTime = clock
@@ -118,6 +120,9 @@ public final class VerificationTokenExecuter<StateGenerator: KripkeStateGenerato
             }
             // Create a new call stack if we detect that the fsm has invoked or called another fsm.
             newCallStack = self.mergeStacks(callStack, self.calls)
+            for id in self.calls.keys {
+                results[id] = nil
+            }
         } else if let callData = callStack[data.id]?.last {
             newCallStack[data.id] = Array((newCallStack[data.id] ?? []).dropLast()) + [CallData(id: callData.id, fsm: callData.fsm, fullyQualifiedName: callData.fullyQualifiedName, parameters: callData.parameters, promiseData: callData.promiseData, inPlace: callData.inPlace, runs: callData.runs + 1, tokens: callData.tokens, view: callData.view)]
         }
@@ -132,7 +137,7 @@ public final class VerificationTokenExecuter<StateGenerator: KripkeStateGenerato
             worldType: .afterExecution
         )
         let postState = self.stateGenerator.generateKripkeState(fromWorld: postWorld, withLastState: preState)
-        return ([preState, postState], data.machine.clock.lastClockValues, externals, callStack)
+        return ([preState, postState], data.machine.clock.lastClockValues, externals, callStack, results)
     }
     
     fileprivate func mergeStacks(_ lhs: [FSM_ID: [CallData]], _ rhs: [FSM_ID: [CallData]]) -> [FSM_ID: [CallData]] {
