@@ -126,6 +126,7 @@ public final class VerificationTokenExecuter<StateGenerator: KripkeStateGenerato
         } else if let callData = callStack[data.id]?.last {
             newCallStack[data.id] = Array((newCallStack[data.id] ?? []).dropLast()) + [CallData(id: callData.id, fsm: callData.fsm, fullyQualifiedName: callData.fullyQualifiedName, parameters: callData.parameters, promiseData: callData.promiseData, inPlace: callData.inPlace, runs: callData.runs + 1, tokens: callData.tokens, view: callData.view)]
         }
+        print("self.calls: \(self.calls)")
         let postWorld = self.worldCreator.createWorld(
             fromExternals: externals,
             andTokens: tokens,
@@ -154,6 +155,7 @@ extension VerificationTokenExecuter: FSMGatewayDelegate {
     
     
     public func hasCalled(inGateway gateway: ModifiableFSMGateway, fsm: AnyParameterisedFiniteStateMachine, withId id: FSM_ID, withParameters parameters: [String: Any], caller: FSM_ID, storingResultsIn promiseData: PromiseData) {
+        print("hasCalled")
         guard let delegate = self.delegate else {
             fatalError("delegate has not been set.")
             return

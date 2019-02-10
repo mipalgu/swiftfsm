@@ -103,10 +103,11 @@ public final class VerificationCycleExecuter {
         
     }
     
-    public func execute<View: KripkeStructureView>(
+    public func execute<View: KripkeStructureView, Gateway: ModifiableFSMGateway>(
         tokens: [[VerificationToken]],
         executing: Int,
         withExternals externals: [(AnySnapshotController, KripkeStatePropertyList)],
+        andGateway gateway: Gateway,
         andLastState last: KripkeState?,
         isInitial initial: Bool,
         usingView view: View,
@@ -116,6 +117,7 @@ public final class VerificationCycleExecuter {
     ) -> [(KripkeState?, [[VerificationToken]], [FSM_ID: [CallData]], [FSM_ID: Any?])] where View.State == KripkeState {
         //swiftlint:disable:next line_length
         self.executer.delegate = delegate
+        gateway.delegate = self.executer
         var tokens = tokens
         tokens[executing] = tokens[executing].filter { nil != $0.data } // Ignore all skip tokens.
         var jobs = [Job(index: 0, tokens: tokens, externals: externals, initialState: nil, lastState: last, clock: 0, usedClockValues: [], callStack: callStack, results: results)]
