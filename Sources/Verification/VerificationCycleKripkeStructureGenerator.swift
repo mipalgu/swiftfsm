@@ -153,7 +153,7 @@ public final class VerificationCycleKripkeStructureGenerator<
             var allResults: [FSM_ID: LazyMapCollection<SortedCollectionSlice<(UInt, Any?)>, Any?>] = [:]
             allResults.reserveCapacity(job.callStack.count)
             for (id, calls) in job.callStack {
-                guard let callData = calls.last else {
+                guard nil == job.results[id], let callData = calls.last else {
                     continue
                 }
                 guard let callResults = self.delegate?.resultsForCall(self, call: callData, withGateway: gateway) else {
@@ -216,10 +216,11 @@ public final class VerificationCycleKripkeStructureGenerator<
                         isInitial: job.initial,
                         usingView: view,
                         andCallStack: callStack,
+                        andPreviousResults: job.results,
                         withDelegate: self
                     )
                     // Create jobs for each different 'run' possible.
-                    for (lastState, newTokens, newCallStack) in runs {
+                    for (lastState, newTokens, newCallStack, newResults) in runs {
                         // Do not generate more jobs if we do not have a last state - means that nothing was executed, should never happen.
                         guard let lastNewState = lastState else {
                             continue
@@ -255,7 +256,7 @@ public final class VerificationCycleKripkeStructureGenerator<
                             } },
                             runs: 0 == newExecutingIndex ? job.runs + 1 : job.runs,
                             callStack: newCallStack,
-                            results: job.results
+                            results: newResults
                         ))
                     }
                 }
@@ -381,7 +382,7 @@ public final class VerificationCycleKripkeStructureGenerator<
         
         let callStack: [FSM_ID: [CallData]]
         
-        let results: [FSM_ID: [Any?]]
+        let results: [FSM_ID: Any?]
         
     }
     
