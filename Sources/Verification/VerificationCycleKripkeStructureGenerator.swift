@@ -144,7 +144,8 @@ public final class VerificationCycleKripkeStructureGenerator<
                     lastState: job.lastState,
                     lastRecords: job.lastRecords,
                     runs: job.runs,
-                    callStack: job.callStack
+                    callStack: job.callStack,
+                    results: job.results
                 ))
                 continue
             }
@@ -253,7 +254,8 @@ public final class VerificationCycleKripkeStructureGenerator<
                                 ($0.data?.fsm.asScheduleableFiniteStateMachine.base).map(self.recorder.takeRecord) ?? KripkeStatePropertyList()
                             } },
                             runs: 0 == newExecutingIndex ? job.runs + 1 : job.runs,
-                            callStack: newCallStack
+                            callStack: newCallStack,
+                            results: job.results
                         ))
                     }
                 }
@@ -297,7 +299,8 @@ public final class VerificationCycleKripkeStructureGenerator<
             lastState: nil,
             lastRecords: tokens.map { $0.map { ($0.data?.fsm.asScheduleableFiniteStateMachine.base).map(self.recorder.takeRecord) ?? KripkeStatePropertyList() } },
             runs: 0,
-            callStack: [:]
+            callStack: [:],
+            results: [:]
         )]
     }
     
@@ -377,6 +380,8 @@ public final class VerificationCycleKripkeStructureGenerator<
         let runs: UInt
         
         let callStack: [FSM_ID: [CallData]]
+        
+        let results: [FSM_ID: [Any?]]
         
     }
     
