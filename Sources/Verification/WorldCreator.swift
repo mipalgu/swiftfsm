@@ -102,25 +102,55 @@ public final class WorldCreator {
         for (key, val) in externalVariables.properties {
             total[key] = val
         }
-        /*for (key, val) in self.createCallProperties(forCallStack: callStack) {
+        for (key, val) in self.createCallProperties(forParameterisedMachines: parameterisedMachines, withCallStack: callStack) {
             total[key] = val
-        }*/
+        }
         return KripkeStatePropertyList(total)
         //return (lastState?.properties ?? [:]) <| varPs <| externalVariables
     }
     
-    /*fileprivate func createCallProperties(forParameterisedMachines parameterisedMachines: [FSM_ID: (String, AnyParameterisedFiniteStateMachine)], withCallStack callStack: [FSM_ID: [CallData]]) -> KripkeStatePropertyList {
-        let lasts = callStack.lazy.compactMap { nil == $1.last ? nil : $1.last! }
-        let inPlaceLasts = lasts.filter { $0.inPlace }
+    fileprivate func createCallProperties(forParameterisedMachines parameterisedMachines: [FSM_ID: (String, AnyParameterisedFiniteStateMachine)], withCallStack callStack: [FSM_ID: [CallData]]) -> KripkeStatePropertyList {
         var props: KripkeStatePropertyList = [:]
         var values: [String: Any] = [:]
         for (id, data) in parameterisedMachines {
-            let fsm = callStack[id].last?.fsm ?? data.1
-            let fullyQualifiedName = callStack[id].last?.fullyQualifiedName ?? data.0
             var inner: KripkeStatePropertyList = [:]
             var innerValues: [String: Any] = [:]
-            inner["parameters"] = KripkeStateProperty(type: .Compound(self.recorder.takeRecord(of: fsm.parameters)), value: fsm.parameters)
-            innerValues["parameters"] = callData.parameters
+            guard let callData = callStack[id]?.last else {
+                let parameterList = self.recorder.takeRecord(of: data.1.parameters)
+                func convertProperty(_ property: KripkeStateProperty) -> KripkeStateProperty {
+                    switch property.type {
+                    case .EmptyCollection:
+                        return property
+                    case .Collection(let properties):
+                        let converted = properties.map(convertProperty)
+                        return KripkeStateProperty(type: .Collection(converted), value: converted.map { $0.value })
+                    case .Compound(let list):
+                        return KripkeStateProperty(type: .Compound(setNil(list)), value: [:])
+                    default:
+                        return KripkeStateProperty(type: .String, value: "nil")
+                    }
+                }
+                func setNil(_ parameterList: KripkeStatePropertyList) -> KripkeStatePropertyList {
+                    var list: [String: KripkeStateProperty] = [:]
+                    list.reserveCapacity(parameterList.count)
+                    for (name, property) in parameterList {
+                        list[name] = convertProperty(property)
+                    }
+                    return KripkeStatePropertyList(list)
+                }
+                inner["parameters"] = KripkeStateProperty(type: .Compound(setNil(parameterList)), value: data.1.parameters)
+                inner["hasFinished"] = KripkeStateProperty(type: .Bool, value: false)
+                innerValues["hasFinished"] = false
+                let (type, value) = self.recorder.getKripkeStatePropertyType(data.1.resultContainer.result)
+                inner["result"] = KripkeStateProperty(type: .String, value: "nil")
+                innerValues["result"] = "nil"
+                inner["runCount"] = KripkeStateProperty(type: .UInt, value: 0)
+                innerValues["runCount"] = 0
+                props[data.0] = KripkeStateProperty(type: .Compound(inner), value: innerValues)
+                values[data.0] = innerValues
+                continue
+            }
+            inner["parameters"] = KripkeStateProperty(type: .Compound(self.recorder.takeRecord(of: callData.parameters)), value: callData.parameters)
             inner["hasFinished"] = KripkeStateProperty(type: .Bool, value: callData.promiseData.hasFinished)
             innerValues["hasFinished"] = callData.promiseData.hasFinished
             let (type, value) = self.recorder.getKripkeStatePropertyType(callData.promiseData.result)
@@ -134,7 +164,7 @@ public final class WorldCreator {
         var out: KripkeStatePropertyList = [:]
         out["parameterisedMachines"] = KripkeStateProperty(type: .Compound(props), value: values)
         return out
-    }*/
+    }
     
     fileprivate func fetchLastExternals(fromLastState lastState: KripkeState?) -> KripkeStatePropertyList {
         guard let externalsProperty = lastState?.properties.properties["externalVariables"] else {
