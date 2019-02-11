@@ -107,6 +107,7 @@ public final class VerificationCycleExecuter {
         tokens: [[VerificationToken]],
         executing: Int,
         withExternals externals: [(AnySnapshotController, KripkeStatePropertyList)],
+        andParameterisedMachines parameterisedMachines: [FSM_ID: (String, AnyParameterisedFiniteStateMachine)],
         andGateway gateway: Gateway,
         andLastState last: KripkeState?,
         isInitial initial: Bool,
@@ -138,6 +139,7 @@ public final class VerificationCycleExecuter {
                 atOffset: job.index,
                 withExternals: job.externals,
                 andClock: job.clock,
+                andParameterisedMachines: parameterisedMachines,
                 andLastState: job.lastState,
                 usingCallStack: job.callStack,
                 andPreviousResults: job.results

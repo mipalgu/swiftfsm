@@ -71,6 +71,7 @@ public final class WorldCreator {
     //swiftlint:disable:next function_parameter_count
     public func createWorld(
         fromExternals externals: [(AnySnapshotController, KripkeStatePropertyList)],
+        andParameterisedMachines parameterisedMachines: [FSM_ID: (String, AnyParameterisedFiniteStateMachine)],
         andTokens tokens: [[VerificationToken]],
         andLastState lastState: KripkeState?,
         andExecuting executing: Int,
@@ -101,22 +102,24 @@ public final class WorldCreator {
         for (key, val) in externalVariables.properties {
             total[key] = val
         }
-        for (key, val) in self.createCallProperties(forCallStack: callStack) {
+        /*for (key, val) in self.createCallProperties(forCallStack: callStack) {
             total[key] = val
-        }
+        }*/
         return KripkeStatePropertyList(total)
         //return (lastState?.properties ?? [:]) <| varPs <| externalVariables
     }
     
-    fileprivate func createCallProperties(forCallStack callStack: [FSM_ID: [CallData]]) -> KripkeStatePropertyList {
+    /*fileprivate func createCallProperties(forParameterisedMachines parameterisedMachines: [FSM_ID: (String, AnyParameterisedFiniteStateMachine)], withCallStack callStack: [FSM_ID: [CallData]]) -> KripkeStatePropertyList {
         let lasts = callStack.lazy.compactMap { nil == $1.last ? nil : $1.last! }
         let inPlaceLasts = lasts.filter { $0.inPlace }
         var props: KripkeStatePropertyList = [:]
         var values: [String: Any] = [:]
-        for callData in inPlaceLasts {
+        for (id, data) in parameterisedMachines {
+            let fsm = callStack[id].last?.fsm ?? data.1
+            let fullyQualifiedName = callStack[id].last?.fullyQualifiedName ?? data.0
             var inner: KripkeStatePropertyList = [:]
             var innerValues: [String: Any] = [:]
-            inner["parameters"] = KripkeStateProperty(type: .Compound(self.recorder.takeRecord(of: callData.parameters)), value: callData.parameters)
+            inner["parameters"] = KripkeStateProperty(type: .Compound(self.recorder.takeRecord(of: fsm.parameters)), value: fsm.parameters)
             innerValues["parameters"] = callData.parameters
             inner["hasFinished"] = KripkeStateProperty(type: .Bool, value: callData.promiseData.hasFinished)
             innerValues["hasFinished"] = callData.promiseData.hasFinished
@@ -131,7 +134,7 @@ public final class WorldCreator {
         var out: KripkeStatePropertyList = [:]
         out["parameterisedMachines"] = KripkeStateProperty(type: .Compound(props), value: values)
         return out
-    }
+    }*/
     
     fileprivate func fetchLastExternals(fromLastState lastState: KripkeState?) -> KripkeStatePropertyList {
         guard let externalsProperty = lastState?.properties.properties["externalVariables"] else {

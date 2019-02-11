@@ -134,6 +134,7 @@ public final class VerificationCycleKripkeStructureGenerator<
             }
             return .orderedSame
         })
+        var parameterisedMachines: [FSM_ID: (String, AnyParameterisedFiniteStateMachine)] = [:]
         while false == jobs.isEmpty {
             let job = jobs.removeFirst()
             // Skip this job if all tokens are .skip tokens.
@@ -190,6 +191,7 @@ public final class VerificationCycleKripkeStructureGenerator<
                     // Check for cycles.
                     let world = self.worldCreator.createWorld(
                         fromExternals: externals,
+                        andParameterisedMachines: parameterisedMachines,
                         andTokens: job.tokens,
                         andLastState: job.lastState,
                         andExecuting: job.executing,
@@ -219,6 +221,7 @@ public final class VerificationCycleKripkeStructureGenerator<
                         tokens: clones,
                         executing: job.executing,
                         withExternals: externals,
+                        andParameterisedMachines: parameterisedMachines,
                         andGateway: gateway,
                         andLastState: job.lastState,
                         isInitial: job.initial,
