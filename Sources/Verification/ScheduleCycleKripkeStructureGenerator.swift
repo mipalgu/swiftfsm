@@ -163,11 +163,24 @@ public final class ScheduleCycleKripkeStructureGenerator<
                     return ExternalVariablesVerificationData(externalVariables: external, defaultValues: defaultValues, spinners: spinners)
                 }
                 let callableTokens = self.createCallableTokens(forToken: token, inDependencies: dependency.dependencies, inMachine: machine, withTokens: tokens, usingGateway: gateway)
-                return .verify(data: VerificationToken.Data(id: gateway.id(of: token.fullyQualifiedName), fsm: dependencyPath.last?.fsm ?? token.machine.fsm, machine: token.machine, externalVariables: externals, callableMachines: callableTokens))
+                let parameterisedMachines = self.fetchParameterisedMachines(forDependency: dependency, withFullyQualifiedName: token.fullyQualifiedName, inGateway: gateway)
+                return .verify(data: VerificationToken.Data(id: gateway.id(of: token.fullyQualifiedName), fsm: dependencyPath.last?.fsm ?? token.machine.fsm, machine: token.machine, externalVariables: externals, callableMachines: callableTokens, parameterisedMachines: parameterisedMachines))
             }
         }
         let view = self.viewFactory.make(identifier: machine.name)
         return (verificationTokens, AnyKripkeStructureView(view))
+    }
+    
+    fileprivate func fetchParameterisedMachines<Gateway: FSMGateway>(forDependency dependency: Dependency, withFullyQualifiedName fullyQualifiedName: String, inGateway gateway: Gateway) -> [FSM_ID: (String, AnyParameterisedFiniteStateMachine)] {
+        return Dictionary(uniqueKeysWithValues: dependency.dependencies.compactMap { (dependency) -> (FSM_ID, (String, AnyParameterisedFiniteStateMachine))? in
+            switch dependency {
+            case .callableParameterisedMachine(let fsm, _), .invokableParameterisedMachine(let fsm, _):
+                let fullyQualifiedName = fullyQualifiedName + "." + fsm.name
+                return (gateway.id(of: fullyQualifiedName), (fullyQualifiedName, fsm))
+            default:
+                return nil
+            }
+        })
     }
     
     fileprivate func createCallableTokens<Gateway: FSMGateway>(forToken token: SchedulerToken, inDependencies dependencies: [Dependency], inMachine machine: Machine, withTokens tokens: [[SchedulerToken]], usingGateway gateway: Gateway) -> [FSM_ID: (String, [[VerificationToken]], AnyKripkeStructureView<KripkeState>)] {

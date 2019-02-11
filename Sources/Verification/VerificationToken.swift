@@ -89,6 +89,8 @@ public enum VerificationToken {
         
         public let callableMachines: [FSM_ID: (String, [[VerificationToken]], AnyKripkeStructureView<KripkeState>)]
         
+        public var parameterisedMachines: [FSM_ID: (String, AnyParameterisedFiniteStateMachine)]
+        
     }
     
 }
