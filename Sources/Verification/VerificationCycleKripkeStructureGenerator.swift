@@ -135,6 +135,14 @@ public final class VerificationCycleKripkeStructureGenerator<
             return .orderedSame
         })
         var parameterisedMachines: [FSM_ID: (String, AnyParameterisedFiniteStateMachine)] = [:]
+        self.tokens.forEach { $0.forEach {
+            guard let tokenData = $0.data else {
+                return
+            }
+            for (id, data) in tokenData.parameterisedMachines {
+                parameterisedMachines[id] = data
+            }
+        }}
         while false == jobs.isEmpty {
             let job = jobs.removeFirst()
             // Skip this job if all tokens are .skip tokens.
