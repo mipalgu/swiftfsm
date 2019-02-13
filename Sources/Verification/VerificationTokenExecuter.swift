@@ -86,7 +86,7 @@ public final class VerificationTokenExecuter<StateGenerator: KripkeStateGenerato
         atOffset offset: Int,
         withExternals externals: [(AnySnapshotController, KripkeStatePropertyList)],
         andClock clock: UInt,
-        andParameterisedMachines parameterisedMachines: [FSM_ID: (String, AnyParameterisedFiniteStateMachine)],
+        andParameterisedMachines parameterisedMachines: [FSM_ID: ParameterisedMachineData],
         andLastState lastState: KripkeState?,
         usingCallStack callStack: [FSM_ID: [CallData]],
         andPreviousResults results: [FSM_ID: Any?]

@@ -134,7 +134,7 @@ public final class VerificationCycleKripkeStructureGenerator<
             }
             return .orderedSame
         })
-        var parameterisedMachines: [FSM_ID: (String, AnyParameterisedFiniteStateMachine)] = [:]
+        var parameterisedMachines: [FSM_ID: ParameterisedMachineData] = [:]
         self.tokens.forEach { $0.forEach {
             guard let tokenData = $0.data else {
                 return
@@ -423,10 +423,10 @@ extension VerificationCycleKripkeStructureGenerator: VerificationTokenExecuterDe
         if callerData.id == id {
             return (self.tokens, self.view)
         }
-        guard let (_, tokens, view) = callerData.callableMachines[id] else {
+        guard let data = callerData.callableMachines[id] else {
             fatalError("FSM with id '\(id)' is not callable by this FSM.")
         }
-        return (tokens, view)
+        return (data.tokens, data.view)
     }
     
     public func shouldInclude(call callData: CallData, forCaller caller: FSM_ID) -> Bool {

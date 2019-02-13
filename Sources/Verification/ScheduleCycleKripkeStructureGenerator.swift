@@ -85,6 +85,8 @@ public final class ScheduleCycleKripkeStructureGenerator<
     
     fileprivate var resultsCache: [String: SortedCollection<(UInt, Any?)>] = [:]
     
+    fileprivate let recorder: MirrorKripkePropertiesRecorder = MirrorKripkePropertiesRecorder()
+    
     public init(
         machines: [Machine],
         extractor: Extractor,
@@ -162,40 +164,43 @@ public final class ScheduleCycleKripkeStructureGenerator<
                     let (defaultValues, spinners) = self.extractor.extract(externalVariables: external)
                     return ExternalVariablesVerificationData(externalVariables: external, defaultValues: defaultValues, spinners: spinners)
                 }
-                let callableTokens = self.createCallableTokens(forToken: token, inDependencies: dependency.dependencies, inMachine: machine, withTokens: tokens, usingGateway: gateway)
-                let parameterisedMachines = self.fetchParameterisedMachines(forDependency: dependency, withFullyQualifiedName: token.fullyQualifiedName, inGateway: gateway)
-                return .verify(data: VerificationToken.Data(id: gateway.id(of: token.fullyQualifiedName), fsm: dependencyPath.last?.fsm ?? token.machine.fsm, machine: token.machine, externalVariables: externals, callableMachines: callableTokens, parameterisedMachines: parameterisedMachines))
+                let parameterisedMachines = self.fetchParameterisedMachines(forDependency: dependency, inMachine: machine, withFullyQualifiedName: token.fullyQualifiedName, withTokens: tokens, inGateway: gateway)
+                return .verify(data: VerificationToken.Data(id: gateway.id(of: token.fullyQualifiedName), fsm: dependencyPath.last?.fsm ?? token.machine.fsm, machine: token.machine, externalVariables: externals, callableMachines: parameterisedMachines.filter { $0.value.inPlace }, parameterisedMachines: parameterisedMachines))
             }
         }
         let view = self.viewFactory.make(identifier: machine.name)
         return (verificationTokens, AnyKripkeStructureView(view))
     }
     
-    fileprivate func fetchParameterisedMachines<Gateway: FSMGateway>(forDependency dependency: Dependency, withFullyQualifiedName fullyQualifiedName: String, inGateway gateway: Gateway) -> [FSM_ID: (String, AnyParameterisedFiniteStateMachine)] {
-        return Dictionary(uniqueKeysWithValues: dependency.dependencies.compactMap { (dependency) -> (FSM_ID, (String, AnyParameterisedFiniteStateMachine))? in
+    fileprivate func fetchParameterisedMachines<Gateway: FSMGateway>(forDependency dependency: Dependency, inMachine machine: Machine, withFullyQualifiedName fullyQualifiedName: String, withTokens tokens: [[SchedulerToken]], inGateway gateway: Gateway) -> [FSM_ID: ParameterisedMachineData] {
+        return Dictionary(uniqueKeysWithValues: dependency.dependencies.compactMap { (dependency) -> (FSM_ID, ParameterisedMachineData)? in
+            let inPlace: Bool
+            switch dependency {
+            case .callableParameterisedMachine:
+                inPlace = true
+            default:
+                inPlace = false
+            }
             switch dependency {
             case .callableParameterisedMachine(let fsm, _), .invokableParameterisedMachine(let fsm, _):
+                let id = gateway.id(of: fullyQualifiedName)
                 let fullyQualifiedName = fullyQualifiedName + "." + fsm.name
-                return (gateway.id(of: fullyQualifiedName), (fullyQualifiedName, fsm))
+                let (tokens, view) = self.schedule(forDependency: dependency, inMachine: machine, usingTokens: tokens, andGateway: gateway)
+                return (
+                    id,
+                    ParameterisedMachineData(
+                        id: id,
+                        fsm: fsm,
+                        fullyQualifiedName: fullyQualifiedName,
+                        parameters: Set(self.recorder.takeRecord(of: fsm.parameters).propertiesDictionary.keys),
+                        inPlace: inPlace,
+                        tokens: tokens,
+                        view: view
+                    )
+                )
             default:
                 return nil
             }
-        })
-    }
-    
-    fileprivate func createCallableTokens<Gateway: FSMGateway>(forToken token: SchedulerToken, inDependencies dependencies: [Dependency], inMachine machine: Machine, withTokens tokens: [[SchedulerToken]], usingGateway gateway: Gateway) -> [FSM_ID: (String, [[VerificationToken]], AnyKripkeStructureView<KripkeState>)] {
-        let callableDependencies = dependencies.lazy.filter {
-            switch $0 {
-            case .callableParameterisedMachine:
-                return true
-            default:
-                return false
-            }
-        }
-        let callableDependenciesTokens = callableDependencies.map { self.schedule(forDependency: $0, inMachine: machine, usingTokens: tokens, andGateway: gateway) }
-        return Dictionary(uniqueKeysWithValues: zip(callableDependencies, callableDependenciesTokens).map {
-            let fullyQualifiedName = token.fullyQualifiedName + "." + $0.fsm.name
-            return (gateway.id(of: fullyQualifiedName), (fullyQualifiedName, $1.0, $1.1))
         })
     }
     

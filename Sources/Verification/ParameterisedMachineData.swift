@@ -1,9 +1,9 @@
 /*
- * VerificationToken.swift
- * Verification
+ * ParameterisedMachineData.swift 
+ * Verification 
  *
- * Created by Callum McColl on 10/9/18.
- * Copyright © 2018 Callum McColl. All rights reserved.
+ * Created by Callum McColl on 13/02/2019.
+ * Copyright © 2019 Callum McColl. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -56,41 +56,24 @@
  *
  */
 
-import swiftfsm
-import MachineStructure
-import FSMVerification
-import KripkeStructureViews
 import KripkeStructure
+import KripkeStructureViews
+import swiftfsm
 
-public enum VerificationToken {
+public struct ParameterisedMachineData {
     
-    var data: VerificationToken.Data? {
-        switch self {
-        case .skip:
-            return nil
-        case .verify(let data):
-            return data
-        }
-    }
+    public let id: FSM_ID
     
-    case skip
+    public let fsm: AnyParameterisedFiniteStateMachine
     
-    case verify(data: VerificationToken.Data)
+    public let fullyQualifiedName: String
     
-    public struct Data {
-        
-        public let id: FSM_ID
-        
-        public let fsm: FSMType
-        
-        public let machine: Machine
-        
-        public let externalVariables: [ExternalVariablesVerificationData]
-        
-        public let callableMachines: [FSM_ID: ParameterisedMachineData]
-        
-        public let parameterisedMachines: [FSM_ID: ParameterisedMachineData]
-        
-    }
+    public let parameters: Set<String>
+    
+    public let inPlace: Bool
+    
+    public let tokens: [[VerificationToken]]
+    
+    public let view: AnyKripkeStructureView<KripkeState>
     
 }
