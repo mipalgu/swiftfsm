@@ -63,22 +63,36 @@ import KripkeStructure
 
 public struct CallData {
     
-    public let id: FSM_ID
-    
-    public let fsm: AnyParameterisedFiniteStateMachine
-    
-    public let fullyQualifiedName: String
+    public let data: ParameterisedMachineData
     
     public let parameters: [String: Any]
     
     public let promiseData: PromiseData
     
-    public let inPlace: Bool
-    
     public let runs: UInt
     
-    public let tokens: [[VerificationToken]]
+    public var id: FSM_ID {
+        return self.data.id
+    }
     
-    public let view: AnyKripkeStructureView<KripkeState>
+    public var fsm: AnyParameterisedFiniteStateMachine {
+        return self.data.fsm
+    }
+    
+    public var fullyQualifiedName: String {
+        return self.data.fullyQualifiedName
+    }
+    
+    public var inPlace: Bool {
+        return self.data.inPlace
+    }
+    
+    public var tokens: [[VerificationToken]] {
+        return self.data.tokens
+    }
+    
+    public var view: AnyKripkeStructureView<KripkeState> {
+        return self.data.view
+    }
     
 }

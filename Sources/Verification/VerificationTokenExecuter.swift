@@ -126,7 +126,7 @@ public final class VerificationTokenExecuter<StateGenerator: KripkeStateGenerato
                 results[id] = nil
             }
         } else if let callData = callStack[data.id]?.last {
-            newCallStack[data.id] = Array((newCallStack[data.id] ?? []).dropLast()) + [CallData(id: callData.id, fsm: callData.fsm, fullyQualifiedName: callData.fullyQualifiedName, parameters: callData.parameters, promiseData: callData.promiseData, inPlace: callData.inPlace, runs: callData.runs + 1, tokens: callData.tokens, view: callData.view)]
+            newCallStack[data.id] = Array((newCallStack[data.id] ?? []).dropLast()) + [CallData(data: callData.data, parameters: callData.parameters, promiseData: callData.promiseData, runs: callData.runs + 1)]
         }
         print("self.calls: \(self.calls)")
         let postWorld = self.worldCreator.createWorld(
@@ -166,8 +166,8 @@ extension VerificationTokenExecuter: FSMGatewayDelegate {
         guard let (name, _) = gateway.ids.first(where: { $1 == id }) else {
             fatalError("Unable to fetch fully qualified name from id.")
         }
-        let (tokens, view) = delegate.scheduleInfo(of: id, caller: caller)
-        self.addCall(CallData(id: caller, fsm: fsm, fullyQualifiedName: name, parameters: parameters, promiseData: promiseData, inPlace: true, runs: 0, tokens: tokens, view: view))
+        let data = delegate.scheduleInfo(of: id, caller: caller, inGateway: gateway)
+        self.addCall(CallData(data: data, parameters: parameters, promiseData: promiseData, runs: 0))
     }
     
     public func hasInvoked(inGateway gateway: ModifiableFSMGateway, fsm: AnyParameterisedFiniteStateMachine, withId id: FSM_ID, withParameters parameters: [String: Any], storingResultsIn promiseData: PromiseData) {
@@ -178,8 +178,8 @@ extension VerificationTokenExecuter: FSMGatewayDelegate {
         guard let (name, _) = gateway.ids.first(where: { $1 == id }) else {
             fatalError("Unable to fetch fully qualified name from id.")
         }
-        let (tokens, view) = delegate.scheduleInfo(of: id, caller: id)
-        self.addCall(CallData(id: id, fsm: fsm, fullyQualifiedName: name, parameters: parameters, promiseData: promiseData, inPlace: false, runs: 0, tokens: tokens, view: view))
+        let data = delegate.scheduleInfo(of: id, caller: id, inGateway: gateway)
+        self.addCall(CallData(data: data, parameters: parameters, promiseData: promiseData, runs: 0))
     }
     
     fileprivate func addCall(_ data: CallData) {

@@ -223,7 +223,7 @@ public final class VerificationCycleKripkeStructureGenerator<
                         Array(self.cloner.clone(jobs: $1, withLastRecords: job.lastRecords[$0]))
                     }
                     // Clone callStack
-                    let callStack = job.callStack.mapValues { $0.map { CallData(id: $0.id, fsm: $0.fsm.clone(), fullyQualifiedName: $0.fullyQualifiedName, parameters: $0.parameters, promiseData: $0.promiseData, inPlace: $0.inPlace, runs: $0.runs, tokens: $0.tokens, view: $0.view) } }
+                    let callStack = job.callStack.mapValues { $0.map { CallData(data: $0.data, parameters: $0.parameters, promiseData: $0.promiseData, runs: $0.runs) } }
                     // Execute and generate kripke states.
                     let runs = self.executer.execute(
                         tokens: clones,
@@ -416,17 +416,32 @@ extension VerificationCycleKripkeStructureGenerator: VerificationTokenExecuterDe
         return Array(results)
     }
     
-    public func scheduleInfo(of id: FSM_ID, caller: FSM_ID) -> ([[VerificationToken]], AnyKripkeStructureView<KripkeState>) {
+    public func scheduleInfo(of id: FSM_ID, caller: FSM_ID, inGateway gateway: ModifiableFSMGateway) -> ParameterisedMachineData {
         guard let callerToken = self.tokensLookup[caller], let callerData = callerToken.data else {
             fatalError("Unable to fetch caller token from caller id.")
         }
         if callerData.id == id {
-            return (self.tokens, self.view)
+            let fsm = gateway.fsms[id]
+            guard let parameterisedFSM = fsm?.asParameterisedFiniteStateMachine else {
+                fatalError("Cannot call self if self is not a parameterised machine.")
+            }
+            guard let fullyQualifiedName = gateway.ids.first(where: { $0.value == id })?.key else {
+                fatalError("Unable to fetch fullyQualifiedName of self.")
+            }
+            return ParameterisedMachineData(
+                id: id,
+                fsm: parameterisedFSM,
+                fullyQualifiedName: fullyQualifiedName,
+                parameters: Set(self.recorder.takeRecord(of: parameterisedFSM.parameters).propertiesDictionary.keys),
+                inPlace: true,
+                tokens: self.tokens,
+                view: self.view
+            )
         }
         guard let data = callerData.parameterisedMachines[id] else {
             fatalError("FSM with id '\(id)' is not callable by this FSM.")
         }
-        return (data.tokens, data.view)
+        return data
     }
     
     public func shouldInclude(call callData: CallData, forCaller caller: FSM_ID) -> Bool {

@@ -65,7 +65,7 @@ public protocol VerificationTokenExecuterDelegate: class {
     
     func results<Gateway: ModifiableFSMGateway>(of: CallData, caller: FSM_ID, withGateway: Gateway) -> [(UInt, Any?)]
     
-    func scheduleInfo(of: FSM_ID, caller: FSM_ID) -> ([[VerificationToken]], AnyKripkeStructureView<KripkeState>)
+    func scheduleInfo(of: FSM_ID, caller: FSM_ID, inGateway: ModifiableFSMGateway) -> ParameterisedMachineData
     
     func shouldInclude(call: CallData, forCaller: FSM_ID) -> Bool
     
