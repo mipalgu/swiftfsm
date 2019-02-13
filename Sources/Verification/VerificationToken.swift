@@ -87,8 +87,6 @@ public enum VerificationToken {
         
         public let externalVariables: [ExternalVariablesVerificationData]
         
-        public let callableMachines: [FSM_ID: ParameterisedMachineData]
-        
         public let parameterisedMachines: [FSM_ID: ParameterisedMachineData]
         
     }

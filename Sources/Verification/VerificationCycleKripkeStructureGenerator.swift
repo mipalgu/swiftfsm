@@ -423,7 +423,7 @@ extension VerificationCycleKripkeStructureGenerator: VerificationTokenExecuterDe
         if callerData.id == id {
             return (self.tokens, self.view)
         }
-        guard let data = callerData.callableMachines[id] else {
+        guard let data = callerData.parameterisedMachines[id] else {
             fatalError("FSM with id '\(id)' is not callable by this FSM.")
         }
         return (data.tokens, data.view)
@@ -433,7 +433,7 @@ extension VerificationCycleKripkeStructureGenerator: VerificationTokenExecuterDe
         guard let callerToken = self.tokensLookup[caller], let callerData = callerToken.data else {
             return false
         }
-        return nil != callerData.callableMachines[callData.id]
+        return nil != callerData.parameterisedMachines[callData.id]
     }
     
     public func shouldInline(call callData: CallData, caller: FSM_ID) -> Bool {
