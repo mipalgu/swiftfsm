@@ -176,7 +176,7 @@ public final class ScheduleCycleKripkeStructureGenerator<
         return Dictionary(uniqueKeysWithValues: dependency.dependencies.compactMap { (dependency) -> (FSM_ID, ParameterisedMachineData)? in
             let inPlace: Bool
             switch dependency {
-            case .callableParameterisedMachine:
+            case .invokableParameterisedMachine:
                 inPlace = true
             default:
                 inPlace = false
