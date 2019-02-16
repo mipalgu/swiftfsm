@@ -161,22 +161,7 @@ public final class VerificationCycleKripkeStructureGenerator<
                 continue
             }
             // Create results for all parameterised machines that are finished.
-            var allResults: [FSM_ID: LazyMapCollection<SortedCollectionSlice<(UInt, Any?)>, Any?>] = [:]
-            allResults.reserveCapacity(job.callStack.count)
-            var highestRunDiff = -1
-            print(job.callStack)
-            for (id, calls) in job.callStack {
-                guard nil == job.results[id], let callData = calls.last else {
-                    continue
-                }
-                guard let callResults = self.delegate?.resultsForCall(self, call: callData, withGateway: gateway) else {
-                    fatalError("Unable to fetch results for call: \(callData)")
-                }
-                print("callResult: \(callResults)")
-                allResults[id] = callResults.find((callData.runs, nil)).lazy.map { $0.1 }
-                let diff = Int(callData.runs) - Int(callResults.last?.0 ?? 0)
-                if diff > highestRunDiff { highestRunDiff = diff }
-            }
+            let (allResults, highestRunDiff) = self.createAllResults(forJob: job, withGateway: gateway)
             // Create spinner for results.
             let resultsSpinner = self.createSpinner(forValues: allResults)
             while let parameterisedResults = resultsSpinner() {
@@ -291,6 +276,26 @@ public final class VerificationCycleKripkeStructureGenerator<
         print("number of state: \(states.value.count)")
         print("number of transitions: \(states.value.reduce(0) { $0 + $1.1.effects.count })")
         return KripkeStructure(initialStates: Array(initialStates.value.lazy.map { $1 }), states: states.value)*/
+    }
+    
+    fileprivate func createAllResults<Gateway: ModifiableFSMGateway>(forJob job: Job, withGateway gateway: Gateway) -> ([FSM_ID: LazyMapCollection<SortedCollectionSlice<(UInt, Any?)>, Any?>], Int) {
+        var allResults: [FSM_ID: LazyMapCollection<SortedCollectionSlice<(UInt, Any?)>, Any?>] = [:]
+        allResults.reserveCapacity(job.callStack.count)
+        var highestRunDiff = -1
+        print(job.callStack)
+        for (id, calls) in job.callStack {
+            guard nil == job.results[id], let callData = calls.last else {
+                continue
+            }
+            guard let callResults = self.delegate?.resultsForCall(self, call: callData, withGateway: gateway) else {
+                fatalError("Unable to fetch results for call: \(callData)")
+            }
+            print("callResult: \(callResults)")
+            allResults[id] = callResults.find((callData.runs, nil)).lazy.map { $0.1 }
+            let diff = Int(callData.runs) - Int(callResults.last?.0 ?? 0)
+            if diff > highestRunDiff { highestRunDiff = diff }
+        }
+        return (allResults, highestRunDiff)
     }
     
     fileprivate func mergeExternals(_ externals: [(AnySnapshotController, KripkeStatePropertyList)], with dict: [String: (AnySnapshotController, KripkeStatePropertyList)]) -> [(AnySnapshotController, KripkeStatePropertyList)] {
