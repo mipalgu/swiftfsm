@@ -204,9 +204,7 @@ public final class VerificationCycleKripkeStructureGenerator<
                         }
                     }
                     // Clone all fsms.
-                    let clones = job.tokens.enumerated().map {
-                        Array(self.cloner.clone(jobs: $1, withLastRecords: job.lastRecords[$0]))
-                    }
+                    let clones = job.tokens.enumerated().map { Array(self.cloner.clone(jobs: $1, withLastRecords: job.lastRecords[$0])) }
                     // Clone callStack
                     let callStack = job.callStack.mapValues { $0.map { CallData(data: $0.data, parameters: $0.parameters, promiseData: $0.promiseData, runs: $0.runs) } }
                     // Execute and generate kripke states.
