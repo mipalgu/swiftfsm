@@ -156,7 +156,8 @@ public final class VerificationCycleKripkeStructureGenerator<
                     lastRecords: job.lastRecords,
                     runs: job.runs,
                     callStack: job.callStack,
-                    results: job.results
+                    results: job.results,
+                    foundResult: job.foundResult
                 ))
                 continue
             }
@@ -223,25 +224,27 @@ public final class VerificationCycleKripkeStructureGenerator<
                     )
                     // Create jobs for each different 'run' possible.
                     for (lastState, newTokens, newCallStack, newResults) in runs {
-                        // Do not generate more jobs if we do not have a last state - means that nothing was executed, should never happen.
+                        // Do not generate more jobs if we do not have a last state -- means that nothing was executed, should never happen.
                         guard let lastNewState = lastState else {
                             continue
                         }
-                        // Add the lastNewState as a finishing state if all fsms have finished -- don't bother to generate more jobs.
-                        if nil == newTokens.first(where: { nil != $0.first { !($0.data?.fsm.hasFinished ?? true) } }) {
-                            if false == foundCycle {
-                                for tokens in newTokens {
-                                    for token in tokens {
-                                        guard let data = token.data else {
-                                            continue
-                                        }
-                                        if data.id == resultID {
-                                            results.insert((job.runs, data.fsm.resultContainer?.result))
-                                        }
-                                    }
+                        var allFinished = true // Are all fsms finished?
+                        var foundResult = job.foundResult
+                        for tokens in newTokens {
+                            for token in tokens {
+                                guard let data = token.data else {
+                                    continue
                                 }
-                                results.insert((job.runs, nil))
+                                // Add any results for the finished fsms.
+                                if data.id == resultID && false == job.foundResult && data.fsm.hasFinished {
+                                    results.insert((job.runs, data.fsm.resultContainer?.result))
+                                    foundResult = true // Remember that we have found this result. Stops us adding this result more than once.
+                                }
+                                allFinished = allFinished && data.fsm.hasFinished
                             }
+                        }
+                        // Add the lastNewState as a finishing state -- don't generate more jobs as all fsms have finished.
+                        if true == allFinished {
                             self.view.commit(state: lastNewState, isInitial: false)
                             continue
                         }
@@ -258,7 +261,8 @@ public final class VerificationCycleKripkeStructureGenerator<
                             } },
                             runs: 0 == newExecutingIndex ? job.runs + 1 : job.runs,
                             callStack: newCallStack,
-                            results: newResults
+                            results: newResults,
+                            foundResult: foundResult
                         ))
                     }
                 }
@@ -322,7 +326,8 @@ public final class VerificationCycleKripkeStructureGenerator<
             lastRecords: tokens.map { $0.map { ($0.data?.fsm.asScheduleableFiniteStateMachine.base).map(self.recorder.takeRecord) ?? KripkeStatePropertyList() } },
             runs: 0,
             callStack: [:],
-            results: [:]
+            results: [:],
+            foundResult: false
         )]
     }
     
@@ -404,6 +409,8 @@ public final class VerificationCycleKripkeStructureGenerator<
         let callStack: [FSM_ID: [CallData]]
         
         let results: [FSM_ID: Any?]
+        
+        let foundResult: Bool
         
     }
     
