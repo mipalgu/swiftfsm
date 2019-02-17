@@ -134,3 +134,15 @@ public final class StackGateway: ModifiableFSMGateway, ModifiableFSMGatewayDefau
     }
     
 }
+
+extension StackGateway: VerifiableGateway {
+    
+    public var gatewayData: [FSM_ID: [PromiseData]] {
+        get {
+            return self.stacks
+        } set {
+            self.stacks = newValue
+        }
+    }
+    
+}
