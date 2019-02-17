@@ -110,10 +110,12 @@ public final class WorldCreator {
     }
     
     fileprivate func createCallProperties(forParameterisedMachines parameterisedMachines: [FSM_ID: ParameterisedMachineData], withCallStack callStack: [FSM_ID: [CallData]]) -> KripkeStatePropertyList {
+        print("create call properties")
         var props: KripkeStatePropertyList = [:]
         var values: [String: Any] = [:]
         var out: KripkeStatePropertyList = [:]
         for (id, data) in parameterisedMachines {
+            print("handle parameterisedMachine call: \(id), \(data.fullyQualifiedName)")
             var inner: KripkeStatePropertyList = [:]
             var innerValues: [String: Any] = [:]
             guard let callData = callStack[id]?.last else {
@@ -145,12 +147,13 @@ public final class WorldCreator {
                 let (type, value) = self.recorder.getKripkeStatePropertyType(data.fsm.resultContainer.result)
                 inner["result"] = KripkeStateProperty(type: .String, value: "nil")
                 innerValues["result"] = "nil"
-                inner["runCount"] = KripkeStateProperty(type: .UInt, value: 0)
+                inner["runCount"] = KripkeStateProperty(type: .UInt, value: UInt(0))
                 innerValues["runCount"] = 0
                 props[data.fullyQualifiedName] = KripkeStateProperty(type: .Compound(inner), value: innerValues)
                 values[data.fullyQualifiedName] = innerValues
                 continue
             }
+            print("wrap up")
             inner["parameters"] = KripkeStateProperty(type: .Compound(self.recorder.takeRecord(of: callData.parameters)), value: callData.parameters)
             inner["hasFinished"] = KripkeStateProperty(type: .Bool, value: callData.promiseData.hasFinished)
             innerValues["hasFinished"] = callData.promiseData.hasFinished
@@ -161,6 +164,7 @@ public final class WorldCreator {
             innerValues["runCount"] = callData.runs
             props[callData.fullyQualifiedName] = KripkeStateProperty(type: .Compound(inner), value: innerValues)
             values[callData.fullyQualifiedName] = innerValues
+            print("finish handle calls")
         }
         out["parameterisedMachines"] = KripkeStateProperty(type: .Compound(props), value: values)
         return out

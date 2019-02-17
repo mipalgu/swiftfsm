@@ -128,7 +128,7 @@ public final class VerificationTokenExecuter<StateGenerator: KripkeStateGenerato
         } else if let callData = callStack[data.id]?.last {
             newCallStack[data.id] = Array((newCallStack[data.id] ?? []).dropLast()) + [CallData(data: callData.data, parameters: callData.parameters, promiseData: callData.promiseData, runs: callData.runs + 1)]
         }
-        print("self.calls: \(self.calls)")
+        //print("self.calls: \(self.calls)")
         let postWorld = self.worldCreator.createWorld(
             fromExternals: externals,
             andParameterisedMachines: parameterisedMachines,
@@ -141,7 +141,7 @@ public final class VerificationTokenExecuter<StateGenerator: KripkeStateGenerato
             worldType: .afterExecution
         )
         let postState = self.stateGenerator.generateKripkeState(fromWorld: postWorld, withLastState: preState)
-        return ([preState, postState], data.machine.clock.lastClockValues, externals, callStack, results)
+        return ([preState, postState], data.machine.clock.lastClockValues, externals, newCallStack, results)
     }
     
     fileprivate func mergeStacks(_ lhs: [FSM_ID: [CallData]], _ rhs: [FSM_ID: [CallData]]) -> [FSM_ID: [CallData]] {
@@ -158,7 +158,7 @@ extension VerificationTokenExecuter: FSMGatewayDelegate {
     
     
     public func hasCalled(inGateway gateway: ModifiableFSMGateway, fsm: AnyParameterisedFiniteStateMachine, withId id: FSM_ID, withParameters parameters: [String: Any], caller: FSM_ID, storingResultsIn promiseData: PromiseData) {
-        print("hasCalled")
+        print("hasCalled: \(fsm.name)")
         guard let delegate = self.delegate else {
             fatalError("delegate has not been set.")
             return
@@ -171,6 +171,7 @@ extension VerificationTokenExecuter: FSMGatewayDelegate {
     }
     
     public func hasInvoked(inGateway gateway: ModifiableFSMGateway, fsm: AnyParameterisedFiniteStateMachine, withId id: FSM_ID, withParameters parameters: [String: Any], storingResultsIn promiseData: PromiseData) {
+        print("hasInvoked: \(fsm.name)")
         guard let delegate = self.delegate else {
             fatalError("delegate has not been set.")
             return

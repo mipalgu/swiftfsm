@@ -163,9 +163,11 @@ public final class VerificationCycleKripkeStructureGenerator<
             }
             // Create results for all parameterised machines that are finished.
             let (allResults, handledAllResults) = self.createAllResults(forJob: job, withGateway: gateway)
+            print("allResults: \(allResults)")
             // Create spinner for results.
             let resultsSpinner = self.createSpinner(forValues: allResults)
             while let parameterisedResults = resultsSpinner() {
+                print("spinning for: \(parameterisedResults)")
                 // Create a spinner for the external variables.
                 let externalsData = self.fetchUniqueExternalsData(fromTokens: [job.tokens[job.executing]])
                 let spinner = self.spinnerConstructor.makeSpinner(forExternals: externalsData)
@@ -182,6 +184,7 @@ public final class VerificationCycleKripkeStructureGenerator<
                         }
                         callData.promiseData.result = parameterisedResults[id]
                     }
+                    print("createWorld")
                     // Check for cycles.
                     let world = self.worldCreator.createWorld(
                         fromExternals: externals,
@@ -204,10 +207,12 @@ public final class VerificationCycleKripkeStructureGenerator<
                             return nil
                         }
                     }
+                    print("Clone fsms.")
                     // Clone all fsms.
                     let clones = job.tokens.enumerated().map { Array(self.cloner.clone(jobs: $1, withLastRecords: job.lastRecords[$0])) }
                     // Clone callStack
                     let callStack = job.callStack.mapValues { $0.map { CallData(data: $0.data, parameters: $0.parameters, promiseData: $0.promiseData, runs: $0.runs) } }
+                    print("execute")
                     // Execute and generate kripke states.
                     let runs = self.executer.execute(
                         tokens: clones,
@@ -222,6 +227,7 @@ public final class VerificationCycleKripkeStructureGenerator<
                         andPreviousResults: job.results,
                         withDelegate: self
                     )
+                    print("handle runs")
                     // Create jobs for each different 'run' possible.
                     for (lastState, newTokens, newCallStack, newResults) in runs {
                         // Do not generate more jobs if we do not have a last state -- means that nothing was executed, should never happen.
@@ -284,9 +290,10 @@ public final class VerificationCycleKripkeStructureGenerator<
         var allResults: [FSM_ID: LazyMapCollection<SortedCollectionSlice<(UInt, Any?)>, Any?>] = [:]
         allResults.reserveCapacity(job.callStack.count)
         var handledAllResults = false
-        print(job.callStack)
+        print("callStack: \(job.callStack)")
         for (id, calls) in job.callStack {
             guard nil == job.results[id], let callData = calls.last else {
+                print("we haven't made any calls: \(calls)")
                 continue
             }
             guard let callResults = self.delegate?.resultsForCall(self, call: callData, withGateway: gateway) else {
