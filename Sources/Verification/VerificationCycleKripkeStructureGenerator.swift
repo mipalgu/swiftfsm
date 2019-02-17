@@ -120,7 +120,7 @@ public final class VerificationCycleKripkeStructureGenerator<
     
     public func generate<Gateway: VerifiableGateway, View: KripkeStructureView>(usingGateway gateway: Gateway, andView view: View, storingResultsFor resultID: FSM_ID?) -> SortedCollection<(UInt, Any?)>? where View.State == KripkeState {
         self.view = AnyKripkeStructureView(view)
-        var jobs = self.createInitialJobs(fromTokens: self.tokens)
+        var jobs = self.createInitialJobs(fromTokens: self.tokens, andGateway: gateway)
         self.view.reset()
         let defaultExternals = self.createExternals(fromTokens: self.tokens)
         var globalDetectorCache = self.cycleDetector.initialData
@@ -157,7 +157,8 @@ public final class VerificationCycleKripkeStructureGenerator<
                     runs: job.runs,
                     callStack: job.callStack,
                     results: job.results,
-                    foundResult: job.foundResult
+                    foundResult: job.foundResult,
+                    gatewayData: job.gatewayData
                 ))
                 continue
             }
@@ -213,6 +214,7 @@ public final class VerificationCycleKripkeStructureGenerator<
                     // Clone callStack
                     let callStack = job.callStack.mapValues { $0.map { CallData(data: $0.data, parameters: $0.parameters, promiseData: $0.promiseData, runs: $0.runs) } }
                     print("execute")
+                    gateway.gatewayData = job.gatewayData as! Gateway.GatewayData
                     // Execute and generate kripke states.
                     let runs = self.executer.execute(
                         tokens: clones,
@@ -229,7 +231,7 @@ public final class VerificationCycleKripkeStructureGenerator<
                     )
                     print("handle runs")
                     // Create jobs for each different 'run' possible.
-                    for (lastState, newTokens, newCallStack, newResults) in runs {
+                    for (lastState, newTokens, newCallStack, newGatewayData, newResults) in runs {
                         // Do not generate more jobs if we do not have a last state -- means that nothing was executed, should never happen.
                         guard let lastNewState = lastState else {
                             continue
@@ -268,7 +270,8 @@ public final class VerificationCycleKripkeStructureGenerator<
                             runs: 0 == newExecutingIndex ? job.runs + 1 : job.runs,
                             callStack: newCallStack,
                             results: newResults,
-                            foundResult: foundResult
+                            foundResult: foundResult,
+                            gatewayData: job.gatewayData
                         ))
                     }
                 }
@@ -323,7 +326,7 @@ public final class VerificationCycleKripkeStructureGenerator<
         return d
     }
     
-    fileprivate func createInitialJobs(fromTokens tokens: [[VerificationToken]]) -> [Job] {
+    fileprivate func createInitialJobs<Gateway: VerifiableGateway>(fromTokens tokens: [[VerificationToken]], andGateway gateway: Gateway) -> [Job] {
         return [Job(
             initial: true,
             cache: self.cycleDetector.initialData,
@@ -334,7 +337,8 @@ public final class VerificationCycleKripkeStructureGenerator<
             runs: 0,
             callStack: [:],
             results: [:],
-            foundResult: false
+            foundResult: false,
+            gatewayData: gateway.gatewayData
         )]
     }
     
@@ -418,6 +422,8 @@ public final class VerificationCycleKripkeStructureGenerator<
         let results: [FSM_ID: Any?]
         
         let foundResult: Bool
+        
+        let gatewayData: Any // Fix this type later.
         
     }
     

@@ -101,6 +101,8 @@ public final class VerificationCycleExecuter {
         
         let results: [FSM_ID: Any?]
         
+        let gatewayData: Any // Fix this type later.
+        
     }
     
     public func execute<View: KripkeStructureView, Gateway: VerifiableGateway>(
@@ -115,23 +117,24 @@ public final class VerificationCycleExecuter {
         andCallStack callStack: [FSM_ID: [CallData]],
         andPreviousResults results: [FSM_ID: Any?],
         withDelegate delegate: VerificationTokenExecuterDelegate
-    ) -> [(KripkeState?, [[VerificationToken]], [FSM_ID: [CallData]], [FSM_ID: Any?])] where View.State == KripkeState {
+    ) -> [(KripkeState?, [[VerificationToken]], [FSM_ID: [CallData]], Gateway.GatewayData, [FSM_ID: Any?])] where View.State == KripkeState {
         //swiftlint:disable:next line_length
         self.executer.delegate = delegate
         gateway.delegate = self.executer
         var tokens = tokens
         tokens[executing] = tokens[executing].filter { nil != $0.data } // Ignore all skip tokens.
-        var jobs = [Job(index: 0, tokens: tokens, externals: externals, initialState: nil, lastState: last, clock: 0, usedClockValues: [], callStack: callStack, results: results)]
+        var jobs = [Job(index: 0, tokens: tokens, externals: externals, initialState: nil, lastState: last, clock: 0, usedClockValues: [], callStack: callStack, results: results, gatewayData: gateway.gatewayData)]
         let states: Ref<[KripkeStatePropertyList: KripkeState]> = Ref(value: [:])
         var initialStates: HashSink<KripkeStatePropertyList, KripkeStatePropertyList> = HashSink()
         var lastStates: HashSink<KripkeStatePropertyList, KripkeStatePropertyList> = HashSink()
-        var runs: [(KripkeState?, [[VerificationToken]], [FSM_ID: [CallData]], [FSM_ID: Any?])] = []
+        var runs: [(KripkeState?, [[VerificationToken]], [FSM_ID: [CallData]], Gateway.GatewayData, [FSM_ID: Any?])] = []
         while false == jobs.isEmpty {
             let job = jobs.removeFirst()
             let newTokens = self.prepareTokens(job.tokens, executing: (executing, job.index), fromExternals: job.externals, usingCallStack: job.callStack)
             guard let data = newTokens[executing][job.index].data else {
                 fatalError("Unable to fetch data of verification token.")
             }
+            gateway.gatewayData = job.gatewayData as! Gateway.GatewayData
             let (generatedStates, clockValues, newExternals, newCallStack, newResults) = self.executer.execute(
                 fsm: data.fsm.asScheduleableFiniteStateMachine,
                 inTokens: newTokens,
@@ -157,11 +160,11 @@ public final class VerificationCycleExecuter {
             // Add tokens to runs when we have finished executing all of the tokens in a run.
             if job.index + 1 >= tokens[executing].count {
                 _ = lastState.map { lastStates.insert($0.properties) }
-                runs.append((lastState, newTokens, newCallStack, newResults))
+                runs.append((lastState, newTokens, newCallStack, gateway.gatewayData, newResults))
                 continue
             }
             // Add a Job for the next token to execute.
-            jobs.append(Job(index: job.index + 1, tokens: newTokens, externals: newExternals, initialState: job.initialState ?? generatedStates.first, lastState: lastState, clock: 0, usedClockValues: [], callStack: newCallStack, results: newResults))
+            jobs.append(Job(index: job.index + 1, tokens: newTokens, externals: newExternals, initialState: job.initialState ?? generatedStates.first, lastState: lastState, clock: 0, usedClockValues: [], callStack: newCallStack, results: newResults, gatewayData: gateway.gatewayData))
         }
         states.value.forEach { (arg: (key: KripkeStatePropertyList, value: KripkeState)) in
             if lastStates.contains(arg.key) {
@@ -195,7 +198,8 @@ public final class VerificationCycleExecuter {
                     clock: $0,
                     usedClockValues: lastJob.usedClockValues + clockValues,
                     callStack: lastJob.callStack,
-                    results: lastJob.results
+                    results: lastJob.results,
+                    gatewayData: lastJob.gatewayData
                 )
             }
         }
