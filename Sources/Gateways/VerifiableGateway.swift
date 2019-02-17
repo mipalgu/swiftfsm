@@ -63,3 +63,15 @@ public protocol VerifiableGateway: ModifiableFSMGateway {
     var gatewayData: GatewayData { get set }
     
 }
+
+extension VerifiableGateway where Self: VerifiableGatewayDelegator {
+    
+    public var gatewayData: Gateway.GatewayData {
+        get {
+            return self.gateway.gatewayData
+        } set {
+            self.gateway.gatewayData = newValue
+        }
+    }
+    
+}

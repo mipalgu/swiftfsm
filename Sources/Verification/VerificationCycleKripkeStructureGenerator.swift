@@ -118,7 +118,7 @@ public final class VerificationCycleKripkeStructureGenerator<
         }
     }
     
-    public func generate<Gateway: ModifiableFSMGateway, View: KripkeStructureView>(usingGateway gateway: Gateway, andView view: View, storingResultsFor resultID: FSM_ID?) -> SortedCollection<(UInt, Any?)>? where View.State == KripkeState {
+    public func generate<Gateway: VerifiableGateway, View: KripkeStructureView>(usingGateway gateway: Gateway, andView view: View, storingResultsFor resultID: FSM_ID?) -> SortedCollection<(UInt, Any?)>? where View.State == KripkeState {
         self.view = AnyKripkeStructureView(view)
         var jobs = self.createInitialJobs(fromTokens: self.tokens)
         self.view.reset()
@@ -286,7 +286,7 @@ public final class VerificationCycleKripkeStructureGenerator<
         return KripkeStructure(initialStates: Array(initialStates.value.lazy.map { $1 }), states: states.value)*/
     }
     
-    fileprivate func createAllResults<Gateway: ModifiableFSMGateway>(forJob job: Job, withGateway gateway: Gateway) -> ([FSM_ID: LazyMapCollection<SortedCollectionSlice<(UInt, Any?)>, Any?>], Bool) {
+    fileprivate func createAllResults<Gateway: VerifiableGateway>(forJob job: Job, withGateway gateway: Gateway) -> ([FSM_ID: LazyMapCollection<SortedCollectionSlice<(UInt, Any?)>, Any?>], Bool) {
         var allResults: [FSM_ID: LazyMapCollection<SortedCollectionSlice<(UInt, Any?)>, Any?>] = [:]
         allResults.reserveCapacity(job.callStack.count)
         var handledAllResults = false
@@ -424,13 +424,6 @@ public final class VerificationCycleKripkeStructureGenerator<
 }
 
 extension VerificationCycleKripkeStructureGenerator: VerificationTokenExecuterDelegate {
-    
-    public func results<Gateway: ModifiableFSMGateway>(of callData: CallData, caller: FSM_ID, withGateway gateway: Gateway) -> [(UInt, Any?)] {
-        guard let results = self.delegate?.resultsForCall(self, call: callData, withGateway: gateway) else {
-            fatalError("Unable to generate kripke structure for call \(callData)")
-        }
-        return Array(results)
-    }
     
     public func scheduleInfo(of id: FSM_ID, caller: FSM_ID, inGateway gateway: ModifiableFSMGateway) -> ParameterisedMachineData {
         guard let callerToken = self.tokensLookup[caller], let callerData = callerToken.data else {

@@ -197,4 +197,4 @@ public class RoundRobinScheduler<Tokenizer: SchedulerTokenizer>: Scheduler where
     
 }
 
-extension RoundRobinScheduler: ModifiableFSMGatewayDelegator {}
+extension RoundRobinScheduler: VerifiableGatewayDelegator {}

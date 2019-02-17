@@ -1,9 +1,9 @@
 /*
- * VerificationTokenExecuterDelegate.swift
- * Verification
+ * VerifiableGatewayDelegator.swift
+ * Gateways
  *
- * Created by Callum McColl on 03/02/18.
- * Copyright © 2018 Callum McColl. All rights reserved.
+ * Created by Callum McColl on 17/02/19.
+ * Copyright © 2019 Callum McColl. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -56,17 +56,9 @@
  *
  */
 
-import Gateways
-import KripkeStructure
-import KripkeStructureViews
-import swiftfsm
-
-public protocol VerificationTokenExecuterDelegate: class {
+public protocol VerifiableGatewayDelegator: VerifiableGateway, ModifiableFSMGatewayDelegator {
     
-    func scheduleInfo(of: FSM_ID, caller: FSM_ID, inGateway: ModifiableFSMGateway) -> ParameterisedMachineData
-    
-    func shouldInclude(call: CallData, forCaller: FSM_ID) -> Bool
-    
-    func shouldInline(call: CallData, caller: FSM_ID) -> Bool
+    associatedtype Gateway: VerifiableGateway
+    associatedtype GatewayData = Gateway.GatewayData
     
 }

@@ -197,7 +197,7 @@ public class Swiftfsm<
         }
     }
 
-    private func generateKripkeStructure<KGF: KripkeStructureGeneratorFactory, Gateway: ModifiableFSMGateway>(
+    private func generateKripkeStructure<KGF: KripkeStructureGeneratorFactory, Gateway: VerifiableGateway>(
         _ machines: [Machine],
         withGenerator generatorFactory: KGF,
         andViews views: [AnyKripkeStructureViewFactory<KripkeState>],

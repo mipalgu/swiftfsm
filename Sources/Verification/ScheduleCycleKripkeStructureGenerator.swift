@@ -101,7 +101,7 @@ public final class ScheduleCycleKripkeStructureGenerator<
         self.viewFactory = viewFactory
     }
     
-    public func generate<Gateway: ModifiableFSMGateway>(usingGateway gateway: Gateway) {
+    public func generate<Gateway: VerifiableGateway>(usingGateway gateway: Gateway) {
         self.machines.forEach {
             self.add(fsm: $0.fsm, toGateway: gateway, withDependencies: $0.dependencies, name: $0.name)
         }
@@ -269,7 +269,7 @@ public final class ScheduleCycleKripkeStructureGenerator<
 
 extension ScheduleCycleKripkeStructureGenerator: LazyKripkeStructureGeneratorDelegate {
     
-    public func resultsForCall<Gateway: ModifiableFSMGateway>(_ generator: LazyKripkeStructureGenerator, call callData: CallData, withGateway gateway: Gateway) -> SortedCollection<(UInt, Any?)> {
+    public func resultsForCall<Gateway: VerifiableGateway>(_ generator: LazyKripkeStructureGenerator, call callData: CallData, withGateway gateway: Gateway) -> SortedCollection<(UInt, Any?)> {
         let key = "id: \(callData.id), parameters: \(callData.parameters)"
         if let results = self.resultsCache[key] {
             return results

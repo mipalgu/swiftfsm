@@ -67,6 +67,6 @@ public protocol KripkeStructureGenerator {
     /**
      *  Generate the `KripkeStructure`.
      */
-    func generate<Gateway: ModifiableFSMGateway>(usingGateway: Gateway)
+    func generate<Gateway: VerifiableGateway>(usingGateway: Gateway)
     
 }

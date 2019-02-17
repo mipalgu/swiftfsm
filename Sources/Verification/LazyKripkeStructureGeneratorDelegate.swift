@@ -70,6 +70,6 @@ public protocol LazyKripkeStructureGeneratorDelegate: class {
      *  in order to easily generate states for when an fsm invokes or calls
      *  another fsm.
      */
-    func resultsForCall<Gateway: ModifiableFSMGateway>(_: LazyKripkeStructureGenerator, call: CallData, withGateway: Gateway) -> SortedCollection<(UInt, Any?)>
+    func resultsForCall<Gateway: VerifiableGateway>(_: LazyKripkeStructureGenerator, call: CallData, withGateway: Gateway) -> SortedCollection<(UInt, Any?)>
     
 }

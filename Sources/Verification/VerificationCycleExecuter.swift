@@ -103,7 +103,7 @@ public final class VerificationCycleExecuter {
         
     }
     
-    public func execute<View: KripkeStructureView, Gateway: ModifiableFSMGateway>(
+    public func execute<View: KripkeStructureView, Gateway: VerifiableGateway>(
         tokens: [[VerificationToken]],
         executing: Int,
         withExternals externals: [(AnySnapshotController, KripkeStatePropertyList)],
