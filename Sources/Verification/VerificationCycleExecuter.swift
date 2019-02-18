@@ -135,6 +135,8 @@ public final class VerificationCycleExecuter {
                 fatalError("Unable to fetch data of verification token.")
             }
             gateway.gatewayData = job.gatewayData as! Gateway.GatewayData
+            print("before: \(gateway.gatewayData)")
+            print("executing: \(data.fsm.name).\(data.fsm.currentState.name)")
             let (generatedStates, clockValues, newExternals, newCallStack, newResults) = self.executer.execute(
                 fsm: data.fsm.asScheduleableFiniteStateMachine,
                 inTokens: newTokens,
@@ -147,6 +149,7 @@ public final class VerificationCycleExecuter {
                 usingCallStack: job.callStack,
                 andPreviousResults: job.results
             )
+            print("after: \(gateway.gatewayData)")
             guard let first = generatedStates.first else {
                 continue
             }

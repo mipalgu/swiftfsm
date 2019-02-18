@@ -120,6 +120,7 @@ public final class VerificationCycleKripkeStructureGenerator<
     
     public func generate<Gateway: VerifiableGateway, View: KripkeStructureView>(usingGateway gateway: Gateway, andView view: View, storingResultsFor resultID: FSM_ID?) -> SortedCollection<(UInt, Any?)>? where View.State == KripkeState {
         self.view = AnyKripkeStructureView(view)
+        let initialGatewayData = gateway.gatewayData
         var jobs = self.createInitialJobs(fromTokens: self.tokens, andGateway: gateway)
         self.view.reset()
         let defaultExternals = self.createExternals(fromTokens: self.tokens)
@@ -143,6 +144,7 @@ public final class VerificationCycleKripkeStructureGenerator<
                 parameterisedMachines[id] = data
             }
         }}
+        var counter = 0
         while false == jobs.isEmpty {
             let job = jobs.removeFirst()
             // Skip this job if all tokens are .skip tokens.
@@ -163,7 +165,7 @@ public final class VerificationCycleKripkeStructureGenerator<
                 continue
             }
             // Create results for all parameterised machines that are finished.
-            let (allResults, handledAllResults) = self.createAllResults(forJob: job, withGateway: gateway)
+            let (allResults, handledAllResults) = self.createAllResults(forJob: job, withGateway: gateway, andInitialGatewayData: initialGatewayData)
             print("allResults: \(allResults)")
             // Create spinner for results.
             let resultsSpinner = self.createSpinner(forValues: allResults)
@@ -185,7 +187,8 @@ public final class VerificationCycleKripkeStructureGenerator<
                         }
                         callData.promiseData.result = parameterisedResults[id]
                     }
-                    print("createWorld")
+                    print("createWorld: \(counter)")
+                    counter += 1
                     // Check for cycles.
                     let world = self.worldCreator.createWorld(
                         fromExternals: externals,
@@ -271,7 +274,7 @@ public final class VerificationCycleKripkeStructureGenerator<
                             callStack: newCallStack,
                             results: newResults,
                             foundResult: foundResult,
-                            gatewayData: job.gatewayData
+                            gatewayData: newGatewayData
                         ))
                     }
                 }
@@ -289,16 +292,16 @@ public final class VerificationCycleKripkeStructureGenerator<
         return KripkeStructure(initialStates: Array(initialStates.value.lazy.map { $1 }), states: states.value)*/
     }
     
-    fileprivate func createAllResults<Gateway: VerifiableGateway>(forJob job: Job, withGateway gateway: Gateway) -> ([FSM_ID: LazyMapCollection<SortedCollectionSlice<(UInt, Any?)>, Any?>], Bool) {
+    fileprivate func createAllResults<Gateway: VerifiableGateway>(forJob job: Job, withGateway gateway: Gateway, andInitialGatewayData initialGatewayData: Gateway.GatewayData) -> ([FSM_ID: LazyMapCollection<SortedCollectionSlice<(UInt, Any?)>, Any?>], Bool) {
         var allResults: [FSM_ID: LazyMapCollection<SortedCollectionSlice<(UInt, Any?)>, Any?>] = [:]
         allResults.reserveCapacity(job.callStack.count)
         var handledAllResults = false
-        print("callStack: \(job.callStack)")
         for (id, calls) in job.callStack {
             guard nil == job.results[id], let callData = calls.last else {
                 print("we haven't made any calls: \(calls)")
                 continue
             }
+            gateway.gatewayData = initialGatewayData
             guard let callResults = self.delegate?.resultsForCall(self, call: callData, withGateway: gateway) else {
                 fatalError("Unable to fetch results for call: \(callData)")
             }
