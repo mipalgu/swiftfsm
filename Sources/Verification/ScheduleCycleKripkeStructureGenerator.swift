@@ -110,7 +110,9 @@ public final class ScheduleCycleKripkeStructureGenerator<
         verificationTokens.forEach { (tokens: [[VerificationToken]], view: AnyKripkeStructureView<KripkeState>) in
             var generator = self.factory.make(tokens: tokens)
             generator.delegate = self
+            view.reset()
             generator.generate(usingGateway: gateway, andView: view, storingResultsFor: nil)
+            view.finish()
         }
     }
     
@@ -186,6 +188,7 @@ public final class ScheduleCycleKripkeStructureGenerator<
                 let id = gateway.id(of: fullyQualifiedName)
                 let fullyQualifiedName = fullyQualifiedName + "." + fsm.name
                 let (tokens, view) = self.schedule(forDependency: dependency, inMachine: machine, usingTokens: tokens, andGateway: gateway)
+                view.reset()
                 return (
                     id,
                     ParameterisedMachineData(
@@ -279,6 +282,7 @@ extension ScheduleCycleKripkeStructureGenerator: LazyKripkeStructureGeneratorDel
         guard let results = generator.generate(usingGateway: gateway, andView: callData.view, storingResultsFor: callData.id) else {
             swiftfsmError("Call to parameterised machine '\(callData.fullyQualifiedName)' that may never return.")
         }
+        callData.view.finish()
         self.resultsCache[key] = results
         return results
     }
