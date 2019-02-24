@@ -166,15 +166,23 @@ public final class VerificationCycleExecuter {
                 runs.append((lastState, newTokens, newCallStack, gateway.gatewayData, newResults))
                 continue
             }
+            print("create new executing job")
             // Add a Job for the next token to execute.
             jobs.append(Job(index: job.index + 1, tokens: newTokens, externals: newExternals, initialState: job.initialState ?? generatedStates.first, lastState: lastState, clock: 0, usedClockValues: [], callStack: newCallStack, results: newResults, gatewayData: gateway.gatewayData))
         }
+        print("finish executing")
         states.value.forEach { (arg: (key: KripkeStatePropertyList, value: KripkeState)) in
             if lastStates.contains(arg.key) {
                 return
             }
+            print("before commit")
+            print("printing state: \(arg.value)")
             view.commit(state: arg.value, isInitial: initial && initialStates.contains(arg.value.properties))
+            print("after commit")
+            fflush(stdout)
         }
+        print("return executing")
+        fflush(stdout)
         return runs
     }
     

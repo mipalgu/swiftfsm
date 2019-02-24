@@ -80,6 +80,7 @@ public final class WorldCreator {
         usingCallStack callStack: [FSM_ID: [CallData]],
         worldType: WorldType
     ) -> KripkeStatePropertyList {
+        print("create world")
         let externalVariables = self.convert(externals: externals, withLastState: lastState)
         let str: String
         switch worldType {
@@ -88,6 +89,7 @@ public final class WorldCreator {
         case .afterExecution:
             str = "W"
         }
+        print("extract schedule vars.")
         let varPs = self.convert(
             tokens: tokens,
             executing: executing,
@@ -102,9 +104,12 @@ public final class WorldCreator {
         for (key, val) in externalVariables.properties {
             total[key] = val
         }
+        print("extract call vars.")
         for (key, val) in self.createCallProperties(forParameterisedMachines: parameterisedMachines, withCallStack: callStack) {
             total[key] = val
         }
+        print("printing props:")
+        print(KripkeStatePropertyList(total))
         return KripkeStatePropertyList(total)
         //return (lastState?.properties ?? [:]) <| varPs <| externalVariables
     }
@@ -157,9 +162,14 @@ public final class WorldCreator {
             inner["parameters"] = KripkeStateProperty(type: .Compound(self.recorder.takeRecord(of: callData.parameters)), value: callData.parameters)
             inner["hasFinished"] = KripkeStateProperty(type: .Bool, value: callData.promiseData.hasFinished)
             innerValues["hasFinished"] = callData.promiseData.hasFinished
-            let (type, value) = self.recorder.getKripkeStatePropertyType(callData.promiseData.result)
-            inner["result"] = KripkeStateProperty(type: type, value: value)
-            innerValues["result"] = value
+            if nil == callData.promiseData.result {
+                inner["result"] = KripkeStateProperty(type: .String, value: "nil")
+                innerValues["result"] = "nil"
+            } else {
+                let (type, value) = self.recorder.getKripkeStatePropertyType(callData.promiseData.result)
+                inner["result"] = KripkeStateProperty(type: type, value: value)
+                innerValues["result"] = value
+            }
             inner["runCount"] = KripkeStateProperty(type: .UInt, value: callData.runs)
             innerValues["runCount"] = callData.runs
             props[callData.fullyQualifiedName] = KripkeStateProperty(type: .Compound(inner), value: innerValues)
@@ -205,21 +215,32 @@ public final class WorldCreator {
         withState state: String,
         appendingToPC str: String
     ) -> KripkeStatePropertyList {
+        print("1")
         var varPs: KripkeStatePropertyList = [:]
         guard let pcTokenData = tokens[executing][token].data else {
             return varPs
         }
+        print("2")
         tokens.forEach {
+            print("2.1")
             $0.forEach {
+                print("2.2")
                 guard let data = $0.data else {
                     return
                 }
+                print("2.3")
+                print(data.fsm.name)
+                print(Array(Mirror(reflecting: data.fsm.asScheduleableFiniteStateMachine.base).children))
+                print(data.fsm.asScheduleableFiniteStateMachine.base)
                 varPs[data.fsm.name] = KripkeStateProperty(
                     type: .Compound(self.recorder.takeRecord(of: data.fsm.asScheduleableFiniteStateMachine.base)),
                     value: data.fsm
                 )
+                print("2.4")
             }
+            print("2.5")
         }
+        print("3")
         varPs["pc"] = KripkeStateProperty(
             type: .String,
             value: self.createPC(ofTokenData: pcTokenData, withState: state, appending: str)

@@ -119,13 +119,16 @@ public final class VerificationCycleKripkeStructureGenerator<
     }
     
     public func generate<Gateway: VerifiableGateway, View: KripkeStructureView>(usingGateway gateway: Gateway, andView view: View, storingResultsFor resultID: FSM_ID?) -> SortedCollection<(UInt, Any?)>? where View.State == KripkeState {
+        print("generate")
         self.view = AnyKripkeStructureView(view)
         let initialGatewayData = gateway.gatewayData
         var jobs = self.createInitialJobs(fromTokens: self.tokens, andGateway: gateway)
-        self.view.reset()
+        print("generate: -2")
+        print("generate: -1")
         let defaultExternals = self.createExternals(fromTokens: self.tokens)
         var globalDetectorCache = self.cycleDetector.initialData
         var foundCycle = false
+        print("generate: 1")
         var results: SortedCollection<(UInt, Any?)> = SortedCollection(comparator: AnyComparator {
             if $0.0 < $1.0 {
                 return .orderedAscending
@@ -135,6 +138,7 @@ public final class VerificationCycleKripkeStructureGenerator<
             }
             return .orderedSame
         })
+        print("generate: 2")
         var parameterisedMachines: [FSM_ID: ParameterisedMachineData] = [:]
         self.tokens.forEach { $0.forEach {
             guard let tokenData = $0.data else {
@@ -144,8 +148,11 @@ public final class VerificationCycleKripkeStructureGenerator<
                 parameterisedMachines[id] = data
             }
         }}
+        print("generate: 3")
         var counter = 0
+        print("start generating")
         while false == jobs.isEmpty {
+            print("new job, storing results for: \(resultID ?? -1)")
             let job = jobs.removeFirst()
             // Skip this job if all tokens are .skip tokens.
             if nil == job.tokens[job.executing].first(where: { nil != $0.data }) {
@@ -165,6 +172,7 @@ public final class VerificationCycleKripkeStructureGenerator<
                 continue
             }
             // Create results for all parameterised machines that are finished.
+            print("call stack: \(job.callStack.mapValues { $0.map { $0.fsm.name } })")
             let (allResults, handledAllResults) = self.createAllResults(forJob: job, withGateway: gateway, andInitialGatewayData: initialGatewayData)
             print("allResults: \(allResults)")
             // Create spinner for results.
@@ -277,11 +285,15 @@ public final class VerificationCycleKripkeStructureGenerator<
                             gatewayData: newGatewayData
                         ))
                     }
+                    print("finish handle runs, storing results in: \(resultID ?? -1)")
                 }
+                print("finished external variables.")
             }
+            print("finish spinning results.")
             _ = job.lastState.map { self.view.commit(state: $0, isInitial: false) }
         }
-        self.view.finish()
+        print("finished generating kripke structure")
+        fflush(stdout)
         if true == foundCycle {
             return nil
         }
@@ -295,7 +307,7 @@ public final class VerificationCycleKripkeStructureGenerator<
     fileprivate func createAllResults<Gateway: VerifiableGateway>(forJob job: Job, withGateway gateway: Gateway, andInitialGatewayData initialGatewayData: Gateway.GatewayData) -> ([FSM_ID: LazyMapCollection<SortedCollectionSlice<(UInt, Any?)>, Any?>], Bool) {
         var allResults: [FSM_ID: LazyMapCollection<SortedCollectionSlice<(UInt, Any?)>, Any?>] = [:]
         allResults.reserveCapacity(job.callStack.count)
-        var handledAllResults = false
+        var handledAllResults = true
         for (id, calls) in job.callStack {
             guard nil == job.results[id], let callData = calls.last else {
                 print("we haven't made any calls: \(calls)")
@@ -307,7 +319,7 @@ public final class VerificationCycleKripkeStructureGenerator<
             }
             print("callResult: \(callResults)")
             allResults[id] = callResults.find((callData.runs, nil)).lazy.map { $0.1 }
-            handledAllResults = handledAllResults || callData.runs < (callResults.last?.0 ?? 0)
+            handledAllResults = handledAllResults && callData.runs > (callResults.last?.0 ?? 0)
         }
         return (allResults, handledAllResults)
     }
