@@ -185,6 +185,7 @@ public final class ScheduleCycleKripkeStructureGenerator<
                 if !isRootOfToken && self.shouldSkip(token: token, inDependencyPath: dependencyPath)  {
                     return .skip
                 }
+                let dependency = dependencyPath.last ?? convertRootFSMToDependency(inMachine: machine)
                 // Create the token data since we cannot skip this token.
                 let externals = token.fsm.externalVariables.map { (external: AnySnapshotController) -> ExternalVariablesVerificationData in
                     let (defaultValues, spinners) = self.extractor.extract(externalVariables: external)
@@ -228,33 +229,35 @@ public final class ScheduleCycleKripkeStructureGenerator<
     ) -> [FSM_ID: ParameterisedMachineData] {
         return Dictionary(uniqueKeysWithValues: dependency.dependencies.compactMap { (dependency) -> (FSM_ID, ParameterisedMachineData)? in
             let inPlace: Bool
+            let id: FSM_ID
+            let fsm: AnyParameterisedFiniteStateMachine
             switch dependency {
-            case .invokableParameterisedMachine:
+            case .invokableParameterisedMachine(let localFsm, _):
+                id = gateway.id(of: fullyQualifiedName + "." + localFsm.name)
                 inPlace = true
-            default:
+                fsm = localFsm
+            case .callableParameterisedMachine(let localFsm, _):
                 inPlace = false
-            }
-            switch dependency {
-            case .callableParameterisedMachine(let fsm, _), .invokableParameterisedMachine(let fsm, _):
-                let id = gateway.id(of: fullyQualifiedName)
-                let fullyQualifiedName = fullyQualifiedName + "." + fsm.name
-                let (tokens, view) = self.schedule(forDependency: dependency, inMachine: machine, usingTokens: tokens, andGateway: gateway, parents: parents)
-                view.reset()
-                return (
-                    id,
-                    ParameterisedMachineData(
-                        id: id,
-                        fsm: fsm,
-                        fullyQualifiedName: fullyQualifiedName,
-                        parameters: Set(self.recorder.takeRecord(of: fsm.parameters).propertiesDictionary.keys),
-                        inPlace: inPlace,
-                        tokens: tokens,
-                        view: view
-                    )
-                )
+                id = gateway.id(of: fullyQualifiedName)
+                fsm = localFsm
             default:
                 return nil
             }
+            let fullyQualifiedName = fullyQualifiedName + "." + fsm.name
+            let (tokens, view) = self.schedule(forDependency: dependency, inMachine: machine, usingTokens: tokens, andGateway: gateway, parents: parents)
+            view.reset()
+            return (
+                id,
+                ParameterisedMachineData(
+                    id: id,
+                    fsm: fsm,
+                    fullyQualifiedName: fullyQualifiedName,
+                    parameters: Set(self.recorder.takeRecord(of: fsm.parameters).propertiesDictionary.keys),
+                    inPlace: inPlace,
+                    tokens: tokens,
+                    view: view
+                )
+            )
         })
     }
     
