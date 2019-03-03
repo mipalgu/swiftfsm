@@ -109,7 +109,12 @@ public final class MachinesMachineLoader: MachineLoader {
     
     fileprivate func load<Gateway: FSMGateway>(machine: Machine, gateway: Gateway, clock: Timer, prefix: String, caller: FSM_ID? = nil) -> (FSMType, [Dependency])? {
         let dependantMachines = machine.submachines + machine.parameterisedMachines
-        let format = { prefix + "." + machine.name + "." + $0 }
+        let format: (String) -> String = {
+            if $0 == machine.name {
+                return prefix + "." + machine.name
+            }
+            return prefix + "." + machine.name + "." + $0
+        }
         let selfID: FSM_ID = gateway.id(of: prefix + "." + machine.name)
         let dependantIds: [FSM_ID] = dependantMachines.map { gateway.id(of: format($0.name)) }
         let callableIds = machine.callableMachines.map { gateway.id(of: format($0.name)) }
@@ -121,12 +126,7 @@ public final class MachinesMachineLoader: MachineLoader {
             callables: Set(callableIds + [selfID]),
             invocables: Set(invocableIds),
             whitelist: Set(dependantIds + [selfID]),
-            formatter: CallbackFormatter {
-                if $0 == machine.name {
-                    return prefix + "." + machine.name
-                }
-                return format($0)
-            }
+            formatter: CallbackFormatter(format)
         )
         guard let recursed = dependantMachines.failMap({ (m: Machine) -> Dependency? in
             let id = gateway.id(of: format(m.name))
