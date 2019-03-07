@@ -203,7 +203,7 @@ public final class ScheduleCycleKripkeStructureGenerator<
                     withFullyQualifiedName: token.fullyQualifiedName,
                     withTokens: tokens,
                     inGateway: gateway,
-                    parents: isRootOfToken ? [self.convertRootFSMToDependency(inMachine: token.machine)] : dependencyPath
+                    parents: isRootOfToken ? [self.convertRootFSMToDependency(inMachine: token.machine)] : Array(dependencyPath.dropLast())
                 )
                 return .verify(data: VerificationToken.Data(id: gateway.id(of: token.fullyQualifiedName), fsm: dependencyPath.last?.fsm ?? token.machine.fsm, machine: token.machine, externalVariables: externals, parameterisedMachines: parameterisedMachines))
             }
@@ -216,10 +216,7 @@ public final class ScheduleCycleKripkeStructureGenerator<
         func search(_ dependencies: [Dependency], pre: String) -> Bool {
             return nil != dependencies.first {
                 let name = pre + "." + $0.fsm.name
-                if name == token.fullyQualifiedName {
-                    return true
-                }
-                return search($0.dependencies, pre: name)
+                return name == token.fullyQualifiedName
             }
         }
         return search(dependencies, pre: token.machine.name)
