@@ -56,6 +56,12 @@
  *
  */
 
+#if !NO_FOUNDATION
+#if canImport(Foundation)
+import Foundation
+#endif
+#endif
+
 import KripkeStructure
 import KripkeStructureViews
 import FSM
@@ -324,6 +330,11 @@ public final class ScheduleCycleKripkeStructureGenerator<
 extension ScheduleCycleKripkeStructureGenerator: LazyKripkeStructureGeneratorDelegate {
     
     public func resultsForCall<Gateway: VerifiableGateway>(_ generator: LazyKripkeStructureGenerator, call callData: CallData, withGateway gateway: Gateway) -> SortedCollection<(UInt, Any?)> {
+        if nil == callData.tokens.first(where: { nil != $0.first(where: { nil != $0.data }) }) {
+            return SortedCollection<(UInt, Any?)>() { (_, _) -> ComparisonResult in
+                return .orderedAscending
+            }
+        }
         print("resultsForCall: \(callData)")
         let key = "id: \(callData.id), parameters: \(callData.parameters.sorted { $0.key < $1.key })"
         if let results = self.resultsCache[key] {

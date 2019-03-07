@@ -78,8 +78,8 @@ extension InvokerDelegator {
         return self.invoker.callSelf(id, withParameters: parameters)
     }
     
-    public func invoke<R>(_ id: FSM_ID, withParameters parameters: [String: Any]) -> Promise<R> {
-        return self.invoker.invoke(id, withParameters: parameters)
+    public func invoke<R>(_ id: FSM_ID, withParameters parameters: [String: Any], caller: FSM_ID) -> Promise<R> {
+        return self.invoker.invoke(id, withParameters: parameters, caller: caller)
     }
     
 }

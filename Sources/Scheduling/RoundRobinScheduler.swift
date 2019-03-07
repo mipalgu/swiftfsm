@@ -66,10 +66,12 @@ import Utilities
 /**
  *  Responsible for the execution of machines.
  */
-public class RoundRobinScheduler<Tokenizer: SchedulerTokenizer>: Scheduler where
+public class RoundRobinScheduler<Tokenizer: SchedulerTokenizer>: Scheduler, VerifiableGatewayDelegator where
     Tokenizer.Object == Machine,
     Tokenizer.SchedulerToken == SchedulerToken
 {
+
+    public typealias Gateway = StackGateway
     
     public var gateway: StackGateway
 
@@ -196,5 +198,3 @@ public class RoundRobinScheduler<Tokenizer: SchedulerTokenizer>: Scheduler where
     }
     
 }
-
-extension RoundRobinScheduler: VerifiableGatewayDelegator {}

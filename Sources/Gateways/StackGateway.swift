@@ -90,7 +90,7 @@ public final class StackGateway: ModifiableFSMGateway, ModifiableFSMGatewayDefau
         self.stacks[id] = []
     }
     
-    public func invoke<R>(_ id: FSM_ID, withParameters parameters: [String: Any]) -> Promise<R> {
+    public func invoke<R>(_ id: FSM_ID, withParameters parameters: [String: Any], caller: FSM_ID) -> Promise<R> {
         print("stack: \(self.stacks.mapValues { $0.map { $0.fsm.name } }), parameters: \(parameters)")
         guard let fsm = self.fsms[id]?.asParameterisedFiniteStateMachine else {
             self.error("Attempting to invoke FSM with id \(id) when it has not been scheduled.")
@@ -100,7 +100,7 @@ public final class StackGateway: ModifiableFSMGateway, ModifiableFSMGatewayDefau
         }
         let promiseData = self.handleInvocation(id: id, fsm: fsm, withParameters: parameters)
         self.stacks[id]?.insert(promiseData, at: 0)
-        self.delegate?.hasInvoked(inGateway: self, fsm: promiseData.fsm, withId: id, withParameters: parameters, storingResultsIn: promiseData)
+        self.delegate?.hasInvoked(inGateway: self, fsm: promiseData.fsm, withId: id, withParameters: parameters, caller: caller, storingResultsIn: promiseData)
         return promiseData.makePromise()
     }
     

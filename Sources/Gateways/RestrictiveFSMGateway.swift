@@ -108,11 +108,11 @@ public final class RestrictiveFSMGateway<Gateway: FSMGateway, _Formatter: Format
         return self.gateway.callSelf(id, withParameters: parameters)
     }
     
-    public func invoke<R>(_ id: FSM_ID, withParameters parameters: [String: Any]) -> Promise<R> {
+    public func invoke<R>(_ id: FSM_ID, withParameters parameters: [String: Any], caller: FSM_ID) -> Promise<R> {
         guard true == self.invocables.contains(id) else {
             fatalError("Unable to invoke fsm with id \(id)")
         }
-        return self.gateway.invoke(id, withParameters: parameters)
+        return self.gateway.invoke(id, withParameters: parameters, caller: caller)
     }
     
     public func fsm(fromID id: FSM_ID) -> AnyControllableFiniteStateMachine {
