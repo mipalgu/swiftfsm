@@ -339,6 +339,10 @@ extension ScheduleCycleKripkeStructureGenerator: LazyKripkeStructureGeneratorDel
         }
         var generator = self.factory.make(tokens: callData.tokens)
         generator.delegate = self
+        guard true == callData.fsm.parametersFromDictionary(callData.parameters) else {
+            swiftfsmError("Unable to call machine.")
+        }
+        callData.fsm.restart()
         guard let results = generator.generate(usingGateway: gateway, andView: callData.view, storingResultsFor: callData.id) else {
             swiftfsmError("Call to parameterised machine '\(callData.fullyQualifiedName)' that may never return.")
         }
