@@ -259,7 +259,7 @@ public final class VerificationCycleKripkeStructureGenerator<
                                     results.insert((job.runs, data.fsm.resultContainer?.result))
                                     foundResult = true // Remember that we have found this result. Stops us adding this result more than once.
                                 }
-                                allFinished = allFinished && data.fsm.hasFinished
+                                allFinished = allFinished && (data.fsm.hasFinished || data.fsm.isSuspended)
                             }
                         }
                         // Add the lastNewState as a finishing state -- don't generate more jobs as all fsms have finished.
