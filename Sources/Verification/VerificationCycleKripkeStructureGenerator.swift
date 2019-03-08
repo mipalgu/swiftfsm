@@ -193,7 +193,12 @@ public final class VerificationCycleKripkeStructureGenerator<
                         guard let callData = calls.last else {
                             continue
                         }
-                        callData.promiseData.result = parameterisedResults[id]
+                        guard let result: Any? = parameterisedResults[id] else {
+                            callData.promiseData.hasFinished = false
+                            continue
+                        }
+                        callData.promiseData.hasFinished = result != nil
+                        callData.promiseData.result = result
                     }
                     print("createWorld: \(counter)")
                     counter += 1
