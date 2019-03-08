@@ -89,6 +89,8 @@ public final class ScheduleCycleKripkeStructureGenerator<
     fileprivate let tokenizer: Tokenizer
     fileprivate let viewFactory: ViewFactory
     
+    fileprivate var viewCache: [String: AnyKripkeStructureView<KripkeState>] = [:]
+    
     fileprivate var resultsCache: [String: SortedCollection<(UInt, Any?)>] = [:]
     
     fileprivate let recorder: MirrorKripkePropertiesRecorder = MirrorKripkePropertiesRecorder()
@@ -119,13 +121,16 @@ public final class ScheduleCycleKripkeStructureGenerator<
             }
             return (data.id, data.fsm.name, data.parameterisedMachines)
         }}}
+        self.viewCache.forEach {
+            $1.reset()
+        }
         verificationTokens.forEach { (tokens: [[VerificationToken]], view: AnyKripkeStructureView<KripkeState>) in
             var generator = self.factory.make(tokens: tokens)
             generator.delegate = self
-            view.reset()
-            print("first generate")
             generator.generate(usingGateway: gateway, andView: view, storingResultsFor: nil)
-            view.finish()
+        }
+        self.viewCache.forEach {
+            $1.finish()
         }
     }
     
@@ -208,8 +213,13 @@ public final class ScheduleCycleKripkeStructureGenerator<
                 return .verify(data: VerificationToken.Data(id: gateway.id(of: token.fullyQualifiedName), fsm: dependencyPath.last?.fsm ?? token.machine.fsm, machine: token.machine, externalVariables: externals, parameterisedMachines: parameterisedMachines))
             }
         }
-        let view = self.viewFactory.make(identifier: machine.name)
-        return (verificationTokens, AnyKripkeStructureView(view))
+        let identifier = parents.isEmpty ? machine.name : (parents + [dependency]).reduce(machine.name) { $0 + "." + $1.fsm.name }
+        guard let view = self.viewCache[identifier] else {
+            let view = AnyKripkeStructureView(self.viewFactory.make(identifier: identifier))
+            self.viewCache[identifier] = view
+            return (verificationTokens, view)
+        }
+        return (verificationTokens, view)
     }
     
     fileprivate func token(_ token: SchedulerToken, inDependencies dependencies: [Dependency]) -> Bool {
@@ -346,7 +356,6 @@ extension ScheduleCycleKripkeStructureGenerator: LazyKripkeStructureGeneratorDel
         guard let results = generator.generate(usingGateway: gateway, andView: callData.view, storingResultsFor: callData.id) else {
             swiftfsmError("Call to parameterised machine '\(callData.fullyQualifiedName)' that may never return.")
         }
-        callData.view.finish()
         self.resultsCache[key] = results
         return results
     }
