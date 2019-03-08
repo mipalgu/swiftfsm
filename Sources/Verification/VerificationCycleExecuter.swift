@@ -57,6 +57,7 @@
  */
 
 import FSM
+import Gateways
 import Hashing
 import KripkeStructure
 import KripkeStructureViews
@@ -96,34 +97,59 @@ public final class VerificationCycleExecuter {
         
         let usedClockValues: [UInt]
         
+        let callStack: [FSM_ID: [CallData]]
+        
+        let results: [FSM_ID: Any?]
+        
+        let gatewayData: Any // Fix this type later.
+        
     }
     
-    public func execute<View: KripkeStructureView>(
+    public func execute<View: KripkeStructureView, Gateway: VerifiableGateway>(
         tokens: [[VerificationToken]],
         executing: Int,
         withExternals externals: [(AnySnapshotController, KripkeStatePropertyList)],
+        andParameterisedMachines parameterisedMachines: [FSM_ID: ParameterisedMachineData],
+        andGateway gateway: Gateway,
         andLastState last: KripkeState?,
         isInitial initial: Bool,
-        usingView view: View
-    ) -> [(KripkeState?, [[VerificationToken]])] where View.State == KripkeState {
+        usingView view: View,
+        andCallStack callStack: [FSM_ID: [CallData]],
+        andPreviousResults results: [FSM_ID: Any?],
+        withDelegate delegate: VerificationTokenExecuterDelegate
+    ) -> [(KripkeState?, [[VerificationToken]], [FSM_ID: [CallData]], Gateway.GatewayData, [FSM_ID: Any?])] where View.State == KripkeState {
         //swiftlint:disable:next line_length
-        var jobs = [Job(index: 0, tokens: tokens, externals: externals, initialState: nil, lastState: last, clock: 0, usedClockValues: [])]
+        self.executer.delegate = delegate
+        gateway.delegate = self.executer
+        var tokens = tokens
+        tokens[executing] = tokens[executing].filter { nil != $0.data } // Ignore all skip tokens.
+        var jobs = [Job(index: 0, tokens: tokens, externals: externals, initialState: nil, lastState: last, clock: 0, usedClockValues: [], callStack: callStack, results: results, gatewayData: gateway.gatewayData)]
         let states: Ref<[KripkeStatePropertyList: KripkeState]> = Ref(value: [:])
         var initialStates: HashSink<KripkeStatePropertyList, KripkeStatePropertyList> = HashSink()
         var lastStates: HashSink<KripkeStatePropertyList, KripkeStatePropertyList> = HashSink()
-        var runs: [(KripkeState?, [[VerificationToken]])] = []
+        var runs: [(KripkeState?, [[VerificationToken]], [FSM_ID: [CallData]], Gateway.GatewayData, [FSM_ID: Any?])] = []
         while false == jobs.isEmpty {
             let job = jobs.removeFirst()
-            let newTokens = self.prepareTokens(job.tokens, executing: (executing, job.index), fromExternals: job.externals)
-            let (generatedStates, clockValues, newExternals) = self.executer.execute(
-                fsm: newTokens[executing][job.index].fsm,
+            let newTokens = self.prepareTokens(job.tokens, executing: (executing, job.index), fromExternals: job.externals, usingCallStack: job.callStack)
+            guard let data = newTokens[executing][job.index].data else {
+                fatalError("Unable to fetch data of verification token.")
+            }
+            gateway.gatewayData = job.gatewayData as! Gateway.GatewayData
+            print("before: \(gateway.gatewayData)")
+            print("executing: \(data.fsm.name).\(data.fsm.currentState.name)")
+            let (generatedStates, clockValues, newExternals, newCallStack, newResults) = self.executer.execute(
+                fsm: data.fsm.asScheduleableFiniteStateMachine,
                 inTokens: newTokens,
                 executing: executing,
                 atOffset: job.index,
                 withExternals: job.externals,
                 andClock: job.clock,
-                andLastState: job.lastState
+                andParameterisedMachines: parameterisedMachines,
+                andLastState: job.lastState,
+                usingCallStack: job.callStack,
+                andPreviousResults: job.results
             )
+            print("after: \(gateway.gatewayData)")
             guard let first = generatedStates.first else {
                 continue
             }
@@ -137,18 +163,26 @@ public final class VerificationCycleExecuter {
             // Add tokens to runs when we have finished executing all of the tokens in a run.
             if job.index + 1 >= tokens[executing].count {
                 _ = lastState.map { lastStates.insert($0.properties) }
-                runs.append((lastState, newTokens))
+                runs.append((lastState, newTokens, newCallStack, gateway.gatewayData, newResults))
                 continue
             }
+            print("create new executing job")
             // Add a Job for the next token to execute.
-            jobs.append(Job(index: job.index + 1, tokens: newTokens, externals: newExternals, initialState: job.initialState ?? generatedStates.first, lastState: lastState, clock: 0, usedClockValues: []))
+            jobs.append(Job(index: job.index + 1, tokens: newTokens, externals: newExternals, initialState: job.initialState ?? generatedStates.first, lastState: lastState, clock: 0, usedClockValues: [], callStack: newCallStack, results: newResults, gatewayData: gateway.gatewayData))
         }
+        print("finish executing")
         states.value.forEach { (arg: (key: KripkeStatePropertyList, value: KripkeState)) in
             if lastStates.contains(arg.key) {
                 return
             }
+            print("before commit")
+            print("printing state: \(arg.value)")
             view.commit(state: arg.value, isInitial: initial && initialStates.contains(arg.value.properties))
+            print("after commit")
+            fflush(stdout)
         }
+        print("return executing")
+        fflush(stdout)
         return runs
     }
     
@@ -173,7 +207,10 @@ public final class VerificationCycleExecuter {
                     initialState: lastJob.initialState,
                     lastState: lastJob.lastState,
                     clock: $0,
-                    usedClockValues: lastJob.usedClockValues + clockValues
+                    usedClockValues: lastJob.usedClockValues + clockValues,
+                    callStack: lastJob.callStack,
+                    results: lastJob.results,
+                    gatewayData: lastJob.gatewayData
                 )
             }
         }
@@ -191,12 +228,28 @@ public final class VerificationCycleExecuter {
         }
     }
     
-    fileprivate func prepareTokens(_ tokens: [[VerificationToken]], executing: (Int, Int), fromExternals externals: [(AnySnapshotController, KripkeStatePropertyList)]) -> [[VerificationToken]] {
-        let clone = tokens[executing.0][executing.1].fsm.clone()
+    fileprivate func prepareTokens(
+        _ tokens: [[VerificationToken]],
+        executing: (Int, Int),
+        fromExternals externals: [(AnySnapshotController, KripkeStatePropertyList)],
+        usingCallStack callStack: [FSM_ID: [CallData]]
+    ) -> [[VerificationToken]] {
+        guard let data = tokens[executing.0][executing.1].data else {
+            fatalError("Unable to fetch data from executing token.")
+        }
+        let fsm: FSMType
+        if let callData = callStack[data.id]?.last {
+            fsm = .parameterisedFSM(callData.fsm)
+        } else {
+            fsm = data.fsm
+        }
+        let clone = fsm.clone()
         var newTokens = tokens
-        newTokens[executing.0][executing.1] = VerificationToken(fsm: clone, machine: tokens[executing.0][executing.1].machine, externalVariables: tokens[executing.0][executing.1].externalVariables)
+        newTokens[executing.0][executing.1] = .verify(data: VerificationToken.Data(id: data.id, fsm: clone, machine: data.machine, externalVariables: data.externalVariables, parameterisedMachines: data.parameterisedMachines))
         newTokens[executing.0].forEach {
-            var fsm = $0.fsm
+            guard var fsm = $0.data?.fsm else {
+                return
+            }
             fsm.externalVariables.enumerated().forEach { (offset, externalVariables) in
                 guard let (external, props) = externals.first(where: { $0.0.name == externalVariables.name }) else {
                     return

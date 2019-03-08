@@ -302,17 +302,18 @@ public class SwiftfsmParser: HelpableParser {
         return temp
     }
     
-    private func convertCharToView(_ c: Character) throws -> AnyKripkeStructureView<KripkeState> {
+    private func convertCharToView(_ c: Character) throws -> AnyKripkeStructureViewFactory<KripkeState> {
         switch c {
         case "g":
-            return AnyKripkeStructureView(GraphVizKripkeStructureView<KripkeState>())
+            return AnyKripkeStructureViewFactory(GraphVizKripkeStructureViewFactory<KripkeState>())
         case "n":
-            return AnyKripkeStructureView(NuSMVKripkeStructureView<KripkeState>())
+            return AnyKripkeStructureViewFactory(NuSMVKripkeStructureViewFactory<KripkeState>())
         case "t":
             throw ParsingErrors.generalError(error: "t view currently Not Implemented")
             //return TulipKripkeStructureView(factory: FilePrinterFactory())
         case "x":
-            return AnyKripkeStructureView(GexfKripkeStructureView<KripkeState>())
+            throw ParsingErrors.generalError(error: "x view currently Not Implemented")
+            //return AnyKripkeStructureView(GexfKripkeStructureView<KripkeState>())
         default:
             throw ParsingErrors.generalError(error: "Unknown value for Kripke Structure output flag.")
         }

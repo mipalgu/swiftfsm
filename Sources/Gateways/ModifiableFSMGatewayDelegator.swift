@@ -1,9 +1,9 @@
 /*
- * VerificationCycleKripkeStructureGeneratorFactoryType.swift
- * Verification
+ * ModifiableFSMGatewayDelegator.swift
+ * Gateways
  *
- * Created by Callum McColl on 10/9/18.
- * Copyright © 2018 Callum McColl. All rights reserved.
+ * Created by Callum McColl on 5/1/19.
+ * Copyright © 2019 Callum McColl. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -56,13 +56,72 @@
  *
  */
 
-import KripkeStructure
-import ModelChecking
+import swiftfsm
 
-public protocol VerificationCycleKripkeStructureGeneratorFactoryType {
+public protocol ModifiableFSMGatewayDelegator: ModifiableFSMGateway {
     
-    associatedtype Generator: LazyKripkeStructureGenerator
+    associatedtype Gateway: ModifiableFSMGateway
     
-    func make(tokens: [[VerificationToken]]) -> Generator
+    var gateway: Gateway { get set }
+    
+}
+
+extension ModifiableFSMGateway where Self: ModifiableFSMGatewayDelegator {
+    
+    public var delegate: FSMGatewayDelegate? {
+        get {
+            return self.gateway.delegate
+        } set {
+            self.gateway.delegate = newValue
+        }
+    }
+    
+    public var latestID: FSM_ID {
+        get {
+            return self.gateway.latestID
+        } set {
+            self.gateway.latestID = newValue
+        }
+    }
+    
+    public var fsms: [FSM_ID: FSMType] {
+        get {
+            return self.gateway.fsms
+        } set {
+            self.gateway.fsms = newValue
+        }
+    }
+    
+    public var ids: [String: FSM_ID] {
+        get {
+            return self.gateway.ids
+        } set {
+            self.gateway.ids = newValue
+        }
+    }
+    
+    public func id(of name: String) -> FSM_ID {
+        return self.gateway.id(of: name)
+    }
+    
+    public func fsm(fromID id: FSM_ID) -> AnyControllableFiniteStateMachine {
+        return self.gateway.fsm(fromID: id)
+    }
+    
+    public func call<R>(_ id: FSM_ID, withParameters parameters: [String : Any], caller: FSM_ID) -> Promise<R> {
+        return self.gateway.call(id, withParameters: parameters, caller: caller)
+    }
+    
+    public func callSelf<R>(_ id: FSM_ID, withParameters parameters: [String : Any]) -> Promise<R> {
+        return self.gateway.callSelf(id, withParameters: parameters)
+    }
+    
+    public func invoke<R>(_ id: FSM_ID, withParameters parameters: [String : Any], caller: FSM_ID) -> Promise<R> {
+        return self.gateway.invoke(id, withParameters: parameters, caller: caller)
+    }
+    
+    public func setup(_ id: FSM_ID) {
+        self.gateway.setup(id)
+    }
     
 }

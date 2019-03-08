@@ -1,9 +1,9 @@
 /*
- * VerificationCycleKripkeStructureGeneratorFactoryType.swift
- * Verification
+ * ParameterisedMachineData.swift 
+ * Verification 
  *
- * Created by Callum McColl on 10/9/18.
- * Copyright © 2018 Callum McColl. All rights reserved.
+ * Created by Callum McColl on 13/02/2019.
+ * Copyright © 2019 Callum McColl. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -57,12 +57,23 @@
  */
 
 import KripkeStructure
-import ModelChecking
+import KripkeStructureViews
+import swiftfsm
 
-public protocol VerificationCycleKripkeStructureGeneratorFactoryType {
+public struct ParameterisedMachineData {
     
-    associatedtype Generator: LazyKripkeStructureGenerator
+    public let id: FSM_ID
     
-    func make(tokens: [[VerificationToken]]) -> Generator
+    public let fsm: AnyParameterisedFiniteStateMachine
+    
+    public let fullyQualifiedName: String
+    
+    public let parameters: Set<String>
+    
+    public let inPlace: Bool
+    
+    public let tokens: [[VerificationToken]]
+    
+    public let view: AnyKripkeStructureView<KripkeState>
     
 }

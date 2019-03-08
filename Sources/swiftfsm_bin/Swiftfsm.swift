@@ -85,13 +85,13 @@ public class Swiftfsm<
     SF: SchedulerFactory,
     MF: MachineFactory,
     KF: KripkeStructureGeneratorFactory
-> where KF.View == AggregateKripkeStructureView<KripkeState> {
+> where KF.ViewFactory == AggregateKripkeStructureViewFactory<KripkeState> {
 
     private let clfsmMachineLoader: MachineLoader
 
     private let kripkeStructureGeneratorFactory: KF
 
-    private let kripkeStructureView: AnyKripkeStructureView<KripkeState>
+    private let kripkeStructureViewFactory: AnyKripkeStructureViewFactory<KripkeState>
 
     private var names: [String: Int] = [:]
 
@@ -131,7 +131,7 @@ public class Swiftfsm<
     public init(
         clfsmMachineLoader: MachineLoader,
         kripkeStructureGeneratorFactory: KF,
-        kripkeStructureView: AnyKripkeStructureView<KripkeState>,
+        kripkeStructureViewFactory: AnyKripkeStructureViewFactory<KripkeState>,
         machineCompiler: Compiler,
         machineFactory: MF,
         machineLoader: MachineLoader,
@@ -141,7 +141,7 @@ public class Swiftfsm<
     ) {
         self.clfsmMachineLoader = clfsmMachineLoader
         self.kripkeStructureGeneratorFactory = kripkeStructureGeneratorFactory
-        self.kripkeStructureView = kripkeStructureView
+        self.kripkeStructureViewFactory = kripkeStructureViewFactory
         self.machineCompiler = machineCompiler
         self.machineFactory = machineFactory
         self.machineLoader = machineLoader
@@ -197,16 +197,16 @@ public class Swiftfsm<
         }
     }
 
-    private func generateKripkeStructure<KGF: KripkeStructureGeneratorFactory, Gateway: ModifiableFSMGateway>(
+    private func generateKripkeStructure<KGF: KripkeStructureGeneratorFactory, Gateway: VerifiableGateway>(
         _ machines: [Machine],
         withGenerator generatorFactory: KGF,
-        andViews views: [AnyKripkeStructureView<KripkeState>],
+        andViews views: [AnyKripkeStructureViewFactory<KripkeState>],
         usingGateway gateway: Gateway
-    ) where KGF.View == AggregateKripkeStructureView<KripkeState> {
+    ) where KGF.ViewFactory == AggregateKripkeStructureViewFactory<KripkeState> {
         if machines.isEmpty {
             return
         }
-        let generator = generatorFactory.make(fromMachines: machines, usingView: AggregateKripkeStructureView(views: views))
+        let generator = generatorFactory.make(fromMachines: machines, usingViewFactory: AggregateKripkeStructureViewFactory(views: views))
         generator.generate(usingGateway: gateway)
     }
 
@@ -222,9 +222,9 @@ public class Swiftfsm<
 
     private func handleJobs(inTask task: Task) {
         KRIPKE = task.generateKripkeStructure
-        let views = task.kripkeStructureViews ?? [self.kripkeStructureView]
+        let views: [AnyKripkeStructureViewFactory<KripkeState>] = task.kripkeStructureViews ?? [self.kripkeStructureViewFactory]
         guard let supportedScheduler = task.scheduler else {
-            let scheduler = self.schedulerFactory.make()
+            let scheduler: SF._Scheduler = self.schedulerFactory.make()
             let machines: [Machine] = task.jobs.flatMap { self.handleJob($0, gateway: scheduler) }
             self.handleMachines(
                 machines,
@@ -264,8 +264,8 @@ public class Swiftfsm<
         task: Task,
         generator: KGF,
         scheduler: S,
-        views: [AnyKripkeStructureView<KripkeState>]
-    ) where KGF.View == AggregateKripkeStructureView<KripkeState> {
+        views: [AnyKripkeStructureViewFactory<KripkeState>]
+    ) where KGF.ViewFactory == AggregateKripkeStructureViewFactory<KripkeState> {
         if task.generateKripkeStructure {
             self.generateKripkeStructure(machines, withGenerator: generator, andViews: views, usingGateway: scheduler)
         }

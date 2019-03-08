@@ -1,9 +1,9 @@
 /*
- * VerificationCycleKripkeStructureGeneratorFactoryType.swift
+ * LazyKripkeStructureGeneratorDelegate.swift
  * Verification
  *
- * Created by Callum McColl on 10/9/18.
- * Copyright © 2018 Callum McColl. All rights reserved.
+ * Created by Callum McColl on 18/1/19.
+ * Copyright © 2019 Callum McColl. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -56,13 +56,20 @@
  *
  */
 
+import Gateways
 import KripkeStructure
-import ModelChecking
+import swiftfsm
+import swift_helpers
 
-public protocol VerificationCycleKripkeStructureGeneratorFactoryType {
+public protocol LazyKripkeStructureGeneratorDelegate: class {
     
-    associatedtype Generator: LazyKripkeStructureGenerator
-    
-    func make(tokens: [[VerificationToken]]) -> Generator
+    /**
+     *  Fetch the initial states and finish states of a parameterised machine.
+     *
+     *  This information is used by `LazyKripkeStructureGenerator`s
+     *  in order to easily generate states for when an fsm invokes or calls
+     *  another fsm.
+     */
+    func resultsForCall<Gateway: VerifiableGateway>(_: LazyKripkeStructureGenerator, call: CallData, withGateway: Gateway) -> SortedCollection<(UInt, Any?)>
     
 }

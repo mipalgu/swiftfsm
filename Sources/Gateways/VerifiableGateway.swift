@@ -1,9 +1,9 @@
 /*
- * VerificationCycleKripkeStructureGeneratorFactoryType.swift
- * Verification
+ * VerifiableGateway.swift
+ * Gateways
  *
- * Created by Callum McColl on 10/9/18.
- * Copyright © 2018 Callum McColl. All rights reserved.
+ * Created by Callum McColl on 17/02/19.
+ * Copyright © 2019 Callum McColl. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -56,13 +56,22 @@
  *
  */
 
-import KripkeStructure
-import ModelChecking
+public protocol VerifiableGateway: ModifiableFSMGateway {
+    
+    associatedtype GatewayData
+    
+    var gatewayData: GatewayData { get set }
+    
+}
 
-public protocol VerificationCycleKripkeStructureGeneratorFactoryType {
+extension VerifiableGateway where Self: VerifiableGatewayDelegator {
     
-    associatedtype Generator: LazyKripkeStructureGenerator
-    
-    func make(tokens: [[VerificationToken]]) -> Generator
+    public var gatewayData: Gateway.GatewayData {
+        get {
+            return self.gateway.gatewayData
+        } set {
+            self.gateway.gatewayData = newValue
+        }
+    }
     
 }

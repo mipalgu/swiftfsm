@@ -62,13 +62,24 @@ public final class PromiseData {
     
     public var fsm: AnyParameterisedFiniteStateMachine
     
-    public var hasFinished: Bool
+    public var hasFinished: Bool {
+        get {
+            return self._hasFinished
+        } set {
+            if true == newValue {
+                self.result = self.fsm.resultContainer.result
+            }
+            self._hasFinished = newValue
+        }
+    }
     
-    fileprivate var result: Any? = nil
+    fileprivate var _hasFinished: Bool
+    
+    public var result: Any? = nil
     
     public init(fsm: AnyParameterisedFiniteStateMachine, hasFinished: Bool = true) {
         self.fsm = fsm
-        self.hasFinished = hasFinished
+        self._hasFinished = hasFinished
     }
     
     public func makePromise<T>() -> Promise<T> {

@@ -65,17 +65,18 @@ import MachineStructure
 
 public final class PassiveRoundRobinKripkeStructureGeneratorFactory: KripkeStructureGeneratorFactory {
     
-    public typealias View = AggregateKripkeStructureView<KripkeState>
+    public typealias ViewFactory = AggregateKripkeStructureViewFactory<KripkeState>
     
     public init() {}
     
-    public func make(fromMachines machines: [Machine], usingView view: AggregateKripkeStructureView<KripkeState>) -> ScheduleCycleKripkeStructureGenerator<
+    public func make(fromMachines machines: [Machine], usingViewFactory viewFactory: ViewFactory) -> ScheduleCycleKripkeStructureGenerator<
         ExternalsSpinnerDataExtractor<
             MirrorKripkePropertiesRecorder,
             KripkeStatePropertySpinnerConverter
         >,
-        VerificationCycleKripkeStructureGeneratorFactory<HashTableCycleDetector<KripkeStatePropertyList>, View>,
-        SequentialPerScheduleCycleTokenizer
+        VerificationCycleKripkeStructureGeneratorFactory<HashTableCycleDetector<KripkeStatePropertyList>>,
+        SequentialPerScheduleCycleTokenizer,
+        ViewFactory
     > {
         return ScheduleCycleKripkeStructureGenerator(
             machines: machines,
@@ -84,10 +85,10 @@ public final class PassiveRoundRobinKripkeStructureGeneratorFactory: KripkeStruc
                 extractor: MirrorKripkePropertiesRecorder()
             ),
             factory: VerificationCycleKripkeStructureGeneratorFactory(
-                cycleDetector: HashTableCycleDetector<KripkeStatePropertyList>(),
-                view: view
+                cycleDetector: HashTableCycleDetector<KripkeStatePropertyList>()
             ),
-            tokenizer: SequentialPerScheduleCycleTokenizer()
+            tokenizer: SequentialPerScheduleCycleTokenizer(),
+            viewFactory: viewFactory
         )
     }
 

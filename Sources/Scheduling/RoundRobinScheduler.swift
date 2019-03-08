@@ -56,15 +56,8 @@
  *
  */
 
-#if os(OSX)
-import Darwin
-#elseif os(Linux)
-import Glibc
-#endif
-
 import FSM
 import Gateways
-import IO
 import MachineStructure
 import MachineLoading
 import swiftfsm
@@ -73,10 +66,14 @@ import Utilities
 /**
  *  Responsible for the execution of machines.
  */
-public class RoundRobinScheduler<Tokenizer: SchedulerTokenizer>: Scheduler where
+public class RoundRobinScheduler<Tokenizer: SchedulerTokenizer>: Scheduler, VerifiableGatewayDelegator where
     Tokenizer.Object == Machine,
     Tokenizer.SchedulerToken == SchedulerToken
 {
+
+    public typealias Gateway = StackGateway
+    
+    public var gateway: StackGateway
 
     private let tokenizer: Tokenizer
 
@@ -84,57 +81,45 @@ public class RoundRobinScheduler<Tokenizer: SchedulerTokenizer>: Scheduler where
 
     private let scheduleHandler: ScheduleHandler
     
-    private let stackLimit: Int
-    
-    private let printer: Printer
-    
-    fileprivate var promises: [FSM_ID: (fsm: AnyParameterisedFiniteStateMachine, stack: [PromiseData])] = [:]
-    
-    fileprivate var invocations: Bool = false
-    
-    public var delegate: FSMGatewayDelegate?
-    
-    public var latestID: FSM_ID = 0
-    
-    public var fsms: [FSM_ID : FSMType] = [:]
-    
-    public var ids: [String: FSM_ID] = [:]
-    
     /**
      *  Create a new `RoundRobinScheduler`.
      *
      *  - Parameter machines: All the `Machine`s that will be executed.
      */
-    public init(tokenizer: Tokenizer, unloader: MachineUnloader, scheduleHandler: ScheduleHandler, stackLimit: Int = 8192, printer: Printer = CommandLinePrinter(errorStream: StderrOutputStream(), messageStream: StdoutOutputStream(), warningStream: StdoutOutputStream())) {
+    public init(
+        gateway: StackGateway = StackGateway(),
+        tokenizer: Tokenizer,
+        unloader: MachineUnloader,
+        scheduleHandler: ScheduleHandler
+    ) {
+        self.gateway = gateway
         self.tokenizer = tokenizer
         self.unloader = unloader
         self.scheduleHandler = scheduleHandler
-        self.stackLimit = stackLimit
-        self.printer = printer
     }
     
     /**
      *  Start executing all machines.
      */
     public func run(_ machines: [Machine]) -> Void {
-        self.promises = [:]
+        self.gateway.stacks = [:]
+        machines.forEach { self.addToGateway($0.fsm, dependencies: $0.dependencies, prefix: $0.name
+            + ".") }
         let tokens = self.tokenizer.separate(machines)
         tokens.forEach {
             $0.forEach {
-                // Create id's for all fsms.
-                let id = self.id(of: $0.fullyQualifiedName)
-                self.fsms[id] = $0.type
                 guard let parameterisedFSM = $0.type.asParameterisedFiniteStateMachine else {
                     return
                 }
                 parameterisedFSM.suspend()
+                let id = self.gateway.id(of: $0.fullyQualifiedName)
                 if false == $0.isRootFSM {
-                    self.promises[id] = (parameterisedFSM, [])
+                    self.gateway.stacks[id] = []
                     return
                 }
                 let clone = parameterisedFSM.clone()
                 clone.restart()
-                self.promises[id] = (parameterisedFSM, [PromiseData(fsm: clone, hasFinished: false)])
+                self.gateway.stacks[id] = [PromiseData(fsm: clone, hasFinished: false)]
             }
         }
         var jobs = self.fetchJobs(fromTokens: tokens)
@@ -148,19 +133,18 @@ public class RoundRobinScheduler<Tokenizer: SchedulerTokenizer>: Scheduler where
                 let machines: Set<Machine> = self.getMachines(fromJob: job)
                 machines.forEach { $0.fsm.takeSnapshot() }
                 for (id, fsm, machine) in job {
-                    let fsm = self.promises[id]?.stack.first?.fsm.asScheduleableFiniteStateMachine ?? fsm
+                    let fsm = self.gateway.stacks[id]?.first?.fsm.asScheduleableFiniteStateMachine ?? fsm
                     machine.clock.update(fromFSM: fsm)
                     DEBUG = machine.debug
                     if (true == scheduleHandler.handleUnloadedMachine(fsm)) {
                         jobs[i].remove(at: j)
                         continue
                     }
-                    self.invocations = false
                     fsm.next()
-                    finish = finish && (fsm.hasFinished || fsm.isSuspended) && (false == self.invocations)
-                    if true == fsm.hasFinished, nil != self.promises[id] {
-                        self.promises[id]?.stack.first?.hasFinished = true
-                        self.promises[id]?.stack.removeFirst()
+                    finish = finish && (fsm.hasFinished || fsm.isSuspended)
+                    if true == fsm.hasFinished, false == (self.gateway.stacks[id]?.isEmpty ?? true) {
+                        self.gateway.stacks[id]?.first?.hasFinished = true
+                        self.gateway.stacks[id]?.removeFirst()
                         finish = false
                     }
                     j += 1
@@ -175,43 +159,10 @@ public class RoundRobinScheduler<Tokenizer: SchedulerTokenizer>: Scheduler where
         }
     }
     
-    public func invoke<R>(_ id: FSM_ID, withParameters parameters: [String: Any]) -> Promise<R> {
-        guard let existingPromiseData = self.promises[id] else {
-            self.error("Attempting to invoke FSM with id \(id) when it has not been scheduled.")
-        }
-        guard true == existingPromiseData.stack.isEmpty else {
-            self.error("Attempting to invoke FSM with id \(id) when it is already running.")
-        }
-        let promiseData = self.handleInvocation(id: id, fsm: existingPromiseData.fsm, withParameters: parameters)
-        self.delegate?.hasInvoked(inGateway: self, fsm: existingPromiseData.fsm, withId: id, storingResultsIn: promiseData)
-        return promiseData.makePromise()
-    }
-    
-    public func invokeSelf<R>(_ id: FSM_ID, withParameters parameters: [String: Any]) -> Promise<R> {
-        guard let existingPromiseData = self.promises[id] else {
-            self.error("Attempting to invoke FSM with id \(id) when it has not been scheduled.")
-        }
-        guard existingPromiseData.stack.count <= self.stackLimit else {
-            self.error("Stack Overflow: Attempting to call FSM with id \(id) more times than the current stack limit (\(self.stackLimit)).")
-        }
-        let promiseData = self.handleInvocation(id: id, fsm: existingPromiseData.fsm, withParameters: parameters)
-        self.delegate?.hasInvokedSelf(inGateway: self, fsm: existingPromiseData.fsm, withId: id, storingResultsIn: promiseData)
-        return promiseData.makePromise()
-    }
-    
-    fileprivate func handleInvocation(id: FSM_ID, fsm: AnyParameterisedFiniteStateMachine, withParameters parameters: [String: Any]) -> PromiseData {
-        let promiseData = PromiseData(fsm: fsm.clone(), hasFinished: false)
-        promiseData.fsm.parametersFromDictionary(parameters)
-        promiseData.fsm.restart()
-        self.promises[id]?.stack.insert(promiseData, at: 0)
-        self.invocations = true
-        return promiseData
-    }
-    
     private func fetchJobs(fromTokens tokens: [[SchedulerToken]]) -> [[(FSM_ID, AnyScheduleableFiniteStateMachine, Machine)]] {
         return tokens.map { tokens in
             tokens.map { token in
-                return (self.id(of: token.fullyQualifiedName), token.fsm, token.machine)
+                return (self.gateway.id(of: token.fullyQualifiedName), token.fsm, token.machine)
             }
         }
     }
@@ -224,9 +175,26 @@ public class RoundRobinScheduler<Tokenizer: SchedulerTokenizer>: Scheduler where
         return machines
     }
     
-    fileprivate func error(_ str: String) -> Never {
-        self.printer.error(str: str)
-        exit(EXIT_FAILURE)
+    fileprivate func addToGateway(_ fsm: FSMType, dependencies: [Dependency], prefix: String) {
+        let id = self.gateway.id(of: prefix + fsm.name)
+        self.gateway.fsms[id] = fsm
+        for dependency in dependencies {
+            let subprefix = prefix + fsm.name + "."
+            switch dependency {
+            case .callableParameterisedMachine(let subfsm, let subdependencies):
+                switch fsm {
+                case .controllableFSM:
+                    self.gateway.stacks[id] = []
+                default:
+                    break
+                }
+                self.addToGateway(.parameterisedFSM(subfsm), dependencies: subdependencies, prefix: subprefix)
+            case .invokableParameterisedMachine(let subfsm, let subdependencies):
+                self.addToGateway(.parameterisedFSM(subfsm), dependencies: subdependencies, prefix: subprefix)
+            case .submachine(let subfsm, let subdependencies):
+                self.addToGateway(.controllableFSM(subfsm), dependencies: subdependencies, prefix: subprefix)
+            }
+        }
     }
     
 }

@@ -69,37 +69,6 @@ public protocol ModifiableFSMGateway: FSMGateway {
     
     var ids: [String: FSM_ID] { get set }
     
-}
-
-extension ModifiableFSMGateway {
-    
-    public func fsm(fromID id: FSM_ID) -> AnyControllableFiniteStateMachine {
-        guard let fsm = self.fsms[id] else {
-            fatalError("FSM with id '\(id)' does not exist.")
-        }
-        guard let controllableFSM = fsm.asControllableFiniteStateMachine else {
-            fatalError("Unable to fetch FSM with id '\(id)' as it is not a controllable FSM.")
-        }
-        self.delegate?.hasFetchedFsm(inGateway: self, fsm: controllableFSM, withId: id)
-        return controllableFSM
-    }
-    
-    public func id(of name: String) -> FSM_ID {
-        guard let id = self.ids[name] else {
-            let id = self.latestID
-            self.ids[name] = id
-            self.latestID = self.latestID.advanced(by: 1)
-            return id
-        }
-        return id
-    }
-    
-    public func invokeSelf<R>(_ name: String, withParameters parameters: [String: Any]) -> Promise<R> {
-        return self.invokeSelf(self.id(of: name), withParameters: parameters)
-    }
-    
-    public func invoke<R>(_ name: String, withParameters parameters: [String: Any]) -> Promise<R> {
-        return self.invoke(self.id(of: name), withParameters: parameters)
-    }
+    func setup(_: FSM_ID)
     
 }

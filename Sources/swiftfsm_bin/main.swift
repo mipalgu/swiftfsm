@@ -64,10 +64,12 @@ import Darwin
 
 import FSM
 import IO
+import KripkeStructure
 import KripkeStructureViews
 import MachineStructure
 import MachineLoading
 import MachineCompiling
+import Libraries
 import ModelChecking
 import Scheduling
 import Parsing
@@ -97,12 +99,12 @@ func run() {
     let machineLoader = NullMachineLoader()
     #else
     let compiler = SwiftMachinesCompiler()
-    let machineLoader = MachinesMachineLoader(libraryLoader: libraryLoader)
+    let machineLoader = MachinesMachineLoader(libraryLoader: LibrarySymbolLoader(creator: DynamicLibraryCreator()))
     #endif
     Swiftfsm(
         clfsmMachineLoader: CLFSMMachineLoader(),
         kripkeStructureGeneratorFactory: RoundRobinKripkeStructureGeneratorFactory(),
-        kripkeStructureView: AnyKripkeStructureView(NuSMVKripkeStructureView()),
+        kripkeStructureViewFactory: AnyKripkeStructureViewFactory(NuSMVKripkeStructureViewFactory<KripkeState>()),
         machineCompiler: compiler,
         machineFactory: SimpleMachineFactory(),
         machineLoader: MachineLoaderStrategy(

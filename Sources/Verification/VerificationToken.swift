@@ -59,13 +59,36 @@
 import swiftfsm
 import MachineStructure
 import FSMVerification
+import KripkeStructureViews
+import KripkeStructure
 
-public struct VerificationToken {
+public enum VerificationToken {
     
-    public let fsm: AnyScheduleableFiniteStateMachine
+    var data: VerificationToken.Data? {
+        switch self {
+        case .skip:
+            return nil
+        case .verify(let data):
+            return data
+        }
+    }
     
-    public let machine: Machine
+    case skip
     
-    public let externalVariables: [ExternalVariablesVerificationData]
+    case verify(data: VerificationToken.Data)
+    
+    public struct Data {
+        
+        public let id: FSM_ID
+        
+        public let fsm: FSMType
+        
+        public let machine: Machine
+        
+        public let externalVariables: [ExternalVariablesVerificationData]
+        
+        public let parameterisedMachines: [FSM_ID: ParameterisedMachineData]
+        
+    }
     
 }

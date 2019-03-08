@@ -57,6 +57,7 @@
  */
 
 import FSM
+import Gateways
 import KripkeStructure
 import MachineStructure
 import ModelChecking
@@ -68,6 +69,10 @@ public final class VerificationTokenExecuter<StateGenerator: KripkeStateGenerato
     fileprivate let worldCreator: WorldCreator
     
     fileprivate let recorder = MirrorKripkePropertiesRecorder()
+    
+    fileprivate var calls: [FSM_ID: [CallData]] = [:]
+    
+    public weak var delegate: VerificationTokenExecuterDelegate?
     
     public init(stateGenerator: StateGenerator, worldCreator: WorldCreator = WorldCreator()) {
         self.stateGenerator = stateGenerator
@@ -81,41 +86,113 @@ public final class VerificationTokenExecuter<StateGenerator: KripkeStateGenerato
         atOffset offset: Int,
         withExternals externals: [(AnySnapshotController, KripkeStatePropertyList)],
         andClock clock: UInt,
-        andLastState lastState: KripkeState?
-    ) -> ([KripkeState], [UInt], [(AnySnapshotController, KripkeStatePropertyList)]) {
+        andParameterisedMachines parameterisedMachines: [FSM_ID: ParameterisedMachineData],
+        andLastState lastState: KripkeState?,
+        usingCallStack callStack: [FSM_ID: [CallData]],
+        andPreviousResults results: [FSM_ID: Any?]
+    ) -> ([KripkeState], [UInt], [(AnySnapshotController, KripkeStatePropertyList)], [FSM_ID: [CallData]], [FSM_ID: Any?]) {
+        self.calls = [:]
+        var results = results
         let token = tokens[executing][offset]
-        token.machine.clock.forcedRunningTime = clock
-        token.machine.clock.lastClockValues = []
+        let data = token.data!
+        data.machine.clock.forcedRunningTime = clock
+        data.machine.clock.lastClockValues = []
         var externals = externals
         let state = fsm.currentState.name
+        print("create preWorld")
         let preWorld = self.worldCreator.createWorld(
             fromExternals: externals,
+            andParameterisedMachines: parameterisedMachines,
             andTokens: tokens,
             andLastState: lastState,
             andExecuting: executing,
             andExecutingToken: offset,
             withState: state,
+            usingCallStack: callStack,
             worldType: .beforeExecution
         )
         let preState = self.stateGenerator.generateKripkeState(fromWorld: preWorld, withLastState: lastState)
-        fsm.next()
-        fsm.externalVariables.forEach { external in
-            for var (i, (e, _)) in externals.enumerated() where e.name == external.name {
-                e.val = external.val
-                externals[i] = (e, self.recorder.takeRecord(of: e.val))
+        var newCallStack: [FSM_ID: [CallData]] = callStack
+        if false == (callStack[data.id]?.last?.inPlace ?? false) {
+            print("actually execute")
+            fsm.next()
+            fsm.externalVariables.forEach { external in
+                for var (i, (e, _)) in externals.enumerated() where e.name == external.name {
+                    e.val = external.val
+                    externals[i] = (e, self.recorder.takeRecord(of: e.val))
+                }
             }
+            print("handle new calls")
+            // Create a new call stack if we detect that the fsm has invoked or called another fsm.
+            newCallStack = self.mergeStacks(callStack, self.calls)
+            for id in self.calls.keys {
+                results[id] = nil
+            }
+        } else if let callData = callStack[data.id]?.last {
+            newCallStack[data.id] = Array((newCallStack[data.id] ?? []).dropLast()) + [CallData(data: callData.data, parameters: callData.parameters, promiseData: callData.promiseData, runs: callData.runs + 1)]
         }
+        print("create postWorld")
+        //print("self.calls: \(self.calls)")
         let postWorld = self.worldCreator.createWorld(
             fromExternals: externals,
+            andParameterisedMachines: parameterisedMachines,
             andTokens: tokens,
             andLastState: preState,
             andExecuting: executing,
             andExecutingToken: offset,
             withState: state,
+            usingCallStack: newCallStack,
             worldType: .afterExecution
         )
         let postState = self.stateGenerator.generateKripkeState(fromWorld: postWorld, withLastState: preState)
-        return ([preState, postState], token.machine.clock.lastClockValues, externals)
+        return ([preState, postState], data.machine.clock.lastClockValues, externals, newCallStack, results)
+    }
+    
+    fileprivate func mergeStacks(_ lhs: [FSM_ID: [CallData]], _ rhs: [FSM_ID: [CallData]]) -> [FSM_ID: [CallData]] {
+        var newStack: [FSM_ID: [CallData]] = lhs
+        for (id, stack) in rhs {
+            newStack[id] = (lhs[id] ?? []) + stack
+        }
+        return newStack
+    }
+    
+}
+
+extension VerificationTokenExecuter: FSMGatewayDelegate {
+    
+    
+    public func hasCalled(inGateway gateway: ModifiableFSMGateway, fsm: AnyParameterisedFiniteStateMachine, withId id: FSM_ID, withParameters parameters: [String: Any], caller: FSM_ID, storingResultsIn promiseData: PromiseData) {
+        print("hasCalled: \(fsm.name)")
+        guard let delegate = self.delegate else {
+            fatalError("delegate has not been set.")
+            return
+        }
+        guard let (name, _) = gateway.ids.first(where: { $1 == id }) else {
+            fatalError("Unable to fetch fully qualified name from id.")
+        }
+        let data = delegate.scheduleInfo(of: id, caller: caller, inGateway: gateway)
+        self.addCall(CallData(data: data, parameters: parameters, promiseData: promiseData, runs: 0))
+    }
+    
+    public func hasInvoked(inGateway gateway: ModifiableFSMGateway, fsm: AnyParameterisedFiniteStateMachine, withId id: FSM_ID, withParameters parameters: [String: Any], caller: FSM_ID, storingResultsIn promiseData: PromiseData) {
+        print("hasInvoked: \(fsm.name)")
+        guard let delegate = self.delegate else {
+            fatalError("delegate has not been set.")
+            return
+        }
+        guard let (name, _) = gateway.ids.first(where: { $1 == id }) else {
+            fatalError("Unable to fetch fully qualified name from id.")
+        }
+        let data = delegate.scheduleInfo(of: id, caller: caller, inGateway: gateway)
+        self.addCall(CallData(data: data, parameters: parameters, promiseData: promiseData, runs: 0))
+    }
+    
+    fileprivate func addCall(_ data: CallData) {
+        if nil == self.calls[data.id] {
+            self.calls[data.id] = [data]
+            return
+        }
+        self.calls[data.id]?.append(data)
     }
     
 }
