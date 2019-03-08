@@ -180,6 +180,7 @@ public final class ScheduleCycleKripkeStructureGenerator<
         andGateway gateway: Gateway,
         parents: [Dependency]
     ) -> ([[VerificationToken]], AnyKripkeStructureView<KripkeState>) {
+        let dependencyFullyQualifiedName = (parents + [dependency]).reduce(machine.name) { $0 + "." + $1.fsm.name }
         let verificationTokens = tokens.map { (arr: [SchedulerToken]) in
             arr.map { (token: SchedulerToken) -> VerificationToken in
                 // Check to see if we can skip this token.
@@ -193,7 +194,7 @@ public final class ScheduleCycleKripkeStructureGenerator<
                 let isRootOfToken =
                     dependencyPath.isEmpty
                     && machine.name + "." + machine.fsm.name == token.fullyQualifiedName
-                if !isRootOfToken && self.shouldSkip(token: token, inDependencyPath: dependencyPath)  {
+                if !isRootOfToken && token.fullyQualifiedName != dependencyFullyQualifiedName && self.shouldSkip(token: token, inDependencyPath: dependencyPath)  {
                     return .skip
                 }
                 let dependency = dependencyPath.last ?? convertRootFSMToDependency(inMachine: machine)
@@ -213,7 +214,7 @@ public final class ScheduleCycleKripkeStructureGenerator<
                 return .verify(data: VerificationToken.Data(id: gateway.id(of: token.fullyQualifiedName), fsm: dependencyPath.last?.fsm ?? token.machine.fsm, machine: token.machine, externalVariables: externals, parameterisedMachines: parameterisedMachines))
             }
         }
-        let identifier = parents.isEmpty ? machine.name : (parents + [dependency]).reduce(machine.name) { $0 + "." + $1.fsm.name }
+        let identifier = parents.isEmpty ? machine.name : dependencyFullyQualifiedName
         guard let view = self.viewCache[identifier] else {
             let view = AnyKripkeStructureView(self.viewFactory.make(identifier: identifier))
             self.viewCache[identifier] = view
@@ -290,7 +291,7 @@ public final class ScheduleCycleKripkeStructureGenerator<
         // Skip if the token represents a machine that has parants that are callable parameterised machines.
         let isCallableMachine = nil != dependencyPath.first {
             switch $0 {
-            case .callableParameterisedMachine:
+            case .callableParameterisedMachine, .invokableParameterisedMachine:
                 return true
             default:
                 return false
