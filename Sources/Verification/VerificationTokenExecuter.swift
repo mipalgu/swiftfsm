@@ -99,7 +99,6 @@ public final class VerificationTokenExecuter<StateGenerator: KripkeStateGenerato
         data.machine.clock.lastClockValues = []
         var externals = externals
         let state = fsm.currentState.name
-        print("create preWorld")
         let preWorld = self.worldCreator.createWorld(
             fromExternals: externals,
             andParameterisedMachines: parameterisedMachines,
@@ -114,7 +113,6 @@ public final class VerificationTokenExecuter<StateGenerator: KripkeStateGenerato
         let preState = self.stateGenerator.generateKripkeState(fromWorld: preWorld, withLastState: lastState)
         var newCallStack: [FSM_ID: [CallData]] = callStack
         if false == (callStack[data.id]?.last?.inPlace ?? false) {
-            print("actually execute")
             fsm.next()
             fsm.externalVariables.forEach { external in
                 for var (i, (e, _)) in externals.enumerated() where e.name == external.name {
@@ -122,7 +120,6 @@ public final class VerificationTokenExecuter<StateGenerator: KripkeStateGenerato
                     externals[i] = (e, self.recorder.takeRecord(of: e.val))
                 }
             }
-            print("handle new calls")
             // Create a new call stack if we detect that the fsm has invoked or called another fsm.
             newCallStack = self.mergeStacks(callStack, self.calls)
             for id in self.calls.keys {
@@ -131,7 +128,6 @@ public final class VerificationTokenExecuter<StateGenerator: KripkeStateGenerato
         } else if let callData = callStack[data.id]?.last {
             newCallStack[data.id] = Array((newCallStack[data.id] ?? []).dropLast()) + [CallData(data: callData.data, parameters: callData.parameters, promiseData: callData.promiseData, runs: callData.runs + 1)]
         }
-        print("create postWorld")
         //print("self.calls: \(self.calls)")
         let postWorld = self.worldCreator.createWorld(
             fromExternals: externals,
@@ -162,7 +158,6 @@ extension VerificationTokenExecuter: FSMGatewayDelegate {
     
     
     public func hasCalled(inGateway gateway: ModifiableFSMGateway, fsm: AnyParameterisedFiniteStateMachine, withId id: FSM_ID, withParameters parameters: [String: Any], caller: FSM_ID, storingResultsIn promiseData: PromiseData) {
-        print("hasCalled: \(fsm.name)")
         guard let delegate = self.delegate else {
             fatalError("delegate has not been set.")
             return
@@ -175,7 +170,6 @@ extension VerificationTokenExecuter: FSMGatewayDelegate {
     }
     
     public func hasInvoked(inGateway gateway: ModifiableFSMGateway, fsm: AnyParameterisedFiniteStateMachine, withId id: FSM_ID, withParameters parameters: [String: Any], caller: FSM_ID, storingResultsIn promiseData: PromiseData) {
-        print("hasInvoked: \(fsm.name)")
         guard let delegate = self.delegate else {
             fatalError("delegate has not been set.")
             return

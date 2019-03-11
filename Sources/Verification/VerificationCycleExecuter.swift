@@ -135,8 +135,6 @@ public final class VerificationCycleExecuter {
                 fatalError("Unable to fetch data of verification token.")
             }
             gateway.gatewayData = job.gatewayData as! Gateway.GatewayData
-            print("before: \(gateway.gatewayData)")
-            print("executing: \(data.fsm.name).\(data.fsm.currentState.name)")
             let (generatedStates, clockValues, newExternals, newCallStack, newResults) = self.executer.execute(
                 fsm: data.fsm.asScheduleableFiniteStateMachine,
                 inTokens: newTokens,
@@ -149,7 +147,6 @@ public final class VerificationCycleExecuter {
                 usingCallStack: job.callStack,
                 andPreviousResults: job.results
             )
-            print("after: \(gateway.gatewayData)")
             guard let first = generatedStates.first else {
                 continue
             }
@@ -166,23 +163,15 @@ public final class VerificationCycleExecuter {
                 runs.append((lastState, newTokens, newCallStack, gateway.gatewayData, newResults))
                 continue
             }
-            print("create new executing job")
             // Add a Job for the next token to execute.
             jobs.append(Job(index: job.index + 1, tokens: newTokens, externals: newExternals, initialState: job.initialState ?? generatedStates.first, lastState: lastState, clock: 0, usedClockValues: [], callStack: newCallStack, results: newResults, gatewayData: gateway.gatewayData))
         }
-        print("finish executing")
         states.value.forEach { (arg: (key: KripkeStatePropertyList, value: KripkeState)) in
             if lastStates.contains(arg.key) {
                 return
             }
-            print("before commit")
-            print("printing state: \(arg.value)")
             view.commit(state: arg.value, isInitial: initial && initialStates.contains(arg.value.properties))
-            print("after commit")
-            fflush(stdout)
         }
-        print("return executing")
-        fflush(stdout)
         return runs
     }
     

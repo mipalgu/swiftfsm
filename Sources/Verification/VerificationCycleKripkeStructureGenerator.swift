@@ -119,16 +119,12 @@ public final class VerificationCycleKripkeStructureGenerator<
     }
     
     public func generate<Gateway: VerifiableGateway, View: KripkeStructureView>(usingGateway gateway: Gateway, andView view: View, storingResultsFor resultID: FSM_ID?) -> SortedCollection<(UInt, Any?)>? where View.State == KripkeState {
-        print("generate")
         self.view = AnyKripkeStructureView(view)
         let initialGatewayData = gateway.gatewayData
         var jobs = self.createInitialJobs(fromTokens: self.tokens, andGateway: gateway)
-        print("generate: -2")
-        print("generate: -1")
         let defaultExternals = self.createExternals(fromTokens: self.tokens)
         var globalDetectorCache = self.cycleDetector.initialData
         var foundCycle = false
-        print("generate: 1")
         var results: SortedCollection<(UInt, Any?)> = SortedCollection(comparator: AnyComparator {
             if $0.0 < $1.0 {
                 return .orderedAscending
@@ -138,7 +134,6 @@ public final class VerificationCycleKripkeStructureGenerator<
             }
             return .orderedSame
         })
-        print("generate: 2")
         var parameterisedMachines: [FSM_ID: ParameterisedMachineData] = [:]
         self.tokens.forEach { $0.forEach {
             guard let tokenData = $0.data else {
@@ -148,11 +143,8 @@ public final class VerificationCycleKripkeStructureGenerator<
                 parameterisedMachines[id] = data
             }
         }}
-        print("generate: 3")
         var counter = 0
-        print("start generating")
         while false == jobs.isEmpty {
-            print("new job, storing results for: \(resultID ?? -1)")
             let job = jobs.removeFirst()
             // Skip this job if all tokens are .skip tokens.
             if nil == job.tokens[job.executing].first(where: { nil != $0.data }) {
@@ -172,13 +164,10 @@ public final class VerificationCycleKripkeStructureGenerator<
                 continue
             }
             // Create results for all parameterised machines that are finished.
-            print("call stack: \(job.callStack.mapValues { $0.map { $0.fsm.name } })")
             let (allResults, handledAllResults) = self.createAllResults(forJob: job, withGateway: gateway, andInitialGatewayData: initialGatewayData)
-            print("allResults: \(allResults)")
             // Create spinner for results.
             let resultsSpinner = self.createSpinner(forValues: allResults)
             while let parameterisedResults = resultsSpinner() {
-                print("spinning for: \(parameterisedResults)")
                 // Create a spinner for the external variables.
                 let externalsData = self.fetchUniqueExternalsData(fromTokens: [job.tokens[job.executing]])
                 let spinner = self.spinnerConstructor.makeSpinner(forExternals: externalsData)
@@ -200,7 +189,6 @@ public final class VerificationCycleKripkeStructureGenerator<
                         callData.promiseData.hasFinished = result != nil
                         callData.promiseData.result = result
                     }
-                    print("createWorld: \(counter)")
                     counter += 1
                     // Check for cycles.
                     let world = self.worldCreator.createWorld(
@@ -224,12 +212,10 @@ public final class VerificationCycleKripkeStructureGenerator<
                             return nil
                         }
                     }
-                    print("Clone fsms.")
                     // Clone all fsms.
                     let clones = job.tokens.enumerated().map { Array(self.cloner.clone(jobs: $1, withLastRecords: job.lastRecords[$0])) }
                     // Clone callStack
                     let callStack = job.callStack.mapValues { $0.map { CallData(data: $0.data, parameters: $0.parameters, promiseData: $0.promiseData, runs: $0.runs) } }
-                    print("execute")
                     gateway.gatewayData = job.gatewayData as! Gateway.GatewayData
                     // Execute and generate kripke states.
                     let runs = self.executer.execute(
@@ -245,7 +231,6 @@ public final class VerificationCycleKripkeStructureGenerator<
                         andPreviousResults: job.results,
                         withDelegate: self
                     )
-                    print("handle runs")
                     // Create jobs for each different 'run' possible.
                     for (lastState, newTokens, newCallStack, newGatewayData, newResults) in runs {
                         // Do not generate more jobs if we do not have a last state -- means that nothing was executed, should never happen.
@@ -290,15 +275,10 @@ public final class VerificationCycleKripkeStructureGenerator<
                             gatewayData: newGatewayData
                         ))
                     }
-                    print("finish handle runs, storing results in: \(resultID ?? -1)")
                 }
-                print("finished external variables.")
             }
-            print("finish spinning results.")
             _ = job.lastState.map { self.view.commit(state: $0, isInitial: false) }
         }
-        print("finished generating kripke structure")
-        fflush(stdout)
         if true == foundCycle {
             return nil
         }
@@ -315,14 +295,12 @@ public final class VerificationCycleKripkeStructureGenerator<
         var handledAllResults = true
         for (id, calls) in job.callStack {
             guard nil == job.results[id], let callData = calls.last else {
-                print("we haven't made any calls: \(calls)")
                 continue
             }
             gateway.gatewayData = initialGatewayData
             guard let callResults = self.delegate?.resultsForCall(self, call: callData, withGateway: gateway) else {
                 fatalError("Unable to fetch results for call: \(callData)")
             }
-            print("callResult: \(callResults)")
             allResults[id] = callResults.find((callData.runs, nil)).lazy.map { $0.1 }
             handledAllResults = handledAllResults && callData.runs > (callResults.last?.0 ?? 0)
         }

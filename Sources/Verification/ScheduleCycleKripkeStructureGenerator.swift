@@ -343,7 +343,6 @@ extension ScheduleCycleKripkeStructureGenerator: LazyKripkeStructureGeneratorDel
                 return .orderedAscending
             }
         }
-        print("resultsForCall: \(callData)")
         let key = "id: \(callData.id), parameters: \(callData.parameters.sorted { $0.key < $1.key })"
         if let results = self.resultsCache[key] {
             return results

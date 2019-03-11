@@ -91,7 +91,6 @@ public final class StackGateway: ModifiableFSMGateway, ModifiableFSMGatewayDefau
     }
     
     public func invoke<R>(_ id: FSM_ID, withParameters parameters: [String: Any], caller: FSM_ID) -> Promise<R> {
-        print("stack: \(self.stacks.mapValues { $0.map { $0.fsm.name } }), parameters: \(parameters)")
         guard let fsm = self.fsms[id]?.asParameterisedFiniteStateMachine else {
             self.error("Attempting to invoke FSM with id \(id) when it has not been scheduled.")
         }
@@ -105,7 +104,6 @@ public final class StackGateway: ModifiableFSMGateway, ModifiableFSMGatewayDefau
     }
     
     public func call<R>(_ id: FSM_ID, withParameters parameters: [String : Any], caller: FSM_ID) -> Promise<R> {
-        print("stack: \(self.stacks.mapValues { $0.map { $0.fsm.name } })")
         guard let fsm = self.fsms[id]?.asParameterisedFiniteStateMachine else {
             self.error("Attempting to call FSM with id \(id) when it has not been scheduled.")
         }
