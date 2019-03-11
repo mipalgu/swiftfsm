@@ -6,11 +6,8 @@
 
 ALL_TARGETS=host-local
 
-.ifdef SYSROOT
+.ifdef SYSSYSROOT
 export LANG=/usr/lib/locale/en_US
-ROOT=${SYSROOT}
-.else
-ROOT=
 .endif
 
 .if ${OS} == Darwin
@@ -19,18 +16,22 @@ EXT=dylib
 EXT=so
 .endif
 
-SWIFTCFLAGS+=-I${ROOT}/usr/local/include/swiftfsm
-.ifdef SYSROOT
+FSM_INCLUDE_DIR?=${SYSSYSROOT}/usr/local/include/swiftfsm
+FSM_LIB_DIR?=${SYSSYSROOT}usr/local/lib
+INSTALL_DIR?=/usr/local/include/swiftfsm
+
+SWIFTCFLAGS+=-I${FSM_INCLUDE_DIR} -L${FSM_LIB_DIR}
+.ifdef SYSSYSROOT
 SWIFT_BUILD_FLAGS=--destination destination.json
 .endif
 
 all:	all-real
 
 install:
-	mkdir -p ${ROOT}/usr/local/include/swiftfsm
-	cp .build/${SWIFT_BUILD_CONFIG}/lib*.${EXT} ${ROOT}/usr/local/lib
-	cp .build/${SWIFT_BUILD_CONFIG}/*.swift* ${ROOT}/usr/local/include/swiftfsm
-	cp .build/${SWIFT_BUILD_CONFIG}/swiftfsm ${ROOT}/usr/local/bin/
+	mkdir -p ${SYSROOT}/usr/local/include/swiftfsm
+	cp .build/${SWIFT_BUILD_CONFIG}/lib*.${EXT} ${SYSROOT}/usr/local/lib
+	cp .build/${SWIFT_BUILD_CONFIG}/*.swift* ${SYSROOT}/usr/local/include/swiftfsm
+	cp .build/${SWIFT_BUILD_CONFIG}/swiftfsm ${SYSROOT}/usr/local/bin/
 
 generate-xcodeproj:
 	$Ecp config.sh.in config.sh
@@ -57,13 +58,13 @@ test:	swift-test-package
 
 .include "../../../mk/mipal.mk"
 
-CFLAGS+=-I${ROOT}/usr/local/include -I${ROOT}/usr/local/include/gusimplewhiteboard -I${ROOT}/usr/local/include/swiftfsm -I${ROOT}/usr/local/include/CLReflect -I${GUNAO_DIR}/Common
-SWIFTCFLAGS=-I${ROOT}/usr/local/include -I${ROOT}/usr/local/include/swiftfsm
+CFLAGS+=-I${FSM_INCLUDE_DIR} -L${FSM_LIB_DIR} -I${SYSROOT}/usr/local/include -I${SYSROOT}/usr/local/include/gusimplewhiteboard -I${SYSROOT}/usr/local/include/swiftfsm -I${SYSROOT}/usr/local/include/CLReflect -I${GUNAO_DIR}/Common
+SWIFTCFLAGS=-I${FSM_INCLUDE_DIR} -I${SYSROOT}/usr/local/include -I${SYSROOT}/usr/local/include/swiftfsm
 .ifdef NO_FOUNDATION
 SWIFTCFLAGS+=-DNO_FOUNDATION
 .endif
-LDFLAGS+=-L${ROOT}/usr/local/lib -lgusimplewhiteboard -lFSM -ldl -lCLReflect -lgu_util
+LDFLAGS+=-L${FSM_LIB_DIR} -L${SYSROOT}/usr/local/lib -lgusimplewhiteboard -lFSM -ldl -lCLReflect -lgu_util
 
 .ifdef SYSROOT
-LDFLAGS+=-L${ROOT}/lib -L${ROOT}/lib/swift/linux-fuse-ld=/home/user/src/swift-tc/ctc-linux64-atom-2.5.2.74/bin/i686-aldebaran-linux-gnu-ld 
+LDFLAGS+=-L${SYSROOT}/lib -L${SYSROOT}/lib/swift/linux-fuse-ld=/home/user/src/swift-tc/ctc-linux64-atom-2.5.2.74/bin/i686-aldebaran-linux-gnu-ld 
 .endif
