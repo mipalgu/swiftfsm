@@ -88,6 +88,7 @@ public final class VerificationCycleKripkeStructureGenerator<
     fileprivate let spinnerConstructor: SpinnerConstructor
     fileprivate let worldCreator: WorldCreator
     fileprivate let recorder = MirrorKripkePropertiesRecorder()
+    fileprivate let fetcher = ExternalVariablesFetcher()
     
     public weak var delegate: LazyKripkeStructureGeneratorDelegate?
     
@@ -122,7 +123,7 @@ public final class VerificationCycleKripkeStructureGenerator<
         self.view = AnyKripkeStructureView(view)
         let initialGatewayData = gateway.gatewayData
         var jobs = self.createInitialJobs(fromTokens: self.tokens, andGateway: gateway)
-        let defaultExternals = self.createExternals(fromTokens: self.tokens)
+        let defaultExternals = self.fetcher.createExternals(fromTokens: self.tokens)
         var globalDetectorCache = self.cycleDetector.initialData
         var foundCycle = false
         var results: SortedCollection<(UInt, Any?)> = SortedCollection(comparator: AnyComparator {
@@ -166,14 +167,14 @@ public final class VerificationCycleKripkeStructureGenerator<
             // Create results for all parameterised machines that are finished.
             let (allResults, handledAllResults) = self.createAllResults(forJob: job, withGateway: gateway, andInitialGatewayData: initialGatewayData)
             // Create spinner for results.
-            let resultsSpinner = self.createSpinner(forValues: allResults)
+            let resultsSpinner = self.fetcher.createSpinner(forValues: allResults)
             while let parameterisedResults = resultsSpinner() {
                 // Create a spinner for the external variables.
-                let externalsData = self.fetchUniqueExternalsData(fromTokens: [job.tokens[job.executing]])
+                let externalsData = self.fetcher.fetchUniqueExternalsData(fromTokens: [job.tokens[job.executing]])
                 let spinner = self.spinnerConstructor.makeSpinner(forExternals: externalsData)
                 // Generate kirpke states for each variation of external variables.
                 while let externals = spinner() {
-                    let externals = nil == job.lastState ? self.mergeExternals(externals, with: defaultExternals) : externals
+                    let externals = nil == job.lastState ? self.fetcher.mergeExternals(externals, with: defaultExternals) : externals
                     guard let firstData = job.tokens[job.executing].first(where: { nil != $0.data })?.data else {
                         break
                     }
@@ -307,23 +308,6 @@ public final class VerificationCycleKripkeStructureGenerator<
         return (allResults, handledAllResults)
     }
     
-    fileprivate func mergeExternals(_ externals: [(AnySnapshotController, KripkeStatePropertyList)], with dict: [String: (AnySnapshotController, KripkeStatePropertyList)]) -> [(AnySnapshotController, KripkeStatePropertyList)] {
-        var dict = dict
-        for (external, ps) in externals {
-            dict[external.name] = (external, ps)
-        }
-        return Array(dict.values)
-    }
-    
-    fileprivate func createExternals(fromTokens tokens: [[VerificationToken]]) -> [String: (AnySnapshotController, KripkeStatePropertyList)] {
-        let allExternalsData = self.fetchUniqueExternalsData(fromTokens: tokens)
-        var d = [String: (AnySnapshotController, KripkeStatePropertyList)](minimumCapacity: allExternalsData.count)
-        allExternalsData.forEach {
-            d[$0.externalVariables.name] = ($0.externalVariables, $0.defaultValues)
-        }
-        return d
-    }
-    
     fileprivate func createInitialJobs<Gateway: VerifiableGateway>(fromTokens tokens: [[VerificationToken]], andGateway gateway: Gateway) -> [Job] {
         return [Job(
             initial: true,
@@ -338,65 +322,6 @@ public final class VerificationCycleKripkeStructureGenerator<
             foundResult: false,
             gatewayData: gateway.gatewayData
         )]
-    }
-    
-    fileprivate func fetchUniqueExternalsData(fromTokens tokens: [[VerificationToken]]) -> [ExternalVariablesVerificationData] {
-        var hashTable: Set<String> = []
-        var externals: [ExternalVariablesVerificationData] = []
-        for tokens in tokens {
-            tokens.forEach { ($0.data?.externalVariables ?? []).forEach {
-                if hashTable.contains($0.externalVariables.name) {
-                    return
-                }
-                externals.append($0)
-                hashTable.insert($0.externalVariables.name)
-            } }
-        }
-        return externals
-    }
-    
-    fileprivate func createSpinner<Key, Value, C: Collection>(forValues values: [Key: C]) -> () -> [Key: Value]? where C.Iterator.Element == Value {
-        func newSpinner(_ values: C) -> () -> Value? {
-            var i = values.startIndex
-            return {
-                guard i != values.endIndex else {
-                    return nil
-                }
-                defer { i = values.index(after: i) }
-                return values[i]
-            }
-        }
-        var spinners = values.mapValues(newSpinner)
-        guard var currentValues: [Key: Value] = spinners.failMap({
-            if let value = $1() {
-                return ($0, value)
-            }
-            return nil
-        }).map({ Dictionary(uniqueKeysWithValues: $0) })
-        else {
-            return { nil }
-        }
-        func handleSpinner(index: Dictionary<Key, () -> Value?>.Index) -> [Key: Value]? {
-            if index == spinners.endIndex {
-                return nil
-            }
-            let (key, spinner) = spinners[index]
-            if let value = spinner() {
-                currentValues[key] = value
-                return currentValues
-            }
-            spinners[key] = newSpinner(values[key]!)
-            guard let value = spinners[index].value() else {
-                return nil
-            }
-            currentValues[key] = value
-            return handleSpinner(index: spinners.index(after: index))
-        }
-        var first = true
-        return {
-            defer { first = false }
-            return first ? currentValues : handleSpinner(index: spinners.startIndex)
-        }
     }
     
     fileprivate struct Job {
