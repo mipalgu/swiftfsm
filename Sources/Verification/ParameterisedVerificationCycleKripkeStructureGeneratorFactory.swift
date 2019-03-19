@@ -56,9 +56,10 @@
  *
  */
 
+import KripkeStructure
 import ModelChecking
 
-public final class ParameterisedVerificationCycleKripkeStructureGeneratorFactory<Detector: CycleDetector>: ParameterisedVerificationCycleKripkeStructureGeneratorFactoryType {
+public final class ParameterisedVerificationCycleKripkeStructureGeneratorFactory<Detector: CycleDetector>: ParameterisedVerificationCycleKripkeStructureGeneratorFactoryType where Detector.Element == KripkeStatePropertyList {
     
     fileprivate let cycleDetector: Detector
     

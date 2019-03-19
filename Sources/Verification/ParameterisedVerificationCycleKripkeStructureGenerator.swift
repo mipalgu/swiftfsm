@@ -63,13 +63,26 @@ import ModelChecking
 import swiftfsm
 import swift_helpers
 
-public final class ParameterisedVerificationCycleKripkeStructureGenerator<Detector: CycleDetector>: LazyKripkeStructureGenerator {
+public final class ParameterisedVerificationCycleKripkeStructureGenerator<Detector: CycleDetector>: LazyKripkeStructureGenerator where Detector.Element == KripkeStatePropertyList {
     
     fileprivate let cycleDetector: Detector
     fileprivate let tokens: [[VerificationToken]]
     fileprivate let recorder = MirrorKripkePropertiesRecorder()
     fileprivate let generator = VerificationCycleKripkeStructureGeneratorFactory().make()
     fileprivate let fetcher: ExternalVariablesFetcher = ExternalVariablesFetcher()
+    
+    fileprivate lazy var tokensLookup: [FSM_ID: VerificationToken] = {
+        var dict: [FSM_ID: VerificationToken] = [:]
+        tokens.forEach { $0.forEach {
+            guard let data = $0.data else {
+                return
+            }
+            dict[data.id] = $0
+        }}
+        return dict
+    }()
+    
+    fileprivate var view: AnyKripkeStructureView<KripkeState>!
     
     public weak var delegate: LazyKripkeStructureGeneratorDelegate?
     
@@ -83,6 +96,7 @@ public final class ParameterisedVerificationCycleKripkeStructureGenerator<Detect
         andView view: View,
         storingResultsFor resultID: FSM_ID?
     ) -> SortedCollection<(UInt, Any?)>? where View.State == KripkeState {
+        self.view = AnyKripkeStructureView(view)
         let initialGatewayData = gateway.gatewayData
         var jobs = self.createInitialJobs(fromTokens: self.tokens, andGateway: gateway)
         var globalDetectorCache = self.cycleDetector.initialData
@@ -150,11 +164,12 @@ public final class ParameterisedVerificationCycleKripkeStructureGenerator<Detect
                     usingCycleDetector: self.cycleDetector,
                     usingGateway: gateway,
                     storingKripkeStructureIn: view,
-                    checkingForCyclesWith: globalDetectorCache,
+                    checkingForCyclesWith: &globalDetectorCache,
                     callingParameterisedMachines: parameterisedMachines,
                     withParameterisedResults: parameterisedResults,
                     storingResultsFor: resultID,
-                    handledAllResults: handledAllResults
+                    handledAllResults: handledAllResults,
+                    tokenExecuterDelegate: self
                 )
             }
         }
@@ -266,6 +281,49 @@ public final class ParameterisedVerificationCycleKripkeStructureGenerator<Detect
         
         let gatewayData: Any // Fix this type later.
         
+    }
+    
+}
+
+extension ParameterisedVerificationCycleKripkeStructureGenerator: VerificationTokenExecuterDelegate {
+    
+    public func scheduleInfo(of id: FSM_ID, caller: FSM_ID, inGateway gateway: ModifiableFSMGateway) -> ParameterisedMachineData {
+        guard let callerToken = self.tokensLookup[caller], let callerData = callerToken.data else {
+            fatalError("Unable to fetch caller token from caller id.")
+        }
+        if callerData.id == id {
+            let fsm = gateway.fsms[id]
+            guard let parameterisedFSM = fsm?.asParameterisedFiniteStateMachine else {
+                fatalError("Cannot call self if self is not a parameterised machine.")
+            }
+            guard let fullyQualifiedName = gateway.ids.first(where: { $0.value == id })?.key else {
+                fatalError("Unable to fetch fullyQualifiedName of self.")
+            }
+            return ParameterisedMachineData(
+                id: id,
+                fsm: parameterisedFSM,
+                fullyQualifiedName: fullyQualifiedName,
+                parameters: Set(self.recorder.takeRecord(of: parameterisedFSM.parameters).propertiesDictionary.keys),
+                inPlace: true,
+                tokens: self.tokens,
+                view: self.view
+            )
+        }
+        guard let data = callerData.parameterisedMachines[id] else {
+            fatalError("FSM with id '\(id)' is not callable by this FSM.")
+        }
+        return data
+    }
+    
+    public func shouldInclude(call callData: CallData, forCaller caller: FSM_ID) -> Bool {
+        guard let callerToken = self.tokensLookup[caller], let callerData = callerToken.data else {
+            return false
+        }
+        return nil != callerData.parameterisedMachines[callData.id]
+    }
+    
+    public func shouldInline(call callData: CallData, caller: FSM_ID) -> Bool {
+        return callData.id == caller
     }
     
 }
