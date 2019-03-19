@@ -66,6 +66,10 @@ struct VerificationState<CycleDetectorData> {
     
     var cycleCache: CycleDetectorData
     
+    var counter: Int
+    
+    var foundCycle: Bool
+    
     var tokens: [[VerificationToken]]
     
     var executing: Int
