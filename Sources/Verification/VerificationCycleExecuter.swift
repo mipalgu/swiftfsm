@@ -117,7 +117,7 @@ public final class VerificationCycleExecuter {
         andCallStack callStack: [FSM_ID: [CallData]],
         andPreviousResults results: [FSM_ID: Any?],
         withDelegate delegate: VerificationTokenExecuterDelegate
-    ) -> [(KripkeState?, [[VerificationToken]], [FSM_ID: [CallData]], Gateway.GatewayData, [FSM_ID: Any?])] where View.State == KripkeState {
+    ) -> [VerificationRun] where View.State == KripkeState {
         //swiftlint:disable:next line_length
         self.executer.delegate = delegate
         gateway.delegate = self.executer
@@ -127,7 +127,7 @@ public final class VerificationCycleExecuter {
         let states: Ref<[KripkeStatePropertyList: KripkeState]> = Ref(value: [:])
         var initialStates: HashSink<KripkeStatePropertyList, KripkeStatePropertyList> = HashSink()
         var lastStates: HashSink<KripkeStatePropertyList, KripkeStatePropertyList> = HashSink()
-        var runs: [(KripkeState?, [[VerificationToken]], [FSM_ID: [CallData]], Gateway.GatewayData, [FSM_ID: Any?])] = []
+        var runs: [VerificationRun] = []
         while false == jobs.isEmpty {
             let job = jobs.removeFirst()
             let newTokens = self.prepareTokens(job.tokens, executing: (executing, job.index), fromExternals: job.externals, usingCallStack: job.callStack)
@@ -160,7 +160,13 @@ public final class VerificationCycleExecuter {
             // Add tokens to runs when we have finished executing all of the tokens in a run.
             if job.index + 1 >= tokens[executing].count {
                 _ = lastState.map { lastStates.insert($0.properties) }
-                runs.append((lastState, newTokens, newCallStack, gateway.gatewayData, newResults))
+                runs.append(VerificationRun(
+                    lastState: lastState,
+                    tokens: newTokens,
+                    callStack: newCallStack,
+                    gatewayData: gateway.gatewayData,
+                    results: newResults
+                ))
                 continue
             }
             // Add a Job for the next token to execute.
