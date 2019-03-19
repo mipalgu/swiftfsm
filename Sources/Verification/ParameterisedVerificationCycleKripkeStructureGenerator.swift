@@ -68,15 +68,14 @@ public final class ParameterisedVerificationCycleKripkeStructureGenerator<Detect
     fileprivate let cycleDetector: Detector
     fileprivate let tokens: [[VerificationToken]]
     fileprivate let recorder = MirrorKripkePropertiesRecorder()
-    fileprivate let generator = VerificationCycleKripkeStructureGenerator()
+    fileprivate let generator = VerificationCycleKripkeStructureGeneratorFactory().make()
     fileprivate let fetcher: ExternalVariablesFetcher = ExternalVariablesFetcher()
     
     public weak var delegate: LazyKripkeStructureGeneratorDelegate?
     
-    public init(cycleDetector: Detector, tokens: [[VerificationToken]], generator: Generator) {
+    public init(cycleDetector: Detector, tokens: [[VerificationToken]]) {
         self.cycleDetector = cycleDetector
         self.tokens = tokens
-        self.generator = generator
     }
     
     public func generate<Gateway: VerifiableGateway, View: KripkeStructureView>(

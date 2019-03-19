@@ -1,9 +1,9 @@
 /*
- * VerificationCycleKripkeStructureGeneratorFactory.swift
+ * ParameterisedVerificationCycleKripkeStructureGeneratorFactoryType.swift
  * Verification
  *
- * Created by Callum McColl on 10/9/18.
- * Copyright © 2018 Callum McColl. All rights reserved.
+ * Created by Callum McColl on 19/3/19.
+ * Copyright © 2019 Callum McColl. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -56,27 +56,10 @@
  *
  */
 
-import KripkeStructure
-import KripkeStructureViews
-import ModelChecking
-import FSMVerification
-
-final class VerificationCycleKripkeStructureGeneratorFactory {
+public protocol ParameterisedVerificationCycleKripkeStructureGeneratorFactoryType {
     
-    func make() -> VerificationCycleKripkeStructureGenerator<
-        AggregateCloner<Cloner<KripkeStatePropertyListConverter>>,
-        MultipleExternalsSpinnerConstructor<
-            ExternalsSpinnerConstructor<SpinnerRunner>
-        >
-    > {
-        return VerificationCycleKripkeStructureGenerator(
-            cloner: AggregateCloner(cloner: Cloner(converter: KripkeStatePropertyListConverter())),
-            spinnerConstructor: MultipleExternalsSpinnerConstructor(
-                constructor: ExternalsSpinnerConstructor(
-                    runner: SpinnerRunner()
-                )
-            )
-        )
-    }
+    associatedtype Generator: LazyKripkeStructureGenerator
+    
+    func make(tokens: [[VerificationToken]]) -> Generator
     
 }

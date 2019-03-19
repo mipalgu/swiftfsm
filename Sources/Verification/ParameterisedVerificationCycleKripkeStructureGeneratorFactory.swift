@@ -1,9 +1,9 @@
 /*
- * VerificationCycleKripkeStructureGeneratorFactoryType.swift
+ * ParameterisedVerificationCycleKripkeStructureGeneratorFactory.swift
  * Verification
  *
- * Created by Callum McColl on 10/9/18.
- * Copyright © 2018 Callum McColl. All rights reserved.
+ * Created by Callum McColl on 19/3/19.
+ * Copyright © 2019 Callum McColl. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -56,13 +56,18 @@
  *
  */
 
-import KripkeStructure
 import ModelChecking
 
-public protocol VerificationCycleKripkeStructureGeneratorFactoryType {
+public final class ParameterisedVerificationCycleKripkeStructureGeneratorFactory<Detector: CycleDetector>: ParameterisedVerificationCycleKripkeStructureGeneratorFactoryType {
     
-    associatedtype Generator: LazyKripkeStructureGenerator
+    fileprivate let cycleDetector: Detector
     
-    func make(tokens: [[VerificationToken]]) -> Generator
+    public init(cycleDetector: Detector) {
+        self.cycleDetector = cycleDetector
+    }
+    
+    public func make(tokens: [[VerificationToken]]) -> ParameterisedVerificationCycleKripkeStructureGeneratoy<Detector> {
+        return ParameterisedVerificationCycleKripkeStructureGenerator(cycleDetector: self.cycleDetector)
+    }
     
 }

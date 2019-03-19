@@ -108,7 +108,7 @@ final class VerificationCycleKripkeStructureGenerator<
         checkingForCyclesWith globalDetectorCache: inout Detector.Data,
         callingParameterisedMachines parameterisedMachines: [FSM_ID: ParameterisedMachineData],
         withParameterisedResults parameterisedResults: [FSM_ID: C],
-        storingResultsFor resultID: FSM_ID,
+        storingResultsFor resultID: FSM_ID?,
         handledAllResults: Bool
     ) -> [VerificationState<Detector.Data>] where C.Element == Any?, Detector.Element == KripkeStatePropertyList {
         // Create a spinner for the external variables.
