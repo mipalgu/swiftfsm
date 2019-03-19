@@ -67,13 +67,13 @@ import swiftfsm
 import swiftfsm_helpers
 import Utilities
 
-public final class VerificationCycleExecuter {
+final class VerificationCycleExecuter {
     
     fileprivate let converter: KripkeStatePropertyListConverter
     fileprivate let executer: VerificationTokenExecuter<KripkeStateGenerator>
     fileprivate let worldCreator: WorldCreator = WorldCreator()
     
-    public init(
+    init(
         converter: KripkeStatePropertyListConverter = KripkeStatePropertyListConverter(),
         executer: VerificationTokenExecuter<KripkeStateGenerator> = VerificationTokenExecuter(stateGenerator: KripkeStateGenerator())
     ) {
@@ -105,7 +105,7 @@ public final class VerificationCycleExecuter {
         
     }
     
-    public func execute<View: KripkeStructureView, Gateway: VerifiableGateway>(
+    func execute<View: KripkeStructureView, Gateway: VerifiableGateway>(
         tokens: [[VerificationToken]],
         executing: Int,
         withExternals externals: [(AnySnapshotController, KripkeStatePropertyList)],
