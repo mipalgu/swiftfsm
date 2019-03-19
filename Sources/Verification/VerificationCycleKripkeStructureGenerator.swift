@@ -127,7 +127,6 @@ final class VerificationCycleKripkeStructureGenerator<
                 callData.promiseData.hasFinished = result != nil
                 callData.promiseData.result = result
             }
-            job.counter += 1
             // Check for cycles.
             let world = self.worldCreator.createWorld(
                 fromExternals: externals,

@@ -119,24 +119,13 @@ public final class ParameterisedVerificationCycleKripkeStructureGenerator<Detect
                 parameterisedMachines[id] = data
             }
         }}
-        var counter = 0
         while false == jobs.isEmpty {
             let job = jobs.removeFirst()
             // Skip this job if all tokens are .skip tokens.
             if nil == job.tokens[job.executing].first(where: { nil != $0.data }) {
-                jobs.append(Job(
-                    initial: job.initial,
-                    cache: job.cache,
-                    tokens: job.tokens,
-                    executing: (job.executing + 1) % job.tokens.count,
-                    lastState: job.lastState,
-                    lastRecords: job.lastRecords,
-                    runs: job.runs,
-                    callStack: job.callStack,
-                    results: job.results,
-                    foundResult: job.foundResult,
-                    gatewayData: job.gatewayData
-                ))
+                var newJob = job
+                newJob.executing = (job.executing + 1) % job.tokens.count
+                jobs.append(newJob)
                 continue
             }
             // Create results for all parameterised machines that are finished.
@@ -144,23 +133,8 @@ public final class ParameterisedVerificationCycleKripkeStructureGenerator<Detect
             // Create spinner for results.
             let resultsSpinner = self.createSpinner(forValues: allResults)
             while let parameterisedResults = resultsSpinner() {
-                let state = VerificationState<Detector.Data>(
-                    initial: job.initial,
-                    cycleCache: job.cache,
-                    counter: counter,
-                    foundCycle: foundCycle,
-                    tokens: job.tokens,
-                    executing: job.executing,
-                    lastState: job.lastState,
-                    lastRecords: job.lastRecords,
-                    runs: job.runs,
-                    callStack: job.callStack,
-                    results: job.results,
-                    foundResult: job.foundResult,
-                    gatewayData: job.gatewayData
-                )
                 let runs = self.generator.generate(
-                    fromState: state,
+                    fromState: job,
                     usingCycleDetector: self.cycleDetector,
                     usingGateway: gateway,
                     storingKripkeStructureIn: view,
@@ -171,15 +145,48 @@ public final class ParameterisedVerificationCycleKripkeStructureGenerator<Detect
                     handledAllResults: handledAllResults,
                     tokenExecuterDelegate: self
                 )
+                for var run in runs {
+                    // Do not generate more jobs if we do not have a last state -- means that nothing was executed, should never happen.
+                    guard let lastNewState = run.lastState else {
+                        continue
+                    }
+                    var allFinished = true // Are all fsms finished?
+                    var foundResult = run.foundResult
+                    for tokens in run.tokens {
+                        for token in tokens {
+                            guard let data = token.data else {
+                                continue
+                            }
+                            // Add any results for the finished fsms.
+                            if data.id == resultID && false == run.foundResult && data.fsm.hasFinished {
+                                results.insert((run.runs, data.fsm.resultContainer?.result))
+                                foundResult = true // Remember that we have found this result. Stops us adding this result more than once.
+                            }
+                            allFinished = allFinished && (data.fsm.hasFinished || data.fsm.isSuspended)
+                        }
+                    }
+                    // Add the lastNewState as a finishing state -- don't generate more jobs as all fsms have finished.
+                    if true == allFinished {
+                        view.commit(state: lastNewState, isInitial: false)
+                        continue
+                    }
+                    let newExecutingIndex = (run.executing + 1) % run.tokens.count
+                    foundCycle = foundCycle || run.foundCycle
+                    // Create a new job from the clones.
+                    run.executing = newExecutingIndex
+                    run.foundResult = foundResult
+                    jobs.append(run)
+                 }
             }
+            _ = job.lastState.map { view.commit(state: $0, isInitial: false) }
         }
         if true == foundCycle {
             return nil
         }
-        return nil
+        return results
     }
     
-    fileprivate func createAllResults<Gateway: VerifiableGateway>(forJob job: Job, withGateway gateway: Gateway, andInitialGatewayData initialGatewayData: Gateway.GatewayData) -> ([FSM_ID: LazyMapCollection<SortedCollectionSlice<(UInt, Any?)>, Any?>], Bool) {
+    fileprivate func createAllResults<Gateway: VerifiableGateway>(forJob job: VerificationState<Detector.Data>, withGateway gateway: Gateway, andInitialGatewayData initialGatewayData: Gateway.GatewayData) -> ([FSM_ID: LazyMapCollection<SortedCollectionSlice<(UInt, Any?)>, Any?>], Bool) {
         var allResults: [FSM_ID: LazyMapCollection<SortedCollectionSlice<(UInt, Any?)>, Any?>] = [:]
         allResults.reserveCapacity(job.callStack.count)
         var handledAllResults = true
@@ -197,20 +204,22 @@ public final class ParameterisedVerificationCycleKripkeStructureGenerator<Detect
         return (allResults, handledAllResults)
     }
     
-    fileprivate func createInitialJobs<Gateway: VerifiableGateway>(fromTokens tokens: [[VerificationToken]], andGateway gateway: Gateway) -> [Job] {
-        return [Job(
-            initial: true,
-            cache: self.cycleDetector.initialData,
-            tokens: tokens,
-            executing: 0,
-            lastState: nil,
-            lastRecords: tokens.map { $0.map { ($0.data?.fsm.asScheduleableFiniteStateMachine.base).map(self.recorder.takeRecord) ?? KripkeStatePropertyList() } },
-            runs: 0,
-            callStack: [:],
-            results: [:],
-            foundResult: false,
-            gatewayData: gateway.gatewayData
-        )]
+    fileprivate func createInitialJobs<Gateway: VerifiableGateway>(fromTokens tokens: [[VerificationToken]], andGateway gateway: Gateway) -> [VerificationState<Detector.Data>] {
+        return [VerificationState(
+                initial: true,
+                cycleCache: self.cycleDetector.initialData,
+                foundCycle: false,
+                tokens: tokens,
+                executing: 0,
+                lastState: nil,
+                lastRecords: tokens.map { $0.map { ($0.data?.fsm.asScheduleableFiniteStateMachine.base).map(self.recorder.takeRecord) ?? KripkeStatePropertyList() } },
+                runs: 0,
+                callStack: [:],
+                results: [:],
+                foundResult: false,
+                gatewayData: gateway.gatewayData
+            )
+        ]
     }
     
     public func createSpinner<Key, Value, C: Collection>(forValues values: [Key: C]) -> () -> [Key: Value]? where C.Iterator.Element == Value {
@@ -255,32 +264,6 @@ public final class ParameterisedVerificationCycleKripkeStructureGenerator<Detect
             defer { first = false }
             return first ? currentValues : handleSpinner(index: spinners.startIndex)
         }
-    }
-    
-    fileprivate struct Job {
-        
-        let initial: Bool
-        
-        let cache: Detector.Data
-        
-        let tokens: [[VerificationToken]]
-        
-        let executing: Int
-        
-        let lastState: KripkeState?
-        
-        let lastRecords: [[KripkeStatePropertyList]]
-        
-        let runs: UInt
-        
-        let callStack: [FSM_ID: [CallData]]
-        
-        let results: [FSM_ID: Any?]
-        
-        let foundResult: Bool
-        
-        let gatewayData: Any // Fix this type later.
-        
     }
     
 }
