@@ -75,7 +75,7 @@ import swift_helpers
 
 public final class ScheduleCycleKripkeStructureGenerator<
     Extractor: ExternalsSpinnerDataExtractorType,
-    Factory: VerificationCycleKripkeStructureGeneratorFactoryType,
+    Factory: ParameterisedVerificationCycleKripkeStructureGeneratorFactoryType,
     Tokenizer: SchedulerTokenizer,
     ViewFactory: KripkeStructureViewFactory
 >: KripkeStructureGenerator where

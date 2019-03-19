@@ -75,7 +75,7 @@ public final class RoundRobinKripkeStructureGeneratorFactory: KripkeStructureGen
             MirrorKripkePropertiesRecorder,
             KripkeStatePropertySpinnerConverter
         >,
-        VerificationCycleKripkeStructureGeneratorFactory<HashTableCycleDetector<KripkeStatePropertyList>>,
+        ParameterisedVerificationCycleKripkeStructureGeneratorFactory<HashTableCycleDetector<KripkeStatePropertyList>>,
         SequentialPerRingletTokenizer,
         ViewFactory
     > {
@@ -85,7 +85,7 @@ public final class RoundRobinKripkeStructureGeneratorFactory: KripkeStructureGen
                 converter: KripkeStatePropertySpinnerConverter(),
                 extractor: MirrorKripkePropertiesRecorder()
             ),
-            factory: VerificationCycleKripkeStructureGeneratorFactory(
+            factory: ParameterisedVerificationCycleKripkeStructureGeneratorFactory(
                 cycleDetector: HashTableCycleDetector<KripkeStatePropertyList>()
             ),
             tokenizer: SequentialPerRingletTokenizer(),

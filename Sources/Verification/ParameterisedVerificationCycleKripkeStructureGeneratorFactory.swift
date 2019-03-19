@@ -66,8 +66,8 @@ public final class ParameterisedVerificationCycleKripkeStructureGeneratorFactory
         self.cycleDetector = cycleDetector
     }
     
-    public func make(tokens: [[VerificationToken]]) -> ParameterisedVerificationCycleKripkeStructureGeneratoy<Detector> {
-        return ParameterisedVerificationCycleKripkeStructureGenerator(cycleDetector: self.cycleDetector)
+    public func make(tokens: [[VerificationToken]]) -> ParameterisedVerificationCycleKripkeStructureGenerator<Detector> {
+        return ParameterisedVerificationCycleKripkeStructureGenerator(cycleDetector: self.cycleDetector, tokens: tokens)
     }
     
 }
