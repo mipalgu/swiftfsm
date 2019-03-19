@@ -73,50 +73,6 @@ public final class ExternalVariablesFetcher {
         return d
     }
     
-    public func createSpinner<Key, Value, C: Collection>(forValues values: [Key: C]) -> () -> [Key: Value]? where C.Iterator.Element == Value {
-        func newSpinner(_ values: C) -> () -> Value? {
-            var i = values.startIndex
-            return {
-                guard i != values.endIndex else {
-                    return nil
-                }
-                defer { i = values.index(after: i) }
-                return values[i]
-            }
-        }
-        var spinners = values.mapValues(newSpinner)
-        guard var currentValues: [Key: Value] = spinners.failMap({
-            if let value = $1() {
-                return ($0, value)
-            }
-            return nil
-        }).map({ Dictionary(uniqueKeysWithValues: $0) })
-            else {
-                return { nil }
-        }
-        func handleSpinner(index: Dictionary<Key, () -> Value?>.Index) -> [Key: Value]? {
-            if index == spinners.endIndex {
-                return nil
-            }
-            let (key, spinner) = spinners[index]
-            if let value = spinner() {
-                currentValues[key] = value
-                return currentValues
-            }
-            spinners[key] = newSpinner(values[key]!)
-            guard let value = spinners[index].value() else {
-                return nil
-            }
-            currentValues[key] = value
-            return handleSpinner(index: spinners.index(after: index))
-        }
-        var first = true
-        return {
-            defer { first = false }
-            return first ? currentValues : handleSpinner(index: spinners.startIndex)
-        }
-    }
-    
     public func fetchUniqueExternalsData(fromTokens tokens: [[VerificationToken]]) -> [ExternalVariablesVerificationData] {
         var hashTable: Set<String> = []
         var externals: [ExternalVariablesVerificationData] = []
