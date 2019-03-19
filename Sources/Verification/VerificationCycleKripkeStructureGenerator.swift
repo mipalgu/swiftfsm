@@ -102,7 +102,7 @@ final class VerificationCycleKripkeStructureGenerator<
         storingResultsFor resultID: FSM_ID?,
         handledAllResults: Bool,
         tokenExecuterDelegate: VerificationTokenExecuterDelegate
-    ) -> [VerificationState<Detector.Data>] where Detector.Element == KripkeStatePropertyList {
+    ) -> [VerificationState<Detector.Data>] where View.State == KripkeState, Detector.Element == KripkeStatePropertyList {
         // Create a spinner for the external variables.
         let defaultExternals = self.fetcher.createExternals(fromTokens: state.tokens)
         let externalsData = self.fetcher.fetchUniqueExternalsData(fromTokens: [state.tokens[state.executing]])
