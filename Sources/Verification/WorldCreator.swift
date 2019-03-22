@@ -117,48 +117,30 @@ public final class WorldCreator {
             var inner: KripkeStatePropertyList = [:]
             var innerValues: [String: Any] = [:]
             guard let callData = callStack[id]?.last else {
-                func convertProperty(_ property: KripkeStateProperty) -> KripkeStateProperty {
-                    switch property.type {
-                    case .EmptyCollection:
-                        return property
-                    case .Collection(let properties):
-                        let converted = properties.map(convertProperty)
-                        return KripkeStateProperty(type: .Collection(converted), value: converted.map { $0.value })
-                    case .Compound(let list):
-                        return KripkeStateProperty(type: .Compound(setNil(list)), value: [:])
-                    default:
-                        return KripkeStateProperty(type: .String, value: "nil")
-                    }
-                }
-                func setNil(_ parameterList: KripkeStatePropertyList) -> KripkeStatePropertyList {
-                    var list: [String: KripkeStateProperty] = [:]
-                    list.reserveCapacity(parameterList.count)
-                    for (name, property) in parameterList {
-                        list[name] = convertProperty(property)
-                    }
-                    return KripkeStatePropertyList(list)
-                }
                 let parameterList = self.recorder.takeRecord(of: data.fsm.parameters)
-                inner["parameters"] = KripkeStateProperty(type: .Compound(setNil(parameterList)), value: data.fsm.parameters)
+                inner["parameters"] = KripkeStateProperty(type: .Compound(parameterList), value: data.fsm.parameters)
+                innerValues["parameters"] = data.fsm.parameters
                 inner["hasFinished"] = KripkeStateProperty(type: .Bool, value: false)
                 innerValues["hasFinished"] = false
-                let (type, value) = self.recorder.getKripkeStatePropertyType(data.fsm.resultContainer.result)
-                inner["result"] = KripkeStateProperty(type: .String, value: "nil")
-                innerValues["result"] = "nil"
+                //let (type, value) = self.recorder.getKripkeStatePropertyType(data.fsm.resultContainer.result)
+                inner["result"] = KripkeStateProperty(type: .Optional(nil), value: Optional<String>.none as Any)
+                innerValues["result"] = Optional<String>.none
                 inner["runCount"] = KripkeStateProperty(type: .UInt, value: UInt(0))
                 innerValues["runCount"] = 0
                 props[data.fullyQualifiedName] = KripkeStateProperty(type: .Compound(inner), value: innerValues)
                 values[data.fullyQualifiedName] = innerValues
                 continue
             }
-            inner["parameters"] = KripkeStateProperty(type: .Compound(self.recorder.takeRecord(of: callData.parameters)), value: callData.parameters)
+            let (type, value) = self.recorder.getKripkeStatePropertyType(callData.parameters)
+            inner["parameters"] = KripkeStateProperty(type: type, value: value)
+            innerValues["parameters"] = value
             inner["hasFinished"] = KripkeStateProperty(type: .Bool, value: callData.promiseData.hasFinished)
             innerValues["hasFinished"] = callData.promiseData.hasFinished
             if nil == callData.promiseData.result {
-                inner["result"] = KripkeStateProperty(type: .String, value: "nil")
-                innerValues["result"] = "nil"
+                inner["result"] = KripkeStateProperty(type: .Optional(nil), value: Optional<String>.none as Any)
+                innerValues["result"] = Optional<String>.none
             } else {
-                let (type, value) = self.recorder.getKripkeStatePropertyType(callData.promiseData.result)
+                let (type, value) = self.recorder.getKripkeStatePropertyType(callData.promiseData.result as Any)
                 inner["result"] = KripkeStateProperty(type: type, value: value)
                 innerValues["result"] = value
             }
