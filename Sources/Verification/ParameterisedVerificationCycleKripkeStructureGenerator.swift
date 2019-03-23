@@ -175,6 +175,7 @@ public final class ParameterisedVerificationCycleKripkeStructureGenerator<Detect
                     // Create a new job from the clones.
                     run.executing = newExecutingIndex
                     run.foundResult = foundResult
+                    run.initial = false
                     jobs.append(run)
                  }
             }
