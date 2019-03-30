@@ -133,7 +133,7 @@ public final class ParameterisedVerificationCycleKripkeStructureGenerator<Detect
             // Create spinner for results.
             let resultsSpinner = self.createSpinner(forValues: allResults)
             while let parameterisedResults = resultsSpinner() {
-                gateway.gatewayData = job.gatewayData as! Gateway.GatewayData
+                gateway.gatewayData = job.gatewayData
                 let runs = self.generator.generate(
                     fromState: job,
                     usingCycleDetector: self.cycleDetector,
@@ -188,7 +188,7 @@ public final class ParameterisedVerificationCycleKripkeStructureGenerator<Detect
         return results
     }
     
-    fileprivate func createAllResults<Gateway: VerifiableGateway>(forJob job: VerificationState<Detector.Data>, withGateway gateway: Gateway, andInitialGatewayData initialGatewayData: Gateway.GatewayData) -> ([FSM_ID: LazyMapCollection<SortedCollectionSlice<(UInt, Any?)>, Any?>], Bool) {
+    fileprivate func createAllResults<Gateway: VerifiableGateway>(forJob job: VerificationState<Detector.Data, Gateway.GatewayData>, withGateway gateway: Gateway, andInitialGatewayData initialGatewayData: Gateway.GatewayData) -> ([FSM_ID: LazyMapCollection<SortedCollectionSlice<(UInt, Any?)>, Any?>], Bool) {
         var allResults: [FSM_ID: LazyMapCollection<SortedCollectionSlice<(UInt, Any?)>, Any?>] = [:]
         allResults.reserveCapacity(job.callStack.count)
         var handledAllResults = true
@@ -206,7 +206,7 @@ public final class ParameterisedVerificationCycleKripkeStructureGenerator<Detect
         return (allResults, handledAllResults)
     }
     
-    fileprivate func createInitialJobs<Gateway: VerifiableGateway>(fromTokens tokens: [[VerificationToken]], andGateway gateway: Gateway) -> [VerificationState<Detector.Data>] {
+    fileprivate func createInitialJobs<Gateway: VerifiableGateway>(fromTokens tokens: [[VerificationToken]], andGateway gateway: Gateway) -> [VerificationState<Detector.Data, Gateway.GatewayData>] {
         return [VerificationState(
                 initial: true,
                 cycleCache: self.cycleDetector.initialData,

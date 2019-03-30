@@ -60,7 +60,7 @@ import ModelChecking
 import KripkeStructure
 import swiftfsm
 
-struct VerificationState<CycleDetectorData> {
+struct VerificationState<CycleDetectorData, GatewayData> {
     
     var initial: Bool
     
@@ -84,6 +84,6 @@ struct VerificationState<CycleDetectorData> {
     
     var foundResult: Bool
     
-    var gatewayData: Any // Fix this type later.
+    var gatewayData: GatewayData // Fix this type later.
     
 }

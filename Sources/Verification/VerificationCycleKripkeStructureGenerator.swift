@@ -92,7 +92,7 @@ final class VerificationCycleKripkeStructureGenerator<
     }
     
     func generate<Detector: CycleDetector, Gateway: VerifiableGateway, View: KripkeStructureView>(
-        fromState state: VerificationState<Detector.Data>,
+        fromState state: VerificationState<Detector.Data, Gateway.GatewayData>,
         usingCycleDetector cycleDetector: Detector,
         usingGateway gateway: Gateway,
         storingKripkeStructureIn view: View,
@@ -102,12 +102,12 @@ final class VerificationCycleKripkeStructureGenerator<
         storingResultsFor resultID: FSM_ID?,
         handledAllResults: Bool,
         tokenExecuterDelegate: VerificationTokenExecuterDelegate
-    ) -> [VerificationState<Detector.Data>] where View.State == KripkeState, Detector.Element == KripkeStatePropertyList {
+    ) -> [VerificationState<Detector.Data, Gateway.GatewayData>] where View.State == KripkeState, Detector.Element == KripkeStatePropertyList {
         // Create a spinner for the external variables.
         let defaultExternals = self.fetcher.createExternals(fromTokens: state.tokens)
         let externalsData = self.fetcher.fetchUniqueExternalsData(fromTokens: [state.tokens[state.executing]])
         let spinner = self.spinnerConstructor.makeSpinner(forExternals: externalsData)
-        var runs: [VerificationState<Detector.Data>] = []
+        var runs: [VerificationState<Detector.Data, Gateway.GatewayData>] = []
         // Generate kirpke states for each variation of external variables.
         while let externals = spinner() {
             var job = state
@@ -152,7 +152,7 @@ final class VerificationCycleKripkeStructureGenerator<
             let clones = job.tokens.enumerated().map { Array(self.cloner.clone(jobs: $1, withLastRecords: job.lastRecords[$0])) }
             // Clone callStack
             let callStack = job.callStack.mapValues { $0.map { CallData(data: $0.data, parameters: $0.parameters, promiseData: $0.promiseData, runs: $0.runs) } }
-            gateway.gatewayData = job.gatewayData as! Gateway.GatewayData
+            gateway.gatewayData = job.gatewayData
             // Execute and generate kripke states.
             let generatedRuns = self.executer.execute(
                 tokens: clones,

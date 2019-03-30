@@ -59,7 +59,7 @@
 import KripkeStructure
 import swiftfsm
 
-struct VerificationRun {
+struct VerificationRun<GatewayData> {
     
     var lastState: KripkeState?
     
@@ -67,7 +67,7 @@ struct VerificationRun {
     
     var callStack: [FSM_ID: [CallData]]
     
-    var gatewayData: Any
+    var gatewayData: GatewayData
     
     var results: [FSM_ID: Any?]
     

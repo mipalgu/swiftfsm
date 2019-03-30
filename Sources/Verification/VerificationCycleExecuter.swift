@@ -81,7 +81,7 @@ final class VerificationCycleExecuter {
         self.executer = executer
     }
     
-    fileprivate struct Job {
+    fileprivate struct Job<GatewayData> {
         
         let index: Int
         
@@ -101,7 +101,7 @@ final class VerificationCycleExecuter {
         
         let results: [FSM_ID: Any?]
         
-        let gatewayData: Any // Fix this type later.
+        let gatewayData: GatewayData // Fix this type later.
         
     }
     
@@ -117,24 +117,24 @@ final class VerificationCycleExecuter {
         andCallStack callStack: [FSM_ID: [CallData]],
         andPreviousResults results: [FSM_ID: Any?],
         withDelegate delegate: VerificationTokenExecuterDelegate
-    ) -> [VerificationRun] where View.State == KripkeState {
+    ) -> [VerificationRun<Gateway.GatewayData>] where View.State == KripkeState {
         //swiftlint:disable:next line_length
         self.executer.delegate = delegate
         gateway.delegate = self.executer
         var tokens = tokens
         tokens[executing] = tokens[executing].filter { nil != $0.data } // Ignore all skip tokens.
-        var jobs = [Job(index: 0, tokens: tokens, externals: externals, initialState: nil, lastState: last, clock: 0, usedClockValues: [], callStack: callStack, results: results, gatewayData: gateway.gatewayData)]
+        var jobs = [Job<Gateway.GatewayData>(index: 0, tokens: tokens, externals: externals, initialState: nil, lastState: last, clock: 0, usedClockValues: [], callStack: callStack, results: results, gatewayData: gateway.gatewayData)]
         let states: Ref<[KripkeStatePropertyList: KripkeState]> = Ref(value: [:])
         var initialStates: HashSink<KripkeStatePropertyList, KripkeStatePropertyList> = HashSink()
         var lastStates: HashSink<KripkeStatePropertyList, KripkeStatePropertyList> = HashSink()
-        var runs: [VerificationRun] = []
+        var runs: [VerificationRun<Gateway.GatewayData>] = []
         while false == jobs.isEmpty {
             let job = jobs.removeFirst()
             let newTokens = self.prepareTokens(job.tokens, executing: (executing, job.index), fromExternals: job.externals, usingCallStack: job.callStack)
             guard let data = newTokens[executing][job.index].data else {
                 fatalError("Unable to fetch data of verification token.")
             }
-            gateway.gatewayData = job.gatewayData as! Gateway.GatewayData
+            gateway.gatewayData = job.gatewayData
             let (generatedStates, clockValues, newExternals, newCallStack, newResults) = self.executer.execute(
                 fsm: data.fsm.asScheduleableFiniteStateMachine,
                 inTokens: newTokens,
@@ -184,8 +184,8 @@ final class VerificationCycleExecuter {
         return runs
     }
     
-    fileprivate func jobsFromClockValues(lastJob: Job, clockValues: [UInt]) -> [Job] {
-        return clockValues.flatMap { (value: UInt) -> [Job] in
+    fileprivate func jobsFromClockValues<GatewayData>(lastJob: Job<GatewayData>, clockValues: [UInt]) -> [Job<GatewayData>] {
+        return clockValues.flatMap { (value: UInt) -> [Job<GatewayData>] in
             if true == lastJob.usedClockValues.contains(value) {
                 return []
             }
