@@ -153,7 +153,7 @@ extension StackGateway: VerifiableGateway {
         }
     }
     
-    public func finishFirst(_ id: FSM_ID) {
+    public func finish(_ id: FSM_ID) {
         if self.stacks[id]?.isEmpty ?? true {
             return
         }

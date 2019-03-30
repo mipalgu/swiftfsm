@@ -69,7 +69,7 @@ public protocol ModifiableFSMGateway: FSMGateway {
     
     var ids: [String: FSM_ID] { get set }
     
-    func finishFirst(_ id: FSM_ID)
+    func finish(_ id: FSM_ID)
     
     func setup(_: FSM_ID)
     

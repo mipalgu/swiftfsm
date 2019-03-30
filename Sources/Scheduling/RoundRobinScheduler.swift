@@ -143,7 +143,7 @@ public class RoundRobinScheduler<Tokenizer: SchedulerTokenizer>: Scheduler, Veri
                     fsm.next()
                     finish = finish && (fsm.hasFinished || fsm.isSuspended)
                     if true == fsm.hasFinished {
-                        self.gateway.finishFirst(id)
+                        self.gateway.finish(id)
                         finish = false
                     }
                     j += 1
