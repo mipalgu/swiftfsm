@@ -153,6 +153,15 @@ extension StackGateway: VerifiableGateway {
         }
     }
     
+    public var verificationData: [FSM_ID: Int] {
+        var dict: [FSM_ID: Int] = [:]
+        dict.reserveCapacity(self.fsms.count)
+        self.fsms.forEach {
+            dict[$0.key] = self.stacks[$0.key]?.count ?? 0
+        }
+        return dict
+    }
+    
     public func finish(_ id: FSM_ID) {
         if self.stacks[id]?.isEmpty ?? true {
             return
