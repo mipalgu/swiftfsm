@@ -30,7 +30,6 @@ all:	all-real
 install:
 	mkdir -p ${SYSROOT}/usr/local/include/swiftfsm
 	cp .build/${SWIFT_BUILD_CONFIG}/lib*.${EXT} ${SYSROOT}/usr/local/lib
-	cp .build/${SWIFT_BUILD_CONFIG}/*.swift* ${SYSROOT}/usr/local/include/swiftfsm
 	cp .build/${SWIFT_BUILD_CONFIG}/swiftfsm ${SYSROOT}/usr/local/bin/
 
 generate-xcodeproj:
