@@ -137,16 +137,27 @@ public final class StackGateway: ModifiableFSMGateway, ModifiableFSMGatewayDefau
 
 extension StackGateway: VerifiableGateway {
     
-    public var gatewayData: [FSM_ID: [PromiseData]] {
+    public var gatewayData: [FSM_ID: [(PromiseData, PromiseData)]] {
         get {
-            return self.stacks
+            return self.stacks.mapValues { $0.map { ($0, $0.clone()) } }
         } set {
-            self.stacks = newValue
+            self.stacks.removeAll()
+            newValue.forEach {
+                self.stacks[$0.key] = $0.value.map { (promiseData, clone) in
+                    promiseData.fsm = clone.fsm
+                    promiseData.hasFinished = clone.hasFinished
+                    promiseData.result = clone.result
+                    return promiseData
+                }
+            }
         }
     }
     
-    public func removeFinished() {
-        self.stacks = self.stacks.mapValues { $0.filter { !$0.hasFinished } }
+    public func removeFirst(_ id: FSM_ID) {
+        if self.stacks[id]?.isEmpty ?? true {
+            return
+        }
+        self.stacks[id]?.removeFirst()
     }
     
 }

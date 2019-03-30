@@ -96,4 +96,10 @@ public final class PromiseData {
         )
     }
     
+    public func clone() -> PromiseData {
+        let promiseData = PromiseData(fsm: self.fsm.clone(), hasFinished: self._hasFinished)
+        promiseData.result = result
+        return promiseData
+    }
+    
 }

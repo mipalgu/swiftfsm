@@ -146,7 +146,6 @@ public final class ParameterisedVerificationCycleKripkeStructureGenerator<Detect
                     handledAllResults: handledAllResults,
                     tokenExecuterDelegate: self
                 )
-                defer { gateway.removeFinished() }
                 for var run in runs {
                     // Do not generate more jobs if we do not have a last state -- means that nothing was executed, should never happen.
                     guard let lastNewState = run.lastState else {

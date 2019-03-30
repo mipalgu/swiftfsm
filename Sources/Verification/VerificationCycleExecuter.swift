@@ -157,6 +157,9 @@ final class VerificationCycleExecuter {
             let lastState = generatedStates.last.map { states.value[$0.properties] ?? $0 }
             // When the clock has been used - try the same token again with new clock values.
             jobs.append(contentsOf: jobsFromClockValues(lastJob: job, clockValues: clockValues))
+            if data.fsm.hasFinished {
+                gateway.removeFirst(data.id)
+            }
             // Add tokens to runs when we have finished executing all of the tokens in a run.
             if job.index + 1 >= tokens[executing].count {
                 _ = lastState.map { lastStates.insert($0.properties) }
