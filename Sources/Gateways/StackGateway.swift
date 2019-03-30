@@ -145,4 +145,8 @@ extension StackGateway: VerifiableGateway {
         }
     }
     
+    public func removeFinished() {
+        self.stacks = self.stacks.mapValues { $0.filter { !$0.hasFinished } }
+    }
+    
 }

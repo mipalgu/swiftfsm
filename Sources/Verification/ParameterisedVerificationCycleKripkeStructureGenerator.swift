@@ -133,6 +133,7 @@ public final class ParameterisedVerificationCycleKripkeStructureGenerator<Detect
             // Create spinner for results.
             let resultsSpinner = self.createSpinner(forValues: allResults)
             while let parameterisedResults = resultsSpinner() {
+                gateway.gatewayData = job.gatewayData as! Gateway.GatewayData
                 let runs = self.generator.generate(
                     fromState: job,
                     usingCycleDetector: self.cycleDetector,
@@ -145,6 +146,7 @@ public final class ParameterisedVerificationCycleKripkeStructureGenerator<Detect
                     handledAllResults: handledAllResults,
                     tokenExecuterDelegate: self
                 )
+                defer { gateway.removeFinished() }
                 for var run in runs {
                     // Do not generate more jobs if we do not have a last state -- means that nothing was executed, should never happen.
                     guard let lastNewState = run.lastState else {

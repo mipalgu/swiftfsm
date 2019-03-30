@@ -62,6 +62,8 @@ public protocol VerifiableGateway: ModifiableFSMGateway {
     
     var gatewayData: GatewayData { get set }
     
+    func removeFinished()
+    
 }
 
 extension VerifiableGateway where Self: VerifiableGatewayDelegator {
@@ -72,6 +74,10 @@ extension VerifiableGateway where Self: VerifiableGatewayDelegator {
         } set {
             self.gateway.gatewayData = newValue
         }
+    }
+    
+    public func removeFinished() {
+        self.gateway.removeFinished()
     }
     
 }

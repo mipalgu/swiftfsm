@@ -124,7 +124,9 @@ public final class ScheduleCycleKripkeStructureGenerator<
         self.viewCache.forEach {
             $1.reset()
         }
+        let data = gateway.gatewayData
         verificationTokens.forEach { (tokens: [[VerificationToken]], view: AnyKripkeStructureView<KripkeState>) in
+            gateway.gatewayData = data
             var generator = self.factory.make(tokens: tokens)
             generator.delegate = self
             generator.generate(usingGateway: gateway, andView: view, storingResultsFor: nil)
