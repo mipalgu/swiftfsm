@@ -153,10 +153,11 @@ extension StackGateway: VerifiableGateway {
         }
     }
     
-    public func removeFirst(_ id: FSM_ID) {
+    public func finishFirst(_ id: FSM_ID) {
         if self.stacks[id]?.isEmpty ?? true {
             return
         }
+        self.stacks[id]?.first?.hasFinished = true
         self.stacks[id]?.removeFirst()
     }
     

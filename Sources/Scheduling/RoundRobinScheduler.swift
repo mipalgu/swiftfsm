@@ -142,9 +142,8 @@ public class RoundRobinScheduler<Tokenizer: SchedulerTokenizer>: Scheduler, Veri
                     }
                     fsm.next()
                     finish = finish && (fsm.hasFinished || fsm.isSuspended)
-                    if true == fsm.hasFinished, false == (self.gateway.stacks[id]?.isEmpty ?? true) {
-                        self.gateway.stacks[id]?.first?.hasFinished = true
-                        self.gateway.stacks[id]?.removeFirst()
+                    if true == fsm.hasFinished {
+                        self.gateway.finishFirst(id)
                         finish = false
                     }
                     j += 1
