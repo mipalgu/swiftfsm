@@ -97,9 +97,14 @@ public final class ParameterisedVerificationCycleKripkeStructureGenerator<Detect
         storingResultsFor resultID: FSM_ID?
     ) -> SortedCollection<(UInt, Any?)>? where View.State == KripkeState {
         self.view = AnyKripkeStructureView(view)
+        // Create the initial starting jobs.
         var jobs = self.createInitialJobs(fromTokens: self.tokens, andGateway: gateway)
-        var globalDetectorCache = self.cycleDetector.initialData
-        var foundCycle = false
+        var globalDetectorCache = self.cycleDetector.initialData // The cycle detectors data which we keep mutating.
+        var foundCycle = false // Have we found a cycle?
+        // Stores any results for the fsm with id `resultID`.
+        // The results are sorted by the run count, in other words, how many
+        // schedule cycles it takes to generate the result.
+        // These results will be returned once the kripke structure has been generated.
         var results: SortedCollection<(UInt, Any?)> = SortedCollection(comparator: AnyComparator {
             if $0.0 < $1.0 {
                 return .orderedAscending
@@ -109,6 +114,8 @@ public final class ParameterisedVerificationCycleKripkeStructureGenerator<Detect
             }
             return .orderedSame
         })
+        // Remember all possible parameterised machines that could be called, as
+        // well as the `ParameterisedMachineData` associated with them.
         var parameterisedMachines: [FSM_ID: ParameterisedMachineData] = [:]
         self.tokens.forEach { $0.forEach {
             guard let tokenData = $0.data else {
@@ -118,6 +125,7 @@ public final class ParameterisedVerificationCycleKripkeStructureGenerator<Detect
                 parameterisedMachines[id] = data
             }
         }}
+        // Generate kripke states until we have no jobs left.
         while false == jobs.isEmpty {
             let job = jobs.removeFirst()
             // Skip this job if all tokens are .skip tokens.
@@ -130,10 +138,11 @@ public final class ParameterisedVerificationCycleKripkeStructureGenerator<Detect
             gateway.gatewayData = job.gatewayData
             // Create results for all parameterised machines that are finished.
             let (allResults, handledAllResults) = self.createAllResults(forJob: job, withGateway: gateway)
-            // Create spinner for results.
+            // Create spinner for results from called parameterised machines.
             let resultsSpinner = self.createSpinner(forValues: allResults)
+            // Generate kripke states for each variation of results from called parameterised machines.
             while let parameterisedResults = resultsSpinner() {
-                gateway.gatewayData = job.gatewayData
+                // Generate kripke states.
                 let runs = self.generator.generate(
                     fromState: job,
                     usingCycleDetector: self.cycleDetector,
@@ -146,13 +155,15 @@ public final class ParameterisedVerificationCycleKripkeStructureGenerator<Detect
                     handledAllResults: handledAllResults,
                     tokenExecuterDelegate: self
                 )
+                // Process each run and create new jobs from it.
                 for var run in runs {
-                    // Do not generate more jobs if we do not have a last state -- means that nothing was executed, should never happen.
+                    // Do not generate more jobs if we do not have a last state,
+                    // means that nothing was executed, should never happen.
                     guard let lastNewState = run.lastState else {
                         continue
                     }
                     var allFinished = true // Are all fsms finished?
-                    var foundResult = run.foundResult
+                    var foundResult = run.foundResult // Did the fsm with id `resultID` return a result?
                     for tokens in run.tokens {
                         for token in tokens {
                             guard let data = token.data else {
@@ -161,19 +172,22 @@ public final class ParameterisedVerificationCycleKripkeStructureGenerator<Detect
                             // Add any results for the finished fsms.
                             if data.id == resultID && false == run.foundResult && data.fsm.hasFinished {
                                 results.insert((run.runs, data.fsm.resultContainer?.result))
-                                foundResult = true // Remember that we have found this result. Stops us adding this result more than once.
+                                // Remember that we have found this result.
+                                // Stops us adding this result more than once.
+                                foundResult = true
                             }
                             allFinished = allFinished && (data.fsm.hasFinished || data.fsm.isSuspended)
                         }
                     }
-                    // Add the lastNewState as a finishing state -- don't generate more jobs as all fsms have finished.
+                    // Add the lastNewState as a finishing state,
+                    // don't generate more jobs as all fsms have finished.
                     if true == allFinished {
                         view.commit(state: lastNewState, isInitial: false)
                         continue
                     }
                     let newExecutingIndex = (run.executing + 1) % run.tokens.count
                     foundCycle = foundCycle || run.foundCycle
-                    // Create a new job from the clones.
+                    // Create a new job from the run.
                     run.executing = newExecutingIndex
                     run.foundResult = foundResult
                     run.initial = false
@@ -182,6 +196,7 @@ public final class ParameterisedVerificationCycleKripkeStructureGenerator<Detect
             }
             _ = job.lastState.map { view.commit(state: $0, isInitial: false) }
         }
+        // Don't return any results if we have cycles.
         if true == foundCycle {
             return nil
         }
