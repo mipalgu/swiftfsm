@@ -115,6 +115,7 @@ final class VerificationCycleKripkeStructureGenerator<
             guard let firstData = job.tokens[job.executing].first(where: { nil != $0.data })?.data else {
                 break
             }
+            gateway.gatewayData = job.gatewayData
             // Assign results to promises.
             for (id, calls) in job.callStack {
                 guard let callData = calls.last else {
@@ -152,7 +153,6 @@ final class VerificationCycleKripkeStructureGenerator<
             let clones = job.tokens.enumerated().map { Array(self.cloner.clone(jobs: $1, withLastRecords: job.lastRecords[$0])) }
             // Clone callStack
             let callStack = job.callStack.mapValues { $0.map { CallData(data: $0.data, parameters: $0.parameters, promiseData: $0.promiseData, runs: $0.runs) } }
-            gateway.gatewayData = job.gatewayData
             // Execute and generate kripke states.
             let generatedRuns = self.executer.execute(
                 tokens: clones,

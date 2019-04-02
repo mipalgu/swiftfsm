@@ -97,7 +97,6 @@ public final class ParameterisedVerificationCycleKripkeStructureGenerator<Detect
         storingResultsFor resultID: FSM_ID?
     ) -> SortedCollection<(UInt, Any?)>? where View.State == KripkeState {
         self.view = AnyKripkeStructureView(view)
-        let initialGatewayData = gateway.gatewayData
         var jobs = self.createInitialJobs(fromTokens: self.tokens, andGateway: gateway)
         var globalDetectorCache = self.cycleDetector.initialData
         var foundCycle = false
@@ -128,8 +127,9 @@ public final class ParameterisedVerificationCycleKripkeStructureGenerator<Detect
                 jobs.append(newJob)
                 continue
             }
+            gateway.gatewayData = job.gatewayData
             // Create results for all parameterised machines that are finished.
-            let (allResults, handledAllResults) = self.createAllResults(forJob: job, withGateway: gateway, andInitialGatewayData: initialGatewayData)
+            let (allResults, handledAllResults) = self.createAllResults(forJob: job, withGateway: gateway)
             // Create spinner for results.
             let resultsSpinner = self.createSpinner(forValues: allResults)
             while let parameterisedResults = resultsSpinner() {
@@ -188,7 +188,7 @@ public final class ParameterisedVerificationCycleKripkeStructureGenerator<Detect
         return results
     }
     
-    fileprivate func createAllResults<Gateway: VerifiableGateway>(forJob job: VerificationState<Detector.Data, Gateway.GatewayData>, withGateway gateway: Gateway, andInitialGatewayData initialGatewayData: Gateway.GatewayData) -> ([FSM_ID: LazyMapCollection<SortedCollectionSlice<(UInt, Any?)>, Any?>], Bool) {
+    fileprivate func createAllResults<Gateway: VerifiableGateway>(forJob job: VerificationState<Detector.Data, Gateway.GatewayData>, withGateway gateway: Gateway) -> ([FSM_ID: LazyMapCollection<SortedCollectionSlice<(UInt, Any?)>, Any?>], Bool) {
         var allResults: [FSM_ID: LazyMapCollection<SortedCollectionSlice<(UInt, Any?)>, Any?>] = [:]
         allResults.reserveCapacity(job.callStack.count)
         var handledAllResults = true
@@ -196,7 +196,6 @@ public final class ParameterisedVerificationCycleKripkeStructureGenerator<Detect
             guard nil == job.results[id], let callData = calls.last else {
                 continue
             }
-            gateway.gatewayData = initialGatewayData
             guard let callResults = self.delegate?.resultsForCall(self, call: callData, withGateway: gateway) else {
                 fatalError("Unable to fetch results for call: \(callData)")
             }
