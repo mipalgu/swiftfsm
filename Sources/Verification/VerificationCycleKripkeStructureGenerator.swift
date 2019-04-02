@@ -103,11 +103,12 @@ final class VerificationCycleKripkeStructureGenerator<
         handledAllResults: Bool,
         tokenExecuterDelegate: VerificationTokenExecuterDelegate
     ) -> [VerificationState<Detector.Data, Gateway.GatewayData>] where View.State == KripkeState, Detector.Element == KripkeStatePropertyList {
+        // Runs contains any new verification states which result from running state.
+        var runs: [VerificationState<Detector.Data, Gateway.GatewayData>] = []
         // Create a spinner for the external variables.
         let defaultExternals = self.fetcher.createExternals(fromTokens: state.tokens)
         let externalsData = self.fetcher.fetchUniqueExternalsData(fromTokens: [state.tokens[state.executing]])
         let spinner = self.spinnerConstructor.makeSpinner(forExternals: externalsData)
-        var runs: [VerificationState<Detector.Data, Gateway.GatewayData>] = []
         // Generate kirpke states for each variation of external variables.
         while let externals = spinner() {
             var job = state
@@ -115,8 +116,8 @@ final class VerificationCycleKripkeStructureGenerator<
             guard let firstData = job.tokens[job.executing].first(where: { nil != $0.data })?.data else {
                 break
             }
-            gateway.gatewayData = job.gatewayData
             // Assign results to promises.
+            gateway.gatewayData = job.gatewayData
             for (id, calls) in job.callStack {
                 guard let callData = calls.last else {
                     continue
@@ -167,6 +168,7 @@ final class VerificationCycleKripkeStructureGenerator<
                 andPreviousResults: job.results,
                 withDelegate: tokenExecuterDelegate
             )
+            // Create new verification states from generatedRuns and add them to runs.
             for run in generatedRuns {
                 var newState = job
                 newState.lastState = run.lastState
@@ -176,58 +178,8 @@ final class VerificationCycleKripkeStructureGenerator<
                 newState.results = run.results
                 runs.append(newState)
             }
-            // Create jobs for each different 'run' possible.
-            /*for (lastState, newTokens, newCallStack, newGatewayData, newResults) in runs {
-                // Do not generate more jobs if we do not have a last state -- means that nothing was executed, should never happen.
-                guard let lastNewState = lastState else {
-                    continue
-                }
-                var allFinished = true // Are all fsms finished?
-                var foundResult = job.foundResult
-                for tokens in newTokens {
-                    for token in tokens {
-                        guard let data = token.data else {
-                            continue
-                        }
-                        // Add any results for the finished fsms.
-                        if data.id == resultID && false == job.foundResult && data.fsm.hasFinished {
-                            results.insert((job.runs, data.fsm.resultContainer?.result))
-                            foundResult = true // Remember that we have found this result. Stops us adding this result more than once.
-                        }
-                        allFinished = allFinished && (data.fsm.hasFinished || data.fsm.isSuspended)
-                    }
-                }
-                // Add the lastNewState as a finishing state -- don't generate more jobs as all fsms have finished.
-                if true == allFinished {
-                    self.view.commit(state: lastNewState, isInitial: false)
-                    continue
-                }
-                let newExecutingIndex = (job.executing + 1) % newTokens.count
-                // Create a new job from the clones.
-                jobs.append(Job(
-                    initial: false,
-                    cache: newCache,
-                    counter: counter,
-                    foundCycle: foundCycle,
-                    tokens: newTokens,
-                    executing: newExecutingIndex,
-                    lastState: lastNewState,
-                    lastRecords: newTokens.map { $0.map {
-                        ($0.data?.fsm.asScheduleableFiniteStateMachine.base).map(self.recorder.takeRecord) ?? KripkeStatePropertyList()
-                    } },
-                    runs: 0 == newExecutingIndex ? job.runs + 1 : job.runs,
-                    callStack: newCallStack,
-                    results: newResults,
-                    foundResult: foundResult
-                ))
-            }*/
-            //_ = job.lastState.map { self.view.commit(state: $0, isInitial: false) }
         }
         return runs
-        /*print("number of initial states: \(initialStates.value.count)")
-        print("number of state: \(states.value.count)")
-        print("number of transitions: \(states.value.reduce(0) { $0 + $1.1.effects.count })")
-        return KripkeStructure(initialStates: Array(initialStates.value.lazy.map { $1 }), states: states.value)*/
     }
     
 }
