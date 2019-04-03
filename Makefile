@@ -66,14 +66,13 @@ test:	swift-test-package
 
 .ifdef FSM_INCLUDE_DIR
 CFLAGS+=-I${FSM_INCLUDE_DIR}
-SWIFTCFLAGS=-I${FSM_INCLUDE_DIR}
+SWIFTCFLAGS+=-I${FSM_INCLUDE_DIR}
 .else
 CFLAGS+=-I${SYSROOT}/usr/local/include -I${SYSROOT}/usr/local/include/swiftfsm
-SWIFTCFLAGS=-I${SYSROOT}/usr/local/include -I${SYSROOT}/usr/local/include/swiftfsm
+SWIFTCFLAGS+=-I${SYSROOT}/usr/local/include -I${SYSROOT}/usr/local/include/swiftfsm
 .endif
 
 .ifdef FSM_LIB_DIR
-CFLAGS+=-L${FSM_LIB_DIR}
 LDFLAGS+=-L${FSM_LIB_DIR}
 .else
 LDFLAGS+=-L${SYSROOT}/usr/local/lib
