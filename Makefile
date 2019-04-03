@@ -16,7 +16,7 @@ EXT=dylib
 EXT=so
 .endif
 
-INSTALL_DIR?=${SYSROOT}/usr/local/include/swiftfsm
+INSTALL_DIR?=${SYSROOT}/usr/local
 
 .ifdef FSM_INCLUDE_DIR
 SWIFTCFLAGS+=-I${FSM_INCLUDE_DIR}
@@ -36,8 +36,8 @@ all:	all-real
 
 install:
 	mkdir -p ${SYSROOT}/usr/local/include/swiftfsm
-	cp .build/${SWIFT_BUILD_CONFIG}/lib*.${EXT} ${SYSROOT}/usr/local/lib
-	cp .build/${SWIFT_BUILD_CONFIG}/swiftfsm ${SYSROOT}/usr/local/bin/
+	cp .build/${SWIFT_BUILD_CONFIG}/lib*.${EXT} ${INSTALL_DIR}/lib/
+	cp .build/${SWIFT_BUILD_CONFIG}/swiftfsm ${INSTALL_DIR}/bin/
 
 generate-xcodeproj:
 	$Ecp config.sh.in config.sh
@@ -74,11 +74,38 @@ SWIFTCFLAGS+=-I${SYSROOT}/usr/local/include -I${SYSROOT}/usr/local/include/swift
 
 .ifdef FSM_LIB_DIR
 LDFLAGS+=-L${FSM_LIB_DIR}
-.else
-LDFLAGS+=-L${SYSROOT}/usr/local/lib
 .endif
 
-CFLAGS+=-I${SYSROOT}/usr/local/include -I${SYSROOT}/usr/local/include/gusimplewhiteboard -I${SYSROOT}/usr/local/include/CLReflect -I${GUNAO_DIR}/Common
+.ifdef WHITEBOARD_INCLUDE_DIR
+CFLAGS+=-I${WHITEBOARD_INCLUDE_DIR} -I${WHITEBOARD_INCLUDE_DIR}/..
+.else
+CFLAGS+=-I${SYSROOT}/usr/local/include -I${SYSROOT}/usr/local/include/gusimplewhiteboard
+.endif
+
+.ifdef WHITEBOARD_LIB_DIR
+LDFLAGS+=-L${WHITEBOARD_LIB_DIR}
+.endif
+
+.ifdef CLREFLECT_INCLUDE_DIR
+CFLAGS+=-I${CLREFLECT_INCLUDE_DIR}
+.else
+CFLAGS+=-I${SYSROOT}/usr/local/include/CLReflect
+.endif
+
+.ifdef CLREFLECT_LIB_DIR
+CFLAGS+=-L${CLREFLECT_LIB_DIR}
+LDFLAGS+=-L${CLREFLECT_LIB_DIR}
+.endif
+
+.ifndef FSM_LIB_DIR
+.ifndef WHITEBOARD_LIB_DIR
+.ifndef CLREFLECT_LIB_DIR
+LDFLAGS+=-L${SYSROOT}/usr/local/lib
+.endif
+.endif
+.endif
+
+CFLAGS+=-I${GUNAO_DIR}/Common
 LDFLAGS+=-lgusimplewhiteboard -lFSM -ldl -lCLReflect -lgu_util
 
 .ifdef NO_FOUNDATION
