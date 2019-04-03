@@ -6,7 +6,7 @@
 
 ALL_TARGETS=host-local
 
-.ifdef SYSSYSROOT
+.ifdef SYSROOT
 export LANG=/usr/lib/locale/en_US
 .endif
 
@@ -16,12 +16,19 @@ EXT=dylib
 EXT=so
 .endif
 
-FSM_INCLUDE_DIR?=${SYSSYSROOT}/usr/local/include/swiftfsm
-FSM_LIB_DIR?=${SYSSYSROOT}usr/local/lib
-INSTALL_DIR?=/usr/local/include/swiftfsm
+INSTALL_DIR?=${SYSROOT}/usr/local/include/swiftfsm
 
-SWIFTCFLAGS+=-I${FSM_INCLUDE_DIR} -L${FSM_LIB_DIR}
-.ifdef SYSSYSROOT
+.ifdef FSM_INCLUDE_DIR
+SWIFTCFLAGS+=-I${FSM_INCLUDE_DIR}
+.endif
+
+.ifdef FSM_LIB_DIR
+SWIFTCFLAGS+=-L${FSM_LIB_DIR}
+.endif
+
+.ifdef SYSROOT
+FSM_INCLUDE_DIR?=${SYSROOT}/usr/local/include/swiftfsm
+FSM_LIB_DIR?=${SYSROOT}usr/local/lib
 SWIFT_BUILD_FLAGS=--destination destination.json
 .endif
 
