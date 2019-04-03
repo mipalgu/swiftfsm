@@ -68,7 +68,7 @@ test:	swift-test-package
 CFLAGS+=-I${FSM_INCLUDE_DIR}
 SWIFTCFLAGS+=-I${FSM_INCLUDE_DIR}
 .else
-CFLAGS+=-I${SYSROOT}/usr/local/include -I${SYSROOT}/usr/local/include/swiftfsm
+CFLAGS+=-I${SYSROOT}/usr/local/include/swiftfsm
 SWIFTCFLAGS+=-I${SYSROOT}/usr/local/include -I${SYSROOT}/usr/local/include/swiftfsm
 .endif
 
@@ -78,7 +78,7 @@ LDFLAGS+=-L${FSM_LIB_DIR}
 LDFLAGS+=-L${SYSROOT}/usr/local/lib
 .endif
 
-CFLAGS+=-I${SYSROOT}/usr/local/include/gusimplewhiteboard -I${SYSROOT}/usr/local/include/CLReflect -I${GUNAO_DIR}/Common
+CFLAGS+=-I${SYSROOT}/usr/local/include -I${SYSROOT}/usr/local/include/gusimplewhiteboard -I${SYSROOT}/usr/local/include/CLReflect -I${GUNAO_DIR}/Common
 LDFLAGS+=-lgusimplewhiteboard -lFSM -ldl -lCLReflect -lgu_util
 
 .ifdef NO_FOUNDATION
