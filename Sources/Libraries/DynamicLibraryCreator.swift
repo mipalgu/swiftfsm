@@ -71,7 +71,7 @@ import IO
  *  Therefore this class can only create DynamicLibraryResources.
  */
 public class DynamicLibraryCreator: LibraryCreator {
-    
+
     private let printer: Printer
 
     /**
@@ -97,7 +97,7 @@ public class DynamicLibraryCreator: LibraryCreator {
     public func open(path: String) -> LibraryResource? {
         #if os(OSX)
         // Can the dylib be opened?
-        if (false == dlopen_preflight(path)) {
+        if false == dlopen_preflight(path) {
             self.printer.error(str: String(cString: dlerror()))
             return nil
         }
@@ -110,5 +110,5 @@ public class DynamicLibraryCreator: LibraryCreator {
         // Create the resource.
         return DynamicLibraryResource(handler: handler, path: path)
     }
-    
+
 }

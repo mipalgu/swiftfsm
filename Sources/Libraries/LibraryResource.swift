@@ -69,7 +69,7 @@ public protocol LibraryResource {
      *  The path to the library.
      */
     var path: String { get }
-    
+
     /**
      *  Attempt to retrieve a symbol from the resource.
      *
@@ -88,7 +88,7 @@ public protocol LibraryResource {
         symbol: UnsafeMutableRawPointer?,
         error: String?
     )
-    
+
     /**
      *  Close the library resource.
      *

@@ -61,7 +61,7 @@
  *  path.
  */
 public protocol LibraryCreator {
-    
+
     /**
      *  Open the library and return an associated LibraryResource representing
      *  the library that was opened.
@@ -71,5 +71,5 @@ public protocol LibraryCreator {
      *  - Returns: An Optional `LibraryResource`.
      */
     func open(path: String) -> LibraryResource?
-    
+
 }

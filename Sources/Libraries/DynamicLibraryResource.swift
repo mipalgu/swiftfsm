@@ -70,17 +70,17 @@
  *  class to create this resource.
  */
 public class DynamicLibraryResource: LibraryResource {
-    
+
     /**
      *  A void pointer to the dynamic library that was loaded using dlopen.
      */
     private let handler: UnsafeMutableRawPointer
-    
+
     /**
      *  The path on the file system to the dynamic library.
      */
     public let path: String
-    
+
     /**
      *  Create the resource.
      *
@@ -95,7 +95,7 @@ public class DynamicLibraryResource: LibraryResource {
         self.handler = handler
         self.path = path
     }
-    
+
     /**
      *  Return a void pointer to a symbol within the dynamic library.
      *
@@ -118,14 +118,14 @@ public class DynamicLibraryResource: LibraryResource {
     ) {
         // Attempt to get the symbol
         let sym: UnsafeMutableRawPointer? = dlsym(self.handler, symbol)
-        if (sym != nil) {
+        if sym != nil {
             // Successful retrieval of symbol
             return (sym, error: nil)
         }
         // Unable to retrieve symbol - retrieve the error
         return (symbol: sym, error: String(cString: dlerror()))
     }
-    
+
     /**
      *  Attemp to close the dynamic library resource.
      *
@@ -141,12 +141,12 @@ public class DynamicLibraryResource: LibraryResource {
     public func close() -> (successful: Bool, error: String?) {
         // Attempt to close the library.
         let result: CInt = dlclose(self.handler)
-        if (result == 0) {
+        if result == 0 {
             // Succesfully closed library.
             return (successful: true, error: nil)
         }
         // Error
         return (successful: false, error: String(cString: dlerror()))
     }
-    
+
 }

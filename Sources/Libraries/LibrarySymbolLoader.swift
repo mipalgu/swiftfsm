@@ -57,19 +57,19 @@
  */
 
 public final class LibrarySymbolLoader {
- 
+
     public enum Errors: Error {
-        
+
         public var message: String {
             switch self {
             case .error(let message):
                 return message
             }
         }
-        
+
         case error(message: String)
     }
-    
+
     /*
      *  Used to create the libraries.
      *
@@ -81,7 +81,7 @@ public final class LibrarySymbolLoader {
      *      url or a network stream.
      */
     fileprivate let creator: LibraryCreator
-    
+
     /**
      *  Create a new `LibrarySymbolLoader`.
      *
@@ -90,7 +90,7 @@ public final class LibrarySymbolLoader {
     public init(creator: LibraryCreator) {
         self.creator = creator
     }
-    
+
     public func load<T, U>(symbol symbolName: String, inLibrary path: String, _ callback: (T) throws -> U) throws -> U {
         // Ignore empty paths
         let path = path.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -101,11 +101,13 @@ public final class LibrarySymbolLoader {
         let result: (symbol: UnsafeMutableRawPointer?, error: String?) = resource.getSymbolPointer(symbol: symbolName)
         // Error with fetching symbol
         guard let symbol = result.symbol else {
-            throw Errors.error(message: result.error ?? "Unable to fetch symbol '\(symbolName)' in library at path '\(path)'")
+            throw Errors.error(
+                message: result.error ?? "Unable to fetch symbol '\(symbolName)' in library at path '\(path)'"
+            )
         }
         // Convert the symbol to the specified type.
         let type = unsafeBitCast(symbol, to: T.self)
         return try callback(type)
     }
-    
+
 }
