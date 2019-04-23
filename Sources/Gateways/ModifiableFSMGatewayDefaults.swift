@@ -61,7 +61,7 @@ import swiftfsm
 public protocol ModifiableFSMGatewayDefaults {}
 
 extension ModifiableFSMGateway where Self: ModifiableFSMGatewayDefaults {
-    
+
     public func fsm(fromID id: FSM_ID) -> AnyControllableFiniteStateMachine {
         guard let fsm = self.fsms[id] else {
             fatalError("FSM with id '\(id)' does not exist.")
@@ -72,7 +72,7 @@ extension ModifiableFSMGateway where Self: ModifiableFSMGatewayDefaults {
         self.delegate?.hasFetchedFsm(inGateway: self, fsm: controllableFSM, withId: id)
         return controllableFSM
     }
-    
+
     public func id(of name: String) -> FSM_ID {
         guard let id = self.ids[name] else {
             let id = self.latestID
@@ -82,9 +82,9 @@ extension ModifiableFSMGateway where Self: ModifiableFSMGatewayDefaults {
         }
         return id
     }
-    
+
     public func callSelf<R>(_ id: FSM_ID, withParameters parameters: [String: Any]) -> Promise<R> {
         return self.call(id, withParameters: parameters, caller: id)
     }
-    
+
 }

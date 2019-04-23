@@ -62,7 +62,7 @@ import ModelChecking
 import FSMVerification
 
 final class VerificationCycleKripkeStructureGeneratorFactory {
-    
+
     func make() -> VerificationCycleKripkeStructureGenerator<
         AggregateCloner<Cloner<KripkeStatePropertyListConverter>>,
         MultipleExternalsSpinnerConstructor<
@@ -78,5 +78,5 @@ final class VerificationCycleKripkeStructureGeneratorFactory {
             )
         )
     }
-    
+
 }

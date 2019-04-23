@@ -63,11 +63,11 @@ import XCTest
 public class SwiftFSMTestCase: XCTestCase {
 
     public var counter: UInt = 0
-    
+
     public override func setUp() {
         self.counter = 0
     }
-    
+
     public override func tearDown() {}
 
     /*public func createPingPongMachine(
@@ -94,13 +94,13 @@ public class SwiftFSMTestCase: XCTestCase {
         
         return FSM("PingPong\(self.counter)", ringlet: MiPalRinglet(), initialState: states[0])
     }
-    
+
     public func getSlowPingPongMachine(end: Bool = true) -> AnyScheduleableFiniteStateMachine {
         return self.createPingPongMachine(end, slow: true)
     }
-    
+
     public func getFastPingPongMachine(end: Bool = true) -> AnyScheduleableFiniteStateMachine {
         return self.createPingPongMachine(end, slow: false)
     }*/
-    
+
 }

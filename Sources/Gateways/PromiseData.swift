@@ -59,9 +59,9 @@
 import swiftfsm
 
 public final class PromiseData {
-    
+
     public var fsm: AnyParameterisedFiniteStateMachine
-    
+
     public var hasFinished: Bool {
         get {
             return self._hasFinished
@@ -72,16 +72,16 @@ public final class PromiseData {
             self._hasFinished = newValue
         }
     }
-    
+
     fileprivate var _hasFinished: Bool
-    
+
     public var result: Any? = nil
-    
+
     public init(fsm: AnyParameterisedFiniteStateMachine, hasFinished: Bool = true) {
         self.fsm = fsm
         self._hasFinished = hasFinished
     }
-    
+
     public func makePromise<T>() -> Promise<T> {
         return Promise(
             hasFinished: { self.hasFinished },
@@ -95,11 +95,11 @@ public final class PromiseData {
             }
         )
     }
-    
+
     public func clone() -> PromiseData {
         let promiseData = PromiseData(fsm: self.fsm.clone(), hasFinished: self._hasFinished)
         promiseData.result = result
         return promiseData
     }
-    
+
 }

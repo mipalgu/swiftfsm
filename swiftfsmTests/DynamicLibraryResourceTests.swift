@@ -66,7 +66,7 @@ import Darwin
 #endif
 
 public class DynamicLibraryResourceTests: SwiftFSMTestCase {
-    
+
     public override var allTests: [(String, () -> Void)] {
         return [
             ("testGetSymbolReturnsPointerToExistingSymbol", testGetSymbolReturnsPointerToExistingSymbol),
@@ -74,7 +74,7 @@ public class DynamicLibraryResourceTests: SwiftFSMTestCase {
             ("testCloseStopsOtherClosesFromWorking", testCloseStopsOtherClosesFromWorking)
         ]
     }
-    
+
     #if os(OSX)
     private var path: String = "../../build.host-local/libswiftfsm.dylib"
     #elseif os(Linux)
@@ -82,7 +82,7 @@ public class DynamicLibraryResourceTests: SwiftFSMTestCase {
     #endif
     private var handler: UnsafeMutablePointer<Void>!
     private var resource: DynamicLibraryResource!
-    
+
     public override func setUp() {
         super.setUp()
         self.openDylib()
@@ -91,26 +91,26 @@ public class DynamicLibraryResourceTests: SwiftFSMTestCase {
             path: self.path
         )
     }
-    
+
     private func openDylib() {
         self.handler = dlopen(self.path, RTLD_NOW)
         XCTAssert(self.handler != nil)
     }
-    
+
     func testGetSymbolReturnsPointerToExistingSymbol() {
         let result: (symbol: UnsafeMutablePointer<Void>, error: String?) =
             self.resource.getSymbolPointer("main")
         XCTAssert(result.symbol != nil)
         XCTAssert(result.error == nil)
     }
-    
+
     func testGetSymbolReturnsErrorsForNonExistingSymbol() {
         let result: (symbol: UnsafeMutablePointer<Void>, error: String?) =
             self.resource.getSymbolPointer("doesNotExist")
         XCTAssert(result.symbol == nil)
         XCTAssert(result.error != nil)
     }
-    
+
     func testCloseStopsOtherClosesFromWorking() {
         let closeResult: (successful: Bool, error: String?) =
             self.resource.close()
@@ -122,7 +122,7 @@ public class DynamicLibraryResourceTests: SwiftFSMTestCase {
         XCTAssert(dlclose(self.handler) == -1)
         self.openDylib()
     }
-    
+
     public override func tearDown() {
         let result: CInt = dlclose(self.handler)
         XCTAssert(result == 0)
@@ -130,5 +130,5 @@ public class DynamicLibraryResourceTests: SwiftFSMTestCase {
             print(String.fromCString(dlerror()))
         }
     }
-    
+
 }

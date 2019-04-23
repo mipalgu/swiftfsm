@@ -57,15 +57,15 @@
  */
 
 public final class CallbackFormatter: Formatter {
-    
+
     fileprivate var _format: (String) -> String
-    
+
     public init(_ _format: @escaping (String) -> String) {
         self._format = _format
     }
-    
+
     public func format(_ str: String) -> String {
         return self._format(str)
     }
-    
+
 }

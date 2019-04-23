@@ -67,10 +67,10 @@ public class MachineRunnerTests: SwiftFSMTestCase {
             ("testRunFinishes", testRunFinishes)
         ]
     }
-    
+
     private var runner: QuerierableMachineRunner!
     private var machine: Machine!
-    
+
     public override func setUp() {
         self.runner = SingleThreadedMachineRunner()
         self.machine = SimpleMachine(
@@ -79,11 +79,11 @@ public class MachineRunnerTests: SwiftFSMTestCase {
             debug: true
         )
     }
-    
+
     public func testRunFinishes() {
         self.runner.run(self.machine)
         XCTAssert(super.counter == 1)
         XCTAssert(super.counter == self.runner.totalExecutions)
     }
-    
+
 }

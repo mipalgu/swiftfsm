@@ -60,12 +60,12 @@
  * Responsible for creating instances of `MachineLoader`.
  */
 public protocol MachineLoaderFactory {
-    
+
     /**
      *  Create an instance of `MachineLoader`.
      *
      *  - Returns: The newly created `MachineLoader`.
      */
     func make() -> MachineLoader
-    
+
 }

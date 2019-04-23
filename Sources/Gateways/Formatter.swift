@@ -57,7 +57,7 @@
  */
 
 public protocol Formatter {
-    
+
     func format(_: String) -> String
-    
+
 }

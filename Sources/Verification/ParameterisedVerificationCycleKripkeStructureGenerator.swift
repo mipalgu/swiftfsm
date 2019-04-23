@@ -64,13 +64,13 @@ import swiftfsm
 import swift_helpers
 
 public final class ParameterisedVerificationCycleKripkeStructureGenerator<Detector: CycleDetector>: LazyKripkeStructureGenerator where Detector.Element == KripkeStatePropertyList {
-    
+
     fileprivate let cycleDetector: Detector
     fileprivate let tokens: [[VerificationToken]]
     fileprivate let recorder = MirrorKripkePropertiesRecorder()
     fileprivate let generator = VerificationCycleKripkeStructureGeneratorFactory().make()
     fileprivate let fetcher: ExternalVariablesFetcher = ExternalVariablesFetcher()
-    
+
     fileprivate lazy var tokensLookup: [FSM_ID: VerificationToken] = {
         var dict: [FSM_ID: VerificationToken] = [:]
         tokens.forEach { $0.forEach {
@@ -81,16 +81,16 @@ public final class ParameterisedVerificationCycleKripkeStructureGenerator<Detect
         }}
         return dict
     }()
-    
+
     fileprivate var view: AnyKripkeStructureView<KripkeState>!
-    
+
     public weak var delegate: LazyKripkeStructureGeneratorDelegate?
-    
+
     public init(cycleDetector: Detector, tokens: [[VerificationToken]]) {
         self.cycleDetector = cycleDetector
         self.tokens = tokens
     }
-    
+
     public func generate<Gateway: VerifiableGateway, View: KripkeStructureView>(
         usingGateway gateway: Gateway,
         andView view: View,
@@ -202,7 +202,7 @@ public final class ParameterisedVerificationCycleKripkeStructureGenerator<Detect
         }
         return results
     }
-    
+
     fileprivate func createAllResults<Gateway: VerifiableGateway>(forJob job: VerificationState<Detector.Data, Gateway.GatewayData>, withGateway gateway: Gateway) -> ([FSM_ID: LazyMapCollection<SortedCollectionSlice<(UInt, Any?)>, Any?>], Bool) {
         var allResults: [FSM_ID: LazyMapCollection<SortedCollectionSlice<(UInt, Any?)>, Any?>] = [:]
         allResults.reserveCapacity(job.callStack.count)
@@ -219,7 +219,7 @@ public final class ParameterisedVerificationCycleKripkeStructureGenerator<Detect
         }
         return (allResults, handledAllResults)
     }
-    
+
     fileprivate func createInitialJobs<Gateway: VerifiableGateway>(fromTokens tokens: [[VerificationToken]], andGateway gateway: Gateway) -> [VerificationState<Detector.Data, Gateway.GatewayData>] {
         return [VerificationState(
                 initial: true,
@@ -237,7 +237,7 @@ public final class ParameterisedVerificationCycleKripkeStructureGenerator<Detect
             )
         ]
     }
-    
+
     public func createSpinner<Key, Value, C: Collection>(forValues values: [Key: C]) -> () -> [Key: Value]? where C.Iterator.Element == Value {
         func newSpinner(_ values: C) -> () -> Value? {
             var i = values.startIndex
@@ -281,11 +281,11 @@ public final class ParameterisedVerificationCycleKripkeStructureGenerator<Detect
             return first ? currentValues : handleSpinner(index: spinners.startIndex)
         }
     }
-    
+
 }
 
 extension ParameterisedVerificationCycleKripkeStructureGenerator: VerificationTokenExecuterDelegate {
-    
+
     public func scheduleInfo(of id: FSM_ID, caller: FSM_ID, inGateway gateway: ModifiableFSMGateway) -> ParameterisedMachineData {
         guard let callerToken = self.tokensLookup[caller], let callerData = callerToken.data else {
             fatalError("Unable to fetch caller token from caller id.")
@@ -313,16 +313,16 @@ extension ParameterisedVerificationCycleKripkeStructureGenerator: VerificationTo
         }
         return data
     }
-    
+
     public func shouldInclude(call callData: CallData, forCaller caller: FSM_ID) -> Bool {
         guard let callerToken = self.tokensLookup[caller], let callerData = callerToken.data else {
             return false
         }
         return nil != callerData.parameterisedMachines[callData.id]
     }
-    
+
     public func shouldInline(call callData: CallData, caller: FSM_ID) -> Bool {
         return callData.id == caller
     }
-    
+
 }

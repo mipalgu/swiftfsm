@@ -69,9 +69,9 @@ import swiftfsm
  *  This class conforms to `MachineLoader`.
  */
 public class LibraryMachineLoader: MachineLoader {
-    
+
     fileprivate typealias SymbolSignature = @convention(c) (Any, Any) -> Any
-    
+
     /*
      *  This is used to remember factories for paths, therefore allowing us to
      *  just use this instead of loading it from the file system.
@@ -84,7 +84,7 @@ public class LibraryMachineLoader: MachineLoader {
      *  Used to print error messages.
      */
     public let printer: Printer
-    
+
     /**
      *  Create a new `LibraryMachineLoader`.
      *
@@ -103,7 +103,7 @@ public class LibraryMachineLoader: MachineLoader {
     public func clearCache() {
         type(of: self).cache = [:]
     }
-    
+
     /**
      *  Load the machines from the library specified from the path.
      *
@@ -160,7 +160,7 @@ public class LibraryMachineLoader: MachineLoader {
             return nil
         }
     }
-    
+
     fileprivate func fetchSymbolName(fromPath path: String) -> String? {
         let components = path.split(separator: "/")
         guard var file = components.last else {
@@ -177,5 +177,5 @@ public class LibraryMachineLoader: MachineLoader {
         }
         return "make_" + name
     }
-    
+
 }

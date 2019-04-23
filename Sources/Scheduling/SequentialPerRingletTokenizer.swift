@@ -63,7 +63,7 @@ import swiftfsm
 public final class SequentialPerRingletTokenizer: SchedulerTokenizer {
 
     fileprivate let flatenner: SubmachineFlatenner
-    
+
     public init(flatenner: SubmachineFlatenner = SubmachineFlatenner()) {
         self.flatenner = flatenner
     }

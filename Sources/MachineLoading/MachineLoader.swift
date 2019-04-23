@@ -63,7 +63,7 @@ import swiftfsm
  *  Conforming types are capable of loading machines from a resource path.
  */
 public protocol MachineLoader {
-    
+
     /**
      *  Load machines from a resource path.
      *
@@ -73,5 +73,5 @@ public protocol MachineLoader {
      *  loaded from the resource.
      */
     func load<Gateway: FSMGateway>(name: String, gateway: Gateway, clock: Timer, path: String) -> (FSMType, [Dependency])?
-    
+
 }

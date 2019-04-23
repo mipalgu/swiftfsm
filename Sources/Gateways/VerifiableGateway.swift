@@ -59,18 +59,18 @@
 import swiftfsm
 
 public protocol VerifiableGateway: ModifiableFSMGateway {
-    
+
     associatedtype GatewayData
     associatedtype VerificationData
-    
+
     var gatewayData: GatewayData { get set }
-    
+
     var verificationData: VerificationData { get }
-    
+
 }
 
 extension VerifiableGateway where Self: VerifiableGatewayDelegator {
-    
+
     public var gatewayData: Gateway.GatewayData {
         get {
             return self.gateway.gatewayData
@@ -78,9 +78,9 @@ extension VerifiableGateway where Self: VerifiableGatewayDelegator {
             self.gateway.gatewayData = newValue
         }
     }
-    
+
     public var verificationData: Gateway.VerificationData {
         return self.gateway.verificationData
     }
-    
+
 }

@@ -61,19 +61,19 @@
  *  `Swiftfsm`.
  */
 public protocol View {
-    
+
     /**
      *  Output a `SwiftfsmErrors` message.
      *
      *  - Parameter error: The error.
      */
     func error(error: SwiftfsmErrors) -> Void
-    
+
     /**
      *  Output a message.
      *
      *  - Parameter message: The message.
      */
     func message(message: String) -> Void
-    
+
 }

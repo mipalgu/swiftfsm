@@ -61,9 +61,9 @@ import swiftfsm
 import MachineStructure
 
 public final class SubmachineFlatenner {
-    
+
     public init() {}
-    
+
     public func flattenSubmachines(_ dependency: Dependency, _ name: String, _ machine: Machine) -> [SchedulerToken] {
         switch dependency {
         case .callableParameterisedMachine(let fsm, let dependencies):
@@ -80,5 +80,5 @@ public final class SubmachineFlatenner {
                 + dependencies.flatMap { self.flattenSubmachines($0, name, machine) }
         }
     }
-    
+
 }

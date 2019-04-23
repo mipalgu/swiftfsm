@@ -61,19 +61,19 @@ import swiftfsm
 import Utilities
 
 public final class RestrictiveFSMGateway<Gateway: FSMGateway, _Formatter: Formatter>: FSMGateway {
-    
+
     fileprivate let gateway: Gateway
-    
+
     fileprivate let selfID: FSM_ID
-    
+
     fileprivate let whitelist: Set<FSM_ID>
-    
+
     fileprivate let callables: Set<FSM_ID>
-    
+
     fileprivate let invocables: Set<FSM_ID>
-    
+
     fileprivate let formatter: _Formatter
-    
+
     public init(
         gateway: Gateway,
         selfID: FSM_ID,
@@ -89,7 +89,7 @@ public final class RestrictiveFSMGateway<Gateway: FSMGateway, _Formatter: Format
         self.whitelist = whitelist
         self.formatter = formatter
     }
-    
+
     public func call<R>(_ id: FSM_ID, withParameters parameters: [String : Any], caller: FSM_ID) -> Promise<R> {
         guard
             caller == self.selfID,
@@ -99,28 +99,28 @@ public final class RestrictiveFSMGateway<Gateway: FSMGateway, _Formatter: Format
         }
         return self.gateway.call(id, withParameters: parameters, caller: caller)
     }
-    
+
     public func callSelf<R>(_ id: FSM_ID, withParameters parameters: [String: Any]) -> Promise<R> {
         guard id == self.selfID else {
             fatalError("Unable to invoke fsm with id \(id)")
         }
         return self.gateway.callSelf(id, withParameters: parameters)
     }
-    
+
     public func invoke<R>(_ id: FSM_ID, withParameters parameters: [String: Any], caller: FSM_ID) -> Promise<R> {
         guard true == self.invocables.contains(id) else {
             fatalError("Unable to invoke fsm with id \(id)")
         }
         return self.gateway.invoke(id, withParameters: parameters, caller: caller)
     }
-    
+
     public func fsm(fromID id: FSM_ID) -> AnyControllableFiniteStateMachine {
         guard true == self.whitelist.contains(id) else {
             fatalError("Unable to fetch fsm with id \(id)")
         }
         return self.gateway.fsm(fromID: id)
     }
-    
+
     public func id(of name: String) -> FSM_ID {
         let name = self.formatter.format(name)
         let id = self.gateway.id(of: name)
@@ -129,11 +129,11 @@ public final class RestrictiveFSMGateway<Gateway: FSMGateway, _Formatter: Format
         }
         return id
     }
-    
+
 }
 
 extension RestrictiveFSMGateway where _Formatter == NullFormatter {
-    
+
     public convenience init(
         gateway: Gateway,
         selfID: FSM_ID,
@@ -150,5 +150,5 @@ extension RestrictiveFSMGateway where _Formatter == NullFormatter {
             formatter: NullFormatter()
         )
     }
-    
+
 }

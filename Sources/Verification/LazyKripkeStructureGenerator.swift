@@ -65,7 +65,7 @@ import swift_helpers
 public protocol LazyKripkeStructureGenerator {
 
     weak var delegate: LazyKripkeStructureGeneratorDelegate? { get set }
-    
+
     func generate<Gateway: VerifiableGateway, View: KripkeStructureView>(usingGateway gateway: Gateway, andView view: View, storingResultsFor: FSM_ID?) -> SortedCollection<(UInt, Any?)>? where View.State == KripkeState
-    
+
 }

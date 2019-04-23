@@ -61,25 +61,25 @@ import swiftfsm
 import swiftfsm_helpers
 
 public final class FSMClock: Clock {
-    
+
     fileprivate var data: [String: (previousState: AnyState, startTime: UInt)] = [:]
-    
+
     public var lastClockValues: [UInt] = []
-    
+
     fileprivate var currentFSM: String! = nil
-    
+
     fileprivate var previousState: AnyState? = nil
-    
+
     fileprivate var startTime: UInt! = nil
-    
+
     public var forcedRunningTime: UInt? = nil
-    
+
     public init() {}
-    
+
     public func after(_ interval: UInt) -> Bool {
         return self.after_ms(interval * 1000)
     }
-    
+
     public func after_ms(_ interval: UInt) -> Bool {
         let interval = interval * 1000
         self.lastClockValues.append(interval)
@@ -91,7 +91,7 @@ public final class FSMClock: Clock {
         }
         return UInt(microseconds()) - data.startTime > interval
     }
-    
+
     public func update(fromFSM fsm: AnyScheduleableFiniteStateMachine) {
         self.lastClockValues = []
         self.currentFSM = fsm.name
@@ -106,5 +106,5 @@ public final class FSMClock: Clock {
         data.previousState = fsm.currentState
         self.data[fsm.name] = data
     }
-    
+
 }

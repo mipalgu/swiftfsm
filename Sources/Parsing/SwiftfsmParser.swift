@@ -67,7 +67,7 @@ import Verification
  *  The standard `Parser`.
  */
 public class SwiftfsmParser: HelpableParser {
-    
+
     public var helpText: String {
         return """
         OVERVIEW: A Finite State Machine Scheduler.
@@ -152,7 +152,7 @@ public class SwiftfsmParser: HelpableParser {
         self.passiveRoundRobinFactory = passiveRoundRobinFactory
         self.roundRobinFactory = roundRobinFactory
     }
-    
+
     /**
      *  Parse the command line arguments and create new `Task`s.
      *
@@ -187,7 +187,7 @@ public class SwiftfsmParser: HelpableParser {
         }
         return task
     }
-    
+
     private func parseTask(words: inout [String]) throws -> Task {
         var task = Task()
         while let str = words.first {
@@ -212,7 +212,7 @@ public class SwiftfsmParser: HelpableParser {
         }
         return task
     }
-    
+
     private func handleNextFlag(_ j: Job, words: inout [String]) throws -> Job {
         switch (words.first!) {
         case "-c":
@@ -254,26 +254,26 @@ public class SwiftfsmParser: HelpableParser {
         words.removeFirst()
         return words.first!
     }
-    
+
     private func handleDebugFlag(_ t: Task, words: inout [String]) -> Task {
         var temp: Task = t
         temp.enableDebugging = true
         return temp
     }
-    
+
     private func handleHelpFlag(_ t: Task, words: inout [String]) -> Task {
         var temp: Task = t
         temp.printHelpText = true
         return temp
     }
-    
+
     private func handleGenerateSchedulerMapFlag(_ t: Task, words: inout [String]) -> Task {
         var temp = t
         temp.generateSchedulerMap = true
         temp.addToScheduler = false
         return temp
     }
-    
+
     private func handleKripkeFlag(_ t: Task, words: inout [String]) throws -> Task {
         if true == t.generateKripkeStructure {
             throw ParsingErrors.generalError(error: "You can only specify the -k option once.")
@@ -301,7 +301,7 @@ public class SwiftfsmParser: HelpableParser {
         }
         return temp
     }
-    
+
     private func convertCharToView(_ c: Character) throws -> AnyKripkeStructureViewFactory<KripkeState> {
         switch c {
         case "g":
@@ -318,7 +318,7 @@ public class SwiftfsmParser: HelpableParser {
             throw ParsingErrors.generalError(error: "Unknown value for Kripke Structure output flag.")
         }
     }
-    
+
     private func handleNameFlag(_ j: Job, words: inout [String]) -> Job {
         guard let name = self.fetchValueAfterFlag(words: &words) else {
             return j
@@ -327,7 +327,7 @@ public class SwiftfsmParser: HelpableParser {
         temp.name = name
         return temp
     }
-    
+
     private func handleParameterFlag(_ j: Job, words: inout [String]) throws -> Job {
         guard let keyAndValue = self.fetchValueAfterFlag(words: &words) else {
             throw ParsingErrors.generalError(error: "No parameters specified.")
@@ -358,7 +358,7 @@ public class SwiftfsmParser: HelpableParser {
         temp.parameters[String(split[0])] = String(split[1])
         return temp
     }
-    
+
     private func handleClfsmFlag(_ j: Job, words: inout [String]) -> Job {
         var temp = j
         temp.isClfsmMachine = true
@@ -374,7 +374,7 @@ public class SwiftfsmParser: HelpableParser {
         return temp
     }
 
-    
+
     private func handleCompileFlag(_ j: Job, words: inout [String]) -> Job {
         var temp = j
         temp.compile = true
@@ -419,7 +419,7 @@ public class SwiftfsmParser: HelpableParser {
             throw ParsingErrors.generalError(error: "Unknown value for scheduler flag")
         }
     }
-    
+
     private func handlePath(_ j: Job, words: inout [String]) throws -> Job {
         // Ignore empty strings
         if (true == words.first!.isEmpty) {
@@ -446,5 +446,5 @@ public class SwiftfsmParser: HelpableParser {
         temp.count = num
         return temp
     }
-    
+
 }

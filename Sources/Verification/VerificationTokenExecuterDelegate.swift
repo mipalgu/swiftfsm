@@ -62,11 +62,11 @@ import KripkeStructureViews
 import swiftfsm
 
 public protocol VerificationTokenExecuterDelegate: class {
-    
+
     func scheduleInfo(of: FSM_ID, caller: FSM_ID, inGateway: ModifiableFSMGateway) -> ParameterisedMachineData
-    
+
     func shouldInclude(call: CallData, forCaller: FSM_ID) -> Bool
-    
+
     func shouldInline(call: CallData, caller: FSM_ID) -> Bool
-    
+
 }

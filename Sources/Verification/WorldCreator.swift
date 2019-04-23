@@ -63,11 +63,11 @@ import ModelChecking
 import swiftfsm
 
 public final class WorldCreator {
-    
+
     fileprivate let recorder = MirrorKripkePropertiesRecorder()
-    
+
     public init() {}
-    
+
     //swiftlint:disable:next function_parameter_count
     public func createWorld(
         fromExternals externals: [(AnySnapshotController, KripkeStatePropertyList)],
@@ -108,7 +108,7 @@ public final class WorldCreator {
         return KripkeStatePropertyList(total)
         //return (lastState?.properties ?? [:]) <| varPs <| externalVariables
     }
-    
+
     fileprivate func createCallProperties(forParameterisedMachines parameterisedMachines: [FSM_ID: ParameterisedMachineData], withCallStack callStack: [FSM_ID: [CallData]]) -> KripkeStatePropertyList {
         var props: KripkeStatePropertyList = [:]
         var values: [String: Any] = [:]
@@ -152,7 +152,7 @@ public final class WorldCreator {
         out["parameterisedMachines"] = KripkeStateProperty(type: .Compound(props), value: values)
         return out
     }
-    
+
     fileprivate func fetchLastExternals(fromLastState lastState: KripkeState?) -> KripkeStatePropertyList {
         guard let externalsProperty = lastState?.properties.properties["externalVariables"] else {
             return [:]
@@ -164,7 +164,7 @@ public final class WorldCreator {
             return [:]
         }
     }
-    
+
     private func convert(externals: [(AnySnapshotController, KripkeStatePropertyList)], withLastState lastState: KripkeState?) -> KripkeStatePropertyList {
         let lastExternals = self.fetchLastExternals(fromLastState: lastState)
         var props: KripkeStatePropertyList = [:]
@@ -180,7 +180,7 @@ public final class WorldCreator {
             )
         ]
     }
-    
+
     private func convert(
         tokens: [[VerificationToken]],
         executing: Int,
@@ -209,7 +209,7 @@ public final class WorldCreator {
         )
         return varPs
     }
-    
+
     fileprivate func createPC(
         ofTokenData data: VerificationToken.Data,
         withState state: String,
@@ -217,5 +217,5 @@ public final class WorldCreator {
     ) -> String {
         return "\(data.fsm.name).\(state).\(str)"
     }
-    
+
 }

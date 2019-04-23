@@ -66,10 +66,10 @@ import Gateways
  *  objects.
  */
 public protocol Scheduler: VerifiableGateway {
-    
+
     /**
      *  Run the scheduler.
      */
     func run(_: [Machine]) -> Void
-    
+
 }

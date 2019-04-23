@@ -61,7 +61,7 @@ import KripkeStructure
 public final class KripkeStatePropertyListConverter: KripkeStatePropertyListConverterProtocol {
 
     public init() {}
-    
+
     public func convert(fromList list: KripkeStatePropertyList) -> [String: Any] {
         var ps: [String: Any] = [:]
         list.forEach {

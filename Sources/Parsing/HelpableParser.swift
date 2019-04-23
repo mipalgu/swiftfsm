@@ -61,10 +61,10 @@
  *  how they parse the command line arguments.
  */
 public protocol HelpableParser: Parser {
-    
+
     /**
      *  The parsers help text.
      */
     var helpText: String { get }
-    
+
 }

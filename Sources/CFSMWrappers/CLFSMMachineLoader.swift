@@ -75,7 +75,7 @@ public class CLFSMMachineLoader: MachineLoader, MachineUnloader, ScheduleHandler
     // STRING COSNTANTS //
     /// String constant for load function name.
     private let loadMachineFunc = "C_loadAndAddMachine"
-    
+
     /// String constant for unload function name.
     private let unloadMachineFunc = "C_unloadMachineWithID"
 
@@ -128,7 +128,7 @@ public func handleUnloadedMachine(_ fsm: AnyScheduleableFiniteStateMachine) -> B
     let unloadedPtr = getFunctionPtr(checkUnloadedMachineFunc)
     return checkUnloadedMachines(unloadedPtr, Int32(id))
 }
-    
+
     /**
      * Unloads the underlying C++ machine of a swift FSM.
      * 
@@ -160,7 +160,7 @@ public func handleUnloadedMachine(_ fsm: AnyScheduleableFiniteStateMachine) -> B
         }
         return createFiniteStateMachine(Int(machineID)).map { (.controllableFSM($0), []) }
     }
-    
+
     /**
      * Creates an array of AnyScheduleableFiniteStateMachine from an array of CLFSM machine IDs
      * 
@@ -213,7 +213,7 @@ public func handleUnloadedMachine(_ fsm: AnyScheduleableFiniteStateMachine) -> B
         addTransitions(cfsmStates, metaMachine: metaMachine)
         return cfsmStates
     }
-    
+
     /**
      * Adds transitions between CFSM states according to the CLReflect metamachine's metatransitions
      * 

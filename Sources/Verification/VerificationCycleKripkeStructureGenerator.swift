@@ -78,19 +78,19 @@ final class VerificationCycleKripkeStructureGenerator<
     Cloner: AggregateClonerProtocol,
     SpinnerConstructor: MultipleExternalsSpinnerConstructorType
 > {
-    
+
     fileprivate let cloner: Cloner
     fileprivate let executer = VerificationCycleExecuter()
     fileprivate let spinnerConstructor: SpinnerConstructor
     fileprivate let worldCreator = WorldCreator()
     fileprivate let recorder = MirrorKripkePropertiesRecorder()
     fileprivate let fetcher = ExternalVariablesFetcher()
-    
+
     init(cloner: Cloner, spinnerConstructor: SpinnerConstructor) {
         self.cloner = cloner
         self.spinnerConstructor = spinnerConstructor
     }
-    
+
     func generate<Detector: CycleDetector, Gateway: VerifiableGateway, View: KripkeStructureView>(
         fromState state: VerificationState<Detector.Data, Gateway.GatewayData>,
         usingCycleDetector cycleDetector: Detector,
@@ -181,5 +181,5 @@ final class VerificationCycleKripkeStructureGenerator<
         }
         return runs
     }
-    
+
 }

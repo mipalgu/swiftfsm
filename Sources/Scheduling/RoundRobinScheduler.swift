@@ -72,7 +72,7 @@ public class RoundRobinScheduler<Tokenizer: SchedulerTokenizer>: Scheduler, Veri
 {
 
     public typealias Gateway = StackGateway
-    
+
     public var gateway: StackGateway
 
     private let tokenizer: Tokenizer
@@ -80,7 +80,7 @@ public class RoundRobinScheduler<Tokenizer: SchedulerTokenizer>: Scheduler, Veri
     private let unloader: MachineUnloader
 
     private let scheduleHandler: ScheduleHandler
-    
+
     /**
      *  Create a new `RoundRobinScheduler`.
      *
@@ -97,7 +97,7 @@ public class RoundRobinScheduler<Tokenizer: SchedulerTokenizer>: Scheduler, Veri
         self.unloader = unloader
         self.scheduleHandler = scheduleHandler
     }
-    
+
     /**
      *  Start executing all machines.
      */
@@ -157,7 +157,7 @@ public class RoundRobinScheduler<Tokenizer: SchedulerTokenizer>: Scheduler, Veri
             }
         }
     }
-    
+
     private func fetchJobs(fromTokens tokens: [[SchedulerToken]]) -> [[(FSM_ID, AnyScheduleableFiniteStateMachine, Machine)]] {
         return tokens.map { tokens in
             tokens.map { token in
@@ -173,7 +173,7 @@ public class RoundRobinScheduler<Tokenizer: SchedulerTokenizer>: Scheduler, Veri
         }
         return machines
     }
-    
+
     fileprivate func addToGateway(_ fsm: FSMType, dependencies: [Dependency], prefix: String) {
         let id = self.gateway.id(of: prefix + fsm.name)
         self.gateway.fsms[id] = fsm
@@ -195,5 +195,5 @@ public class RoundRobinScheduler<Tokenizer: SchedulerTokenizer>: Scheduler, Veri
             }
         }
     }
-    
+
 }

@@ -61,7 +61,7 @@ import FSM
 import XCTest
 
 public class LibraryMachineLoaderTests: SwiftFSMTestCase {
-    
+
     public override var allTests: [(String, () -> Void)] {
         return [
             ("testLoadReturnsAnArrayOfMachines", testLoadReturnsAnArrayOfMachines),
@@ -70,7 +70,7 @@ public class LibraryMachineLoaderTests: SwiftFSMTestCase {
             ("testLoadReturnsEmptyArrayForEmptyString", testLoadReturnsEmptyArrayForEmptyString)
         ]
     }
-    
+
     private var machines: [[FiniteStateMachine]]?
     private var scheduler: RoundRobinScheduler {
         let f: Factories = Factories()
@@ -94,42 +94,42 @@ public class LibraryMachineLoaderTests: SwiftFSMTestCase {
         }
         return RoundRobinScheduler(machines: machines)
     }
-    
+
     public override func setUp() {
         super.setUp()
         self.machines = nil
         Factories().clear()
     }
-    
+
     private func getLoader() -> LibraryMachineLoader {
         return LibraryMachineLoader(
             creator: MockedLibraryResourceCreator(machines: self.machines)
         )
     }
-    
+
     func testLoadReturnsAnArrayOfMachines() {
         self.machines = [[getSlowPingPongMachine(), getSlowPingPongMachine()]]
         getLoader().load("test")
         XCTAssert(self.scheduler.machines.count == 2)
     }
-    
+
     func testLoadReturnsEmptyArrayForUnableToGetSymbol() {
         getLoader().load("test")
         XCTAssert(self.scheduler.machines.count == 0)
     }
-    
+
     func testLoadReturnsEmptyArrayForWhenTheSymbolFunctionReturnsNoMachines() {
         self.machines = []
         getLoader().load("test")
         XCTAssert(self.scheduler.machines.count == 0)
     }
-    
+
     func testLoadReturnsEmptyArrayForEmptyString() {
         self.machines = [[getSlowPingPongMachine()]]
         getLoader().load("")
         XCTAssert(self.scheduler.machines.count == 0)
     }
-    
-    
-    
+
+
+
 }

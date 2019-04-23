@@ -88,13 +88,13 @@ public final class ScheduleCycleKripkeStructureGenerator<
     fileprivate let factory: Factory
     fileprivate let tokenizer: Tokenizer
     fileprivate let viewFactory: ViewFactory
-    
+
     fileprivate var viewCache: [String: AnyKripkeStructureView<KripkeState>] = [:]
-    
+
     fileprivate var resultsCache: [String: SortedCollection<(UInt, Any?)>] = [:]
-    
+
     fileprivate let recorder: MirrorKripkePropertiesRecorder = MirrorKripkePropertiesRecorder()
-    
+
     public init(
         machines: [Machine],
         extractor: Extractor,
@@ -108,7 +108,7 @@ public final class ScheduleCycleKripkeStructureGenerator<
         self.tokenizer = tokenizer
         self.viewFactory = viewFactory
     }
-    
+
     public func generate<Gateway: VerifiableGateway>(usingGateway gateway: Gateway) {
         self.machines.forEach {
             self.add(fsm: $0.fsm, toGateway: gateway, withDependencies: $0.dependencies, name: $0.name)
@@ -135,7 +135,7 @@ public final class ScheduleCycleKripkeStructureGenerator<
             $1.finish()
         }
     }
-    
+
     fileprivate func add<Gateway: ModifiableFSMGateway>(fsm: FSMType, toGateway gateway: Gateway, withDependencies dependencies: [Dependency], name: String) {
         let name = name + "." + fsm.name
         gateway.fsms[gateway.id(of: name)] = fsm
@@ -150,7 +150,7 @@ public final class ScheduleCycleKripkeStructureGenerator<
             }
         }
     }
-    
+
     /*
      *  Creates an list of schedules where each schedule only contains fsms for
      *  a particular machine.
@@ -165,7 +165,7 @@ public final class ScheduleCycleKripkeStructureGenerator<
             return self.schedule(forDependency: dep, inMachine: machine, usingTokens: tokens, andGateway: gateway, parents: [])
         }
     }
-    
+
     fileprivate func convertRootFSMToDependency(inMachine machine: Machine) -> Dependency {
         switch machine.fsm {
         case .parameterisedFSM(let fsm):
@@ -174,7 +174,7 @@ public final class ScheduleCycleKripkeStructureGenerator<
             return .submachine(fsm, machine.dependencies)
         }
     }
-    
+
     fileprivate func schedule<Gateway: FSMGateway>(
         forDependency dependency: Dependency,
         inMachine machine: Machine,
@@ -224,7 +224,7 @@ public final class ScheduleCycleKripkeStructureGenerator<
         }
         return (verificationTokens, view)
     }
-    
+
     fileprivate func token(_ token: SchedulerToken, inDependencies dependencies: [Dependency]) -> Bool {
         func search(_ dependencies: [Dependency], pre: String) -> Bool {
             return nil != dependencies.first {
@@ -234,7 +234,7 @@ public final class ScheduleCycleKripkeStructureGenerator<
         }
         return search(dependencies, pre: token.machine.name)
     }
-    
+
     fileprivate func fetchParameterisedMachines<Gateway: FSMGateway>(
         forDependency dependency: Dependency,
         inMachine machine: Machine,
@@ -276,7 +276,7 @@ public final class ScheduleCycleKripkeStructureGenerator<
             )
         })
     }
-    
+
     /**
      *  Should we skip this token if we are generating a `KripkeStructure` for
      *  `machine`?
@@ -304,7 +304,7 @@ public final class ScheduleCycleKripkeStructureGenerator<
         }
         return false
     }
-    
+
     /**
      *  Finds the dependency path leading to the dependency represented by the
      *  token.
@@ -334,11 +334,11 @@ public final class ScheduleCycleKripkeStructureGenerator<
         }
         return []
     }
-    
+
 }
 
 extension ScheduleCycleKripkeStructureGenerator: LazyKripkeStructureGeneratorDelegate {
-    
+
     public func resultsForCall<Gateway: VerifiableGateway>(_ generator: LazyKripkeStructureGenerator, call callData: CallData, withGateway gateway: Gateway) -> SortedCollection<(UInt, Any?)> {
         if nil == callData.tokens.first(where: { nil != $0.first(where: { nil != $0.data }) }) {
             return SortedCollection<(UInt, Any?)>() { (_, _) -> ComparisonResult in
@@ -361,5 +361,5 @@ extension ScheduleCycleKripkeStructureGenerator: LazyKripkeStructureGeneratorDel
         self.resultsCache[key] = results
         return results
     }
-    
+
 }

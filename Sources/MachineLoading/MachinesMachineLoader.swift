@@ -70,7 +70,7 @@ import swift_helpers
 public final class MachinesMachineLoader: MachineLoader {
 
     fileprivate typealias SymbolSignature = @convention(c) (Any, Any, Any) -> Any
-    
+
     fileprivate let compiler: MachineCompiler<MachineAssembler>
     fileprivate let libraryLoader: LibrarySymbolLoader
     fileprivate let parser: MachineParser
@@ -106,7 +106,7 @@ public final class MachinesMachineLoader: MachineLoader {
         }
         return load(machine: machine, gateway: gateway, clock: clock, prefix: name)
     }
-    
+
     fileprivate func load<Gateway: FSMGateway>(machine: Machine, gateway: Gateway, clock: Timer, prefix: String, caller: FSM_ID? = nil) -> (FSMType, [Dependency])? {
         let dependantMachines = machine.submachines + machine.parameterisedMachines
         let format: (String) -> String = {
@@ -164,7 +164,7 @@ public final class MachinesMachineLoader: MachineLoader {
         }
         return (fsm, recursed)
     }
-    
+
     fileprivate func loadSymbol<G: FSMGateway>(inMachine name: String, gateway: G, clock: Timer, path: String, caller: FSM_ID) -> FSMType? {
         let symbolName = "make_" + name
         do {
@@ -187,7 +187,7 @@ public final class MachinesMachineLoader: MachineLoader {
             return nil
         }
     }
-    
+
     fileprivate func convert(_ fsm: FSMType, dependencies: [Dependency], inMachine machine: Machine) -> Dependency {
         switch fsm {
         case .controllableFSM(let fsm):

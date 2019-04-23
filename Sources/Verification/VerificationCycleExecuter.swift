@@ -68,11 +68,11 @@ import swiftfsm_helpers
 import Utilities
 
 final class VerificationCycleExecuter {
-    
+
     fileprivate let converter: KripkeStatePropertyListConverter
     fileprivate let executer: VerificationTokenExecuter<KripkeStateGenerator>
     fileprivate let worldCreator: WorldCreator = WorldCreator()
-    
+
     init(
         converter: KripkeStatePropertyListConverter = KripkeStatePropertyListConverter(),
         executer: VerificationTokenExecuter<KripkeStateGenerator> = VerificationTokenExecuter(stateGenerator: KripkeStateGenerator())
@@ -80,7 +80,7 @@ final class VerificationCycleExecuter {
         self.converter = converter
         self.executer = executer
     }
-    
+
     fileprivate struct Job<GatewayData> {
         
         let index: Int
@@ -104,7 +104,7 @@ final class VerificationCycleExecuter {
         let gatewayData: GatewayData // Fix this type later.
         
     }
-    
+
     func execute<View: KripkeStructureView, Gateway: VerifiableGateway>(
         tokens: [[VerificationToken]],
         executing: Int,
@@ -183,7 +183,7 @@ final class VerificationCycleExecuter {
         }
         return runs
     }
-    
+
     fileprivate func jobsFromClockValues<GatewayData>(lastJob: Job<GatewayData>, clockValues: [UInt]) -> [Job<GatewayData>] {
         return clockValues.flatMap { (value: UInt) -> [Job<GatewayData>] in
             if true == lastJob.usedClockValues.contains(value) {
@@ -213,7 +213,7 @@ final class VerificationCycleExecuter {
             }
         }
     }
-    
+
     fileprivate func add(_ newStates: [KripkeState], to states: Ref<[KripkeStatePropertyList: KripkeState]>) {
         newStates.forEach {
             // If this is the first time seeing this state then just add it.
@@ -225,7 +225,7 @@ final class VerificationCycleExecuter {
             existingState.effects.formUnion($0.effects)
         }
     }
-    
+
     fileprivate func prepareTokens(
         _ tokens: [[VerificationToken]],
         executing: (Int, Int),

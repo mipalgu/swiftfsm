@@ -57,9 +57,9 @@
  */
 
 public protocol ParameterisedVerificationCycleKripkeStructureGeneratorFactoryType {
-    
+
     associatedtype Generator: LazyKripkeStructureGenerator
-    
+
     func make(tokens: [[VerificationToken]]) -> Generator
-    
+
 }

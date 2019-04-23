@@ -61,9 +61,9 @@ import FSM
 import FSMVerification
 
 public final class ExternalVariablesFetcher {
-    
+
     public init() {}
-    
+
     public func createExternals(fromTokens tokens: [[VerificationToken]]) -> [String: (AnySnapshotController, KripkeStatePropertyList)] {
         let allExternalsData = self.fetchUniqueExternalsData(fromTokens: tokens)
         var d = [String: (AnySnapshotController, KripkeStatePropertyList)](minimumCapacity: allExternalsData.count)
@@ -72,7 +72,7 @@ public final class ExternalVariablesFetcher {
         }
         return d
     }
-    
+
     public func fetchUniqueExternalsData(fromTokens tokens: [[VerificationToken]]) -> [ExternalVariablesVerificationData] {
         var hashTable: Set<String> = []
         var externals: [ExternalVariablesVerificationData] = []
@@ -87,7 +87,7 @@ public final class ExternalVariablesFetcher {
         }
         return externals
     }
-    
+
     public func mergeExternals(_ externals: [(AnySnapshotController, KripkeStatePropertyList)], with dict: [String: (AnySnapshotController, KripkeStatePropertyList)]) -> [(AnySnapshotController, KripkeStatePropertyList)] {
         var dict = dict
         for (external, ps) in externals {
@@ -95,5 +95,5 @@ public final class ExternalVariablesFetcher {
         }
         return Array(dict.values)
     }
-    
+
 }

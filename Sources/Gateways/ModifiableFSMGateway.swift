@@ -60,17 +60,17 @@ import FSM
 import swiftfsm
 
 public protocol ModifiableFSMGateway: FSMGateway {
-    
+
     var delegate: FSMGatewayDelegate? { get set }
-    
+
     var latestID: FSM_ID { get set }
-    
+
     var fsms: [FSM_ID: FSMType] { get set }
-    
+
     var ids: [String: FSM_ID] { get set }
-    
+
     func finish(_ id: FSM_ID)
-    
+
     func setup(_: FSM_ID)
-    
+
 }

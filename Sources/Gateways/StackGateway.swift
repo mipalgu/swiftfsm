@@ -66,30 +66,30 @@ import IO
 import swiftfsm
 
 public final class StackGateway: ModifiableFSMGateway, ModifiableFSMGatewayDefaults {
-    
+
     private let printer: Printer
-    
+
     fileprivate let stackLimit: Int
-    
+
     public var stacks: [FSM_ID: [PromiseData]] = [:]
-    
+
     public var delegate: FSMGatewayDelegate?
-    
+
     public var latestID: FSM_ID = 0
-    
+
     public var fsms: [FSM_ID : FSMType] = [:]
-    
+
     public var ids: [String: FSM_ID] = [:]
-    
+
     public init(stackLimit: Int = 8192, printer: Printer = CommandLinePrinter(errorStream: StderrOutputStream(), messageStream: StdoutOutputStream(), warningStream: StdoutOutputStream())) {
         self.stackLimit = stackLimit
         self.printer = printer
     }
-    
+
     public func setup(_ id: FSM_ID) {
         self.stacks[id] = []
     }
-    
+
     public func invoke<R>(_ id: FSM_ID, withParameters parameters: [String: Any], caller: FSM_ID) -> Promise<R> {
         guard let fsm = self.fsms[id]?.asParameterisedFiniteStateMachine else {
             self.error("Attempting to invoke FSM with id \(id) when it has not been scheduled.")
@@ -102,7 +102,7 @@ public final class StackGateway: ModifiableFSMGateway, ModifiableFSMGatewayDefau
         self.delegate?.hasInvoked(inGateway: self, fsm: promiseData.fsm, withId: id, withParameters: parameters, caller: caller, storingResultsIn: promiseData)
         return promiseData.makePromise()
     }
-    
+
     public func call<R>(_ id: FSM_ID, withParameters parameters: [String : Any], caller: FSM_ID) -> Promise<R> {
         guard let fsm = self.fsms[id]?.asParameterisedFiniteStateMachine else {
             self.error("Attempting to call FSM with id \(id) when it has not been scheduled.")
@@ -118,7 +118,7 @@ public final class StackGateway: ModifiableFSMGateway, ModifiableFSMGatewayDefau
         self.delegate?.hasCalled(inGateway: self, fsm: promiseData.fsm, withId: id, withParameters: parameters, caller: caller, storingResultsIn: promiseData)
         return promiseData.makePromise()
     }
-    
+
     fileprivate func handleInvocation(id: FSM_ID, fsm: AnyParameterisedFiniteStateMachine, withParameters parameters: [String: Any]) -> PromiseData {
         let promiseData = PromiseData(fsm: fsm.clone(), hasFinished: false)
         guard true == promiseData.fsm.parametersFromDictionary(parameters) else {
@@ -127,16 +127,16 @@ public final class StackGateway: ModifiableFSMGateway, ModifiableFSMGatewayDefau
         promiseData.fsm.restart()
         return promiseData
     }
-    
+
     fileprivate func error(_ str: String) -> Never {
         self.printer.error(str: str)
         exit(EXIT_FAILURE)
     }
-    
+
 }
 
 extension StackGateway: VerifiableGateway {
-    
+
     public var gatewayData: [FSM_ID: [(PromiseData, PromiseData)]] {
         get {
             return self.stacks.mapValues { $0.map { ($0, $0.clone()) } }
@@ -152,7 +152,7 @@ extension StackGateway: VerifiableGateway {
             }
         }
     }
-    
+
     public var verificationData: [FSM_ID: Int] {
         var dict: [FSM_ID: Int] = [:]
         dict.reserveCapacity(self.fsms.count)
@@ -161,7 +161,7 @@ extension StackGateway: VerifiableGateway {
         }
         return dict
     }
-    
+
     public func finish(_ id: FSM_ID) {
         if self.stacks[id]?.isEmpty ?? true {
             return
@@ -169,5 +169,5 @@ extension StackGateway: VerifiableGateway {
         self.stacks[id]?.first?.hasFinished = true
         self.stacks[id]?.removeFirst()
     }
-    
+
 }

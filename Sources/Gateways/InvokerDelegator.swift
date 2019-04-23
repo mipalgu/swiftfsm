@@ -63,23 +63,23 @@ import Utilities
 public protocol InvokerDelegator: Invoker {
  
     associatedtype Delegate: Invoker
-    
+
     var invoker: Delegate { get }
-    
+
 }
 
 extension InvokerDelegator {
-    
+
     public func call<R>(_ id: FSM_ID, withParameters parameters: [String : Any], caller: FSM_ID) -> Promise<R> {
         return self.invoker.call(id, withParameters: parameters, caller: caller)
     }
-    
+
     public func callSelf<R>(_ id: FSM_ID, withParameters parameters: [String: Any]) -> Promise<R> {
         return self.invoker.callSelf(id, withParameters: parameters)
     }
-    
+
     public func invoke<R>(_ id: FSM_ID, withParameters parameters: [String: Any], caller: FSM_ID) -> Promise<R> {
         return self.invoker.invoke(id, withParameters: parameters, caller: caller)
     }
-    
+
 }

@@ -63,7 +63,7 @@ import KripkeStructureViews
 import KripkeStructure
 
 public enum VerificationToken {
-    
+
     var data: VerificationToken.Data? {
         switch self {
         case .skip:
@@ -72,11 +72,11 @@ public enum VerificationToken {
             return data
         }
     }
-    
+
     case skip
-    
+
     case verify(data: VerificationToken.Data)
-    
+
     public struct Data {
         
         public let id: FSM_ID
@@ -90,5 +90,5 @@ public enum VerificationToken {
         public let parameterisedMachines: [FSM_ID: ParameterisedMachineData]
         
     }
-    
+
 }

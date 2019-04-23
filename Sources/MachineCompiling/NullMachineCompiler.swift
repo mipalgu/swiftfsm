@@ -57,9 +57,9 @@
  */
 
 public final class NullMachineCompiler: MachineCompiler {
-    
+
     public init() {}
-    
+
     public func compileMachine(
         atPath _: String,
         withCCompilerFlags _: [String],
@@ -68,5 +68,5 @@ public final class NullMachineCompiler: MachineCompiler {
     ) -> Bool {
         return false
     }
-    
+
 }

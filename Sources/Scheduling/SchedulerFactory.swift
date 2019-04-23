@@ -65,7 +65,7 @@ import MachineStructure
 public protocol SchedulerFactory {
 
     associatedtype _Scheduler: Scheduler
-    
+
     /**
      *  Create a `Scheduler`.
      *

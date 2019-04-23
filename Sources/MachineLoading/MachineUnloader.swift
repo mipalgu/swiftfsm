@@ -63,7 +63,7 @@ import swiftfsm
  * Conforming types are able to unload C++ LLFSMs.
  */
 public protocol MachineUnloader {
-    
+
     /**
      * Unloads a C++ LLFSM from its runtime.
      * 

@@ -64,13 +64,13 @@ public class SwiftFSMTestCase: XCTestCase {
     public var allTests: [(String, () throws -> Void)] {
         return []
     }
-    
+
     public var counter: UInt = 0
-    
+
     public func setUp() {
         self.counter = 0
     }
-    
+
     public func tearDown() {}
 
     public func createPingPongMachine(
@@ -99,13 +99,13 @@ public class SwiftFSMTestCase: XCTestCase {
         
         return FSM(initialState: states[0], ringlet: MiPalRinglet())
     }
-    
+
     public func getSlowPingPongMachine(end: Bool = true) -> FiniteStateMachine {
         return self.createPingPongMachine(end, slow: true)
     }
-    
+
     public func getFastPingPongMachine(end: Bool = true) -> FiniteStateMachine {
         return self.createPingPongMachine(end, slow: false)
     }
-    
+
 }

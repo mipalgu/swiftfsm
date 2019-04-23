@@ -64,11 +64,11 @@ import Scheduling
 import MachineStructure
 
 public final class PassiveRoundRobinKripkeStructureGeneratorFactory: KripkeStructureGeneratorFactory {
-    
+
     public typealias ViewFactory = AggregateKripkeStructureViewFactory<KripkeState>
-    
+
     public init() {}
-    
+
     public func make(fromMachines machines: [Machine], usingViewFactory viewFactory: ViewFactory) -> ScheduleCycleKripkeStructureGenerator<
         ExternalsSpinnerDataExtractor<
             MirrorKripkePropertiesRecorder,

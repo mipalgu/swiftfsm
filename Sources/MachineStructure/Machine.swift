@@ -65,7 +65,7 @@ import Timers
  *  the Finite State Machines to be scheduled.
  */
 public struct Machine {
-    
+
     /**
      *  Should debugging be turned on?
      */
@@ -77,14 +77,14 @@ public struct Machine {
      *  - Warning: This should be unique per `Machine`.
      */
     public let name: String
-    
+
     /**
      * The top FSM which makes up the fsm hierarchy.
      */
     public var fsm: FSMType
-    
+
     public var dependencies: [Dependency]
-    
+
     public let clock: FSMClock
 
     /**
@@ -103,7 +103,7 @@ public struct Machine {
         self.dependencies = dependencies
         self.clock = clock
     }
-    
+
 }
 
 extension Machine: Equatable {}

@@ -60,20 +60,20 @@
 import XCTest
 
 public class DynamicLibraryMachineLoaderFactoryTests: SwiftFSMTestCase {
-    
+
     public override var allTests: [(String, () throws -> Void)] {
         return [
             ("testFactoryCreatesDynamicLibraryMachineLoader", testFactoryCreatesDynamicLibraryMachineLoader)
         ]
     }
-    
+
     private var factory: DynamicLibraryMachineLoaderFactory!
-    
+
     public override func setUp() {
         super.setUp()
         self.factory = DynamicLibraryMachineLoaderFactory()
     }
-    
+
     func testFactoryCreatesDynamicLibraryMachineLoader() {
         let loader: MachineLoader = self.factory.make()
         XCTAssert(loader is LibraryMachineLoader)
@@ -83,5 +83,5 @@ public class DynamicLibraryMachineLoaderFactoryTests: SwiftFSMTestCase {
         let libLoader: LibraryMachineLoader = loader as! LibraryMachineLoader
         XCTAssert(libLoader.creator is DynamicLibraryCreator)
     }
-    
+
 }

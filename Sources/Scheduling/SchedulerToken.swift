@@ -66,13 +66,13 @@ public struct SchedulerToken {
     public let type: FSMType
 
     public let machine: Machine
-    
+
     public let isRootFSM: Bool
 
     public var fsm: AnyScheduleableFiniteStateMachine {
         return self.type.asScheduleableFiniteStateMachine
     }
-    
+
     public init(fullyQualifiedName: String, type: FSMType, machine: Machine, isRootFSM: Bool = false) {
         self.fullyQualifiedName = fullyQualifiedName
         self.type = type

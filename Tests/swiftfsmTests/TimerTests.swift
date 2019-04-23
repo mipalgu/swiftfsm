@@ -67,27 +67,27 @@ import Darwin
 #endif
 
 public class TimerTests: SwiftFSMTestCase {
-    
+
     public static var allTests: [(String, (TimerTests) -> () throws -> Void)] {
         return [
             ("testDelayWorks", testDelayWorks)
         ]
     }
-    
+
     private var running: Bool = false
     private var timer: swiftfsm.Timer!
-    
+
     public override func setUp() {
         self.running = false
         //self.timer = Timer()
     }
-    
+
     private func testFunc() {
         self.running = true
         sleep(1)
         self.running = false
     }
-    
+
     public func testDelayWorks() {
         /*let timestamp: UInt = microseconds()
         let delay: UInt = 15000
@@ -98,5 +98,5 @@ public class TimerTests: SwiftFSMTestCase {
         XCTAssert(runTime >= delay && delay < runTime + 1000)
         */
     }
-    
+
 }

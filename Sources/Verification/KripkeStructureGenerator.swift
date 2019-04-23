@@ -63,10 +63,10 @@ import Gateways
  *  Conforming types are responsible for generating `KripkeStructure`s.
  */
 public protocol KripkeStructureGenerator {
-    
+
     /**
      *  Generate the `KripkeStructure`.
      */
     func generate<Gateway: VerifiableGateway>(usingGateway: Gateway)
-    
+
 }

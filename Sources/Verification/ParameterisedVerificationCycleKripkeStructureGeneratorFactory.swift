@@ -60,15 +60,15 @@ import KripkeStructure
 import ModelChecking
 
 public final class ParameterisedVerificationCycleKripkeStructureGeneratorFactory<Detector: CycleDetector>: ParameterisedVerificationCycleKripkeStructureGeneratorFactoryType where Detector.Element == KripkeStatePropertyList {
-    
+
     fileprivate let cycleDetector: Detector
-    
+
     public init(cycleDetector: Detector) {
         self.cycleDetector = cycleDetector
     }
-    
+
     public func make(tokens: [[VerificationToken]]) -> ParameterisedVerificationCycleKripkeStructureGenerator<Detector> {
         return ParameterisedVerificationCycleKripkeStructureGenerator(cycleDetector: self.cycleDetector, tokens: tokens)
     }
-    
+
 }

@@ -62,7 +62,7 @@ import swiftfsm
 import swift_helpers
 
 public protocol LazyKripkeStructureGeneratorDelegate: class {
-    
+
     /**
      *  Fetch the initial states and finish states of a parameterised machine.
      *
@@ -71,5 +71,5 @@ public protocol LazyKripkeStructureGeneratorDelegate: class {
      *  another fsm.
      */
     func resultsForCall<Gateway: VerifiableGateway>(_: LazyKripkeStructureGenerator, call: CallData, withGateway: Gateway) -> SortedCollection<(UInt, Any?)>
-    
+
 }

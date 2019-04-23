@@ -61,52 +61,52 @@
  *  machine.
  */
 public struct Job {
-    
+
     /**
      * Should we compile the machine?
      */
     public var compile: Bool = false
-    
+
     /**
      * Flags passed to the C compiler when compiling a machine.
      */
     public var cCompilerFlags: [String] = []
-    
+
     /**
      *  How many times should we repeat this task?
      */
     public var count: Int = 1
-    
+
     /**
      *  Is this `Machine` a clfsm machine?
      */
     public var isClfsmMachine: Bool = false
-    
+
     /**
      * Flags which are passed to the linker when compiling a machine.
      */
     public var linkerFlags: [String] = []
-    
+
     /**
      *  The name of the `Machine`.
      */
     public var name: String?
-    
+
     /**
      *  Contains a list of parameters and their associated values.
      *
      *  This allows the user to give values to parameters from the command line.
      */
     public var parameters: [String: String] = [:]
-    
+
     /**
      *  The path to load the `Machine`.
      */
     public var path: String?
-    
+
     /**
      * Flags passed to the swift compiler when compiling a machine.
      */
     public var swiftCompilerFlags: [String] = []
-    
+
 }

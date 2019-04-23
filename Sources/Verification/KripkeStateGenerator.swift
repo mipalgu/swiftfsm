@@ -64,7 +64,7 @@ import swiftfsm
 public final class KripkeStateGenerator: KripkeStateGeneratorProtocol {
 
     public init() {}
-    
+
     public func generateKripkeState(
         fromWorld world: KripkeStatePropertyList,
         withLastState last: KripkeState? = nil

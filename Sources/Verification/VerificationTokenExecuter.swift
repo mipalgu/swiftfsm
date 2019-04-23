@@ -64,21 +64,21 @@ import ModelChecking
 import swiftfsm
 
 public final class VerificationTokenExecuter<StateGenerator: KripkeStateGeneratorProtocol> {
-    
+
     fileprivate let stateGenerator: StateGenerator
     fileprivate let worldCreator: WorldCreator
-    
+
     fileprivate let recorder = MirrorKripkePropertiesRecorder()
-    
+
     fileprivate var calls: [FSM_ID: [CallData]] = [:]
-    
+
     public weak var delegate: VerificationTokenExecuterDelegate?
-    
+
     public init(stateGenerator: StateGenerator, worldCreator: WorldCreator = WorldCreator()) {
         self.stateGenerator = stateGenerator
         self.worldCreator = worldCreator
     }
-    
+
     public func execute(
         fsm: AnyScheduleableFiniteStateMachine,
         inTokens tokens: [[VerificationToken]],
@@ -143,7 +143,7 @@ public final class VerificationTokenExecuter<StateGenerator: KripkeStateGenerato
         let postState = self.stateGenerator.generateKripkeState(fromWorld: postWorld, withLastState: preState)
         return ([preState, postState], data.machine.clock.lastClockValues, externals, newCallStack, results)
     }
-    
+
     fileprivate func mergeStacks(_ lhs: [FSM_ID: [CallData]], _ rhs: [FSM_ID: [CallData]]) -> [FSM_ID: [CallData]] {
         var newStack: [FSM_ID: [CallData]] = lhs
         for (id, stack) in rhs {
@@ -151,12 +151,12 @@ public final class VerificationTokenExecuter<StateGenerator: KripkeStateGenerato
         }
         return newStack
     }
-    
+
 }
 
 extension VerificationTokenExecuter: FSMGatewayDelegate {
-    
-    
+
+
     public func hasCalled(inGateway gateway: ModifiableFSMGateway, fsm: AnyParameterisedFiniteStateMachine, withId id: FSM_ID, withParameters parameters: [String: Any], caller: FSM_ID, storingResultsIn promiseData: PromiseData) {
         guard let delegate = self.delegate else {
             fatalError("delegate has not been set.")
@@ -168,7 +168,7 @@ extension VerificationTokenExecuter: FSMGatewayDelegate {
         let data = delegate.scheduleInfo(of: id, caller: caller, inGateway: gateway)
         self.addCall(CallData(data: data, parameters: parameters, promiseData: promiseData, runs: 0))
     }
-    
+
     public func hasInvoked(inGateway gateway: ModifiableFSMGateway, fsm: AnyParameterisedFiniteStateMachine, withId id: FSM_ID, withParameters parameters: [String: Any], caller: FSM_ID, storingResultsIn promiseData: PromiseData) {
         guard let delegate = self.delegate else {
             fatalError("delegate has not been set.")
@@ -180,7 +180,7 @@ extension VerificationTokenExecuter: FSMGatewayDelegate {
         let data = delegate.scheduleInfo(of: id, caller: caller, inGateway: gateway)
         self.addCall(CallData(data: data, parameters: parameters, promiseData: promiseData, runs: 0))
     }
-    
+
     fileprivate func addCall(_ data: CallData) {
         if nil == self.calls[data.id] {
             self.calls[data.id] = [data]
@@ -188,5 +188,5 @@ extension VerificationTokenExecuter: FSMGatewayDelegate {
         }
         self.calls[data.id]?.append(data)
     }
-    
+
 }

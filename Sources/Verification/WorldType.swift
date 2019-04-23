@@ -57,8 +57,8 @@
  */
 
 public enum WorldType {
-    
+
     case beforeExecution
     case afterExecution
-    
+
 }

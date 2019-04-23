@@ -66,17 +66,17 @@ import Darwin
 #endif
 
 public class MockedLibraryResource: LibraryResource {
-    
+
     private typealias CMainMethod = @convention(c) (CInt, UnsafeMutablePointer<UnsafeMutablePointer<CChar>>) -> CInt
-    
+
     public let path: String = ""
-    
+
     public var machines: [[FiniteStateMachine]]?
-    
+
     public init(machines: [[FiniteStateMachine]]? = nil) {
         self.machines = machines
     }
-    
+
     public func getSymbolPointer(symbol: String) -> (
         symbol: UnsafeMutableRawPointer,
         error: String?
@@ -94,9 +94,9 @@ public class MockedLibraryResource: LibraryResource {
         let f: CMainMethod = {argc, argv in return CInt(0)}
         return (symbol: UnsafeMutableRawPointer(&f), error: nil)
     }
-    
+
     public func close() -> (successful: Bool, error: String?) {
         return (successful: true, error: nil)
     }
-    
+
 }

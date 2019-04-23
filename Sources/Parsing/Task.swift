@@ -83,17 +83,17 @@ public struct Task {
      *  Should we generate a `KripkeStructure`s?.
      */
     public var generateKripkeStructure: Bool = false
-    
+
     /**
      *  Should we generate a scheduler map file?
      */
     public var generateSchedulerMap: Bool = false
-    
+
     /**
      *  A list of data for each machine that needs to be loaded.
      */
     public var jobs: [Job] = []
-    
+
     /**
      *  The list of kripke structure views which will output a `KripkeStructure`
      *  into a specific format.

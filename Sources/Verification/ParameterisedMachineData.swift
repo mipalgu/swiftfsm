@@ -61,19 +61,19 @@ import KripkeStructureViews
 import swiftfsm
 
 public struct ParameterisedMachineData {
-    
+
     public let id: FSM_ID
-    
+
     public let fsm: AnyParameterisedFiniteStateMachine
-    
+
     public let fullyQualifiedName: String
-    
+
     public let parameters: Set<String>
-    
+
     public let inPlace: Bool
-    
+
     public let tokens: [[VerificationToken]]
-    
+
     public let view: AnyKripkeStructureView<KripkeState>
-    
+
 }

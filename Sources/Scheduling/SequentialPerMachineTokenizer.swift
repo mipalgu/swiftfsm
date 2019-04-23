@@ -61,9 +61,9 @@ import MachineStructure
 import swiftfsm
 
 public final class SequentialPerMachineTokenizer: SchedulerTokenizer {
-    
+
     fileprivate let flatenner: SubmachineFlatenner
-    
+
     public init(flatenner: SubmachineFlatenner = SubmachineFlatenner()) {
         self.flatenner = flatenner
     }

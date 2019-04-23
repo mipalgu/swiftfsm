@@ -61,15 +61,15 @@ import MachineStructure
 import swiftfsm
 
 public final class ParallelTokenizer: SchedulerTokenizer {
-    
+
     public init() {}
-    
+
     public func separate(_ machines: [Machine]) -> [[(AnyScheduleableFiniteStateMachine, Machine)]] {
         return []
     }
-    
+
     fileprivate func flattenSubmachines(_ fsm: AnyScheduleableFiniteStateMachine) -> [AnyScheduleableFiniteStateMachine] {
         return [fsm] + fsm.submachines.flatMap(self.flattenSubmachines)
     }
-    
+
 }

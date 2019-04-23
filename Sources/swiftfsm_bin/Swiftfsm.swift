@@ -258,7 +258,7 @@ public class Swiftfsm<
             )
         }
     }
-    
+
     private func handleMachines<KGF: KripkeStructureGeneratorFactory, S: Scheduler>(
         _ machines: [Machine],
         task: Task,

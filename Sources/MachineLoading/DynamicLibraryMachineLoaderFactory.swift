@@ -66,7 +66,7 @@ import Libraries
  *  The machine loader leverages the `DynamicLibraryCreator` class.
  */
 public class DynamicLibraryMachineLoaderFactory: MachineLoaderFactory {
-    
+
     private let printer: Printer
 
     /**
@@ -90,5 +90,5 @@ public class DynamicLibraryMachineLoaderFactory: MachineLoaderFactory {
             printer: self.printer 
         )
     }
-    
+
 }

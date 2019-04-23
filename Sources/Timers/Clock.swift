@@ -59,14 +59,14 @@
 import swiftfsm
 
 public protocol Clock: class, Timer {
-    
+
     /**
      *  Reports the values used to the last `Timer` function calls.
      *
      *  This allows other classes to query how an object is using the timer.
      */
     var lastClockValues: [UInt] { get }
-    
+
     func update(fromFSM: AnyScheduleableFiniteStateMachine)
-    
+
 }

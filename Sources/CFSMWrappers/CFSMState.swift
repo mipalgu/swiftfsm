@@ -123,7 +123,7 @@ open class CFSMState: MiPalState
         let res = refl_evaluateTransition(self.metaMachine, UInt32(self.stateNumber), UInt32(transitionNumber), nil)
         return res == 1 ? true : false
     }
-    
+
 
     /**
      *  Create a copy of `self`.

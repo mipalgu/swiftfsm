@@ -57,9 +57,9 @@
  */
 
 public final class NullFormatter: Formatter {
-    
+
     public func format(_ str: String) -> String {
         return str
     }
-    
+
 }

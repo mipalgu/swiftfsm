@@ -61,29 +61,29 @@ import KripkeStructure
 import swiftfsm
 
 struct VerificationState<CycleDetectorData, GatewayData> {
-    
+
     var initial: Bool
-    
+
     var cycleCache: CycleDetectorData
-    
+
     var foundCycle: Bool
-    
+
     var tokens: [[VerificationToken]]
-    
+
     var executing: Int
-    
+
     var lastState: KripkeState?
-    
+
     var lastRecords: [[KripkeStatePropertyList]]
-    
+
     var runs: UInt
-    
+
     var callStack: [FSM_ID: [CallData]]
-    
+
     var results: [FSM_ID: Any?]
-    
+
     var foundResult: Bool
-    
+
     var gatewayData: GatewayData // Fix this type later.
-    
+
 }
