@@ -430,7 +430,7 @@ public class SwiftfsmParser: HelpableParser {
             return temp
         default:
             guard let table = self.parseTable(scheduler) else {
-                throw ParsingErrors.generalError(error: "Unable to load scheduler \(scheduler)")
+                throw ParsingErrors.generalError(error: "Unable to parse scheduler \(scheduler)")
             }
             var temp: Task = t
             temp.scheduler = .timeTriggered(
@@ -442,8 +442,8 @@ public class SwiftfsmParser: HelpableParser {
     }
     
     private func parseTable(_ path: String) -> MetaDispatchTable? {
-        
-        return nil
+        let parser = MetaDispatchTableParser()
+        return parser.parse(atPath: path)
     }
 
     private func handlePath(_ j: Job, words: inout [String]) throws -> Job {

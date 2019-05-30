@@ -66,8 +66,11 @@ public final class MetaDispatchTableParser {
         guard let content = try? String(contentsOfFile: path) else {
             return nil
         }
-        let lines = content.components(separatedBy: .newlines)
-        let sections = lines.grouped(by: { (lhs, _) in !lhs.trimmingCharacters(in: .whitespaces).isEmpty })
+        let lines = content.components(separatedBy: .newlines).map { $0.trimmingCharacters(in: .whitespaces) }
+        let sections: [[String]] = lines.lazy.grouped { (lhs, _) in !lhs.isEmpty }.compactMap {
+            let lines = $0.filter { !$0.isEmpty }
+            return lines.isEmpty ? nil : lines
+        }
         guard let timeslots = sections.failMap({ (section) -> [MetaTimeslot]? in
             return section.failMap { (row: String) -> MetaTimeslot? in
                 let data: [String] = row.components(separatedBy: String(",")).compactMap {
