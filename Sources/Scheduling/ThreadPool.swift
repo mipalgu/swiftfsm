@@ -60,20 +60,30 @@ import Dispatch
 
 public struct ThreadPool {
     
-    public let numberOfThreads: Int
-    
     fileprivate var queues: [DispatchQueue]
     
+    public var numberOfThreads: Int {
+        return self.queues.count
+    }
+    
+    public init(queues: [DispatchQueue]) {
+        self.queues = queues
+    }
+    
     public init(numberOfThreads: Int) {
-        self.numberOfThreads = numberOfThreads
         if numberOfThreads < 1 {
             fatalError("Attempting to create a thread pool with \(numberOfThreads) threads.")
         }
-        if 1 == numberOfThreads {
-            self.queues = [DispatchQueue.main]
-            return
-        }
         self.queues = [DispatchQueue.main] + [1..<numberOfThreads].map { DispatchQueue(label: "\($0)") }
+    }
+    
+    func execute(_ jobs: [() -> Void]) {
+        if jobs.count > self.queues.count {
+            fatalError("Attempting to execute \(jobs.count) jobs on thread pool with size \(self.numberOfThreads)")
+        }
+        let group = DispatchGroup()
+        zip(self.queues, jobs).forEach { group.notify(queue: $0, execute: $1) }
+        group.wait()
     }
     
 }
