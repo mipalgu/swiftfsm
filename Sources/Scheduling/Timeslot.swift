@@ -62,6 +62,6 @@ public struct Timeslot {
     
     public var duration: UInt
     
-    public var token: SchedulerToken
+    public var fullyQualifiedName: String
     
 }
