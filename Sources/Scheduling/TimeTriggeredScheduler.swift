@@ -121,7 +121,7 @@ public class TimeTriggeredScheduler: Scheduler, VerifiableGatewayDelegator {
                 self.gateway.stacks[id] = [PromiseData(fsm: clone, hasFinished: false)]
             }
         }
-        //var jobs = self.fetchJobs(fromTokens: tokens)
+        let table = self.fetchTable(fromTokens: tokens)
         /*var finish: Bool = false
         // Run until all machines are finished.
         while (false == jobs.isEmpty && false == STOP && false == finish) {
@@ -157,12 +157,8 @@ public class TimeTriggeredScheduler: Scheduler, VerifiableGatewayDelegator {
         }*/
     }
     
-    private func fetchJobs(fromTokens tokens: [[SchedulerToken]]) -> [[(FSM_ID, AnyScheduleableFiniteStateMachine, Machine)]] {
-        return tokens.map { tokens in
-            tokens.map { token in
-                return (self.gateway.id(of: token.fullyQualifiedName), token.fsm, token.machine)
-            }
-        }
+    private func fetchTable(fromTokens tokens: [[SchedulerToken]]) -> SchedulerDispatchTable? {
+        return nil
     }
     
     private func getMachines(fromJob job: [(FSM_ID, AnyScheduleableFiniteStateMachine, Machine)]) -> Set<Machine> {
