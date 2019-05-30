@@ -147,10 +147,17 @@ public class SwiftfsmParser: HelpableParser {
     fileprivate let passiveRoundRobinFactory: PassiveRoundRobinSchedulerFactory
 
     fileprivate let roundRobinFactory: RoundRobinSchedulerFactory
+    
+    fileprivate let timeTriggeredFactory: TimeTriggeredSchedulerFactoryCreator
 
-    public init(passiveRoundRobinFactory: PassiveRoundRobinSchedulerFactory, roundRobinFactory: RoundRobinSchedulerFactory) {
+    public init(
+        passiveRoundRobinFactory: PassiveRoundRobinSchedulerFactory,
+        roundRobinFactory: RoundRobinSchedulerFactory,
+        timeTriggeredFactory: TimeTriggeredSchedulerFactoryCreator
+    ) {
         self.passiveRoundRobinFactory = passiveRoundRobinFactory
         self.roundRobinFactory = roundRobinFactory
+        self.timeTriggeredFactory = timeTriggeredFactory
     }
 
     /**
@@ -416,8 +423,20 @@ public class SwiftfsmParser: HelpableParser {
             temp.scheduler = .passiveRoundRobin(self.passiveRoundRobinFactory, PassiveRoundRobinKripkeStructureGeneratorFactory())
             return temp
         default:
-            throw ParsingErrors.generalError(error: "Unknown value for scheduler flag")
+            guard let table = self.parseTable(scheduler) else {
+                throw ParsingErrors.generalError(error: "Unable to load scheduler \(scheduler)")
+            }
+            var temp: Task = t
+            temp.scheduler = .timeTriggered(
+                self.timeTriggeredFactory.make(dispatchTable: table),
+                RoundRobinKripkeStructureGeneratorFactory()
+            )
+            return temp
         }
+    }
+    
+    private func parseTable(_: String) -> DispatchTable? {
+        return nil
     }
 
     private func handlePath(_ j: Job, words: inout [String]) throws -> Job {

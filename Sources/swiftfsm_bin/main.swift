@@ -90,6 +90,11 @@ let roundRobinFactory = RoundRobinSchedulerFactory(
     unloader: clfsmMachineLoader
 )
 
+let timeTriggeredFactory = TimeTriggeredSchedulerFactoryCreator(
+    scheduleHandler: clfsmMachineLoader,
+    unloader: clfsmMachineLoader
+)
+
 let libraryLoader = DynamicLibraryMachineLoaderFactory(printer: printer).make()
 
 @available(macOS 10.11, *)
@@ -116,7 +121,8 @@ func run() {
                 scheduleHandler: clfsmMachineLoader,
                 unloader: clfsmMachineLoader
             ),
-            roundRobinFactory: roundRobinFactory
+            roundRobinFactory: roundRobinFactory,
+            timeTriggeredFactory: timeTriggeredFactory
         ),
         schedulerFactory: roundRobinFactory,
         view: printer

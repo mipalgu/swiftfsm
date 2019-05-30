@@ -256,6 +256,16 @@ public class Swiftfsm<
                 scheduler: scheduler,
                 views: views
             )
+        case .timeTriggered(let schedulerFactory, let generator):
+            let scheduler = schedulerFactory.make()
+            let machines: [Machine] = task.jobs.flatMap { self.handleJob($0, gateway: scheduler) }
+            self.handleMachines(
+                machines,
+                task: task,
+                generator: generator,
+                scheduler: scheduler,
+                views: views
+            )
         }
     }
 

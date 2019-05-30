@@ -1,9 +1,9 @@
 /*
- * SupportedSchedulers.swift 
- * Parsing 
+ * TimeTriggeredSchedulerFactoryCreator.swift
+ * Scheduling
  *
- * Created by Callum McColl on 26/09/2018.
- * Copyright © 2018 Callum McColl. All rights reserved.
+ * Created by Callum McColl on 30/5/19.
+ * Copyright © 2019 Callum McColl. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -56,15 +56,31 @@
  *
  */
 
-import KripkeStructure
-import ModelChecking
-import Scheduling
-import Verification
+import FSM
+import MachineStructure
+import MachineLoading
+import swiftfsm
 
-public enum SupportedSchedulers {
-
-    case passiveRoundRobin(PassiveRoundRobinSchedulerFactory, PassiveRoundRobinKripkeStructureGeneratorFactory)
-    case roundRobin(RoundRobinSchedulerFactory, RoundRobinKripkeStructureGeneratorFactory)
-    case timeTriggered(TimeTriggeredSchedulerFactory, RoundRobinKripkeStructureGeneratorFactory)
-
+public final class TimeTriggeredSchedulerFactoryCreator {
+    
+    fileprivate let scheduleHandler: ScheduleHandler
+    
+    fileprivate let unloader: MachineUnloader
+    
+    public init(
+        scheduleHandler: ScheduleHandler,
+        unloader: MachineUnloader
+    ) {
+        self.scheduleHandler = scheduleHandler
+        self.unloader = unloader
+    }
+    
+    public func make(dispatchTable: DispatchTable) -> TimeTriggeredSchedulerFactory {
+        return TimeTriggeredSchedulerFactory(
+            dispatchTable: dispatchTable,
+            scheduleHandler: self.scheduleHandler,
+            unloader: self.unloader
+        )
+    }
+    
 }
