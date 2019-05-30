@@ -61,6 +61,7 @@ import Gateways
 import MachineStructure
 import MachineLoading
 import swiftfsm
+import swiftfsm_helpers
 import Utilities
 
 /**
@@ -129,42 +130,41 @@ public class TimeTriggeredScheduler: Scheduler, VerifiableGatewayDelegator {
         }
         var finish: Bool = false
         // Run until all machines are finished.
-        /*while (false == jobs.isEmpty && false == STOP && false == finish) {
+        while (false == STOP && false == finish) {
             finish = true
-            let executeFunctions = table.timeslots.map { timeslots in
-                for timeslot in timeslots {
-                    
+            let jobs = table.timeslots.map { timeslots in
+                return { () -> Void in
+                    let cycleStartTime = microseconds()
+                    for timeslot in timeslots {
+                        let startTime = cycleStartTime + timeslot.startTime
+                        let endTime = startTime + timeslot.duration
+                        let startSlackTime = startTime - microseconds()
+                        if startSlackTime > 0 {
+                            microsleep(startSlackTime)
+                        }
+                        let fsm = self.gateway.stacks[timeslot.task.id]?.first?.fsm.asScheduleableFiniteStateMachine ?? timeslot.task.fsm
+                        fsm.takeSnapshot()
+                        timeslot.task.machine.clock.update(fromFSM: fsm)
+                        DEBUG = timeslot.task.machine.debug
+                        if (true == self.scheduleHandler.handleUnloadedMachine(fsm)) {
+                            continue
+                        }
+                        fsm.next()
+                        finish = finish && (fsm.hasFinished || fsm.isSuspended)
+                        if true == fsm.hasFinished {
+                            self.gateway.finish(timeslot.task.id)
+                            finish = false
+                        }
+                        let endSlackTime = endTime - microseconds()
+                        if endSlackTime > 0 {
+                            microsleep(endSlackTime)
+                        }
+                        fsm.saveSnapshot()
+                    }
                 }
             }
-            var i = 0
-            for job in jobs {
-                var j = 0
-                let machines: Set<Machine> = self.getMachines(fromJob: job)
-                machines.forEach { $0.fsm.takeSnapshot() }
-                for (id, fsm, machine) in job {
-                    let fsm = self.gateway.stacks[id]?.first?.fsm.asScheduleableFiniteStateMachine ?? fsm
-                    machine.clock.update(fromFSM: fsm)
-                    DEBUG = machine.debug
-                    if (true == scheduleHandler.handleUnloadedMachine(fsm)) {
-                        jobs[i].remove(at: j)
-                        continue
-                    }
-                    fsm.next()
-                    finish = finish && (fsm.hasFinished || fsm.isSuspended)
-                    if true == fsm.hasFinished {
-                        self.gateway.finish(id)
-                        finish = false
-                    }
-                    j += 1
-                }
-                machines.forEach { $0.fsm.saveSnapshot() }
-                if (true == jobs[i].isEmpty) {
-                    jobs.remove(at: i)
-                    continue
-                }
-                i += 1
-            }
-        }*/
+            self.threadPool.execute(jobs)
+        }
     }
     
     private func fetchTable(fromTokens tokens: [[SchedulerToken]]) -> DispatchTable<Token>? {
@@ -179,19 +179,11 @@ public class TimeTriggeredScheduler: Scheduler, VerifiableGatewayDelegator {
                     machine: token.machine
                 )
                 return Timeslot<Token>(startTime: timeslot.startTime, duration: timeslot.duration, task: newToken)
-            }
+            }?.sorted { $0.startTime < $1.startTime }
         }) else {
             return nil
         }
         return DispatchTable<Token>(numberOfThreads: self.dispatchTable.numberOfThreads, timeslots: timeslots)
-    }
-    
-    private func getMachines(fromJob job: [(FSM_ID, AnyScheduleableFiniteStateMachine, Machine)]) -> Set<Machine> {
-        var machines: Set<Machine> = []
-        job.forEach {
-            machines.insert($2)
-        }
-        return machines
     }
     
     fileprivate func addToGateway(_ fsm: FSMType, dependencies: [Dependency], prefix: String) {
