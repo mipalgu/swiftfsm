@@ -79,6 +79,8 @@ public class TimeTriggeredScheduler: Scheduler, VerifiableGatewayDelegator {
     
     private let scheduleHandler: ScheduleHandler
     
+    fileprivate var threadPool: ThreadPool
+    
     /**
      *  Create a new `RoundRobinScheduler`.
      *
@@ -94,6 +96,7 @@ public class TimeTriggeredScheduler: Scheduler, VerifiableGatewayDelegator {
         self.gateway = gateway
         self.unloader = unloader
         self.scheduleHandler = scheduleHandler
+        self.threadPool = ThreadPool(numberOfThreads: dispatchTable.numberOfThreads)
     }
     
     /**
@@ -121,11 +124,18 @@ public class TimeTriggeredScheduler: Scheduler, VerifiableGatewayDelegator {
                 self.gateway.stacks[id] = [PromiseData(fsm: clone, hasFinished: false)]
             }
         }
-        let table = self.fetchTable(fromTokens: tokens)
-        /*var finish: Bool = false
+        guard let table = self.fetchTable(fromTokens: tokens) else {
+            return
+        }
+        var finish: Bool = false
         // Run until all machines are finished.
-        while (false == jobs.isEmpty && false == STOP && false == finish) {
+        /*while (false == jobs.isEmpty && false == STOP && false == finish) {
             finish = true
+            let executeFunctions = table.timeslots.map { timeslots in
+                for timeslot in timeslots {
+                    
+                }
+            }
             var i = 0
             for job in jobs {
                 var j = 0
@@ -157,8 +167,23 @@ public class TimeTriggeredScheduler: Scheduler, VerifiableGatewayDelegator {
         }*/
     }
     
-    private func fetchTable(fromTokens tokens: [[SchedulerToken]]) -> SchedulerDispatchTable? {
-        return nil
+    private func fetchTable(fromTokens tokens: [[SchedulerToken]]) -> DispatchTable<Token>? {
+        guard let timeslots: [[Timeslot<Token>]] = tokens.failMap({ tokens in
+            tokens.failMap { token in
+                guard let timeslot = self.dispatchTable.findTimeslot(token.fullyQualifiedName) else {
+                    return nil
+                }
+                let newToken = Token(
+                    id: self.gateway.id(of: token.fullyQualifiedName),
+                    fsm: token.fsm,
+                    machine: token.machine
+                )
+                return Timeslot<Token>(startTime: timeslot.startTime, duration: timeslot.duration, task: newToken)
+            }
+        }) else {
+            return nil
+        }
+        return DispatchTable<Token>(numberOfThreads: self.dispatchTable.numberOfThreads, timeslots: timeslots)
     }
     
     private func getMachines(fromJob job: [(FSM_ID, AnyScheduleableFiniteStateMachine, Machine)]) -> Set<Machine> {
@@ -189,6 +214,16 @@ public class TimeTriggeredScheduler: Scheduler, VerifiableGatewayDelegator {
                 self.addToGateway(.controllableFSM(subfsm), dependencies: subdependencies, prefix: subprefix)
             }
         }
+    }
+    
+    fileprivate struct Token {
+        
+        var id: FSM_ID
+        
+        var fsm: AnyScheduleableFiniteStateMachine
+        
+        var machine: Machine
+        
     }
     
 }

@@ -72,3 +72,13 @@ public struct DispatchTable<T> {
     }
     
 }
+
+extension DispatchTable where T: Equatable {
+    
+    func findTimeslot(_ task: T) -> Timeslot<T>? {
+        return self.timeslots.lazy.compactMap {
+            $0.first { $0.task == task }
+        }.first
+    }
+    
+}
