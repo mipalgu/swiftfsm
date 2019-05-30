@@ -1,6 +1,6 @@
 /*
- * Timeslot.swift
- * Scheduling
+ * MetaDispathTableParser.swift
+ * Parsing
  *
  * Created by Callum McColl on 30/5/19.
  * Copyright © 2019 Callum McColl. All rights reserved.
@@ -56,22 +56,37 @@
  *
  */
 
-public typealias MetaTimeslot = Timeslot<String>
+import Foundation
+import Scheduling
+import swift_helpers
 
-public typealias SchedulerTimeslot = Timeslot<SchedulerToken>
-
-public struct Timeslot<T> {
+public final class MetaDispatchTableParser {
     
-    public var startTime: UInt
-    
-    public var duration: UInt
-    
-    public var task: T
-    
-    public init(startTime: UInt, duration: UInt, task: T) {
-        self.startTime = startTime
-        self.duration = duration
-        self.task = task
+    func parse(atPath path: String) -> MetaDispatchTable? {
+        guard let content = try? String(contentsOfFile: path) else {
+            return nil
+        }
+        let lines = content.components(separatedBy: .newlines)
+        let sections = lines.grouped(by: { (lhs, _) in !lhs.trimmingCharacters(in: .whitespaces).isEmpty })
+        guard let timeslots = sections.failMap({ (section) -> [MetaTimeslot]? in
+            return section.failMap { (row: String) -> MetaTimeslot? in
+                let data: [String] = row.components(separatedBy: String(",")).compactMap {
+                    let value = $0.trimmingCharacters(in: .whitespaces)
+                    return value.isEmpty ? nil : value
+                }
+                if (data.count != 3) {
+                    return nil
+                }
+                guard let startTime = UInt(data[0]), let duration = UInt(data[1]) else {
+                    return nil
+                }
+                return MetaTimeslot(startTime: startTime, duration: duration, task: data[2])
+            }
+        })
+        else {
+            return nil
+        }
+        return MetaDispatchTable(numberOfThreads: timeslots.count, timeslots: timeslots)
     }
     
 }

@@ -66,4 +66,9 @@ public struct DispatchTable<T> {
     
     public var timeslots: [[Timeslot<T>]]
     
+    public init(numberOfThreads: Int, timeslots: [[Timeslot<T>]]) {
+        self.numberOfThreads = numberOfThreads
+        self.timeslots = timeslots
+    }
+    
 }

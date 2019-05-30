@@ -56,6 +56,12 @@
  *
  */
 
+#if os(macOS)
+import Darwin
+#else
+import Glibc
+#endif
+
 import IO
 import KripkeStructure
 import KripkeStructureViews
@@ -435,7 +441,8 @@ public class SwiftfsmParser: HelpableParser {
         }
     }
     
-    private func parseTable(_: String) -> MetaDispatchTable? {
+    private func parseTable(_ path: String) -> MetaDispatchTable? {
+        
         return nil
     }
 
