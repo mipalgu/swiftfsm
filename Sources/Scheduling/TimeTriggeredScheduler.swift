@@ -126,43 +126,48 @@ public class TimeTriggeredScheduler: Scheduler, VerifiableGatewayDelegator {
             }
         }
         guard let table = self.fetchTable(fromTokens: tokens) else {
-            return
+            fatalError("Unable to create schedulers dispatch table.")
         }
         var finish: Bool = false
+        var cycleStartTime: UInt = UInt.max
+        let jobs = table.timeslots.map { timeslots in
+            return { () -> Void in
+                for timeslot in timeslots {
+                    let startTime = cycleStartTime + timeslot.startTime
+                    let endTime = startTime + timeslot.duration
+                    let currentTime = microseconds()
+                    if currentTime < startTime {
+                        microsleep(startTime - currentTime)
+                    } else {
+                        print("Starting \(currentTime - startTime) microseconds late")
+                    }
+                    let fsm = self.gateway.stacks[timeslot.task.id]?.first?.fsm.asScheduleableFiniteStateMachine ?? timeslot.task.fsm
+                    fsm.takeSnapshot()
+                    timeslot.task.machine.clock.update(fromFSM: fsm)
+                    DEBUG = timeslot.task.machine.debug
+                    if (true == self.scheduleHandler.handleUnloadedMachine(fsm)) {
+                        continue
+                    }
+                    fsm.next()
+                    finish = finish && (fsm.hasFinished || fsm.isSuspended)
+                    if true == fsm.hasFinished {
+                        self.gateway.finish(timeslot.task.id)
+                        finish = false
+                    }
+                    let currentTime2 = microseconds()
+                    if currentTime2 < endTime {
+                        microsleep(endTime - currentTime2)
+                    } else {
+                        print("Ending \(currentTime2 - endTime) microseconds late")
+                    }
+                    fsm.saveSnapshot()
+                }
+            }
+        }
         // Run until all machines are finished.
         while (false == STOP && false == finish) {
             finish = true
-            let jobs = table.timeslots.map { timeslots in
-                return { () -> Void in
-                    let cycleStartTime = microseconds()
-                    for timeslot in timeslots {
-                        let startTime = cycleStartTime + timeslot.startTime
-                        let endTime = startTime + timeslot.duration
-                        let startSlackTime = startTime - microseconds()
-                        if startSlackTime > 0 {
-                            microsleep(startSlackTime)
-                        }
-                        let fsm = self.gateway.stacks[timeslot.task.id]?.first?.fsm.asScheduleableFiniteStateMachine ?? timeslot.task.fsm
-                        fsm.takeSnapshot()
-                        timeslot.task.machine.clock.update(fromFSM: fsm)
-                        DEBUG = timeslot.task.machine.debug
-                        if (true == self.scheduleHandler.handleUnloadedMachine(fsm)) {
-                            continue
-                        }
-                        fsm.next()
-                        finish = finish && (fsm.hasFinished || fsm.isSuspended)
-                        if true == fsm.hasFinished {
-                            self.gateway.finish(timeslot.task.id)
-                            finish = false
-                        }
-                        let endSlackTime = endTime - microseconds()
-                        if endSlackTime > 0 {
-                            microsleep(endSlackTime)
-                        }
-                        fsm.saveSnapshot()
-                    }
-                }
-            }
+            cycleStartTime = microseconds() + 1000 // Account for some jitter from the scheduler.
             self.threadPool.execute(jobs)
         }
     }
