@@ -122,12 +122,14 @@ public class RoundRobinScheduler<Tokenizer: SchedulerTokenizer>: Scheduler, Veri
                 self.gateway.stacks[id] = [PromiseData(fsm: clone, hasFinished: false)]
             }
         }
-        var jobs = self.fetchJobs(fromTokens: tokens)
+        guard let table = self.fetchTable(fromTokens: tokens) else {
+            fatalError("Unable to schedule all machines.")
+        }
         var finish: Bool = false
         // Run until all machines are finished.
-        while (false == jobs.isEmpty && false == STOP && false == finish) {
+        while (false == finish) {
             finish = true
-            var i = 0
+            /*var i = 0
             for job in jobs {
                 var j = 0
                 let machines: Set<Machine> = self.getMachines(fromJob: job)
@@ -154,16 +156,12 @@ public class RoundRobinScheduler<Tokenizer: SchedulerTokenizer>: Scheduler, Veri
                     continue
                 }
                 i += 1
-            }
+            }*/
         }
     }
 
-    private func fetchJobs(fromTokens tokens: [[SchedulerToken]]) -> [[(FSM_ID, AnyScheduleableFiniteStateMachine, Machine)]] {
-        return tokens.map { tokens in
-            tokens.map { token in
-                return (self.gateway.id(of: token.fullyQualifiedName), token.fsm, token.machine)
-            }
-        }
+    private func fetchTable(fromTokens tokens: [[SchedulerToken]]) -> SchedulerDispatchTable? {
+        return nil
     }
 
     private func getMachines(fromJob job: [(FSM_ID, AnyScheduleableFiniteStateMachine, Machine)]) -> Set<Machine> {
