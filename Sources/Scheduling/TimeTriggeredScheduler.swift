@@ -103,6 +103,25 @@ public class TimeTriggeredScheduler: Scheduler, VerifiableGatewayDelegator {
         self.gateway.stacks = [:]
         machines.forEach { self.addToGateway($0.fsm, dependencies: $0.dependencies, prefix: $0.name
             + ".") }
+        let tokenizer = SequentialPerRingletTokenizer()
+        let tokens = tokenizer.separate(machines)
+        tokens.forEach {
+            $0.forEach {
+                guard let parameterisedFSM = $0.type.asParameterisedFiniteStateMachine else {
+                    return
+                }
+                parameterisedFSM.suspend()
+                let id = self.gateway.id(of: $0.fullyQualifiedName)
+                if false == $0.isRootFSM {
+                    self.gateway.stacks[id] = []
+                    return
+                }
+                let clone = parameterisedFSM.clone()
+                clone.restart()
+                self.gateway.stacks[id] = [PromiseData(fsm: clone, hasFinished: false)]
+            }
+        }
+        //var jobs = self.fetchJobs(fromTokens: tokens)
         /*var finish: Bool = false
         // Run until all machines are finished.
         while (false == jobs.isEmpty && false == STOP && false == finish) {
