@@ -71,7 +71,7 @@ public class TimeTriggeredScheduler: Scheduler, VerifiableGatewayDelegator {
     
     public typealias Gateway = StackGateway
     
-    fileprivate let dispatchTable: DispatchTable
+    fileprivate let dispatchTable: MetaDispatchTable
     
     public var gateway: StackGateway
     
@@ -85,7 +85,7 @@ public class TimeTriggeredScheduler: Scheduler, VerifiableGatewayDelegator {
      *  - Parameter machines: All the `Machine`s that will be executed.
      */
     public init(
-        dispatchTable: DispatchTable,
+        dispatchTable: MetaDispatchTable,
         gateway: StackGateway = StackGateway(),
         unloader: MachineUnloader,
         scheduleHandler: ScheduleHandler

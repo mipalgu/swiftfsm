@@ -75,7 +75,7 @@ public final class TimeTriggeredSchedulerFactoryCreator {
         self.unloader = unloader
     }
     
-    public func make(dispatchTable: DispatchTable) -> TimeTriggeredSchedulerFactory {
+    public func make(dispatchTable: MetaDispatchTable) -> TimeTriggeredSchedulerFactory {
         return TimeTriggeredSchedulerFactory(
             dispatchTable: dispatchTable,
             scheduleHandler: self.scheduleHandler,

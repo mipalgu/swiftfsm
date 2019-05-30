@@ -56,12 +56,12 @@
  *
  */
 
-public struct Timeslot {
+public struct Timeslot<T> {
     
     public var startTime: UInt
     
     public var duration: UInt
     
-    public var fullyQualifiedName: String
+    public var task: T
     
 }

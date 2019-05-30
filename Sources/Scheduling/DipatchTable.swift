@@ -56,10 +56,14 @@
  *
  */
 
-public struct DispatchTable {
+public typealias MetaDispatchTable = DispatchTable<String>
+
+public typealias SchedulerDispatchTable = DispatchTable<SchedulerToken>
+
+public struct DispatchTable<T> {
     
     public var numberOfThreads: Int
     
-    public var timeslots: [[Timeslot]]
+    public var timeslots: [[Timeslot<T>]]
     
 }

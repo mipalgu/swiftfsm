@@ -63,14 +63,14 @@ import swiftfsm
 
 public final class TimeTriggeredSchedulerFactory: SchedulerFactory {
     
-    fileprivate var dispatchTable: DispatchTable
+    fileprivate var dispatchTable: MetaDispatchTable
     
     fileprivate let scheduleHandler: ScheduleHandler
     
     fileprivate let unloader: MachineUnloader
     
     public init(
-        dispatchTable: DispatchTable,
+        dispatchTable: MetaDispatchTable,
         scheduleHandler: ScheduleHandler,
         unloader: MachineUnloader
     ) {

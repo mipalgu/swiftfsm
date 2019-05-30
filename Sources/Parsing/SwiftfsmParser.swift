@@ -435,7 +435,7 @@ public class SwiftfsmParser: HelpableParser {
         }
     }
     
-    private func parseTable(_: String) -> DispatchTable? {
+    private func parseTable(_: String) -> MetaDispatchTable? {
         return nil
     }
 
