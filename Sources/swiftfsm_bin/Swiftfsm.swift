@@ -185,8 +185,17 @@ public class Swiftfsm<
     }
 
     private func cleanArgs(_ args: [String]) -> [String] {
+        var ignore = false
         return args[1 ..< args.count].flatMap { (str: String) -> [String] in
-            let cs = Array(str.characters)
+            if ignore {
+                ignore = false
+                return [str]
+            }
+            if str == "-Xlinker" || str == "-Xcc" || str == "-Xswiftc" {
+                ignore = true
+                return [str]
+            }
+            let cs = Array(str)
             if cs.count < 2 || cs.first != "-" {
                 return [str]
             }

@@ -249,7 +249,7 @@ public class SwiftfsmParser: HelpableParser {
         }
     }
 
-    private func fetchValueAfterFlag(words: inout [String]) -> String? {
+    private func fetchValueAfterFlag(words: inout [String], ignoreHyphen: Bool = false) -> String? {
         if (words.count < 2) {
             return nil
         }
@@ -261,7 +261,7 @@ public class SwiftfsmParser: HelpableParser {
         }
         // Ignore other flags if the user forgets to enter a name after the name
         // flag.
-        if ("-" == n.characters.first!) {
+        if (!ignoreHyphen && "-" == n.characters.first!) {
             return nil
         }
         words.removeFirst()
@@ -379,7 +379,7 @@ public class SwiftfsmParser: HelpableParser {
     }
 
     private func handleCCompilerFlag(_ j: Job, words: inout [String]) -> Job {
-        guard let arg = self.fetchValueAfterFlag(words: &words) else {
+        guard let arg = self.fetchValueAfterFlag(words: &words, ignoreHyphen: true) else {
             return j
         }
         var temp = j
@@ -395,7 +395,7 @@ public class SwiftfsmParser: HelpableParser {
     }
 
     private func handleLinkerFlag(_ j: Job, words: inout [String]) -> Job {
-        guard let arg = self.fetchValueAfterFlag(words: &words) else {
+        guard let arg = self.fetchValueAfterFlag(words: &words, ignoreHyphen: true) else {
             return j
         }
         var temp = j
@@ -404,7 +404,7 @@ public class SwiftfsmParser: HelpableParser {
     }
 
     private func handleSwiftCompilerFlag(_ j: Job, words: inout [String]) -> Job {
-        guard let arg = self.fetchValueAfterFlag(words: &words) else {
+        guard let arg = self.fetchValueAfterFlag(words: &words, ignoreHyphen: true) else {
             return j
         }
         var temp = j
