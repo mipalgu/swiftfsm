@@ -74,7 +74,7 @@ public struct ThreadPool {
         if numberOfThreads < 1 {
             fatalError("Attempting to create a thread pool with \(numberOfThreads) threads.")
         }
-        self.queues = [1..<numberOfThreads].map { DispatchQueue(label: "\($0)") }
+        self.queues = Array(1..<numberOfThreads).map { DispatchQueue(label: "\($0)") }
     }
     
     func execute(_ jobs: [() -> Void]) {

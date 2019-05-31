@@ -64,6 +64,8 @@ import swiftfsm
 import swiftfsm_helpers
 import Utilities
 
+public var VERBOSE = false
+
 /**
  *  Responsible for the execution of machines in a time-triggered parallel
  *  schedule.
@@ -142,6 +144,9 @@ public class TimeTriggeredScheduler: Scheduler, VerifiableGatewayDelegator {
                         print("Starting \(currentTime - startTime) microseconds late")
                     }
                     let fsm = self.gateway.stacks[timeslot.task.id]?.first?.fsm.asScheduleableFiniteStateMachine ?? timeslot.task.fsm
+                    if VERBOSE {
+                        print("\(microseconds() - startTime) - \(timeslot.task.machine.name).\(fsm.name).\(fsm.currentState.name)")
+                    }
                     fsm.takeSnapshot()
                     timeslot.task.machine.clock.update(fromFSM: fsm)
                     DEBUG = timeslot.task.machine.debug

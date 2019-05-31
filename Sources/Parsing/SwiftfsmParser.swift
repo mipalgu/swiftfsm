@@ -215,6 +215,8 @@ public class SwiftfsmParser: HelpableParser {
                 try task = self.handleKripkeFlag(task, words: &words)
             case "-s", "--scheduler":
                 try task = self.handleSchedulerFlag(task, words: &words)
+            case "-v", "--verbose":
+                try task = self.handleVerboseFlag(task, words: &words)
             case "--":
                 words.removeFirst()
                 return task
@@ -266,6 +268,13 @@ public class SwiftfsmParser: HelpableParser {
         }
         words.removeFirst()
         return words.first!
+    }
+    
+    private func handleVerboseFlag(_ t: Task, words: inout [String]) -> Task {
+        var temp: Task = t
+        temp.enableVerbose = true
+        VERBOSE = true
+        return temp
     }
 
     private func handleDebugFlag(_ t: Task, words: inout [String]) -> Task {

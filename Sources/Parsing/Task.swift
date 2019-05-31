@@ -78,6 +78,8 @@ public struct Task {
      *  Should we enable debugging?.
      */
     public var enableDebugging: Bool = false
+    
+    public var enableVerbose: Bool = false
 
     /**
      *  Should we generate a `KripkeStructure`s?.
