@@ -63,6 +63,7 @@ let package = Package(
                 "Gateways"
             ]
         ),
+        .testTarget(name: "LibrariesTests", dependencies: [.target(name: "Libraries")]),
         .testTarget(name: "VerificationTests", dependencies: [.target(name: "Verification")]),
         .testTarget(name: "swiftfsmTests", dependencies: [.target(name: "swiftfsm_bin")])
     ]
