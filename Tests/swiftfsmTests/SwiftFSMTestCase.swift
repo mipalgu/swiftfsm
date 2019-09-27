@@ -56,7 +56,7 @@
  *
  */
 
-@testable import swiftfsm
+@testable import swiftfsm_bin
 import FSM
 import XCTest
 

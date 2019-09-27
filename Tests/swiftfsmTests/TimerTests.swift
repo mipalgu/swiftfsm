@@ -57,7 +57,8 @@
  */
 
 @testable import swiftfsm_helpers
-@testable import swiftfsm
+@testable import Timers
+@testable import swiftfsm_bin
 import XCTest
 
 #if os(Linux)
@@ -75,7 +76,7 @@ public class TimerTests: SwiftFSMTestCase {
     }
 
     private var running: Bool = false
-    private var timer: swiftfsm.Timer!
+    //private var timer: Timers.Timer!
 
     public override func setUp() {
         self.running = false
