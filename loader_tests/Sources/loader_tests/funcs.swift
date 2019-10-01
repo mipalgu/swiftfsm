@@ -4,6 +4,10 @@ public func test() {
 }
 
 @_cdecl("test2")
+public func test2_wrapper(a: Any) -> Any {
+    return test2(a: a as! Int)
+}
+
 public func test2(a: Int) -> Int {
     return a * 2
 }
