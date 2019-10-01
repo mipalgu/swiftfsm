@@ -56,14 +56,57 @@
  *
  */
 
+#if os(macOS)
+import Darwin
+#else
+import Glibc
+#endif
+
 @testable import Libraries 
 
 import XCTest
 
 public class LibrariesTestCase: XCTestCase {
 
-   public override func setUp() {}
+    public override func setUp() {
+        guard let wd = opendir(".") else {
+            XCTFail("Unable to open the current working directory.")
+            return
+        }
+        defer {
+            closedir(wd)
+        }
+        guard let loaderTestsDir = opendir("loader_tests") else {
+            XCTFail("Unable to open the loader_tests directory.")
+            return
+        }
+        defer {
+            closedir(loaderTestsDir)
+        }
+        guard 0 == fchdir(dirfd(loaderTestsDir)) else {
+            XCTFail("Unable to change to loader_tests director")
+            return
+        }
+        var pid: pid_t = pid_t()
+        let argv: [UnsafeMutablePointer<CChar>?] = ["env", "swift", "build", "-c", "debug", nil].map {
+            $0.flatMap { $0.withCString(strdup) }
+        }
+        let status = posix_spawn(&pid, "/usr/bin/env", nil, nil, argv, environ)
+        _ = fchdir(dirfd(wd))
+        if status != 0 {
+            XCTFail("Unable to build loader_tests project: \(status)")
+            return
+        }
+        var processStatus: CInt = 0
+        waitpid(pid, &processStatus, 0)
+        if 0 != processStatus {
+            XCTFail("Unable to build loader_tests")
+            return
+        }
+    }
 
-   public override func tearDown() {}
+    public override func tearDown() {
+        
+    }
 
 }
