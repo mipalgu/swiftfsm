@@ -68,15 +68,21 @@ import XCTest
 
 public class LibrariesTestCase: XCTestCase {
 
+    public var root: String {
+        return String(#file).components(separatedBy: "Tests").first.map {
+            String($0.reversed().drop(while: { $0 == "/"}).reversed())
+        } ?? ""
+    }
+    
     public override func setUp() {
-        guard let wd = opendir(".") else {
+        guard let wd = opendir(self.root) else {
             XCTFail("Unable to open the current working directory.")
             return
         }
         defer {
             closedir(wd)
         }
-        guard let loaderTestsDir = opendir("loader_tests") else {
+        guard let loaderTestsDir = opendir(self.root + "/loader_tests") else {
             XCTFail("Unable to open the loader_tests directory.")
             return
         }

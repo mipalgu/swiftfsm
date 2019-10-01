@@ -57,6 +57,7 @@
  */
 
 @testable import Libraries
+@testable import loader_tests
 
 import XCTest
 
@@ -67,9 +68,60 @@ public class LibrarySymbolLoaderTests: LibrariesTestCase {
             ("test_canLoadVoidFunction", test_canLoadVoidFunction)
         ]
     }
+    
+    fileprivate var resource: DynamicLibraryResource!
+    
+    public override func setUp() {
+        super.setUp()
+        #if os(macOS)
+        let ext = "dylib"
+        #else
+        let ext = "so"
+        #endif
+        let path = self.root + "/loader_tests/.build/debug/libloader_tests.\(ext)"
+        guard let handler = dlopen(path, RTLD_NOW | RTLD_LOCAL) else {
+            XCTFail(String(cString: dlerror()))
+            return
+        }
+        self.resource = DynamicLibraryResource(handler: handler, path: path)
+    }
+    
+    public override func tearDown() {
+        _ = self.resource?.close()
+        super.tearDown()
+    }
+    
+    fileprivate func rebind<T, U>(symbol: String, to type: T.Type, _ callback: (T) -> U) -> U? {
+        let (fetchedSymbol, error) = self.resource.getSymbolPointer(symbol: "test")
+        if let error = error {
+            XCTFail(error)
+            return nil
+        }
+        guard let symbol = fetchedSymbol else {
+            XCTFail("Unable to fetch valid symbol.")
+            return nil
+        }
+        let f = unsafeBitCast(symbol, to: type)
+        return callback(f)
+    }
 
     public func test_canLoadVoidFunction() {
-
+        _ = self.rebind(symbol: "test", to: (@convention(c) () -> Void).self) { $0() }
+    }
+    
+    public func test_canLoadIntFunction() {
+        guard let result = self.rebind(symbol: "test2", to: (@convention(c) (Any) -> Any).self, { $0(2) as? Int }) else {
+            return
+        }
+        XCTAssertEqual(result, .some(4))
+    }
+    
+    public func test_canLoadPersonFunction() {
+        let bob = Person(name: "Bob")
+        guard let result = self.rebind(symbol: "test3", to: (@convention(c) (Any) -> Any).self, { $0(bob) as? Person }) else {
+            return
+        }
+        XCTAssertEqual(result, .some(Person(name: "Bill")))
     }
 
 }

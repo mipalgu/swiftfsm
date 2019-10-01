@@ -5,7 +5,8 @@ import PackageDescription
 let normalDependencies: [Package.Dependency] = [
     .package(url: "ssh://git.mipal.net/git/swift_wb.git", .branch("swift-4.2")),
     .package(url: "ssh://git.mipal.net/git/swift_CLReflect.git", .branch("master")),
-    .package(url: "ssh://git.mipal.net/git/swift_helpers.git", .branch("master"))
+    .package(url: "ssh://git.mipal.net/git/swift_helpers.git", .branch("master")),
+    .package(url: "loader_tests", .branch("master"))
 ]
 
 func convert(_ arr: [String]) -> [Target.Dependency] {
@@ -63,7 +64,7 @@ let package = Package(
                 "Gateways"
             ]
         ),
-        .testTarget(name: "LibrariesTests", dependencies: [.target(name: "Libraries")]),
+        .testTarget(name: "LibrariesTests", dependencies: [.target(name: "Libraries"), "loader_tests"]),
         .testTarget(name: "VerificationTests", dependencies: [.target(name: "Verification")]),
         .testTarget(name: "swiftfsmTests", dependencies: [.target(name: "swiftfsm_bin")])
     ]
