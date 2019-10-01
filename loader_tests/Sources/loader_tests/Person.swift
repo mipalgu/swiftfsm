@@ -65,3 +65,5 @@ public struct Person {
     }
 
 }
+
+extension Person: Equatable {}
