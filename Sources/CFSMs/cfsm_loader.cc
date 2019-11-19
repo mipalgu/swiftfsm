@@ -61,7 +61,7 @@
 #include "cfsm_index.h"
 #include "CLMachine.h"
 #include <dlfcn.h>
-#include <CLReflectAPI.h>
+#include <CLReflect/CLReflectAPI.h>
 #include <stdlib.h>
 #include <string>
 #include <algorithm>
