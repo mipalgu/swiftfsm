@@ -6,17 +6,18 @@
 
 ALL_TARGETS=host-local
 
-.ifdef SYSROOT
-export LANG=/usr/lib/locale/en_US
-.endif
-
 .if ${OS} == Darwin
 EXT=dylib
 .else
 EXT=so
 .endif
 
-INSTALL_DIR?=${SYSROOT}/usr/local
+.ifdef TARGET
+FSM_INCLUDE_DIR?=${STAGING.${TARGET}}/usr/local/include/swiftfsm
+FSM_LIB_DIR?=${STAGING.${TARGET}}/usr/local/lib
+.endif
+
+.include "../../../mk/prefs.mk"
 
 .ifdef FSM_INCLUDE_DIR
 SWIFTCFLAGS+=-I${FSM_INCLUDE_DIR}
@@ -26,18 +27,40 @@ SWIFTCFLAGS+=-I${FSM_INCLUDE_DIR}
 SWIFTCFLAGS+=-L${FSM_LIB_DIR}
 .endif
 
-.ifdef SYSROOT
-FSM_INCLUDE_DIR?=${SYSROOT}/usr/local/include/swiftfsm
-FSM_LIB_DIR?=${SYSROOT}usr/local/lib
-SWIFT_BUILD_FLAGS=--destination destination.json
+.ifdef FSM_INCLUDE_DIR
+CFLAGS+=-I${FSM_INCLUDE_DIR}
+SWIFTCFLAGS+=-I${FSM_INCLUDE_DIR}
+.endif
+
+.ifdef FSM_LIB_DIR
+LDFLAGS+=-L${FSM_LIB_DIR}
+.endif
+
+.ifdef WHITEBOARD_INCLUDE_DIR
+CFLAGS+=-I${WHITEBOARD_INCLUDE_DIR} -I${WHITEBOARD_INCLUDE_DIR}/..
+.endif
+
+.ifdef WHITEBOARD_LIB_DIR
+LDFLAGS+=-L${WHITEBOARD_LIB_DIR}
+.endif
+
+.ifdef CLREFLECT_INCLUDE_DIR
+CFLAGS+=-I${CLREFLECT_INCLUDE_DIR}
+.endif
+
+.ifdef CLREFLECT_LIB_DIR
+CFLAGS+=-L${CLREFLECT_LIB_DIR}
+LDFLAGS+=-L${CLREFLECT_LIB_DIR}
+.endif
+
+CFLAGS+=-I${GUNAO_DIR}/Common
+LDFLAGS+=-lgusimplewhiteboard -lFSM -ldl -lCLReflect -lgu_util
+
+.ifdef NO_FOUNDATION
+SWIFTCFLAGS+=-DNO_FOUNDATION
 .endif
 
 all:	all-real
-
-install:
-	mkdir -p ${SYSROOT}/usr/local/include/swiftfsm
-	cp .build/${SWIFT_BUILD_CONFIG}/lib*.${EXT} ${INSTALL_DIR}/lib/
-	cp .build/${SWIFT_BUILD_CONFIG}/swiftfsm ${INSTALL_DIR}/bin/
 
 generate-xcodeproj:
 	$Ecp config.sh.in config.sh
@@ -63,55 +86,3 @@ disable-foundation:
 test:	swift-test-package
 
 .include "../../../mk/mipal.mk"
-
-.ifdef FSM_INCLUDE_DIR
-CFLAGS+=-I${FSM_INCLUDE_DIR}
-SWIFTCFLAGS+=-I${FSM_INCLUDE_DIR}
-.else
-CFLAGS+=-I${SYSROOT}/usr/local/include/swiftfsm
-SWIFTCFLAGS+=-I${SYSROOT}/usr/local/include -I${SYSROOT}/usr/local/include/swiftfsm
-.endif
-
-.ifdef FSM_LIB_DIR
-LDFLAGS+=-L${FSM_LIB_DIR}
-.endif
-
-.ifdef WHITEBOARD_INCLUDE_DIR
-CFLAGS+=-I${WHITEBOARD_INCLUDE_DIR} -I${WHITEBOARD_INCLUDE_DIR}/..
-.else
-CFLAGS+=-I${SYSROOT}/usr/local/include -I${SYSROOT}/usr/local/include/gusimplewhiteboard
-.endif
-
-.ifdef WHITEBOARD_LIB_DIR
-LDFLAGS+=-L${WHITEBOARD_LIB_DIR}
-.endif
-
-.ifdef CLREFLECT_INCLUDE_DIR
-CFLAGS+=-I${CLREFLECT_INCLUDE_DIR}
-.else
-CFLAGS+=-I${SYSROOT}/usr/local/include/CLReflect
-.endif
-
-.ifdef CLREFLECT_LIB_DIR
-CFLAGS+=-L${CLREFLECT_LIB_DIR}
-LDFLAGS+=-L${CLREFLECT_LIB_DIR}
-.endif
-
-.ifndef FSM_LIB_DIR
-.ifndef WHITEBOARD_LIB_DIR
-.ifndef CLREFLECT_LIB_DIR
-LDFLAGS+=-L${SYSROOT}/usr/local/lib
-.endif
-.endif
-.endif
-
-CFLAGS+=-I${GUNAO_DIR}/Common
-LDFLAGS+=-lgusimplewhiteboard -lFSM -ldl -lCLReflect -lgu_util
-
-.ifdef NO_FOUNDATION
-SWIFTCFLAGS+=-DNO_FOUNDATION
-.endif
-
-.ifdef SYSROOT
-LDFLAGS+=-L${SYSROOT}/lib -L${SYSROOT}/lib/swift/linux-fuse-ld=/home/user/src/swift-tc/ctc-linux64-atom-2.5.2.74/bin/i686-aldebaran-linux-gnu-ld 
-.endif
