@@ -56,7 +56,7 @@
  *
  */
 
-#if !NO_FOUNDATION
+#if !NO_FOUNDATION && canImport(Foundation)
 
 import IO
 import SwiftMachines

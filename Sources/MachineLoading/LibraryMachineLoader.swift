@@ -57,6 +57,7 @@
  */
 
 import FSM
+import Gateways
 import Functional
 import IO
 import swiftfsm_helpers
@@ -114,7 +115,12 @@ public class LibraryMachineLoader: MachineLoader {
      *
      *  - Returns: A tuple containing the FSM and all of its dependencies.
      */
-    public func load<Gateway: FSMGateway>(name: String, gateway: Gateway, clock: Timer, path: String) -> (FSMType, [Dependency])? {
+    public func load<Gateway: FSMGateway>(
+        name: String,
+        gateway: Gateway,
+        clock: Timer,
+        path: String
+    ) -> (FSMType, [Dependency])? {
         // Ignore empty paths
         guard false == path.isEmpty else {
             return nil
@@ -149,7 +155,7 @@ public class LibraryMachineLoader: MachineLoader {
                 }
                 return data
             }
-        } catch (let error as LibrarySymbolLoader.Errors) {
+        } catch let error as LibrarySymbolLoader.Errors {
             switch error {
             case .error(let message):
                 self.printer.error(str: message)

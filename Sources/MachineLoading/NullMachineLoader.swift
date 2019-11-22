@@ -58,7 +58,6 @@
 
 import FSM
 import swiftfsm
-import Trees
 
 public final class NullMachineLoader: MachineLoader {
 

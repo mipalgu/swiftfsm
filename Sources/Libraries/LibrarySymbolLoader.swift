@@ -92,8 +92,6 @@ public final class LibrarySymbolLoader {
     }
 
     public func load<T, U>(symbol symbolName: String, inLibrary path: String, _ callback: (T) throws -> U) throws -> U {
-        // Ignore empty paths
-        let path = path.trimmingCharacters(in: .whitespacesAndNewlines)
         // Load the factory from the dynamic library.
         guard let resource = self.creator.open(path: path) else {
             throw Errors.error(message: "Unable to create a resource for libray at path '\(path)'")

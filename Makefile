@@ -15,6 +15,9 @@ EXT=so
 .ifdef TARGET
 FSM_INCLUDE_DIR?=${STAGING.${TARGET}}/usr/local/include/swiftfsm
 FSM_LIB_DIR?=${STAGING.${TARGET}}/usr/local/lib
+.else
+FSM_INCLUDE_DIR?=/usr/local/include/swiftfsm
+FSM_LIB_DIR?=/usr/local/lib
 .endif
 
 .include "../../../mk/prefs.mk"
