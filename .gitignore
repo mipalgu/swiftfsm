@@ -1,3 +1,4 @@
 *.xcodeproj
 config.sh
 build
+.no-foundation

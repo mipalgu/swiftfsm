@@ -22,6 +22,12 @@ FSM_LIB_DIR?=/usr/local/lib
 
 .include "../../../mk/prefs.mk"
 
+NO_FOUNDATION_FILE?=.no-foundation
+
+.if exists(${PWD}/${NO_FOUNDATION_FILE})
+NO_FOUNDATION?=yes
+.endif
+
 .ifdef FSM_INCLUDE_DIR
 SWIFTCFLAGS+=-I${FSM_INCLUDE_DIR}
 .endif
@@ -78,6 +84,7 @@ enable-foundation:
 	$Ecat Package.foundation.swift >> Package.swift
 	$Eecho "" >> Package.swift
 	$Ecat Package.in.swift >> Package.swift
+	$Etouch ${NO_FOUNDATION_FILE}
 
 disable-foundation:
 	$Ecat Package.start.swift > Package.swift
@@ -85,6 +92,7 @@ disable-foundation:
 	$Ecat Package.slim.swift >> Package.swift
 	$Eecho "" >> Package.swift
 	$Ecat Package.in.swift >> Package.swift
+	$Erm -f ${NO_FOUNDATION_FILE}
 
 test:	swift-test-package
 
