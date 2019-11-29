@@ -84,7 +84,7 @@ enable-foundation:
 	$Ecat Package.foundation.swift >> Package.swift
 	$Eecho "" >> Package.swift
 	$Ecat Package.in.swift >> Package.swift
-	$Etouch ${NO_FOUNDATION_FILE}
+	$Erm -f ${NO_FOUNDATION_FILE}
 
 disable-foundation:
 	$Ecat Package.start.swift > Package.swift
@@ -92,7 +92,7 @@ disable-foundation:
 	$Ecat Package.slim.swift >> Package.swift
 	$Eecho "" >> Package.swift
 	$Ecat Package.in.swift >> Package.swift
-	$Erm -f ${NO_FOUNDATION_FILE}
+	$Etouch ${NO_FOUNDATION_FILE}
 
 test:	swift-test-package
 
