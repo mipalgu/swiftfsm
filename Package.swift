@@ -12,8 +12,10 @@ func convert(_ arr: [String]) -> [Target.Dependency] {
     return arr.map {.byName(name: $0) }
 }
 
-let foundationDeps: [Target.Dependency] = []
-let deps = normalDependencies
+let foundationDeps: [Target.Dependency] = [.byName(name: "Machines")]
+let deps = [
+    .package(url: "ssh://git.mipal.net/git/Machines.git", .branch("master")),
+] + normalDependencies
 
 let package = Package(
     name: "swiftfsm",
@@ -61,5 +63,7 @@ let package = Package(
                 "Gateways"
             ]
         ),
+        .testTarget(name: "VerificationTests", dependencies: [.target(name: "Verification")]),
+        .testTarget(name: "swiftfsmTests", dependencies: [.target(name: "swiftfsm_bin")])
     ]
 )
