@@ -71,7 +71,7 @@ import swiftfsm
  */
 public class LibraryMachineLoader: MachineLoader {
 
-    fileprivate typealias SymbolSignature = @convention(c) (Any, Any) -> Any
+    fileprivate typealias SymbolSignature = @convention(c) (Any, Any, Any) -> Any
 
     /*
      *  This is used to remember factories for paths, therefore allowing us to
@@ -127,7 +127,7 @@ public class LibraryMachineLoader: MachineLoader {
         }
         // Load the factory from the cache if it is there.
         if let factory = type(of: self).cache[path] {
-            return (factory(gateway, clock) as? FSMType).map { ($0, []) }
+            return (factory(gateway, clock, 0) as? FSMType).map { ($0, []) }
         }
         // Load the factory from the dynamic library.
         guard let data = self.loadMachine(name: name, gateway: gateway, clock: clock, path: path) else {
@@ -149,10 +149,13 @@ public class LibraryMachineLoader: MachineLoader {
         }
         do {
             return try self.loader.load(symbol: symbolName, inLibrary: path) { (factory: SymbolSignature) -> FSMType? in
-                guard let data = factory(gateway, clock) as? FSMType else {
+                print("Loaded")
+                guard let data = factory(gateway, clock, 0) as? FSMType else {
+                    print("error")
                     self.printer.error(str: "Unable to call factory function '\(symbolName)' for machine \(name)")
                     return nil
                 }
+                print("return")
                 return data
             }
         } catch let error as LibrarySymbolLoader.Errors {
@@ -175,12 +178,16 @@ public class LibraryMachineLoader: MachineLoader {
         if file.hasPrefix("lib") {
             file.removeFirst(3)
         }
-        guard let name = file.split(separator: ".").first else {
+        let split = file.split(separator: ".")
+        guard let first = split.first else {
             return nil
         }
-        if true == name.isEmpty {
+        let filename = ([first] + Array(split.dropFirst().dropLast())).reduce("", +)
+        if true == filename.isEmpty {
             return nil
         }
+        let name = filename.hasSuffix("Machine") ? String(filename.dropLast(7)) : filename
+        print("Loading symbol: \(name)")
         return "make_" + name
     }
 
