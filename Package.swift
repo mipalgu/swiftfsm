@@ -12,10 +12,8 @@ func convert(_ arr: [String]) -> [Target.Dependency] {
     return arr.map {.byName(name: $0) }
 }
 
-let foundationDeps: [Target.Dependency] = [.byName(name: "Machines")]
-let deps = [
-    .package(url: "ssh://git.mipal.net/git/Machines.git", .branch("master")),
-] + normalDependencies
+let foundationDeps: [Target.Dependency] = []
+let deps = normalDependencies
 
 let package = Package(
     name: "swiftfsm",
@@ -24,15 +22,15 @@ let package = Package(
             name: "swiftfsm",
             targets: ["swiftfsm_bin"]
         ),
-        .library(
+        /*.library(
             name: "CFSMs",
             type: .dynamic,
             targets: ["CFSMs"]
-        )
+        )*/
     ],
     dependencies: deps,
     targets: [
-        .target(name: "CFSMs", dependencies: []),
+        //.target(name: "CFSMs", dependencies: []),
         .target(name: "swiftfsm_helpers", dependencies: []),
         .target(name: "Gateways", dependencies: ["swift_helpers"]),
         .target(name: "Timers", dependencies: ["swiftfsm_helpers"]),
@@ -49,7 +47,7 @@ let package = Package(
             dependencies: [
                 "GUSimpleWhiteboard",
                 "IO",
-                "CFSMs",
+                //"CFSMs",
                 "swiftfsm_helpers",
                 "Libraries",
                 "MachineStructure",
