@@ -56,6 +56,8 @@
  *
  */
 
+#if canImport(Foundation) && !NO_FOUNDATION
+
 import Foundation
 import Scheduling
 import swift_helpers
@@ -93,3 +95,5 @@ public final class MetaDispatchTableParser {
     }
     
 }
+
+#endif

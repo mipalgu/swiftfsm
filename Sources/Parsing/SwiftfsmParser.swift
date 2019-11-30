@@ -438,6 +438,7 @@ public class SwiftfsmParser: HelpableParser {
             temp.scheduler = .passiveRoundRobin(self.passiveRoundRobinFactory, PassiveRoundRobinKripkeStructureGeneratorFactory())
             return temp
         default:
+#if canImport(Foundation) && !NO_FOUNDATION
             guard let table = self.parseTable(scheduler) else {
                 throw ParsingErrors.generalError(error: "Unable to parse scheduler \(scheduler)")
             }
@@ -447,13 +448,18 @@ public class SwiftfsmParser: HelpableParser {
                 RoundRobinKripkeStructureGeneratorFactory()
             )
             return temp
+#else
+            throw ParsingErrors.generalError(error: "Unrecognised scheduler: \(scheduler).")
+#endif
         }
     }
     
+#if canImport(Foundation) && !NO_FOUNDATION
     private func parseTable(_ path: String) -> MetaDispatchTable? {
         let parser = MetaDispatchTableParser()
         return parser.parse(atPath: path)
     }
+#endif
 
     private func handlePath(_ j: Job, words: inout [String]) throws -> Job {
         // Ignore empty strings
