@@ -183,11 +183,11 @@ public class LibraryMachineLoader: MachineLoader {
             return nil
         }
         let filename = ([first] + Array(split.dropFirst().dropLast())).reduce("", +)
-        if true == filename.isEmpty {
+        let name = filename.hasSuffix("Machine") ? String(filename.dropLast(7)) : filename
+        if true == name.isEmpty {
             return nil
         }
-        let name = filename.hasSuffix("Machine") ? String(filename.dropLast(7)) : filename
-        print("Loading symbol: \(name)")
+        print("Loading symbol: make_\(name)")
         return "make_" + name
     }
 
