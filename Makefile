@@ -4,7 +4,7 @@
 # Global Makefile
 #
 
-ALL_TARGETS=host-local
+ALL_TARGETS=host
 
 .if ${OS} == Darwin
 EXT=dylib
