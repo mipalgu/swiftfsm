@@ -71,7 +71,8 @@ import swiftfsm
  */
 public class LibraryMachineLoader: MachineLoader {
 
-    fileprivate typealias SymbolSignature = @convention(c) (Any, Any, Any) -> Any
+    //swiftlint:disable:next line_length
+    fileprivate typealias SymbolSignature = @convention(c) (UnsafeMutableRawPointer, UnsafeMutableRawPointer, UnsafeMutableRawPointer, UnsafeMutableRawPointer) -> Void
 
     /*
      *  This is used to remember factories for paths, therefore allowing us to
@@ -127,7 +128,7 @@ public class LibraryMachineLoader: MachineLoader {
         }
         // Load the factory from the cache if it is there.
         if let factory = type(of: self).cache[path] {
-            return (factory(gateway, clock, 0) as? FSMType).map { ($0, []) }
+            return (self.call(factory: factory, gateway: gateway, clock: clock, id: 0), [])
         }
         // Load the factory from the dynamic library.
         guard let data = self.loadMachine(name: name, gateway: gateway, clock: clock, path: path) else {
@@ -149,14 +150,7 @@ public class LibraryMachineLoader: MachineLoader {
         }
         do {
             return try self.loader.load(symbol: symbolName, inLibrary: path) { (factory: SymbolSignature) -> FSMType? in
-                print("Loaded")
-                guard let data = factory(gateway, clock, 0) as? FSMType else {
-                    print("error")
-                    self.printer.error(str: "Unable to call factory function '\(symbolName)' for machine \(name)")
-                    return nil
-                }
-                print("return")
-                return data
+                return self.call(factory: factory, gateway: gateway, clock: clock, id: 0)
             }
         } catch let error as LibrarySymbolLoader.Errors {
             switch error {
@@ -189,6 +183,31 @@ public class LibraryMachineLoader: MachineLoader {
         }
         print("Loading symbol: make_\(name)")
         return "make_" + name
+    }
+    
+    fileprivate func call(factory: SymbolSignature, gateway: FSMGateway, clock: Timer, id: FSM_ID) -> FSMType {
+        var gateway = gateway
+        var clock = clock
+        var id = id
+        return withUnsafeMutablePointer(to: &gateway) {
+            let gatewayPointer = UnsafeMutableRawPointer($0)
+            return withUnsafeMutablePointer(to: &clock) {
+                let clockPointer = UnsafeMutableRawPointer($0)
+                return withUnsafeMutablePointer(to: &id) {
+                    let idPointer = UnsafeMutableRawPointer($0)
+                    var fsm: FSMType? = nil
+                    var callback: (FSMType) -> Void = { fsm = $0 }
+                    return withUnsafeMutablePointer(to: &callback) {
+                        let callbackPointer = UnsafeMutableRawPointer($0)
+                        factory(gatewayPointer, clockPointer, idPointer, callbackPointer)
+                        guard let fsm = fsm else {
+                            fatalError("bad")
+                        }
+                        return fsm
+                    }
+                }
+            }
+        }
     }
 
 }
