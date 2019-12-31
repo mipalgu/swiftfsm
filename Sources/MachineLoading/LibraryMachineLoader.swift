@@ -126,9 +126,10 @@ public class LibraryMachineLoader: MachineLoader {
         guard false == path.isEmpty else {
             return nil
         }
+        let id = gateway.id(of: name)
         // Load the factory from the cache if it is there.
         if let factory = type(of: self).cache[path] {
-            return (self.call(factory: factory, gateway: gateway, clock: clock, id: 0), [])
+            return (self.call(factory: factory, gateway: gateway, clock: clock, id: id), [])
         }
         // Load the factory from the dynamic library.
         guard let data = self.loadMachine(name: name, gateway: gateway, clock: clock, path: path) else {
@@ -148,9 +149,10 @@ public class LibraryMachineLoader: MachineLoader {
             self.printer.error(str: "Unable to synthesize the factory function symbol name from path '\(path)'")
             return nil
         }
+        let id = gateway.id(of: name)
         do {
             return try self.loader.load(symbol: symbolName, inLibrary: path) { (factory: SymbolSignature) -> FSMType? in
-                return self.call(factory: factory, gateway: gateway, clock: clock, id: 0)
+                return self.call(factory: factory, gateway: gateway, clock: clock, id: id)
             }
         } catch let error as LibrarySymbolLoader.Errors {
             switch error {

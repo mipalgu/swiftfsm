@@ -72,7 +72,7 @@ public final class MachinesMachineLoader: MachineLoader {
     fileprivate typealias SymbolSignature = @convention(c) (Any, Any, Any) -> Any
 
     fileprivate let compiler: MachineCompiler<MachineAssembler>
-    fileprivate let libraryLoader: LibrarySymbolLoader
+    fileprivate let libraryLoader: LibraryMachineLoader
     fileprivate let parser: MachineParser
     fileprivate let printer: Printer
 
@@ -83,7 +83,7 @@ public final class MachinesMachineLoader: MachineLoader {
     @available(macOS 10.11, *)
     public init(
         compiler: MachineCompiler<MachineAssembler> = MachineCompiler(assembler: MachineAssembler()),
-        libraryLoader: LibrarySymbolLoader,
+        libraryLoader: LibraryMachineLoader,
         parser: MachineParser = MachineParser(),
         printer: Printer = CommandLinePrinter(errorStream: StderrOutputStream(), messageStream: StdoutOutputStream(), warningStream: StdoutOutputStream()),
         cCompilerFlags: [String] = [],
@@ -166,26 +166,7 @@ public final class MachinesMachineLoader: MachineLoader {
     }
 
     fileprivate func loadSymbol<G: FSMGateway>(inMachine name: String, gateway: G, clock: Timer, path: String, caller: FSM_ID) -> FSMType? {
-        let symbolName = "make_" + name
-        do {
-            return try self.libraryLoader.load(
-                symbol: symbolName,
-                inLibrary: path,
-                { (factory: SymbolSignature) -> FSMType? in
-                    guard let fsm = factory(gateway, clock, caller) as? FSMType else {
-                        self.printer.error(str: "Unable to call factory function \(symbolName) for machine \(name)")
-                        return nil
-                    }
-                    return fsm
-                }
-            )
-        } catch (let error as LibrarySymbolLoader.Errors) {
-            self.printer.error(str: error.message)
-            return nil
-        } catch {
-            self.printer.error(str: "Unable to load machine \(name)")
-            return nil
-        }
+        return self.libraryLoader.load(name: name, gateway: gateway, clock: clock, path: path)?.0
     }
 
     fileprivate func convert(_ fsm: FSMType, dependencies: [Dependency], inMachine machine: Machine) -> Dependency {

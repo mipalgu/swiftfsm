@@ -95,7 +95,10 @@ let timeTriggeredFactory = TimeTriggeredSchedulerFactoryCreator(
     unloader: clfsmMachineLoader
 )
 
-let libraryLoader = DynamicLibraryMachineLoaderFactory(printer: printer).make()
+let libraryLoader = LibraryMachineLoader(
+    loader: LibrarySymbolLoader(creator: DynamicLibraryCreator()),
+    printer: printer
+)
 
 @available(macOS 10.11, *)
 func run() {
@@ -104,7 +107,7 @@ func run() {
     let machineLoader = NullMachineLoader()
     #else
     let compiler = SwiftMachinesCompiler()
-    let machineLoader = MachinesMachineLoader(libraryLoader: LibrarySymbolLoader(creator: DynamicLibraryCreator()))
+    let machineLoader = MachinesMachineLoader(libraryLoader: libraryLoader)
     #endif
     Swiftfsm(
         clfsmMachineLoader: CLFSMMachineLoader(),
