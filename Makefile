@@ -20,6 +20,8 @@ FSM_INCLUDE_DIR?=/usr/local/include/swiftfsm
 FSM_LIB_DIR?=/usr/local/lib
 .endif
 
+PACKAGE_SWIFT?=${MODULE_DIR}/Package.in.swift
+
 .include "../../../mk/prefs.mk"
 
 NO_FOUNDATION_FILE?=.no-foundation
@@ -65,11 +67,17 @@ LDFLAGS+=-L${CLREFLECT_LIB_DIR}
 CFLAGS+=-I${GUNAO_DIR}/Common
 LDFLAGS+=-lgusimplewhiteboard -lFSM -ldl -lCLReflect -lgu_util
 
-.ifdef NO_FOUNDATION
+.if defined(TARGET) || defined(NO_FOUNDATION)
 SWIFTCFLAGS+=-DNO_FOUNDATION
 .endif
 
 all:	all-real
+
+.ifdef TARGET
+pre-build:	disable-foundation
+.else
+pre-build:	enable-foundation
+.endif
 
 generate-xcodeproj:
 	$Ecp config.sh.in config.sh
@@ -78,21 +86,33 @@ generate-xcodeproj:
 	$Eecho "SWIFTCFLAGS=\"${SWIFTCFLAGS:C,(.*),-Xswiftc \1,g}\"" >> config.sh
 	$E./xcodegen.sh
 
+.if exists(${NO_FOUNDATION_FILE}) || !exists(Package.swift)
 enable-foundation:
+	$E${MAKE} clean
+	$Emkdir -p ${BUILDDIR}
 	$Ecat Package.start.swift > Package.swift
 	$Eecho "" >> Package.swift
 	$Ecat Package.foundation.swift >> Package.swift
 	$Eecho "" >> Package.swift
 	$Ecat Package.in.swift >> Package.swift
 	$Erm -f ${NO_FOUNDATION_FILE}
+.else
+enable-foundation:
+.endif
 
+.if !exists(${NO_FOUNDATION_FILE}) || !exists(Package.swift)
 disable-foundation:
+	$E${MAKE} clean
+	$Emkdir -p ${BUILDDIR}
 	$Ecat Package.start.swift > Package.swift
 	$Eecho "" >> Package.swift
 	$Ecat Package.slim.swift >> Package.swift
 	$Eecho "" >> Package.swift
 	$Ecat Package.in.swift >> Package.swift
 	$Etouch ${NO_FOUNDATION_FILE}
+.else
+disable-foundation:
+.endif
 
 test:	swift-test-package
 
