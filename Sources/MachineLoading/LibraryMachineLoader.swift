@@ -186,7 +186,7 @@ public class LibraryMachineLoader: MachineLoader {
         print("Loading symbol: make_\(name)")
         return "make_" + name
     }
-    
+
     fileprivate func call(factory: SymbolSignature, gateway: FSMGateway, clock: Timer, id: FSM_ID) -> FSMType {
         var gateway = gateway
         var clock = clock
@@ -197,7 +197,7 @@ public class LibraryMachineLoader: MachineLoader {
                 let clockPointer = UnsafeMutableRawPointer($0)
                 return withUnsafeMutablePointer(to: &id) {
                     let idPointer = UnsafeMutableRawPointer($0)
-                    var fsm: FSMType? = nil
+                    var fsm: FSMType?
                     var callback: (FSMType) -> Void = { fsm = $0 }
                     return withUnsafeMutablePointer(to: &callback) {
                         let callbackPointer = UnsafeMutableRawPointer($0)
