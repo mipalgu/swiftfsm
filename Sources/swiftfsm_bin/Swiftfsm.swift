@@ -191,7 +191,7 @@ public class Swiftfsm<
                 ignore = false
                 return [str]
             }
-            if str == "-Xlinker" || str == "-Xcc" || str == "-Xswiftc" {
+            if str == "-Xlinker" || str == "-Xcc" || str == "-Xswiftc" || str == "-Xcxx" || str == "-Xswiftbuild" {
                 ignore = true
                 return [str]
             }
