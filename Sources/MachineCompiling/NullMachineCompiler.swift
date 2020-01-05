@@ -64,7 +64,8 @@ public final class NullMachineCompiler: MachineCompiler {
         atPath _: String,
         withCCompilerFlags _: [String],
         andLinkerFlags _: [String],
-        andSwiftCompilerFlags _: [String]
+        andSwiftCompilerFlags _: [String],
+        andSwiftBuildFlags _: [String]
     ) -> Bool {
         return false
     }

@@ -147,6 +147,9 @@ public class SwiftfsmParser: HelpableParser {
                 -Xswiftc <value>
                                 Pass a compiler flag to the swift compiler when
                                 compiling this machine.
+                -Xswiftbuild <value>
+                                Pass a flag to swift build when compiling
+                                this machine.
         """
     }
 
@@ -246,6 +249,8 @@ public class SwiftfsmParser: HelpableParser {
             return self.handleLinkerFlag(j, words: &words)
         case "-Xswiftc":
             return self.handleSwiftCompilerFlag(j, words: &words)
+        case "-Xswiftbuild":
+            return self.handleSwiftBuildFlag(j, words: &words)
         default:
             return try self.handlePath(j, words: &words)
         }
@@ -418,6 +423,15 @@ public class SwiftfsmParser: HelpableParser {
         }
         var temp = j
         temp.swiftCompilerFlags.append(arg)
+        return temp
+    }
+    
+    private func handleSwiftBuildFlag(_ j: Job, words: inout [String]) -> Job {
+        guard let arg = self.fetchValueAfterFlag(words: &words, ignoreHyphen: true) else {
+            return j
+        }
+        var temp = j
+        temp.swiftBuildFlags.append(arg)
         return temp
     }
 

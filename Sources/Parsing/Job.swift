@@ -108,5 +108,7 @@ public struct Job {
      * Flags passed to the swift compiler when compiling a machine.
      */
     public var swiftCompilerFlags: [String] = []
+    
+    public var swiftBuildFlags: [String] = []
 
 }

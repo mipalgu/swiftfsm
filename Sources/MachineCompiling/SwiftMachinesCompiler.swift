@@ -83,7 +83,8 @@ public final class SwiftMachinesCompiler: MachineCompiler {
         atPath path: String,
         withCCompilerFlags compilerFlags: [String],
         andLinkerFlags linkerFlags: [String],
-        andSwiftCompilerFlags swiftCompilerFlags: [String]
+        andSwiftCompilerFlags swiftCompilerFlags: [String],
+        andSwiftBuildFlags swiftBuildFlags: [String]
     ) -> Bool {
         guard let machine = self.parser.parseMachine(atPath: path) else {
             self.parser.errors.forEach(self.printer.error)
@@ -93,7 +94,8 @@ public final class SwiftMachinesCompiler: MachineCompiler {
             machine,
             withCCompilerFlags: compilerFlags,
             andLinkerFlags: linkerFlags,
-            andSwiftCompilerFlags: swiftCompilerFlags
+            andSwiftCompilerFlags: swiftCompilerFlags,
+            andSwiftBuildFlags: swiftBuildFlags
         ) else {
             self.compiler.errors.forEach(self.printer.error)
             return false

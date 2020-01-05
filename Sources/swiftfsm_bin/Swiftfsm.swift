@@ -345,7 +345,8 @@ public class Swiftfsm<
                 atPath: path,
                 withCCompilerFlags: job.cCompilerFlags,
                 andLinkerFlags: job.linkerFlags,
-                andSwiftCompilerFlags: job.swiftCompilerFlags
+                andSwiftCompilerFlags: job.swiftCompilerFlags,
+                andSwiftBuildFlags: job.swiftBuildFlags
             ) else {
                 self.handleError(.generalError(error: "Unable to compile machine at \(path)"))
             }

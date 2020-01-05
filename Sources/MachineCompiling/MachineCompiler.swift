@@ -62,7 +62,8 @@ public protocol MachineCompiler {
         atPath: String,
         withCCompilerFlags: [String],
         andLinkerFlags: [String],
-        andSwiftCompilerFlags: [String]
+        andSwiftCompilerFlags: [String],
+        andSwiftBuildFlags: [String]
     ) -> Bool
 
 }

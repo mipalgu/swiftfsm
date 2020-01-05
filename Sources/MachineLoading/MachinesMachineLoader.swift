@@ -79,6 +79,7 @@ public final class MachinesMachineLoader: MachineLoader {
     fileprivate let cCompilerFlags: [String]
     fileprivate let linkerFlags: [String]
     fileprivate let swiftCompilerFlags: [String]
+    fileprivate let swiftBuildFlags: [String]
 
     @available(macOS 10.11, *)
     public init(
@@ -88,7 +89,8 @@ public final class MachinesMachineLoader: MachineLoader {
         printer: Printer = CommandLinePrinter(errorStream: StderrOutputStream(), messageStream: StdoutOutputStream(), warningStream: StdoutOutputStream()),
         cCompilerFlags: [String] = [],
         linkerFlags: [String] = [],
-        swiftCompilerFlags: [String] = []
+        swiftCompilerFlags: [String] = [],
+        swiftBuildFlags: [String] = []
     ) {
         self.compiler = compiler
         self.libraryLoader = libraryLoader
@@ -97,6 +99,7 @@ public final class MachinesMachineLoader: MachineLoader {
         self.cCompilerFlags = cCompilerFlags
         self.linkerFlags = linkerFlags
         self.swiftCompilerFlags = swiftCompilerFlags
+        self.swiftBuildFlags = swiftBuildFlags
     }
 
     public func load<Gateway: FSMGateway>(name: String, gateway: Gateway, clock: Timer, path: String) -> (FSMType, [Dependency])? {
@@ -153,7 +156,8 @@ public final class MachinesMachineLoader: MachineLoader {
                 machine,
                 withCCompilerFlags: self.cCompilerFlags,
                 andLinkerFlags: self.linkerFlags,
-                andSwiftCompilerFlags: self.swiftCompilerFlags
+                andSwiftCompilerFlags: self.swiftCompilerFlags,
+                andSwiftBuildFlags: self.swiftBuildFlags
             )
         else {
             self.compiler.errors.forEach(self.printer.error)
