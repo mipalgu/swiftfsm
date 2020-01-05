@@ -77,6 +77,7 @@ public final class MachinesMachineLoader: MachineLoader {
     fileprivate let printer: Printer
 
     fileprivate let cCompilerFlags: [String]
+    fileprivate let cxxCompilerFlags: [String]
     fileprivate let linkerFlags: [String]
     fileprivate let swiftCompilerFlags: [String]
     fileprivate let swiftBuildFlags: [String]
@@ -88,6 +89,7 @@ public final class MachinesMachineLoader: MachineLoader {
         parser: MachineParser = MachineParser(),
         printer: Printer = CommandLinePrinter(errorStream: StderrOutputStream(), messageStream: StdoutOutputStream(), warningStream: StdoutOutputStream()),
         cCompilerFlags: [String] = [],
+        cxxCompilerFlags: [String] = [],
         linkerFlags: [String] = [],
         swiftCompilerFlags: [String] = [],
         swiftBuildFlags: [String] = []
@@ -97,6 +99,7 @@ public final class MachinesMachineLoader: MachineLoader {
         self.parser = parser
         self.printer = printer
         self.cCompilerFlags = cCompilerFlags
+        self.cxxCompilerFlags = cxxCompilerFlags
         self.linkerFlags = linkerFlags
         self.swiftCompilerFlags = swiftCompilerFlags
         self.swiftBuildFlags = swiftBuildFlags
@@ -155,6 +158,7 @@ public final class MachinesMachineLoader: MachineLoader {
             let outputPath = self.compiler.compile(
                 machine,
                 withCCompilerFlags: self.cCompilerFlags,
+                andCXXCompilerFlags: self.cxxCompilerFlags,
                 andLinkerFlags: self.linkerFlags,
                 andSwiftCompilerFlags: self.swiftCompilerFlags,
                 andSwiftBuildFlags: self.swiftBuildFlags

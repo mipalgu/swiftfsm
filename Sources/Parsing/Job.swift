@@ -71,6 +71,8 @@ public struct Job {
      * Flags passed to the C compiler when compiling a machine.
      */
     public var cCompilerFlags: [String] = []
+    
+    public var cxxCompilerFlags: [String] = []
 
     /**
      *  How many times should we repeat this task?

@@ -141,6 +141,8 @@ public class SwiftfsmParser: HelpableParser {
                 -Xcc <value>
                                 Pass a compiler flag to the C compiler when
                                 compiling this machine.
+                -Xcxx <value>   Pass a compiler flag to the C++ compiler when
+                                compiling this machine.
                 -Xlinker <value>
                                 Pass a linker flag to the linker when compiling
                                 this machine.
@@ -245,6 +247,8 @@ public class SwiftfsmParser: HelpableParser {
             return self.handleRepeatFlag(j, words: &words)
         case "-Xcc":
             return self.handleCCompilerFlag(j, words: &words)
+        case "-Xcxx":
+            return self.handleCXXFlag(j, words: &words)
         case "-Xlinker":
             return self.handleLinkerFlag(j, words: &words)
         case "-Xswiftc":
@@ -405,6 +409,15 @@ public class SwiftfsmParser: HelpableParser {
     private func handleCompileFlag(_ j: Job, words: inout [String]) -> Job {
         var temp = j
         temp.compile = true
+        return temp
+    }
+    
+    private func handleCXXFlag(_ j: Job, words: inout [String]) -> Job {
+        guard let arg = self.fetchValueAfterFlag(words: &words, ignoreHyphen: true) else {
+            return j
+        }
+        var temp = j
+        temp.cxxCompilerFlags.append(arg)
         return temp
     }
 

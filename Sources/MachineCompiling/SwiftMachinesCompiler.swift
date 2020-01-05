@@ -82,6 +82,7 @@ public final class SwiftMachinesCompiler: MachineCompiler {
     public func compileMachine(
         atPath path: String,
         withCCompilerFlags compilerFlags: [String],
+        andCXXCompilerFlags cxxCompilerFlags: [String],
         andLinkerFlags linkerFlags: [String],
         andSwiftCompilerFlags swiftCompilerFlags: [String],
         andSwiftBuildFlags swiftBuildFlags: [String]
@@ -93,6 +94,7 @@ public final class SwiftMachinesCompiler: MachineCompiler {
         guard nil != self.compiler.compileTree(
             machine,
             withCCompilerFlags: compilerFlags,
+            andCXXCompilerFlags: cxxCompilerFlags,
             andLinkerFlags: linkerFlags,
             andSwiftCompilerFlags: swiftCompilerFlags,
             andSwiftBuildFlags: swiftBuildFlags

@@ -61,6 +61,7 @@ public protocol MachineCompiler {
     func compileMachine(
         atPath: String,
         withCCompilerFlags: [String],
+        andCXXCompilerFlags: [String],
         andLinkerFlags: [String],
         andSwiftCompilerFlags: [String],
         andSwiftBuildFlags: [String]
