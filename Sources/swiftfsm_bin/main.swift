@@ -95,7 +95,7 @@ let timeTriggeredFactory = TimeTriggeredSchedulerFactoryCreator(
     unloader: clfsmMachineLoader
 )
 
-let libraryLoader = LibraryMachineLoader(
+let libraryLoader = LibraryMachineLoaderFactory(
     loader: LibrarySymbolLoader(creator: DynamicLibraryCreator()),
     printer: printer
 )
@@ -104,10 +104,10 @@ let libraryLoader = LibraryMachineLoader(
 func run() {
     #if NO_FOUNDATION
     let compiler = NullMachineCompiler()
-    let machineLoader = NullMachineLoader()
+    let machineLoader = NullMachineLoaderFactory()
     #else
     let compiler = SwiftMachinesCompiler()
-    let machineLoader = MachinesMachineLoader(libraryLoader: libraryLoader)
+    let machineLoader = MachinesMachineLoaderFactory(libraryLoader: libraryLoader)
     #endif
     Swiftfsm(
         clfsmMachineLoader: CLFSMMachineLoader(),
@@ -115,10 +115,7 @@ func run() {
         kripkeStructureViewFactory: AnyKripkeStructureViewFactory(NuSMVKripkeStructureViewFactory<KripkeState>()),
         machineCompiler: compiler,
         machineFactory: SimpleMachineFactory(),
-        machineLoader: MachineLoaderStrategy(
-            machineLoader: machineLoader,
-            libraryLoader: libraryLoader
-        ),
+        machineLoader: MachineLoaderStrategyFactor(machineLoaderFactory: machineLoader, libraryLoaderFactory: libraryLoader),
         parser: SwiftfsmParser(
             passiveRoundRobinFactory: PassiveRoundRobinSchedulerFactory(
                 scheduleHandler: clfsmMachineLoader,

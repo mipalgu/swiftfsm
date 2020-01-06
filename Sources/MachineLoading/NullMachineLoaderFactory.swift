@@ -1,5 +1,5 @@
 /*
- * MachinesMachineLoaderFactory.swift
+ * NullMachineLoaderFactory.swift
  * MachineLoading
  *
  * Created by Callum McColl on 6/1/20.
@@ -56,68 +56,19 @@
  *
  */
 
-#if !NO_FOUNDATION
-
-import FSM
-import Libraries
-import SwiftMachines
-import swiftfsm
-import IO
-import Gateways
-import swift_helpers
-
-@available(macOS 10.11, *)
-public final class MachinesMachineLoaderFactory: MachineLoaderFactory {
+public final class NullMachineLoaderFactory: MachineLoaderFactory {
     
-    public typealias Loader = MachinesMachineLoader
-    
-    fileprivate let compiler: MachineCompiler<MachineAssembler>
-    fileprivate let libraryLoader: LibraryMachineLoaderFactory
-    fileprivate let parser: MachineParser
-    fileprivate let printer: Printer
-    
-    public init(
-        compiler: MachineCompiler<MachineAssembler> = MachineCompiler(assembler: MachineAssembler()),
-        libraryLoader: LibraryMachineLoaderFactory,
-        parser: MachineParser = MachineParser(),
-        printer: Printer = CommandLinePrinter(errorStream: StderrOutputStream(), messageStream: StdoutOutputStream(), warningStream: StdoutOutputStream())
-    ) {
-        self.compiler = compiler
-        self.libraryLoader = libraryLoader
-        self.parser = parser
-        self.printer = printer
-    }
+    public init() {}
     
     public func make(
-        buildDir: String,
-        cFlags: [String],
-        cxxFlags: [String],
-        ldFlags: [String],
-        swiftcFlags: [String],
-        swiftBuildFlags: [String]
-    ) -> MachinesMachineLoader {
-        let libLoader = self.libraryLoader.make(
-            buildDir: buildDir,
-            cFlags: cFlags,
-            cxxFlags: cxxFlags,
-            ldFlags: ldFlags,
-            swiftcFlags: swiftcFlags,
-            swiftBuildFlags: swiftBuildFlags
-        )
-        return MachinesMachineLoader(
-            compiler: self.compiler,
-            libraryLoader: libLoader,
-            parser: self.parser,
-            printer: self.printer,
-            buildDir: buildDir,
-            cCompilerFlags: cFlags,
-            cxxCompilerFlags: cxxFlags,
-            linkerFlags: ldFlags,
-            swiftCompilerFlags: swiftcFlags,
-            swiftBuildFlags: swiftBuildFlags
-        )
+        buildDir _: String,
+        cFlags _: [String],
+        cxxFlags _: [String],
+        ldFlags _: [String],
+        swiftcFlags _: [String],
+        swiftBuildFlags _: [String]
+    ) -> NullMachineLoader {
+        return NullMachineLoader()
     }
     
 }
-
-#endif

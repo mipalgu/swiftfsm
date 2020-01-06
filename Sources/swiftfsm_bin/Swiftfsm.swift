@@ -82,6 +82,7 @@ import swiftfsm
  */
 public class Swiftfsm<
     Compiler: MachineCompiler,
+    Loader: MachineLoaderFactory,
     SF: SchedulerFactory,
     MF: MachineFactory,
     KF: KripkeStructureGeneratorFactory
@@ -99,7 +100,7 @@ public class Swiftfsm<
 
     private let machineFactory: MF
 
-    private let machineLoader: MachineLoader
+    private let machineLoader: Loader
 
     private let parser: HelpableParser
 
@@ -134,7 +135,7 @@ public class Swiftfsm<
         kripkeStructureViewFactory: AnyKripkeStructureViewFactory<KripkeState>,
         machineCompiler: Compiler,
         machineFactory: MF,
-        machineLoader: MachineLoader,
+        machineLoader: Loader,
         parser: HelpableParser,
         schedulerFactory: SF,
         view: View
@@ -314,7 +315,14 @@ public class Swiftfsm<
         if true == job.isClfsmMachine {
             fsm = self.clfsmMachineLoader.load(name: name, gateway: gateway, clock: clock, path: job.path!)
         } else {
-            fsm = self.machineLoader.load(name: name, gateway: gateway, clock: clock, path: job.path!)
+            fsm = self.machineLoader.make(
+                buildDir: job.buildDir,
+                cFlags: job.cCompilerFlags,
+                cxxFlags: job.cxxCompilerFlags,
+                ldFlags: job.linkerFlags,
+                swiftcFlags: job.swiftCompilerFlags,
+                swiftBuildFlags: job.swiftBuildFlags
+            ).load(name: name, gateway: gateway, clock: clock, path: job.path!)
         }
         guard let unwrappedFSM = fsm else {
             // Handle when we are unable to load the fsm.
