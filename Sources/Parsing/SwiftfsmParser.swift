@@ -301,7 +301,6 @@ public class SwiftfsmParser: HelpableParser {
     private func handleGenerateSchedulerMapFlag(_ t: Task, words: inout [String]) -> Task {
         var temp = t
         temp.generateSchedulerMap = true
-        temp.addToScheduler = false
         return temp
     }
 
@@ -311,7 +310,6 @@ public class SwiftfsmParser: HelpableParser {
         }
         var temp: Task = t
         temp.generateKripkeStructure = true
-        temp.addToScheduler = false
         while words.count > 1 {
             switch words[1] {
             case "-o", "--output":
@@ -323,8 +321,6 @@ public class SwiftfsmParser: HelpableParser {
                     throw ParsingErrors.generalError(error: "No valid values for Kripke Structure output flag.")
                 }
                 words.removeFirst()
-            case "-r", "--run":
-                temp.addToScheduler = true
             default:
                 return temp
             }

@@ -70,11 +70,6 @@ import Verification
 public struct Task {
 
     /**
-     *  Should we add this `Machine` to the scheduler?
-     */
-    public var addToScheduler: Bool = true
-
-    /**
      *  Should we enable debugging?.
      */
     public var enableDebugging: Bool = false

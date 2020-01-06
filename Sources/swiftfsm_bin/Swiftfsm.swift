@@ -234,7 +234,7 @@ public class Swiftfsm<
         let views: [AnyKripkeStructureViewFactory<KripkeState>] = task.kripkeStructureViews ?? [self.kripkeStructureViewFactory]
         guard let supportedScheduler = task.scheduler else {
             let scheduler: SF._Scheduler = self.schedulerFactory.make()
-            let machines: [Machine] = task.jobs.flatMap { self.handleJob($0, gateway: scheduler) }
+            let machines = task.jobs.flatMap { self.handleJob($0, gateway: scheduler) }
             self.handleMachines(
                 machines,
                 task: task,
@@ -288,9 +288,7 @@ public class Swiftfsm<
         if task.generateKripkeStructure {
             self.generateKripkeStructure(machines, withGenerator: generator, andViews: views, usingGateway: scheduler)
         }
-        if task.addToScheduler {
-            scheduler.run(machines)
-        }
+        scheduler.run(machines)
     }
 
     private func getMachinesName(_ job: Job) -> String {
@@ -351,6 +349,7 @@ public class Swiftfsm<
             ) else {
                 self.handleError(.generalError(error: "Unable to compile machine at \(path)"))
             }
+            return []
         }
         var machines: [Machine] = []
         for _ in 0 ..< job.count {
