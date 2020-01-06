@@ -69,15 +69,13 @@ import Glibc
 public struct Job {
     
     public var buildDir: String = {
-        let defaultName = ".build"
-        var uts: utsname = utsname()
-        guard 0 == uname(&uts) else {
-            return defaultName
-        }
-        let sysnameWrapped = withUnsafePointer(to: &uts.sysname.0) { String(utf8String: $0) }
-        let machineWrapped = withUnsafePointer(to: &uts.machine.0) { String(utf8String: $0) }
-        guard let sysname = sysnameWrapped, let machine = machineWrapped else {
-            return defaultName
+        var uts = utsname()
+        guard
+            0 == uname(&uts),
+            let sysname = withUnsafePointer(to: &uts.sysname.0, { String(utf8String: $0) }),
+            let machine = withUnsafePointer(to: &uts.machine.0, { String(utf8String: $0) })
+        else {
+            return ".build"
         }
         return sysname + "-" + machine
     }()
