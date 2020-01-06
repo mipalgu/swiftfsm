@@ -67,19 +67,19 @@ import Glibc
  *  machine.
  */
 public struct Job {
-    
+
     public var buildDir: String = {
         var uts = utsname()
         guard
             0 == uname(&uts),
-            let sysname = withUnsafePointer(to: &uts.sysname.0, { String(utf8String: $0) }),
-            let machine = withUnsafePointer(to: &uts.machine.0, { String(utf8String: $0) })
+            let sysname = withUnsafePointer(to: &uts.sysname.0, { String(validatingUTF8: $0) }),
+            let machine = withUnsafePointer(to: &uts.machine.0, { String(validatingUTF8: $0) })
         else {
             return ".build"
         }
         return sysname + "-" + machine
     }()
-    
+
     /**
      * Should we compile the machine?
      */
@@ -89,7 +89,7 @@ public struct Job {
      * Flags passed to the C compiler when compiling a machine.
      */
     public var cCompilerFlags: [String] = []
-    
+
     public var cxxCompilerFlags: [String] = []
 
     /**
@@ -128,7 +128,7 @@ public struct Job {
      * Flags passed to the swift compiler when compiling a machine.
      */
     public var swiftCompilerFlags: [String] = []
-    
+
     public var swiftBuildFlags: [String] = []
 
 }
