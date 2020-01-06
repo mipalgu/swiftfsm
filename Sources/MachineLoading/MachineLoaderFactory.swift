@@ -61,11 +61,20 @@
  */
 public protocol MachineLoaderFactory {
 
+    associatedtype Loader: MachineLoader
+    
     /**
      *  Create an instance of `MachineLoader`.
      *
      *  - Returns: The newly created `MachineLoader`.
      */
-    func make() -> MachineLoader
+    func make(
+        buildDir: String,
+        cFlags: [String],
+        cxxFlags: [String],
+        ldFlags: [String],
+        swiftcFlags: [String],
+        swiftBuildFlags: [String]
+    ) -> Loader
 
 }

@@ -1,9 +1,9 @@
 /*
- * DynamicLibraryMachineLoaderFactory.swift
- * swiftfsm
+ * LibraryMachineLoaderFactory.swift
+ * MachineLoading
  *
- * Created by Callum McColl on 27/08/2015.
- * Copyright © 2015 Callum McColl. All rights reserved.
+ * Created by Callum McColl on 6/1/20.
+ * Copyright © 2020 Callum McColl. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -56,48 +56,34 @@
  *
  */
 
+import FSM
+import Gateways
+import Functional
 import IO
+import swiftfsm_helpers
 import Libraries
+import swiftfsm
 
-/**
- *  Creates A `MachineLoader` that is capable of loading machines from dynamic
- *  libraries.
- *
- *  The machine loader leverages the `DynamicLibraryCreator` class.
- */
-public class DynamicLibraryMachineLoaderFactory: MachineLoaderFactory {
-
-    public typealias Loader = LibraryMachineLoader
+public final class LibraryMachineLoaderFactory: MachineLoaderFactory {
     
-    private let printer: Printer
+    public let loader: LibrarySymbolLoader
 
-    /**
-     *  Create a new `DynamicLibraryMachineLoaderFactory`.
-     *
-     *  - Parameter printer: The `LibraryMachineLoader` that is created will use
-     *  this `Printer`.
-     */
-    public init(printer: Printer) {
+    public let printer: Printer
+    
+    public init(loader: LibrarySymbolLoader, printer: Printer) {
+        self.loader = loader
         self.printer = printer
     }
-
-    /**
-     *  Create the `MachineLoader`.
-     *
-     *  - Returns: A new instance of `MachineLoader`.
-     */
+    
     public func make(
-        buildDir _: String,
-        cFlags _: [String],
-        cxxFlags _: [String],
-        ldFlags _: [String],
-        swiftcFlags _: [String],
-        swiftBuildFlags _: [String]
+        buildDir: String,
+        cFlags: [String],
+        cxxFlags: [String],
+        ldFlags: [String],
+        swiftcFlags: [String],
+        swiftBuildFlags: [String]
     ) -> LibraryMachineLoader {
-        return LibraryMachineLoader(
-            loader: LibrarySymbolLoader(creator: DynamicLibraryCreator()),
-            printer: self.printer 
-        )
+        return LibraryMachineLoader(loader: self.loader, printer: self.printer)
     }
-
+    
 }

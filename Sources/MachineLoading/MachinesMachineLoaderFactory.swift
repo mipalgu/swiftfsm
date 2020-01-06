@@ -1,9 +1,9 @@
 /*
- * DynamicLibraryMachineLoaderFactory.swift
- * swiftfsm
+ * MachinesMachineLoaderFactory.swift
+ * MachineLoading
  *
- * Created by Callum McColl on 27/08/2015.
- * Copyright © 2015 Callum McColl. All rights reserved.
+ * Created by Callum McColl on 6/1/20.
+ * Copyright © 2020 Callum McColl. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -56,48 +56,60 @@
  *
  */
 
-import IO
+#if !NO_FOUNDATION
+
+import FSM
 import Libraries
+import SwiftMachines
+import swiftfsm
+import IO
+import Gateways
+import swift_helpers
 
-/**
- *  Creates A `MachineLoader` that is capable of loading machines from dynamic
- *  libraries.
- *
- *  The machine loader leverages the `DynamicLibraryCreator` class.
- */
-public class DynamicLibraryMachineLoaderFactory: MachineLoaderFactory {
-
-    public typealias Loader = LibraryMachineLoader
+@available(macOS 10.11, *)
+public final class MachinesMachineLoaderFactory: MachineLoaderFactory {
     
-    private let printer: Printer
-
-    /**
-     *  Create a new `DynamicLibraryMachineLoaderFactory`.
-     *
-     *  - Parameter printer: The `LibraryMachineLoader` that is created will use
-     *  this `Printer`.
-     */
-    public init(printer: Printer) {
+    public typealias Loader = MachinesMachineLoader
+    
+    fileprivate let compiler: MachineCompiler<MachineAssembler>
+    fileprivate let libraryLoader: LibraryMachineLoader
+    fileprivate let parser: MachineParser
+    fileprivate let printer: Printer
+    
+    public init(
+        compiler: MachineCompiler<MachineAssembler> = MachineCompiler(assembler: MachineAssembler()),
+        libraryLoader: LibraryMachineLoader,
+        parser: MachineParser = MachineParser(),
+        printer: Printer = CommandLinePrinter(errorStream: StderrOutputStream(), messageStream: StdoutOutputStream(), warningStream: StdoutOutputStream())
+    ) {
+        self.compiler = compiler
+        self.libraryLoader = libraryLoader
+        self.parser = parser
         self.printer = printer
     }
-
-    /**
-     *  Create the `MachineLoader`.
-     *
-     *  - Returns: A new instance of `MachineLoader`.
-     */
+    
     public func make(
-        buildDir _: String,
-        cFlags _: [String],
-        cxxFlags _: [String],
-        ldFlags _: [String],
-        swiftcFlags _: [String],
-        swiftBuildFlags _: [String]
-    ) -> LibraryMachineLoader {
-        return LibraryMachineLoader(
-            loader: LibrarySymbolLoader(creator: DynamicLibraryCreator()),
-            printer: self.printer 
+        buildDir: String,
+        cFlags: [String],
+        cxxFlags: [String],
+        ldFlags: [String],
+        swiftcFlags: [String],
+        swiftBuildFlags: [String]
+    ) -> MachinesMachineLoader {
+        return MachinesMachineLoader(
+            compiler: self.compiler,
+            libraryLoader: self.libraryLoader,
+            parser: self.parser,
+            printer: self.printer,
+            buildDir: buildDir,
+            cCompilerFlags: cFlags,
+            cxxCompilerFlags: cxxFlags,
+            linkerFlags: ldFlags,
+            swiftCompilerFlags: swiftcFlags,
+            swiftBuildFlags: swiftBuildFlags
         )
     }
-
+    
 }
+
+#endif
