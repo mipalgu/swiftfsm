@@ -341,6 +341,7 @@ public class Swiftfsm<
         if true == job.compile {
             guard true == self.machineCompiler.compileMachine(
                 atPath: path,
+                withBuildDir: job.buildDir,
                 withCCompilerFlags: job.cCompilerFlags,
                 andCXXCompilerFlags: job.cxxCompilerFlags,
                 andLinkerFlags: job.linkerFlags,

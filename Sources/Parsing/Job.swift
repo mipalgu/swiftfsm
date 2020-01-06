@@ -56,12 +56,32 @@
  *
  */
 
+#if os(macOS)
+import Darwin
+#else
+import Glibc
+#endif
+
 /**
  *  Represents all data passed through the command line about how to load a
  *  machine.
  */
 public struct Job {
-
+    
+    public var buildDir: String = {
+        let defaultName = ".build"
+        var uts: utsname = utsname()
+        guard 0 == uname(&uts) else {
+            return defaultName
+        }
+        let sysnameWrapped = withUnsafePointer(to: &uts.sysname.0) { String(utf8String: $0) }
+        let machineWrapped = withUnsafePointer(to: &uts.machine.0) { String(utf8String: $0) }
+        guard let sysname = sysnameWrapped, let machine = machineWrapped else {
+            return defaultName
+        }
+        return sysname + "-" + machine
+    }()
+    
     /**
      * Should we compile the machine?
      */

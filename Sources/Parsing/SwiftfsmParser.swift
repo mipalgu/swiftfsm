@@ -122,7 +122,12 @@ public class SwiftfsmParser: HelpableParser {
                                          ringlet in each LLFSM.
         
         MACHINE OPTIONS:
-                -c              Compile this machine.
+                -c  [-d <value=.build>, --builddir <value=.build>]
+                                Compile this machine.
+                                Note: Optionally specify a name for the build
+                                folder. This folder will be created inside the
+                                machine directory and is where the swift package
+                                is generated on compiling the machine.
                 -l, --clfsm
                                 Specifies that this is a machine that has been
                                 built using the CLFSM specification.
@@ -180,6 +185,7 @@ public class SwiftfsmParser: HelpableParser {
      *  line arguments.
      */
     public func parse(words: [String]) throws -> Task {
+        print("words: \(words)")
         var wds: [String] = words
         var task = try self.parseTask(words: &wds)
         var jobs: [Job] = []
@@ -405,7 +411,20 @@ public class SwiftfsmParser: HelpableParser {
     private func handleCompileFlag(_ j: Job, words: inout [String]) -> Job {
         var temp = j
         temp.compile = true
-        return temp
+        if words.count <= 1 {
+            return temp
+        }
+        switch words[1] {
+        case "-d", "--builddir":
+            words.removeFirst()
+            guard let buildDir = self.fetchValueAfterFlag(words: &words, ignoreHyphen: true) else {
+                return temp
+            }
+            temp.buildDir = buildDir
+            return temp
+        default:
+            return temp
+        }
     }
     
     private func handleCXXFlag(_ j: Job, words: inout [String]) -> Job {

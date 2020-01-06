@@ -60,6 +60,7 @@ public protocol MachineCompiler {
 
     func compileMachine(
         atPath: String,
+        withBuildDir: String,
         withCCompilerFlags: [String],
         andCXXCompilerFlags: [String],
         andLinkerFlags: [String],

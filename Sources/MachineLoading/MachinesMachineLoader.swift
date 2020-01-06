@@ -75,7 +75,8 @@ public final class MachinesMachineLoader: MachineLoader {
     fileprivate let libraryLoader: LibraryMachineLoader
     fileprivate let parser: MachineParser
     fileprivate let printer: Printer
-
+    
+    fileprivate let buildDir: String
     fileprivate let cCompilerFlags: [String]
     fileprivate let cxxCompilerFlags: [String]
     fileprivate let linkerFlags: [String]
@@ -88,6 +89,7 @@ public final class MachinesMachineLoader: MachineLoader {
         libraryLoader: LibraryMachineLoader,
         parser: MachineParser = MachineParser(),
         printer: Printer = CommandLinePrinter(errorStream: StderrOutputStream(), messageStream: StdoutOutputStream(), warningStream: StdoutOutputStream()),
+        buildDir: String = ".build",
         cCompilerFlags: [String] = [],
         cxxCompilerFlags: [String] = [],
         linkerFlags: [String] = [],
@@ -98,6 +100,7 @@ public final class MachinesMachineLoader: MachineLoader {
         self.libraryLoader = libraryLoader
         self.parser = parser
         self.printer = printer
+        self.buildDir = buildDir
         self.cCompilerFlags = cCompilerFlags
         self.cxxCompilerFlags = cxxCompilerFlags
         self.linkerFlags = linkerFlags
@@ -147,8 +150,8 @@ public final class MachinesMachineLoader: MachineLoader {
         }) else {
             return nil
         }
-        if false == self.compiler.shouldCompile(machine) {
-            let outputPath = self.compiler.outputPath(forMachine: machine)
+        if false == self.compiler.shouldCompile(machine, inDirectory: self.buildDir) {
+            let outputPath = self.compiler.outputPath(forMachine: machine, builtInDirectory: self.buildDir)
             guard let fsm = self.loadSymbol(inMachine: machine.name, gateway: newGateway, clock: clock, path: outputPath, caller: caller) else {
                 return nil
             }
@@ -157,6 +160,7 @@ public final class MachinesMachineLoader: MachineLoader {
         guard
             let outputPath = self.compiler.compile(
                 machine,
+                withBuildDir: self.buildDir,
                 withCCompilerFlags: self.cCompilerFlags,
                 andCXXCompilerFlags: self.cxxCompilerFlags,
                 andLinkerFlags: self.linkerFlags,
