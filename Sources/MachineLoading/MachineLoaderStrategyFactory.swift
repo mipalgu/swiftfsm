@@ -56,7 +56,7 @@
  *
  */
 
-public final class MachineLoaderStrategyFactor<
+public final class MachineLoaderStrategyFactory<
     MachineLoader: MachineLoaderFactory,
     LibraryLoader: MachineLoaderFactory
 >: MachineLoaderFactory {

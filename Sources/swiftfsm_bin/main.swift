@@ -115,7 +115,10 @@ func run() {
         kripkeStructureViewFactory: AnyKripkeStructureViewFactory(NuSMVKripkeStructureViewFactory<KripkeState>()),
         machineCompiler: compiler,
         machineFactory: SimpleMachineFactory(),
-        machineLoader: MachineLoaderStrategyFactor(machineLoaderFactory: machineLoader, libraryLoaderFactory: libraryLoader),
+        machineLoader: MachineLoaderStrategyFactory(
+            machineLoaderFactory: machineLoader,
+            libraryLoaderFactory: libraryLoader
+        ),
         parser: SwiftfsmParser(
             passiveRoundRobinFactory: PassiveRoundRobinSchedulerFactory(
                 scheduleHandler: clfsmMachineLoader,
