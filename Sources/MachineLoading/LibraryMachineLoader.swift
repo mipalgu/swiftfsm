@@ -71,145 +71,25 @@ import swiftfsm
  */
 public class LibraryMachineLoader: MachineLoader {
 
-    //swiftlint:disable:next line_length
-    fileprivate typealias SymbolSignature = @convention(c) (UnsafeMutableRawPointer, UnsafeMutableRawPointer, UnsafeMutableRawPointer, UnsafeMutableRawPointer) -> Void
-
-    /*
-     *  This is used to remember factories for paths, therefore allowing us to
-     *  just use this instead of loading it from the file system.
-     */
-    private static var cache: [String: SymbolSignature] = [:]
-
-    public let loader: LibrarySymbolLoader
-
-    /**
-     *  Used to print error messages.
-     */
-    public let printer: Printer
-
-    /**
-     *  Create a new `LibraryMachineLoader`.
-     *
-     *  - Parameter loader: Used to load the symbols.
-     *
-     *  - Parameter printer: Error messages get sent here.
-     */
-    public init(loader: LibrarySymbolLoader, printer: Printer) {
-        self.loader = loader
-        self.printer = printer
+    fileprivate let shallowLoader: ShallowLibraryMachineLoader
+    
+    init(shallowLoader: ShallowLibraryMachineLoader) {
+        self.shallowLoader = shallowLoader
     }
-
-    /**
-     *  Remove all the factories from the cache.
-     */
+    
+    public convenience init(loader: LibrarySymbolLoader, printer: Printer) {
+        self.init(shallowLoader: ShallowLibraryMachineLoader(loader: loader, printer: printer))
+    }
+    
+    public func load<Gateway>(name: String, gateway: Gateway, clock: Timer, path: String) -> (FSMType, [Dependency])? where Gateway : FSMGateway {
+        guard let (fsm, _) = self.shallowLoader.load(name: name, gateway: gateway, clock: clock, path: path) else {
+            return nil
+        }
+        return (fsm, [])
+    }
+    
     public func clearCache() {
-        type(of: self).cache = [:]
+        self.shallowLoader.clearCache()
     }
-
-    /**
-     *  Load the machines from the library specified from the path.
-     *
-     *  To accomplish this the machines factory function is executed which
-     *  returns the necessary machine data.
-     *
-     *  - Parameter path: The path to the library.
-     *
-     *  - Returns: A tuple containing the FSM and all of its dependencies.
-     */
-    public func load<Gateway: FSMGateway>(
-        name: String,
-        gateway: Gateway,
-        clock: Timer,
-        path: String
-    ) -> (FSMType, [Dependency])? {
-        // Ignore empty paths
-        guard false == path.isEmpty else {
-            return nil
-        }
-        let id = gateway.id(of: name)
-        // Load the factory from the cache if it is there.
-        if let factory = type(of: self).cache[path] {
-            return (self.call(factory: factory, gateway: gateway, clock: clock, id: id), [])
-        }
-        // Load the factory from the dynamic library.
-        guard let data = self.loadMachine(name: name, gateway: gateway, clock: clock, path: path) else {
-            return nil
-        }
-        return (data, [])
-    }
-
-    private func loadMachine<Gateway: FSMGateway>(
-        name: String,
-        gateway: Gateway,
-        clock: Timer,
-        path: String
-    ) -> FSMType? {
-        // Get main method symbol
-        guard let symbolName = self.fetchSymbolName(fromPath: path) else {
-            self.printer.error(str: "Unable to synthesize the factory function symbol name from path '\(path)'")
-            return nil
-        }
-        let id = gateway.id(of: name)
-        do {
-            return try self.loader.load(symbol: symbolName, inLibrary: path) { (factory: SymbolSignature) -> FSMType? in
-                return self.call(factory: factory, gateway: gateway, clock: clock, id: id)
-            }
-        } catch let error as LibrarySymbolLoader.Errors {
-            switch error {
-            case .error(let message):
-                self.printer.error(str: message)
-            }
-            return nil
-        } catch {
-            self.printer.error(str: "Unable to load machine \(name)")
-            return nil
-        }
-    }
-
-    fileprivate func fetchSymbolName(fromPath path: String) -> String? {
-        let components = path.split(separator: "/")
-        guard var file = components.last else {
-            return nil
-        }
-        if file.hasPrefix("lib") {
-            file.removeFirst(3)
-        }
-        let split = file.split(separator: ".")
-        guard let first = split.first else {
-            return nil
-        }
-        let filename = ([first] + Array(split.dropFirst().dropLast())).reduce("", +)
-        let name = filename.hasSuffix("Machine") ? String(filename.dropLast(7)) : filename
-        if true == name.isEmpty {
-            return nil
-        }
-        print("Loading symbol: make_\(name)")
-        return "make_" + name
-    }
-
-    fileprivate func call(factory: SymbolSignature, gateway: FSMGateway, clock: Timer, id: FSM_ID) -> FSMType {
-        var gateway = gateway
-        var clock = clock
-        var id = id
-        return withUnsafeMutablePointer(to: &gateway) {
-            let gatewayPointer = UnsafeMutableRawPointer($0)
-            return withUnsafeMutablePointer(to: &clock) {
-                let clockPointer = UnsafeMutableRawPointer($0)
-                return withUnsafeMutablePointer(to: &id) {
-                    let idPointer = UnsafeMutableRawPointer($0)
-                    var fsm: FSMType?
-                    var callback: (FSMType) -> Void = { fsm = $0 }
-                    return withUnsafeMutablePointer(to: &callback) {
-                        let callbackPointer = UnsafeMutableRawPointer($0)
-                        factory(gatewayPointer, clockPointer, idPointer, callbackPointer)
-                        guard let fsm = fsm else {
-                            fatalError("bad")
-                        }
-                        return fsm
-                    }
-                }
-            }
-        }
-    }
-
+    
 }
