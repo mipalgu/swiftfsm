@@ -141,7 +141,15 @@ public final class MachinesMachineLoader: MachineLoader {
     public func load<Gateway: FSMGateway>(name: String, gateway: Gateway, clock: Timer, path: String) -> (FSMType, [Dependency])? {
         // Attempt to load the machine from the compiled libs.
         let buildDir = path + "/" + self.buildDir
-        if let data = self.loadCompiledMachine(name: name, gateway: gateway, clock: clock, path: buildDir, prefix: name) {
+        guard let lastComponent = path.split(separator: "/").last else {
+            self.printer.error(str: "Unable to calculate machine name from path '\(path)'")
+            return nil
+        }
+        var machineName = String(lastComponent.trim("/"))
+        if machineName.hasSuffix(".machine") {
+            machineName.removeLast(8)
+        }
+        if let data = self.loadCompiledMachine(name: machineName, gateway: gateway, clock: clock, path: buildDir, prefix: name) {
             return data
         }
         #if !NO_FOUNDATION && canImport(Foundation)
@@ -235,21 +243,26 @@ public final class MachinesMachineLoader: MachineLoader {
         let ext = "so"
         #endif
         let libPath = path + "/" + name + "." + ext
-        guard let (fsm, dependencies) = self.libraryLoader.load(name: name, gateway: gateway, clock: clock, path: libPath) else {
+        let nullGateway = StackGateway()
+        guard let (_, tempDependencies) = self.libraryLoader.load(name: name, gateway: nullGateway, clock: clock, path: libPath) else {
             return nil
         }
-        let dependantMachines = dependencies.map { $0.name }
-        let callableMachines = dependencies.filter { $0.isCallable }.map { $0.name }
-        let invocableMachines = dependencies.filter { $0.isInvokable }.map {$0.name }
+        let dependantMachines = tempDependencies.map { $0.name }
+        let callableMachines = tempDependencies.filter { $0.isCallable }.map { $0.name }
+        let invocableMachines = tempDependencies.filter { $0.isInvokable }.map {$0.name }
         let selfID: FSM_ID = gateway.id(of: prefix + "." + name)
         let caller = caller ?? selfID
         let newGateway = self.createRestrictiveGateway(forMachine: name, gateway: gateway, dependantMachines: dependantMachines, callableMachines: callableMachines, invocableMachines: invocableMachines, prefix: prefix, selfID: selfID, caller: caller)
+        guard let (fsm, dependencies) = self.libraryLoader.load(name: name, gateway: newGateway, clock: clock, path: libPath) else {
+            return nil
+        }
         guard let allDependencies = dependencies.failMap({ (m: ShallowDependency) -> Dependency? in
             let id = newGateway.id(of: m.name)
+            print("id of \(m.name): \(id)")
             // Set the caller to the parent caller when we are calling machines.
             let caller = true == callableMachines.contains(m.name) ? caller : id
-            let newDirectory = path + "/" + m.name + "Dependencies"
-            guard let (fsm, dependencies) = self.loadCompiledMachine(name: m.name, gateway: gateway, clock: clock, path: newDirectory, prefix: prefix + "." + m.name, caller: caller) else {
+            let newDirectory = path + "/" + name + "Dependencies"
+            guard let (fsm, dependencies) = self.loadCompiledMachine(name: m.name, gateway: gateway, clock: clock, path: newDirectory, prefix: prefix + "." + name, caller: caller) else {
                 return nil
             }
             switch m {
