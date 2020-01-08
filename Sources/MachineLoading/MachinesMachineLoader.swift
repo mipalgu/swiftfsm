@@ -248,7 +248,7 @@ public final class MachinesMachineLoader: MachineLoader {
             let id = newGateway.id(of: m.name)
             // Set the caller to the parent caller when we are calling machines.
             let caller = true == callableMachines.contains(m.name) ? caller : id
-            let newDirectory = path + "/dependencies/" + m.name
+            let newDirectory = path + "/" + m.name + "Dependencies"
             guard let (fsm, dependencies) = self.loadCompiledMachine(name: m.name, gateway: gateway, clock: clock, path: newDirectory, prefix: prefix + "." + m.name, caller: caller) else {
                 return nil
             }

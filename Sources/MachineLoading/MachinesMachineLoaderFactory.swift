@@ -56,11 +56,13 @@
  *
  */
 
-#if !NO_FOUNDATION
+#if !NO_FOUNDATION && canImport(Foundation)
+import SwiftMachines
+#endif
 
 import FSM
 import Libraries
-import SwiftMachines
+
 import swiftfsm
 import IO
 import Gateways
@@ -71,22 +73,35 @@ public final class MachinesMachineLoaderFactory: MachineLoaderFactory {
     
     public typealias Loader = MachinesMachineLoader
     
+    #if !NO_FOUNDATION && canImport(Foundation)
     fileprivate let compiler: MachineCompiler<MachineAssembler>
-    fileprivate let libraryLoader: LibraryMachineLoaderFactory
     fileprivate let parser: MachineParser
+    #endif
+    
+    fileprivate let loader: LibrarySymbolLoader
     fileprivate let printer: Printer
     
+    #if !NO_FOUNDATION && canImport(Foundation)
     public init(
         compiler: MachineCompiler<MachineAssembler> = MachineCompiler(assembler: MachineAssembler()),
-        libraryLoader: LibraryMachineLoaderFactory,
+        loader: LibrarySymbolLoader,
         parser: MachineParser = MachineParser(),
         printer: Printer = CommandLinePrinter(errorStream: StderrOutputStream(), messageStream: StdoutOutputStream(), warningStream: StdoutOutputStream())
     ) {
         self.compiler = compiler
-        self.libraryLoader = libraryLoader
+        self.loader = loader
         self.parser = parser
         self.printer = printer
     }
+    #else
+    public init(
+        loader: LibrarySymbolLoader,
+        printer: Printer = CommandLinePrinter(errorStream: StderrOutputStream(), messageStream: StdoutOutputStream(), warningStream: StdoutOutputStream())
+    ) {
+        self.loader = loader
+        self.printer = printer
+    }
+    #endif
     
     public func make(
         buildDir: String,
@@ -96,17 +111,10 @@ public final class MachinesMachineLoaderFactory: MachineLoaderFactory {
         swiftcFlags: [String],
         swiftBuildFlags: [String]
     ) -> MachinesMachineLoader {
-        let libLoader = self.libraryLoader.make(
-            buildDir: buildDir,
-            cFlags: cFlags,
-            cxxFlags: cxxFlags,
-            ldFlags: ldFlags,
-            swiftcFlags: swiftcFlags,
-            swiftBuildFlags: swiftBuildFlags
-        )
+        #if !NO_FOUNDATION && canImport(Foundation)
         return MachinesMachineLoader(
             compiler: self.compiler,
-            libraryLoader: libLoader,
+            loader: self.loader,
             parser: self.parser,
             printer: self.printer,
             buildDir: buildDir,
@@ -116,8 +124,18 @@ public final class MachinesMachineLoaderFactory: MachineLoaderFactory {
             swiftCompilerFlags: swiftcFlags,
             swiftBuildFlags: swiftBuildFlags
         )
+        #else
+        return MachinesMachineLoader(
+            loader: self.loader,
+            printer: self.printer,
+            buildDir: buildDir,
+            cCompilerFlags: cFlags,
+            cxxCompilerFlags: cxxFlags,
+            linkerFlags: ldFlags,
+            swiftCompilerFlags: swiftcFlags,
+            swiftBuildFlags: swiftBuildFlags
+        )
+        #endif
     }
     
 }
-
-#endif
