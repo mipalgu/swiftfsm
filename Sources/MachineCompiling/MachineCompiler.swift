@@ -61,6 +61,7 @@ public protocol MachineCompiler {
     func compileMachine(
         atPath: String,
         withBuildDir: String,
+        target: TargetTriple?,
         withCCompilerFlags: [String],
         andCXXCompilerFlags: [String],
         andLinkerFlags: [String],

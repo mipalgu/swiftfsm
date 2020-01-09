@@ -19,7 +19,7 @@ let package = Package(
         .target(name: "Timers", dependencies: ["swiftfsm_helpers"]),
         .target(name: "Libraries", dependencies: []),
         .target(name: "MachineStructure", dependencies: convert(["Libraries", "Timers"]) + foundationDeps),
-        .target(name: "MachineLoading", dependencies: convert(["Libraries", "Gateways", "swiftfsm_helpers"]) + foundationDeps),
+        .target(name: "MachineLoading", dependencies: convert(["Libraries", "Gateways", "swiftfsm_helpers", "MachineCompiling"]) + foundationDeps),
         .target(name: "MachineCompiling", dependencies: foundationDeps),
         .target(name: "Scheduling", dependencies: ["MachineStructure", "MachineLoading", "Timers", "Gateways"]),
         .target(name: "Verification", dependencies: ["MachineStructure", "Scheduling", "Timers", "Gateways"]),

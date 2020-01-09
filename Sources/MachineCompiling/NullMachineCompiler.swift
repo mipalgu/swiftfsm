@@ -63,6 +63,7 @@ public final class NullMachineCompiler: MachineCompiler {
     public func compileMachine(
         atPath _: String,
         withBuildDir _: String,
+        target _: TargetTriple?,
         withCCompilerFlags _: [String],
         andCXXCompilerFlags _: [String],
         andLinkerFlags _: [String],

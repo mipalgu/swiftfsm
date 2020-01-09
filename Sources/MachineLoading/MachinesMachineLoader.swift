@@ -198,6 +198,7 @@ public final class MachinesMachineLoader: MachineLoader {
             ext = "so"
         }
         #endif
+        return ext
     }
     
 #if !NO_FOUNDATION && canImport(Foundation)
@@ -229,8 +230,9 @@ public final class MachinesMachineLoader: MachineLoader {
         }) else {
             return nil
         }
-        if false == self.compiler.shouldCompile(machine, inDirectory: self.buildDir) {
-            let outputPath = self.compiler.outputPath(forMachine: machine, builtInDirectory: self.buildDir)
+        let ext = self.calculateExt()
+        if false == self.compiler.shouldCompile(machine, inDirectory: self.buildDir, libExtension: ext) {
+            let outputPath = self.compiler.outputPath(forMachine: machine, builtInDirectory: self.buildDir, libExtension: ext)
             guard let fsm = self.loadSymbol(inMachine: machine.name, gateway: newGateway, clock: clock, path: outputPath, caller: caller) else {
                 return nil
             }
@@ -240,6 +242,7 @@ public final class MachinesMachineLoader: MachineLoader {
             let outputPath = self.compiler.compile(
                 machine,
                 withBuildDir: self.buildDir,
+                libExtension: ext,
                 withCCompilerFlags: self.cCompilerFlags,
                 andCXXCompilerFlags: self.cxxCompilerFlags,
                 andLinkerFlags: self.linkerFlags,

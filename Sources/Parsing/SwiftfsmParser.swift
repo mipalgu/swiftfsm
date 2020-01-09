@@ -148,7 +148,7 @@ public class SwiftfsmParser: HelpableParser {
                                 will be created inside the machine directory and
                                 is where the swift package is generated on
                                 compiling the machine.
-                --target <<arch><subarch>-<vendor>-<os>-<environment>>
+                -target <<arch><subarch>-<vendor>-<os>-<environment>>
                                 Specify an LLVM triple to cross-compile for.
                 -Xcc <value>
                                 Pass a compiler flag to the C compiler when
@@ -417,7 +417,7 @@ public class SwiftfsmParser: HelpableParser {
                 words.removeFirst()
                 temp = self.handleDFlag(temp, words: &words)
                 continue
-            case "--target":
+            case "-target":
                 words.removeFirst()
                 temp = self.handleTargetFlag(temp, words: &words)
             case "-Xcc":

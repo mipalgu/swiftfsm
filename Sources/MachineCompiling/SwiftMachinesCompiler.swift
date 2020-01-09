@@ -82,6 +82,7 @@ public final class SwiftMachinesCompiler: MachineCompiler {
     public func compileMachine(
         atPath path: String,
         withBuildDir buildDir: String,
+        target: TargetTriple?,
         withCCompilerFlags compilerFlags: [String],
         andCXXCompilerFlags cxxCompilerFlags: [String],
         andLinkerFlags linkerFlags: [String],
@@ -92,9 +93,39 @@ public final class SwiftMachinesCompiler: MachineCompiler {
             self.parser.errors.forEach(self.printer.error)
             return false
         }
+        #if os(macOS)
+        let ext: String
+        if let target = target {
+            switch target.os {
+            case .unknown, .Darwin, .MacOSX, .IOS, .TvOS, .WatchOS:
+                ext = "dylib"
+            case .Win32:
+                ext = "dll"
+            default:
+                ext = "so"
+            }
+        } else {
+            ext = "dylib"
+        }
+        #else
+        let ext: String
+        if let target = self.target {
+            switch target.os {
+            case .Darwin, .MacOSX, .IOS, .TvOS, .WatchOS:
+                ext = "dylib"
+            case .Win32:
+                ext = "dll"
+            default:
+                ext = "so"
+            }
+        } else {
+            ext = "so"
+        }
+        #endif
         guard nil != self.compiler.compileTree(
             machine,
             withBuildDir: buildDir,
+            libExtension: ext,
             withCCompilerFlags: compilerFlags,
             andCXXCompilerFlags: cxxCompilerFlags,
             andLinkerFlags: linkerFlags,

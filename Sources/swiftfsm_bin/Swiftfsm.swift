@@ -192,7 +192,7 @@ public class Swiftfsm<
                 ignore = false
                 return [str]
             }
-            if str == "-Xlinker" || str == "-Xcc" || str == "-Xswiftc" || str == "-Xcxx" || str == "-Xswiftbuild" {
+            if str == "-Xlinker" || str == "-Xcc" || str == "-Xswiftc" || str == "-Xcxx" || str == "-Xswiftbuild" || str == "-target" {
                 ignore = true
                 return [str]
             }
@@ -351,6 +351,7 @@ public class Swiftfsm<
             guard true == self.machineCompiler.compileMachine(
                 atPath: path,
                 withBuildDir: job.buildDir,
+                target: job.target,
                 withCCompilerFlags: job.cCompilerFlags,
                 andCXXCompilerFlags: job.cxxCompilerFlags,
                 andLinkerFlags: job.linkerFlags,
