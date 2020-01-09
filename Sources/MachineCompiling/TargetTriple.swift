@@ -230,7 +230,7 @@ public struct TargetTriple: Equatable, Hashable {
     
     var os: OS
     
-    var enironment: Environment
+    var environment: Environment
     
     public init(
         arch: Arch = .unknown,
@@ -243,7 +243,7 @@ public struct TargetTriple: Equatable, Hashable {
         self.subarch = subarch
         self.vendor = vendor
         self.os = os
-        self.enironment = environment
+        self.environment = environment
     }
     
     /**
@@ -251,7 +251,61 @@ public struct TargetTriple: Equatable, Hashable {
      *  \<arch>\<subarch>-\<vendor>-\<os>-\<environment>.
      */
     public init(triple: String) {
-        self.init()
+        func parseArch(_ str: String) -> (Arch, SubArch?)? {
+            guard let arch = Arch.allCases.sorted(by: { $0.rawValue.count > $1.rawValue.count }).first(where: { str.uppercased().hasPrefix($0.rawValue.uppercased()) }) else {
+                return nil
+            }
+            let subarchStr = String(str.dropFirst(arch.rawValue.count))
+            let subarch = SubArch.allCases.first { (arch.rawValue + "SubArch_" + subarchStr).uppercased() == $0.rawValue.uppercased() }
+            return (arch, subarch)
+        }
+        func parseVendor(_ str: String) -> Vendor? {
+            return Vendor.allCases.first { str.uppercased() == $0.rawValue.uppercased() }
+        }
+        func parseOS(_ str: String) -> OS? {
+            return OS.allCases.first { str.uppercased() == $0.rawValue.uppercased() }
+        }
+        func parseEnvironment(_ str: String) -> Environment? {
+            return Environment.allCases.first { str.uppercased() == $0.rawValue.uppercased() }
+        }
+        let split = triple.split(separator: "-").lazy.map { String($0) }
+        if split.count >= 4 {
+            let (arch, subarch) = parseArch(split[0]) ?? (.unknown, nil)
+            let vendor = parseVendor(split[1]) ?? .unknown
+            let os = parseOS(split[2]) ?? .unknown
+            let environment = parseEnvironment(split[3]) ?? .unknown
+            self.init(arch: arch, subarch: subarch, vendor: vendor, os: os, environment: environment)
+            return
+        }
+        if split.count < 1 {
+            self.init()
+            return
+        }
+        var arch: Arch = .unknown
+        var subarch: SubArch?
+        var vendor: Vendor = .unknown
+        var os: OS = .unknown
+        var environment: Environment = .unknown
+        for i in 0..<split.count {
+            if i == 0, let (parsedArch, parsedSubArch) = parseArch(split[i]) {
+                arch = parsedArch
+                subarch = parsedSubArch
+                continue
+            }
+            if i <= 1, let parsedVendor = parseVendor(split[i]) {
+                vendor = parsedVendor
+                continue
+            }
+            if i <= 2, let parsedOS = parseOS(split[i]) {
+                os = parsedOS
+                continue
+            }
+            if i <= 3, let parsedEnvironment = parseEnvironment(split[i]) {
+                environment = parsedEnvironment
+                continue
+            }
+        }
+        self.init(arch: arch, subarch: subarch, vendor: vendor, os: os, environment: environment)
     }
     
 }
