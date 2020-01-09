@@ -63,7 +63,10 @@ import XCTest
 public class TargetTripleTests: XCTestCase {
 
     var allCases = [
-        ("test_canParseFullTriple", test_canParseFullTriple)
+        ("test_canParseFullTriple", test_canParseFullTriple),
+        ("test_canParseWithNoSubArch", test_canParseWithNoSubArch),
+        ("test_canParseWithoutVendor", test_canParseWithoutVendor),
+        ("test_canParseUnknownVendor", test_canParseUnknownVendor)
     ]
     
     public override func setUp() {
@@ -72,13 +75,31 @@ public class TargetTripleTests: XCTestCase {
     public override func tearDown() {}
     
     func test_canParseFullTriple() {
-        let triple = "i686-unknown-linux-gnu"
-        guard let targetTriple = TargetTriple(triple: triple) else {
-            XCTFail("Unable to parse triple: \(triple)")
-            return
-        }
-        let expected = TargetTriple(arch: .x86, subarch: nil, vendor: .unknown, os: .Linux, environment: .GNU)
-        XCTAssertEqual(expected, triple)
+        let triple = "armv5-pc-linux-gnu"
+        let targetTriple = TargetTriple(triple: triple)
+        let expected = TargetTriple(arch: .arm, subarch: .ARMSubArch_v5, vendor: .PC, os: .Linux, environment: .GNU)
+        XCTAssertEqual(expected, targetTriple)
+    }
+    
+    func test_canParseWithNoSubArch() {
+        let triple = "i686-pc-linux-gnu"
+        let targetTriple = TargetTriple(triple: triple)
+        let expected = TargetTriple(arch: .x86, vendor: .PC, os: .Linux, environment: .GNU)
+        XCTAssertEqual(expected, targetTriple)
+    }
+    
+    func test_canParseWithoutVendor() {
+        let triple = "i686-linux-gnu"
+        let targetTriple = TargetTriple(triple: triple)
+        let expected = TargetTriple(arch: .x86, vendor: .unknown, os: .Linux, environment: .GNU)
+        XCTAssertEqual(expected, targetTriple)
+    }
+    
+    func test_canParseUnknownVendor() {
+        let triple = "i686-aldebaran-linux-gnu"
+        let targetTriple = TargetTriple(triple: triple)
+        let expected = TargetTriple(arch: .x86, vendor: .unknown, os: .Linux, environment: .GNU)
+        XCTAssertEqual(expected, targetTriple)
     }
 
 }

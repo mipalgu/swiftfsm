@@ -56,9 +56,9 @@
  *
  */
 
-public struct TargetTriple {
+public struct TargetTriple: Equatable, Hashable {
     
-    public enum Arch: String, CaseIterable {
+    public enum Arch: String, CaseIterable, Equatable, Hashable {
         case unknown
         case arm
         case armeb
@@ -108,7 +108,7 @@ public struct TargetTriple {
         case lanai
     }
     
-    public enum SubArch: String, CaseIterable {
+    public enum SubArch: String, CaseIterable, Equatable, Hashable {
         case ARMSubArch_v8_5a
         case ARMSubArch_v8_4a
         case ARMSubArch_v8_3a
@@ -138,7 +138,7 @@ public struct TargetTriple {
         case MipsSubArch_r6
     }
     
-    public enum Vendor: String, CaseIterable {
+    public enum Vendor: String, CaseIterable, Equatable, Hashable {
         case unknown
         case Apple
         case PC
@@ -158,7 +158,7 @@ public struct TargetTriple {
         case OpenEmbedded
     }
     
-    public enum OS: String, CaseIterable {
+    public enum OS: String, CaseIterable, Equatable, Hashable {
         case unknown
         case Ananas
         case CloudABI
@@ -197,7 +197,7 @@ public struct TargetTriple {
         case Emscripten
     }
     
-    public enum Environment {
+    public enum Environment: String, CaseIterable, Equatable, Hashable {
         case unknown
         case GNU
         case GNUABIN32
@@ -250,8 +250,8 @@ public struct TargetTriple {
      *  Parse the arch, subarch, vendor and os from a triple string of the form
      *  \<arch>\<subarch>-\<vendor>-\<os>-\<environment>.
      */
-    public init?(triple: String) {
-        return nil
+    public init(triple: String) {
+        self.init()
     }
     
 }
