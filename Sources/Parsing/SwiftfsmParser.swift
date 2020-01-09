@@ -78,7 +78,7 @@ public class SwiftfsmParser: HelpableParser {
         return """
         OVERVIEW: A Finite State Machine Scheduler.
         
-        USAGE: swiftfsm [options] [--] ([machine_options] <machine_path>)...
+        USAGE: swiftfsm [options] [--] ([machine_options...] <machine_path>)...
         
         OPTIONS:
                 -d, --debug     Enables debugging.
@@ -122,12 +122,8 @@ public class SwiftfsmParser: HelpableParser {
                                          ringlet in each LLFSM.
         
         MACHINE OPTIONS:
-                -c  [-d <value=.build>, --builddir <value=.build>]
+                -c  [compiler_options...] [--]
                                 Compile this machine.
-                                Note: Optionally specify a name for the build
-                                folder. This folder will be created inside the
-                                machine directory and is where the swift package
-                                is generated on compiling the machine.
                 -l, --clfsm
                                 Specifies that this is a machine that has been
                                 built using the CLFSM specification.
@@ -135,7 +131,8 @@ public class SwiftfsmParser: HelpableParser {
                                 Specify a name for this machine.
                 -p <key>=<value>, --parameter <key>=<value>
                                 Specify that the parameter <key> should receive
-                                the value <value>.
+                                the value <value>. This allows executing
+                                parameterised machines from the command line.
                 -x <value>, --repeat <value>
                                 Specify number of times to schedule this
                                 machine. This flag allows the creation of more
@@ -143,6 +140,13 @@ public class SwiftfsmParser: HelpableParser {
                                 Each instance will have a unique name and be
                                 treated as a separate machine for the purposes
                                 of scheduling.
+        
+        COMPILER OPTIONS:
+                -d <value=.build>, --builddir <value=.build>
+                                Specify a name for the build folder. This folder
+                                will be created inside the machine directory and
+                                is where the swift package is generated on
+                                compiling the machine.
                 -Xcc <value>
                                 Pass a compiler flag to the C compiler when
                                 compiling this machine.
@@ -251,16 +255,6 @@ public class SwiftfsmParser: HelpableParser {
             return try self.handleParameterFlag(j, words: &words)
         case "-x", "--repeat":
             return self.handleRepeatFlag(j, words: &words)
-        case "-Xcc":
-            return self.handleCCompilerFlag(j, words: &words)
-        case "-Xcxx":
-            return self.handleCXXFlag(j, words: &words)
-        case "-Xlinker":
-            return self.handleLinkerFlag(j, words: &words)
-        case "-Xswiftc":
-            return self.handleSwiftCompilerFlag(j, words: &words)
-        case "-Xswiftbuild":
-            return self.handleSwiftBuildFlag(j, words: &words)
         default:
             return try self.handlePath(j, words: &words)
         }
@@ -414,17 +408,48 @@ public class SwiftfsmParser: HelpableParser {
         if words.count <= 1 {
             return temp
         }
-        switch words[1] {
-        case "-d", "--builddir":
-            words.removeFirst()
-            guard let buildDir = self.fetchValueAfterFlag(words: &words, ignoreHyphen: true) else {
+        while let flag = words.dropFirst().first {
+            switch flag {
+            case "-d", "--builddir":
+                words.removeFirst()
+                temp = self.handleDFlag(temp, words: &words)
+                continue
+            case "-Xcc":
+                words.removeFirst()
+                temp = self.handleCCompilerFlag(temp, words: &words)
+                continue
+            case "-Xcxx":
+                words.removeFirst()
+                temp = self.handleCXXFlag(temp, words: &words)
+                continue
+            case "-Xlinker":
+                words.removeFirst()
+                temp = self.handleLinkerFlag(temp, words: &words)
+                continue
+            case "-Xswiftc":
+                words.removeFirst()
+                temp = self.handleSwiftCompilerFlag(temp, words: &words)
+                continue
+            case "-Xswiftbuild":
+                words.removeFirst()
+                temp = self.handleSwiftBuildFlag(temp, words: &words)
+                continue
+            case "--":
+                return temp
+            default:
                 return temp
             }
-            temp.buildDir = buildDir
-            return temp
-        default:
-            return temp
         }
+        return temp
+    }
+    
+    private func handleDFlag(_ j: Job, words: inout [String]) -> Job {
+        guard let buildDir = self.fetchValueAfterFlag(words: &words, ignoreHyphen: true) else {
+            return j
+        }
+        var temp = j
+        temp.buildDir = buildDir
+        return temp
     }
     
     private func handleCXXFlag(_ j: Job, words: inout [String]) -> Job {
