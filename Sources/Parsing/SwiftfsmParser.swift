@@ -65,6 +65,7 @@ import Glibc
 import IO
 import KripkeStructure
 import KripkeStructureViews
+import MachineCompiling
 import ModelChecking
 import Scheduling
 import Verification
@@ -147,6 +148,8 @@ public class SwiftfsmParser: HelpableParser {
                                 will be created inside the machine directory and
                                 is where the swift package is generated on
                                 compiling the machine.
+                --target <<arch><subarch>-<vendor>-<os>-<environment>>
+                                Specify an LLVM triple to cross-compile for.
                 -Xcc <value>
                                 Pass a compiler flag to the C compiler when
                                 compiling this machine.
@@ -414,6 +417,9 @@ public class SwiftfsmParser: HelpableParser {
                 words.removeFirst()
                 temp = self.handleDFlag(temp, words: &words)
                 continue
+            case "--target":
+                words.removeFirst()
+                temp = self.handleTargetFlag(temp, words: &words)
             case "-Xcc":
                 words.removeFirst()
                 temp = self.handleCCompilerFlag(temp, words: &words)
@@ -449,6 +455,16 @@ public class SwiftfsmParser: HelpableParser {
         }
         var temp = j
         temp.buildDir = buildDir
+        return temp
+    }
+    
+    fileprivate func handleTargetFlag(_ j: Job, words: inout [String]) -> Job {
+        guard let tripleStr = self.fetchValueAfterFlag(words: &words, ignoreHyphen: true) else {
+            return j
+        }
+        let triple = TargetTriple(triple: tripleStr)
+        var temp = j
+        temp.target = triple
         return temp
     }
     

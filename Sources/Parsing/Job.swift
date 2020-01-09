@@ -62,6 +62,8 @@ import Darwin
 import Glibc
 #endif
 
+import MachineCompiling
+
 /**
  *  Represents all data passed through the command line about how to load a
  *  machine.
@@ -130,5 +132,7 @@ public struct Job {
     public var swiftCompilerFlags: [String] = []
 
     public var swiftBuildFlags: [String] = []
+    
+    public var target: TargetTriple?
 
 }
