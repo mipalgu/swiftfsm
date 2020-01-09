@@ -117,3 +117,9 @@ disable-foundation:
 test:	swift-test-package
 
 .include "../../../mk/mipal.mk"
+
+.ifdef TARGET
+CFLAGS+=-I${STAGING}/usr/local/include
+.else
+CFLAGS+=-I/usr/local/include
+.endif
