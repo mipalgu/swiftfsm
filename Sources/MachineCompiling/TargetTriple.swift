@@ -252,8 +252,27 @@ public struct TargetTriple: Equatable, Hashable {
      */
     public init(triple: String) {
         func parseArch(_ str: String) -> (Arch, SubArch?)? {
-            guard let arch = Arch.allCases.sorted(by: { $0.rawValue.count > $1.rawValue.count }).first(where: { str.uppercased().hasPrefix($0.rawValue.uppercased()) }) else {
+            guard let arch = Arch.allCases.sorted(by: {
+                    $0.rawValue.count > $1.rawValue.count
+                }).first(where: {
+                    if str.uppercased().hasPrefix($0.rawValue.uppercased()) {
+                        return true
+                    }
+                    let x86Archs = ["i386", "i486", "i586", "i686", "i786", "i886", "i986"]
+                    let x86_64Archs = x86Archs.map { $0 + "_64" }
+                    if $0 == .x86 {
+                        return nil != x86Archs.first { str.uppercased() == $0.uppercased() }
+                    }
+                    if $0 == .x86_64 {
+                        return nil != x86_64Archs.first { str.uppercased() == $0.uppercased() }
+                    }
+                    return false
+                })
+            else {
                 return nil
+            }
+            if arch == .x86_64 || arch == .x86 {
+                return (arch, nil)
             }
             let subarchStr = String(str.dropFirst(arch.rawValue.count))
             let subarch = SubArch.allCases.first { (arch.rawValue + "SubArch_" + subarchStr).uppercased() == $0.rawValue.uppercased() }
