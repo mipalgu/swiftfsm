@@ -56,6 +56,8 @@
  *
  */
 
+import MachineCompiling
+
 public final class MachineLoaderStrategyFactory<
     MachineLoader: MachineLoaderFactory,
     LibraryLoader: MachineLoaderFactory
@@ -71,6 +73,7 @@ public final class MachineLoaderStrategyFactory<
     
     public func make(
         buildDir: String,
+        target: TargetTriple?,
         cFlags: [String],
         cxxFlags: [String],
         ldFlags: [String],
@@ -79,6 +82,7 @@ public final class MachineLoaderStrategyFactory<
     ) -> MachineLoaderStrategy {
         let machineLoader = self.machineLoaderFactory.make(
             buildDir: buildDir,
+            target: target,
             cFlags: cFlags,
             cxxFlags: cxxFlags,
             ldFlags: ldFlags,
@@ -87,6 +91,7 @@ public final class MachineLoaderStrategyFactory<
         )
         let libraryLoader = self.libraryLoaderFactory.make(
             buildDir: buildDir,
+            target: target,
             cFlags: cFlags,
             cxxFlags: cxxFlags,
             ldFlags: ldFlags,

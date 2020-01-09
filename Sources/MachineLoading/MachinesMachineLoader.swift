@@ -64,6 +64,7 @@ import SwiftMachines
 
 import FSM
 import Libraries
+import MachineCompiling
 import swiftfsm
 import IO
 import Gateways
@@ -75,7 +76,7 @@ public final class MachinesMachineLoader: MachineLoader {
     fileprivate typealias SymbolSignature = @convention(c) (Any, Any, Any) -> Any
 
     #if !NO_FOUNDATION && canImport(Foundation)
-    fileprivate let compiler: MachineCompiler<MachineAssembler>
+    fileprivate let compiler: SwiftMachines.MachineCompiler<MachineAssembler>
     fileprivate let parser: MachineParser
     #endif
     
@@ -83,6 +84,7 @@ public final class MachinesMachineLoader: MachineLoader {
     fileprivate let printer: Printer
     
     fileprivate let buildDir: String
+    fileprivate let target: TargetTriple?
     fileprivate let cCompilerFlags: [String]
     fileprivate let cxxCompilerFlags: [String]
     fileprivate let linkerFlags: [String]
@@ -92,11 +94,12 @@ public final class MachinesMachineLoader: MachineLoader {
     #if !NO_FOUNDATION && canImport(Foundation)
     @available(macOS 10.11, *)
     public init(
-        compiler: MachineCompiler<MachineAssembler> = MachineCompiler(assembler: MachineAssembler()),
+        compiler: SwiftMachines.MachineCompiler<MachineAssembler> = MachineCompiler(assembler: MachineAssembler()),
         loader: LibrarySymbolLoader,
         parser: MachineParser = MachineParser(),
         printer: Printer = CommandLinePrinter(errorStream: StderrOutputStream(), messageStream: StdoutOutputStream(), warningStream: StdoutOutputStream()),
         buildDir: String = ".build",
+        target: TargetTriple? = nil,
         cCompilerFlags: [String] = [],
         cxxCompilerFlags: [String] = [],
         linkerFlags: [String] = [],
@@ -108,6 +111,7 @@ public final class MachinesMachineLoader: MachineLoader {
         self.parser = parser
         self.printer = printer
         self.buildDir = buildDir
+        self.target = target
         self.cCompilerFlags = cCompilerFlags
         self.cxxCompilerFlags = cxxCompilerFlags
         self.linkerFlags = linkerFlags
@@ -120,6 +124,7 @@ public final class MachinesMachineLoader: MachineLoader {
         loader: LibrarySymbolLoader,
         printer: Printer = CommandLinePrinter(errorStream: StderrOutputStream(), messageStream: StdoutOutputStream(), warningStream: StdoutOutputStream()),
         buildDir: String = ".build",
+        target: TargetTriple? = nil,
         cCompilerFlags: [String] = [],
         cxxCompilerFlags: [String] = [],
         linkerFlags: [String] = [],
@@ -129,6 +134,7 @@ public final class MachinesMachineLoader: MachineLoader {
         self.libraryLoader = ShallowLibraryMachineLoader(loader: loader, printer: printer)
         self.printer = printer
         self.buildDir = buildDir
+        self.target = target
         self.cCompilerFlags = cCompilerFlags
         self.cxxCompilerFlags = cxxCompilerFlags
         self.linkerFlags = linkerFlags
@@ -160,6 +166,38 @@ public final class MachinesMachineLoader: MachineLoader {
         self.parser.errors.forEach(self.printer.error)
         #endif
         return nil
+    }
+    
+    fileprivate func calculateExt() -> String {
+        #if os(macOS)
+        let ext: String
+        if let target = self.target {
+            switch target.os {
+            case .unknown, .Darwin, .MacOSX, .IOS, .TvOS, .WatchOS:
+                ext = "dylib"
+            case .Win32:
+                ext = "dll"
+            default:
+                ext = "so"
+            }
+        } else {
+            ext = "dylib"
+        }
+        #else
+        let ext: String
+        if let target = self.target {
+            switch target.os {
+            case .Darwin, .MacOSX, .IOS, .TvOS, .WatchOS:
+                ext = "dylib"
+            case .Win32:
+                ext = "dll"
+            default:
+                ext = "so"
+            }
+        } else {
+            ext = "so"
+        }
+        #endif
     }
     
 #if !NO_FOUNDATION && canImport(Foundation)
@@ -237,11 +275,7 @@ public final class MachinesMachineLoader: MachineLoader {
 #endif
     
     fileprivate func loadCompiledMachine<Gateway: FSMGateway>(name: String, gateway: Gateway, clock: Timer, path: String, prefix: String, caller: FSM_ID? = nil) -> (FSMType, [Dependency])? {
-        #if os(macOS)
-        let ext = "dylib"
-        #else
-        let ext = "so"
-        #endif
+        let ext = self.calculateExt()
         let libPath = path + "/" + name + "." + ext
         let nullGateway = StackGateway()
         guard let (_, tempDependencies) = self.libraryLoader.load(name: name, gateway: nullGateway, clock: clock, path: libPath) else {

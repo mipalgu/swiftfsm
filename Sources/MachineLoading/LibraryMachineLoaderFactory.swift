@@ -60,9 +60,10 @@ import FSM
 import Gateways
 import Functional
 import IO
-import swiftfsm_helpers
 import Libraries
+import MachineCompiling
 import swiftfsm
+import swiftfsm_helpers
 
 public final class LibraryMachineLoaderFactory: MachineLoaderFactory {
     
@@ -76,12 +77,13 @@ public final class LibraryMachineLoaderFactory: MachineLoaderFactory {
     }
     
     public func make(
-        buildDir: String,
-        cFlags: [String],
-        cxxFlags: [String],
-        ldFlags: [String],
-        swiftcFlags: [String],
-        swiftBuildFlags: [String]
+        buildDir _: String,
+        target _: TargetTriple?,
+        cFlags _: [String],
+        cxxFlags _: [String],
+        ldFlags _: [String],
+        swiftcFlags _: [String],
+        swiftBuildFlags _: [String]
     ) -> LibraryMachineLoader {
         return LibraryMachineLoader(loader: self.loader, printer: self.printer)
     }

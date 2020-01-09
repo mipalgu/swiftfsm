@@ -317,6 +317,7 @@ public class Swiftfsm<
         } else {
             fsm = self.machineLoader.make(
                 buildDir: job.buildDir,
+                target: job.target,
                 cFlags: job.cCompilerFlags,
                 cxxFlags: job.cxxCompilerFlags,
                 ldFlags: job.linkerFlags,

@@ -56,12 +56,15 @@
  *
  */
 
+import MachineCompiling
+
 public final class NullMachineLoaderFactory: MachineLoaderFactory {
     
     public init() {}
     
     public func make(
         buildDir _: String,
+        target _: TargetTriple?,
         cFlags _: [String],
         cxxFlags _: [String],
         ldFlags _: [String],

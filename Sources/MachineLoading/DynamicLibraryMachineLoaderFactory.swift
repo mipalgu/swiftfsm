@@ -58,6 +58,7 @@
 
 import IO
 import Libraries
+import MachineCompiling
 
 /**
  *  Creates A `MachineLoader` that is capable of loading machines from dynamic
@@ -88,6 +89,7 @@ public class DynamicLibraryMachineLoaderFactory: MachineLoaderFactory {
      */
     public func make(
         buildDir _: String,
+        target _: TargetTriple?,
         cFlags _: [String],
         cxxFlags _: [String],
         ldFlags _: [String],

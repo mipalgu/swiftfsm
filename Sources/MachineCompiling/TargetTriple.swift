@@ -222,15 +222,15 @@ public struct TargetTriple: Equatable, Hashable {
         case MacABI
     }
     
-    var arch: Arch
+    public var arch: Arch
     
-    var subarch: SubArch?
+    public var subarch: SubArch?
     
-    var vendor: Vendor
+    public var vendor: Vendor
     
-    var os: OS
+    public var os: OS
     
-    var environment: Environment
+    public var environment: Environment
     
     public init(
         arch: Arch = .unknown,

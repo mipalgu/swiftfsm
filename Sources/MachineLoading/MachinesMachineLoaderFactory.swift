@@ -62,7 +62,7 @@ import SwiftMachines
 
 import FSM
 import Libraries
-
+import MachineCompiling
 import swiftfsm
 import IO
 import Gateways
@@ -74,7 +74,7 @@ public final class MachinesMachineLoaderFactory: MachineLoaderFactory {
     public typealias Loader = MachinesMachineLoader
     
     #if !NO_FOUNDATION && canImport(Foundation)
-    fileprivate let compiler: MachineCompiler<MachineAssembler>
+    fileprivate let compiler: SwiftMachines.MachineCompiler<MachineAssembler>
     fileprivate let parser: MachineParser
     #endif
     
@@ -83,7 +83,7 @@ public final class MachinesMachineLoaderFactory: MachineLoaderFactory {
     
     #if !NO_FOUNDATION && canImport(Foundation)
     public init(
-        compiler: MachineCompiler<MachineAssembler> = MachineCompiler(assembler: MachineAssembler()),
+        compiler: SwiftMachines.MachineCompiler<MachineAssembler> = MachineCompiler(assembler: MachineAssembler()),
         loader: LibrarySymbolLoader,
         parser: MachineParser = MachineParser(),
         printer: Printer = CommandLinePrinter(errorStream: StderrOutputStream(), messageStream: StdoutOutputStream(), warningStream: StdoutOutputStream())
@@ -105,6 +105,7 @@ public final class MachinesMachineLoaderFactory: MachineLoaderFactory {
     
     public func make(
         buildDir: String,
+        target: TargetTriple?,
         cFlags: [String],
         cxxFlags: [String],
         ldFlags: [String],
@@ -118,6 +119,7 @@ public final class MachinesMachineLoaderFactory: MachineLoaderFactory {
             parser: self.parser,
             printer: self.printer,
             buildDir: buildDir,
+            target: target,
             cCompilerFlags: cFlags,
             cxxCompilerFlags: cxxFlags,
             linkerFlags: ldFlags,
@@ -129,6 +131,7 @@ public final class MachinesMachineLoaderFactory: MachineLoaderFactory {
             loader: self.loader,
             printer: self.printer,
             buildDir: buildDir,
+            target: target,
             cCompilerFlags: cFlags,
             cxxCompilerFlags: cxxFlags,
             linkerFlags: ldFlags,

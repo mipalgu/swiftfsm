@@ -56,6 +56,8 @@
  *
  */
 
+import MachineCompiling
+
 /**
  * Responsible for creating instances of `MachineLoader`.
  */
@@ -70,6 +72,7 @@ public protocol MachineLoaderFactory {
      */
     func make(
         buildDir: String,
+        target: TargetTriple?,
         cFlags: [String],
         cxxFlags: [String],
         ldFlags: [String],
