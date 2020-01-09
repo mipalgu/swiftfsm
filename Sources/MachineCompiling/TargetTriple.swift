@@ -248,7 +248,7 @@ public struct TargetTriple {
     
     /**
      *  Parse the arch, subarch, vendor and os from a triple string of the form
-     *  "<arch>-<subarch>-<vendor>-<os>-<environment>".
+     *  \<arch>\<subarch>-\<vendor>-\<os>-\<environment>.
      */
     public init?(triple: String) {
         return nil
