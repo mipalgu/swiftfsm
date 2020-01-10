@@ -316,7 +316,7 @@ public class Swiftfsm<
             fsm = self.clfsmMachineLoader.load(name: name, gateway: gateway, clock: clock, path: job.path!)
         } else {
             fsm = self.machineLoader.make(
-                buildDir: job.buildDir,
+                buildDir: self.calculateBuildDir(forJob: job),
                 target: job.target,
                 cFlags: job.cCompilerFlags,
                 cxxFlags: job.cxxCompilerFlags,
@@ -340,6 +340,26 @@ public class Swiftfsm<
         }
         return (unwrappedFSM.0, unwrappedFSM.1, clock)
     }
+    
+    fileprivate func calculateBuildDir(forJob job: Job) -> String {
+        if let buildDir = job.buildDir {
+            return buildDir
+        }
+        if let target = job.target {
+            let os = target.os.rawValue
+            let arch = target.rawArch ?? target.arch.rawValue
+            return os + "-" + arch
+        }
+        var uts = utsname()
+        guard
+            0 == uname(&uts),
+            let sysname = withUnsafePointer(to: &uts.sysname.0, { String(validatingUTF8: $0) }),
+            let machine = withUnsafePointer(to: &uts.machine.0, { String(validatingUTF8: $0) })
+        else {
+            return ".build"
+        }
+        return sysname + "-" + machine
+    }
 
     private func handleJob<Gateway: FSMGateway>(_ job: Job, gateway: Gateway) -> [Machine] {
         var name: String = self.getMachinesName(job)
@@ -350,7 +370,7 @@ public class Swiftfsm<
         if true == job.compile {
             guard true == self.machineCompiler.compileMachine(
                 atPath: path,
-                withBuildDir: job.buildDir,
+                withBuildDir: self.calculateBuildDir(forJob: job),
                 target: job.target,
                 withCCompilerFlags: job.cCompilerFlags,
                 andCXXCompilerFlags: job.cxxCompilerFlags,

@@ -222,9 +222,19 @@ public struct TargetTriple: Equatable, Hashable {
         case MacABI
     }
     
-    public var arch: Arch
+    public fileprivate(set) var rawArch: String?
     
-    public var subarch: SubArch?
+    public var arch: Arch {
+        didSet {
+            self.rawArch = nil
+        }
+    }
+    
+    public var subarch: SubArch? {
+        didSet {
+            self.rawArch = nil
+        }
+    }
     
     public var vendor: Vendor
     
@@ -251,7 +261,7 @@ public struct TargetTriple: Equatable, Hashable {
      *  \<arch>\<subarch>-\<vendor>-\<os>-\<environment>.
      */
     public init(triple: String) {
-        func parseArch(_ str: String) -> (Arch, SubArch?)? {
+        func parseArch(_ str: String) -> (Arch, SubArch?, String?)? {
             guard let arch = Arch.allCases.sorted(by: {
                     $0.rawValue.count > $1.rawValue.count
                 }).first(where: {
@@ -272,11 +282,11 @@ public struct TargetTriple: Equatable, Hashable {
                 return nil
             }
             if arch == .x86_64 || arch == .x86 {
-                return (arch, nil)
+                return (arch, nil, str)
             }
             let subarchStr = String(str.dropFirst(arch.rawValue.count))
             let subarch = SubArch.allCases.first { (arch.rawValue + "SubArch_" + subarchStr).uppercased() == $0.rawValue.uppercased() }
-            return (arch, subarch)
+            return (arch, subarch, nil)
         }
         func parseVendor(_ str: String) -> Vendor? {
             return Vendor.allCases.first { str.uppercased() == $0.rawValue.uppercased() }
@@ -289,11 +299,12 @@ public struct TargetTriple: Equatable, Hashable {
         }
         let split = triple.split(separator: "-").lazy.map { String($0) }
         if split.count >= 4 {
-            let (arch, subarch) = parseArch(split[0]) ?? (.unknown, nil)
+            let (arch, subarch, rawArch) = parseArch(split[0]) ?? (.unknown, nil, nil)
             let vendor = parseVendor(split[1]) ?? .unknown
             let os = parseOS(split[2]) ?? .unknown
             let environment = parseEnvironment(split[3]) ?? .unknown
             self.init(arch: arch, subarch: subarch, vendor: vendor, os: os, environment: environment)
+            self.rawArch = rawArch
             return
         }
         if split.count < 1 {
@@ -302,13 +313,15 @@ public struct TargetTriple: Equatable, Hashable {
         }
         var arch: Arch = .unknown
         var subarch: SubArch?
+        var rawArch: String?
         var vendor: Vendor = .unknown
         var os: OS = .unknown
         var environment: Environment = .unknown
         for i in 0..<split.count {
-            if i == 0, let (parsedArch, parsedSubArch) = parseArch(split[i]) {
+            if i == 0, let (parsedArch, parsedSubArch, parsedRawArch) = parseArch(split[i]) {
                 arch = parsedArch
                 subarch = parsedSubArch
+                rawArch = parsedRawArch
                 continue
             }
             if i <= 1, let parsedVendor = parseVendor(split[i]) {
@@ -325,6 +338,7 @@ public struct TargetTriple: Equatable, Hashable {
             }
         }
         self.init(arch: arch, subarch: subarch, vendor: vendor, os: os, environment: environment)
+        self.rawArch = rawArch
     }
     
 }
