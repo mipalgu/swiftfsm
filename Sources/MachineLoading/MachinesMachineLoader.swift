@@ -337,7 +337,8 @@ public final class MachinesMachineLoader: MachineLoader {
         let invocableIds = invocableMachines.map { gateway.id(of: format($0)) }
         return RestrictiveFSMGateway(
             gateway: gateway,
-            selfID: caller ?? selfID,
+            selfID: selfID,
+            caller: caller ?? selfID,
             callables: Set(callableIds + [selfID]),
             invocables: Set(invocableIds),
             whitelist: Set(dependantIds + [selfID]),

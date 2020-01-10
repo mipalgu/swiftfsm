@@ -65,6 +65,8 @@ public final class RestrictiveFSMGateway<Gateway: FSMGateway, _Formatter: Format
     fileprivate let gateway: Gateway
 
     fileprivate let selfID: FSM_ID
+    
+    fileprivate let caller: FSM_ID
 
     fileprivate let whitelist: Set<FSM_ID>
 
@@ -77,6 +79,7 @@ public final class RestrictiveFSMGateway<Gateway: FSMGateway, _Formatter: Format
     public init(
         gateway: Gateway,
         selfID: FSM_ID,
+        caller: FSM_ID,
         callables: Set<FSM_ID>,
         invocables: Set<FSM_ID>,
         whitelist: Set<FSM_ID>,
@@ -84,6 +87,7 @@ public final class RestrictiveFSMGateway<Gateway: FSMGateway, _Formatter: Format
     ) {
         self.gateway = gateway
         self.selfID = selfID
+        self.caller = caller
         self.callables = callables
         self.invocables = invocables
         self.whitelist = whitelist
@@ -97,7 +101,7 @@ public final class RestrictiveFSMGateway<Gateway: FSMGateway, _Formatter: Format
         else {
             fatalError("Unable to call fsm with id \(id) with caller \(caller)")
         }
-        return self.gateway.call(id, withParameters: parameters, caller: caller)
+        return self.gateway.call(id, withParameters: parameters, caller: self.caller)
     }
 
     public func callSelf<R>(_ id: FSM_ID, withParameters parameters: [String: Any]) -> Promise<R> {
@@ -137,6 +141,7 @@ extension RestrictiveFSMGateway where _Formatter == NullFormatter {
     public convenience init(
         gateway: Gateway,
         selfID: FSM_ID,
+        caller: FSM_ID,
         callables: Set<FSM_ID>,
         invocables: Set<FSM_ID>,
         whitelist: Set<FSM_ID>
@@ -144,6 +149,7 @@ extension RestrictiveFSMGateway where _Formatter == NullFormatter {
         self.init(
             gateway: gateway,
             selfID: selfID,
+            caller: caller,
             callables: callables,
             invocables: invocables,
             whitelist: whitelist,
