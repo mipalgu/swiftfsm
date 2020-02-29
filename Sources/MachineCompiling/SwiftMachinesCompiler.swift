@@ -109,7 +109,7 @@ public final class SwiftMachinesCompiler: MachineCompiler {
         }
         #else
         let ext: String
-        if let target = self.target {
+        if let target = target {
             switch target.os {
             case .Darwin, .MacOSX, .IOS, .TvOS, .WatchOS:
                 ext = "dylib"
