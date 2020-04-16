@@ -288,8 +288,10 @@ public class Swiftfsm<
     ) where KGF.ViewFactory == AggregateKripkeStructureViewFactory<KripkeState> {
         if task.generateKripkeStructure {
             self.generateKripkeStructure(machines, withGenerator: generator, andViews: views, usingGateway: scheduler)
+        } else {
+            scheduler.run(machines)
         }
-        scheduler.run(machines)
+        
     }
 
     private func getMachinesName(_ job: Job) -> String {
