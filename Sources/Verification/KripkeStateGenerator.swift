@@ -69,10 +69,10 @@ public final class KripkeStateGenerator: KripkeStateGeneratorProtocol {
         fromWorld world: KripkeStatePropertyList,
         withLastState last: KripkeState? = nil
     ) -> KripkeState {
-        last?.effects.insert(world)
+        last?.edges.insert(KripkeEdge(target: world))
         return KripkeState(
             properties: world,
-            effects: []
+            edges: []
         )
     }
 

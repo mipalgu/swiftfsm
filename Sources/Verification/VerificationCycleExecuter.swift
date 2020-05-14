@@ -222,7 +222,7 @@ final class VerificationCycleExecuter {
                 return
             }
             // Attempt to add any new transitions/effects to the kripke state.
-            existingState.effects.formUnion($0.effects)
+            existingState.edges.formUnion($0.edges)
         }
     }
 
