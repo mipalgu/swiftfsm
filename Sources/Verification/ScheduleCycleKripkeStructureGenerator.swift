@@ -113,7 +113,9 @@ public final class ScheduleCycleKripkeStructureGenerator<
         self.machines.forEach {
             self.add(fsm: $0.fsm, toGateway: gateway, withDependencies: $0.dependencies, name: $0.name)
         }
+        // Split all machines into a collection of `SchedulerToken`s.
         let tokens = self.tokenizer.separate(self.machines)
+        // Convert these `SchedulerToken`s to `VerificationToken`s.
         let verificationTokens = self.convert(tokens: tokens, forMachines: self.machines, usingGateway: gateway)
         let temp = verificationTokens.flatMap { $0.0.flatMap { $0.compactMap { (token: VerificationToken) -> (FSM_ID, String, [FSM_ID: ParameterisedMachineData])? in
             guard let data = token.data else {
@@ -121,9 +123,13 @@ public final class ScheduleCycleKripkeStructureGenerator<
             }
             return (data.id, data.fsm.name, data.parameterisedMachines)
         }}}
+        // Reset all views so that we may reuse views that have previously been used.
         self.viewCache.forEach {
             $1.reset()
         }
+        // Generate a separate kripke structure for each collection of verification token.
+        // This allows the creation of isolated kripke structures based on the
+        // dependencies between machines.
         let data = gateway.gatewayData
         verificationTokens.forEach { (tokens: [[VerificationToken]], view: AnyKripkeStructureView<KripkeState>) in
             gateway.gatewayData = data
