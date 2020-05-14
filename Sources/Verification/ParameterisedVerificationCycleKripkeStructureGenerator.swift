@@ -203,17 +203,41 @@ public final class ParameterisedVerificationCycleKripkeStructureGenerator<Detect
         return results
     }
 
+    /*
+     *  Fetches the results of a call to a parameterised machine.
+     *
+     *  - Parameter job: The job that is about to be executed. Importantly,
+     *  the `callStack` of this job is used to fetch the results. The results
+     *  for the parameterised machine on the top of the stack are returned.
+     *
+     *  - Parameter gateway: The `Gateway` containing the references to the
+     *  parameterised machines.
+     *
+     *  - Returns: A tuple containing results and a Bool indicating
+     *  whether all possible results have been fetched. This Bool could be
+     *  false if there is a possibility that the caller must wait further
+     *  schedule cycles for further results. The results are a dictionary
+     *  mapping the `FSM_ID` of a parameterised machine to a collection of
+     *  result values. These results represent the results that would be
+     *  available to the caller that has been waiting for the schedule cycles
+     *  count retrieved from the `CallData.runs` variable of the call.
+     */
     fileprivate func createAllResults<Gateway: VerifiableGateway>(forJob job: VerificationState<Detector.Data, Gateway.GatewayData>, withGateway gateway: Gateway) -> ([FSM_ID: LazyMapCollection<SortedCollectionSlice<(UInt, Any?)>, Any?>], Bool) {
+        // Setup our results collection.
         var allResults: [FSM_ID: LazyMapCollection<SortedCollectionSlice<(UInt, Any?)>, Any?>] = [:]
         allResults.reserveCapacity(job.callStack.count)
-        var handledAllResults = true
+        var handledAllResults = true // Have we handled all results? Or alternatively, are there no more results to fetch after this?
         for (id, calls) in job.callStack {
+            // This should never happen.
             guard nil == job.results[id], let callData = calls.last else {
                 continue
             }
+            // Fetch the results for this particular call.
             guard let callResults = self.delegate?.resultsForCall(self, call: callData, withGateway: gateway) else {
                 fatalError("Unable to fetch results for call: \(callData)")
             }
+            // Add the results to our collection and make sure to check if
+            // there is a possibily for more results in the future.
             allResults[id] = callResults.find((callData.runs, nil)).lazy.map { $0.1 }
             handledAllResults = handledAllResults && callData.runs > (callResults.last?.0 ?? 0)
         }
