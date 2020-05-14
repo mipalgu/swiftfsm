@@ -110,7 +110,7 @@ public final class VerificationTokenExecuter<StateGenerator: KripkeStateGenerato
             usingCallStack: callStack,
             worldType: .beforeExecution
         )
-        let preState = self.stateGenerator.generateKripkeState(fromWorld: preWorld, withLastState: lastState)
+        let preState = self.stateGenerator.generateKripkeState(fromWorld: preWorld, constraint: nil, withLastState: lastState)
         var newCallStack: [FSM_ID: [CallData]] = callStack
         if false == (callStack[data.id]?.last?.inPlace ?? false) {
             fsm.next()
@@ -140,7 +140,7 @@ public final class VerificationTokenExecuter<StateGenerator: KripkeStateGenerato
             usingCallStack: newCallStack,
             worldType: .afterExecution
         )
-        let postState = self.stateGenerator.generateKripkeState(fromWorld: postWorld, withLastState: preState)
+        let postState = self.stateGenerator.generateKripkeState(fromWorld: postWorld, constraint: nil, withLastState: preState)
         return ([preState, postState], data.machine.clock.lastClockValues, externals, newCallStack, results)
     }
 
