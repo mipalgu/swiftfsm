@@ -144,7 +144,7 @@ final class VerificationCycleKripkeStructureGenerator<
             job.foundCycle = job.foundCycle || cycleDetector.inCycle(data: &job.cycleCache, element: world)
             if true == cycleDetector.inCycle(data: &globalDetectorCache, element: world) {
                 if nil == resultID {
-                    job.lastState?.edges.insert(KripkeEdge(target: world))
+                    job.lastState?.edges.insert(KripkeEdge(time: 0, target: world))
                     continue
                 } else if job.foundCycle && handledAllResults {
                     return runs

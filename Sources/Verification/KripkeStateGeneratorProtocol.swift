@@ -66,6 +66,7 @@ public protocol KripkeStateGeneratorProtocol {
     func generateKripkeState(
         fromWorld: KripkeStatePropertyList,
         constraint: ClockConstraint?,
+        time: UInt,
         withLastState: KripkeState?
     ) -> KripkeState
 }
