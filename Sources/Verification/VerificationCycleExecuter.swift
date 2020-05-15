@@ -238,7 +238,22 @@ final class VerificationCycleExecuter {
                 return
             }
             // Attempt to add any new transitions/effects to the kripke state.
-            existingState.edges.formUnion($0.edges)
+            $0.edges.forEach { edge in
+                guard let index = existingState.edges.firstIndex(where: { $0.target == edge.target && $0.time == edge.time }) else {
+                    existingState.edges.insert(edge)
+                    return
+                }
+                guard let edgeConstraint = edge.constraint else {
+                    return
+                }
+                if let constraint = existingState.edges[index].constraint {
+                    existingState.edges.remove(at: index)
+                    existingState.edges.insert(KripkeEdge(constraint: .or(lhs: constraint, rhs: edgeConstraint), time: edge.time, target: edge.target))
+                    return
+                }
+                existingState.edges.remove(at: index)
+                existingState.edges.insert(edge)
+            }
         }
     }
 
