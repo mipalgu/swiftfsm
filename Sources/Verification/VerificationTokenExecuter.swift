@@ -86,6 +86,7 @@ public final class VerificationTokenExecuter<StateGenerator: KripkeStateGenerato
         atOffset offset: Int,
         withExternals externals: [(AnySnapshotController, KripkeStatePropertyList)],
         andClock clock: UInt,
+        clockConstraint: ClockConstraint,
         andParameterisedMachines parameterisedMachines: [FSM_ID: ParameterisedMachineData],
         andLastState lastState: KripkeState?,
         usingCallStack callStack: [FSM_ID: [CallData]],
@@ -95,7 +96,6 @@ public final class VerificationTokenExecuter<StateGenerator: KripkeStateGenerato
         var results = results
         let token = tokens[executing][offset]
         let data = token.data!
-        let lastClockValue = data.machine.clock.lastClockValues.last ?? 0
         data.machine.clock.forcedRunningTime = clock
         data.machine.clock.lastClockValues = []
         var externals = externals
@@ -111,8 +111,7 @@ public final class VerificationTokenExecuter<StateGenerator: KripkeStateGenerato
             usingCallStack: callStack,
             worldType: .beforeExecution
         )
-        let preConstraint = self.calculateConstraint(lastClock: lastClockValue, clock: clock)
-        let preState = self.stateGenerator.generateKripkeState(fromWorld: preWorld, constraint: preConstraint, time: 0, withLastState: lastState)
+        let preState = self.stateGenerator.generateKripkeState(fromWorld: preWorld, constraint: nil, time: 0, withLastState: lastState)
         var newCallStack: [FSM_ID: [CallData]] = callStack
         if false == (callStack[data.id]?.last?.inPlace ?? false) {
             fsm.next()
@@ -142,15 +141,9 @@ public final class VerificationTokenExecuter<StateGenerator: KripkeStateGenerato
             usingCallStack: newCallStack,
             worldType: .afterExecution
         )
-        let postState = self.stateGenerator.generateKripkeState(fromWorld: postWorld, constraint: nil, time: 0, withLastState: preState)
+        //let preConstraint = self.calculateConstraint(clock: clock, clockValuesDuringRun: clock)
+        let postState = self.stateGenerator.generateKripkeState(fromWorld: postWorld, constraint: clockConstraint, time: 0, withLastState: preState)
         return ([preState, postState], data.machine.clock.lastClockValues, externals, newCallStack, results)
-    }
-    
-    private func calculateConstraint(lastClock: UInt, clock: UInt) -> ClockConstraint {
-        if clock == 0 {
-            return .equal(value: 0)
-        }
-        return .and(lhs: .greaterThan(value: lastClock), rhs: .lessThanEqual(value: clock))
     }
 
     fileprivate func mergeStacks(_ lhs: [FSM_ID: [CallData]], _ rhs: [FSM_ID: [CallData]]) -> [FSM_ID: [CallData]] {
