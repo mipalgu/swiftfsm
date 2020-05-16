@@ -73,18 +73,28 @@ public enum VerificationToken {
         }
     }
     
-    var offset: (startTime: UInt, duration: UInt)? {
+    var timeData: TimeData? {
         switch self {
-        case .skip(let offset):
-            return offset
+        case .skip(let timeData):
+            return timeData
         case .verify(let data):
-            return data.offset
+            return data.timeData
         }
     }
 
-    case skip(offset: (startTime: UInt, duration: UInt)?)
+    case skip(data: TimeData?)
 
     case verify(data: VerificationToken.Data)
+    
+    public struct TimeData {
+        
+        let startTime: UInt
+        
+        let duration: UInt
+        
+        let cycleLength: UInt
+        
+    }
 
     public struct Data {
         
@@ -98,7 +108,7 @@ public enum VerificationToken {
         
         public let parameterisedMachines: [FSM_ID: ParameterisedMachineData]
         
-        public let offset: (startTime: UInt, duration: UInt)?
+        public let timeData: TimeData?
         
     }
 

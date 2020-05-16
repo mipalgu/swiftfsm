@@ -274,7 +274,7 @@ final class VerificationCycleExecuter {
         }
         let clone = fsm.clone()
         var newTokens = tokens
-        newTokens[executing.0][executing.1] = .verify(data: VerificationToken.Data(id: data.id, fsm: clone, machine: data.machine, externalVariables: data.externalVariables, parameterisedMachines: data.parameterisedMachines, offset: data.offset))
+        newTokens[executing.0][executing.1] = .verify(data: VerificationToken.Data(id: data.id, fsm: clone, machine: data.machine, externalVariables: data.externalVariables, parameterisedMachines: data.parameterisedMachines, timeData: data.timeData))
         newTokens[executing.0].forEach {
             guard var fsm = $0.data?.fsm else {
                 return
