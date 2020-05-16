@@ -111,8 +111,9 @@ public final class VerificationTokenExecuter<StateGenerator: KripkeStateGenerato
             usingCallStack: callStack,
             worldType: .beforeExecution
         )
+        let clockName = self.clockName(forToken: tokens[executing][offset])
         let time = (lastState == nil ? 0 : self.timeSinceLastStart(in: tokens, executing: executing, offset: offset)) ?? 0
-        let preState = self.stateGenerator.generateKripkeState(fromWorld: preWorld, constraint: nil, time: time, withLastState: lastState)
+        let preState = self.stateGenerator.generateKripkeState(clockName: clockName, resetClock: clock == 0, fromWorld: preWorld, constraint: nil, time: time, withLastState: lastState)
         var newCallStack: [FSM_ID: [CallData]] = callStack
         if false == (callStack[data.id]?.last?.inPlace ?? false) {
             fsm.next()
@@ -143,8 +144,15 @@ public final class VerificationTokenExecuter<StateGenerator: KripkeStateGenerato
             worldType: .afterExecution
         )
         //let preConstraint = self.calculateConstraint(clock: clock, clockValuesDuringRun: clock)
-        let postState = self.stateGenerator.generateKripkeState(fromWorld: postWorld, constraint: clockConstraint, time: tokens[executing][offset].timeData?.duration ?? 0, withLastState: preState)
+        let postState = self.stateGenerator.generateKripkeState(clockName: clockName, resetClock: false, fromWorld: postWorld, constraint: clockConstraint, time: tokens[executing][offset].timeData?.duration ?? 0, withLastState: preState)
         return ([preState, postState], data.machine.clock.lastClockValues, externals, newCallStack, results)
+    }
+    
+    private func clockName(forToken token: VerificationToken) -> String {
+        guard let data = token.data else {
+            fatalError("Generating Kripke States for a skip verification token.")
+        }
+        return data.machine.name + "." + data.fsm.name + ".clock"
     }
 
     fileprivate func mergeStacks(_ lhs: [FSM_ID: [CallData]], _ rhs: [FSM_ID: [CallData]]) -> [FSM_ID: [CallData]] {
