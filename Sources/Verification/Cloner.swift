@@ -97,7 +97,8 @@ public final class Cloner<Converter: KripkeStatePropertyListConverter>: ClonerPr
                 fsm: clone,
                 machine: data.machine,
                 externalVariables: newExternals,
-                parameterisedMachines: data.parameterisedMachines
+                parameterisedMachines: data.parameterisedMachines,
+                timeData: data.timeData
             )
         )
     }

@@ -60,7 +60,18 @@ public typealias MetaDispatchTable = DispatchTable<String>
 
 public typealias SchedulerDispatchTable = DispatchTable<SchedulerToken>
 
-public struct DispatchTable<T> {
+public protocol DispatchTableProtocol {
+    
+    associatedtype Token: Equatable
+    
+    var timeslots: [[Timeslot<Token>]] { get }
+    
+    func findTimeslot(for: Token) -> Timeslot<Token>?
+}
+
+public struct DispatchTable<T: Equatable>: DispatchTableProtocol {
+    
+    public typealias Token = T
     
     public var numberOfThreads: Int
     
@@ -71,11 +82,7 @@ public struct DispatchTable<T> {
         self.timeslots = timeslots
     }
     
-}
-
-extension DispatchTable where T: Equatable {
-    
-    func findTimeslot(_ task: T) -> Timeslot<T>? {
+    public func findTimeslot(for task: T) -> Timeslot<T>? {
         return self.timeslots.lazy.compactMap {
             $0.first { $0.task == task }
         }.first

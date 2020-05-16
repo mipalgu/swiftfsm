@@ -60,11 +60,14 @@ import FSM
 import MachineStructure
 import swiftfsm
 
-public final class SequentialPerMachineTokenizer: SchedulerTokenizer {
+public final class SequentialPerMachineTokenizer<Converter: SchedulerTokenDispatchTableConverter>: SchedulerTokenizer, SchedulerTokenDispatchTableConverterContainer where Converter.Token == SchedulerToken {
 
+    public let converter: Converter
+    
     fileprivate let flatenner: SubmachineFlatenner
 
-    public init(flatenner: SubmachineFlatenner = SubmachineFlatenner()) {
+    public init(converter: Converter, flatenner: SubmachineFlatenner = SubmachineFlatenner()) {
+        self.converter = converter
         self.flatenner = flatenner
     }
 

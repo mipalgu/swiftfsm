@@ -56,6 +56,7 @@
  *
  */
 
+import Gateways
 import ModelChecking
 import FSMVerification
 import KripkeStructure
@@ -66,8 +67,12 @@ import MachineStructure
 public final class PassiveRoundRobinKripkeStructureGeneratorFactory: KripkeStructureGeneratorFactory {
 
     public typealias ViewFactory = AggregateKripkeStructureViewFactory<KripkeState>
-
-    public init() {}
+    
+    private let gateway: StackGateway
+    
+    public init(gateway: StackGateway) {
+        self.gateway = gateway
+    }
 
     public func make(fromMachines machines: [Machine], usingViewFactory viewFactory: ViewFactory) -> ScheduleCycleKripkeStructureGenerator<
         ExternalsSpinnerDataExtractor<
@@ -75,9 +80,10 @@ public final class PassiveRoundRobinKripkeStructureGeneratorFactory: KripkeStruc
             KripkeStatePropertySpinnerConverter
         >,
         ParameterisedVerificationCycleKripkeStructureGeneratorFactory<HashTableCycleDetector<KripkeStatePropertyList>>,
-        SequentialPerScheduleCycleTokenizer,
+        SequentialPerScheduleCycleTokenizer<SchedulerTokenToDispatchTableConverter<StackGateway>>,
         ViewFactory
     > {
+        let converter = SchedulerTokenToDispatchTableConverter<StackGateway>(gateway: self.gateway)
         return ScheduleCycleKripkeStructureGenerator(
             machines: machines,
             extractor: ExternalsSpinnerDataExtractor(
@@ -87,7 +93,7 @@ public final class PassiveRoundRobinKripkeStructureGeneratorFactory: KripkeStruc
             factory: ParameterisedVerificationCycleKripkeStructureGeneratorFactory(
                 cycleDetector: HashTableCycleDetector<KripkeStatePropertyList>()
             ),
-            tokenizer: SequentialPerScheduleCycleTokenizer(),
+            tokenizer: SequentialPerScheduleCycleTokenizer(converter: converter),
             viewFactory: viewFactory
         )
     }

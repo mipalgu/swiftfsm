@@ -57,6 +57,7 @@
  */
 
 import FSM
+import Gateways
 import MachineStructure
 import MachineLoading
 
@@ -65,11 +66,14 @@ import MachineLoading
  */
 public class PassiveRoundRobinSchedulerFactory: SchedulerFactory {
 
+    private let gateway: StackGateway
+    
     fileprivate let scheduleHandler: ScheduleHandler
 
     fileprivate let unloader: MachineUnloader
 
-    public init(scheduleHandler: ScheduleHandler, unloader: MachineUnloader) {
+    public init(gateway: StackGateway, scheduleHandler: ScheduleHandler, unloader: MachineUnloader) {
+        self.gateway = gateway
         self.scheduleHandler = scheduleHandler
         self.unloader = unloader
     }
@@ -79,9 +83,10 @@ public class PassiveRoundRobinSchedulerFactory: SchedulerFactory {
      *
      *  - Parameter machines: All the machines that are going to execute.
      */
-    public func make() -> RoundRobinScheduler<SequentialPerScheduleCycleTokenizer> {
+    public func make() -> RoundRobinScheduler<SequentialPerScheduleCycleTokenizer<SchedulerTokenToDispatchTableConverter<StackGateway>>> {
+        let converter = SchedulerTokenToDispatchTableConverter(gateway: self.gateway)
         return RoundRobinScheduler(
-            tokenizer: SequentialPerScheduleCycleTokenizer(),
+            tokenizer: SequentialPerScheduleCycleTokenizer(converter: converter),
             unloader: self.unloader,
             scheduleHandler: self.scheduleHandler
         )

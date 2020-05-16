@@ -80,9 +80,10 @@ public final class ScheduleCycleKripkeStructureGenerator<
     ViewFactory: KripkeStructureViewFactory
 >: KripkeStructureGenerator where
     Tokenizer.Object == Machine,
-    Tokenizer.SchedulerToken == SchedulerToken,
+    Tokenizer.DispatchTable.Token: VerifiableDispatchTableTokenProtocol,
     ViewFactory.View.State == KripkeState
 {
+    fileprivate let dispatchTable: MetaDispatchTable?
     fileprivate let machines: [Machine]
     fileprivate let extractor: Extractor
     fileprivate let factory: Factory
@@ -96,12 +97,14 @@ public final class ScheduleCycleKripkeStructureGenerator<
     fileprivate let recorder: MirrorKripkePropertiesRecorder = MirrorKripkePropertiesRecorder()
 
     public init(
+        dispatchTable: MetaDispatchTable? = nil,
         machines: [Machine],
         extractor: Extractor,
         factory: Factory,
         tokenizer: Tokenizer,
         viewFactory: ViewFactory
     ) {
+        self.dispatchTable = dispatchTable
         self.machines = machines
         self.extractor = extractor
         self.factory = factory
@@ -115,8 +118,9 @@ public final class ScheduleCycleKripkeStructureGenerator<
         }
         // Split all machines into a collection of `SchedulerToken`s.
         let tokens = self.tokenizer.separate(self.machines)
+        let dispatchTable = self.dispatchTable.flatMap { self.tokenizer.fetchDispatchTable(fromTokens: tokens, referencing: $0) }
         // Convert these `SchedulerToken`s to `VerificationToken`s.
-        let verificationTokens = self.convert(tokens: tokens, forMachines: self.machines, usingGateway: gateway)
+        let verificationTokens = self.convert(tokens: tokens, forMachines: self.machines, usingGateway: gateway, dispatchTable: dispatchTable)
         let temp = verificationTokens.flatMap { $0.0.flatMap { $0.compactMap { (token: VerificationToken) -> (FSM_ID, String, [FSM_ID: ParameterisedMachineData])? in
             guard let data = token.data else {
                 return nil
@@ -165,10 +169,10 @@ public final class ScheduleCycleKripkeStructureGenerator<
      *  possible because an FSM may only manipulate or control other FSM's
      *  within the same machine.
      */
-    fileprivate func convert<Gateway: FSMGateway>(tokens: [[SchedulerToken]], forMachines machines: [Machine], usingGateway gateway: Gateway) -> [([[VerificationToken]], AnyKripkeStructureView<KripkeState>)] {
+    fileprivate func convert<Gateway: FSMGateway>(tokens: [[SchedulerToken]], forMachines machines: [Machine], usingGateway gateway: Gateway, dispatchTable: Tokenizer.DispatchTable?) -> [([[VerificationToken]], AnyKripkeStructureView<KripkeState>)] {
         return machines.map { machine in
             let dep = self.convertRootFSMToDependency(inMachine: machine)
-            return self.schedule(forDependency: dep, inMachine: machine, usingTokens: tokens, andGateway: gateway, parents: [])
+            return self.schedule(forDependency: dep, inMachine: machine, usingTokens: tokens, andGateway: gateway, parents: [], dispatchTable: dispatchTable)
         }
     }
 
@@ -186,24 +190,52 @@ public final class ScheduleCycleKripkeStructureGenerator<
         inMachine machine: Machine,
         usingTokens tokens: [[SchedulerToken]],
         andGateway gateway: Gateway,
-        parents: [Dependency]
+        parents: [Dependency],
+        dispatchTable: Tokenizer.DispatchTable?
     ) -> ([[VerificationToken]], AnyKripkeStructureView<KripkeState>) {
         let dependencyFullyQualifiedName = (parents + [dependency]).reduce(machine.name) { $0 + "." + $1.fsm.name }
+        let cycleLength = tokens.reduce(UInt(0)) {
+            let cycleTime: UInt = ($1.last.map {
+                let dispatchToken = Tokenizer.DispatchTable.Token(
+                    id: gateway.id(of: $0.fullyQualifiedName),
+                    fsm: $0.fsm,
+                    machine: $0.machine,
+                    fullyQualifiedName: $0.fullyQualifiedName
+                )
+                guard let timeslot = dispatchTable?.findTimeslot(for: dispatchToken) else {
+                    return 0
+                }
+                return timeslot.startTime + timeslot.duration
+            } ?? 0)
+            return max($0, cycleTime)
+        }
         let verificationTokens = tokens.map { (arr: [SchedulerToken]) in
             arr.map { (token: SchedulerToken) -> VerificationToken in
+                let dispatchToken = Tokenizer.DispatchTable.Token(
+                    id: gateway.id(of: token.fullyQualifiedName),
+                    fsm: token.fsm,
+                    machine: token.machine,
+                    fullyQualifiedName: token.fullyQualifiedName
+                )
+                let timeData: VerificationToken.TimeData?
+                if let timeslot = dispatchTable?.findTimeslot(for: dispatchToken) {
+                    timeData = VerificationToken.TimeData(startTime: timeslot.startTime, duration: timeslot.duration, cycleLength: cycleLength)
+                } else {
+                    timeData = nil
+                }
                 // Check to see if we can skip this token.
                 if token.machine != machine {
-                    return .skip
+                    return .skip(data: timeData)
                 }
                 if self.token(token, inDependencies: parents) {
-                    return .skip
+                    return .skip(data: timeData)
                 }
                 let dependencyPath = self.fetchDependencyPath(forToken: token, inDependencies: machine.dependencies, machine.name + "." + machine.fsm.name)
                 let isRootOfToken =
                     dependencyPath.isEmpty
                     && machine.name + "." + machine.fsm.name == token.fullyQualifiedName
                 if !isRootOfToken && token.fullyQualifiedName != dependencyFullyQualifiedName && self.shouldSkip(token: token, inDependencyPath: dependencyPath)  {
-                    return .skip
+                    return .skip(data: timeData)
                 }
                 let dependency = dependencyPath.last ?? convertRootFSMToDependency(inMachine: machine)
                 // Create the token data since we cannot skip this token.
@@ -217,9 +249,10 @@ public final class ScheduleCycleKripkeStructureGenerator<
                     withFullyQualifiedName: token.fullyQualifiedName,
                     withTokens: tokens,
                     inGateway: gateway,
-                    parents: isRootOfToken ? [self.convertRootFSMToDependency(inMachine: token.machine)] : Array(dependencyPath.dropLast())
+                    parents: isRootOfToken ? [self.convertRootFSMToDependency(inMachine: token.machine)] : Array(dependencyPath.dropLast()),
+                    dispatchTable: dispatchTable
                 )
-                return .verify(data: VerificationToken.Data(id: gateway.id(of: token.fullyQualifiedName), fsm: dependencyPath.last?.fsm ?? token.machine.fsm, machine: token.machine, externalVariables: externals, parameterisedMachines: parameterisedMachines))
+                return .verify(data: VerificationToken.Data(id: gateway.id(of: token.fullyQualifiedName), fsm: dependencyPath.last?.fsm ?? token.machine.fsm, machine: token.machine, externalVariables: externals, parameterisedMachines: parameterisedMachines, timeData: timeData))
             }
         }
         let identifier = parents.isEmpty ? machine.name : dependencyFullyQualifiedName
@@ -247,7 +280,8 @@ public final class ScheduleCycleKripkeStructureGenerator<
         withFullyQualifiedName fullyQualifiedName: String,
         withTokens tokens: [[SchedulerToken]],
         inGateway gateway: Gateway,
-        parents: [Dependency]
+        parents: [Dependency],
+        dispatchTable: Tokenizer.DispatchTable?
     ) -> [FSM_ID: ParameterisedMachineData] {
         return Dictionary(uniqueKeysWithValues: dependency.dependencies.compactMap { (dependency) -> (FSM_ID, ParameterisedMachineData)? in
             let inPlace: Bool
@@ -266,7 +300,7 @@ public final class ScheduleCycleKripkeStructureGenerator<
                 return nil
             }
             let fullyQualifiedName = fullyQualifiedName + "." + fsm.name
-            let (tokens, view) = self.schedule(forDependency: dependency, inMachine: machine, usingTokens: tokens, andGateway: gateway, parents: parents)
+            let (tokens, view) = self.schedule(forDependency: dependency, inMachine: machine, usingTokens: tokens, andGateway: gateway, parents: parents, dispatchTable: dispatchTable)
             view.reset()
             return (
                 id,

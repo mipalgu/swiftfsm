@@ -72,10 +72,29 @@ public enum VerificationToken {
             return data
         }
     }
+    
+    var timeData: TimeData? {
+        switch self {
+        case .skip(let timeData):
+            return timeData
+        case .verify(let data):
+            return data.timeData
+        }
+    }
 
-    case skip
+    case skip(data: TimeData?)
 
     case verify(data: VerificationToken.Data)
+    
+    public struct TimeData {
+        
+        let startTime: UInt
+        
+        let duration: UInt
+        
+        let cycleLength: UInt
+        
+    }
 
     public struct Data {
         
@@ -88,6 +107,8 @@ public enum VerificationToken {
         public let externalVariables: [ExternalVariablesVerificationData]
         
         public let parameterisedMachines: [FSM_ID: ParameterisedMachineData]
+        
+        public let timeData: TimeData?
         
     }
 

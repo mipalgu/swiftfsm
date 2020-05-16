@@ -166,21 +166,34 @@ public class SwiftfsmParser: HelpableParser {
                                 this machine.
         """
     }
+    
 
     fileprivate let passiveRoundRobinFactory: PassiveRoundRobinSchedulerFactory
+    
+    private let passiveRoundRobinKripkeFactory: PassiveRoundRobinKripkeStructureGeneratorFactory
 
     fileprivate let roundRobinFactory: RoundRobinSchedulerFactory
     
+    private let roundRobinKripkeFactory: RoundRobinKripkeStructureGeneratorFactory
+    
     fileprivate let timeTriggeredFactory: TimeTriggeredSchedulerFactoryCreator
+    
+    private let timeTriggeredKripkeFactory: TimeTriggeredKripkeStructureGeneratorFactoryCreator
 
     public init(
         passiveRoundRobinFactory: PassiveRoundRobinSchedulerFactory,
+        passiveRoundRobinKripkeFactory: PassiveRoundRobinKripkeStructureGeneratorFactory,
         roundRobinFactory: RoundRobinSchedulerFactory,
-        timeTriggeredFactory: TimeTriggeredSchedulerFactoryCreator
+        roundRobinKripkeFactory: RoundRobinKripkeStructureGeneratorFactory,
+        timeTriggeredFactory: TimeTriggeredSchedulerFactoryCreator,
+        timeTriggeredKripkeFactory: TimeTriggeredKripkeStructureGeneratorFactoryCreator
     ) {
         self.passiveRoundRobinFactory = passiveRoundRobinFactory
+        self.passiveRoundRobinKripkeFactory = passiveRoundRobinKripkeFactory
         self.roundRobinFactory = roundRobinFactory
+        self.roundRobinKripkeFactory = roundRobinKripkeFactory
         self.timeTriggeredFactory = timeTriggeredFactory
+        self.timeTriggeredKripkeFactory = timeTriggeredKripkeFactory
     }
 
     /**
@@ -514,11 +527,11 @@ public class SwiftfsmParser: HelpableParser {
         switch scheduler {
         case "rr", "RoundRobin":
             var temp: Task = t
-            temp.scheduler = .roundRobin(self.roundRobinFactory, RoundRobinKripkeStructureGeneratorFactory()) 
+            temp.scheduler = .roundRobin(self.roundRobinFactory, self.roundRobinKripkeFactory)
             return temp
         case "prr", "PassiveRoundRobin":
             var temp: Task = t
-            temp.scheduler = .passiveRoundRobin(self.passiveRoundRobinFactory, PassiveRoundRobinKripkeStructureGeneratorFactory())
+            temp.scheduler = .passiveRoundRobin(self.passiveRoundRobinFactory, self.passiveRoundRobinKripkeFactory)
             return temp
         default:
 #if canImport(Foundation) && !NO_FOUNDATION
@@ -528,7 +541,7 @@ public class SwiftfsmParser: HelpableParser {
             var temp: Task = t
             temp.scheduler = .timeTriggered(
                 self.timeTriggeredFactory.make(dispatchTable: table),
-                RoundRobinKripkeStructureGeneratorFactory()
+                self.timeTriggeredKripkeFactory.make(dispatchTable: table)
             )
             return temp
 #else

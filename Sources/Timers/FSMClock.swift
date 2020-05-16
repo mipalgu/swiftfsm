@@ -64,6 +64,15 @@ public final class FSMClock: Clock {
 
     fileprivate var data: [String: (previousState: AnyState, startTime: UInt)] = [:]
 
+    /**
+     *  An array of clock values in microseconds that were queried during the
+     *  last state execution.
+     *
+     *  As an example, a call to `after(2)` will result in the value
+     *  `2000000` being stores in this array. This array is necessary for
+     *  verification purposed so that the verification can query what after
+     *  calls were made during the execution of a state.
+     */
     public var lastClockValues: [UInt] = []
 
     fileprivate var currentFSM: String! = nil

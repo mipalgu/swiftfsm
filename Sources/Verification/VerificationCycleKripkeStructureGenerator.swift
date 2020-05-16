@@ -144,7 +144,8 @@ final class VerificationCycleKripkeStructureGenerator<
             job.foundCycle = job.foundCycle || cycleDetector.inCycle(data: &job.cycleCache, element: world)
             if true == cycleDetector.inCycle(data: &globalDetectorCache, element: world) {
                 if nil == resultID {
-                    job.lastState?.effects.insert(world)
+                    let time = self.timeSinceLastStart(in: job.tokens, executing: job.executing, offset: 0)
+                    job.lastState?.edges.insert(KripkeEdge(time: time ?? 0, target: world))
                     continue
                 } else if job.foundCycle && handledAllResults {
                     return runs
@@ -180,6 +181,30 @@ final class VerificationCycleKripkeStructureGenerator<
             }
         }
         return runs
+    }
+    
+    private func timeSinceLastStart(in tokens: [[VerificationToken]], executing: Int, offset: Int) -> UInt? {
+        guard let currentOffset = tokens[executing][offset].timeData else {
+            return nil
+        }
+        // Get the offset of the previous token in the same cycle.
+        if offset > 0, let lastExecuted = tokens[executing][0..<offset].last(where: { nil != $0.data })?.timeData {
+            return currentOffset.startTime - (lastExecuted.startTime + lastExecuted.duration)
+        }
+        // Get the offset of the last token in the previous executed cycle.
+        if let lastExecuted = tokens[0..<executing].last(where: { nil != $0.first { nil != $0.data} })?.last(where: { nil != $0.data })?.timeData {
+            return currentOffset.startTime - (lastExecuted.startTime + lastExecuted.duration)
+        }
+        // Wrap around if we are unable to get the last token from the previous executed cycle.
+        let currentExecutingIndex = tokens.index(0, offsetBy: executing)
+        if let firstExecutingIndex = tokens.firstIndex(where: { nil != $0.first { nil != $0.data } }),
+            currentExecutingIndex == firstExecutingIndex,
+            tokens.count > (firstExecutingIndex + 1),
+            let lastExecuted = tokens[(executing)..<tokens.count].last(where: { nil != $0.first { nil != $0.data } })?.last(where: { nil != $0.data })?.timeData
+        {
+            return currentOffset.startTime + (lastExecuted.cycleLength - (lastExecuted.startTime + lastExecuted.duration))
+        }
+        return currentOffset.startTime
     }
 
 }

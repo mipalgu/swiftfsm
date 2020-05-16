@@ -1,9 +1,9 @@
 /*
- * SequentialPerScheduleCycleTokenizer.swift 
- * swiftfsm 
+ * DispatchTableTokenProtocol.swift
+ * Scheduling
  *
- * Created by Callum McColl on 09/06/2017.
- * Copyright © 2017 Callum McColl. All rights reserved.
+ * Created by Callum McColl on 16/5/20.
+ * Copyright © 2020 Callum McColl. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -56,28 +56,23 @@
  *
  */
 
-import FSM
 import MachineStructure
 import swiftfsm
 
-public final class SequentialPerScheduleCycleTokenizer<Converter: SchedulerTokenDispatchTableConverter>: SchedulerTokenizer, SchedulerTokenDispatchTableConverterContainer where Converter.Token == SchedulerToken {
+public protocol ScheduleableDispatchTableTokenProtocol: Equatable {
     
-    public let converter: Converter
+    var id: FSM_ID { get }
+    
+    var fsm: AnyScheduleableFiniteStateMachine { get }
+    
+    var machine: Machine { get }
+    
+    var fullyQualifiedName: String { get }
+    
+}
 
-    fileprivate let flatenner: SubmachineFlatenner
-
-    public init(converter: Converter, flatenner: SubmachineFlatenner = SubmachineFlatenner()) {
-        self.converter = converter
-        self.flatenner = flatenner
-    }
-
-    public func separate(_ machines: [Machine]) -> [[SchedulerToken]] {
-        let tokens = machines.flatMap { (machine) -> [SchedulerToken] in
-            let name = machine.name + "." + machine.fsm.name
-            let tokens: [SchedulerToken] = machine.dependencies.flatMap { self.flatenner.flattenSubmachines($0, name, machine) }
-            return [SchedulerToken(fullyQualifiedName: name, type: machine.fsm, machine: machine, isRootFSM: true)] + tokens
-        }
-        return [tokens]
-    }
-
+public protocol VerifiableDispatchTableTokenProtocol: ScheduleableDispatchTableTokenProtocol {
+    
+    init(id: FSM_ID, fsm: AnyScheduleableFiniteStateMachine, machine: Machine, fullyQualifiedName: String)
+    
 }

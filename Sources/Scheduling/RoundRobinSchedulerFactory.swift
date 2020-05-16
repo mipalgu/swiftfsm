@@ -57,6 +57,7 @@
  */
 
 import FSM
+import Gateways
 import MachineStructure
 import MachineLoading
 import swiftfsm
@@ -65,12 +66,15 @@ import swiftfsm
  *  Provides a way to create a `RoundRobinScheduler`.
  */
 public class RoundRobinSchedulerFactory: SchedulerFactory {
-
+    
+    private let gateway: StackGateway
+    
     fileprivate let scheduleHandler: ScheduleHandler
 
     fileprivate let unloader: MachineUnloader
 
-    public init(scheduleHandler: ScheduleHandler, unloader: MachineUnloader) {
+    public init(gateway: StackGateway, scheduleHandler: ScheduleHandler, unloader: MachineUnloader) {
+        self.gateway = gateway
         self.scheduleHandler = scheduleHandler
         self.unloader = unloader
     }
@@ -80,9 +84,11 @@ public class RoundRobinSchedulerFactory: SchedulerFactory {
      *
      *  - Parameter machines: All the machines that are going to execute.
      */
-    public func make() -> RoundRobinScheduler<SequentialPerRingletTokenizer> {
+    public func make() -> RoundRobinScheduler<SequentialPerRingletTokenizer<SchedulerTokenToDispatchTableConverter<StackGateway>>> {
+        let converter = SchedulerTokenToDispatchTableConverter(gateway: self.gateway)
         return RoundRobinScheduler(
-            tokenizer: SequentialPerRingletTokenizer(),
+            gateway: self.gateway,
+            tokenizer: SequentialPerRingletTokenizer(converter: converter),
             unloader: self.unloader,
             scheduleHandler: self.scheduleHandler
         )

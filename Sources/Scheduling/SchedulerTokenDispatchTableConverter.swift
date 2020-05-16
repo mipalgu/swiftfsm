@@ -1,9 +1,9 @@
 /*
- * SequentialPerScheduleCycleTokenizer.swift 
- * swiftfsm 
+ * SchedulerTokenDispatchTableConverter.swift
+ * Scheduling
  *
- * Created by Callum McColl on 09/06/2017.
- * Copyright © 2017 Callum McColl. All rights reserved.
+ * Created by Callum McColl on 16/5/20.
+ * Copyright © 2020 Callum McColl. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -56,28 +56,73 @@
  *
  */
 
-import FSM
+import Gateways
 import MachineStructure
 import swiftfsm
 
-public final class SequentialPerScheduleCycleTokenizer<Converter: SchedulerTokenDispatchTableConverter>: SchedulerTokenizer, SchedulerTokenDispatchTableConverterContainer where Converter.Token == SchedulerToken {
+public protocol SchedulerTokenDispatchTableConverter {
     
-    public let converter: Converter
+    associatedtype Token
+    associatedtype Table: DispatchTableProtocol
+    
+    func convert(tokens: [[Token]], referencing: MetaDispatchTable) -> Table?
+    
+}
 
-    fileprivate let flatenner: SubmachineFlatenner
+public protocol SchedulerTokenDispatchTableConverterContainer {
+    
+    associatedtype Converter: SchedulerTokenDispatchTableConverter
+    
+    var converter: Converter { get }
+    
+}
 
-    public init(converter: Converter, flatenner: SubmachineFlatenner = SubmachineFlatenner()) {
-        self.converter = converter
-        self.flatenner = flatenner
+public struct SchedulerTokenToDispatchTableConverter<Gateway: FSMGateway>: SchedulerTokenDispatchTableConverter, GatewayContainer {
+    
+    
+    public let gateway: Gateway
+    
+    public init(gateway: Gateway) {
+        self.gateway = gateway
     }
-
-    public func separate(_ machines: [Machine]) -> [[SchedulerToken]] {
-        let tokens = machines.flatMap { (machine) -> [SchedulerToken] in
-            let name = machine.name + "." + machine.fsm.name
-            let tokens: [SchedulerToken] = machine.dependencies.flatMap { self.flatenner.flattenSubmachines($0, name, machine) }
-            return [SchedulerToken(fullyQualifiedName: name, type: machine.fsm, machine: machine, isRootFSM: true)] + tokens
+    
+    public func convert(tokens: [[SchedulerToken]], referencing dispatchTable: MetaDispatchTable) -> DispatchTable<TableToken>? {
+        guard let timeslots: [[Timeslot<TableToken>]] = tokens.failMap({ tokens in
+            tokens.failMap { token in
+                guard let timeslot = dispatchTable.findTimeslot(for: token.fullyQualifiedName) else {
+                    return nil
+                }
+                let newToken = TableToken(
+                    id: self.gateway.id(of: token.fullyQualifiedName),
+                    fsm: token.fsm,
+                    machine: token.machine,
+                    fullyQualifiedName: token.fullyQualifiedName
+                )
+                return Timeslot<TableToken>(startTime: timeslot.startTime, duration: timeslot.duration, task: newToken)
+            }?.sorted { $0.startTime < $1.startTime }
+        }) else {
+            return nil
         }
-        return [tokens]
+        return DispatchTable<TableToken>(numberOfThreads: dispatchTable.numberOfThreads, timeslots: timeslots)
     }
-
+    
+    public struct TableToken: VerifiableDispatchTableTokenProtocol {
+        
+        public let id: FSM_ID
+        
+        public let fsm: AnyScheduleableFiniteStateMachine
+        
+        public let machine: Machine
+        
+        public let fullyQualifiedName: String
+        
+        public init(id: FSM_ID, fsm: AnyScheduleableFiniteStateMachine, machine: Machine, fullyQualifiedName: String) {
+            self.id = id
+            self.fsm = fsm
+            self.machine = machine
+            self.fullyQualifiedName = fullyQualifiedName
+        }
+        
+    }
+    
 }

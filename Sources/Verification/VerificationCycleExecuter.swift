@@ -95,7 +95,9 @@ final class VerificationCycleExecuter {
         
         let clock: UInt
         
-        let usedClockValues: [UInt]
+        let clockConstraint: ClockConstraint
+        
+        let usedClockValues: Set<UInt>
         
         let callStack: [FSM_ID: [CallData]]
         
@@ -123,7 +125,7 @@ final class VerificationCycleExecuter {
         gateway.delegate = self.executer
         var tokens = tokens
         tokens[executing] = tokens[executing].filter { nil != $0.data } // Ignore all skip tokens.
-        var jobs = [Job<Gateway.GatewayData>(index: 0, tokens: tokens, externals: externals, initialState: nil, lastState: last, clock: 0, usedClockValues: [], callStack: callStack, results: results, gatewayData: gateway.gatewayData)]
+        var jobs = [Job<Gateway.GatewayData>(index: 0, tokens: tokens, externals: externals, initialState: nil, lastState: last, clock: 0, clockConstraint: .equal(value: 0), usedClockValues: [], callStack: callStack, results: results, gatewayData: gateway.gatewayData)]
         let states: Ref<[KripkeStatePropertyList: KripkeState]> = Ref(value: [:])
         var initialStates: HashSink<KripkeStatePropertyList, KripkeStatePropertyList> = HashSink()
         var lastStates: HashSink<KripkeStatePropertyList, KripkeStatePropertyList> = HashSink()
@@ -142,6 +144,7 @@ final class VerificationCycleExecuter {
                 atOffset: job.index,
                 withExternals: job.externals,
                 andClock: job.clock,
+                clockConstraint: job.clockConstraint,
                 andParameterisedMachines: parameterisedMachines,
                 andLastState: job.lastState,
                 usingCallStack: job.callStack,
@@ -173,7 +176,7 @@ final class VerificationCycleExecuter {
                 continue
             }
             // Add a Job for the next token to execute.
-            jobs.append(Job(index: job.index + 1, tokens: newTokens, externals: newExternals, initialState: job.initialState ?? generatedStates.first, lastState: lastState, clock: 0, usedClockValues: [], callStack: newCallStack, results: newResults, gatewayData: gateway.gatewayData))
+            jobs.append(Job(index: job.index + 1, tokens: newTokens, externals: newExternals, initialState: job.initialState ?? generatedStates.first, lastState: lastState, clock: 0, clockConstraint: .equal(value: 0), usedClockValues: [], callStack: newCallStack, results: newResults, gatewayData: gateway.gatewayData))
         }
         states.value.forEach { (arg: (key: KripkeStatePropertyList, value: KripkeState)) in
             if lastStates.contains(arg.key) {
@@ -185,33 +188,46 @@ final class VerificationCycleExecuter {
     }
 
     fileprivate func jobsFromClockValues<GatewayData>(lastJob: Job<GatewayData>, clockValues: [UInt]) -> [Job<GatewayData>] {
-        return clockValues.flatMap { (value: UInt) -> [Job<GatewayData>] in
-            if true == lastJob.usedClockValues.contains(value) {
-                return []
-            }
-            var arr: [UInt] = []
-            arr.reserveCapacity(2)
-            if value != UInt.max {
-                arr.append(value + 1)
-            }
-            if value != UInt.min {
-                arr.append(value - 1)
-            }
-            return arr.map {
-                Job(
-                    index: lastJob.index,
-                    tokens: lastJob.tokens,
-                    externals: lastJob.externals,
-                    initialState: lastJob.initialState,
-                    lastState: lastJob.lastState,
-                    clock: $0,
-                    usedClockValues: lastJob.usedClockValues + clockValues,
-                    callStack: lastJob.callStack,
-                    results: lastJob.results,
-                    gatewayData: lastJob.gatewayData
-                )
-            }
+        let sorted = clockValues.sorted()
+        let zipped = zip([0] + sorted, sorted)
+        guard let last = sorted.last else {
+            return []
         }
+        let newClockValues = lastJob.usedClockValues.union(Set(clockValues + [last + 1]))
+        let results = zipped.compactMap { (lastValue: UInt, currentValue: UInt) -> Job<GatewayData>? in
+            if true == lastJob.usedClockValues.contains(currentValue) || lastValue == currentValue {
+                return nil
+            }
+            return Job(
+                index: lastJob.index,
+                tokens: lastJob.tokens,
+                externals: lastJob.externals,
+                initialState: lastJob.initialState,
+                lastState: lastJob.lastState,
+                clock: currentValue,
+                clockConstraint: .and(lhs: .greaterThan(value: lastValue), rhs: .lessThanEqual(value: currentValue)),
+                usedClockValues: newClockValues,
+                callStack: lastJob.callStack,
+                results: lastJob.results,
+                gatewayData: lastJob.gatewayData
+            )
+        }
+        guard !lastJob.usedClockValues.contains(last + 1) else {
+            return results
+        }
+        return results + [Job(
+            index: lastJob.index,
+            tokens: lastJob.tokens,
+            externals: lastJob.externals,
+            initialState: lastJob.initialState,
+            lastState: lastJob.lastState,
+            clock: last + 1,
+            clockConstraint: .greaterThan(value: last),
+            usedClockValues: newClockValues,
+            callStack: lastJob.callStack,
+            results: lastJob.results,
+            gatewayData: lastJob.gatewayData
+        )]
     }
 
     fileprivate func add(_ newStates: [KripkeState], to states: Ref<[KripkeStatePropertyList: KripkeState]>) {
@@ -222,7 +238,22 @@ final class VerificationCycleExecuter {
                 return
             }
             // Attempt to add any new transitions/effects to the kripke state.
-            existingState.effects.formUnion($0.effects)
+            $0.edges.forEach { edge in
+                guard let index = existingState.edges.firstIndex(where: { $0.target == edge.target && $0.time == edge.time }) else {
+                    existingState.edges.insert(edge)
+                    return
+                }
+                guard let edgeConstraint = edge.constraint else {
+                    return
+                }
+                if let constraint = existingState.edges[index].constraint {
+                    existingState.edges.remove(at: index)
+                    existingState.edges.insert(KripkeEdge(constraint: .or(lhs: constraint, rhs: edgeConstraint), time: edge.time, target: edge.target))
+                    return
+                }
+                existingState.edges.remove(at: index)
+                existingState.edges.insert(edge)
+            }
         }
     }
 
@@ -243,7 +274,7 @@ final class VerificationCycleExecuter {
         }
         let clone = fsm.clone()
         var newTokens = tokens
-        newTokens[executing.0][executing.1] = .verify(data: VerificationToken.Data(id: data.id, fsm: clone, machine: data.machine, externalVariables: data.externalVariables, parameterisedMachines: data.parameterisedMachines))
+        newTokens[executing.0][executing.1] = .verify(data: VerificationToken.Data(id: data.id, fsm: clone, machine: data.machine, externalVariables: data.externalVariables, parameterisedMachines: data.parameterisedMachines, timeData: data.timeData))
         newTokens[executing.0].forEach {
             guard var fsm = $0.data?.fsm else {
                 return

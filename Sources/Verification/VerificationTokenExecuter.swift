@@ -86,6 +86,7 @@ public final class VerificationTokenExecuter<StateGenerator: KripkeStateGenerato
         atOffset offset: Int,
         withExternals externals: [(AnySnapshotController, KripkeStatePropertyList)],
         andClock clock: UInt,
+        clockConstraint: ClockConstraint,
         andParameterisedMachines parameterisedMachines: [FSM_ID: ParameterisedMachineData],
         andLastState lastState: KripkeState?,
         usingCallStack callStack: [FSM_ID: [CallData]],
@@ -110,7 +111,8 @@ public final class VerificationTokenExecuter<StateGenerator: KripkeStateGenerato
             usingCallStack: callStack,
             worldType: .beforeExecution
         )
-        let preState = self.stateGenerator.generateKripkeState(fromWorld: preWorld, withLastState: lastState)
+        let time = (lastState == nil ? 0 : self.timeSinceLastStart(in: tokens, executing: executing, offset: offset)) ?? 0
+        let preState = self.stateGenerator.generateKripkeState(fromWorld: preWorld, constraint: nil, time: time, withLastState: lastState)
         var newCallStack: [FSM_ID: [CallData]] = callStack
         if false == (callStack[data.id]?.last?.inPlace ?? false) {
             fsm.next()
@@ -140,7 +142,8 @@ public final class VerificationTokenExecuter<StateGenerator: KripkeStateGenerato
             usingCallStack: newCallStack,
             worldType: .afterExecution
         )
-        let postState = self.stateGenerator.generateKripkeState(fromWorld: postWorld, withLastState: preState)
+        //let preConstraint = self.calculateConstraint(clock: clock, clockValuesDuringRun: clock)
+        let postState = self.stateGenerator.generateKripkeState(fromWorld: postWorld, constraint: clockConstraint, time: tokens[executing][offset].timeData?.duration ?? 0, withLastState: preState)
         return ([preState, postState], data.machine.clock.lastClockValues, externals, newCallStack, results)
     }
 
@@ -150,6 +153,30 @@ public final class VerificationTokenExecuter<StateGenerator: KripkeStateGenerato
             newStack[id] = (lhs[id] ?? []) + stack
         }
         return newStack
+    }
+    
+    private func timeSinceLastStart(in tokens: [[VerificationToken]], executing: Int, offset: Int) -> UInt? {
+        guard let currentOffset = tokens[executing][offset].timeData else {
+            return nil
+        }
+        // Get the offset of the previous token in the same cycle.
+        if offset > 0, let lastExecuted = tokens[executing][0..<offset].last(where: { nil != $0.data })?.timeData {
+            return currentOffset.startTime - (lastExecuted.startTime + lastExecuted.duration)
+        }
+        // Get the offset of the last token in the previous executed cycle.
+        if let lastExecuted = tokens[0..<executing].last(where: { nil != $0.first { nil != $0.data} })?.last(where: { nil != $0.data })?.timeData {
+            return currentOffset.startTime - (lastExecuted.startTime + lastExecuted.duration)
+        }
+        // Wrap around if we are unable to get the last token from the previous executed cycle.
+        let currentExecutingIndex = tokens.index(0, offsetBy: executing)
+        if let firstExecutingIndex = tokens.firstIndex(where: { nil != $0.first { nil != $0.data } }),
+            currentExecutingIndex == firstExecutingIndex,
+            tokens.count > (firstExecutingIndex + 1),
+            let lastExecuted = tokens[(executing)..<tokens.count].last(where: { nil != $0.first { nil != $0.data } })?.last(where: { nil != $0.data })?.timeData
+        {
+            return currentOffset.startTime + (lastExecuted.cycleLength - (lastExecuted.startTime + lastExecuted.duration))
+        }
+        return currentOffset.startTime
     }
 
 }
