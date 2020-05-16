@@ -136,7 +136,7 @@ func run() {
             roundRobinFactory: roundRobinFactory,
             roundRobinKripkeFactory: RoundRobinKripkeStructureGeneratorFactory(gateway: gateway),
             timeTriggeredFactory: timeTriggeredFactory,
-            timeTriggeredKripkeFactory: RoundRobinKripkeStructureGeneratorFactory(gateway: gateway)
+            timeTriggeredKripkeFactory: TimeTriggeredKripkeStructureGeneratorFactoryCreator(gateway: gateway)
         ),
         schedulerFactory: roundRobinFactory,
         view: printer

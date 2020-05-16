@@ -1,9 +1,9 @@
 /*
- * SupportedSchedulers.swift 
- * Parsing 
+ * TimeTriggeredKripkeStructureGeneratorFactoryCreator.swift
+ * Verification
  *
- * Created by Callum McColl on 26/09/2018.
- * Copyright © 2018 Callum McColl. All rights reserved.
+ * Created by Callum McColl on 16/5/20.
+ * Copyright © 2020 Callum McColl. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -57,16 +57,21 @@
  */
 
 import Gateways
-import KripkeStructure
-import ModelChecking
 import Scheduling
-import Verification
 
-
-public enum SupportedSchedulers {
-
-    case passiveRoundRobin(PassiveRoundRobinSchedulerFactory, PassiveRoundRobinKripkeStructureGeneratorFactory)
-    case roundRobin(RoundRobinSchedulerFactory, RoundRobinKripkeStructureGeneratorFactory)
-    case timeTriggered(TimeTriggeredSchedulerFactory, TimeTriggeredKripkeStructureGeneratorFactory)
-
+public struct TimeTriggeredKripkeStructureGeneratorFactoryCreator {
+    
+    private let gateway: StackGateway
+    
+    public init(gateway: StackGateway) {
+        self.gateway = gateway
+    }
+    
+    public func make(dispatchTable: MetaDispatchTable) -> TimeTriggeredKripkeStructureGeneratorFactory {
+        return TimeTriggeredKripkeStructureGeneratorFactory(
+            dispatchTable: dispatchTable,
+            gateway: self.gateway
+        )
+    }
+    
 }

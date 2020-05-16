@@ -82,6 +82,7 @@ public final class ScheduleCycleKripkeStructureGenerator<
     Tokenizer.Object == Machine,
     ViewFactory.View.State == KripkeState
 {
+    fileprivate let dispatchTable: MetaDispatchTable?
     fileprivate let machines: [Machine]
     fileprivate let extractor: Extractor
     fileprivate let factory: Factory
@@ -95,12 +96,14 @@ public final class ScheduleCycleKripkeStructureGenerator<
     fileprivate let recorder: MirrorKripkePropertiesRecorder = MirrorKripkePropertiesRecorder()
 
     public init(
+        dispatchTable: MetaDispatchTable? = nil,
         machines: [Machine],
         extractor: Extractor,
         factory: Factory,
         tokenizer: Tokenizer,
         viewFactory: ViewFactory
     ) {
+        self.dispatchTable = dispatchTable
         self.machines = machines
         self.extractor = extractor
         self.factory = factory

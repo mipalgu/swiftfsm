@@ -178,7 +178,7 @@ public class SwiftfsmParser: HelpableParser {
     
     fileprivate let timeTriggeredFactory: TimeTriggeredSchedulerFactoryCreator
     
-    private let timeTriggeredKripkeFactory: RoundRobinKripkeStructureGeneratorFactory
+    private let timeTriggeredKripkeFactory: TimeTriggeredKripkeStructureGeneratorFactoryCreator
 
     public init(
         passiveRoundRobinFactory: PassiveRoundRobinSchedulerFactory,
@@ -186,7 +186,7 @@ public class SwiftfsmParser: HelpableParser {
         roundRobinFactory: RoundRobinSchedulerFactory,
         roundRobinKripkeFactory: RoundRobinKripkeStructureGeneratorFactory,
         timeTriggeredFactory: TimeTriggeredSchedulerFactoryCreator,
-        timeTriggeredKripkeFactory: RoundRobinKripkeStructureGeneratorFactory
+        timeTriggeredKripkeFactory: TimeTriggeredKripkeStructureGeneratorFactoryCreator
     ) {
         self.passiveRoundRobinFactory = passiveRoundRobinFactory
         self.passiveRoundRobinKripkeFactory = passiveRoundRobinKripkeFactory
@@ -541,7 +541,7 @@ public class SwiftfsmParser: HelpableParser {
             var temp: Task = t
             temp.scheduler = .timeTriggered(
                 self.timeTriggeredFactory.make(dispatchTable: table),
-                self.timeTriggeredKripkeFactory
+                self.timeTriggeredKripkeFactory.make(dispatchTable: table)
             )
             return temp
 #else

@@ -1,9 +1,9 @@
 /*
- * SupportedSchedulers.swift 
- * Parsing 
+ * TimeTriggeredKripkeStructureGeneratorFactory.swift
+ * Verification
  *
- * Created by Callum McColl on 26/09/2018.
- * Copyright © 2018 Callum McColl. All rights reserved.
+ * Created by Callum McColl on 16/5/20.
+ * Copyright © 2020 Callum McColl. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -57,16 +57,49 @@
  */
 
 import Gateways
-import KripkeStructure
 import ModelChecking
+import FSMVerification
+import KripkeStructure
+import KripkeStructureViews
 import Scheduling
-import Verification
+import MachineStructure
 
+public final class TimeTriggeredKripkeStructureGeneratorFactory: KripkeStructureGeneratorFactory {
 
-public enum SupportedSchedulers {
+    public typealias ViewFactory = AggregateKripkeStructureViewFactory<KripkeState>
+    
+    private let dispatchTable: MetaDispatchTable
+    
+    private let gateway: StackGateway
+    
+    public init(dispatchTable: MetaDispatchTable, gateway: StackGateway) {
+        self.dispatchTable = dispatchTable
+        self.gateway = gateway
+    }
 
-    case passiveRoundRobin(PassiveRoundRobinSchedulerFactory, PassiveRoundRobinKripkeStructureGeneratorFactory)
-    case roundRobin(RoundRobinSchedulerFactory, RoundRobinKripkeStructureGeneratorFactory)
-    case timeTriggered(TimeTriggeredSchedulerFactory, TimeTriggeredKripkeStructureGeneratorFactory)
+    public func make(fromMachines machines: [Machine], usingViewFactory viewFactory: ViewFactory) -> ScheduleCycleKripkeStructureGenerator<
+        ExternalsSpinnerDataExtractor<
+            MirrorKripkePropertiesRecorder,
+            KripkeStatePropertySpinnerConverter
+        >,
+        ParameterisedVerificationCycleKripkeStructureGeneratorFactory<HashTableCycleDetector<KripkeStatePropertyList>>,
+        SequentialPerRingletTokenizer<SchedulerTokenToDispatchTableConverter<StackGateway>>,
+        ViewFactory
+    > {
+        let converter = SchedulerTokenToDispatchTableConverter(gateway: self.gateway)
+        return ScheduleCycleKripkeStructureGenerator(
+            dispatchTable: self.dispatchTable,
+            machines: machines,
+            extractor: ExternalsSpinnerDataExtractor(
+                converter: KripkeStatePropertySpinnerConverter(),
+                extractor: MirrorKripkePropertiesRecorder()
+            ),
+            factory: ParameterisedVerificationCycleKripkeStructureGeneratorFactory(
+                cycleDetector: HashTableCycleDetector<KripkeStatePropertyList>()
+            ),
+            tokenizer: SequentialPerRingletTokenizer(converter: converter),
+            viewFactory: viewFactory
+        )
+    }
 
 }
