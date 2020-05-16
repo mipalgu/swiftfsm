@@ -196,19 +196,31 @@ public final class ScheduleCycleKripkeStructureGenerator<
         let dependencyFullyQualifiedName = (parents + [dependency]).reduce(machine.name) { $0 + "." + $1.fsm.name }
         let verificationTokens = tokens.map { (arr: [SchedulerToken]) in
             arr.map { (token: SchedulerToken) -> VerificationToken in
+                let dispatchToken = Tokenizer.DispatchTable.Token(
+                    id: gateway.id(of: token.fullyQualifiedName),
+                    fsm: token.fsm,
+                    machine: token.machine,
+                    fullyQualifiedName: token.fullyQualifiedName
+                )
+                let offset: (startTime: UInt, duration: UInt)?
+                if let timeslot = dispatchTable?.findTimeslot(for: dispatchToken) {
+                    offset = (timeslot.startTime, timeslot.duration)
+                } else {
+                    offset = nil
+                }
                 // Check to see if we can skip this token.
                 if token.machine != machine {
-                    return .skip
+                    return .skip(offset: offset)
                 }
                 if self.token(token, inDependencies: parents) {
-                    return .skip
+                    return .skip(offset: offset)
                 }
                 let dependencyPath = self.fetchDependencyPath(forToken: token, inDependencies: machine.dependencies, machine.name + "." + machine.fsm.name)
                 let isRootOfToken =
                     dependencyPath.isEmpty
                     && machine.name + "." + machine.fsm.name == token.fullyQualifiedName
                 if !isRootOfToken && token.fullyQualifiedName != dependencyFullyQualifiedName && self.shouldSkip(token: token, inDependencyPath: dependencyPath)  {
-                    return .skip
+                    return .skip(offset: offset)
                 }
                 let dependency = dependencyPath.last ?? convertRootFSMToDependency(inMachine: machine)
                 // Create the token data since we cannot skip this token.
@@ -225,18 +237,6 @@ public final class ScheduleCycleKripkeStructureGenerator<
                     parents: isRootOfToken ? [self.convertRootFSMToDependency(inMachine: token.machine)] : Array(dependencyPath.dropLast()),
                     dispatchTable: dispatchTable
                 )
-                let dispatchToken = Tokenizer.DispatchTable.Token(
-                    id: gateway.id(of: token.fullyQualifiedName),
-                    fsm: dependencyPath.last?.fsm.asScheduleableFiniteStateMachine ?? token.machine.fsm.asScheduleableFiniteStateMachine,
-                    machine: token.machine,
-                    fullyQualifiedName: token.fullyQualifiedName
-                )
-                let offset: (startTime: UInt, duration: UInt)?
-                if let timeslot = dispatchTable?.findTimeslot(for: dispatchToken) {
-                    offset = (timeslot.startTime, timeslot.duration)
-                } else {
-                    offset = nil
-                }
                 return .verify(data: VerificationToken.Data(id: gateway.id(of: token.fullyQualifiedName), fsm: dependencyPath.last?.fsm ?? token.machine.fsm, machine: token.machine, externalVariables: externals, parameterisedMachines: parameterisedMachines, offset: offset))
             }
         }

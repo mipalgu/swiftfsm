@@ -72,8 +72,17 @@ public enum VerificationToken {
             return data
         }
     }
+    
+    var offset: (startTime: UInt, duration: UInt)? {
+        switch self {
+        case .skip(let offset):
+            return offset
+        case .verify(let data):
+            return data.offset
+        }
+    }
 
-    case skip
+    case skip(offset: (startTime: UInt, duration: UInt)?)
 
     case verify(data: VerificationToken.Data)
 
