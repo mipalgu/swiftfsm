@@ -172,7 +172,7 @@ public final class VerificationTokenExecuter<StateGenerator: KripkeStateGenerato
         if let firstExecutingIndex = tokens.firstIndex(where: { nil != $0.first { nil != $0.data } }),
             currentExecutingIndex == firstExecutingIndex,
             tokens.count > (firstExecutingIndex + 1),
-            let lastExecuted = tokens[(executing + 1)..<tokens.count].last(where: { nil != $0.first { nil != $0.data } })?.last(where: { nil != $0.data })?.timeData
+            let lastExecuted = tokens[(executing)..<tokens.count].last(where: { nil != $0.first { nil != $0.data } })?.last(where: { nil != $0.data })?.timeData
         {
             return currentOffset.startTime + (lastExecuted.cycleLength - (lastExecuted.startTime + lastExecuted.duration))
         }

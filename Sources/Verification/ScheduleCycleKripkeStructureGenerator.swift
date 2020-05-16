@@ -195,7 +195,7 @@ public final class ScheduleCycleKripkeStructureGenerator<
     ) -> ([[VerificationToken]], AnyKripkeStructureView<KripkeState>) {
         let dependencyFullyQualifiedName = (parents + [dependency]).reduce(machine.name) { $0 + "." + $1.fsm.name }
         let cycleLength = tokens.reduce(UInt(0)) {
-            $0 + ($1.last.map {
+            let cycleTime: UInt = ($1.last.map {
                 let dispatchToken = Tokenizer.DispatchTable.Token(
                     id: gateway.id(of: $0.fullyQualifiedName),
                     fsm: $0.fsm,
@@ -207,6 +207,7 @@ public final class ScheduleCycleKripkeStructureGenerator<
                 }
                 return timeslot.startTime + timeslot.duration
             } ?? 0)
+            return max($0, cycleTime)
         }
         let verificationTokens = tokens.map { (arr: [SchedulerToken]) in
             arr.map { (token: SchedulerToken) -> VerificationToken in
