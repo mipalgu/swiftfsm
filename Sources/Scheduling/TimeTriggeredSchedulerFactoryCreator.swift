@@ -57,20 +57,25 @@
  */
 
 import FSM
+import Gateways
 import MachineStructure
 import MachineLoading
 import swiftfsm
 
-public final class TimeTriggeredSchedulerFactoryCreator {
+public final class TimeTriggeredSchedulerFactoryCreator{
+    
+    private let gateway: StackGateway
     
     fileprivate let scheduleHandler: ScheduleHandler
     
     fileprivate let unloader: MachineUnloader
     
     public init(
+        gateway: StackGateway,
         scheduleHandler: ScheduleHandler,
         unloader: MachineUnloader
     ) {
+        self.gateway = gateway
         self.scheduleHandler = scheduleHandler
         self.unloader = unloader
     }
@@ -78,6 +83,7 @@ public final class TimeTriggeredSchedulerFactoryCreator {
     public func make(dispatchTable: MetaDispatchTable) -> TimeTriggeredSchedulerFactory {
         return TimeTriggeredSchedulerFactory(
             dispatchTable: dispatchTable,
+            gateway: self.gateway,
             scheduleHandler: self.scheduleHandler,
             unloader: self.unloader
         )

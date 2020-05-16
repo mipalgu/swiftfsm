@@ -63,6 +63,7 @@ import Darwin
 #endif
 
 import FSM
+import Gateways
 import IO
 import KripkeStructure
 import KripkeStructureViews
@@ -85,12 +86,16 @@ let printer: CommandLinePrinter =
 
 let clfsmMachineLoader = CLFSMMachineLoader()
 
+let gateway = StackGateway(printer: printer)
+
 let roundRobinFactory = RoundRobinSchedulerFactory(
+    gateway: gateway,
     scheduleHandler: clfsmMachineLoader,
     unloader: clfsmMachineLoader
 )
 
 let timeTriggeredFactory = TimeTriggeredSchedulerFactoryCreator(
+    gateway: gateway,
     scheduleHandler: clfsmMachineLoader,
     unloader: clfsmMachineLoader
 )
@@ -113,7 +118,7 @@ func run() {
     #endif
     Swiftfsm(
         clfsmMachineLoader: CLFSMMachineLoader(),
-        kripkeStructureGeneratorFactory: RoundRobinKripkeStructureGeneratorFactory(),
+        kripkeStructureGeneratorFactory: RoundRobinKripkeStructureGeneratorFactory(gateway: gateway),
         kripkeStructureViewFactory: AnyKripkeStructureViewFactory(NuSMVKripkeStructureViewFactory<KripkeState>()),
         machineCompiler: compiler,
         machineFactory: SimpleMachineFactory(),
@@ -123,11 +128,15 @@ func run() {
         ),
         parser: SwiftfsmParser(
             passiveRoundRobinFactory: PassiveRoundRobinSchedulerFactory(
+                gateway: gateway,
                 scheduleHandler: clfsmMachineLoader,
                 unloader: clfsmMachineLoader
             ),
+            passiveRoundRobinKripkeFactory: PassiveRoundRobinKripkeStructureGeneratorFactory(gateway: gateway),
             roundRobinFactory: roundRobinFactory,
-            timeTriggeredFactory: timeTriggeredFactory
+            roundRobinKripkeFactory: RoundRobinKripkeStructureGeneratorFactory(gateway: gateway),
+            timeTriggeredFactory: timeTriggeredFactory,
+            timeTriggeredKripkeFactory: RoundRobinKripkeStructureGeneratorFactory(gateway: gateway)
         ),
         schedulerFactory: roundRobinFactory,
         view: printer

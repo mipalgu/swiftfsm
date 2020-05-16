@@ -67,8 +67,7 @@ import Utilities
  *  Responsible for the execution of machines.
  */
 public class RoundRobinScheduler<Tokenizer: SchedulerTokenizer>: Scheduler, VerifiableGatewayDelegator where
-    Tokenizer.Object == Machine,
-    Tokenizer.SchedulerToken == SchedulerToken
+    Tokenizer.Object == Machine
 {
 
     public typealias Gateway = StackGateway

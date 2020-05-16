@@ -60,11 +60,15 @@ import FSM
 import MachineStructure
 import swiftfsm
 
-public final class ParallelTokenizer: SchedulerTokenizer {
+public final class ParallelTokenizer<Converter: SchedulerTokenDispatchTableConverter>: SchedulerTokenizer, SchedulerTokenDispatchTableConverterContainer where Converter.Token == SchedulerToken {
 
-    public init() {}
+    public let converter: Converter
+    
+    public init(converter: Converter) {
+        self.converter = converter
+    }
 
-    public func separate(_ machines: [Machine]) -> [[(AnyScheduleableFiniteStateMachine, Machine)]] {
+    public func separate(_ machines: [Machine]) -> [[SchedulerToken]] {
         return []
     }
 

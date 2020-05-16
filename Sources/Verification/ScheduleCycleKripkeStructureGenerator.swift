@@ -80,7 +80,6 @@ public final class ScheduleCycleKripkeStructureGenerator<
     ViewFactory: KripkeStructureViewFactory
 >: KripkeStructureGenerator where
     Tokenizer.Object == Machine,
-    Tokenizer.SchedulerToken == SchedulerToken,
     ViewFactory.View.State == KripkeState
 {
     fileprivate let machines: [Machine]

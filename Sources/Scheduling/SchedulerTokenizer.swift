@@ -57,14 +57,26 @@
  */
 
 import FSM
+import Gateways
 import ModelChecking
+import MachineStructure
 import swiftfsm
 
 public protocol SchedulerTokenizer {
 
     associatedtype Object
-    associatedtype SchedulerToken
+    associatedtype DispatchTable: DispatchTableProtocol
 
     func separate(_: [Object]) -> [[SchedulerToken]]
+    
+    func fetchDispatchTable(fromTokens: [[SchedulerToken]], referencing: MetaDispatchTable) -> DispatchTable?
 
+}
+
+extension SchedulerTokenizer where Self: SchedulerTokenDispatchTableConverterContainer, Self.Converter.Token == SchedulerToken {
+    
+    public func fetchDispatchTable(fromTokens tokens: [[SchedulerToken]], referencing dispatchTable: MetaDispatchTable) -> Converter.Table? {
+        self.converter.convert(tokens: tokens, referencing: dispatchTable)
+    }
+    
 }

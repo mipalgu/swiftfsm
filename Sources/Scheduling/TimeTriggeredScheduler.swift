@@ -70,13 +70,15 @@ public var VERBOSE = false
  *  Responsible for the execution of machines in a time-triggered parallel
  *  schedule.
  */
-public class TimeTriggeredScheduler: Scheduler, VerifiableGatewayDelegator {
+public class TimeTriggeredScheduler<Tokenizer: SchedulerTokenizer>: Scheduler, VerifiableGatewayDelegator where Tokenizer.Object == Machine, Tokenizer.DispatchTable.Token: ScheduleableDispatchTableTokenProtocol {
     
     public typealias Gateway = StackGateway
     
     fileprivate let dispatchTable: MetaDispatchTable
     
     public var gateway: StackGateway
+    
+    private let tokenizer: Tokenizer
     
     private let unloader: MachineUnloader
     
@@ -92,11 +94,13 @@ public class TimeTriggeredScheduler: Scheduler, VerifiableGatewayDelegator {
     public init(
         dispatchTable: MetaDispatchTable,
         gateway: StackGateway = StackGateway(),
+        tokenizer: Tokenizer,
         unloader: MachineUnloader,
         scheduleHandler: ScheduleHandler
     ) {
         self.dispatchTable = dispatchTable
         self.gateway = gateway
+        self.tokenizer = tokenizer
         self.unloader = unloader
         self.scheduleHandler = scheduleHandler
         self.threadPool = ThreadPool(numberOfThreads: dispatchTable.numberOfThreads)
@@ -109,8 +113,7 @@ public class TimeTriggeredScheduler: Scheduler, VerifiableGatewayDelegator {
         self.gateway.stacks = [:]
         machines.forEach { self.addToGateway($0.fsm, dependencies: $0.dependencies, prefix: $0.name
             + ".") }
-        let tokenizer = SequentialPerRingletTokenizer()
-        let tokens = tokenizer.separate(machines)
+        let tokens = self.tokenizer.separate(machines)
         tokens.forEach {
             $0.forEach {
                 guard let parameterisedFSM = $0.type.asParameterisedFiniteStateMachine else {
@@ -127,7 +130,7 @@ public class TimeTriggeredScheduler: Scheduler, VerifiableGatewayDelegator {
                 self.gateway.stacks[id] = [PromiseData(fsm: clone, hasFinished: false)]
             }
         }
-        guard let table = self.fetchTable(fromTokens: tokens) else {
+        guard let table = self.tokenizer.fetchDispatchTable(fromTokens: tokens, referencing: self.dispatchTable) else {
             fatalError("Unable to create schedulers dispatch table.")
         }
         var finish: Bool = false
@@ -177,25 +180,6 @@ public class TimeTriggeredScheduler: Scheduler, VerifiableGatewayDelegator {
         }
     }
     
-    private func fetchTable(fromTokens tokens: [[SchedulerToken]]) -> DispatchTable<Token>? {
-        guard let timeslots: [[Timeslot<Token>]] = tokens.failMap({ tokens in
-            tokens.failMap { token in
-                guard let timeslot = self.dispatchTable.findTimeslot(token.fullyQualifiedName) else {
-                    return nil
-                }
-                let newToken = Token(
-                    id: self.gateway.id(of: token.fullyQualifiedName),
-                    fsm: token.fsm,
-                    machine: token.machine
-                )
-                return Timeslot<Token>(startTime: timeslot.startTime, duration: timeslot.duration, task: newToken)
-            }?.sorted { $0.startTime < $1.startTime }
-        }) else {
-            return nil
-        }
-        return DispatchTable<Token>(numberOfThreads: self.dispatchTable.numberOfThreads, timeslots: timeslots)
-    }
-    
     fileprivate func addToGateway(_ fsm: FSMType, dependencies: [Dependency], prefix: String) {
         let id = self.gateway.id(of: prefix + fsm.name)
         self.gateway.fsms[id] = fsm
@@ -216,16 +200,6 @@ public class TimeTriggeredScheduler: Scheduler, VerifiableGatewayDelegator {
                 self.addToGateway(.controllableFSM(subfsm), dependencies: subdependencies, prefix: subprefix)
             }
         }
-    }
-    
-    fileprivate struct Token {
-        
-        var id: FSM_ID
-        
-        var fsm: AnyScheduleableFiniteStateMachine
-        
-        var machine: Machine
-        
     }
     
 }

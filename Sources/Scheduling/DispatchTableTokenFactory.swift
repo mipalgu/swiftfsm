@@ -1,9 +1,9 @@
 /*
- * SupportedSchedulers.swift 
- * Parsing 
+ * DispatchTableTokenFactory.swift
+ * Scheduling
  *
- * Created by Callum McColl on 26/09/2018.
- * Copyright © 2018 Callum McColl. All rights reserved.
+ * Created by Callum McColl on 16/5/20.
+ * Copyright © 2020 Callum McColl. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -56,17 +56,13 @@
  *
  */
 
-import Gateways
-import KripkeStructure
-import ModelChecking
-import Scheduling
-import Verification
+import MachineStructure
+import swiftfsm
 
-
-public enum SupportedSchedulers {
-
-    case passiveRoundRobin(PassiveRoundRobinSchedulerFactory, PassiveRoundRobinKripkeStructureGeneratorFactory)
-    case roundRobin(RoundRobinSchedulerFactory, RoundRobinKripkeStructureGeneratorFactory)
-    case timeTriggered(TimeTriggeredSchedulerFactory, RoundRobinKripkeStructureGeneratorFactory)
-
+public protocol DispatchTableTokenFactory {
+    
+    associatedtype Token
+    
+    func make(id: FSM_ID, fsm: AnyScheduleableFiniteStateMachine, machine: Machine) -> Token
+    
 }

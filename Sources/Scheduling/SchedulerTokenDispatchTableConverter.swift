@@ -1,9 +1,9 @@
 /*
- * SupportedSchedulers.swift 
- * Parsing 
+ * SchedulerTokenDispatchTableConverter.swift
+ * Scheduling
  *
- * Created by Callum McColl on 26/09/2018.
- * Copyright © 2018 Callum McColl. All rights reserved.
+ * Created by Callum McColl on 16/5/20.
+ * Copyright © 2020 Callum McColl. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -57,16 +57,65 @@
  */
 
 import Gateways
-import KripkeStructure
-import ModelChecking
-import Scheduling
-import Verification
+import MachineStructure
+import swiftfsm
 
+public protocol SchedulerTokenDispatchTableConverter {
+    
+    associatedtype Token
+    associatedtype Table: DispatchTableProtocol
+    
+    func convert(tokens: [[Token]], referencing: MetaDispatchTable) -> Table?
+    
+}
 
-public enum SupportedSchedulers {
+public protocol SchedulerTokenDispatchTableConverterContainer {
+    
+    associatedtype Converter: SchedulerTokenDispatchTableConverter
+    
+    var converter: Converter { get }
+    
+}
 
-    case passiveRoundRobin(PassiveRoundRobinSchedulerFactory, PassiveRoundRobinKripkeStructureGeneratorFactory)
-    case roundRobin(RoundRobinSchedulerFactory, RoundRobinKripkeStructureGeneratorFactory)
-    case timeTriggered(TimeTriggeredSchedulerFactory, RoundRobinKripkeStructureGeneratorFactory)
-
+public struct SchedulerTokenToDispatchTableConverter<Gateway: FSMGateway>: SchedulerTokenDispatchTableConverter, GatewayContainer {
+    
+    
+    public let gateway: Gateway
+    
+    public init(gateway: Gateway) {
+        self.gateway = gateway
+    }
+    
+    public func convert(tokens: [[SchedulerToken]], referencing dispatchTable: MetaDispatchTable) -> DispatchTable<TableToken>? {
+        guard let timeslots: [[Timeslot<TableToken>]] = tokens.failMap({ tokens in
+            tokens.failMap { token in
+                guard let timeslot = dispatchTable.findTimeslot(for: token.fullyQualifiedName) else {
+                    return nil
+                }
+                let newToken = TableToken(
+                    id: self.gateway.id(of: token.fullyQualifiedName),
+                    fsm: token.fsm,
+                    machine: token.machine,
+                    fullyQualifiedName: token.fullyQualifiedName
+                )
+                return Timeslot<TableToken>(startTime: timeslot.startTime, duration: timeslot.duration, task: newToken)
+            }?.sorted { $0.startTime < $1.startTime }
+        }) else {
+            return nil
+        }
+        return DispatchTable<TableToken>(numberOfThreads: dispatchTable.numberOfThreads, timeslots: timeslots)
+    }
+    
+    public struct TableToken: ScheduleableDispatchTableTokenProtocol {
+        
+        public let id: FSM_ID
+        
+        public let fsm: AnyScheduleableFiniteStateMachine
+        
+        public let machine: Machine
+        
+        public let fullyQualifiedName: String
+        
+    }
+    
 }
