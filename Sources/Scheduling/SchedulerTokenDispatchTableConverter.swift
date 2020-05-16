@@ -106,7 +106,7 @@ public struct SchedulerTokenToDispatchTableConverter<Gateway: FSMGateway>: Sched
         return DispatchTable<TableToken>(numberOfThreads: dispatchTable.numberOfThreads, timeslots: timeslots)
     }
     
-    public struct TableToken: ScheduleableDispatchTableTokenProtocol {
+    public struct TableToken: VerifiableDispatchTableTokenProtocol {
         
         public let id: FSM_ID
         
@@ -115,6 +115,13 @@ public struct SchedulerTokenToDispatchTableConverter<Gateway: FSMGateway>: Sched
         public let machine: Machine
         
         public let fullyQualifiedName: String
+        
+        public init(id: FSM_ID, fsm: AnyScheduleableFiniteStateMachine, machine: Machine, fullyQualifiedName: String) {
+            self.id = id
+            self.fsm = fsm
+            self.machine = machine
+            self.fullyQualifiedName = fullyQualifiedName
+        }
         
     }
     

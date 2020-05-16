@@ -70,3 +70,9 @@ public protocol ScheduleableDispatchTableTokenProtocol: Equatable {
     var fullyQualifiedName: String { get }
     
 }
+
+public protocol VerifiableDispatchTableTokenProtocol: ScheduleableDispatchTableTokenProtocol {
+    
+    init(id: FSM_ID, fsm: AnyScheduleableFiniteStateMachine, machine: Machine, fullyQualifiedName: String)
+    
+}

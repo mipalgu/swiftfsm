@@ -89,6 +89,8 @@ public enum VerificationToken {
         
         public let parameterisedMachines: [FSM_ID: ParameterisedMachineData]
         
+        public let offset: (startTime: UInt, duration: UInt)?
+        
     }
 
 }
