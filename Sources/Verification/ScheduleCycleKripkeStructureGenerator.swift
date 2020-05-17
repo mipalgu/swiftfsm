@@ -129,7 +129,7 @@ public final class ScheduleCycleKripkeStructureGenerator<
         }}}
         // Reset all views so that we may reuse views that have previously been used.
         self.viewCache.forEach {
-            $1.reset()
+            $1.reset(usingClocks: self.dispatchTable != nil)
         }
         // Generate a separate kripke structure for each collection of verification token.
         // This allows the creation of isolated kripke structures based on the
@@ -301,7 +301,7 @@ public final class ScheduleCycleKripkeStructureGenerator<
             }
             let fullyQualifiedName = fullyQualifiedName + "." + fsm.name
             let (tokens, view) = self.schedule(forDependency: dependency, inMachine: machine, usingTokens: tokens, andGateway: gateway, parents: parents, dispatchTable: dispatchTable)
-            view.reset()
+            view.reset(usingClocks: dispatchTable != nil)
             return (
                 id,
                 ParameterisedMachineData(
