@@ -110,6 +110,8 @@ public enum VerificationToken {
         
         public let timeData: TimeData?
         
+        public let clockName: String
+        
     }
 
 }

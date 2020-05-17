@@ -252,7 +252,7 @@ public final class ScheduleCycleKripkeStructureGenerator<
                     parents: isRootOfToken ? [self.convertRootFSMToDependency(inMachine: token.machine)] : Array(dependencyPath.dropLast()),
                     dispatchTable: dispatchTable
                 )
-                return .verify(data: VerificationToken.Data(id: gateway.id(of: token.fullyQualifiedName), fsm: dependencyPath.last?.fsm ?? token.machine.fsm, machine: token.machine, externalVariables: externals, parameterisedMachines: parameterisedMachines, timeData: timeData))
+                return .verify(data: VerificationToken.Data(id: gateway.id(of: token.fullyQualifiedName), fsm: dependencyPath.last?.fsm ?? token.machine.fsm, machine: token.machine, externalVariables: externals, parameterisedMachines: parameterisedMachines, timeData: timeData, clockName: token.fullyQualifiedName + ".clock"))
             }
         }
         let identifier = parents.isEmpty ? machine.name : dependencyFullyQualifiedName

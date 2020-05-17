@@ -145,7 +145,8 @@ final class VerificationCycleKripkeStructureGenerator<
             if true == cycleDetector.inCycle(data: &globalDetectorCache, element: world) {
                 if nil == resultID {
                     let time = self.timeSinceLastStart(in: job.tokens, executing: job.executing, offset: 0)
-                    job.lastState?.edges.insert(KripkeEdge(time: time ?? 0, target: world))
+                    let tokenData = job.tokens[job.executing][0].data
+                    job.lastState?.edges.insert(KripkeEdge(clockName: tokenData?.clockName, resetClock: true, time: time ?? 0, target: world))
                     continue
                 } else if job.foundCycle && handledAllResults {
                     return runs
