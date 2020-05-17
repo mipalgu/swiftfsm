@@ -112,6 +112,8 @@ public enum VerificationToken {
         
         public let clockName: String
         
+        public var lastFSMStateName: String?
+        
     }
 
 }

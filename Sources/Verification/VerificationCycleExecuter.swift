@@ -132,6 +132,7 @@ final class VerificationCycleExecuter {
         var runs: [VerificationRun<Gateway.GatewayData>] = []
         while false == jobs.isEmpty {
             let job = jobs.removeFirst()
+            let lastStateName = tokens[executing][job.index].data?.fsm.currentState.name
             let newTokens = self.prepareTokens(job.tokens, executing: (executing, job.index), fromExternals: job.externals, usingCallStack: job.callStack)
             guard let data = newTokens[executing][job.index].data else {
                 fatalError("Unable to fetch data of verification token.")
@@ -166,9 +167,14 @@ final class VerificationCycleExecuter {
             // Add tokens to runs when we have finished executing all of the tokens in a run.
             if job.index + 1 >= tokens[executing].count {
                 _ = lastState.map { lastStates.insert($0.properties) }
+                var copy = newTokens
+                if let data = copy[executing][job.index].data {
+                    let newData = VerificationToken.Data(id: data.id, fsm: data.fsm, machine: data.machine, externalVariables: data.externalVariables, parameterisedMachines: data.parameterisedMachines, timeData: data.timeData, clockName: data.clockName, lastFSMStateName: lastStateName)
+                    copy[executing][job.index] = .verify(data: newData)
+                }
                 runs.append(VerificationRun(
                     lastState: lastState,
-                    tokens: newTokens,
+                    tokens: copy,
                     callStack: newCallStack,
                     gatewayData: gateway.gatewayData,
                     results: newResults
@@ -274,7 +280,7 @@ final class VerificationCycleExecuter {
         }
         let clone = fsm.clone()
         var newTokens = tokens
-        newTokens[executing.0][executing.1] = .verify(data: VerificationToken.Data(id: data.id, fsm: clone, machine: data.machine, externalVariables: data.externalVariables, parameterisedMachines: data.parameterisedMachines, timeData: data.timeData, clockName: data.clockName))
+        newTokens[executing.0][executing.1] = .verify(data: VerificationToken.Data(id: data.id, fsm: clone, machine: data.machine, externalVariables: data.externalVariables, parameterisedMachines: data.parameterisedMachines, timeData: data.timeData, clockName: data.clockName, lastFSMStateName: data.lastFSMStateName))
         newTokens[executing.0].forEach {
             guard var fsm = $0.data?.fsm else {
                 return
