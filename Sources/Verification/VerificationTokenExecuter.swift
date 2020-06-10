@@ -131,6 +131,7 @@ public final class VerificationTokenExecuter<StateGenerator: KripkeStateGenerato
         } else if let callData = callStack[data.id]?.last {
             newCallStack[data.id] = Array((newCallStack[data.id] ?? []).dropLast()) + [CallData(data: callData.data, parameters: callData.parameters, promiseData: callData.promiseData, runs: callData.runs + 1)]
         }
+        let newConstraint: ClockConstraint? = data.machine.clock.lastClockValues.isEmpty ? nil : clockConstraint
         //print("self.calls: \(self.calls)")
         let postWorld = self.worldCreator.createWorld(
             fromExternals: externals,
@@ -144,7 +145,7 @@ public final class VerificationTokenExecuter<StateGenerator: KripkeStateGenerato
             worldType: .afterExecution
         )
         //let preConstraint = self.calculateConstraint(clock: clock, clockValuesDuringRun: clock)
-        let postState = self.stateGenerator.generateKripkeState(clockName: clockName, resetClock: false, fromWorld: postWorld, constraint: clockConstraint, time: tokens[executing][offset].timeData?.duration ?? 0, withLastState: preState)
+        let postState = self.stateGenerator.generateKripkeState(clockName: clockName, resetClock: false, fromWorld: postWorld, constraint: newConstraint, time: tokens[executing][offset].timeData?.duration ?? 0, withLastState: preState)
         return ([preState, postState], data.machine.clock.lastClockValues, externals, newCallStack, results)
     }
     
