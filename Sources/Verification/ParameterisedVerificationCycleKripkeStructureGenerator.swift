@@ -245,13 +245,24 @@ public final class ParameterisedVerificationCycleKripkeStructureGenerator<Detect
     }
 
     fileprivate func createInitialJobs<Gateway: VerifiableGateway>(fromTokens tokens: [[VerificationToken]], andGateway gateway: Gateway) -> [VerificationState<Detector.Data, Gateway.GatewayData>] {
+        let initial: Bool
+        let lastState: KripkeState?
+        if nil != tokens.lazy.flatMap({ $0 }).first(where: { $0.timeData != nil }) {
+            let kripkeState = KripkeState(properties: ["pc": KripkeStateProperty(type: .String, value: "initial")])
+            self.view.commit(state: kripkeState, isInitial: true)
+            initial = false
+            lastState = kripkeState
+        } else {
+            initial = true
+            lastState = nil
+        }
         return [VerificationState(
-                initial: true,
+                initial: initial,
                 cycleCache: self.cycleDetector.initialData,
                 foundCycle: false,
                 tokens: tokens,
                 executing: 0,
-                lastState: nil,
+                lastState: lastState,
                 lastRecords: tokens.map { $0.map { ($0.data?.fsm.asScheduleableFiniteStateMachine.base).map(self.recorder.takeRecord) ?? KripkeStatePropertyList() } },
                 runs: 0,
                 callStack: [:],

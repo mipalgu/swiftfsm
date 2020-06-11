@@ -174,9 +174,15 @@ public final class VerificationTokenExecuter<StateGenerator: KripkeStateGenerato
         if index > 0, let lastExecuted = flattenedTokens[0..<index].last(where: { nil != $0.data })?.timeData {
             return currentOffset.startTime - (lastExecuted.startTime + lastExecuted.duration)
         }
+        // If this token has not executed before - use its initial start time.
+        if nil == tokens[executing][offset].data?.lastFSMStateName {
+            return currentOffset.startTime
+        }
+        // Try finding the previous token starting from the back of the schedule.
         if let lastExecuted = flattenedTokens[(index + 1)..<flattenedTokens.count].last(where: { nil != $0.data })?.timeData {
             return currentOffset.startTime + (currentOffset.cycleLength - (lastExecuted.startTime + lastExecuted.duration))
         }
+        // This token has executed before and it was the last token to execute - use the cycle length.
         return currentOffset.cycleLength - currentOffset.duration
     }
 
