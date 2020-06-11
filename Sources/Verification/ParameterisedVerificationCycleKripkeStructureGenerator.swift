@@ -98,7 +98,7 @@ public final class ParameterisedVerificationCycleKripkeStructureGenerator<Detect
     ) -> SortedCollection<(UInt, Any?)>? where View.State == KripkeState {
         self.view = AnyKripkeStructureView(view)
         // Create the initial starting jobs.
-        var jobs = self.createInitialJobs(fromTokens: self.tokens, andGateway: gateway)
+        var (jobs, initialPseudoState) = self.createInitialJobs(fromTokens: self.tokens, andGateway: gateway)
         var globalDetectorCache = self.cycleDetector.initialData // The cycle detectors data which we keep mutating.
         var foundCycle = false // Have we found a cycle?
         // Stores any results for the fsm with id `resultID`.
@@ -182,7 +182,7 @@ public final class ParameterisedVerificationCycleKripkeStructureGenerator<Detect
                     // Add the lastNewState as a finishing state,
                     // don't generate more jobs as all fsms have finished.
                     if true == allFinished {
-                        view.commit(state: lastNewState, isInitial: false)
+                        view.commit(state: lastNewState)
                         continue
                     }
                     let newExecutingIndex = (run.executing + 1) % run.tokens.count
@@ -194,7 +194,7 @@ public final class ParameterisedVerificationCycleKripkeStructureGenerator<Detect
                     jobs.append(run)
                  }
             }
-            _ = job.lastState.map { view.commit(state: $0, isInitial: false) }
+            _ = job.lastState.map { view.commit(state: $0) }
         }
         // Don't return any results if we have cycles.
         if true == foundCycle {
@@ -244,19 +244,18 @@ public final class ParameterisedVerificationCycleKripkeStructureGenerator<Detect
         return (allResults, handledAllResults)
     }
 
-    fileprivate func createInitialJobs<Gateway: VerifiableGateway>(fromTokens tokens: [[VerificationToken]], andGateway gateway: Gateway) -> [VerificationState<Detector.Data, Gateway.GatewayData>] {
+    fileprivate func createInitialJobs<Gateway: VerifiableGateway>(fromTokens tokens: [[VerificationToken]], andGateway gateway: Gateway) -> ([VerificationState<Detector.Data, Gateway.GatewayData>], KripkeState?) {
         let initial: Bool
         let lastState: KripkeState?
         if nil != tokens.lazy.flatMap({ $0 }).first(where: { $0.timeData != nil }) {
-            let kripkeState = KripkeState(properties: ["pc": KripkeStateProperty(type: .String, value: "initial")])
-            self.view.commit(state: kripkeState, isInitial: true)
+            let kripkeState = KripkeState(isInitial: true, properties: ["pc": KripkeStateProperty(type: .String, value: "initial")])
             initial = false
             lastState = kripkeState
         } else {
             initial = true
             lastState = nil
         }
-        return [VerificationState(
+        return ([VerificationState(
                 initial: initial,
                 cycleCache: self.cycleDetector.initialData,
                 foundCycle: false,
@@ -270,7 +269,7 @@ public final class ParameterisedVerificationCycleKripkeStructureGenerator<Detect
                 foundResult: false,
                 gatewayData: gateway.gatewayData
             )
-        ]
+        ], lastState)
     }
 
     public func createSpinner<Key, Value, C: Collection>(forValues values: [Key: C]) -> () -> [Key: Value]? where C.Iterator.Element == Value {

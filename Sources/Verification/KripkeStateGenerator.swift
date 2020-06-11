@@ -75,6 +75,7 @@ public final class KripkeStateGenerator: KripkeStateGeneratorProtocol {
     ) -> KripkeState {
         last?.edges.insert(KripkeEdge(clockName: clockName, constraint: constraint, resetClock: resetClock, time: time, target: world))
         return KripkeState(
+            isInitial: last == nil,
             properties: world,
             edges: []
         )

@@ -129,6 +129,9 @@ final class VerificationCycleExecuter {
         let states: Ref<[KripkeStatePropertyList: KripkeState]> = Ref(value: [:])
         var initialStates: HashSink<KripkeStatePropertyList, KripkeStatePropertyList> = HashSink()
         var lastStates: HashSink<KripkeStatePropertyList, KripkeStatePropertyList> = HashSink()
+        if let token = tokens[0][0].timeData, nil == tokens.flatMap({ $0 }).first(where: { nil != $0.data })?.data?.lastFSMStateName {
+            
+        }
         var runs: [VerificationRun<Gateway.GatewayData>] = []
         while false == jobs.isEmpty {
             let job = jobs.removeFirst()
@@ -188,7 +191,7 @@ final class VerificationCycleExecuter {
             if lastStates.contains(arg.key) {
                 return
             }
-            view.commit(state: arg.value, isInitial: initial && initialStates.contains(arg.value.properties))
+            view.commit(state: arg.value)
         }
         return runs
     }

@@ -113,7 +113,13 @@ public final class VerificationTokenExecuter<StateGenerator: KripkeStateGenerato
         )
         let clockName = self.clockName(forToken: tokens[executing][offset])
         let time = (lastState == nil ? 0 : self.timeSinceLastStart(in: tokens, executing: executing, offset: offset)) ?? 0
-        let preState = self.stateGenerator.generateKripkeState(clockName: clockName, resetClock: token.data?.lastFSMStateName != token.data?.fsm.currentState.name, fromWorld: preWorld, constraint: nil, time: time, withLastState: lastState)
+        let resetClock = token.data.map {
+            guard let stateName = $0.lastFSMStateName else {
+                return true
+            }
+            return stateName != $0.fsm.currentState.name
+        } ?? false
+        let preState = self.stateGenerator.generateKripkeState(clockName: clockName, resetClock: resetClock, fromWorld: preWorld, constraint: nil, time: time, withLastState: lastState)
         var newCallStack: [FSM_ID: [CallData]] = callStack
         if false == (callStack[data.id]?.last?.inPlace ?? false) {
             fsm.next()
