@@ -87,9 +87,10 @@ public struct SchedulerTokenToDispatchTableConverter<Gateway: FSMGateway>: Sched
     }
     
     public func convert(tokens: [[SchedulerToken]], referencing dispatchTable: MetaDispatchTable) -> DispatchTable<TableToken>? {
-        guard let timeslots: [[Timeslot<TableToken>]] = tokens.failMap({ tokens in
-            tokens.failMap { token in
-                guard let timeslot = dispatchTable.findTimeslot(for: token.fullyQualifiedName) else {
+        let flattenedTokens = tokens.lazy.flatMap { $0 }
+        guard let timeslots: [[Timeslot<TableToken>]] = dispatchTable.timeslots.failMap({ timeslots in
+            timeslots.failMap { timeslot in
+                guard let token = flattenedTokens.first(where: { $0.fullyQualifiedName == timeslot.task }) else {
                     return nil
                 }
                 let newToken = TableToken(

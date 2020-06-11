@@ -188,24 +188,16 @@ final class VerificationCycleKripkeStructureGenerator<
         guard let currentOffset = tokens[executing][offset].timeData else {
             return nil
         }
-        // Get the offset of the previous token in the same cycle.
-        if offset > 0, let lastExecuted = tokens[executing][0..<offset].last(where: { nil != $0.data })?.timeData {
+        let flattenedTokens = tokens.flatMap { $0 }
+        let index = tokens[0..<executing].reduce(0) { $0 + $1.count } + offset
+        // Get the offset of the previous token.
+        if index > 0, let lastExecuted = flattenedTokens[0..<index].last(where: { nil != $0.data })?.timeData {
             return currentOffset.startTime - (lastExecuted.startTime + lastExecuted.duration)
         }
-        // Get the offset of the last token in the previous executed cycle.
-        if let lastExecuted = tokens[0..<executing].last(where: { nil != $0.first { nil != $0.data} })?.last(where: { nil != $0.data })?.timeData {
-            return currentOffset.startTime - (lastExecuted.startTime + lastExecuted.duration)
+        if let lastExecuted = flattenedTokens[(index + 1)..<flattenedTokens.count].last(where: { nil != $0.data })?.timeData {
+            return currentOffset.startTime + (currentOffset.cycleLength - (lastExecuted.startTime + lastExecuted.duration))
         }
-        // Wrap around if we are unable to get the last token from the previous executed cycle.
-        let currentExecutingIndex = tokens.index(0, offsetBy: executing)
-        if let firstExecutingIndex = tokens.firstIndex(where: { nil != $0.first { nil != $0.data } }),
-            currentExecutingIndex == firstExecutingIndex,
-            tokens.count > (firstExecutingIndex + 1),
-            let lastExecuted = tokens[(executing)..<tokens.count].last(where: { nil != $0.first { nil != $0.data } })?.last(where: { nil != $0.data })?.timeData
-        {
-            return currentOffset.startTime + (lastExecuted.cycleLength - (lastExecuted.startTime + lastExecuted.duration))
-        }
-        return currentOffset.startTime
+        return currentOffset.cycleLength - currentOffset.duration
     }
 
 }
