@@ -119,7 +119,7 @@ public final class VerificationTokenExecuter<StateGenerator: KripkeStateGenerato
             }
             return stateName != $0.fsm.currentState.name
         } ?? false
-        let preState = self.stateGenerator.generateKripkeState(clockName: clockName, resetClock: resetClock, fromWorld: preWorld, constraint: nil, time: time, withLastState: lastState)
+        let preState = self.stateGenerator.generateKripkeState(clockName: clockName, resetClock: resetClock, takeSnapshot: true, fromWorld: preWorld, constraint: nil, time: time, withLastState: lastState)
         var newCallStack: [FSM_ID: [CallData]] = callStack
         if false == (callStack[data.id]?.last?.inPlace ?? false) {
             fsm.next()
@@ -151,7 +151,7 @@ public final class VerificationTokenExecuter<StateGenerator: KripkeStateGenerato
             worldType: .afterExecution
         )
         //let preConstraint = self.calculateConstraint(clock: clock, clockValuesDuringRun: clock)
-        let postState = self.stateGenerator.generateKripkeState(clockName: clockName, resetClock: false, fromWorld: postWorld, constraint: newConstraint, time: tokens[executing][offset].timeData?.duration ?? 0, withLastState: preState)
+        let postState = self.stateGenerator.generateKripkeState(clockName: clockName, resetClock: false, takeSnapshot: false, fromWorld: postWorld, constraint: newConstraint, time: tokens[executing][offset].timeData?.duration ?? 0, withLastState: preState)
         return ([preState, postState], data.machine.clock.lastClockValues, externals, newCallStack, results)
     }
     

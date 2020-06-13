@@ -68,12 +68,13 @@ public final class KripkeStateGenerator: KripkeStateGeneratorProtocol {
     public func generateKripkeState(
         clockName: String,
         resetClock: Bool,
+        takeSnapshot: Bool,
         fromWorld world: KripkeStatePropertyList,
         constraint: ClockConstraint? = nil,
         time: UInt = 0,
         withLastState last: KripkeState? = nil
     ) -> KripkeState {
-        last?.edges.insert(KripkeEdge(clockName: clockName, constraint: constraint, resetClock: resetClock, time: time, target: world))
+        last?.edges.insert(KripkeEdge(clockName: clockName, constraint: constraint, resetClock: resetClock, takeSnapshot: takeSnapshot, time: time, target: world))
         return KripkeState(
             isInitial: last == nil,
             properties: world,
