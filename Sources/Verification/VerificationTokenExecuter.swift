@@ -102,6 +102,7 @@ public final class VerificationTokenExecuter<StateGenerator: KripkeStateGenerato
         let state = fsm.currentState.name
         let preWorld = self.worldCreator.createWorld(
             fromExternals: externals,
+            actuators: data.fsm.actuators,
             andParameterisedMachines: parameterisedMachines,
             andTokens: tokens,
             andLastState: lastState,
@@ -141,6 +142,7 @@ public final class VerificationTokenExecuter<StateGenerator: KripkeStateGenerato
         //print("self.calls: \(self.calls)")
         let postWorld = self.worldCreator.createWorld(
             fromExternals: externals,
+            actuators: data.fsm.actuators,
             andParameterisedMachines: parameterisedMachines,
             andTokens: tokens,
             andLastState: preState,

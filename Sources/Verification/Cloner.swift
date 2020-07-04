@@ -82,10 +82,14 @@ public final class Cloner<Converter: KripkeStatePropertyListConverter>: ClonerPr
         var newExternals: [ExternalVariablesVerificationData] = []
         newExternals.reserveCapacity(data.externalVariables.count)
         for i in 0..<data.externalVariables.count {
-            clone.externalVariables[i].val = data.externalVariables[i].externalVariables.val
+            if i < clone.externalVariables.count {
+                clone.externalVariables[i].val = data.externalVariables[i].externalVariables.val
+            } else {
+                clone.sensors[i - clone.externalVariables.count].val = data.externalVariables[i].externalVariables.val
+            }
             newExternals.append(
                 ExternalVariablesVerificationData(
-                    externalVariables: clone.externalVariables[i],
+                    externalVariables: i < clone.externalVariables.count ? clone.externalVariables[i] : clone.sensors[i - clone.externalVariables.count],
                     defaultValues: data.externalVariables[i].defaultValues,
                     spinners: data.externalVariables[i].spinners
                 )

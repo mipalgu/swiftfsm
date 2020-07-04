@@ -232,7 +232,7 @@ public final class ScheduleCycleKripkeStructureGenerator<
                 }
                 let dependency = dependencyPath.last ?? convertRootFSMToDependency(inMachine: machine)
                 // Create the token data since we cannot skip this token.
-                let externals = token.fsm.externalVariables.map { (external: AnySnapshotController) -> ExternalVariablesVerificationData in
+                let externals = (token.fsm.externalVariables + token.fsm.sensors).map { (external: AnySnapshotController) -> ExternalVariablesVerificationData in
                     let (defaultValues, spinners) = self.extractor.extract(externalVariables: external)
                     return ExternalVariablesVerificationData(externalVariables: external, defaultValues: defaultValues, spinners: spinners)
                 }

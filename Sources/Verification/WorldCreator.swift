@@ -71,6 +71,7 @@ public final class WorldCreator {
     //swiftlint:disable:next function_parameter_count
     public func createWorld(
         fromExternals externals: [(AnySnapshotController, KripkeStatePropertyList)],
+        actuators: [AnySnapshotController],
         andParameterisedMachines parameterisedMachines: [FSM_ID: ParameterisedMachineData],
         andTokens tokens: [[VerificationToken]],
         andLastState lastState: KripkeState?,
@@ -80,7 +81,7 @@ public final class WorldCreator {
         usingCallStack callStack: [FSM_ID: [CallData]],
         worldType: WorldType
     ) -> KripkeStatePropertyList {
-        let externalVariables = self.convert(externals: externals, withLastState: lastState)
+        let externalVariables = self.convert(externals: externals, actuators: actuators, withLastState: lastState)
         let str: String
         switch worldType {
         case .beforeExecution:
@@ -165,13 +166,20 @@ public final class WorldCreator {
         }
     }
 
-    private func convert(externals: [(AnySnapshotController, KripkeStatePropertyList)], withLastState lastState: KripkeState?) -> KripkeStatePropertyList {
+    private func convert(externals: [(AnySnapshotController, KripkeStatePropertyList)], actuators: [AnySnapshotController], withLastState lastState: KripkeState?) -> KripkeStatePropertyList {
         let lastExternals = self.fetchLastExternals(fromLastState: lastState)
         var props: KripkeStatePropertyList = [:]
         var values: [String: Any] = [:]
         externals.forEach {
             props[$0.0.name] = KripkeStateProperty(type: .Compound($0.1), value: $0.0.val)
             values[$0.0.name] = $0.0.val
+        }
+        actuators.forEach {
+            if props[$0.name] != nil {
+                return
+            }
+            props[$0.name] = KripkeStateProperty(type: .Compound(self.recorder.takeRecord(of: $0.val)), value: $0.val)
+            values[$0.name] = $0.val
         }
         return [
             "externalVariables": KripkeStateProperty(

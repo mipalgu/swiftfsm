@@ -132,6 +132,7 @@ final class VerificationCycleKripkeStructureGenerator<
             // Check for cycles.
             let world = self.worldCreator.createWorld(
                 fromExternals: externals,
+                actuators: firstData.fsm.actuators,
                 andParameterisedMachines: parameterisedMachines,
                 andTokens: job.tokens,
                 andLastState: job.lastState,
