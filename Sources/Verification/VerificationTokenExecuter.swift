@@ -102,7 +102,6 @@ public final class VerificationTokenExecuter<StateGenerator: KripkeStateGenerato
         let state = fsm.currentState.name
         let preWorld = self.worldCreator.createWorld(
             fromExternals: externals,
-            actuators: data.fsm.actuators,
             andParameterisedMachines: parameterisedMachines,
             andTokens: tokens,
             andLastState: lastState,
@@ -124,7 +123,7 @@ public final class VerificationTokenExecuter<StateGenerator: KripkeStateGenerato
         var newCallStack: [FSM_ID: [CallData]] = callStack
         if false == (callStack[data.id]?.last?.inPlace ?? false) {
             fsm.next()
-            fsm.externalVariables.forEach { external in
+            (fsm.externalVariables + fsm.sensors + fsm.actuators).forEach { external in
                 for var (i, (e, _)) in externals.enumerated() where e.name == external.name {
                     e.val = external.val
                     externals[i] = (e, self.recorder.takeRecord(of: e.val))
@@ -142,7 +141,6 @@ public final class VerificationTokenExecuter<StateGenerator: KripkeStateGenerato
         //print("self.calls: \(self.calls)")
         let postWorld = self.worldCreator.createWorld(
             fromExternals: externals,
-            actuators: data.fsm.actuators,
             andParameterisedMachines: parameterisedMachines,
             andTokens: tokens,
             andLastState: preState,

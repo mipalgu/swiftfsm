@@ -106,6 +106,10 @@ public enum VerificationToken {
         
         public let externalVariables: [ExternalVariablesVerificationData]
         
+        public let sensors: [ExternalVariablesVerificationData]
+        
+        public let actuators: [ExternalVariablesVerificationData]
+        
         public let parameterisedMachines: [FSM_ID: ParameterisedMachineData]
         
         public let timeData: TimeData?

@@ -172,7 +172,7 @@ final class VerificationCycleExecuter {
                 _ = lastState.map { lastStates.insert($0.properties) }
                 var copy = newTokens
                 if let data = copy[executing][job.index].data {
-                    let newData = VerificationToken.Data(id: data.id, fsm: data.fsm, machine: data.machine, externalVariables: data.externalVariables, parameterisedMachines: data.parameterisedMachines, timeData: data.timeData, clockName: data.clockName, lastFSMStateName: lastStateName)
+                    let newData = VerificationToken.Data(id: data.id, fsm: data.fsm, machine: data.machine, externalVariables: data.externalVariables, sensors: data.sensors, actuators: data.actuators, parameterisedMachines: data.parameterisedMachines, timeData: data.timeData, clockName: data.clockName, lastFSMStateName: lastStateName)
                     copy[executing][job.index] = .verify(data: newData)
                 }
                 runs.append(VerificationRun(
@@ -283,7 +283,7 @@ final class VerificationCycleExecuter {
         }
         let clone = fsm.clone()
         var newTokens = tokens
-        newTokens[executing.0][executing.1] = .verify(data: VerificationToken.Data(id: data.id, fsm: clone, machine: data.machine, externalVariables: data.externalVariables, parameterisedMachines: data.parameterisedMachines, timeData: data.timeData, clockName: data.clockName, lastFSMStateName: data.lastFSMStateName))
+        newTokens[executing.0][executing.1] = .verify(data: VerificationToken.Data(id: data.id, fsm: clone, machine: data.machine, externalVariables: data.externalVariables, sensors: data.sensors, actuators: data.actuators, parameterisedMachines: data.parameterisedMachines, timeData: data.timeData, clockName: data.clockName, lastFSMStateName: data.lastFSMStateName))
         newTokens[executing.0].forEach {
             guard var fsm = $0.data?.fsm else {
                 return

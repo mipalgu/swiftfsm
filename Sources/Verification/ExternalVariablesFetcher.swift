@@ -77,7 +77,7 @@ public final class ExternalVariablesFetcher {
         var hashTable: Set<String> = []
         var externals: [ExternalVariablesVerificationData] = []
         for tokens in tokens {
-            tokens.forEach { ($0.data?.externalVariables ?? []).forEach {
+            tokens.forEach { (($0.data?.externalVariables ?? []) + ($0.data?.sensors ?? []) + ($0.data?.actuators ?? [])).forEach {
                 if hashTable.contains($0.externalVariables.name) {
                     return
                 }

@@ -232,8 +232,16 @@ public final class ScheduleCycleKripkeStructureGenerator<
                 }
                 let dependency = dependencyPath.last ?? convertRootFSMToDependency(inMachine: machine)
                 // Create the token data since we cannot skip this token.
-                let externals = (token.fsm.externalVariables + token.fsm.sensors).map { (external: AnySnapshotController) -> ExternalVariablesVerificationData in
+                let externals = token.fsm.externalVariables.map { (external: AnySnapshotController) -> ExternalVariablesVerificationData in
                     let (defaultValues, spinners) = self.extractor.extract(externalVariables: external)
+                    return ExternalVariablesVerificationData(externalVariables: external, defaultValues: defaultValues, spinners: spinners)
+                }
+                let sensors = token.fsm.sensors.map { (external: AnySnapshotController) -> ExternalVariablesVerificationData in
+                    let (defaultValues, spinners) = self.extractor.extract(externalVariables: external)
+                    return ExternalVariablesVerificationData(externalVariables: external, defaultValues: defaultValues, spinners: spinners)
+                }
+                let actuators = token.fsm.actuators.map { (external: AnySnapshotController) -> ExternalVariablesVerificationData in
+                    let (defaultValues, spinners) = self.extractor.extract(actuators: external)
                     return ExternalVariablesVerificationData(externalVariables: external, defaultValues: defaultValues, spinners: spinners)
                 }
                 let parameterisedMachines = self.fetchParameterisedMachines(
@@ -245,7 +253,7 @@ public final class ScheduleCycleKripkeStructureGenerator<
                     parents: isRootOfToken ? [self.convertRootFSMToDependency(inMachine: token.machine)] : Array(dependencyPath.dropLast()),
                     dispatchTable: dispatchTable
                 )
-                return .verify(data: VerificationToken.Data(id: gateway.id(of: token.fullyQualifiedName), fsm: dependencyPath.last?.fsm ?? token.machine.fsm, machine: token.machine, externalVariables: externals, parameterisedMachines: parameterisedMachines, timeData: timeData, clockName: token.fullyQualifiedName + ".clock", lastFSMStateName: nil))
+                return .verify(data: VerificationToken.Data(id: gateway.id(of: token.fullyQualifiedName), fsm: dependencyPath.last?.fsm ?? token.machine.fsm, machine: token.machine, externalVariables: externals, sensors: sensors, actuators: actuators, parameterisedMachines: parameterisedMachines, timeData: timeData, clockName: token.fullyQualifiedName + ".clock", lastFSMStateName: nil))
             }
         }
         let identifier = parents.isEmpty ? machine.name : dependencyFullyQualifiedName

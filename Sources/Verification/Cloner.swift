@@ -79,20 +79,28 @@ public final class Cloner<Converter: KripkeStatePropertyListConverter>: ClonerPr
         }
         var clone = data.fsm.clone()
         //clone.update(fromDictionary: self.converter.convert(fromList: lastRecord))
-        var newExternals: [ExternalVariablesVerificationData] = []
-        newExternals.reserveCapacity(data.externalVariables.count)
-        for i in 0..<data.externalVariables.count {
-            if i < clone.externalVariables.count {
-                clone.externalVariables[i].val = data.externalVariables[i].externalVariables.val
-            } else {
-                clone.sensors[i - clone.externalVariables.count].val = data.externalVariables[i].externalVariables.val
-            }
-            newExternals.append(
-                ExternalVariablesVerificationData(
-                    externalVariables: i < clone.externalVariables.count ? clone.externalVariables[i] : clone.sensors[i - clone.externalVariables.count],
-                    defaultValues: data.externalVariables[i].defaultValues,
-                    spinners: data.externalVariables[i].spinners
-                )
+        let newExternals: [ExternalVariablesVerificationData] = data.externalVariables.enumerated().map { (index, element) in
+            clone.externalVariables[index].val = data.externalVariables[index].externalVariables.val
+            return ExternalVariablesVerificationData(
+                externalVariables: clone.externalVariables[index],
+                defaultValues: element.defaultValues,
+                spinners: element.spinners
+            )
+        }
+        let newSensors: [ExternalVariablesVerificationData] = data.sensors.enumerated().map { (index, element) in
+            clone.sensors[index].val = data.sensors[index].externalVariables.val
+            return ExternalVariablesVerificationData(
+                externalVariables: clone.sensors[index],
+                defaultValues: element.defaultValues,
+                spinners: element.spinners
+            )
+        }
+        let newActuators: [ExternalVariablesVerificationData] = data.actuators.enumerated().map { (index, element) in
+            clone.actuators[index].val = data.actuators[index].externalVariables.val
+            return ExternalVariablesVerificationData(
+                externalVariables: clone.actuators[index],
+                defaultValues: MirrorKripkePropertiesRecorder().takeRecord(of: clone.actuators[index].val),
+                spinners: element.spinners
             )
         }
         return .verify(
@@ -101,6 +109,8 @@ public final class Cloner<Converter: KripkeStatePropertyListConverter>: ClonerPr
                 fsm: clone,
                 machine: data.machine,
                 externalVariables: newExternals,
+                sensors: newSensors,
+                actuators: newActuators,
                 parameterisedMachines: data.parameterisedMachines,
                 timeData: data.timeData,
                 clockName: data.clockName,
