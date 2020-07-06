@@ -70,15 +70,11 @@ public final class Cloner<Converter: KripkeStatePropertyListConverter>: ClonerPr
         self.converter = converter
     }
 
-    public func clone(
-        job: VerificationToken,
-        withLastRecord lastRecord: KripkeStatePropertyList
-    ) -> VerificationToken {
+    public func clone(job: VerificationToken) -> VerificationToken {
         guard let data = job.data else {
             return job
         }
         var clone = data.fsm.clone()
-        //clone.update(fromDictionary: self.converter.convert(fromList: lastRecord))
         let newExternals: [ExternalVariablesVerificationData] = data.externalVariables.enumerated().map { (index, element) in
             clone.externalVariables[index].val = data.externalVariables[index].externalVariables.val
             return ExternalVariablesVerificationData(

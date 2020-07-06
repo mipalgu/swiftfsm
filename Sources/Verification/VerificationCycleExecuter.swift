@@ -69,6 +69,7 @@ import Utilities
 
 final class VerificationCycleExecuter {
 
+    private let cloner = Cloner(converter: KripkeStatePropertyListConverter())
     fileprivate let converter: KripkeStatePropertyListConverter
     fileprivate let executer: VerificationTokenExecuter<KripkeStateGenerator>
     fileprivate let worldCreator: WorldCreator = WorldCreator()
@@ -171,10 +172,8 @@ final class VerificationCycleExecuter {
             if job.index + 1 >= tokens[executing].count {
                 _ = lastState.map { lastStates.insert($0.properties) }
                 var copy = newTokens
-                if let data = copy[executing][job.index].data {
-                    let newData = VerificationToken.Data(id: data.id, fsm: data.fsm, machine: data.machine, externalVariables: data.externalVariables, sensors: data.sensors, actuators: data.actuators, parameterisedMachines: data.parameterisedMachines, timeData: data.timeData, clockName: data.clockName, lastFSMStateName: lastStateName)
-                    copy[executing][job.index] = .verify(data: newData)
-                }
+                let clone = self.cloner.clone(job: copy[executing][job.index])
+                copy[executing][job.index] = clone
                 runs.append(VerificationRun(
                     lastState: lastState,
                     tokens: copy,
