@@ -77,13 +77,20 @@ public final class ExternalVariablesFetcher {
         var hashTable: Set<String> = []
         var externals: [ExternalVariablesVerificationData] = []
         for tokens in tokens {
-            tokens.forEach { (($0.data?.externalVariables ?? []) + ($0.data?.sensors ?? []) + ($0.data?.actuators ?? [])).forEach {
-                if hashTable.contains($0.externalVariables.name) {
-                    return
+            for token in tokens where token.data != nil {
+                guard let data = token.data else {
+                    continue
                 }
-                externals.append($0)
-                hashTable.insert($0.externalVariables.name)
-            } }
+                let allExternals = data.externalVariables + data.sensors + data.actuators
+                let snapshots = Set((data.fsm.snapshotSensors + data.fsm.snapshotActuators).lazy.map { $0.name })
+                for external in allExternals.lazy.filter({ snapshots.contains($0.externalVariables.name) }) {
+                    if hashTable.contains(external.externalVariables.name) {
+                        continue
+                    }
+                    externals.append(external)
+                    hashTable.insert(external.externalVariables.name)
+                }
+            }
         }
         return externals
     }
