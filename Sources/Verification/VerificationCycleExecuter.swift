@@ -130,14 +130,11 @@ final class VerificationCycleExecuter {
         let states: Ref<[KripkeStatePropertyList: KripkeState]> = Ref(value: [:])
         var initialStates: HashSink<KripkeStatePropertyList, KripkeStatePropertyList> = HashSink()
         var lastStates: HashSink<KripkeStatePropertyList, KripkeStatePropertyList> = HashSink()
-        if let token = tokens[0][0].timeData, nil == tokens.flatMap({ $0 }).first(where: { nil != $0.data })?.data?.lastFSMStateName {
-            
-        }
         var runs: [VerificationRun<Gateway.GatewayData>] = []
         while false == jobs.isEmpty {
             let job = jobs.removeFirst()
             let lastStateName = tokens[executing][job.index].data?.fsm.currentState.name
-            let newTokens = self.prepareTokens(job.tokens, executing: (executing, job.index), fromExternals: job.externals, usingCallStack: job.callStack)
+            var newTokens = self.prepareTokens(job.tokens, executing: (executing, job.index), fromExternals: job.externals, usingCallStack: job.callStack)
             guard let data = newTokens[executing][job.index].data else {
                 fatalError("Unable to fetch data of verification token.")
             }
@@ -168,6 +165,18 @@ final class VerificationCycleExecuter {
             if data.fsm.hasFinished {
                 gateway.finish(data.id)
             }
+            newTokens[executing][job.index] = .verify(data: VerificationToken.Data(
+                id: data.id,
+                fsm: data.fsm,
+                machine: data.machine,
+                externalVariables: data.externalVariables,
+                sensors: data.sensors,
+                actuators: data.actuators,
+                parameterisedMachines: data.parameterisedMachines,
+                timeData: data.timeData,
+                clockName: data.clockName,
+                lastFSMStateName: lastStateName
+            ))
             // Add tokens to runs when we have finished executing all of the tokens in a run.
             if job.index + 1 >= tokens[executing].count {
                 _ = lastState.map { lastStates.insert($0.properties) }
