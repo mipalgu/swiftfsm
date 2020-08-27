@@ -64,7 +64,7 @@ import swiftfsm
 
 public final class TimeTriggeredSchedulerFactory: SchedulerFactory {
     
-    fileprivate var dispatchTable: MetaDispatchTable
+    public private(set) var dispatchTable: MetaDispatchTable
     
     private let gateway: StackGateway
     

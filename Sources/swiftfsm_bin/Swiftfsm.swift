@@ -268,7 +268,7 @@ public class Swiftfsm<
             )
         case .timeTriggered(let schedulerFactory, let generator):
             let scheduler = schedulerFactory.make()
-            let machines: [Machine] = task.jobs.flatMap { self.handleJob($0, gateway: scheduler) }
+            let machines: [Machine] = task.jobs.flatMap { self.handleJob($0, gateway: scheduler, dispatchTable: schedulerFactory.dispatchTable) }
             self.handleMachines(
                 machines,
                 task: task,
@@ -310,9 +310,11 @@ public class Swiftfsm<
         _ job: Job,
         name: String,
         gateway: Gateway,
-        parameters: [String: String]
+        parameters: [String: String],
+        ringletLengths: [String: UInt],
+        scheduleLength: UInt
     ) -> (FSMType, [Dependency], FSMClock) {
-        let clock = FSMClock()
+        let clock = FSMClock(ringletLengths: ringletLengths, scheduleLength: scheduleLength)
         let fsm: (FSMType, [Dependency])?
         if true == job.isClfsmMachine {
             fsm = self.clfsmMachineLoader.load(name: name, gateway: gateway, clock: clock, path: job.path!)
@@ -363,7 +365,7 @@ public class Swiftfsm<
         return sysname + "-" + machine
     }
 
-    private func handleJob<Gateway: FSMGateway>(_ job: Job, gateway: Gateway) -> [Machine] {
+    private func handleJob<Gateway: FSMGateway>(_ job: Job, gateway: Gateway, dispatchTable: MetaDispatchTable? = nil) -> [Machine] {
         var name: String = self.getMachinesName(job)
         // Handle when there is no path in the Task.
         guard let path = job.path else {
@@ -384,10 +386,19 @@ public class Swiftfsm<
             }
             return []
         }
+        let ringletLengths = (dispatchTable?.timeslots.flatMap {
+            $0.map { ($0.task, $0.duration) }
+        }).map { Dictionary(uniqueKeysWithValues: $0) } ?? [:]
+        let scheduleLength = dispatchTable?.timeslots.reduce(UInt(0)) {
+            guard let last = $1.last else {
+                return $0
+            }
+            return max($0, last.startTime + last.duration)
+        } ?? 0
         var machines: [Machine] = []
         for _ in 0 ..< job.count {
             // Create the Machine
-            let (fsm, dependencies, clock) = self.loadFsm(job, name: name, gateway: gateway, parameters: job.parameters)
+            let (fsm, dependencies, clock) = self.loadFsm(job, name: name, gateway: gateway, parameters: job.parameters, ringletLengths: ringletLengths, scheduleLength: scheduleLength)
             let temp: Machine = self.machineFactory.make(
                 name: name,
                 fsm: fsm,

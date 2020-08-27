@@ -217,12 +217,12 @@ public final class ScheduleCycleKripkeStructureGenerator<
                     timeData = nil
                 }
                 // Check to see if we can skip this token.
-                if token.machine != machine {
+                /*if token.machine != machine {
                     return .skip(data: timeData)
                 }
                 if self.token(token, inDependencies: parents) {
                     return .skip(data: timeData)
-                }
+                }*/
                 let dependencyPath = self.fetchDependencyPath(forToken: token, inDependencies: machine.dependencies, machine.name + "." + machine.fsm.name)
                 let isRootOfToken =
                     dependencyPath.isEmpty

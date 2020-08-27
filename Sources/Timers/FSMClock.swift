@@ -80,10 +80,21 @@ public final class FSMClock: Clock {
     fileprivate var previousState: AnyState? = nil
 
     fileprivate var startTime: UInt! = nil
+    
+    private let ringletLengths: [String: UInt]
 
     public var forcedRunningTime: UInt? = nil
+    
+    public var ringletLength: UInt {
+        return self.ringletLengths[currentFSM] ?? 0
+    }
+    
+    public let scheduleLength: UInt
 
-    public init() {}
+    public init(ringletLengths: [String: UInt], scheduleLength: UInt) {
+        self.ringletLengths = ringletLengths
+        self.scheduleLength = scheduleLength
+    }
 
     public func after(_ interval: UInt) -> Bool {
         return self.after_ms(interval * 1000)
