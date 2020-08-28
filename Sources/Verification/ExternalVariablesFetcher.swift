@@ -57,11 +57,14 @@
  */
 
 import KripkeStructure
+import ModelChecking
 import FSM
 import FSMVerification
 
 public final class ExternalVariablesFetcher {
-
+    
+    private let extractor = ExternalsSpinnerDataExtractor(converter: KripkeStatePropertySpinnerConverter(), extractor: MirrorKripkePropertiesRecorder())
+    
     public init() {}
 
     public func createExternals(fromTokens tokens: [[VerificationToken]]) -> [String: (AnySnapshotController, KripkeStatePropertyList)] {
@@ -81,14 +84,29 @@ public final class ExternalVariablesFetcher {
                 guard let data = token.data else {
                     continue
                 }
-                let allExternals = data.externalVariables + data.sensors + data.actuators
-                let snapshots = Set((data.fsm.snapshotSensors + data.fsm.snapshotActuators).lazy.map { $0.name })
-                for external in allExternals.lazy.filter({ snapshots.contains($0.externalVariables.name) }) {
+                let allSensors = data.externalVariables + data.sensors
+                let snapshotSensors = Set(data.fsm.snapshotSensors.lazy.map { $0.name })
+                for external in allSensors.lazy.filter({ snapshotSensors.contains($0.externalVariables.name) }) {
                     if hashTable.contains(external.externalVariables.name) {
                         continue
                     }
                     externals.append(external)
                     hashTable.insert(external.externalVariables.name)
+                }
+                let allExternals = allSensors + data.actuators
+                for external in allExternals.lazy.filter({ !snapshotSensors.contains($0.externalVariables.name) }) {
+                    if hashTable.contains(external.externalVariables.name) {
+                        continue
+                    }
+                    hashTable.insert(external.externalVariables.name)
+                    let (props, spinners) = self.extractor.extract(actuators: external.externalVariables)
+                    externals.append(
+                        ExternalVariablesVerificationData(
+                            externalVariables: external.externalVariables,
+                            defaultValues: props,
+                            spinners: spinners
+                        )
+                    )
                 }
             }
         }
