@@ -64,8 +64,8 @@ public struct Swiftfsm {
         let args: SwiftfsmArguments
         do {
             args = try SwiftfsmArguments.parse()
-        } catch let e {
-            fatalError("\(e)")
+        } catch let error {
+            SwiftfsmArguments.exit(withError: error)
         }
         print(args)
     }
