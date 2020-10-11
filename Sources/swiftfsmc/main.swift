@@ -59,7 +59,7 @@
 let args: SwiftfsmcArguments
 do {
     args = try SwiftfsmcArguments.parse()
-} catch let e {
-    fatalError("\(e)")
+} catch let error {
+    SwiftfsmcArguments.exit(withError: error)
 }
 print(args)

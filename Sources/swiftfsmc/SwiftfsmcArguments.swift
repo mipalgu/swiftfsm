@@ -73,6 +73,7 @@ extension TargetTriple: ExpressibleByArgument {
 
 struct SwiftfsmcArguments: ParsableCommand {
     
+    static let configuration = CommandConfiguration(abstract: "swiftfsm compiler.")
     
     @Option(name: .customLong("target", withSingleDash: true), help: "Specify an LLVM triple to cross-compile for.")
     public var target: TargetTriple?
@@ -83,25 +84,25 @@ struct SwiftfsmcArguments: ParsableCommand {
     /**
      * Flags passed to the C compiler when compiling a machine.
      */
-    @Option(name: .customLong("Xcc", withSingleDash: true), help: "Pass a compiler flag to the C compiler when compiling this machine.")
+    @Option(name: .customLong("Xcc", withSingleDash: true), parsing: .unconditionalSingleValue, help: "Pass a compiler flag to the C compiler when compiling this machine.")
     public var cCompilerFlags: [String] = []
 
-    @Option(name: .customLong("Xcxx", withSingleDash: true), help: "Pass a compiler flag to the C++ compiler when compiling this machine.")
+    @Option(name: .customLong("Xcxx", withSingleDash: true), parsing: .unconditionalSingleValue, help: "Pass a compiler flag to the C++ compiler when compiling this machine.")
     public var cxxCompilerFlags: [String] = []
 
     /**
      * Flags which are passed to the linker when compiling a machine.
      */
-    @Option(name: .customLong("Xlinker", withSingleDash: true), help: "Pass a linker flag to the linker when compiling this machine.")
+    @Option(name: .customLong("Xlinker", withSingleDash: true), parsing: .unconditionalSingleValue, help: "Pass a linker flag to the linker when compiling this machine.")
     public var linkerFlags: [String] = []
 
     /**
      * Flags passed to the swift compiler when compiling a machine.
      */
-    @Option(name: .customLong("Xswiftc", withSingleDash: true), help: "Pass a compiler flag to the swift compiler when compiling this machine.")
+    @Option(name: .customLong("Xswiftc", withSingleDash: true), parsing: .unconditionalSingleValue, help: "Pass a compiler flag to the swift compiler when compiling this machine.")
     public var swiftCompilerFlags: [String] = []
 
-    @Option(name: .customLong("Xswiftbuild", withSingleDash: true), help: "Pass a flag to swift build when compiling this machine.")
+    @Option(name: .customLong("Xswiftbuild", withSingleDash: true), parsing: .unconditionalSingleValue, help: "Pass a flag to swift build when compiling this machine.")
     public var swiftBuildFlags: [String] = []
     
     /**
