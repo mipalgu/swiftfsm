@@ -1,8 +1,8 @@
 /*
- * main.swift 
- * swiftfsmc 
+ * SwiftfsmcArguments.swift
+ * swiftfsmc
  *
- * Created by Callum McColl on 12/10/2020.
+ * Created by Callum McColl on 12/10/20.
  * Copyright © 2020 Callum McColl. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -56,10 +56,58 @@
  *
  */
 
-let args: SwiftfsmcArguments
-do {
-    args = try SwiftfsmcArguments.parse()
-} catch let e {
-    fatalError("\(e)")
+import ArgumentParser
+import MachineCompiling
+
+extension TargetTriple: ExpressibleByArgument {
+    
+    public init?(argument: String) {
+        self.init(triple: argument)
+    }
+    
+    public var defaultValueDescription: String {
+        return "<<arch><subarch>-<vendor>-<os>-<environment>>"
+    }
+    
 }
-print(args)
+
+struct SwiftfsmcArguments: ParsableCommand {
+    
+    
+    @Option(name: .customLong("target", withSingleDash: true), help: "Specify an LLVM triple to cross-compile for.")
+    public var target: TargetTriple?
+    
+    @Option(wrappedValue: nil, name: .shortAndLong, help: "Force a specific build directory name.", transform: { $0.isEmpty ? nil : $0 })
+    public var buildDir: String?
+
+    /**
+     * Flags passed to the C compiler when compiling a machine.
+     */
+    @Option(name: .customLong("Xcc", withSingleDash: true), help: "Pass a compiler flag to the C compiler when compiling this machine.")
+    public var cCompilerFlags: [String] = []
+
+    @Option(name: .customLong("Xcxx", withSingleDash: true), help: "Pass a compiler flag to the C++ compiler when compiling this machine.")
+    public var cxxCompilerFlags: [String] = []
+
+    /**
+     * Flags which are passed to the linker when compiling a machine.
+     */
+    @Option(name: .customLong("Xlinker", withSingleDash: true), help: "Pass a linker flag to the linker when compiling this machine.")
+    public var linkerFlags: [String] = []
+
+    /**
+     * Flags passed to the swift compiler when compiling a machine.
+     */
+    @Option(name: .customLong("Xswiftc", withSingleDash: true), help: "Pass a compiler flag to the swift compiler when compiling this machine.")
+    public var swiftCompilerFlags: [String] = []
+
+    @Option(name: .customLong("Xswiftbuild", withSingleDash: true), help: "Pass a flag to swift build when compiling this machine.")
+    public var swiftBuildFlags: [String] = []
+    
+    /**
+     *  The path to load the `Machine`.
+     */
+    @Argument(help: "The path to the machine.")
+    public var path: String?
+    
+}
