@@ -56,12 +56,6 @@
  *
  */
 
-import Gateways
-import KripkeStructure
-import ModelChecking
-import Scheduling
-import Verification
-import MachineStructure
 import ArgumentParser
 
 struct SwiftfsmArguments: ParsableCommand {
