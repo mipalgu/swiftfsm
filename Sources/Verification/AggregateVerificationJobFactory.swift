@@ -76,8 +76,8 @@ public final class AggregateVerificationJobFactory<
     public func make(
         tokens: [(AnyScheduleableFiniteStateMachine, Machine)],
         externalVariables: [(AnySnapshotController, KripkeStatePropertyList)]
-    ) -> LazyMapRandomAccessCollection<
-        LazyMapRandomAccessCollection<
+    ) -> LazyMapCollection<
+        LazyMapCollection<
             [(AnyScheduleableFiniteStateMachine, Machine)],
             (AnyScheduleableFiniteStateMachine, Machine, [AnySnapshotController])
         >,

@@ -282,13 +282,13 @@ public class SwiftfsmParser: HelpableParser {
         }
         let n: String = words[1]
         // Ignore empty strings as names
-        if (true == n.characters.isEmpty) {
+        if (true == n.isEmpty) {
             words.removeFirst()
             return nil
         }
         // Ignore other flags if the user forgets to enter a name after the name
         // flag.
-        if (!ignoreHyphen && "-" == n.characters.first!) {
+        if (!ignoreHyphen && "-" == n.first!) {
             return nil
         }
         words.removeFirst()
@@ -563,7 +563,7 @@ public class SwiftfsmParser: HelpableParser {
             return j
         }
         // Ignore unknown flags
-        if ("-" == words.first!.characters.first) {
+        if ("-" == words.first!.first) {
             throw ParsingErrors.unknownFlag(flag: words.first!)
         }
         var temp = j

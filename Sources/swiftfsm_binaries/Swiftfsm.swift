@@ -1,9 +1,9 @@
 /*
- * LazyKripkeStructureGenerator.swift
- * Verification
+ * Swiftfsm.swift
+ * swiftfsm_binaries
  *
- * Created by Callum McColl on 17/1/19.
- * Copyright © 2019 Callum McColl. All rights reserved.
+ * Created by Callum McColl on 12/10/20.
+ * Copyright © 2020 Callum McColl. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -56,16 +56,18 @@
  *
  */
 
-import Gateways
-import KripkeStructure
-import KripkeStructureViews
-import swiftfsm
-import swift_helpers
+import MachineStructure
 
-public protocol LazyKripkeStructureGenerator {
-
-    var delegate: LazyKripkeStructureGeneratorDelegate? { get set }
-
-    func generate<Gateway: VerifiableGateway, View: KripkeStructureView>(usingGateway gateway: Gateway, andView view: View, storingResultsFor: FSM_ID?) -> SortedCollection<(UInt, Any?)>? where View.State == KripkeState
-
+public struct Swiftfsm {
+    
+    public static func run(machines: [Machine]) {
+        let args: SwiftfsmArguments
+        do {
+            args = try SwiftfsmArguments.parse()
+        } catch let e {
+            fatalError("\(e)")
+        }
+        print(args)
+    }
+    
 }

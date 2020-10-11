@@ -26,6 +26,23 @@ let package = Package(
         .target(name: "Parsing", dependencies: ["Scheduling", "Timers", "Verification", "MachineCompiling"]),
         .target(name: "CFSMWrappers", dependencies: ["Libraries", "Scheduling", "Timers"]),
         .target(
+            name: "swiftfsm_binaries",
+            dependencies: [
+                .product(name: "ArgumentParser", package: "swift-argument-parser"),
+                "CFSMs",
+                "swiftfsm_helpers",
+                "Libraries",
+                "MachineStructure",
+                "MachineLoading",
+                "MachineCompiling",
+                "Scheduling",
+                "Timers",
+                "Verification",
+                "CFSMWrappers",
+                "Gateways"
+            ]
+        ),
+        .target(
             name: "swiftfsm_bin",
             dependencies: [
                 "CFSMs",
@@ -43,6 +60,7 @@ let package = Package(
             ]
         ),
         .testTarget(name: "VerificationTests", dependencies: [.target(name: "Verification")]),
-        .testTarget(name: "swiftfsmTests", dependencies: [.target(name: "swiftfsm_bin")])
+        .testTarget(name: "swiftfsm_binariesTests", dependencies: [.target(name: "swiftfsm_binaries")]),
+        .testTarget(name: "swiftfsm_binTests", dependencies: [.target(name: "swiftfsm_bin")])
     ]
 )

@@ -1,9 +1,9 @@
 /*
- * LazyKripkeStructureGenerator.swift
- * Verification
+ * SwiftFSMTestCase.swift
+ * swiftfsm_tests
  *
- * Created by Callum McColl on 17/1/19.
- * Copyright © 2019 Callum McColl. All rights reserved.
+ * Created by Callum McColl on 26/10/2015.
+ * Copyright © 2015 Callum McColl. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -56,16 +56,51 @@
  *
  */
 
-import Gateways
-import KripkeStructure
-import KripkeStructureViews
-import swiftfsm
-import swift_helpers
+@testable import swiftfsm
+import FSM
+import XCTest
 
-public protocol LazyKripkeStructureGenerator {
+public class SwiftFSMTestCase: XCTestCase {
 
-    var delegate: LazyKripkeStructureGeneratorDelegate? { get set }
+    public var counter: UInt = 0
 
-    func generate<Gateway: VerifiableGateway, View: KripkeStructureView>(usingGateway gateway: Gateway, andView view: View, storingResultsFor: FSM_ID?) -> SortedCollection<(UInt, Any?)>? where View.State == KripkeState
+    public override func setUp() {
+        self.counter = 0
+    }
+
+    public override func tearDown() {}
+
+    /*public func createPingPongMachine(
+        _ end: Bool,
+        slow: Bool
+    ) -> AnyScheduleableFiniteStateMachine {
+        let f: (String) -> Void = { (str: String) in
+            print(str)
+            self.counter += 1
+            if (slow) {
+                sleep(1)
+            }
+        }
+        var states: [CallbackMiPalState] = [
+            CallbackMiPalState("ping", onEntry: {f("ping")}),
+            CallbackMiPalState("pong", onEntry: {f("pong")})
+        ]
+        let t1: Transition<MiPalState, MiPalState> = Transition(states[1])
+        states[0].addTransition(t1)
+        if (false == end) {
+            let t2: Transition<MiPalState, MiPalState> = Transition(states[0])
+            states[1].addTransition(t2)
+        }
+        
+        return FSM("PingPong\(self.counter)", ringlet: MiPalRinglet(), initialState: states[0])
+    }
+
+    public func getSlowPingPongMachine(end: Bool = true) -> AnyScheduleableFiniteStateMachine {
+        return self.createPingPongMachine(end, slow: true)
+    }
+
+    public func getFastPingPongMachine(end: Bool = true) -> AnyScheduleableFiniteStateMachine {
+        return self.createPingPongMachine(end, slow: false)
+    }*/
 
 }
