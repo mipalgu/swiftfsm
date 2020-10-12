@@ -13,6 +13,10 @@ let package = Package(
             name: "CFSMs",
             type: .dynamic,
             targets: ["CFSMs"]
+        ),
+        .library(
+            name: "swiftfsm_binaries",
+            targets: ["swiftfsm_binaries"]
         )
     ],
     dependencies: deps,
