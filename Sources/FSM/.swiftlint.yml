@@ -1,0 +1,6 @@
+disabled_rules:
+    - colon
+    - identifier_name
+    - opening_brace
+    - type_name
+    - vertical_parameter_alignment
