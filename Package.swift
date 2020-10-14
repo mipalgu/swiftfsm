@@ -39,7 +39,7 @@ let package = Package(
         ),
         .library(
             name: "libswiftfsm",
-            targets: ["swiftfsm"]
+            targets: ["libswiftfsm"]
         )
     ],
     dependencies: deps,
@@ -52,7 +52,7 @@ let package = Package(
         .target(name: "FSM", dependencies: ["Functional", "Utilities", "KripkeStructure", "ModelChecking"]),
         .target(name: "ExternalVariables", dependencies: ["Functional", "Utilities", "KripkeStructure", "ModelChecking", "FSM"]),
         .target(name: "FSMVerification", dependencies: ["Functional", "Utilities", "KripkeStructure", "ModelChecking", "FSM"]),
-        .target(name: "swiftfsm", dependencies: [
+        .target(name: "libswiftfsm", dependencies: [
             "Functional",
             "Utilities",
             "KripkeStructure",
@@ -67,22 +67,22 @@ let package = Package(
             "swift_helpers"
         ]),
         .systemLibrary(name: "CLReflect", pkgConfig: "libCLReflect"),
-        .target(name: "CFSMs", dependencies: ["swiftfsm", "CLReflect"]),
-        .target(name: "swiftfsm_helpers", dependencies: ["swiftfsm"]),
-        .target(name: "Gateways", dependencies: ["swiftfsm"]),
-        .target(name: "Timers", dependencies: ["swiftfsm_helpers", "swiftfsm"]),
-        .target(name: "Libraries", dependencies: ["swiftfsm"]),
-        .target(name: "MachineStructure", dependencies: convert(["Libraries", "Timers", "swiftfsm"]) + foundationDeps),
-        .target(name: "MachineLoading", dependencies: convert(["Libraries", "Gateways", "swiftfsm_helpers", "MachineCompiling", "swiftfsm"]) + foundationDeps),
-        .target(name: "MachineCompiling", dependencies: ["swiftfsm"] + foundationDeps),
-        .target(name: "Scheduling", dependencies: ["MachineStructure", "MachineLoading", "Timers", "Gateways", "swiftfsm"]),
-        .target(name: "Verification", dependencies: ["MachineStructure", "Scheduling", "Timers", "Gateways", "swiftfsm"]),
-        .target(name: "Parsing", dependencies: ["Scheduling", "Timers", "Verification", "MachineCompiling", "swiftfsm"]),
-        .target(name: "CFSMWrappers", dependencies: ["Libraries", "Scheduling", "Timers", "swiftfsm"]),
+        .target(name: "CFSMs", dependencies: ["libswiftfsm", "CLReflect"]),
+        .target(name: "swiftfsm_helpers", dependencies: ["libswiftfsm"]),
+        .target(name: "Gateways", dependencies: ["libswiftfsm"]),
+        .target(name: "Timers", dependencies: ["swiftfsm_helpers", "libswiftfsm"]),
+        .target(name: "Libraries", dependencies: ["libswiftfsm"]),
+        .target(name: "MachineStructure", dependencies: convert(["Libraries", "Timers", "libswiftfsm"]) + foundationDeps),
+        .target(name: "MachineLoading", dependencies: convert(["Libraries", "Gateways", "swiftfsm_helpers", "MachineCompiling", "libswiftfsm"]) + foundationDeps),
+        .target(name: "MachineCompiling", dependencies: ["libswiftfsm"] + foundationDeps),
+        .target(name: "Scheduling", dependencies: ["MachineStructure", "MachineLoading", "Timers", "Gateways", "libswiftfsm"]),
+        .target(name: "Verification", dependencies: ["MachineStructure", "Scheduling", "Timers", "Gateways", "libswiftfsm"]),
+        .target(name: "Parsing", dependencies: ["Scheduling", "Timers", "Verification", "MachineCompiling", "libswiftfsm"]),
+        .target(name: "CFSMWrappers", dependencies: ["Libraries", "Scheduling", "Timers", "libswiftfsm"]),
         .target(
             name: "swiftfsm_binaries",
             dependencies: [
-                "swiftfsm",
+                "libswiftfsm",
                 .product(name: "ArgumentParser", package: "swift-argument-parser"),
                 "CFSMs",
                 "swiftfsm_helpers",
@@ -100,7 +100,7 @@ let package = Package(
         .target(
             name: "swiftfsmc",
             dependencies: [
-                "swiftfsm",
+                "libswiftfsm",
                 .product(name: "ArgumentParser", package: "swift-argument-parser"),
                 "CFSMs",
                 "swiftfsm_helpers",
@@ -118,7 +118,7 @@ let package = Package(
         .target(
             name: "swiftfsm_bin",
             dependencies: [
-                "swiftfsm",
+                "libswiftfsm",
                 "CFSMs",
                 "swiftfsm_helpers",
                 "Libraries",
