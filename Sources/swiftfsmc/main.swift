@@ -56,10 +56,48 @@
  *
  */
 
+import swift_helpers
+import IO
+import SwiftMachines
+import Foundation
+
 let args: SwiftfsmcArguments
 do {
     args = try SwiftfsmcArguments.parse()
 } catch let error {
     SwiftfsmcArguments.exit(withError: error)
 }
-print(args)
+
+let buildDir = args.actualBuildDir
+let assembler = MachineArrangmentAssembler()
+let machineAssembler = MachineAssembler()
+let parser = MachineParser()
+
+// Parse machines
+guard let machines = args.paths.failMap({ parser.parseMachine(atPath: $0) }) else {
+    parser.errors.forEach {
+        print($0, stderr)
+    }
+    print("Unable to parse machines", stderr)
+    exit(EXIT_FAILURE)
+}
+
+// Generate each machines package.
+for machine in machines {
+    guard nil != machineAssembler.assemble(machine, inDirectory: machine.filePath.appendingPathComponent(buildDir, isDirectory: true)) else {
+        machineAssembler.errors.forEach {
+            print($0, stderr)
+        }
+        print("Unable to generate the '\(machine.filePath.path)' machine package", stderr)
+        exit(EXIT_FAILURE)
+    }
+}
+
+// Generate the arrangment package.
+guard nil != assembler.assemble(machines, inDirectory: URL(fileURLWithPath: ".build", isDirectory: true), name: "machine_bin", machineBuildDir: buildDir) else {
+    assembler.errors.forEach {
+        print($0, stderr)
+    }
+    print("Unable to generate the arrangement package", stderr)
+    exit(EXIT_FAILURE)
+}

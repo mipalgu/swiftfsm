@@ -58,6 +58,7 @@
 
 import ArgumentParser
 import MachineCompiling
+import Foundation
 
 extension TargetTriple: ExpressibleByArgument {
     
@@ -78,7 +79,7 @@ struct SwiftfsmcArguments: ParsableCommand {
     @Option(name: .customLong("target", withSingleDash: true), help: "Specify an LLVM triple to cross-compile for.")
     public var target: TargetTriple?
     
-    @Option(wrappedValue: nil, name: .shortAndLong, help: "Force a specific build directory name.", transform: { $0.isEmpty ? nil : $0 })
+    @Option(wrappedValue: nil, name: .shortAndLong, help: "Force a specific machine build directory name.", transform: { $0.isEmpty ? nil : $0 })
     public var buildDir: String?
 
     /**
@@ -109,6 +110,26 @@ struct SwiftfsmcArguments: ParsableCommand {
      *  The path to load the `Machine`.
      */
     @Argument(help: "The path to the machine.")
-    public var path: String?
+    public var paths: [String]
+    
+    public var actualBuildDir: String {
+        if let buildDir = buildDir {
+            return buildDir
+        }
+        if let target = target {
+            let os = target.os.rawValue
+            let arch = target.rawArch ?? target.arch.rawValue
+            return os + "-" + arch
+        }
+        var uts = utsname()
+        guard
+            0 == uname(&uts),
+            let sysname = withUnsafePointer(to: &uts.sysname.0, { String(validatingUTF8: $0) }),
+            let machine = withUnsafePointer(to: &uts.machine.0, { String(validatingUTF8: $0) })
+        else {
+            return ".build"
+        }
+        return sysname + "-" + machine
+    }
     
 }
