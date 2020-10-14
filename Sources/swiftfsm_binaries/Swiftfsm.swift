@@ -65,49 +65,48 @@ import ModelChecking
 import Scheduling
 import Verification
 import MachineStructure
+import swiftfsm
+import Timers
 
 public struct Swiftfsm {
     
     let args: SwiftfsmArguments
-    let machines: [Machine]
+    let machines: [(fsm: FSMType, dependencies: [Dependency])]
+    let gateway: StackGateway
     
-    init(args: SwiftfsmArguments, machines: [Machine]) {
+    init(args: SwiftfsmArguments, machines: [(FSMType, [Dependency])], gateway: StackGateway) {
         self.args = args
         self.machines = machines
+        self.gateway = gateway
     }
     
     func run() {
-        let printer: CommandLinePrinter =
-            CommandLinePrinter(
-                errorStream: StderrOutputStream(),
-                messageStream: StdoutOutputStream(),
-                warningStream: StdoutOutputStream()
-            )
+        let clock = FSMClock(ringletLengths: [:], scheduleLength: 0)
+        let machines = self.machines.map { Machine(debug: args.debug, name: $0.fsm.name, fsm: $0.fsm, clock: clock) }
         let clfsmMachineLoader = CLFSMMachineLoader()
-        let gateway = StackGateway(printer: printer)
         switch self.args.scheduler {
         case .roundRobin:
-            let scheduler = RoundRobinSchedulerFactory(gateway: gateway, scheduleHandler: clfsmMachineLoader, unloader: clfsmMachineLoader).make()
-            let generatorFactory = RoundRobinKripkeStructureGeneratorFactory(gateway: gateway)
-            self.handleMachines(scheduler: scheduler, generatorFactory: generatorFactory, gateway: gateway)
+            let scheduler = RoundRobinSchedulerFactory(gateway: Swiftfsm.gateway, scheduleHandler: clfsmMachineLoader, unloader: clfsmMachineLoader).make()
+            let generatorFactory = RoundRobinKripkeStructureGeneratorFactory(gateway: self.gateway)
+            self.handleMachines(machines: machines, scheduler: scheduler, generatorFactory: generatorFactory)
         case .passiveRoundRobin:
-            let scheduler = PassiveRoundRobinSchedulerFactory(gateway: gateway, scheduleHandler: clfsmMachineLoader, unloader: clfsmMachineLoader).make()
-            let generatorFactory = PassiveRoundRobinKripkeStructureGeneratorFactory(gateway: gateway)
-            self.handleMachines(scheduler: scheduler, generatorFactory: generatorFactory, gateway: gateway)
+            let scheduler = PassiveRoundRobinSchedulerFactory(gateway: Swiftfsm.gateway, scheduleHandler: clfsmMachineLoader, unloader: clfsmMachineLoader).make()
+            let generatorFactory = PassiveRoundRobinKripkeStructureGeneratorFactory(gateway: self.gateway)
+            self.handleMachines(machines: machines, scheduler: scheduler, generatorFactory: generatorFactory)
         case .timeTriggered:
             fatalError("Not Yet Implemented")
         }
     }
     
-    private func handleMachines<S: Scheduler, F: KripkeStructureGeneratorFactory, G: VerifiableGateway>(scheduler: S, generatorFactory: F, gateway: G) where F.ViewFactory == AggregateKripkeStructureViewFactory<KripkeState> {
+    private func handleMachines<S: Scheduler, F: KripkeStructureGeneratorFactory>(machines: [Machine], scheduler: S, generatorFactory: F) where F.ViewFactory == AggregateKripkeStructureViewFactory<KripkeState> {
         if !self.args.generateKripkeStructure.isEmpty {
-            self.generateKripkeStructure(generatorFactory: generatorFactory, formats: self.args.generateKripkeStructure, gateway: gateway)
+            self.generateKripkeStructure(machines: machines, generatorFactory: generatorFactory, formats: self.args.generateKripkeStructure)
             return
         }
-        scheduler.run(self.machines)
+        scheduler.run(machines)
     }
     
-    private func generateKripkeStructure<F: KripkeStructureGeneratorFactory, G: VerifiableGateway>(generatorFactory: F, formats: [SwiftfsmArguments.KripkeStructureFormats], gateway: G) where F.ViewFactory == AggregateKripkeStructureViewFactory<KripkeState> {
+    private func generateKripkeStructure<F: KripkeStructureGeneratorFactory>(machines: [Machine], generatorFactory: F, formats: [SwiftfsmArguments.KripkeStructureFormats]) where F.ViewFactory == AggregateKripkeStructureViewFactory<KripkeState> {
         let viewFactories: [AnyKripkeStructureViewFactory<KripkeState>] = formats.map {
             switch $0 {
             case .graphviz:
@@ -120,18 +119,56 @@ public struct Swiftfsm {
                 fatalError("Gexf view is currently unsupported.")
             }
         }
-        let generator = generatorFactory.make(fromMachines: self.machines, usingViewFactory: AggregateKripkeStructureViewFactory(views: viewFactories))
+        let generator = generatorFactory.make(fromMachines: machines, usingViewFactory: AggregateKripkeStructureViewFactory(views: viewFactories))
         generator.generate(usingGateway: gateway)
     }
     
-    public static func run(machines: [Machine]) {
+    public typealias MachineFactory = (FSMGateway, Timer, FSM_ID) -> (FSMType, [ShallowDependency])
+    
+    private static let gateway: StackGateway = StackGateway(printer: CommandLinePrinter(
+        errorStream: StderrOutputStream(),
+        messageStream: StdoutOutputStream(),
+        warningStream: StdoutOutputStream()
+    ))
+    
+    public static func makeMachine(name: String, factories: [String: MachineFactory]) -> (FSMType, [Dependency]) {
+        let id = Swiftfsm.gateway.id(of: name)
+        if let fsm = Swiftfsm.gateway.fsms[id] {
+            return (fsm, [])
+        }
+        guard let factory = factories[name] else {
+            fatalError("Unable to load machine named '\(name)' as it is not in the factory list.")
+        }
+        let (fsm, shallowDependencies) = factory(
+            Swiftfsm.gateway,
+            FSMClock(ringletLengths: [:], scheduleLength: 0),
+            Swiftfsm.gateway.id(of: name)
+        )
+        Swiftfsm.gateway.fsms[id] = fsm
+        let dependencies: [Dependency] = shallowDependencies.map { dependency in
+            let (depFSM, deps) = makeMachine(name: name + "_" + dependency.name, factories: factories)
+            if dependency.isInvokable, let paramMachine = depFSM.asParameterisedFiniteStateMachine {
+                return .invokableParameterisedMachine(paramMachine, deps)
+            }
+            if dependency.isCallable, let paramMachine = depFSM.asParameterisedFiniteStateMachine {
+                return .callableParameterisedMachine(paramMachine, deps)
+            }
+            if let submachine = depFSM.asControllableFiniteStateMachine {
+                return .submachine(submachine, deps)
+            }
+            fatalError("Unable to create fsm.")
+        }
+        return (fsm, dependencies)
+    }
+    
+    public static func run(machines: [(FSMType, [Dependency])]) {
         let args: SwiftfsmArguments
         do {
             args = try SwiftfsmArguments.parse()
         } catch let error {
             SwiftfsmArguments.exit(withError: error)
         }
-        let swiftfsm = Swiftfsm(args: args, machines: machines)
+        let swiftfsm = Swiftfsm(args: args, machines: machines, gateway: Swiftfsm.gateway)
         swiftfsm.run()
     }
     
