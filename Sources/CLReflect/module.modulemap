@@ -1,6 +1,0 @@
-module CLReflect [system] {
-  link "CLReflect"
-  umbrella header "libCLReflect_bridging.h"
-  export *
-  module * { export * }
-}

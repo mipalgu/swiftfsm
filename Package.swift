@@ -13,6 +13,7 @@ func convert(_ arr: [String]) -> [Target.Dependency] {
 
 let foundationDeps: [Target.Dependency] = [.byName(name: "Machines"), .byName(name: "IO")]
 let deps = [
+    .package(url: "ssh://git.mipal.net/git/swiftfsm_FSM.git", .branch("master")),
     .package(url: "ssh://git.mipal.net/git/Machines.git", .branch("binaries")),
     .package(url: "ssh://git.mipal.net/git/swift_helpers.git", .branch("master"))
 ] + normalDependencies
@@ -36,57 +37,25 @@ let package = Package(
         .library(
             name: "swiftfsm_binaries",
             targets: ["swiftfsm_binaries"]
-        ),
-        .library(
-            name: "swiftfsm",
-            targets: ["swiftfsm"]
-        ),
-        .library(
-            name: "swiftfsm",
-            targets: ["swiftfsm"]
-        ),
+        )
     ],
     dependencies: deps,
     targets: [
-        .target(name: "Utilities", dependencies: []),
-        .target(name: "Logic", dependencies: []),
-        .target(name: "KripkeStructure", dependencies: ["Functional", "Utilities", "Logic"]),
-        .target(name: "KripkeStructureViews", dependencies: ["Hashing", "IO", "KripkeStructure", "swift_helpers"]),
-        .target(name: "ModelChecking", dependencies: ["Functional", "Hashing", "IO", "swift_helpers", "Utilities", "KripkeStructure", "KripkeStructureViews"]),
-        .target(name: "FSM", dependencies: ["Functional", "Utilities", "KripkeStructure", "ModelChecking"]),
-        .target(name: "ExternalVariables", dependencies: ["Functional", "Utilities", "KripkeStructure", "ModelChecking", "FSM"]),
-        .target(name: "FSMVerification", dependencies: ["Functional", "Utilities", "KripkeStructure", "ModelChecking", "FSM"]),
-        .target(name: "swiftfsm", dependencies: [
-            "Functional",
-            "Utilities",
-            "KripkeStructure",
-            "KripkeStructureViews",
-            "ModelChecking",
-            "FSM",
-            "ExternalVariables",
-            "FSMVerification",
-            "Hashing",
-            "IO",
-            "Trees",
-            "swift_helpers"
-        ]),
-        .systemLibrary(name: "CLReflect", pkgConfig: "libCLReflect"),
-        .target(name: "CFSMs", dependencies: ["swiftfsm", "CLReflect"]),
-        .target(name: "swiftfsm_helpers", dependencies: ["swiftfsm"]),
-        .target(name: "Gateways", dependencies: ["swiftfsm"]),
-        .target(name: "Timers", dependencies: ["swiftfsm_helpers", "swiftfsm"]),
-        .target(name: "Libraries", dependencies: ["swiftfsm"]),
-        .target(name: "MachineStructure", dependencies: convert(["Libraries", "Timers", "swiftfsm"]) + foundationDeps),
-        .target(name: "MachineLoading", dependencies: convert(["Libraries", "Gateways", "swiftfsm_helpers", "MachineCompiling", "swiftfsm"]) + foundationDeps),
-        .target(name: "MachineCompiling", dependencies: ["swiftfsm"] + foundationDeps),
-        .target(name: "Scheduling", dependencies: ["MachineStructure", "MachineLoading", "Timers", "Gateways", "swiftfsm"]),
-        .target(name: "Verification", dependencies: ["MachineStructure", "Scheduling", "Timers", "Gateways", "swiftfsm"]),
-        .target(name: "Parsing", dependencies: ["Scheduling", "Timers", "Verification", "MachineCompiling", "swiftfsm"]),
-        .target(name: "CFSMWrappers", dependencies: ["Libraries", "Scheduling", "Timers", "swiftfsm"]),
+        .target(name: "CFSMs", dependencies: []),
+        .target(name: "swiftfsm_helpers", dependencies: []),
+        .target(name: "Gateways", dependencies: ["FSM"]),
+        .target(name: "Timers", dependencies: ["swiftfsm_helpers", "FSM"]),
+        .target(name: "Libraries", dependencies: ["FSM"]),
+        .target(name: "MachineStructure", dependencies: convert(["Libraries", "Timers", "FSM"]) + foundationDeps),
+        .target(name: "MachineLoading", dependencies: convert(["Libraries", "Gateways", "swiftfsm_helpers", "MachineCompiling", "FSM"]) + foundationDeps),
+        .target(name: "MachineCompiling", dependencies: ["FSM"] + foundationDeps),
+        .target(name: "Scheduling", dependencies: ["MachineStructure", "MachineLoading", "Timers", "Gateways", "FSM"]),
+        .target(name: "Verification", dependencies: ["MachineStructure", "Scheduling", "Timers", "Gateways", "FSM"]),
+        .target(name: "Parsing", dependencies: ["Scheduling", "Timers", "Verification", "MachineCompiling", "FSM"]),
+        .target(name: "CFSMWrappers", dependencies: ["Libraries", "Scheduling", "Timers", "FSM"]),
         .target(
             name: "swiftfsm_binaries",
             dependencies: [
-                "swiftfsm",
                 .product(name: "ArgumentParser", package: "swift-argument-parser"),
                 "CFSMs",
                 "swiftfsm_helpers",
@@ -98,13 +67,13 @@ let package = Package(
                 "Timers",
                 "Verification",
                 "CFSMWrappers",
-                "Gateways"
+                "Gateways",
+                "FSM"
             ]
         ),
         .target(
             name: "swiftfsmc",
             dependencies: [
-                "swiftfsm",
                 .product(name: "ArgumentParser", package: "swift-argument-parser"),
                 "CFSMs",
                 "swiftfsm_helpers",
@@ -116,13 +85,13 @@ let package = Package(
                 "Timers",
                 "Verification",
                 "CFSMWrappers",
-                "Gateways"
+                "Gateways",
+                "FSM"
             ]
         ),
         .target(
             name: "swiftfsm_bin",
             dependencies: [
-                "swiftfsm",
                 "CFSMs",
                 "swiftfsm_helpers",
                 "Libraries",
@@ -134,7 +103,8 @@ let package = Package(
                 "Parsing",
                 "Verification",
                 "CFSMWrappers",
-                "Gateways"
+                "Gateways",
+                "FSM"
             ]
         ),
         .testTarget(name: "VerificationTests", dependencies: [.target(name: "Verification")]),
