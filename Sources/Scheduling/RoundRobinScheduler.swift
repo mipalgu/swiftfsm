@@ -102,8 +102,7 @@ public class RoundRobinScheduler<Tokenizer: SchedulerTokenizer>: Scheduler, Veri
      */
     public func run(_ machines: [Machine]) -> Void {
         self.gateway.stacks = [:]
-        machines.forEach { self.addToGateway($0.fsm, dependencies: $0.dependencies, prefix: $0.name
-            + ".") }
+        machines.forEach { self.addToGateway($0.fsm, dependencies: $0.dependencies, prefix: "") }
         let tokens = self.tokenizer.separate(machines)
         tokens.forEach {
             $0.forEach {
