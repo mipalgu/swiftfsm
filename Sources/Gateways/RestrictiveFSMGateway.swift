@@ -158,3 +158,67 @@ extension RestrictiveFSMGateway where _Formatter == NullFormatter {
     }
 
 }
+
+extension RestrictiveFSMGateway: ModifiableFSMGateway where Gateway: ModifiableFSMGateway {
+    
+    public var delegate: FSMGatewayDelegate? {
+        get {
+            self.gateway.delegate
+        }
+        set {
+            self.gateway.delegate = newValue
+        }
+    }
+    
+    public var latestID: FSM_ID {
+        get {
+            self.gateway.latestID
+        }
+        set {
+            self.gateway.latestID = newValue
+        }
+    }
+    
+    public var fsms: [FSM_ID : FSMType] {
+        get {
+            self.gateway.fsms
+        }
+        set {
+            self.gateway.fsms = newValue
+        }
+    }
+    
+    public var ids: [String : FSM_ID] {
+        get {
+            self.gateway.ids
+        }
+        set {
+            self.gateway.ids = newValue
+        }
+    }
+    
+    public func finish(_ id: FSM_ID) {
+        self.gateway.finish(id)
+    }
+    
+    public func setup(_ id: FSM_ID) {
+        self.gateway.setup(id)
+    }
+    
+}
+
+extension RestrictiveFSMGateway: VerifiableGateway where Gateway: VerifiableGateway {
+    
+    public var gatewayData: Gateway.GatewayData {
+        get {
+            self.gateway.gatewayData
+        } set {
+            self.gateway.gatewayData = newValue
+        }
+    }
+
+    public var verificationData: Gateway.VerificationData {
+        self.gateway.verificationData
+    }
+    
+}
