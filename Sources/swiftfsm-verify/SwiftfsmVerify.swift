@@ -116,21 +116,12 @@ struct SwiftfsmVerify: ParsableCommand {
             throw ExitCode.failure
         }
         var args: [String] = []
-        args.append("-k")
+        args.append("--generate-kripke-structures")
         verifyArgs.formats.forEach {
-            switch $0 {
-            case .nusmv:
-                args.append("-n")
-            case .graphviz:
-                args.append("-g")
-            case .tulip:
-                args.append("-t")
-            case .gexf:
-                args.append("-x")
-            }
+            args.append("--" + $0.rawValue)
         }
         if verifyArgs.formats.isEmpty {
-            args.append("-n")
+            args.append("--" + VerifyArguments.KripkeStructureFormats.nusmv.rawValue)
         }
         let invoker = Invoker()
         guard invoker.run(executable.path, withArguments: args) else {

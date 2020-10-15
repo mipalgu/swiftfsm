@@ -58,8 +58,8 @@
 
 import ArgumentParser
 
-struct SwiftfsmArguments: ParsableArguments {
-
+struct SwiftfsmArguments: ParsableCommand {
+    
     @Flag(help: "Generate kripke structures")
     var generateKripkeStructures: Bool = false
     
