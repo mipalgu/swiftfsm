@@ -33,6 +33,10 @@ let package = Package(
             name: "swiftfsm-run",
             targets: ["swiftfsm-run"]
         ),
+        .executable(
+            name: "swiftfsm-verify",
+            targets: ["swiftfsm-verify"]
+        ),
         .library(
             name: "CFSMs",
             type: .dynamic,
@@ -95,6 +99,25 @@ let package = Package(
         ),
         .target(
             name: "swiftfsm-run",
+            dependencies: [
+                .product(name: "ArgumentParser", package: "swift-argument-parser"),
+                "CFSMs",
+                "swiftfsm_helpers",
+                "Libraries",
+                "MachineStructure",
+                "MachineLoading",
+                "MachineCompiling",
+                "Scheduling",
+                "Timers",
+                "Verification",
+                "CFSMWrappers",
+                "Gateways",
+                "FSM",
+                "swiftfsm_binaries"
+            ]
+        ),
+        .target(
+            name: "swiftfsm-verify",
             dependencies: [
                 .product(name: "ArgumentParser", package: "swift-argument-parser"),
                 "CFSMs",

@@ -1,8 +1,8 @@
 /*
- * SwiftfsmArguments.swift
- * swiftfsm_binaries
+ * main.swift 
+ * swiftfsm-verify 
  *
- * Created by Callum McColl on 12/10/20.
+ * Created by Callum McColl on 16/10/2020.
  * Copyright © 2020 Callum McColl. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -56,15 +56,4 @@
  *
  */
 
-import ArgumentParser
-
-struct SwiftfsmArguments: ParsableArguments {
-
-    @Flag(help: "Generate kripke structures")
-    var generateKripkeStructures: Bool = false
-    
-    @OptionGroup var verifyArgs: VerifyArguments
-    
-    @OptionGroup var scheduleArgs: RunArguments
-    
-}
+SwiftfsmVerify.main()

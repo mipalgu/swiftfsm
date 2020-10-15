@@ -82,13 +82,13 @@ struct SwiftfsmRunner {
     
     func run() {
         let clock = FSMClock(ringletLengths: [:], scheduleLength: 0)
-        let machines = self.machines.map { Machine(debug: args.schedule.debug, name: $0.fsm.name, fsm: $0.fsm, dependencies: $0.dependencies, clock: clock) }
+        let machines = self.machines.map { Machine(debug: args.scheduleArgs.debug, name: $0.fsm.name, fsm: $0.fsm, dependencies: $0.dependencies, clock: clock) }
         let clfsmMachineLoader = CLFSMMachineLoader()
-        if let dispatchTable = args.schedule.dispatchTable {
+        if let dispatchTable = args.scheduleArgs.dispatchTable {
             print("Time-triggered scheduling not yet implemented.")
             return
         }
-        switch self.args.schedule.scheduler {
+        switch self.args.scheduleArgs.scheduler {
         case .roundRobin:
             let scheduler = RoundRobinSchedulerFactory(gateway: self.gateway, scheduleHandler: clfsmMachineLoader, unloader: clfsmMachineLoader).make()
             let generatorFactory = RoundRobinKripkeStructureGeneratorFactory(gateway: self.gateway)
@@ -101,14 +101,15 @@ struct SwiftfsmRunner {
     }
     
     private func handleMachines<S: Scheduler, F: KripkeStructureGeneratorFactory>(machines: [Machine], scheduler: S, generatorFactory: F) where F.ViewFactory == AggregateKripkeStructureViewFactory<KripkeState> {
-        if !self.args.generateKripkeStructure.isEmpty {
-            self.generateKripkeStructure(machines: machines, generatorFactory: generatorFactory, formats: self.args.generateKripkeStructure)
+        if self.args.generateKripkeStructures {
+            self.generateKripkeStructure(machines: machines, generatorFactory: generatorFactory, formats: self.args.verifyArgs.formats)
             return
         }
         scheduler.run(machines)
     }
     
-    private func generateKripkeStructure<F: KripkeStructureGeneratorFactory>(machines: [Machine], generatorFactory: F, formats: [SwiftfsmArguments.KripkeStructureFormats]) where F.ViewFactory == AggregateKripkeStructureViewFactory<KripkeState> {
+    private func generateKripkeStructure<F: KripkeStructureGeneratorFactory>(machines: [Machine], generatorFactory: F, formats: [VerifyArguments.KripkeStructureFormats]) where F.ViewFactory == AggregateKripkeStructureViewFactory<KripkeState> {
+        let formats = formats.isEmpty ? [.nusmv] : formats
         let viewFactories: [AnyKripkeStructureViewFactory<KripkeState>] = formats.map {
             switch $0 {
             case .graphviz:
