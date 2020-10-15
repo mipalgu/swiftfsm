@@ -83,9 +83,9 @@ extension SwiftBuildConfig: ExpressibleByArgument {
 }
 
 @available(macOS 10.11, *)
-struct SwiftfsmBuild: ParsableCommand {
+public struct SwiftfsmBuild: ParsableCommand {
     
-    static let configuration = CommandConfiguration(commandName: "swiftfsm-build", abstract: "Generate and compile a swiftfsm arrangement.")
+    public static let configuration = CommandConfiguration(commandName: "build", _superCommandName: "swiftfsm", abstract: "Generate and compile a swiftfsm arrangement.")
     
     @Option(name: .customShort("o"), help: "Path to the resulting arrangment directory.")
     public var arrangmentPath: String
@@ -140,6 +140,8 @@ struct SwiftfsmBuild: ParsableCommand {
     @Argument(help: "Paths to the machines in the arrangement.")
     public var paths: [String]
     
+    public init() {}
+    
     public var actualBuildDir: String {
         if let buildDir = buildDir {
             return buildDir
@@ -160,7 +162,7 @@ struct SwiftfsmBuild: ParsableCommand {
         return sysname + "-" + machine
     }
     
-    func run() throws {
+    public func run() throws {
         let printer = CommandLinePrinter(errorStream: StderrOutputStream(), messageStream: StdoutOutputStream(), warningStream: StdoutOutputStream())
         let buildDir = self.actualBuildDir
         let compiler = MachineArrangementCompiler()

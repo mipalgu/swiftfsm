@@ -27,15 +27,15 @@ let package = Package(
         ),
         .executable(
             name: "swiftfsm-build",
-            targets: ["swiftfsm-build"]
+            targets: ["swiftfsm_build"]
         ),
         .executable(
             name: "swiftfsm-run",
-            targets: ["swiftfsm-run"]
+            targets: ["swiftfsm_run"]
         ),
         .executable(
             name: "swiftfsm-verify",
-            targets: ["swiftfsm-verify"]
+            targets: ["swiftfsm_verify"]
         ),
         .library(
             name: "CFSMs",
@@ -80,25 +80,7 @@ let package = Package(
             ]
         ),
         .target(
-            name: "swiftfsm-build",
-            dependencies: [
-                .product(name: "ArgumentParser", package: "swift-argument-parser"),
-                "CFSMs",
-                "swiftfsm_helpers",
-                "Libraries",
-                "MachineStructure",
-                "MachineLoading",
-                "MachineCompiling",
-                "Scheduling",
-                "Timers",
-                "Verification",
-                "CFSMWrappers",
-                "Gateways",
-                "FSM"
-            ]
-        ),
-        .target(
-            name: "swiftfsm-run",
+            name: "swiftfsm_build",
             dependencies: [
                 .product(name: "ArgumentParser", package: "swift-argument-parser"),
                 "CFSMs",
@@ -117,7 +99,26 @@ let package = Package(
             ]
         ),
         .target(
-            name: "swiftfsm-verify",
+            name: "swiftfsm_run",
+            dependencies: [
+                .product(name: "ArgumentParser", package: "swift-argument-parser"),
+                "CFSMs",
+                "swiftfsm_helpers",
+                "Libraries",
+                "MachineStructure",
+                "MachineLoading",
+                "MachineCompiling",
+                "Scheduling",
+                "Timers",
+                "Verification",
+                "CFSMWrappers",
+                "Gateways",
+                "FSM",
+                "swiftfsm_binaries"
+            ]
+        ),
+        .target(
+            name: "swiftfsm_verify",
             dependencies: [
                 .product(name: "ArgumentParser", package: "swift-argument-parser"),
                 "CFSMs",
@@ -138,19 +139,8 @@ let package = Package(
         .target(
             name: "swiftfsm_bin",
             dependencies: [
-                "CFSMs",
-                "swiftfsm_helpers",
-                "Libraries",
-                "MachineStructure",
-                "MachineLoading",
-                "MachineCompiling",
-                "Scheduling",
-                "Timers",
-                "Parsing",
-                "Verification",
-                "CFSMWrappers",
-                "Gateways",
-                "FSM"
+                .product(name: "ArgumentParser", package: "swift-argument-parser"),
+                "swiftfsm_binaries"
             ]
         ),
         .testTarget(name: "VerificationTests", dependencies: [.target(name: "Verification")]),

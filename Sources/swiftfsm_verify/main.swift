@@ -1,9 +1,9 @@
 /*
- * SwiftfsmErrors.swift
- * swiftfsm
+ * main.swift 
+ * swiftfsm-verify 
  *
- * Created by Callum McColl on 20/12/2015.
- * Copyright © 2015 Callum McColl. All rights reserved.
+ * Created by Callum McColl on 16/10/2020.
+ * Copyright © 2020 Callum McColl. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -56,28 +56,6 @@
  *
  */
 
-import Parsing
+import swiftfsm_binaries
 
-/**
- *  A list of errors that can be caused when attempting to run `Swiftfsm`.
- */
-public enum SwiftfsmErrors: Error {
-
-    /**
-     *  For any error that does not fit nicely into the other errors.
-     */
-    case generalError(error: String)
-
-    /**
-     * For when the parser has errors.
-     */
-    case parsingError(error: ParsingErrors)
-
-    /**
-     *  For when there was no way to load the `Machine` from the path.
-     */
-    case unableToLoad(machineName: String, path: String)
-
-    case verifyingCppMachines
-
-}
+SwiftfsmVerify.main()

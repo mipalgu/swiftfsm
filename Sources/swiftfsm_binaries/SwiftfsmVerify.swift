@@ -56,23 +56,14 @@
  *
  */
 
-import swiftfsm_binaries
 import ArgumentParser
 import SwiftMachines
 import IO
 import Foundation
 
-extension SwiftBuildConfig: ExpressibleByArgument {
+public struct SwiftfsmVerify: ParsableCommand {
     
-    public init?(argument: String) {
-        self.init(rawValue: argument)
-    }
-    
-}
-
-struct SwiftfsmVerify: ParsableCommand {
-    
-    static let configuration = CommandConfiguration(abstract: "Generate Kripke Structures for an arrangement of swiftfsm machines.")
+    public static let configuration = CommandConfiguration(commandName: "verify", _superCommandName: "swiftfsm", abstract: "Generate Kripke Structures for an arrangement of swiftfsm machines.")
     
     @Option(name: .short, help: "Specify which build to verify.")
     public var config: SwiftBuildConfig?
@@ -84,6 +75,8 @@ struct SwiftfsmVerify: ParsableCommand {
      */
     @Argument(help: "The path to the arrangement.")
     public var arrangement: String
+    
+    public init() {}
     
     private var executable: URL? {
         let printer = CommandLinePrinter(errorStream: StderrOutputStream(), messageStream: StdoutOutputStream(), warningStream: StdoutOutputStream())
@@ -111,7 +104,7 @@ struct SwiftfsmVerify: ParsableCommand {
         return nil
     }
     
-    func run() throws {
+    public func run() throws {
         guard let executable = self.executable else {
             throw ExitCode.failure
         }

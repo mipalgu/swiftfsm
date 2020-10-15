@@ -61,19 +61,10 @@ import ArgumentParser
 import MachineCompiling
 import SwiftMachines
 import Foundation
-import swiftfsm_binaries
 
-extension SwiftBuildConfig: ExpressibleByArgument {
+public struct SwiftfsmRun: ParsableCommand {
     
-    public init?(argument: String) {
-        self.init(rawValue: argument)
-    }
-    
-}
-
-struct SwiftfsmRun: ParsableCommand {
-    
-    static let configuration = CommandConfiguration(abstract: "Execute an arrangement of swiftfsm machines.")
+    public static let configuration = CommandConfiguration(commandName: "run", _superCommandName: "swiftfsm", abstract: "Execute an arrangement of swiftfsm machines.")
     
     @Option(name: .short, help: "Specify which build to execute.")
     public var config: SwiftBuildConfig?
@@ -85,6 +76,8 @@ struct SwiftfsmRun: ParsableCommand {
      */
     @Argument(help: "The path to the arrangement.")
     public var arrangement: String
+    
+    public init() {}
     
     private var executable: URL? {
         let printer = CommandLinePrinter(errorStream: StderrOutputStream(), messageStream: StdoutOutputStream(), warningStream: StdoutOutputStream())
@@ -112,7 +105,7 @@ struct SwiftfsmRun: ParsableCommand {
         return nil
     }
     
-    func run() throws {
+    public func run() throws {
         guard let executable = self.executable else {
             throw ExitCode.failure
         }

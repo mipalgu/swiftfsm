@@ -56,4 +56,6 @@
  *
  */
 
+import swiftfsm_binaries
+
 SwiftfsmRun.main()

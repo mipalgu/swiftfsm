@@ -1,8 +1,8 @@
 /*
  * main.swift 
- * swiftfsm-verify 
+ * swiftfsmc 
  *
- * Created by Callum McColl on 16/10/2020.
+ * Created by Callum McColl on 12/10/2020.
  * Copyright © 2020 Callum McColl. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -56,4 +56,15 @@
  *
  */
 
-SwiftfsmVerify.main()
+import swiftfsm_binaries
+import swift_helpers
+import IO
+import SwiftMachines
+import Foundation
+
+if #available(macOS 10.11, *) {
+    SwiftfsmBuild.main()
+} else {
+    print("You need a minimum of macOS 10.11", stderr)
+    exit(EXIT_FAILURE)
+}
