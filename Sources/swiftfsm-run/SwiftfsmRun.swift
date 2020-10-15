@@ -131,7 +131,6 @@ struct SwiftfsmRun: ParsableCommand {
             args.append(dispatchTable)
         }
         let invoker = Invoker()
-        print(args)
         guard invoker.run(executable.path, withArguments: args) else {
             throw ExitCode.failure
         }
