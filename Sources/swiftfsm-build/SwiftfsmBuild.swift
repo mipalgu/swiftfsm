@@ -1,5 +1,5 @@
 /*
- * SwiftfsmcArguments.swift
+ * SwiftfsmBuild.swift
  * swiftfsmc
  *
  * Created by Callum McColl on 12/10/20.
@@ -56,6 +56,7 @@
  *
  */
 
+import IO
 import ArgumentParser
 import MachineCompiling
 import SwiftMachines
@@ -81,9 +82,24 @@ extension SwiftBuildConfig: ExpressibleByArgument {
     
 }
 
-struct SwiftfsmcArguments: ParsableCommand {
+@available(macOS 10.11, *)
+struct SwiftfsmBuild: ParsableCommand {
     
-    static let configuration = CommandConfiguration(abstract: "swiftfsm compiler.")
+    static let configuration = CommandConfiguration(commandName: "swiftfsm-build", abstract: "Generate and compile a swiftfsm arrangement.")
+    
+    @Option(name: .customShort("o"), help: "Path to the resulting arrangment directory.")
+    public var arrangmentPath: String
+    
+    public var executableName: String? {
+        guard let executable = self.arrangmentPath.components(separatedBy: ".").first else {
+            return nil
+        }
+        let trimmed = executable.trimmingCharacters(in: .whitespaces)
+        if trimmed.isEmpty {
+            return nil
+        }
+        return trimmed
+    }
     
     @Option(name: .short, help: "Specify the swift build config")
     public var config: SwiftBuildConfig = .debug
@@ -121,11 +137,8 @@ struct SwiftfsmcArguments: ParsableCommand {
     /**
      *  The path to load the `Machine`.
      */
-    @Argument(help: "The path to the machine.")
+    @Argument(help: "Paths to the machines in the arrangement.")
     public var paths: [String]
-    
-    @Option(name: .customShort("o"), help: "The name of the arrangement.")
-    public var executableName: String
     
     public var actualBuildDir: String {
         if let buildDir = buildDir {
@@ -145,6 +158,43 @@ struct SwiftfsmcArguments: ParsableCommand {
             return ".build"
         }
         return sysname + "-" + machine
+    }
+    
+    func run() throws {
+        let printer = CommandLinePrinter(errorStream: StderrOutputStream(), messageStream: StdoutOutputStream(), warningStream: StdoutOutputStream())
+        let buildDir = self.actualBuildDir
+        let compiler = MachineArrangementCompiler()
+        let parser = MachineParser()
+        // Parse machines
+        guard let machines = self.paths.failMap({ parser.parseMachine(atPath: $0) }) else {
+            parser.errors.forEach {
+                print($0, stderr)
+            }
+            printer.error(str: "Unable to parse machines")
+            throw ExitCode.failure
+        }
+        guard let executableName = self.executableName else {
+            throw ValidationError("Cannot calcualte executable name from arrangement path: " + self.arrangmentPath)
+        }
+        // Compile the arrangement.
+        guard nil != compiler.compileArrangement(
+            arrangement: machines,
+            executableName: executableName,
+            withBuildDir: URL(fileURLWithPath: self.arrangmentPath, isDirectory: true),
+            machineBuildDir: buildDir,
+            swiftBuildConfig: self.config,
+            withCCompilerFlags: self.cCompilerFlags,
+            andCXXCompilerFlags: self.cxxCompilerFlags,
+            andLinkerFlags: self.linkerFlags,
+            andSwiftCompilerFlags: self.swiftCompilerFlags,
+            andSwiftBuildFlags: self.swiftBuildFlags
+        ) else {
+            compiler.errors.forEach {
+                printer.error(str: $0)
+            }
+            printer.error(str: "Unable to compile the arrangement package")
+            throw ExitCode.failure
+        }
     }
     
 }

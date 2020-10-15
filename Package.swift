@@ -26,8 +26,8 @@ let package = Package(
             targets: ["swiftfsm_bin"]
         ),
         .executable(
-            name: "swiftfsmc",
-            targets: ["swiftfsmc"]
+            name: "swiftfsm-build",
+            targets: ["swiftfsm-build"]
         ),
         .executable(
             name: "swiftfsm-run",
@@ -76,7 +76,7 @@ let package = Package(
             ]
         ),
         .target(
-            name: "swiftfsmc",
+            name: "swiftfsm-build",
             dependencies: [
                 .product(name: "ArgumentParser", package: "swift-argument-parser"),
                 "CFSMs",

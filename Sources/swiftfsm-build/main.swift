@@ -62,46 +62,7 @@ import SwiftMachines
 import Foundation
 
 if #available(macOS 10.11, *) {
-    
-    let args: SwiftfsmcArguments
-    do {
-        args = try SwiftfsmcArguments.parse()
-    } catch let error {
-        SwiftfsmcArguments.exit(withError: error)
-    }
-
-    let buildDir = args.actualBuildDir
-    let compiler = MachineArrangementCompiler()
-    let parser = MachineParser()
-
-    // Parse machines
-    guard let machines = args.paths.failMap({ parser.parseMachine(atPath: $0) }) else {
-        parser.errors.forEach {
-            print($0, stderr)
-        }
-        print("Unable to parse machines", stderr)
-        exit(EXIT_FAILURE)
-    }
-
-    guard nil != compiler.compileArrangement(
-        arrangement: machines,
-        executableName: args.executableName,
-        withBuildDir: URL(fileURLWithPath: args.executableName + ".arrangement", isDirectory: true),
-        machineBuildDir: buildDir,
-        swiftBuildConfig: args.config,
-        withCCompilerFlags: args.cCompilerFlags,
-        andCXXCompilerFlags: args.cxxCompilerFlags,
-        andLinkerFlags: args.linkerFlags,
-        andSwiftCompilerFlags: args.swiftCompilerFlags,
-        andSwiftBuildFlags: args.swiftBuildFlags
-    ) else {
-        compiler.errors.forEach {
-            print($0, stderr)
-        }
-        print("Unable to compile the arrangement package", stderr)
-        exit(EXIT_FAILURE)
-    }
-
+    SwiftfsmBuild.main()
 } else {
     print("You need a minimum of macOS 10.11", stderr)
     exit(EXIT_FAILURE)
