@@ -80,6 +80,8 @@ public struct Swiftfsm {
         )
     )
     
+    public init() {}
+    
     public func makeMachine(name: String, dependantMachines: [String: [String]], callableMachines: [String: [String]], invocableMachines: [String: [String]], factories: [String: MachineFactory], caller: FSM_ID? = nil) -> (FSMType, [Dependency]) {
         func _makeMachine<Gateway: VerifiableGateway>(name: String, prefix: String?, gateway: Gateway, caller: FSM_ID? = nil) -> (FSMType, [Dependency]) {
             let prefixedName = (prefix.map { $0 + "." } ?? "") + name
