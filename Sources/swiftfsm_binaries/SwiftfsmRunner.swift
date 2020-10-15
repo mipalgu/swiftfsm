@@ -82,7 +82,7 @@ struct SwiftfsmRunner {
     
     func run() {
         let clock = FSMClock(ringletLengths: [:], scheduleLength: 0)
-        let machines = self.machines.map { Machine(debug: args.debug, name: $0.fsm.name, fsm: $0.fsm, clock: clock) }
+        let machines = self.machines.map { Machine(debug: args.debug, name: $0.fsm.name, fsm: $0.fsm, dependencies: $0.dependencies, clock: clock) }
         let clfsmMachineLoader = CLFSMMachineLoader()
         switch self.args.scheduler {
         case .roundRobin:
