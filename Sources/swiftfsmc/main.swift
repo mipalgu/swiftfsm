@@ -82,18 +82,7 @@ guard let machines = args.paths.failMap({ parser.parseMachine(atPath: $0) }) els
     exit(EXIT_FAILURE)
 }
 
-// Generate each machines package.
-for machine in machines {
-    guard nil != machineAssembler.assemble(machine, inDirectory: machine.filePath.appendingPathComponent(buildDir, isDirectory: true)) else {
-        machineAssembler.errors.forEach {
-            print($0, stderr)
-        }
-        print("Unable to generate the '\(machine.filePath.path)' machine package", stderr)
-        exit(EXIT_FAILURE)
-    }
-}
-
-// Generate the arrangment package.
+// Generate each machines and the arrangments package.
 guard nil != assembler.assemble(machines, inDirectory: URL(fileURLWithPath: ".build", isDirectory: true), name: "machine_bin", machineBuildDir: buildDir) else {
     assembler.errors.forEach {
         print($0, stderr)
