@@ -86,8 +86,8 @@ public struct Swiftfsm {
         func _makeMachine<Gateway: VerifiableGateway>(name: String, prefix: String?, gateway: Gateway, caller: FSM_ID? = nil) -> (FSMType, [Dependency]) {
             let prefixedName = (prefix.map { $0 + "." } ?? "") + name
             let id = gateway.id(of: prefixedName)
-            guard let factory = factories[name] else {
-                fatalError("Unable to load machine named '\(name)' as it is not in the factory list.")
+            guard let factory = factories[prefixedName] else {
+                fatalError("Unable to load machine named '\(prefixedName)' as it is not in the factory list.")
             }
             let caller = caller ?? id
             guard
@@ -95,7 +95,7 @@ public struct Swiftfsm {
                 let callableMachines = callableMachines[prefixedName],
                 let invocableMachines = invocableMachines[prefixedName]
             else {
-                fatalError("Unable to load dependency lists for machine '\(name)'")
+                fatalError("Unable to load dependency lists for machine '\(prefixedName)'")
             }
             let newGateway = self.createRestrictiveGateway(
                 forMachine: name,
@@ -109,7 +109,7 @@ public struct Swiftfsm {
             )
             let dependenciesDict: [String: Dependency] = Dictionary(uniqueKeysWithValues: dependantMachines.map { dep in
                 let id = newGateway.id(of: dep)
-                let (depFSM, deps) = _makeMachine(name: dep, prefix: prefix.map { $0 + "." + name } ?? name, gateway: gateway, caller: callableMachines.contains(dep) ? caller : id)
+                let (depFSM, deps) = _makeMachine(name: dep, prefix: prefixedName, gateway: gateway, caller: callableMachines.contains(dep) ? caller : id)
                 if invocableMachines.contains(dep), let paramMachine = depFSM.asParameterisedFiniteStateMachine {
                     return (dep, .invokableParameterisedMachine(paramMachine, deps))
                 }
