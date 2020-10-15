@@ -1,8 +1,8 @@
 /*
- * SwiftfsmArguments.swift
- * swiftfsm_binaries
+ * main.swift
+ * swiftfsm-run
  *
- * Created by Callum McColl on 12/10/20.
+ * Created by Callum McColl on 16/10/2020.
  * Copyright © 2020 Callum McColl. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -56,48 +56,4 @@
  *
  */
 
-import ArgumentParser
-
-struct SwiftfsmArguments: ParsableArguments {
-    
-    enum KripkeStructureFormats: String, CaseIterable, EnumerableFlag, ExpressibleByArgument {
-        
-        case graphviz
-        case nusmv
-        case tulip
-        case gexf
-        
-        static func name(for value: KripkeStructureFormats) -> NameSpecification {
-            switch value {
-            case .graphviz:
-                return [.short, .long]
-            case .nusmv:
-                return [.short, .long]
-            case .tulip:
-                return [.short, .long]
-            case .gexf:
-                return [.customShort("x"), .long]
-            }
-        }
-
-        static func help(for value: KripkeStructureFormats) -> ArgumentHelp? {
-            switch value {
-            case .graphviz:
-                return "GraphViz dot format. Outputs kripke_structure.gv."
-            case .nusmv:
-                return "NuSMV format. Outputs main.smv."
-            case .tulip:
-                return "Tulip format. Used by the Tulip graph visualiser. Outputs kripke_structure.tlp."
-            case .gexf:
-                return "Gexf format. Used by the Gephi graph visualiser. Outputs kripke_structure.gexf."
-            }
-        }
-        
-    }
-
-    @Option(name: .shortAndLong, help: "Generate Kripke Structures in specific formats")
-    var generateKripkeStructure: [KripkeStructureFormats] = []
-    
-    @OptionGroup var schedule: RunArguments
-    
-}
+SwiftfsmRun.main()

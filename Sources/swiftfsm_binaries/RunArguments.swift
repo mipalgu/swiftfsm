@@ -1,8 +1,8 @@
 /*
- * SwiftfsmArguments.swift
+ * RunArguments.swift
  * swiftfsm_binaries
  *
- * Created by Callum McColl on 12/10/20.
+ * Created by Callum McColl on 16/10/20.
  * Copyright © 2020 Callum McColl. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -58,46 +58,49 @@
 
 import ArgumentParser
 
-struct SwiftfsmArguments: ParsableArguments {
+public struct RunArguments: ParsableArguments {
     
-    enum KripkeStructureFormats: String, CaseIterable, EnumerableFlag, ExpressibleByArgument {
+    public enum Schedulers: String, EnumerableFlag {
+
+        case passiveRoundRobin
+        case roundRobin
         
-        case graphviz
-        case nusmv
-        case tulip
-        case gexf
-        
-        static func name(for value: KripkeStructureFormats) -> NameSpecification {
+        public static func name(for value: Schedulers) -> NameSpecification {
             switch value {
-            case .graphviz:
-                return [.short, .long]
-            case .nusmv:
-                return [.short, .long]
-            case .tulip:
-                return [.short, .long]
-            case .gexf:
-                return [.customShort("x"), .long]
+            case .passiveRoundRobin:
+                return [.customLong("prr", withSingleDash: true), .customLong("passive-round-robin")]
+            case .roundRobin:
+                return [.customLong("rr", withSingleDash: true), .customLong("round-robin")]
             }
         }
 
-        static func help(for value: KripkeStructureFormats) -> ArgumentHelp? {
+        public static func help(for value: Schedulers) -> ArgumentHelp? {
             switch value {
-            case .graphviz:
-                return "GraphViz dot format. Outputs kripke_structure.gv."
-            case .nusmv:
-                return "NuSMV format. Outputs main.smv."
-            case .tulip:
-                return "Tulip format. Used by the Tulip graph visualiser. Outputs kripke_structure.tlp."
-            case .gexf:
-                return "Gexf format. Used by the Gephi graph visualiser. Outputs kripke_structure.gexf."
+            case .passiveRoundRobin:
+                return ArgumentHelp(
+                    "Passive Round-Robin",
+                    discussion: "Takes a snapshot of the external variables before executing each entire schedule cycle. The snapshot is saved at the end of each schedule cycle, after all LLFSMs have executed a single ringlet."
+                )
+            case .roundRobin:
+                return ArgumentHelp(
+                    "Round-Robin",
+                    discussion: "Takes a snapshot of the external variables before executing each ringlet in each LLFSM. The snapshot is saved after executing each ringlet in each LLFSM."
+                )
             }
         }
-        
+
     }
-
-    @Option(name: .shortAndLong, help: "Generate Kripke Structures in specific formats")
-    var generateKripkeStructure: [KripkeStructureFormats] = []
     
-    @OptionGroup var schedule: RunArguments
+    @Flag(name: .shortAndLong, help: "Enable debugging.")
+    public var debug: Bool = false
+    
+    //@Flag(help: "Specify which scheduler to use.", transform: Schedulers.init)
+    @Flag(exclusivity: FlagExclusivity.exclusive, help: "Specify which scheduler to use.")
+    public var scheduler: Schedulers = .roundRobin
+    
+    @Option(name: .customShort("S"), help: "Specify a dispatch table to use instead of a standard scheduler.")
+    public var dispatchTable: String?
+    
+    public init() {}
     
 }

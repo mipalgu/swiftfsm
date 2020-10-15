@@ -117,12 +117,15 @@ struct SwiftfsmcArguments: ParsableCommand {
 
     @Option(name: .customLong("Xswiftbuild", withSingleDash: true), parsing: .unconditionalSingleValue, help: "Pass a flag to swift build when compiling this machine.")
     public var swiftBuildFlags: [String] = []
-    
+
     /**
      *  The path to load the `Machine`.
      */
     @Argument(help: "The path to the machine.")
     public var paths: [String]
+    
+    @Option(name: .customShort("o"), help: "The name of the arrangement.")
+    public var executableName: String
     
     public var actualBuildDir: String {
         if let buildDir = buildDir {

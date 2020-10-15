@@ -82,9 +82,13 @@ struct SwiftfsmRunner {
     
     func run() {
         let clock = FSMClock(ringletLengths: [:], scheduleLength: 0)
-        let machines = self.machines.map { Machine(debug: args.debug, name: $0.fsm.name, fsm: $0.fsm, dependencies: $0.dependencies, clock: clock) }
+        let machines = self.machines.map { Machine(debug: args.schedule.debug, name: $0.fsm.name, fsm: $0.fsm, dependencies: $0.dependencies, clock: clock) }
         let clfsmMachineLoader = CLFSMMachineLoader()
-        switch self.args.scheduler {
+        if let dispatchTable = args.schedule.dispatchTable {
+            print("Time-triggered scheduling not yet implemented.")
+            return
+        }
+        switch self.args.schedule.scheduler {
         case .roundRobin:
             let scheduler = RoundRobinSchedulerFactory(gateway: self.gateway, scheduleHandler: clfsmMachineLoader, unloader: clfsmMachineLoader).make()
             let generatorFactory = RoundRobinKripkeStructureGeneratorFactory(gateway: self.gateway)
@@ -93,8 +97,6 @@ struct SwiftfsmRunner {
             let scheduler = PassiveRoundRobinSchedulerFactory(gateway: self.gateway, scheduleHandler: clfsmMachineLoader, unloader: clfsmMachineLoader).make()
             let generatorFactory = PassiveRoundRobinKripkeStructureGeneratorFactory(gateway: self.gateway)
             self.handleMachines(machines: machines, scheduler: scheduler, generatorFactory: generatorFactory)
-        case .timeTriggered:
-            fatalError("Not Yet Implemented")
         }
     }
     

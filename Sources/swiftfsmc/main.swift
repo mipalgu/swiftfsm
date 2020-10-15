@@ -85,8 +85,8 @@ if #available(macOS 10.11, *) {
 
     guard nil != compiler.compileArrangement(
         arrangement: machines,
-        executableName: "machine_bin",
-        withBuildDir: URL(fileURLWithPath: ".build", isDirectory: true),
+        executableName: args.executableName,
+        withBuildDir: URL(fileURLWithPath: args.executableName + ".arrangement", isDirectory: true),
         machineBuildDir: buildDir,
         swiftBuildConfig: args.config,
         withCCompilerFlags: args.cCompilerFlags,
