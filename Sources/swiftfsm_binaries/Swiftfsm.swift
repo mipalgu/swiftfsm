@@ -122,7 +122,7 @@ public struct Swiftfsm {
                 fatalError("Unable to create fsm.")
             })
             let (fsm, shallowDependencies) = factory(
-                self.gateway,
+                newGateway,
                 FSMClock(ringletLengths: [:], scheduleLength: 0),
                 caller
             )
