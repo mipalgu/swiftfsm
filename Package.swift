@@ -20,6 +20,7 @@ let deps = [
 
 let package = Package(
     name: "swiftfsm",
+    platforms: [.macOS(.v10_11)],
     products: [
         .executable(
             name: "swiftfsm",

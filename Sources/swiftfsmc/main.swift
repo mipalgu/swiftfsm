@@ -61,32 +61,48 @@ import IO
 import SwiftMachines
 import Foundation
 
-let args: SwiftfsmcArguments
-do {
-    args = try SwiftfsmcArguments.parse()
-} catch let error {
-    SwiftfsmcArguments.exit(withError: error)
-}
-
-let buildDir = args.actualBuildDir
-let assembler = MachineArrangmentAssembler()
-let machineAssembler = MachineAssembler()
-let parser = MachineParser()
-
-// Parse machines
-guard let machines = args.paths.failMap({ parser.parseMachine(atPath: $0) }) else {
-    parser.errors.forEach {
-        print($0, stderr)
+if #available(macOS 10.11, *) {
+    
+    let args: SwiftfsmcArguments
+    do {
+        args = try SwiftfsmcArguments.parse()
+    } catch let error {
+        SwiftfsmcArguments.exit(withError: error)
     }
-    print("Unable to parse machines", stderr)
-    exit(EXIT_FAILURE)
-}
 
-// Generate each machines and the arrangments package.
-guard nil != assembler.assemble(machines, inDirectory: URL(fileURLWithPath: ".build", isDirectory: true), name: "machine_bin", machineBuildDir: buildDir) else {
-    assembler.errors.forEach {
-        print($0, stderr)
+    let buildDir = args.actualBuildDir
+    let compiler = MachineArrangementCompiler()
+    let parser = MachineParser()
+
+    // Parse machines
+    guard let machines = args.paths.failMap({ parser.parseMachine(atPath: $0) }) else {
+        parser.errors.forEach {
+            print($0, stderr)
+        }
+        print("Unable to parse machines", stderr)
+        exit(EXIT_FAILURE)
     }
-    print("Unable to generate the arrangement package", stderr)
+
+    guard nil != compiler.compileArrangement(
+        arrangement: machines,
+        executableName: "machine_bin",
+        withBuildDir: URL(fileURLWithPath: ".build", isDirectory: true),
+        machineBuildDir: buildDir,
+        swiftBuildConfig: args.config,
+        withCCompilerFlags: args.cCompilerFlags,
+        andCXXCompilerFlags: args.cxxCompilerFlags,
+        andLinkerFlags: args.linkerFlags,
+        andSwiftCompilerFlags: args.swiftCompilerFlags,
+        andSwiftBuildFlags: args.swiftBuildFlags
+    ) else {
+        compiler.errors.forEach {
+            print($0, stderr)
+        }
+        print("Unable to compile the arrangement package", stderr)
+        exit(EXIT_FAILURE)
+    }
+
+} else {
+    print("You need a minimum of macOS 10.11", stderr)
     exit(EXIT_FAILURE)
 }

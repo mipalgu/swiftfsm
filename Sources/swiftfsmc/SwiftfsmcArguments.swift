@@ -58,6 +58,7 @@
 
 import ArgumentParser
 import MachineCompiling
+import SwiftMachines
 import Foundation
 
 extension TargetTriple: ExpressibleByArgument {
@@ -72,9 +73,20 @@ extension TargetTriple: ExpressibleByArgument {
     
 }
 
+extension SwiftBuildConfig: ExpressibleByArgument {
+    
+    public init?(argument: String) {
+        self.init(rawValue: argument)
+    }
+    
+}
+
 struct SwiftfsmcArguments: ParsableCommand {
     
     static let configuration = CommandConfiguration(abstract: "swiftfsm compiler.")
+    
+    @Option(name: .short, help: "Specify the swift build config")
+    public var config: SwiftBuildConfig = .debug
     
     @Option(name: .customLong("target", withSingleDash: true), help: "Specify an LLVM triple to cross-compile for.")
     public var target: TargetTriple?
