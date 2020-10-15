@@ -134,7 +134,7 @@ public struct Swiftfsm {
             self.gateway.fsms[id] = fsm
             return (fsm, dependencies)
         }
-        return _makeMachine(name: name, prefix: nil, gateway: self.gateway)
+        return _makeMachine(name: name, prefix: name + ".", gateway: self.gateway)
     }
     
     public func run(machines: [(FSMType, [Dependency])]) {
