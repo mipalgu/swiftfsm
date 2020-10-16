@@ -115,7 +115,6 @@ let package = Package(
             ]
         ),
         .testTarget(name: "VerificationTests", dependencies: [.target(name: "Verification")]),
-        .testTarget(name: "swiftfsm_binariesTests", dependencies: [.target(name: "swiftfsm_binaries")]),
-        .testTarget(name: "swiftfsm_binTests", dependencies: [.target(name: "swiftfsm_bin")])
+        .testTarget(name: "swiftfsm_binariesTests", dependencies: [.target(name: "swiftfsm_binaries")])
     ]
 )

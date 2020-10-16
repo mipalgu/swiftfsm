@@ -73,6 +73,11 @@ internal final class TempFiniteStateMachine: FiniteStateMachineType,
     Snapshotable,
     SnapshotControllerContainer,
     Updateable {
+    
+    var sensors: [AnySnapshotController] = []
+    
+    var actuators: [AnySnapshotController] = []
+    
 
     //swiftlint:disable:next type_name
     typealias _StateType = MiPalState
