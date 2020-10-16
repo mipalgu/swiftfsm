@@ -3,8 +3,7 @@
 import PackageDescription
 
 let normalDependencies: [Package.Dependency] = [
-    .package(url: "https://github.com/apple/swift-argument-parser", .upToNextMinor(from: "0.3.0")),
-    .package(url: "ssh://git.mipal.net/git/swift_CLReflect.git", .branch("master"))
+    .package(url: "https://github.com/apple/swift-argument-parser", .upToNextMinor(from: "0.3.0"))
 ]
 
 func convert(_ arr: [String]) -> [Target.Dependency] {
@@ -44,7 +43,7 @@ let package = Package(
         .library(
             name: "CFSMs",
             type: .dynamic,
-            targets: ["CFSMs"]
+            targets: ["CFSMs", "CLReflect"]
         ),
         .library(
             name: "swiftfsm_binaries",
@@ -53,7 +52,8 @@ let package = Package(
     ],
     dependencies: deps,
     targets: [
-        .target(name: "CFSMs", dependencies: []),
+        .target(name: "CLReflect", dependencies: []),
+        .target(name: "CFSMs", dependencies: ["CLReflect"]),
         .target(name: "swiftfsm_helpers", dependencies: []),
         .target(name: "Gateways", dependencies: ["FSM"]),
         .target(name: "Timers", dependencies: ["swiftfsm_helpers", "FSM"]),
@@ -64,7 +64,7 @@ let package = Package(
         .target(name: "Scheduling", dependencies: ["MachineStructure", "MachineLoading", "Timers", "Gateways", "FSM"]),
         .target(name: "Verification", dependencies: ["MachineStructure", "Scheduling", "Timers", "Gateways", "FSM"]),
         .target(name: "Parsing", dependencies: ["Scheduling", "Timers", "Verification", "MachineCompiling", "FSM"]),
-        .target(name: "CFSMWrappers", dependencies: ["Libraries", "Scheduling", "Timers", "FSM"]),
+        .target(name: "CFSMWrappers", dependencies: ["Libraries", "Scheduling", "Timers", "FSM", "CLReflect"]),
         .target(
             name: "swiftfsm_binaries",
             dependencies: [

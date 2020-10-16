@@ -58,7 +58,7 @@
 
 import FSM
 import KripkeStructure
-import swift_CLReflect
+import CLReflect
 import swiftfsm
 
 /**

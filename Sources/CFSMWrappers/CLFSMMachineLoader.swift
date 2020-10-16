@@ -58,7 +58,7 @@
 
 import FSM
 import swiftfsm_helpers
-import swift_CLReflect
+import CLReflect
 import Libraries
 import MachineLoading
 import Scheduling
