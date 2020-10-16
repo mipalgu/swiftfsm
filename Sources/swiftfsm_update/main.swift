@@ -1,9 +1,8 @@
-//
 /*
- * Swiftfsm.swift
- * swiftfsm_bin
+ * main.swift 
+ * swiftfsm_update 
  *
- * Created by Callum McColl on 16/10/20.
+ * Created by Callum McColl on 16/10/2020.
  * Copyright © 2020 Callum McColl. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -57,24 +56,6 @@
  *
  */
 
-import ArgumentParser
-
 import swiftfsm_binaries
 
-struct Swiftfsm: ParsableCommand {
-    
-    static var configuration: CommandConfiguration = {
-        let subcommands: [ParsableCommand.Type]
-        if #available(macOS 10.11, *) {
-            subcommands = [SwiftfsmBuild.self, SwiftfsmRun.self, SwiftfsmUpdate.self, SwiftfsmVerify.self]
-        } else {
-            subcommands = [SwiftfsmRun.self, SwiftfsmUpdate.self, SwiftfsmVerify.self]
-        }
-        return CommandConfiguration(
-            abstract: "A Finite State Machine scheduler",
-            subcommands: subcommands,
-            defaultSubcommand: SwiftfsmRun.self
-        )
-    }()
-    
-}
+SwiftfsmUpdate.main()

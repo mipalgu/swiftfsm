@@ -34,6 +34,10 @@ let package = Package(
             targets: ["swiftfsm_run"]
         ),
         .executable(
+            name: "swiftfsm-update",
+            targets: ["swiftfsm_update"]
+        ),
+        .executable(
             name: "swiftfsm-verify",
             targets: ["swiftfsm_verify"]
         ),
@@ -82,57 +86,24 @@ let package = Package(
         .target(
             name: "swiftfsm_build",
             dependencies: [
-                .product(name: "ArgumentParser", package: "swift-argument-parser"),
-                "CFSMs",
-                "swiftfsm_helpers",
-                "Libraries",
-                "MachineStructure",
-                "MachineLoading",
-                "MachineCompiling",
-                "Scheduling",
-                "Timers",
-                "Verification",
-                "CFSMWrappers",
-                "Gateways",
-                "FSM",
                 "swiftfsm_binaries"
             ]
         ),
         .target(
             name: "swiftfsm_run",
             dependencies: [
-                .product(name: "ArgumentParser", package: "swift-argument-parser"),
-                "CFSMs",
-                "swiftfsm_helpers",
-                "Libraries",
-                "MachineStructure",
-                "MachineLoading",
-                "MachineCompiling",
-                "Scheduling",
-                "Timers",
-                "Verification",
-                "CFSMWrappers",
-                "Gateways",
-                "FSM",
+                "swiftfsm_binaries"
+            ]
+        ),
+        .target(
+            name: "swiftfsm_update",
+            dependencies: [
                 "swiftfsm_binaries"
             ]
         ),
         .target(
             name: "swiftfsm_verify",
             dependencies: [
-                .product(name: "ArgumentParser", package: "swift-argument-parser"),
-                "CFSMs",
-                "swiftfsm_helpers",
-                "Libraries",
-                "MachineStructure",
-                "MachineLoading",
-                "MachineCompiling",
-                "Scheduling",
-                "Timers",
-                "Verification",
-                "CFSMWrappers",
-                "Gateways",
-                "FSM",
                 "swiftfsm_binaries"
             ]
         ),

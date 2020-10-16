@@ -1,7 +1,6 @@
-//
 /*
- * Swiftfsm.swift
- * swiftfsm_bin
+ * SwiftfsmUpdate.swift
+ * swiftfsm_binaries
  *
  * Created by Callum McColl on 16/10/20.
  * Copyright © 2020 Callum McColl. All rights reserved.
@@ -57,24 +56,41 @@
  *
  */
 
+import IO
 import ArgumentParser
+import MachineCompiling
+import SwiftMachines
+import Foundation
 
-import swiftfsm_binaries
-
-struct Swiftfsm: ParsableCommand {
+public struct SwiftfsmUpdate: ParsableCommand {
     
-    static var configuration: CommandConfiguration = {
-        let subcommands: [ParsableCommand.Type]
-        if #available(macOS 10.11, *) {
-            subcommands = [SwiftfsmBuild.self, SwiftfsmRun.self, SwiftfsmUpdate.self, SwiftfsmVerify.self]
-        } else {
-            subcommands = [SwiftfsmRun.self, SwiftfsmUpdate.self, SwiftfsmVerify.self]
+    public static let configuration = CommandConfiguration(
+        commandName: "update",
+        _superCommandName: "swiftfsm",
+        abstract: "Update to the latest version of the packages within a swiftfsm arrangement."
+    )
+    
+    /**
+     *  The path to load the `Machine`.
+     */
+    @Argument(help: "The path to the arrangement.")
+    public var arrangement: String
+    
+    public init() {}
+    
+    public func run() throws {
+        let fm = FileManager.default
+        if !fm.fileExists(atPath: self.arrangement) {
+            throw ValidationError(self.arrangement + "directory does not exist.")
         }
-        return CommandConfiguration(
-            abstract: "A Finite State Machine scheduler",
-            subcommands: subcommands,
-            defaultSubcommand: SwiftfsmRun.self
-        )
-    }()
+        let url = URL(fileURLWithPath: arrangement, isDirectory: true).appendingPathComponent("Arrangement", isDirectory: false)
+        if false == fm.changeCurrentDirectoryPath(url.path) {
+            throw ValidationError("The arrangment \(arrangement) has not yet been built.")
+        }
+        let invoker = Invoker()
+        if false == invoker.run("/usr/bin/env", withArguments: ["swift", "package", "update"]) {
+            throw ExitCode.failure
+        }
+    }
     
 }
