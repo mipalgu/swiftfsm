@@ -107,7 +107,7 @@ struct SwiftfsmRunner {
     }
     
     private func machineHierarchy(_ fsm: FSMType, dependencies: [Dependency], prefix: String, indent: String = "") -> String {
-        let str = indent + fsm.name
+        let str = indent + prefix + fsm.name
         let deps = dependencies.map {
             machineHierarchy($0.fsm, dependencies: $0.dependencies, prefix: prefix + fsm.name + ".", indent: indent + "    ")
         }.joined(separator: ",\n")
