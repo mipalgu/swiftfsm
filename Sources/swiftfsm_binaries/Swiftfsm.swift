@@ -70,7 +70,7 @@ import Timers
 
 public struct Swiftfsm {
 
-    public typealias MachineFactory = (FSMGateway, Timer, FSM_ID) -> (FSMType, [ShallowDependency])
+    public typealias MachineFactory = (String, FSMGateway, Timer, FSM_ID) -> (FSMType, [ShallowDependency])
     
     private let gateway: StackGateway = StackGateway(
         printer: CommandLinePrinter(
@@ -122,6 +122,7 @@ public struct Swiftfsm {
                 fatalError("Unable to create fsm.")
             })
             let (fsm, shallowDependencies) = factory(
+                prefixedName,
                 newGateway,
                 FSMClock(ringletLengths: [:], scheduleLength: 0),
                 caller
