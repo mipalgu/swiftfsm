@@ -143,7 +143,7 @@ public struct RunArguments: ParsableArguments {
                     machine should not exceed this value. The <machine> field
                     represents the name of the machine in the namespace. You
                     can fetch the names of all the machines in the arrangement
-                    by executing `swiftfsm show-machines <directory.arrangement>`.
+                    by executing `\(SwiftfsmShow.configuration._superCommandName ?? "swiftfsm") \(SwiftfsmShow.configuration.commandName ?? "show") <directory.arrangement>`.
                     A group consists of several lines of timeslot:
                         <timeslot1>
                         <timeslot2>
