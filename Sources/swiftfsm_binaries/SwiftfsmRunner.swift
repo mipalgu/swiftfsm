@@ -83,7 +83,9 @@ struct SwiftfsmRunner {
     func run() {
         let clock = FSMClock(ringletLengths: [:], scheduleLength: 0)
         if args.showMachines {
-            let str = machines.map { self.machineHierarchy($0.fsm, dependencies: $0.dependencies) }.joined(separator: "\n\n")
+            let str = machines.map {
+                self.machineHierarchy($0.fsm, dependencies: $0.dependencies, prefix: $0.fsm.name + ".")
+            }.joined(separator: "\n\n")
             print(str)
             return
         }
@@ -104,10 +106,10 @@ struct SwiftfsmRunner {
         }
     }
     
-    private func machineHierarchy(_ fsm: FSMType, dependencies: [Dependency], indent: String = "") -> String {
+    private func machineHierarchy(_ fsm: FSMType, dependencies: [Dependency], prefix: String, indent: String = "") -> String {
         let str = indent + fsm.name
         let deps = dependencies.map {
-            machineHierarchy($0.fsm, dependencies: $0.dependencies, indent: indent + "    ")
+            machineHierarchy($0.fsm, dependencies: $0.dependencies, prefix: prefix + fsm.name + ".", indent: indent + "    ")
         }.joined(separator: ",\n")
         if deps.isEmpty {
             return str
