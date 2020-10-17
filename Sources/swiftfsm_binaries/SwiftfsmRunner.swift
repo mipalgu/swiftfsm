@@ -82,6 +82,11 @@ struct SwiftfsmRunner {
     
     func run() {
         let clock = FSMClock(ringletLengths: [:], scheduleLength: 0)
+        if args.showMachines {
+            let str = machines.map { self.machineHierarchy($0.fsm, dependencies: $0.dependencies) }.joined(separator: "\n\n")
+            print(str)
+            return
+        }
         let machines = self.machines.map { Machine(debug: args.scheduleArgs.debug, name: $0.fsm.name, fsm: $0.fsm, dependencies: $0.dependencies, clock: clock) }
         let clfsmMachineLoader = CLFSMMachineLoader()
         switch self.args.scheduleArgs.scheduler {
@@ -97,6 +102,17 @@ struct SwiftfsmRunner {
             print("Time-triggered scheduling not yet implemented.")
             return
         }
+    }
+    
+    private func machineHierarchy(_ fsm: FSMType, dependencies: [Dependency], indent: String = "") -> String {
+        let str = indent + fsm.name
+        let deps = dependencies.map {
+            machineHierarchy($0.fsm, dependencies: $0.dependencies, indent: indent + "    ")
+        }.joined(separator: ",\n")
+        if deps.isEmpty {
+            return str
+        }
+        return str + ":\n" + deps
     }
     
     private func handleMachines<S: Scheduler, F: KripkeStructureGeneratorFactory>(machines: [Machine], scheduler: S, generatorFactory: F) where F.ViewFactory == AggregateKripkeStructureViewFactory<KripkeState> {

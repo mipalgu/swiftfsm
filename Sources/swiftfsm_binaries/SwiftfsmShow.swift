@@ -1,9 +1,8 @@
-//
 /*
- * Swiftfsm.swift
- * swiftfsm_bin
+ * SwiftfsmShow.swift
+ * swiftfsm_binaries
  *
- * Created by Callum McColl on 16/10/20.
+ * Created by Callum McColl on 18/10/20.
  * Copyright © 2020 Callum McColl. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -57,24 +56,62 @@
  *
  */
 
+import IO
 import ArgumentParser
+import MachineCompiling
+import SwiftMachines
+import Foundation
 
-import swiftfsm_binaries
-
-struct Swiftfsm: ParsableCommand {
+public struct SwiftfsmShow: ParsableCommand {
     
-    static var configuration: CommandConfiguration = {
-        let subcommands: [ParsableCommand.Type]
-        if #available(macOS 10.11, *) {
-            subcommands = [SwiftfsmBuild.self, SwiftfsmRun.self, SwiftfsmShow.self, SwiftfsmUpdate.self, SwiftfsmVerify.self]
-        } else {
-            subcommands = [SwiftfsmRun.self, SwiftfsmShow.self, SwiftfsmUpdate.self, SwiftfsmVerify.self]
+    public static let configuration = CommandConfiguration(commandName: "show", _superCommandName: "swiftfsm", abstract: "Displays a list of machines in an arrangement.")
+    
+    @Option(name: .short, help: ArgumentHelp("Specify which build to show.", valueName: "config"))
+    public var config: SwiftBuildConfig?
+    
+    /**
+     *  The path to load the `Machine`.
+     */
+    @Argument(help: ArgumentHelp("The path to the arrangement.", valueName: "directory.arrangement"))
+    public var arrangement: String
+    
+    public init() {}
+    
+    private var executable: URL? {
+        let printer = CommandLinePrinter(errorStream: StderrOutputStream(), messageStream: StdoutOutputStream(), warningStream: StdoutOutputStream())
+        let fm = FileManager.default
+        let arrangementDir = URL(fileURLWithPath: arrangement, isDirectory: true)
+        let fileName = arrangementDir.lastPathComponent
+        guard let executeableName = fileName.components(separatedBy: ".").first else {
+            printer.error(str: "Unable to calculate the executable name from the arrangment.")
+            return nil
         }
-        return CommandConfiguration(
-            abstract: "A Finite State Machine scheduler",
-            subcommands: subcommands,
-            defaultSubcommand: SwiftfsmRun.self
-        )
-    }()
+        if let config = config {
+            let executablePath = arrangementDir.appendingPathComponent(config.rawValue, isDirectory: true).appendingPathComponent(executeableName, isDirectory: false)
+            guard fm.fileExists(atPath: executablePath.path) else {
+                printer.error(str: "Unable to find executable at path: " + executablePath.path)
+                return nil
+            }
+            return executablePath
+        }
+        for config in SwiftBuildConfig.allCases.reversed() {
+            let path = arrangementDir.appendingPathComponent(config.rawValue, isDirectory: true).appendingPathComponent(executeableName, isDirectory: false)
+            if true == fm.fileExists(atPath: path.path) {
+                return path
+            }
+        }
+        return nil
+    }
+    
+    public func run() throws {
+        guard let executable = self.executable else {
+            throw ExitCode.failure
+        }
+        let args: [String] = ["--show-machines"]
+        let invoker = Invoker()
+        guard invoker.run(executable.path, withArguments: args) else {
+            throw ExitCode.failure
+        }
+    }
     
 }

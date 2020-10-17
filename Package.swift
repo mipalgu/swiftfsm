@@ -33,6 +33,10 @@ let package = Package(
             targets: ["swiftfsm_run"]
         ),
         .executable(
+            name: "swiftfsm-show",
+            targets: ["swiftfsm_show"]
+        ),
+        .executable(
             name: "swiftfsm-update",
             targets: ["swiftfsm_update"]
         ),
@@ -91,6 +95,12 @@ let package = Package(
         ),
         .target(
             name: "swiftfsm_run",
+            dependencies: [
+                "swiftfsm_binaries"
+            ]
+        ),
+        .target(
+            name: "swiftfsm_show",
             dependencies: [
                 "swiftfsm_binaries"
             ]

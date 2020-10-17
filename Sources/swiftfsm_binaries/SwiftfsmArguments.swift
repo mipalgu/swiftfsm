@@ -63,6 +63,9 @@ struct SwiftfsmArguments: ParsableCommand {
     @Flag(help: "Generate kripke structures")
     var generateKripkeStructures: Bool = false
     
+    @Flag(help: "Print the machines in this arrangement.")
+    var showMachines: Bool = false
+    
     @OptionGroup var verifyArgs: VerifyArguments
     
     @OptionGroup var scheduleArgs: RunArguments
