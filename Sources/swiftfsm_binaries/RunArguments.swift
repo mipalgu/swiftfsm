@@ -60,32 +60,50 @@ import ArgumentParser
 
 public struct RunArguments: ParsableArguments {
     
-    public enum Schedulers: String, EnumerableFlag {
+    public enum Schedulers: RawRepresentable, ExpressibleByArgument {
 
         case passiveRoundRobin
         case roundRobin
+        case timeTriggered(dispatchTable: String)
         
-        public static func name(for value: Schedulers) -> NameSpecification {
-            switch value {
+        public var defaultValueDescription: String {
+            switch self {
             case .passiveRoundRobin:
-                return [.customLong("prr", withSingleDash: true), .customLong("passive-round-robin")]
+                return "passive-round-robin"
             case .roundRobin:
-                return [.customLong("rr", withSingleDash: true), .customLong("round-robin")]
+                return "round-robin"
+            case .timeTriggered:
+                return "<file.table>"
             }
         }
-
-        public static func help(for value: Schedulers) -> ArgumentHelp? {
-            switch value {
-            case .passiveRoundRobin:
-                return ArgumentHelp(
-                    "Passive Round-Robin",
-                    discussion: "Takes a snapshot of the external variables before executing each entire schedule cycle. The snapshot is saved at the end of each schedule cycle, after all LLFSMs have executed a single ringlet."
-                )
+        
+        public static var allValueStrings: [String] {
+            return ["round-robin", "passive-round-robin", "<file.table>"]
+        }
+        
+        public var rawValue: String {
+            switch self {
             case .roundRobin:
-                return ArgumentHelp(
-                    "Round-Robin",
-                    discussion: "Takes a snapshot of the external variables before executing each ringlet in each LLFSM. The snapshot is saved after executing each ringlet in each LLFSM."
-                )
+                return "round-robin"
+            case .passiveRoundRobin:
+                return "passive-round-robin"
+            case .timeTriggered(let table):
+                return table
+            }
+        }
+        
+        public init?(argument: String) {
+            self.init(rawValue: argument)
+        }
+        
+        public init?(rawValue: String) {
+            switch rawValue {
+            case "rr", "round-robin":
+                self = .roundRobin
+            case "prr", "passive-round-robin":
+                self = .passiveRoundRobin
+            default:
+                self = .timeTriggered(dispatchTable: rawValue)
             }
         }
 
@@ -95,11 +113,56 @@ public struct RunArguments: ParsableArguments {
     public var debug: Bool = false
     
     //@Flag(help: "Specify which scheduler to use.", transform: Schedulers.init)
-    @Flag(exclusivity: FlagExclusivity.exclusive, help: "Specify which scheduler to use.")
+    @Option(
+        name: [.short, .long],
+        help: ArgumentHelp(
+            "Specify which scheduler to use.",
+            discussion: """
+                You may specify a standard scheduler or a dispatch table file.
+                Standard schedulers:
+                    round-robin: Takes a snapshot of the external variables before
+                        executing each ringlet in each LLFSM. The snapshot is saved
+                        after executing each ringlet in each LLFSM.
+                    passive-round-robin: Takes a snapshot of the external variables
+                        before executing each entire schedule cycle. The snapshot is
+                        saved at the end of each schedule cycle, after all LLFSMS
+                        have executed a single ringlet.
+                Dispatch table file format:
+                    The dispatch table file format allows specifying a parallal
+                    time-triggered schedule. The dispatch table consists of
+                    groups of machines in timeslots which execute sequentially.
+                    Each group executes in parallel to the others. Each timeslot
+                    has the following format:
+                        <offset-start-time> <run-time> <machine>
+                    where <offset-start-time> is the time offset from the start
+                    of the schedule cycle and dictates when the machine should
+                    start executing. An offset of 0 indicates that the machine
+                    should start executing at the beginning of a schedule cycle.
+                    The <run-time> field indicates how much time the
+                    machine has to execute. The worst-cast execution time of the
+                    machine should not exceed this value. The <machine> field
+                    represents the name of the machine in the namespace. You
+                    can fetch the names of all the machines in the arrangement
+                    by executing `swiftfsm show-machines <directory.arrangement>`.
+                    A group consists of several lines of timeslot:
+                        <timeslot1>
+                        <timeslot2>
+                        <timeslot3>
+                    and each group is separated by a blank line:
+                        <timeslot1>
+                        <timeslot2>
+                        <timeslot3>
+
+                        <timeslot4>
+                        <timeslot5>
+                        <timeslot6>
+                    In this example, timeslots 1-3 are executed in parallel to
+                    timeslots 4-6.
+                """,
+            valueName: "scheduler|<file.table>"
+        )
+    )
     public var scheduler: Schedulers = .roundRobin
-    
-    @Option(name: .customShort("S"), help: "Specify a dispatch table to use instead of a standard scheduler.")
-    public var dispatchTable: String?
     
     public init() {}
     

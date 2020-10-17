@@ -83,13 +83,13 @@ public struct VerifyArguments: ParsableArguments {
         public static func help(for value: KripkeStructureFormats) -> ArgumentHelp? {
             switch value {
             case .graphviz:
-                return "GraphViz dot format. Outputs kripke_structure.gv."
+                return "Generate GraphViz dot format. Outputs kripke_structure.gv."
             case .nusmv:
-                return "NuSMV format. Outputs main.smv."
+                return "Generate NuSMV format. Outputs main.smv."
             case .tulip:
-                return "Tulip format. Used by the Tulip graph visualiser. Outputs kripke_structure.tlp."
+                return "Generate Tulip format. Used by the Tulip graph visualiser. Outputs kripke_structure.tlp."
             case .gexf:
-                return "Gexf format. Used by the Gephi graph visualiser. Outputs kripke_structure.gexf."
+                return "Generate Gexf format. Used by the Gephi graph visualiser. Outputs kripke_structure.gexf."
             }
         }
         

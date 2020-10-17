@@ -69,7 +69,7 @@ extension TargetTriple: ExpressibleByArgument {
     }
     
     public var defaultValueDescription: String {
-        return "<<arch><subarch>-<vendor>-<os>-<environment>>"
+        return "<arch><subarch>-<vendor>-<os>-<environment>"
     }
     
 }
@@ -87,9 +87,6 @@ public struct SwiftfsmBuild: ParsableCommand {
     
     public static let configuration = CommandConfiguration(commandName: "build", _superCommandName: "swiftfsm", abstract: "Generate and compile a swiftfsm arrangement.")
     
-    @Option(name: .customShort("o"), help: "Path to the resulting arrangment directory.")
-    public var arrangmentPath: String
-    
     public var executableName: String? {
         guard let executable = self.arrangmentPath.components(separatedBy: ".").first else {
             return nil
@@ -101,37 +98,87 @@ public struct SwiftfsmBuild: ParsableCommand {
         return trimmed
     }
     
-    @Option(name: .short, help: "Specify the swift build config")
+    @Option(
+        name: .customShort("o"),
+        help: ArgumentHelp("Write output to <directory.arrangement>.", valueName: "directory.arrangement")
+    )
+    public var arrangmentPath: String
+    
+    @Option(name: .short, help: ArgumentHelp("Specify the swift build config", valueName: "config"))
     public var config: SwiftBuildConfig = .debug
     
-    @Option(name: .customLong("target", withSingleDash: true), help: "Specify an LLVM triple to cross-compile for.")
+    @Option(
+        name: .customLong("target", withSingleDash: true),
+        help: ArgumentHelp(
+            "Specify an LLVM triple to cross-compile for.",
+            discussion: """
+                The triple is composed of several fields in the format <arch><subarch>-<vendor>-<os>-<environment>:
+                    <arch>: The target architecture (e.g. arm, arm64, i386, x86_64).
+                    <subarch>: The target sub-architecture. This is only required
+                               for certain <arch> values (e.g. arm64v8).
+                    <vendor>: The target vendor (e.g. aldebaran, apple, pc, nvidia).
+                    <os>: The target operating system (e.g. darwin, linux, cuda).
+                    <environment>: The target environment (e.g. gnu, msvc, android,
+                                   macabi, simulator).
+                """,
+            valueName: "triple"
+        )
+    )
     public var target: TargetTriple?
     
-    @Option(wrappedValue: nil, name: .shortAndLong, help: "Force a specific machine build directory name.", transform: { $0.isEmpty ? nil : $0 })
+    @Option(
+        wrappedValue: nil,
+        name: .shortAndLong,
+        help: ArgumentHelp(
+            "Force a specific machine build directory name.",
+            discussion: "For each machine in the arrangement, will create/search for swift packages in <machine>.machine/<build-dir>.",
+            valueName: "build-dir"
+        ),
+        transform: { $0.isEmpty ? nil : $0 }
+    )
     public var buildDir: String?
 
     /**
      * Flags passed to the C compiler when compiling a machine.
      */
-    @Option(name: .customLong("Xcc", withSingleDash: true), parsing: .unconditionalSingleValue, help: "Pass a compiler flag to the C compiler when compiling this machine.")
+    @Option(
+        name: .customLong("Xcc", withSingleDash: true),
+        parsing: .unconditionalSingleValue,
+        help: ArgumentHelp("Pass <flag> to the C compiler when compiling this arrangement.", valueName: "flag"))
     public var cCompilerFlags: [String] = []
 
-    @Option(name: .customLong("Xcxx", withSingleDash: true), parsing: .unconditionalSingleValue, help: "Pass a compiler flag to the C++ compiler when compiling this machine.")
+    @Option(
+        name: .customLong("Xcxx", withSingleDash: true),
+        parsing: .unconditionalSingleValue,
+        help: ArgumentHelp("Pass <flag> to the C++ compiler when compiling this arrangement.", valueName: "flag")
+    )
     public var cxxCompilerFlags: [String] = []
 
     /**
      * Flags which are passed to the linker when compiling a machine.
      */
-    @Option(name: .customLong("Xlinker", withSingleDash: true), parsing: .unconditionalSingleValue, help: "Pass a linker flag to the linker when compiling this machine.")
+    @Option(
+        name: .customLong("Xlinker", withSingleDash: true),
+        parsing: .unconditionalSingleValue,
+        help: ArgumentHelp("Pass <flag> to the linker when compiling this arrangement.", valueName: "flag")
+    )
     public var linkerFlags: [String] = []
 
     /**
      * Flags passed to the swift compiler when compiling a machine.
      */
-    @Option(name: .customLong("Xswiftc", withSingleDash: true), parsing: .unconditionalSingleValue, help: "Pass a compiler flag to the swift compiler when compiling this machine.")
+    @Option(
+        name: .customLong("Xswiftc", withSingleDash: true),
+        parsing: .unconditionalSingleValue,
+        help: ArgumentHelp("Pass <flag> to the swift compiler when compiling this arrangement.", valueName: "flag")
+    )
     public var swiftCompilerFlags: [String] = []
 
-    @Option(name: .customLong("Xswiftbuild", withSingleDash: true), parsing: .unconditionalSingleValue, help: "Pass a flag to swift build when compiling this machine.")
+    @Option(
+        name: .customLong("Xswiftbuild", withSingleDash: true),
+        parsing: .unconditionalSingleValue,
+        help: ArgumentHelp("Pass <flag> to swift build when compiling this arrangement.", valueName: "flag")
+    )
     public var swiftBuildFlags: [String] = []
 
     /**

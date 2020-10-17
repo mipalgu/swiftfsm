@@ -65,7 +65,7 @@ public struct SwiftfsmVerify: ParsableCommand {
     
     public static let configuration = CommandConfiguration(commandName: "verify", _superCommandName: "swiftfsm", abstract: "Generate Kripke Structures for an arrangement of swiftfsm machines.")
     
-    @Option(name: .short, help: "Specify which build to verify.")
+    @Option(name: .short, help: ArgumentHelp("Specify which build to verify.", valueName: "config"))
     public var config: SwiftBuildConfig?
     
     @OptionGroup public var verifyArgs: VerifyArguments
@@ -73,7 +73,7 @@ public struct SwiftfsmVerify: ParsableCommand {
     /**
      *  The path to load the `Machine`.
      */
-    @Argument(help: "The path to the arrangement.")
+    @Argument(help: ArgumentHelp("The path to the arrangement being verified.", valueName: "directory.arrangement"))
     public var arrangement: String
     
     public init() {}

@@ -66,7 +66,7 @@ public struct SwiftfsmRun: ParsableCommand {
     
     public static let configuration = CommandConfiguration(commandName: "run", _superCommandName: "swiftfsm", abstract: "Execute an arrangement of swiftfsm machines.")
     
-    @Option(name: .short, help: "Specify which build to execute.")
+    @Option(name: .short, help: ArgumentHelp("Specify which build to execute.", valueName: "config"))
     public var config: SwiftBuildConfig?
     
     @OptionGroup public var swiftfsmArgs: RunArguments
@@ -74,7 +74,7 @@ public struct SwiftfsmRun: ParsableCommand {
     /**
      *  The path to load the `Machine`.
      */
-    @Argument(help: "The path to the arrangement.")
+    @Argument(help: ArgumentHelp("The path to the arrangement being executed.", valueName: "directory.arrangement"))
     public var arrangement: String
     
     public init() {}
@@ -113,14 +113,13 @@ public struct SwiftfsmRun: ParsableCommand {
         if swiftfsmArgs.debug {
             args.append("-d")
         }
+        args.append("-s")
         switch swiftfsmArgs.scheduler {
         case .roundRobin:
-            args.append("-rr")
+            args.append("rr")
         case .passiveRoundRobin:
-            args.append("-prr")
-        }
-        if let dispatchTable = swiftfsmArgs.dispatchTable {
-            args.append("-S")
+            args.append("prr")
+        case .timeTriggered(let dispatchTable):
             args.append(dispatchTable)
         }
         let invoker = Invoker()
