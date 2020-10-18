@@ -84,7 +84,7 @@ struct SwiftfsmRunner {
         let clock = FSMClock(ringletLengths: [:], scheduleLength: 0)
         if args.showMachines {
             let str = machines.map {
-                self.machineHierarchy($0.fsm, dependencies: $0.dependencies, prefix: $0.fsm.name + ".")
+                self.machineHierarchy($0.fsm, dependencies: $0.dependencies, prefix: "")
             }.joined(separator: "\n\n")
             print(str)
             return
