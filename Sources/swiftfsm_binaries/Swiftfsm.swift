@@ -151,8 +151,9 @@ public struct Swiftfsm {
     
     fileprivate func createRestrictiveGateway<Gateway: VerifiableGateway>(forMachine machine: String, gateway: Gateway, dependantMachines: [String], callableMachines: [String], invocableMachines: [String], prefix: String?, selfID: FSM_ID, caller: FSM_ID?) -> RestrictiveFSMGateway<Gateway, CallbackFormatter> {
         let format: (String) -> String = {
-            if $0 == machine {
-                return (prefix.map { $0 + "." } ?? "") + machine
+            let machineName = (prefix.map { $0 + "." } ?? "") + machine
+            if $0 == machineName {
+                return machineName
             }
             return (prefix.map { $0 + "." } ?? "") + machine + "." + $0
         }
