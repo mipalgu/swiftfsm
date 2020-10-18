@@ -60,80 +60,14 @@ import ArgumentParser
 
 struct SwiftfsmArguments: ParsableCommand {
     
-    enum KripkeStructureFormats: String, CaseIterable, EnumerableFlag, ExpressibleByArgument {
-        
-        case graphviz
-        case nusmv
-        case tulip
-        case gexf
-        
-        static func name(for value: KripkeStructureFormats) -> NameSpecification {
-            switch value {
-            case .graphviz:
-                return [.short, .long]
-            case .nusmv:
-                return [.short, .long]
-            case .tulip:
-                return [.short, .long]
-            case .gexf:
-                return [.customShort("x"), .long]
-            }
-        }
-
-        static func help(for value: KripkeStructureFormats) -> ArgumentHelp? {
-            switch value {
-            case .graphviz:
-                return "GraphViz dot format. Outputs kripke_structure.gv."
-            case .nusmv:
-                return "NuSMV format. Outputs main.smv."
-            case .tulip:
-                return "Tulip format. Used by the Tulip graph visualiser. Outputs kripke_structure.tlp."
-            case .gexf:
-                return "Gexf format. Used by the Gephi graph visualiser. Outputs kripke_structure.gexf."
-            }
-        }
-        
-    }
-
-    enum Schedulers: String, CaseIterable, EnumerableFlag, ExpressibleByArgument {
-
-        case passiveRoundRobin
-        case roundRobin
-        case timeTriggered
-        
-        static func name(for value: Schedulers) -> NameSpecification {
-            return [.short, .long]
-        }
-
-        static func help(for value: Schedulers) -> ArgumentHelp? {
-            switch value {
-            case .passiveRoundRobin:
-                return ArgumentHelp(
-                    "Passive Round-Robin",
-                    discussion: "Takes a snapshot of the external variables before executing each entire schedule cycle. The snapshot is saved at the end of each schedule cycle, after all LLFSMs have executed a single ringlet."
-                )
-            case .roundRobin:
-                return ArgumentHelp(
-                    "Round-Robin",
-                    discussion: "Takes a snapshot of the external variables before executing each ringlet in each LLFSM. The snapshot is saved after executing each ringlet in each LLFSM."
-                )
-            case .timeTriggered:
-                return ArgumentHelp(
-                    "Time-Triggered",
-                    discussion: "Uses a time-triggered schedule map file to specify the schedule arrangment."
-                )
-            }
-        }
-
-    }
+    @Flag(help: "Generate kripke structures")
+    var generateKripkeStructures: Bool = false
     
-    @Flag(name: .shortAndLong, help: "Enable debugging.")
-    var debug: Bool = false
+    @Flag(help: "Print the machines in this arrangement.")
+    var showMachines: Bool = false
     
-    @Option(name: .shortAndLong, help: "Generate Kripke Structures in specific formats")
-    var generateKripkeStructure: [KripkeStructureFormats] = []
+    @OptionGroup var verifyArgs: VerifyArguments
     
-    @Option(name: .shortAndLong, help: "Specify which scheduler to use. Defaults to a round-robin scheduler")
-    var scheduler: Schedulers = .roundRobin
+    @OptionGroup var scheduleArgs: RunArguments
     
 }

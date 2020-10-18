@@ -1,8 +1,8 @@
 /*
- * SwiftfsmcArguments.swift
- * swiftfsmc
+ * SwiftfsmRun.swift
+ * swiftfsm-run
  *
- * Created by Callum McColl on 12/10/20.
+ * Created by Callum McColl on 16/10/20.
  * Copyright © 2020 Callum McColl. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -56,59 +56,76 @@
  *
  */
 
+import IO
 import ArgumentParser
 import MachineCompiling
+import SwiftMachines
+import Foundation
 
-extension TargetTriple: ExpressibleByArgument {
+public struct SwiftfsmRun: ParsableCommand {
     
-    public init?(argument: String) {
-        self.init(triple: argument)
-    }
+    public static let configuration = CommandConfiguration(commandName: "run", _superCommandName: "swiftfsm", abstract: "Execute an arrangement of swiftfsm machines.")
     
-    public var defaultValueDescription: String {
-        return "<<arch><subarch>-<vendor>-<os>-<environment>>"
-    }
+    @Option(name: .short, help: ArgumentHelp("Specify which build to execute.", valueName: "config"))
+    public var config: SwiftBuildConfig?
     
-}
-
-struct SwiftfsmcArguments: ParsableCommand {
-    
-    static let configuration = CommandConfiguration(abstract: "swiftfsm compiler.")
-    
-    @Option(name: .customLong("target", withSingleDash: true), help: "Specify an LLVM triple to cross-compile for.")
-    public var target: TargetTriple?
-    
-    @Option(wrappedValue: nil, name: .shortAndLong, help: "Force a specific build directory name.", transform: { $0.isEmpty ? nil : $0 })
-    public var buildDir: String?
-
-    /**
-     * Flags passed to the C compiler when compiling a machine.
-     */
-    @Option(name: .customLong("Xcc", withSingleDash: true), parsing: .unconditionalSingleValue, help: "Pass a compiler flag to the C compiler when compiling this machine.")
-    public var cCompilerFlags: [String] = []
-
-    @Option(name: .customLong("Xcxx", withSingleDash: true), parsing: .unconditionalSingleValue, help: "Pass a compiler flag to the C++ compiler when compiling this machine.")
-    public var cxxCompilerFlags: [String] = []
-
-    /**
-     * Flags which are passed to the linker when compiling a machine.
-     */
-    @Option(name: .customLong("Xlinker", withSingleDash: true), parsing: .unconditionalSingleValue, help: "Pass a linker flag to the linker when compiling this machine.")
-    public var linkerFlags: [String] = []
-
-    /**
-     * Flags passed to the swift compiler when compiling a machine.
-     */
-    @Option(name: .customLong("Xswiftc", withSingleDash: true), parsing: .unconditionalSingleValue, help: "Pass a compiler flag to the swift compiler when compiling this machine.")
-    public var swiftCompilerFlags: [String] = []
-
-    @Option(name: .customLong("Xswiftbuild", withSingleDash: true), parsing: .unconditionalSingleValue, help: "Pass a flag to swift build when compiling this machine.")
-    public var swiftBuildFlags: [String] = []
+    @OptionGroup public var swiftfsmArgs: RunArguments
     
     /**
      *  The path to load the `Machine`.
      */
-    @Argument(help: "The path to the machine.")
-    public var path: String?
+    @Argument(help: ArgumentHelp("The path to the arrangement being executed.", valueName: "directory.arrangement"))
+    public var arrangement: String
+    
+    public init() {}
+    
+    private var executable: URL? {
+        let printer = CommandLinePrinter(errorStream: StderrOutputStream(), messageStream: StdoutOutputStream(), warningStream: StdoutOutputStream())
+        let fm = FileManager.default
+        let arrangementDir = URL(fileURLWithPath: arrangement, isDirectory: true)
+        let fileName = arrangementDir.lastPathComponent
+        guard let executeableName = fileName.components(separatedBy: ".").first else {
+            printer.error(str: "Unable to calculate the executable name from the arrangment.")
+            return nil
+        }
+        if let config = config {
+            let executablePath = arrangementDir.appendingPathComponent(config.rawValue, isDirectory: true).appendingPathComponent(executeableName, isDirectory: false)
+            guard fm.fileExists(atPath: executablePath.path) else {
+                printer.error(str: "Unable to find executable at path: " + executablePath.path)
+                return nil
+            }
+            return executablePath
+        }
+        for config in SwiftBuildConfig.allCases.reversed() {
+            let path = arrangementDir.appendingPathComponent(config.rawValue, isDirectory: true).appendingPathComponent(executeableName, isDirectory: false)
+            if true == fm.fileExists(atPath: path.path) {
+                return path
+            }
+        }
+        return nil
+    }
+    
+    public func run() throws {
+        guard let executable = self.executable else {
+            throw ExitCode.failure
+        }
+        var args: [String] = []
+        if swiftfsmArgs.debug {
+            args.append("-d")
+        }
+        args.append("-s")
+        switch swiftfsmArgs.scheduler {
+        case .roundRobin:
+            args.append("rr")
+        case .passiveRoundRobin:
+            args.append("prr")
+        case .timeTriggered(let dispatchTable):
+            args.append(dispatchTable)
+        }
+        let invoker = Invoker()
+        guard invoker.run(executable.path, withArguments: args) else {
+            throw ExitCode.failure
+        }
+    }
     
 }

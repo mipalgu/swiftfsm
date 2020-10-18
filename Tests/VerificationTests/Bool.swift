@@ -1,9 +1,9 @@
 /*
- * SwiftFSMTestCase.swift
- * swiftfsm_tests
+ * Bool.swift
+ * VerificationTests
  *
- * Created by Callum McColl on 26/10/2015.
- * Copyright © 2015 Callum McColl. All rights reserved.
+ * Created by Callum McColl on 19/10/20.
+ * Copyright © 2020 Callum McColl. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -56,51 +56,27 @@
  *
  */
 
-@testable import swiftfsm_bin
-import FSM
-import XCTest
+import swiftfsm
 
-public class SwiftFSMTestCase: XCTestCase {
+extension Bool: ExternalVariables, KripkeVariablesModifier {
 
-    public var counter: UInt = 0
-
-    public override func setUp() {
-        self.counter = 0
+    public var computedVars: [String: Any] {
+        return ["value": self]
     }
 
-    public override func tearDown() {}
+    public var manipulators: [String: (Any) -> Any] {
+        return [:]
+    }
 
-    /*public func createPingPongMachine(
-        _ end: Bool,
-        slow: Bool
-    ) -> AnyScheduleableFiniteStateMachine {
-        let f: (String) -> Void = { (str: String) in
-            print(str)
-            self.counter += 1
-            if (slow) {
-                sleep(1)
-            }
+    public var validVars: [String: [Any]] {
+        return [:]
+    }
+
+    public init(fromDictionary dict: [String: Any]) {
+        guard let value = dict["value"] as? Bool else {
+            fatalError("Unable to convert \(dict) to Bool.")
         }
-        var states: [CallbackMiPalState] = [
-            CallbackMiPalState("ping", onEntry: {f("ping")}),
-            CallbackMiPalState("pong", onEntry: {f("pong")})
-        ]
-        let t1: Transition<MiPalState, MiPalState> = Transition(states[1])
-        states[0].addTransition(t1)
-        if (false == end) {
-            let t2: Transition<MiPalState, MiPalState> = Transition(states[0])
-            states[1].addTransition(t2)
-        }
-        
-        return FSM("PingPong\(self.counter)", ringlet: MiPalRinglet(), initialState: states[0])
+        self = value
     }
-
-    public func getSlowPingPongMachine(end: Bool = true) -> AnyScheduleableFiniteStateMachine {
-        return self.createPingPongMachine(end, slow: true)
-    }
-
-    public func getFastPingPongMachine(end: Bool = true) -> AnyScheduleableFiniteStateMachine {
-        return self.createPingPongMachine(end, slow: false)
-    }*/
 
 }

@@ -1,8 +1,8 @@
 /*
  * main.swift 
- * swiftfsmc 
+ * swiftfsm-show 
  *
- * Created by Callum McColl on 12/10/2020.
+ * Created by Callum McColl on 18/10/2020.
  * Copyright © 2020 Callum McColl. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -56,10 +56,6 @@
  *
  */
 
-let args: SwiftfsmcArguments
-do {
-    args = try SwiftfsmcArguments.parse()
-} catch let error {
-    SwiftfsmcArguments.exit(withError: error)
-}
-print(args)
+import swiftfsm_binaries
+
+SwiftfsmShow.main()

@@ -1,9 +1,9 @@
 /*
- * GenericPrinter.swift 
- * swiftfsm 
+ * SwiftfsmUpdate.swift
+ * swiftfsm_binaries
  *
- * Created by Callum McColl on 16/01/2017.
- * Copyright © 2017 Callum McColl. All rights reserved.
+ * Created by Callum McColl on 16/10/20.
+ * Copyright © 2020 Callum McColl. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -57,48 +57,40 @@
  */
 
 import IO
+import ArgumentParser
+import MachineCompiling
+import SwiftMachines
+import Foundation
 
-/**
- *  Allow the `GenericPrinter` to print `SwiftfsmErrors`.
- */
-extension GenericPrinter: View {
-
+public struct SwiftfsmUpdate: ParsableCommand {
+    
+    public static let configuration = CommandConfiguration(
+        commandName: "update",
+        _superCommandName: "swiftfsm",
+        abstract: "Update to the latest version of the packages within a swiftfsm arrangement."
+    )
+    
     /**
-     *  Print `SwiftfsmErrors` to `errorStream`.
-     *
-     *  - Parameter error: The `SwiftfsmErrors` instance.
+     *  The path to load the `Machine`.
      */
-    public func error(error: SwiftfsmErrors) {
-        let str: String
-        switch error {
-        case .generalError(let error):
-            str = error
-        case .parsingError(let error):
-            switch error {
-            case .noPathsFound:
-                str = "Unable to find a path to any machines.  Did you specify one?"
-            case .pathNotFound(let machineName):
-                str = "Unable to find a path for '\(machineName)'"
-            case .generalError(let error):
-                str = error
-            case .unknownFlag(let flag):
-                str = "Unknown Flag '\(flag)'"
-            }
-        case .unableToLoad(let machineName, let path):
-            str = "Unable to load '\(machineName)' at '\(path)'"
-        case .verifyingCppMachines:
-            str = "Cannot perform a verification on clfsm machines."
+    @Argument(help: "The path to the arrangement.")
+    public var arrangement: String
+    
+    public init() {}
+    
+    public func run() throws {
+        let fm = FileManager.default
+        if !fm.fileExists(atPath: self.arrangement) {
+            throw ValidationError(self.arrangement + "directory does not exist.")
         }
-        self.error(str: str)
+        let url = URL(fileURLWithPath: arrangement, isDirectory: true).appendingPathComponent("Arrangement", isDirectory: false)
+        if false == fm.changeCurrentDirectoryPath(url.path) {
+            throw ValidationError("The arrangment \(arrangement) has not yet been built.")
+        }
+        let invoker = Invoker()
+        if false == invoker.run("/usr/bin/env", withArguments: ["swift", "package", "update"]) {
+            throw ExitCode.failure
+        }
     }
-
-    /**
-     *  Print a message to `messageStream`.
-     *
-     *  - Parameter message: The contents of the message
-     */
-    public func message(message: String) {
-        return self.message(str: message)
-    }
-
+    
 }

@@ -1,9 +1,9 @@
 /*
- * SequentialPerMachineTokenizer.swift 
- * swiftfsm 
+ * main.swift 
+ * swiftfsmc 
  *
- * Created by Callum McColl on 09/06/2017.
- * Copyright © 2017 Callum McColl. All rights reserved.
+ * Created by Callum McColl on 12/10/2020.
+ * Copyright © 2020 Callum McColl. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -56,26 +56,15 @@
  *
  */
 
-import FSM
-import MachineStructure
-import swiftfsm
+import swiftfsm_binaries
+import swift_helpers
+import IO
+import SwiftMachines
+import Foundation
 
-public final class SequentialPerMachineTokenizer<Converter: SchedulerTokenDispatchTableConverter>: SchedulerTokenizer, SchedulerTokenDispatchTableConverterContainer where Converter.Token == SchedulerToken {
-
-    public let converter: Converter
-    
-    fileprivate let flatenner: SubmachineFlatenner
-
-    public init(converter: Converter, flatenner: SubmachineFlatenner = SubmachineFlatenner()) {
-        self.converter = converter
-        self.flatenner = flatenner
-    }
-
-    public func separate(_ machines: [Machine]) -> [[SchedulerToken]] {
-        return machines.map { machine in
-            let tokens: [SchedulerToken] = machine.dependencies.flatMap { self.flatenner.flattenSubmachines($0, machine) }
-            return [SchedulerToken(fullyQualifiedName: machine.fsm.name, type: machine.fsm, machine: machine, isRootFSM: true)] + tokens
-        }
-    }
-
+if #available(macOS 10.11, *) {
+    SwiftfsmBuild.main()
+} else {
+    print("You need a minimum of macOS 10.11", stderr)
+    exit(EXIT_FAILURE)
 }

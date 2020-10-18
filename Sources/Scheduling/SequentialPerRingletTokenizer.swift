@@ -73,9 +73,8 @@ public final class SequentialPerRingletTokenizer<Converter: SchedulerTokenDispat
 
     public func separate(_ machines: [Machine]) -> [[SchedulerToken]] {
         return machines.lazy.flatMap { (machine) -> [SchedulerToken] in
-            let name = machine.name + "." + machine.fsm.name
-            let tokens: [SchedulerToken] = machine.dependencies.flatMap { self.flatenner.flattenSubmachines($0, name, machine) }
-            return [SchedulerToken(fullyQualifiedName: name, type: machine.fsm, machine: machine, isRootFSM: true)] + tokens
+            let tokens: [SchedulerToken] = machine.dependencies.flatMap { self.flatenner.flattenSubmachines($0, machine) }
+            return [SchedulerToken(fullyQualifiedName: machine.fsm.name, type: machine.fsm, machine: machine, isRootFSM: true)] + tokens
         }.map { [$0] }
     }
 

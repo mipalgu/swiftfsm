@@ -1,9 +1,9 @@
 /*
- * TimerTests.swift
- * swiftfsm_tests
+ * CLReflect.h
+ * swiftfsm
  *
- * Created by Callum McColl on 26/10/2015.
- * Copyright © 2015 Callum McColl. All rights reserved.
+ * Created by Callum McColl on 17/10/20.
+ * Copyright © 2020 Callum McColl. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -56,48 +56,48 @@
  *
  */
 
-@testable import swiftfsm_helpers
-@testable import Timers
-@testable import swiftfsm_bin
-import XCTest
+#ifndef CFSMS_CLReflect_h
+#define CFSMS_CLReflect_h
 
-#if os(Linux)
-import Glibc
-#elseif os(OSX)
-import Darwin
+#ifdef __cplusplus
+extern "C" {
 #endif
 
-public class TimerTests: SwiftFSMTestCase {
+int REFL_UNKNOWN_ERROR;
+int REFL_BUFFER_OVERFLOW;
+int REFL_INVALID_ARGS;
+int REFL_INVALID_CALL;
+int REFL_SUCCESS;
 
-    public static var allTests: [(String, (TimerTests) -> () throws -> Void)] {
-        return [
-            ("testDelayWorks", testDelayWorks)
-        ]
-    }
+typedef int CLReflectResult;
+typedef void* refl_metaMachine;
+typedef void* refl_metaState;
+typedef void* refl_metaTransition;
+typedef unsigned char refl_bool;
 
-    private var running: Bool = false
-    //private var timer: Timers.Timer!
+void refl_initAPI(CLReflectResult *result);
+void refl_destroyAPI(CLReflectResult *result);
 
-    public override func setUp() {
-        self.running = false
-        //self.timer = Timer()
-    }
+void refl_registerMetaMachine(refl_metaMachine metaMachine, unsigned int machineID, CLReflectResult *result);
+refl_metaMachine refl_getMetaMachine(unsigned int machineID, CLReflectResult *result);
+const char * refl_getMetaMachineName(refl_metaMachine machine, CLReflectResult* result);
 
-    private func testFunc() {
-        self.running = true
-        sleep(1)
-        self.running = false
-    }
+void refl_invokeOnEntry(refl_metaMachine metaMachine, unsigned int stateNum, CLReflectResult* result);
+void refl_invokeInternal(refl_metaMachine metaMachine, unsigned int stateNum, CLReflectResult* result);
+void refl_invokeOnExit(refl_metaMachine metaMachine, unsigned int stateNum, CLReflectResult* result);
+refl_bool refl_evaluateTransition(refl_metaMachine metaMachine, unsigned int stateNum, unsigned int transitionNum, CLReflectResult *result);
 
-    public func testDelayWorks() {
-        /*let timestamp: UInt = microseconds()
-        let delay: UInt = 15000
-        //self.timer.delay(delay, callback: testFunc)
-        while(false == self.running) {}
-        while(true == self.running) {}
-        let runTime: UInt = microseconds() - timestamp
-        XCTAssert(runTime >= delay && delay < runTime + 1000)
-        */
-    }
+int refl_getSuspendState(refl_metaMachine metaMachine, CLReflectResult *result);
 
+refl_metaState * refl_getMetaStates(refl_metaMachine metaMachine, CLReflectResult *result);
+unsigned int refl_getNumberOfStates(refl_metaMachine machine, CLReflectResult* result);
+const char* refl_getMetaStateName(refl_metaState metaState, CLReflectResult *result);
+unsigned int refl_getNumberOfTransitions(refl_metaState metaState, CLReflectResult* result);
+refl_metaTransition const * refl_getMetaTransitions(refl_metaState metaState, CLReflectResult* result);
+int refl_getMetaTransitionTarget(refl_metaTransition trans, CLReflectResult* result);
+
+#ifdef __cplusplus
 }
+#endif
+
+#endif /* CFSMS_CLReflect_h */

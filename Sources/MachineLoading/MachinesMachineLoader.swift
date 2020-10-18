@@ -204,24 +204,24 @@ public final class MachinesMachineLoader: MachineLoader {
 #if !NO_FOUNDATION && canImport(Foundation)
 
     fileprivate func load<Gateway: FSMGateway>(machine: Machine, gateway: Gateway, clock: Timer, prefix: String, caller: FSM_ID? = nil) -> (FSMType, [Dependency])? {
-        let dependantMachines = machine.submachines + machine.parameterisedMachines
+        let dependantMachines = machine.dependencies
         let selfID: FSM_ID = gateway.id(of: prefix + "." + machine.name)
         let caller = caller ?? selfID
         let newGateway = self.createRestrictiveGateway(
             forMachine: machine.name,
             gateway: gateway,
-            dependantMachines: dependantMachines.map { $0.name },
-            callableMachines: machine.callableMachines.map { $0.name },
-            invocableMachines: machine.invocableMachines.map { $0.name },
+            dependantMachines: dependantMachines.map { $0.callName },
+            callableMachines: machine.callables.map { $0.callName },
+            invocableMachines: machine.invocables.map { $0.callName },
             prefix: prefix,
             selfID: selfID,
             caller: caller
         )
-        guard let recursed = dependantMachines.failMap({ (m: Machine) -> Dependency? in
-            let id = newGateway.id(of: m.name)
-            let caller = true == machine.callableMachines.lazy.map { $0.name }.contains(m.name) ? caller : id
+        guard let recursed = dependantMachines.failMap({ (m: Machine.Dependency) -> Dependency? in
+            let id = newGateway.id(of: m.callName)
+            let caller = true == machine.callables.lazy.map { $0.callName }.contains(m.callName) ? caller : id
             return load(
-                machine: m,
+                machine: m.machine,
                 gateway: gateway,
                 clock: clock,
                 prefix: prefix + "." + machine.name,
@@ -268,7 +268,7 @@ public final class MachinesMachineLoader: MachineLoader {
         case .controllableFSM(let fsm):
             return .submachine(fsm, dependencies)
         case .parameterisedFSM(let fsm):
-            if machine.callableMachines.contains(where: { $0.name == fsm.name }) {
+            if machine.callables.contains(where: { $0.callName == fsm.name }) {
                 return .callableParameterisedMachine(fsm, dependencies)
             }
             return .invokableParameterisedMachine(fsm, dependencies)

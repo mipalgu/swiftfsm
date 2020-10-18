@@ -1,9 +1,9 @@
 /*
- * View.swift
- * swiftfsm
+ * InMemoryContainer.swift
+ * VerificationTests
  *
- * Created by Callum McColl on 20/12/2015.
- * Copyright © 2015 Callum McColl. All rights reserved.
+ * Created by Callum McColl on 19/10/20.
+ * Copyright © 2020 Callum McColl. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -56,24 +56,27 @@
  *
  */
 
-/**
- *  Provides a common interface for types that want to handle output for
- *  `Swiftfsm`.
- */
-public protocol View {
+import swiftfsm
 
-    /**
-     *  Output a `SwiftfsmErrors` message.
-     *
-     *  - Parameter error: The error.
-     */
-    func error(error: SwiftfsmErrors) -> Void
-
-    /**
-     *  Output a message.
-     *
-     *  - Parameter message: The message.
-     */
-    func message(message: String) -> Void
-
+public final class InMemoryContainer<T: ExternalVariables>: ExternalVariablesContainer, Snapshotable {
+    
+    public var name: String = "InMemoryContainer-\(String(describing: Class.self))"
+    
+    private var _val: T
+    
+    public var val: T
+    
+    public init(_ initialValue: T) {
+        self._val = initialValue
+        self.val = initialValue
+    }
+    
+    public func saveSnapshot() {
+        self._val = val
+    }
+    
+    public func takeSnapshot() {
+        self.val = _val
+    }
+    
 }
