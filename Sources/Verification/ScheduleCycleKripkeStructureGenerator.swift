@@ -114,19 +114,13 @@ public final class ScheduleCycleKripkeStructureGenerator<
 
     public func generate<Gateway: VerifiableGateway>(usingGateway gateway: Gateway) {
         self.machines.forEach {
-            self.add(fsm: $0.fsm, toGateway: gateway, withDependencies: $0.dependencies, name: $0.name)
+            self.add(fsm: $0.fsm, toGateway: gateway, withDependencies: $0.dependencies)
         }
         // Split all machines into a collection of `SchedulerToken`s.
         let tokens = self.tokenizer.separate(self.machines)
         let dispatchTable = self.dispatchTable.flatMap { self.tokenizer.fetchDispatchTable(fromTokens: tokens, referencing: $0) }
         // Convert these `SchedulerToken`s to `VerificationToken`s.
         let verificationTokens = self.convert(tokens: tokens, forMachines: self.machines, usingGateway: gateway, dispatchTable: dispatchTable)
-        let temp = verificationTokens.flatMap { $0.0.flatMap { $0.compactMap { (token: VerificationToken) -> (FSM_ID, String, [FSM_ID: ParameterisedMachineData])? in
-            guard let data = token.data else {
-                return nil
-            }
-            return (data.id, data.fsm.name, data.parameterisedMachines)
-        }}}
         // Reset all views so that we may reuse views that have previously been used.
         self.viewCache.forEach {
             $1.reset(usingClocks: self.dispatchTable != nil)
@@ -139,7 +133,7 @@ public final class ScheduleCycleKripkeStructureGenerator<
             gateway.gatewayData = data
             var generator = self.factory.make(tokens: tokens)
             generator.delegate = self
-            generator.generate(usingGateway: gateway, andView: view, storingResultsFor: nil)
+            _ = generator.generate(usingGateway: gateway, andView: view, storingResultsFor: nil)
         }
         self.viewCache.forEach {
             $1.finish()
