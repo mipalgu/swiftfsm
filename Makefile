@@ -6,13 +6,19 @@
 
 ALL_TARGETS=host
 
-install:
-	install .build/${SWIFT_BUILD_CONFIG}/swiftfsm        \
-		.build/${SWIFT_BUILD_CONFIG}/swiftfsm-run    \
-		.build/${SWIFT_BUILD_CONFIG}/swiftfsm-show   \
-		.build/${SWIFT_BUILD_CONFIG}/swiftfsm-build  \
-		.build/${SWIFT_BUILD_CONFIG}/swiftfsm-verify \
-		.build/${SWIFT_BUILD_CONFIG}/swiftfsm-update \
-		/usr/local/bin/
+PRODUCT_BINARIES=swiftfsm swiftfsm-run swiftfsm-show swiftfsm-build swiftfsm-verify swiftfsm-update
+
+.ifndef TARGET
+install: host
+.else
+install: cross
+.endif
+.for bin in ${PRODUCT_BINARIES}
+	if [ -d ${BUILDDIR}/${bin:Q} ]; then \
+		cp -pR ${BUILDDIR}/${bin:Q} ${DST:Q}/bin;\
+	else \
+		install -m 755 ${BUILDDIR}/${bin} ${DST:Q}/bin;\
+	fi
+.endfor
 
 .include "../../../mk/mipal.mk"
