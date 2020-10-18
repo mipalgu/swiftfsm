@@ -74,9 +74,9 @@ internal final class TempFiniteStateMachine: FiniteStateMachineType,
     SnapshotControllerContainer,
     Updateable {
     
-    var sensors: [AnySnapshotController] = [AnySnapshotController(InMemoryContainer<Bool>(false))]
+    var sensors: [AnySnapshotController] = [AnySnapshotController(InMemoryContainer<Bool>(false)), AnySnapshotController(InMemoryContainer<Bool>(false))]
     
-    var actuators: [AnySnapshotController] = []
+    var actuators: [AnySnapshotController] = [AnySnapshotController(InMemoryContainer<Bool>(false)), AnySnapshotController(InMemoryContainer<Bool>(false))]
     
 
     //swiftlint:disable:next type_name
@@ -97,7 +97,7 @@ internal final class TempFiniteStateMachine: FiniteStateMachineType,
 
     var currentState: MiPalState = EmptyMiPalState("current")
 
-    var externalVariables: [AnySnapshotController] = []
+    var externalVariables: [AnySnapshotController] = [AnySnapshotController(InMemoryContainer<Bool>(false)), AnySnapshotController(InMemoryContainer<Bool>(false))]
 
     let hasFinished: Bool = true
 

@@ -90,18 +90,34 @@ public final class VerificationCycleKripkeStructureGeneratorTests: VerificationT
         gateway.fsms[fsmID] = fsmType
         let machine = Machine(debug: false, name: "test", fsm: fsmType, clock: FSMClock(ringletLengths: [fsm.name: 0], scheduleLength: 0))
         let boolSpinner: Spinners.Spinner<Bool> = { $0 ? nil : true }
-        let sensorsData = ExternalVariablesVerificationData(
-            externalVariables: fsm.sensors[0],
-            defaultValues: KripkeStatePropertyList(["value": KripkeStateProperty(type: .Bool, value: false)]),
-            spinners: ["value": { boolSpinner($0 as! Bool) } ]
-        )
+        let externalsData = fsm.externalVariables.map {
+            ExternalVariablesVerificationData(
+                externalVariables: $0,
+                defaultValues: KripkeStatePropertyList(["value": KripkeStateProperty(type: .Bool, value: false)]),
+                spinners: ["value": { boolSpinner($0 as! Bool) } ]
+            )
+        }
+        let sensorsData = fsm.sensors.map {
+            ExternalVariablesVerificationData(
+                externalVariables: $0,
+                defaultValues: KripkeStatePropertyList(["value": KripkeStateProperty(type: .Bool, value: false)]),
+                spinners: ["value": { boolSpinner($0 as! Bool) } ]
+            )
+        }
+        let actuatorData = fsm.actuators.map {
+            ExternalVariablesVerificationData(
+                externalVariables: $0,
+                defaultValues: KripkeStatePropertyList(["value": KripkeStateProperty(type: .Bool, value: false)]),
+                spinners: ["value": { boolSpinner($0 as! Bool) } ]
+            )
+        }
         return VerificationToken.verify(data: VerificationToken.Data(
             id: fsmID,
             fsm: fsmType,
             machine: machine,
-            externalVariables: [],
-            sensors: [sensorsData],
-            actuators: [],
+            externalVariables: externalsData,
+            sensors: sensorsData,
+            actuators: actuatorData,
             parameterisedMachines: [:],
             timeData: nil,
             clockName: fsm.name,
@@ -145,7 +161,43 @@ public final class VerificationCycleKripkeStructureGeneratorTests: VerificationT
             handledAllResults: false,
             tokenExecuterDelegate: self
         )
-        XCTAssertEqual(runs.count, 2)
+        let expectedExternals: [[Bool]] = [[false, false], [false, true], [true, false], [true, true]]
+        let expectedSensors: [[Bool]] = [[false, false], [false, true], [true, false], [true, true]]
+        let expectedActuators: [[Bool]] = [[false, false], [false, false], [false, false], [false, false]]
+        for (offset, run) in runs.enumerated() {
+            XCTAssertEqual(run.tokens.count, 1)
+            for tokens in run.tokens {
+                XCTAssertEqual(tokens.count, 1)
+                for token in tokens {
+                    XCTAssertNotNil(token.data)
+                    guard let data = token.data else {
+                        return
+                    }
+                    for index in data.sensors.indices {
+                        guard let bool = data.fsm.sensors[index].val as? Bool else {
+                            XCTFail("val must be a bool")
+                            return
+                        }
+                        XCTAssertEqual(bool, expectedSensors[offset][index], "sensor run: \(offset), index: \(index)")
+                    }
+                    for index in data.externalVariables.indices {
+                        guard let bool = data.fsm.externalVariables[index].val as? Bool else {
+                            XCTFail("val must be a bool")
+                            return
+                        }
+                        XCTAssertEqual(bool, expectedExternals[offset][index], "external run: \(offset), index: \(index)")
+                    }
+                    for index in data.actuators.indices {
+                        guard let bool = data.fsm.actuators[index].val as? Bool else {
+                            XCTFail("val must be a bool")
+                            return
+                        }
+                        XCTAssertEqual(bool, expectedActuators[offset][index], "actuator run: \(offset), index: \(index)")
+                    }
+                }
+            }
+        }
+        //XCTAssertEqual(runs.count, 16)
     }
     
     public func scheduleInfo(of: FSM_ID, caller: FSM_ID, inGateway: ModifiableFSMGateway) -> ParameterisedMachineData {
