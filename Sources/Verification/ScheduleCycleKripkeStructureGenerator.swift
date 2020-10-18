@@ -146,17 +146,17 @@ public final class ScheduleCycleKripkeStructureGenerator<
         }
     }
 
-    fileprivate func add<Gateway: ModifiableFSMGateway>(fsm: FSMType, toGateway gateway: Gateway, withDependencies dependencies: [Dependency], name: String) {
-        let name = name + "." + fsm.name
+    fileprivate func add<Gateway: ModifiableFSMGateway>(fsm: FSMType, toGateway gateway: Gateway, withDependencies dependencies: [Dependency]) {
+        let name = fsm.name
         gateway.fsms[gateway.id(of: name)] = fsm
         gateway.setup(gateway.id(of: name))
         dependencies.forEach {
             switch $0 {
             case .callableParameterisedMachine(let fsm, let dependencies), .invokableParameterisedMachine(let fsm, let dependencies):
                 fsm.suspend()
-                self.add(fsm: .parameterisedFSM(fsm), toGateway: gateway, withDependencies: dependencies, name: name)
+                self.add(fsm: .parameterisedFSM(fsm), toGateway: gateway, withDependencies: dependencies)
             case .submachine(let fsm, let dependencies):
-                self.add(fsm: .controllableFSM(fsm), toGateway: gateway, withDependencies: dependencies, name: name)
+                self.add(fsm: .controllableFSM(fsm), toGateway: gateway, withDependencies: dependencies)
             }
         }
     }
