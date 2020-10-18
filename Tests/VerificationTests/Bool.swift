@@ -1,9 +1,9 @@
 /*
- * TempFiniteStateMachine.swift 
- * VerificationTests 
+ * Bool.swift
+ * VerificationTests
  *
- * Created by Callum McColl on 17/02/2018.
- * Copyright © 2018 Callum McColl. All rights reserved.
+ * Created by Callum McColl on 19/10/20.
+ * Copyright © 2020 Callum McColl. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -56,71 +56,27 @@
  *
  */
 
-import FSM
-import KripkeStructure
 import swiftfsm
-import ModelChecking
 
-internal final class TempFiniteStateMachine: FiniteStateMachineType,
-    Cloneable,
-    ConvertibleToScheduleableFiniteStateMachine,
-    StateExecuter,
-    Exitable,
-    Finishable,
-    KripkePropertiesRecordable,
-    Resumeable,
-    Restartable,
-    Snapshotable,
-    SnapshotControllerContainer,
-    Updateable {
-    
-    var sensors: [AnySnapshotController] = [AnySnapshotController(InMemoryContainer<Bool>(false))]
-    
-    var actuators: [AnySnapshotController] = []
-    
+extension Bool: ExternalVariables, KripkeVariablesModifier {
 
-    //swiftlint:disable:next type_name
-    typealias _StateType = MiPalState
-
-    let name: String = "fsm"
-
-    var initialState: MiPalState = EmptyMiPalState("initial")
-
-    var currentRecord: KripkeStatePropertyList {
-        return [
-            "fsm": KripkeStateProperty(
-                type: .Bool,
-                value: true
-            )
-        ]
+    public var computedVars: [String: Any] {
+        return ["value": self]
     }
 
-    var currentState: MiPalState = EmptyMiPalState("current")
-
-    var externalVariables: [AnySnapshotController] = []
-
-    let hasFinished: Bool = true
-
-    let isSuspended: Bool = true
-
-    let submachines: [AnyScheduleableFiniteStateMachine] = []
-
-    func clone() -> TempFiniteStateMachine {
-        return self
+    public var manipulators: [String: (Any) -> Any] {
+        return [:]
     }
 
-    func exit() {}
+    public var validVars: [String: [Any]] {
+        return [:]
+    }
 
-    func next() {}
-
-    func restart() {}
-
-    func resume() {}
-
-    func saveSnapshot() {}
-
-    func suspend() {}
-
-    func update(fromDictionary: [String: Any]) {}
+    public init(fromDictionary dict: [String: Any]) {
+        guard let value = dict["value"] as? Bool else {
+            fatalError("Unable to convert \(dict) to Bool.")
+        }
+        self = value
+    }
 
 }
