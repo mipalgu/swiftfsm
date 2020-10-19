@@ -1,8 +1,8 @@
 /*
- * TempFiniteStateMachine.swift 
+ * KripkeStructureTestCase.swift 
  * VerificationTests 
  *
- * Created by Callum McColl on 17/02/2018.
+ * Created by Callum McColl on 20/10/2020.
  * Copyright © 2018 Callum McColl. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -56,80 +56,14 @@
  *
  */
 
-import FSM
-import KripkeStructure
-import Verification
-import swiftfsm
+@testable import KripkeStructure 
 
-internal final class TempFiniteStateMachine: FiniteStateMachineType,
-    Cloneable,
-    ConvertibleToScheduleableFiniteStateMachine,
-    StateExecuter,
-    Exitable,
-    Finishable,
-    KripkePropertiesRecordable,
-    Resumeable,
-    Restartable,
-    Snapshotable,
-    SnapshotControllerContainer,
-    Updateable {
-    
-    var sensors: [AnySnapshotController] = [
-        AnySnapshotController(InMemoryContainer<Bool>(name: "sensors1", initialValue: false)),
-        AnySnapshotController(InMemoryContainer<Bool>(name: "sensors2", initialValue: false))
-    ]
-    
-    var actuators: [AnySnapshotController] = [
-        AnySnapshotController(InMemoryContainer<Bool>(name: "actuators1", initialValue: false)),
-        AnySnapshotController(InMemoryContainer<Bool>(name: "actuators2", initialValue: false))
-    ]
-    
+import XCTest
 
-    //swiftlint:disable:next type_name
-    typealias _StateType = MiPalState
+public class KripkeStructureTestCase: XCTestCase {
 
-    let name: String = "fsm"
+   public override func setUp() {}
 
-    var initialState: MiPalState = EmptyMiPalState("initial")
-
-    var currentRecord: KripkeStatePropertyList {
-        return [
-            "fsm": KripkeStateProperty(
-                type: .Bool,
-                value: true
-            )
-        ]
-    }
-
-    var currentState: MiPalState = EmptyMiPalState("current")
-
-    var externalVariables: [AnySnapshotController] = [
-        AnySnapshotController(InMemoryContainer<Bool>(name: "externals1", initialValue: false)),
-        AnySnapshotController(InMemoryContainer<Bool>(name: "externals2", initialValue: false))
-    ]
-
-    let hasFinished: Bool = true
-
-    let isSuspended: Bool = true
-
-    let submachines: [AnyScheduleableFiniteStateMachine] = []
-
-    func clone() -> TempFiniteStateMachine {
-        return self
-    }
-
-    func exit() {}
-
-    func next() {}
-
-    func restart() {}
-
-    func resume() {}
-
-    func saveSnapshot() {}
-
-    func suspend() {}
-
-    func update(fromDictionary: [String: Any]) {}
+   public override func tearDown() {}
 
 }

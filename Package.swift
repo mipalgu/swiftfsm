@@ -126,7 +126,12 @@ let package = Package(
                 "swiftfsm_binaries"
             ]
         ),
-        .testTarget(name: "VerificationTests", dependencies: [.target(name: "Verification")]),
+        .testTarget(name: "KripkeStructureTests", dependencies: [.target(name: "KripkeStructure")]),
+        .testTarget(name: "VerificationTests", dependencies: [
+            .target(name: "KripkeStructure"),
+            .target(name: "KripkeStructureViews"),
+            .target(name: "Verification")
+        ]),
         .testTarget(name: "swiftfsm_binariesTests", dependencies: [.target(name: "swiftfsm_binaries")])
     ]
 )

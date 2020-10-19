@@ -56,6 +56,8 @@
  *
  */
 
+import KripkeStructure
+import KripkeStructureViews
 @testable import Verification
 import Gateways
 import MachineStructure
