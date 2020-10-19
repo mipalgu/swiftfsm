@@ -57,8 +57,7 @@
  */
 
 import FSM
-import CGUSimpleWhiteboard
-import GUSimpleWhiteboard
+import CTests
 
 //swiftlint:disable superfluous_disable_command
 //swiftlint:disable type_body_length
