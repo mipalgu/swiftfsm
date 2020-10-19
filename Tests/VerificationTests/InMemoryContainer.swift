@@ -60,13 +60,14 @@ import swiftfsm
 
 public final class InMemoryContainer<T: ExternalVariables>: ExternalVariablesContainer, Snapshotable {
     
-    public var name: String = "InMemoryContainer-\(String(describing: Class.self))"
+    public let name: String
     
     private var _val: T
     
     public var val: T
     
-    public init(_ initialValue: T) {
+    public init(name: String, initialValue: T) {
+        self.name = "InMemoryContainer-" + name
         self._val = initialValue
         self.val = initialValue
     }

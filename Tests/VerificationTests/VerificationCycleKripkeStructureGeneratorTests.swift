@@ -197,7 +197,7 @@ public final class VerificationCycleKripkeStructureGeneratorTests: VerificationT
                 }
             }
         }
-        //XCTAssertEqual(runs.count, 16)
+        XCTAssertEqual(runs.count, 16)
     }
     
     public func scheduleInfo(of: FSM_ID, caller: FSM_ID, inGateway: ModifiableFSMGateway) -> ParameterisedMachineData {
