@@ -58,8 +58,6 @@
 
 import KripkeStructure
 import KripkeStructureViews
-import ModelChecking
-import FSMVerification
 
 final class VerificationCycleKripkeStructureGeneratorFactory {
 

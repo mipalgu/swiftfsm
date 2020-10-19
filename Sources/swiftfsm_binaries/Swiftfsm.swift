@@ -61,7 +61,6 @@ import CFSMWrappers
 import Gateways
 import KripkeStructure
 import KripkeStructureViews
-import ModelChecking
 import Scheduling
 import Verification
 import MachineStructure

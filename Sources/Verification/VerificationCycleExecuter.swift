@@ -62,7 +62,6 @@ import Hashing
 import KripkeStructure
 import KripkeStructureViews
 import MachineStructure
-import ModelChecking
 import swiftfsm
 import swiftfsm_helpers
 import Utilities

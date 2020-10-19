@@ -57,8 +57,6 @@
  */
 
 import Gateways
-import ModelChecking
-import FSMVerification
 import KripkeStructure
 import KripkeStructureViews
 import Scheduling

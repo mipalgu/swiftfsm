@@ -59,7 +59,6 @@
 import FSM
 import KripkeStructure
 import MachineStructure
-import ModelChecking
 import swiftfsm
 
 public final class WorldCreator {

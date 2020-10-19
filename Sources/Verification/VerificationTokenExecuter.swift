@@ -60,7 +60,6 @@ import FSM
 import Gateways
 import KripkeStructure
 import MachineStructure
-import ModelChecking
 import swiftfsm
 
 public final class VerificationTokenExecuter<StateGenerator: KripkeStateGeneratorProtocol> {

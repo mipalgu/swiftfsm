@@ -57,9 +57,7 @@
  */
 
 import KripkeStructure
-import ModelChecking
 import FSM
-import FSMVerification
 
 public final class ExternalVariablesFetcher {
     

@@ -58,7 +58,6 @@
 
 import swiftfsm
 import MachineStructure
-import FSMVerification
 import KripkeStructureViews
 import KripkeStructure
 

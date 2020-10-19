@@ -66,7 +66,9 @@ let package = Package(
         .target(name: "MachineLoading", dependencies: convert(["Libraries", "Gateways", "swiftfsm_helpers", "MachineCompiling", "FSM"]) + foundationDeps),
         .target(name: "MachineCompiling", dependencies: ["FSM"] + foundationDeps),
         .target(name: "Scheduling", dependencies: ["MachineStructure", "MachineLoading", "Timers", "Gateways", "FSM"]),
-        .target(name: "Verification", dependencies: ["MachineStructure", "Scheduling", "Timers", "Gateways", "FSM"]),
+        .target(name: "KripkeStructure", dependencies: ["FSM"]),
+        .target(name: "KripkeStructureViews", dependencies: ["KripkeStructure", "FSM"]),
+        .target(name: "Verification", dependencies: ["MachineStructure", "Scheduling", "Timers", "Gateways", "FSM", "KripkeStructure", "KripkeStructureViews"]),
         .target(name: "Parsing", dependencies: ["Scheduling", "Timers", "Verification", "MachineCompiling", "FSM"]),
         .target(name: "CFSMWrappers", dependencies: ["Libraries", "Scheduling", "Timers", "FSM", "CLReflect"]),
         .target(

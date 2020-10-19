@@ -68,8 +68,6 @@ import FSM
 import Gateways
 import Scheduling
 import MachineStructure
-import ModelChecking
-import FSMVerification
 import swiftfsm
 import swift_helpers
 

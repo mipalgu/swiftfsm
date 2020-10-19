@@ -58,7 +58,6 @@
 
 import KripkeStructureViews
 import MachineStructure
-import ModelChecking
 
 public protocol KripkeStructureGeneratorFactory {
 

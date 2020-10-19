@@ -59,7 +59,6 @@
 import KripkeStructure
 import KripkeStructureViews
 import Gateways
-import ModelChecking
 import swiftfsm
 import swift_helpers
 

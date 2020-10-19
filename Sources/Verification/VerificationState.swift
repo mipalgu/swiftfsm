@@ -56,7 +56,6 @@
  *
  */
 
-import ModelChecking
 import KripkeStructure
 import swiftfsm
 

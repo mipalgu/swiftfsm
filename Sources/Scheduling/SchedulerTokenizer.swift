@@ -58,7 +58,6 @@
 
 import FSM
 import Gateways
-import ModelChecking
 import MachineStructure
 import swiftfsm
 

@@ -59,7 +59,6 @@
 import IO
 import KripkeStructure
 import KripkeStructureViews
-import ModelChecking
 import Scheduling
 import Verification
 

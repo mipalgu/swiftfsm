@@ -56,9 +56,8 @@
  *
  */
 
-public protocol VerifiableGatewayDelegator: VerifiableGateway, ModifiableFSMGatewayDelegator {
-
-    associatedtype Gateway: VerifiableGateway
+public protocol VerifiableGatewayDelegator: VerifiableGateway, ModifiableFSMGatewayDelegator where Gateway: VerifiableGateway {
+    
     associatedtype GatewayData = Gateway.GatewayData
 
 }

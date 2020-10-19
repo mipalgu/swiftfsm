@@ -57,7 +57,6 @@
  */
 
 import KripkeStructure
-import ModelChecking
 
 public final class ParameterisedVerificationCycleKripkeStructureGeneratorFactory<Detector: CycleDetector>: ParameterisedVerificationCycleKripkeStructureGeneratorFactoryType where Detector.Element == KripkeStatePropertyList {
 
