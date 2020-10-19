@@ -161,43 +161,79 @@ public final class VerificationCycleKripkeStructureGeneratorTests: VerificationT
             handledAllResults: false,
             tokenExecuterDelegate: self
         )
-        let expectedExternals: [[Bool]] = [[false, false], [false, true], [true, false], [true, true]]
-        let expectedSensors: [[Bool]] = [[false, false], [false, true], [true, false], [true, true]]
-        let expectedActuators: [[Bool]] = [[false, false], [false, false], [false, false], [false, false]]
-        for (offset, run) in runs.enumerated() {
-            XCTAssertEqual(run.tokens.count, 1)
-            for tokens in run.tokens {
-                XCTAssertEqual(tokens.count, 1)
-                for token in tokens {
+        let expected = [
+            ([false, false], [false, false], [false, false]),
+            ([false, false], [false, true], [false, false]),
+            ([false, false], [true, false], [false, false]),
+            ([false, true], [false, false], [false, false]),
+            ([true, false], [false, false], [false, false]),
+            ([false, false], [true, true], [false, false]),
+            ([false, true], [false, true], [false, false]),
+            ([true, false], [false, true], [false, false]),
+            ([false, true], [true, false], [false, false]),
+            ([true, false], [true, false], [false, false]),
+            ([true, true], [false, false], [false, false]),
+            ([false, true], [true, true], [false, false]),
+            ([true, false], [true, true], [false, false]),
+            ([true, true], [false, true], [false, false]),
+            ([true, true], [true, false], [false, false]),
+            ([true, true], [true, true], [false, false]),
+        ]
+        let results: [([Bool], [Bool], [Bool])] = runs.enumerated().flatMap { (offset, run) -> [([Bool], [Bool], [Bool])] in
+            run.tokens.flatMap { (tokens) -> [([Bool], [Bool], [Bool])] in
+                let externals = tokens.map { (token) -> [Bool] in
                     XCTAssertNotNil(token.data)
                     guard let data = token.data else {
-                        return
+                        return []
                     }
-                    for index in data.sensors.indices {
-                        guard let bool = data.fsm.sensors[index].val as? Bool else {
+                    return data.fsm.externalVariables.map {
+                        guard let bool = $0.val as? Bool else {
                             XCTFail("val must be a bool")
-                            return
+                            return false
                         }
-                        XCTAssertEqual(bool, expectedSensors[offset][index], "sensor run: \(offset), index: \(index)")
+                        return bool
                     }
-                    for index in data.externalVariables.indices {
-                        guard let bool = data.fsm.externalVariables[index].val as? Bool else {
+                }
+                let sensors = tokens.map { (token) -> [Bool] in
+                    XCTAssertNotNil(token.data)
+                    guard let data = token.data else {
+                        return []
+                    }
+                    return data.fsm.sensors.map {
+                        guard let bool = $0.val as? Bool else {
                             XCTFail("val must be a bool")
-                            return
+                            return false
                         }
-                        XCTAssertEqual(bool, expectedExternals[offset][index], "external run: \(offset), index: \(index)")
+                        return bool
                     }
-                    for index in data.actuators.indices {
-                        guard let bool = data.fsm.actuators[index].val as? Bool else {
+                }
+                let actuators = tokens.map { (token) -> [Bool] in
+                    XCTAssertNotNil(token.data)
+                    guard let data = token.data else {
+                        return []
+                    }
+                    return data.fsm.actuators.map {
+                        guard let bool = $0.val as? Bool else {
                             XCTFail("val must be a bool")
-                            return
+                            return false
                         }
-                        XCTAssertEqual(bool, expectedActuators[offset][index], "actuator run: \(offset), index: \(index)")
+                        return bool
                     }
+                }
+                XCTAssertEqual(externals.count, sensors.count)
+                XCTAssertEqual(externals.count, actuators.count)
+                guard externals.count == sensors.count, sensors.count == actuators.count else {
+                    return []
+                }
+                return externals.indices.map {
+                    (externals[$0], sensors[$0], actuators[$0])
                 }
             }
         }
-        XCTAssertEqual(runs.count, 16)
+        XCTAssertEqual(runs.count, expected.count)
+        XCTAssertEqual(results.map { $0.0 }, expected.map { $0.0 })
+        XCTAssertEqual(results.map { $0.1 }, expected.map { $0.1 })
+        XCTAssertEqual(results.map { $0.2 }, expected.map { $0.2 })
     }
     
     public func scheduleInfo(of: FSM_ID, caller: FSM_ID, inGateway: ModifiableFSMGateway) -> ParameterisedMachineData {
