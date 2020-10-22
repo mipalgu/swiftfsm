@@ -58,7 +58,6 @@
 
 import IO
 import ArgumentParser
-import MachineCompiling
 import SwiftMachines
 import Foundation
 
@@ -66,8 +65,8 @@ public struct SwiftfsmShow: ParsableCommand {
     
     public static let configuration = CommandConfiguration(commandName: "show", _superCommandName: "swiftfsm", abstract: "Displays a list of machines in an arrangement.")
     
-    @Option(name: .short, help: ArgumentHelp("Specify which build to show.", valueName: "config"))
-    public var config: SwiftBuildConfig?
+    @Flag(help: "Show the entire machine hierarchy.")
+    public var all: Bool = false
     
     /**
      *  The path to load the `Machine`.
@@ -77,41 +76,20 @@ public struct SwiftfsmShow: ParsableCommand {
     
     public init() {}
     
-    private var executable: URL? {
-        let printer = CommandLinePrinter(errorStream: StderrOutputStream(), messageStream: StdoutOutputStream(), warningStream: StdoutOutputStream())
-        let fm = FileManager.default
-        let arrangementDir = URL(fileURLWithPath: arrangement, isDirectory: true)
-        let fileName = arrangementDir.lastPathComponent
-        guard let executeableName = fileName.components(separatedBy: ".").first else {
-            printer.error(str: "Unable to calculate the executable name from the arrangment.")
-            return nil
-        }
-        if let config = config {
-            let executablePath = arrangementDir.appendingPathComponent(config.rawValue, isDirectory: true).appendingPathComponent(executeableName, isDirectory: false)
-            guard fm.fileExists(atPath: executablePath.path) else {
-                printer.error(str: "Unable to find executable at path: " + executablePath.path)
-                return nil
-            }
-            return executablePath
-        }
-        for config in SwiftBuildConfig.allCases.reversed() {
-            let path = arrangementDir.appendingPathComponent(config.rawValue, isDirectory: true).appendingPathComponent(executeableName, isDirectory: false)
-            if true == fm.fileExists(atPath: path.path) {
-                return path
-            }
-        }
-        return nil
-    }
-    
     public func run() throws {
-        guard let executable = self.executable else {
+        let printer = CommandLinePrinter(errorStream: StderrOutputStream(), messageStream: StdoutOutputStream(), warningStream: StdoutOutputStream())
+        let parser = MachineArrangementParser()
+        guard let arrangement = parser.parseArrangement(atDirectory: URL(fileURLWithPath: arrangement, isDirectory: true)) else {
+            parser.errors.forEach(printer.error)
             throw ExitCode.failure
         }
-        let args: [String] = ["--show-machines"]
-        let invoker = Invoker()
-        guard invoker.run(executable.path, withArguments: args) else {
-            throw ExitCode.failure
+        let str: String
+        if false == all {
+            str = arrangement.dependencies.map { $0.name ?? $0.machineName + " -> " + $0.filePath.path }.joined(separator: "\n")
+        } else {
+            str = "Not Yet Implemented"
         }
+        printer.message(str: str)
     }
     
 }
