@@ -37,6 +37,10 @@ let package = Package(
             targets: ["swiftfsm_init"]
         ),
         .executable(
+            name: "swiftfsm-remove",
+            targets: ["swiftfsm_remove"]
+        ),
+        .executable(
             name: "swiftfsm-run",
             targets: ["swiftfsm_run"]
         ),
@@ -111,6 +115,12 @@ let package = Package(
         ),
         .target(
             name: "swiftfsm_init",
+            dependencies: [
+                "swiftfsm_binaries"
+            ]
+        ),
+        .target(
+            name: "swiftfsm_remove",
             dependencies: [
                 "swiftfsm_binaries"
             ]

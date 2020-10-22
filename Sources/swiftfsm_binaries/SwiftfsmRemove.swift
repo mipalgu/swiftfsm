@@ -1,9 +1,8 @@
-//
 /*
- * Swiftfsm.swift
- * swiftfsm_bin
+ * SwiftfsmRemove.swift
+ * swiftfsm_binaries
  *
- * Created by Callum McColl on 16/10/20.
+ * Created by Callum McColl on 23/10/20.
  * Copyright © 2020 Callum McColl. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -57,24 +56,41 @@
  *
  */
 
+import Foundation
+
 import ArgumentParser
+import IO
+import SwiftMachines
 
-import swiftfsm_binaries
-
-struct Swiftfsm: ParsableCommand {
+public struct SwiftfsmRemove: ParsableCommand {
     
-    static var configuration: CommandConfiguration = {
-        let subcommands: [ParsableCommand.Type]
-        if #available(macOS 10.11, *) {
-            subcommands = [SwiftfsmAdd.self, SwiftfsmBuild.self, SwiftfsmInit.self, SwiftfsmRemove.self, SwiftfsmRun.self, SwiftfsmShow.self, SwiftfsmUpdate.self, SwiftfsmVerify.self]
-        } else {
-            subcommands = [SwiftfsmAdd.self, SwiftfsmInit.self, SwiftfsmRemove.self, SwiftfsmRun.self, SwiftfsmShow.self, SwiftfsmUpdate.self, SwiftfsmVerify.self]
+    public static let configuration = CommandConfiguration(
+        commandName: "remove",
+        _superCommandName: "swiftfsm",
+        abstract: "Remove a machine from a swiftfsm arrangement."
+    )
+    
+    @Argument(help: ArgumentHelp("Remove <name> from the arrangement.", valueName: "name"))
+    public var name: String
+    
+    @Argument(help: ArgumentHelp("The arrangement which contains the <name> machine.", valueName: "directory.arrangement"))
+    public var arrangementPath: String
+    
+    public init() {}
+    
+    public func run() throws {
+        let printer = CommandLinePrinter(errorStream: StderrOutputStream(), messageStream: StdoutOutputStream(), warningStream: StdoutOutputStream())
+        let parser = MachineArrangementParser()
+        let generator = MachineArrangementGenerator()
+        guard var arrangement = parser.parseArrangement(atDirectory: URL(fileURLWithPath: arrangementPath, isDirectory: true)) else {
+            parser.errors.forEach(printer.error)
+            throw ExitCode.failure
         }
-        return CommandConfiguration(
-            abstract: "A Finite State Machine scheduler",
-            subcommands: subcommands,
-            defaultSubcommand: SwiftfsmRun.self
-        )
-    }()
+        arrangement.dependencies.removeAll { ($0.name ?? $0.machineName) == self.name }
+        guard nil != generator.generateArrangement(arrangement) else {
+            generator.errors.forEach(printer.error)
+            throw ExitCode.failure
+        }
+    }
     
 }
