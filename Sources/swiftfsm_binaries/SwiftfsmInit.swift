@@ -65,20 +65,23 @@ import SwiftMachines
 @available(macOS 10.11, *)
 public struct SwiftfsmInit: ParsableCommand {
     
+    public struct MachineDependency: ParsableArguments {
+        
+        @Option(name: [.short], help: "Specify a name for the machine (allows having multiple instances of the same machine with different names in the same arrangement).")
+        public var name: String?
+        
+        @Argument(help: ArgumentHelp("Add <machine.directory> to the arrangement.", valueName: "machine.directory"))
+        public var path: String
+        
+        public init() {}
+        
+    }
+    
     public static let configuration = CommandConfiguration(
         commandName: "init",
         _superCommandName: "swiftfsm",
         abstract: "Initialise a swiftfsm arrangement."
     )
-
-    /**
-     *  The paths to the machine to add to the arrangement.
-     */
-    @Option(
-        name: [.customShort("a")],
-        help: ArgumentHelp("Add <machine.directory> to the arrangement.", valueName: "machine.directory")
-    )
-    public var machines: [String]
     
     @Argument(help: ArgumentHelp("Write output to <directory.arrangement>.", valueName: "directory.arrangement"))
     public var arrangementPath: String
@@ -100,7 +103,7 @@ public struct SwiftfsmInit: ParsableCommand {
         let printer = CommandLinePrinter(errorStream: StderrOutputStream(), messageStream: StdoutOutputStream(), warningStream: StdoutOutputStream())
         let generator = MachineArrangementGenerator()
         // Parse machines
-        guard let dependencies: [Machine.Dependency] = self.machines.failMap({
+        /*guard let dependencies: [Machine.Dependency] = self.machines.failMap({
             guard let dep = Machine.Dependency(name: nil, filePath: URL(fileURLWithPath: $0, isDirectory: true)) else {
                 printer.error(str: "Unable to parse name of machines from path \($0)")
                 return nil
@@ -108,12 +111,12 @@ public struct SwiftfsmInit: ParsableCommand {
             return dep
         }) else {
             throw ExitCode.failure
-        }
+        }*/
         let url = URL(fileURLWithPath: arrangementPath, isDirectory: true)
         guard let name = self.executableName else {
             throw ValidationError("Cannot calcualte name of arrangement from arrangement path: " + self.arrangementPath)
         }
-        let arrangement = Arrangement(name: name, filePath: url, dependencies: dependencies)
+        let arrangement = Arrangement(name: name, filePath: url, dependencies: [])
         guard nil != generator.generateArrangement(arrangement) else {
             generator.errors.forEach(printer.error)
             throw ExitCode.failure
