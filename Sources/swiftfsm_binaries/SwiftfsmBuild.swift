@@ -85,12 +85,9 @@ extension SwiftBuildConfig: ExpressibleByArgument {
 @available(macOS 10.11, *)
 public struct SwiftfsmBuild: ParsableCommand {
     
-    public static let configuration = CommandConfiguration(commandName: "build", _superCommandName: "swiftfsm", abstract: "Generate and compile a swiftfsm arrangement.")
+    public static let configuration = CommandConfiguration(commandName: "build", _superCommandName: "swiftfsm", abstract: "Compile a swiftfsm arrangement.")
     
-    @Option(
-        name: .customShort("o"),
-        help: ArgumentHelp("Write output to <directory.arrangement>.", valueName: "directory.arrangement")
-    )
+    @Argument(help: ArgumentHelp("Compile <directory.arrangement>.", valueName: "directory.arrangement"))
     public var arrangmentPath: String
     
     @Option(name: .short, help: ArgumentHelp("Specify the swift build config", valueName: "config"))
