@@ -58,7 +58,6 @@
 
 import IO
 import ArgumentParser
-import MachineCompiling
 import SwiftMachines
 import Foundation
 
@@ -66,8 +65,8 @@ public struct SwiftfsmShow: ParsableCommand {
     
     public static let configuration = CommandConfiguration(commandName: "show", _superCommandName: "swiftfsm", abstract: "Displays a list of machines in an arrangement.")
     
-    @Option(name: .short, help: ArgumentHelp("Specify which build to show.", valueName: "config"))
-    public var config: SwiftBuildConfig?
+    @Flag(help: "Show the entire machine hierarchy.")
+    public var all: Bool = false
     
     /**
      *  The path to load the `Machine`.
@@ -77,41 +76,36 @@ public struct SwiftfsmShow: ParsableCommand {
     
     public init() {}
     
-    private var executable: URL? {
+    public func run() throws {
         let printer = CommandLinePrinter(errorStream: StderrOutputStream(), messageStream: StdoutOutputStream(), warningStream: StdoutOutputStream())
-        let fm = FileManager.default
-        let arrangementDir = URL(fileURLWithPath: arrangement, isDirectory: true)
-        let fileName = arrangementDir.lastPathComponent
-        guard let executeableName = fileName.components(separatedBy: ".").first else {
-            printer.error(str: "Unable to calculate the executable name from the arrangment.")
-            return nil
+        let parser = MachineArrangementParser()
+        guard let arrangement = parser.parseArrangement(atDirectory: URL(fileURLWithPath: arrangement, isDirectory: true)) else {
+            parser.errors.forEach(printer.error)
+            throw ExitCode.failure
         }
-        if let config = config {
-            let executablePath = arrangementDir.appendingPathComponent(config.rawValue, isDirectory: true).appendingPathComponent(executeableName, isDirectory: false)
-            guard fm.fileExists(atPath: executablePath.path) else {
-                printer.error(str: "Unable to find executable at path: " + executablePath.path)
-                return nil
-            }
-            return executablePath
+        let str: String
+        if false == all {
+            str = arrangement.dependencies.map { ($0.name ?? $0.machineName) + " -> " + $0.filePath.path }.joined(separator: "\n")
+        } else {
+            str = self.hierarchy(of: arrangement)
         }
-        for config in SwiftBuildConfig.allCases.reversed() {
-            let path = arrangementDir.appendingPathComponent(config.rawValue, isDirectory: true).appendingPathComponent(executeableName, isDirectory: false)
-            if true == fm.fileExists(atPath: path.path) {
-                return path
-            }
-        }
-        return nil
+        printer.message(str: str)
     }
     
-    public func run() throws {
-        guard let executable = self.executable else {
-            throw ExitCode.failure
+    private func hierarchy(of arrangement: Arrangement) -> String {
+        func process(_ dependency: Machine.Dependency, prefix: String = "", indent: String = "") -> String {
+            let name = (dependency.name ?? dependency.machineName)
+            let str = indent + prefix + name + " -> " + dependency.filePath.path
+            let deps = dependency.machine.dependencies.map {
+                process($0, prefix: name + ".", indent: indent + "    ")
+            }.joined(separator: "\n")
+            let spacing = deps.isEmpty ? "" : "\n"
+            if deps.isEmpty {
+                return str + spacing
+            }
+            return str + "\n" + deps + spacing
         }
-        let args: [String] = ["--show-machines"]
-        let invoker = Invoker()
-        guard invoker.run(executable.path, withArguments: args) else {
-            throw ExitCode.failure
-        }
+        return arrangement.dependencies.map { process($0) }.joined(separator: "\n")
     }
     
 }

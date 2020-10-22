@@ -1,9 +1,8 @@
-//
 /*
- * Swiftfsm.swift
- * swiftfsm_bin
+ * SwiftfsmAdd.swift
+ * swiftfsm_binaries
  *
- * Created by Callum McColl on 16/10/20.
+ * Created by Callum McColl on 23/10/20.
  * Copyright © 2020 Callum McColl. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -57,24 +56,52 @@
  *
  */
 
+import Foundation
+
 import ArgumentParser
+import IO
+import SwiftMachines
 
-import swiftfsm_binaries
-
-struct Swiftfsm: ParsableCommand {
+public struct SwiftfsmAdd: ParsableCommand {
     
-    static var configuration: CommandConfiguration = {
-        let subcommands: [ParsableCommand.Type]
-        if #available(macOS 10.11, *) {
-            subcommands = [SwiftfsmAdd.self, SwiftfsmBuild.self, SwiftfsmInit.self, SwiftfsmRemove.self, SwiftfsmRun.self, SwiftfsmShow.self, SwiftfsmUpdate.self, SwiftfsmVerify.self]
-        } else {
-            subcommands = [SwiftfsmAdd.self, SwiftfsmInit.self, SwiftfsmRemove.self, SwiftfsmRun.self, SwiftfsmShow.self, SwiftfsmUpdate.self, SwiftfsmVerify.self]
+    public static let configuration = CommandConfiguration(
+        commandName: "add",
+        _superCommandName: "swiftfsm",
+        abstract: "Add a machine to a swiftfsm arrangement."
+    )
+    
+    @Option(name: [.short], help: ArgumentHelp("Specify a name for the machine (allows having multiple instances of the same machine with different names in the arrangement).", valueName: "name"))
+    public var name: String?
+    
+    @Argument(help: ArgumentHelp("Add <machine.directory> to the arrangement.", valueName: "machine.directory"))
+    public var path: String
+    
+    @Argument(help: ArgumentHelp("Add the machine to <directory.arrangement>.", valueName: "directory.arrangement"))
+    public var arrangementPath: String
+    
+    public init() {}
+    
+    public func run() throws {
+        let printer = CommandLinePrinter(errorStream: StderrOutputStream(), messageStream: StdoutOutputStream(), warningStream: StdoutOutputStream())
+        let parser = MachineArrangementParser()
+        let generator = MachineArrangementGenerator()
+        guard let dependency = Machine.Dependency(name: name, filePath: URL(fileURLWithPath: path, isDirectory: true)) else {
+            throw ValidationError("Cannot parse machines name from path \(path)")
         }
-        return CommandConfiguration(
-            abstract: "A Finite State Machine scheduler",
-            subcommands: subcommands,
-            defaultSubcommand: SwiftfsmRun.self
-        )
-    }()
+        guard var arrangement = parser.parseArrangement(atDirectory: URL(fileURLWithPath: arrangementPath, isDirectory: true)) else {
+            parser.errors.forEach(printer.error)
+            throw ExitCode.failure
+        }
+        try arrangement.dependencies.forEach {
+            if ($0.name ?? $0.machineName) == (dependency.name ?? dependency.machineName) {
+                throw ValidationError("This arrangement already contains a machine with the name \(dependency.name ?? dependency.machineName)")
+            }
+        }
+        arrangement.dependencies.append(dependency)
+        guard nil != generator.generateArrangement(arrangement) else {
+            generator.errors.forEach(printer.error)
+            throw ExitCode.failure
+        }
+    }
     
 }

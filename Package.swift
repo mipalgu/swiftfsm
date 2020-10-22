@@ -25,8 +25,20 @@ let package = Package(
             targets: ["swiftfsm_bin"]
         ),
         .executable(
+            name: "swiftfsm-add",
+            targets: ["swiftfsm_add"]
+        ),
+        .executable(
             name: "swiftfsm-build",
             targets: ["swiftfsm_build"]
+        ),
+        .executable(
+            name: "swiftfsm-init",
+            targets: ["swiftfsm_init"]
+        ),
+        .executable(
+            name: "swiftfsm-remove",
+            targets: ["swiftfsm_remove"]
         ),
         .executable(
             name: "swiftfsm-run",
@@ -90,7 +102,25 @@ let package = Package(
             ]
         ),
         .target(
+            name: "swiftfsm_add",
+            dependencies: [
+                "swiftfsm_binaries"
+            ]
+        ),
+        .target(
             name: "swiftfsm_build",
+            dependencies: [
+                "swiftfsm_binaries"
+            ]
+        ),
+        .target(
+            name: "swiftfsm_init",
+            dependencies: [
+                "swiftfsm_binaries"
+            ]
+        ),
+        .target(
+            name: "swiftfsm_remove",
             dependencies: [
                 "swiftfsm_binaries"
             ]
