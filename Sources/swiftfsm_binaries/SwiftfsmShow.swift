@@ -85,11 +85,27 @@ public struct SwiftfsmShow: ParsableCommand {
         }
         let str: String
         if false == all {
-            str = arrangement.dependencies.map { $0.name ?? $0.machineName + " -> " + $0.filePath.path }.joined(separator: "\n")
+            str = arrangement.dependencies.map { ($0.name ?? $0.machineName) + " -> " + $0.filePath.path }.joined(separator: "\n")
         } else {
-            str = "Not Yet Implemented"
+            str = self.hierarchy(of: arrangement)
         }
         printer.message(str: str)
+    }
+    
+    private func hierarchy(of arrangement: Arrangement) -> String {
+        func process(_ dependency: Machine.Dependency, prefix: String = "", indent: String = "") -> String {
+            let name = (dependency.name ?? dependency.machineName)
+            let str = indent + prefix + name + " -> " + dependency.filePath.path
+            let deps = dependency.machine.dependencies.map {
+                process($0, prefix: name + ".", indent: indent + "    ")
+            }.joined(separator: "\n")
+            let spacing = deps.isEmpty ? "" : "\n"
+            if deps.isEmpty {
+                return str + spacing
+            }
+            return str + "\n" + deps + spacing
+        }
+        return arrangement.dependencies.map { process($0) }.joined(separator: "\n")
     }
     
 }
