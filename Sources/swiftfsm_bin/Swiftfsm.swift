@@ -66,9 +66,9 @@ struct Swiftfsm: ParsableCommand {
     static var configuration: CommandConfiguration = {
         let subcommands: [ParsableCommand.Type]
         if #available(macOS 10.11, *) {
-            subcommands = [SwiftfsmBuild.self, SwiftfsmRun.self, SwiftfsmShow.self, SwiftfsmUpdate.self, SwiftfsmVerify.self]
+            subcommands = [SwiftfsmAdd.self, SwiftfsmBuild.self, SwiftfsmInit.self, SwiftfsmRun.self, SwiftfsmShow.self, SwiftfsmUpdate.self, SwiftfsmVerify.self]
         } else {
-            subcommands = [SwiftfsmRun.self, SwiftfsmShow.self, SwiftfsmUpdate.self, SwiftfsmVerify.self]
+            subcommands = [SwiftfsmAdd.self, SwiftfsmInit.self, SwiftfsmRun.self, SwiftfsmShow.self, SwiftfsmUpdate.self, SwiftfsmVerify.self]
         }
         return CommandConfiguration(
             abstract: "A Finite State Machine scheduler",

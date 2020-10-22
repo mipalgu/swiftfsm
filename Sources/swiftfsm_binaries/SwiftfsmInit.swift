@@ -62,7 +62,6 @@ import ArgumentParser
 import IO
 import SwiftMachines
 
-@available(macOS 10.11, *)
 public struct SwiftfsmInit: ParsableCommand {
     
     public struct MachineDependency: ParsableArguments {
