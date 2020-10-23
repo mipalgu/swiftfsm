@@ -80,33 +80,47 @@ public struct SwiftfsmRun: ParsableCommand {
     public init() {}
     
     private var executable: URL? {
-        let printer = CommandLinePrinter(errorStream: StderrOutputStream(), messageStream: StdoutOutputStream(), warningStream: StdoutOutputStream())
-        let fm = FileManager.default
         let arrangementDir = URL(fileURLWithPath: arrangement, isDirectory: true)
         let fileName = arrangementDir.lastPathComponent
         guard let executeableName = fileName.components(separatedBy: ".").first else {
-            printer.error(str: "Unable to calculate the executable name from the arrangment.")
             return nil
         }
         if let config = config {
-            let executablePath = arrangementDir.appendingPathComponent(config.rawValue, isDirectory: true).appendingPathComponent(executeableName, isDirectory: false)
-            guard fm.fileExists(atPath: executablePath.path) else {
-                printer.error(str: "Unable to find executable at path: " + executablePath.path)
+            guard let url = self.executeablePath(named: executeableName, in: arrangementDir, forConfig: config) else {
                 return nil
             }
-            return executablePath
+            return url
         }
         for config in SwiftBuildConfig.allCases.reversed() {
-            let path = arrangementDir.appendingPathComponent(config.rawValue, isDirectory: true).appendingPathComponent(executeableName, isDirectory: false)
-            if true == fm.fileExists(atPath: path.path) {
-                return path
+            if let url = self.executeablePath(named: executeableName, in: arrangementDir, forConfig: config) {
+                return url
             }
         }
         return nil
     }
     
+    private func executeablePath(named executeableName: String, in arrangementDir: URL, forConfig config: SwiftBuildConfig) -> URL? {
+        let executeableURL: URL
+        if #available(macOS 10.11, *) {
+            let compiler = MachineArrangementCompiler()
+            executeableURL = compiler.outputURL(forArrangement: arrangementDir, executableName: executeableName, swiftBuildConfig: config)
+        } else {
+            executeableURL = arrangementDir
+                .appendingPathComponent(".build", isDirectory: true)
+                .appendingPathComponent(config.rawValue, isDirectory: true)
+                .appendingPathComponent(executeableName, isDirectory: false)
+        }
+        let fm = FileManager.default
+        guard fm.fileExists(atPath: executeableURL.path) else {
+            return nil
+        }
+        return executeableURL
+    }
+    
     public func run() throws {
+        let printer = CommandLinePrinter(errorStream: StderrOutputStream(), messageStream: StdoutOutputStream(), warningStream: StdoutOutputStream())
         guard let executable = self.executable else {
+            printer.error(str: "Unable to load executable of arrangement.")
             throw ExitCode.failure
         }
         var args: [String] = []
