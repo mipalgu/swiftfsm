@@ -103,7 +103,7 @@ public struct SwiftfsmRun: ParsableCommand {
         let executeableURL: URL
         if #available(macOS 10.11, *) {
             let compiler = MachineArrangementCompiler()
-            executeableURL = compiler.outputURL(forArrangement: arrangementDir, executableName: executeableName, swiftBuildConfig: config)
+            executeableURL = compiler.outputURL(forArrangement: arrangementDir, executableName: executeableName, swiftBuildConfig: config, libExtension: TargetTriple.platform?.sharedObjectExtension ?? "so")
         } else {
             executeableURL = arrangementDir
                 .appendingPathComponent(".build", isDirectory: true)

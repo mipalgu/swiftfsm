@@ -169,6 +169,10 @@ public struct SwiftfsmBuild: ParsableCommand {
     
     public init() {}
     
+    public var libExtension: String {
+        return (self.target ?? TargetTriple.platform)?.sharedObjectExtension ?? "so"
+    }
+    
     public var actualBuildDir: String {
         if let buildDir = buildDir {
             return buildDir
@@ -203,6 +207,7 @@ public struct SwiftfsmBuild: ParsableCommand {
         guard nil != compiler.compileArrangement(
             arrangement,
             machineBuildDir: buildDir,
+            libExtension: self.libExtension,
             swiftBuildConfig: self.config,
             withCCompilerFlags: self.cCompilerFlags,
             andCXXCompilerFlags: self.cxxCompilerFlags,
