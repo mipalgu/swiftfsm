@@ -56,6 +56,7 @@
  *
  */
 
+import swiftfsm
 import ArgumentParser
 import SwiftMachines
 import IO
@@ -105,21 +106,27 @@ public struct SwiftfsmVerify: ParsableCommand {
     }
     
     public func run() throws {
+        let printer = CommandLinePrinter(errorStream: StderrOutputStream(), messageStream: StdoutOutputStream(), warningStream: StdoutOutputStream())
         guard let executable = self.executable else {
             throw ExitCode.failure
         }
-        var args: [String] = []
-        args.append("--generate-kripke-structures")
-        verifyArgs.formats.forEach {
-            args.append("--" + $0.rawValue)
-        }
-        if verifyArgs.formats.isEmpty {
-            args.append("--" + VerifyArguments.KripkeStructureFormats.nusmv.rawValue)
-        }
-        let invoker = Invoker()
-        guard invoker.run(executable.path, withArguments: args) else {
+        let arrangement: FlattenedMetaArrangement
+        do {
+            arrangement = try FlattenedMetaArrangement(fromSharedLibrary: executable.path)
+        } catch let e {
+            printer.error(str: "\(e)")
             throw ExitCode.failure
         }
+        let swiftfsm = Swiftfsm()
+        let machines = swiftfsm.makeMachines(arrangement)
+        let swiftfsmArgs = SwiftfsmArguments(
+            generateKripkeStructures: false,
+            showMachines: false,
+            verifyArgs: self.verifyArgs,
+            scheduleArgs: RunArguments(debug: false, scheduler: .roundRobin)
+        )
+        let runner = SwiftfsmRunner(args: swiftfsmArgs, machines: machines, gateway: swiftfsm.gateway)
+        runner.run()
     }
     
 }
