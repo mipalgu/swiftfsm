@@ -33,6 +33,10 @@ let package = Package(
             targets: ["swiftfsm_build"]
         ),
         .executable(
+            name: "swiftfsm-clean",
+            targets: ["swiftfsm_clean"]
+        ),
+        .executable(
             name: "swiftfsm-init",
             targets: ["swiftfsm_init"]
         ),
@@ -109,6 +113,12 @@ let package = Package(
         ),
         .target(
             name: "swiftfsm_build",
+            dependencies: [
+                "swiftfsm_binaries"
+            ]
+        ),
+        .target(
+            name: "swiftfsm_clean",
             dependencies: [
                 "swiftfsm_binaries"
             ]

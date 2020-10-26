@@ -8,7 +8,7 @@ ALL_TARGETS=host
 
 PRODUCT_MODULES=swiftfsm ExternalVariables FSM Utilities
 PRODUCT_LIBS=FSM CFSMS
-PRODUCT_BINARIES=swiftfsm swiftfsm-run swiftfsm-show swiftfsm-build swiftfsm-verify swiftfsm-update swiftfsm-add swiftfsm-init swiftfsm-remove
+PRODUCT_BINARIES=swiftfsm swiftfsm-run swiftfsm-show swiftfsm-build swiftfsm-verify swiftfsm-update swiftfsm-add swiftfsm-init swiftfsm-remove swiftfsm-clean
 
 .ifndef TARGET
 install: host
