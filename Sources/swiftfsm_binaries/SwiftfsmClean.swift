@@ -130,6 +130,7 @@ public struct SwiftfsmClean: ParsableCommand {
         let url = URL(fileURLWithPath: arrangement, isDirectory: true)
         let fm = FileManager.default
         let buildDir = url.appendingPathComponent(".build", isDirectory: true).path
+        printer.message(str: "Removing " + buildDir)
         do {
             try fm.removeItem(atPath: buildDir)
         } catch let e as NSError {
@@ -147,14 +148,14 @@ public struct SwiftfsmClean: ParsableCommand {
             throw ExitCode.failure
         }
         do {
-            try clean(arrangement: arrangement, buildDir: actualBuildDir)
+            try clean(arrangement: arrangement, buildDir: actualBuildDir, printer: printer)
         } catch let e {
             printer.error(str: "\(e)")
             throw ExitCode.failure
         }
     }
     
-    private func clean(arrangement: Arrangement, buildDir: String) throws {
+    private func clean<P: Printer>(arrangement: Arrangement, buildDir: String, printer: P) throws {
         let fm = FileManager.default
         var processed: Set<URL> = []
         func _process(_ dependency: Machine.Dependency) throws {
@@ -163,6 +164,7 @@ public struct SwiftfsmClean: ParsableCommand {
             }
             processed.insert(dependency.filePath)
             let buildDir = dependency.filePath.appendingPathComponent(buildDir, isDirectory: true).path
+            printer.message(str: "Removing " + buildDir)
             do {
                 try fm.removeItem(atPath: buildDir)
             } catch let e as NSError {
