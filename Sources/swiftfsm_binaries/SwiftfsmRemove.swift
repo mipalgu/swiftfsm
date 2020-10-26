@@ -70,11 +70,11 @@ public struct SwiftfsmRemove: ParsableCommand {
         abstract: "Remove a machine from a swiftfsm arrangement."
     )
     
-    @Argument(help: ArgumentHelp("Remove <name> from the arrangement.", valueName: "name"))
-    public var name: String
-    
     @Argument(help: ArgumentHelp("The arrangement which contains the <name> machine.", valueName: "directory.arrangement"))
     public var arrangementPath: String
+    
+    @Argument(help: ArgumentHelp("Remove <name> from the arrangement.", valueName: "name"))
+    public var name: String
     
     public init() {}
     
