@@ -130,10 +130,10 @@ public struct SwiftfsmClean: ParsableCommand {
         let url = URL(fileURLWithPath: arrangement, isDirectory: true)
         let fm = FileManager.default
         let buildDir = url.appendingPathComponent(".build", isDirectory: true).path
-        if fm.fileExists(atPath: buildDir) {
-            do {
-                try fm.removeItem(atPath: buildDir)
-            } catch let e {
+        do {
+            try fm.removeItem(atPath: buildDir)
+        } catch let e as NSError {
+            if e.code != NSFileNoSuchFileError {
                 printer.error(str: "\(e)")
                 throw ExitCode.failure
             }
@@ -163,11 +163,11 @@ public struct SwiftfsmClean: ParsableCommand {
             }
             processed.insert(dependency.filePath)
             let buildDir = dependency.filePath.appendingPathComponent(buildDir, isDirectory: true).path
-            if fm.fileExists(atPath: buildDir) {
-                do {
-                    try fm.removeItem(atPath: buildDir)
-                } catch let e {
-                    throw CleanError.error(message: "\(e)")
+            do {
+                try fm.removeItem(atPath: buildDir)
+            } catch let e as NSError {
+                if e.code != NSFileNoSuchFileError {
+                    throw CleanError.error(message: e.localizedDescription)
                 }
             }
             try dependency.machine.dependencies.forEach(_process)
