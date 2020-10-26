@@ -60,6 +60,7 @@ import ArgumentParser
 
 struct SwiftfsmArguments: ParsableCommand {
     
+    
     @Flag(help: "Generate kripke structures")
     var generateKripkeStructures: Bool = false
     
@@ -69,5 +70,14 @@ struct SwiftfsmArguments: ParsableCommand {
     @OptionGroup var verifyArgs: VerifyArguments
     
     @OptionGroup var scheduleArgs: RunArguments
+    
+    public init() {}
+    
+    public init(generateKripkeStructures: Bool = false, showMachines: Bool = false, verifyArgs: VerifyArguments = VerifyArguments(), scheduleArgs: RunArguments = RunArguments()) {
+        self.generateKripkeStructures = generateKripkeStructures
+        self.showMachines = showMachines
+        self.verifyArgs = verifyArgs
+        self.scheduleArgs = scheduleArgs
+    }
     
 }

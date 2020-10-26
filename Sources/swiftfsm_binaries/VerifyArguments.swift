@@ -100,4 +100,8 @@ public struct VerifyArguments: ParsableArguments {
     
     public init() {}
     
+    public init(formats: [KripkeStructureFormats]) {
+        self.formats = formats
+    }
+    
 }

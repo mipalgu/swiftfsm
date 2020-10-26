@@ -56,6 +56,7 @@
  *
  */
 
+import swiftfsm
 import IO
 import ArgumentParser
 import MachineCompiling
@@ -123,23 +124,23 @@ public struct SwiftfsmRun: ParsableCommand {
             printer.error(str: "Unable to load executable of arrangement.")
             throw ExitCode.failure
         }
-        var args: [String] = []
-        if swiftfsmArgs.debug {
-            args.append("-d")
-        }
-        args.append("-s")
-        switch swiftfsmArgs.scheduler {
-        case .roundRobin:
-            args.append("rr")
-        case .passiveRoundRobin:
-            args.append("prr")
-        case .timeTriggered(let dispatchTable):
-            args.append(dispatchTable)
-        }
-        let invoker = Invoker()
-        guard invoker.run(executable.path, withArguments: args) else {
+        let arrangement: FlattenedMetaArrangement
+        do {
+            arrangement = try FlattenedMetaArrangement(fromSharedLibrary: executable.path)
+        } catch let e {
+            printer.error(str: "\(e)")
             throw ExitCode.failure
         }
+        let swiftfsm = Swiftfsm()
+        let machines = swiftfsm.makeMachines(arrangement)
+        let swiftfsmArgs = SwiftfsmArguments(
+            generateKripkeStructures: false,
+            showMachines: false,
+            verifyArgs: VerifyArguments(formats: []),
+            scheduleArgs: self.swiftfsmArgs
+        )
+        let runner = SwiftfsmRunner(args: swiftfsmArgs, machines: machines, gateway: swiftfsm.gateway)
+        runner.run()
     }
     
 }
