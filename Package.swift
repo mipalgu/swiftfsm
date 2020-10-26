@@ -12,8 +12,8 @@ func convert(_ arr: [String]) -> [Target.Dependency] {
 
 let foundationDeps: [Target.Dependency] = [.byName(name: "Machines"), .byName(name: "IO")]
 let deps = [
-    .package(url: "ssh://git.mipal.net/git/swiftfsm_FSM.git", .branch("build")),
-    .package(url: "ssh://git.mipal.net/git/Machines.git", .branch("build")),
+    .package(url: "ssh://git.mipal.net/git/swiftfsm_FSM.git", .branch("master")),
+    .package(url: "ssh://git.mipal.net/git/Machines.git", .branch("master")),
     .package(url: "ssh://git.mipal.net/git/swift_helpers.git", .branch("master"))
 ] + normalDependencies
 
