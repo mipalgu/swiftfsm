@@ -71,7 +71,7 @@ public struct Swiftfsm {
 
     public typealias MachineFactory = (String, FSMGateway, Timer, FSM_ID) -> (FSMType, [ShallowDependency])
     
-    private let gateway: StackGateway = StackGateway(
+    public let gateway: StackGateway = StackGateway(
         printer: CommandLinePrinter(
             errorStream: StderrOutputStream(),
             messageStream: StdoutOutputStream(),
@@ -81,47 +81,36 @@ public struct Swiftfsm {
     
     public init() {}
     
-    public func makeMachine(name: String, dependantMachines: [String: [String]], callableMachines: [String: [String]], invocableMachines: [String: [String]], factories: [String: MachineFactory], caller: FSM_ID? = nil) -> (FSMType, [Dependency]) {
-        func _makeMachine<Gateway: VerifiableGateway>(name: String, prefix: String?, gateway: Gateway, caller: FSM_ID? = nil) -> (FSMType, [Dependency]) {
-            let prefixedName = (prefix.map { $0 + "." } ?? "") + name
-            let id = gateway.id(of: prefixedName)
-            guard let factory = factories[prefixedName] else {
-                fatalError("Unable to load machine named '\(prefixedName)' as it is not in the factory list.")
-            }
+    public func makeMachines(_ arrangement: FlattenedMetaArrangement) -> [(FSMType, [Dependency])] {
+        func _makeMachine<Gateway: VerifiableGateway>(dependency: FlattenedMetaDependency, gateway: Gateway, caller: FSM_ID? = nil) -> (FSMType, [Dependency]) {
+            let id = gateway.id(of: dependency.prefixedName)
             let caller = caller ?? id
-            guard
-                let dependantMachines = dependantMachines[prefixedName],
-                let callableMachines = callableMachines[prefixedName],
-                let invocableMachines = invocableMachines[prefixedName]
-            else {
-                fatalError("Unable to load dependency lists for machine '\(prefixedName)'")
+            guard let fsm = arrangement.fsms[dependency.prefixedName] else {
+                fatalError("Unable to load fsm \(dependency.prefixedName)")
             }
             let newGateway = self.createRestrictiveGateway(
-                forMachine: name,
+                dependency: dependency,
+                fsm: fsm,
                 gateway: gateway,
-                dependantMachines: dependantMachines,
-                callableMachines: callableMachines,
-                invocableMachines: invocableMachines,
-                prefix: prefix,
                 selfID: id,
                 caller: caller
             )
-            let dependenciesDict: [String: Dependency] = Dictionary(uniqueKeysWithValues: dependantMachines.map { dep in
-                let id = newGateway.id(of: dep)
-                let (depFSM, deps) = _makeMachine(name: dep, prefix: prefixedName, gateway: gateway, caller: callableMachines.contains(dep) ? caller : id)
-                if invocableMachines.contains(dep), let paramMachine = depFSM.asParameterisedFiniteStateMachine {
-                    return (dep, .invokableParameterisedMachine(paramMachine, deps))
+            let dependenciesDict: [String: Dependency] = Dictionary(uniqueKeysWithValues: fsm.dependencies.map { dep in
+                let id = newGateway.id(of: dep.prefixedName)
+                let (depFSM, deps) = _makeMachine(dependency: dep, gateway: gateway, caller: dep.isCallable ? caller : id)
+                if dep.isInvocable, let paramMachine = depFSM.asParameterisedFiniteStateMachine {
+                    return (dep.name, .invokableParameterisedMachine(paramMachine, deps))
                 }
-                if callableMachines.contains(dep), let paramMachine = depFSM.asParameterisedFiniteStateMachine {
-                    return (dep, .callableParameterisedMachine(paramMachine, deps))
+                if dep.isCallable, let paramMachine = depFSM.asParameterisedFiniteStateMachine {
+                    return (dep.name, .callableParameterisedMachine(paramMachine, deps))
                 }
                 if let submachine = depFSM.asControllableFiniteStateMachine {
-                    return (dep, .submachine(submachine, deps))
+                    return (dep.name, .submachine(submachine, deps))
                 }
                 fatalError("Unable to create fsm.")
             })
-            let (fsm, shallowDependencies) = factory(
-                prefixedName,
+            let (fsmType, shallowDependencies) = fsm.factory(
+                dependency.prefixedName,
                 newGateway,
                 FSMClock(ringletLengths: [:], scheduleLength: 0),
                 caller
@@ -131,10 +120,36 @@ public struct Swiftfsm {
             }) else {
                 fatalError("Unable to load dependencies from shallow dependencies")
             }
-            self.gateway.fsms[id] = fsm
-            return (fsm, dependencies)
+            gateway.fsms[id] = fsmType
+            return (fsmType, dependencies)
         }
-        return _makeMachine(name: name, prefix: nil, gateway: self.gateway)
+        return arrangement.rootFSMs.map {
+            _makeMachine(dependency: FlattenedMetaDependency.controllable(prefixedName: $0, name: $0), gateway: self.gateway)
+        }
+    }
+    
+    private func createRestrictiveGateway<Gateway: VerifiableGateway>(dependency: FlattenedMetaDependency, fsm: FlattenedMetaFSM, gateway: Gateway, selfID: FSM_ID, caller: FSM_ID?) -> RestrictiveFSMGateway<Gateway, CallbackFormatter> {
+        let format: (String) -> String = { name in
+            if name == dependency.name {
+                return dependency.name
+            }
+            if let dep = fsm.dependencies.first(where: { $0.name == name }) {
+                return dep.prefixedName
+            }
+            return name
+        }
+        let dependantIds: [FSM_ID] = fsm.dependencies.map { gateway.id(of: $0.prefixedName) }
+        let callableIds = fsm.dependencies.filter { $0.isCallable }.map { gateway.id(of: $0.prefixedName) }
+        let invocableIds = fsm.dependencies.filter { $0.isInvocable }.map { gateway.id(of: $0.prefixedName) }
+        return RestrictiveFSMGateway(
+            gateway: gateway,
+            selfID: selfID,
+            caller: caller ?? selfID,
+            callables: Set(callableIds + [selfID]),
+            invocables: Set(invocableIds),
+            whitelist: Set(dependantIds + [selfID]),
+            formatter: CallbackFormatter(format)
+        )
     }
     
     public func run(machines: [(FSMType, [Dependency])]) {
@@ -146,28 +161,6 @@ public struct Swiftfsm {
         }
         let swiftfsm = SwiftfsmRunner(args: args, machines: machines, gateway: self.gateway)
         swiftfsm.run()
-    }
-    
-    fileprivate func createRestrictiveGateway<Gateway: VerifiableGateway>(forMachine machine: String, gateway: Gateway, dependantMachines: [String], callableMachines: [String], invocableMachines: [String], prefix: String?, selfID: FSM_ID, caller: FSM_ID?) -> RestrictiveFSMGateway<Gateway, CallbackFormatter> {
-        let format: (String) -> String = {
-            let machineName = (prefix.map { $0 + "." } ?? "") + machine
-            if $0 == machineName {
-                return machineName
-            }
-            return (prefix.map { $0 + "." } ?? "") + machine + "." + $0
-        }
-        let dependantIds: [FSM_ID] = dependantMachines.map { gateway.id(of: format($0)) }
-        let callableIds = callableMachines.map { gateway.id(of: format($0)) }
-        let invocableIds = invocableMachines.map { gateway.id(of: format($0)) }
-        return RestrictiveFSMGateway(
-            gateway: gateway,
-            selfID: selfID,
-            caller: caller ?? selfID,
-            callables: Set(callableIds + [selfID]),
-            invocables: Set(invocableIds),
-            whitelist: Set(dependantIds + [selfID]),
-            formatter: CallbackFormatter(format)
-        )
     }
     
 }

@@ -70,14 +70,14 @@ public struct SwiftfsmAdd: ParsableCommand {
         abstract: "Add a machine to a swiftfsm arrangement."
     )
     
+    @Argument(help: ArgumentHelp("Add the machine to <directory.arrangement>.", valueName: "directory.arrangement"))
+    public var arrangementPath: String
+    
     @Option(name: [.short], help: ArgumentHelp("Specify a name for the machine (allows having multiple instances of the same machine with different names in the arrangement).", valueName: "name"))
     public var name: String?
     
     @Argument(help: ArgumentHelp("Add <machine.directory> to the arrangement.", valueName: "machine.directory"))
     public var path: String
-    
-    @Argument(help: ArgumentHelp("Add the machine to <directory.arrangement>.", valueName: "directory.arrangement"))
-    public var arrangementPath: String
     
     public init() {}
     

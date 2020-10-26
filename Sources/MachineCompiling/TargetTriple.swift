@@ -56,6 +56,12 @@
  *
  */
 
+#if os(macOS)
+import Darwin
+#else
+import GLibc
+#endif
+
 public struct TargetTriple: Equatable, Hashable {
     
     public enum Arch: String, CaseIterable, Equatable, Hashable {
@@ -241,6 +247,33 @@ public struct TargetTriple: Equatable, Hashable {
     public var os: OS
     
     public var environment: Environment
+    
+    public var sharedObjectExtension: String {
+        switch self.os {
+        case .IOS, .Darwin, .MacOSX:
+            return "dylib"
+        case .Win32:
+            return "dll"
+        default:
+            return "so"
+        }
+    }
+    
+    public static var platform: TargetTriple? {
+        #if os(macOS)
+        return TargetTriple(arch: .x86_64, vendor: .Apple, os: .MacOSX, environment: .MacABI)
+        #else
+        var uts = utsname()
+        guard
+            0 == uname(&uts),
+            let os = withUnsafePointer(to: &uts.sysname.0, { String(validatingUTF8: $0) }),
+            let arch = withUnsafePointer(to: &uts.machine.0, { String(validatingUTF8: $0) })
+        else {
+            return nil
+        }
+        return TargetTriple(triple: "\(arch)-unknown-\(os)-unknown")
+        #endif
+    }
     
     public init(
         arch: Arch = .unknown,

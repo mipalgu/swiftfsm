@@ -71,7 +71,7 @@ struct Swiftfsm: ParsableCommand {
             subcommands = [SwiftfsmAdd.self, SwiftfsmInit.self, SwiftfsmRemove.self, SwiftfsmRun.self, SwiftfsmShow.self, SwiftfsmUpdate.self, SwiftfsmVerify.self]
         }
         return CommandConfiguration(
-            abstract: "A Finite State Machine scheduler",
+            abstract: "A Finite State Machine Scheduler.",
             subcommands: subcommands,
             defaultSubcommand: SwiftfsmRun.self
         )

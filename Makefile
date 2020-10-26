@@ -6,7 +6,7 @@
 
 ALL_TARGETS=host
 
-PRODUCT_MODULES=swiftfsm
+PRODUCT_MODULES=swiftfsm ExternalVariables FSM Utilities
 PRODUCT_LIBS=FSM CFSMS
 PRODUCT_BINARIES=swiftfsm swiftfsm-run swiftfsm-show swiftfsm-build swiftfsm-verify swiftfsm-update swiftfsm-add swiftfsm-init swiftfsm-remove
 
@@ -16,8 +16,8 @@ install: host
 install: cross
 .endif
 .ifdef PRODUCT_MODULES
-	rm -rf ${DST:Q}/include/${MODULE_BASE}
 	mkdir -p ${DST:Q}/include/${MODULE_BASE}
+	rm ${DST:Q}/include/${MODULE_BASE}/*
 .for module in ${PRODUCT_MODULES}
 	install -m 644 ${BUILDDIR}/${module}.swiftmodule ${DST:Q}/include/${MODULE_BASE}
 	install -m 644 ${BUILDDIR}/${module}.swiftdoc ${DST:Q}/include/${MODULE_BASE}

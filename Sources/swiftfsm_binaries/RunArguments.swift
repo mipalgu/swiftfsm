@@ -166,4 +166,9 @@ public struct RunArguments: ParsableArguments {
     
     public init() {}
     
+    public init(debug: Bool, scheduler: Schedulers) {
+        self.debug = debug
+        self.scheduler = scheduler
+    }
+    
 }
