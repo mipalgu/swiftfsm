@@ -134,7 +134,7 @@ public struct Swiftfsm {
                 return dependency.name
             }
             if let dep = fsm.dependencies.first(where: { $0.name == name }) {
-                return dep.name
+                return dep.prefixedName
             }
             return name
         }
