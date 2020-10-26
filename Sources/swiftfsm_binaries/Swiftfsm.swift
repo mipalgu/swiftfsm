@@ -133,7 +133,10 @@ public struct Swiftfsm {
             if name == dependency.name {
                 return dependency.name
             }
-            return fsm.dependencies.first { $0.name == name }!.prefixedName
+            if let dep = fsm.dependencies.first(where: { $0.name == name }) {
+                return dep.name
+            }
+            return name
         }
         let dependantIds: [FSM_ID] = fsm.dependencies.map { gateway.id(of: $0.prefixedName) }
         let callableIds = fsm.dependencies.filter { $0.isCallable }.map { gateway.id(of: $0.prefixedName) }
