@@ -72,15 +72,16 @@ struct SwiftfsmRunner {
     let args: SwiftfsmArguments
     let machines: [(fsm: FSMType, dependencies: [Dependency])]
     let gateway: StackGateway
+    let clock: FSMClock
     
-    init(args: SwiftfsmArguments, machines: [(FSMType, [Dependency])], gateway: StackGateway) {
+    init(args: SwiftfsmArguments, machines: [(FSMType, [Dependency])], gateway: StackGateway, clock: FSMClock) {
         self.args = args
         self.machines = machines
         self.gateway = gateway
+        self.clock = clock
     }
     
     func run() {
-        let clock = FSMClock(ringletLengths: [:], scheduleLength: 0)
         if args.showMachines {
             let str = machines.map {
                 self.machineHierarchy($0.fsm, dependencies: $0.dependencies)

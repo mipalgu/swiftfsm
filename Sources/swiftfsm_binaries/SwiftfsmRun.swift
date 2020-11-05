@@ -61,6 +61,7 @@ import IO
 import ArgumentParser
 import MachineCompiling
 import SwiftMachines
+import Timers
 import Foundation
 
 public struct SwiftfsmRun: ParsableCommand {
@@ -132,14 +133,15 @@ public struct SwiftfsmRun: ParsableCommand {
             throw ExitCode.failure
         }
         let swiftfsm = Swiftfsm()
-        let machines = swiftfsm.makeMachines(arrangement)
+        let clock = FSMClock(ringletLengths: [:], scheduleLength: 0)
+        let machines = swiftfsm.makeMachines(arrangement, clock: clock)
         let swiftfsmArgs = SwiftfsmArguments(
             generateKripkeStructures: false,
             showMachines: false,
             verifyArgs: VerifyArguments(formats: []),
             scheduleArgs: self.swiftfsmArgs
         )
-        let runner = SwiftfsmRunner(args: swiftfsmArgs, machines: machines, gateway: swiftfsm.gateway)
+        let runner = SwiftfsmRunner(args: swiftfsmArgs, machines: machines, gateway: swiftfsm.gateway, clock: clock)
         runner.run()
     }
     

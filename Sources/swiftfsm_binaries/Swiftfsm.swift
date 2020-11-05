@@ -81,7 +81,7 @@ public struct Swiftfsm {
     
     public init() {}
     
-    public func makeMachines(_ arrangement: FlattenedMetaArrangement) -> [(FSMType, [Dependency])] {
+    public func makeMachines<Clock: Timer>(_ arrangement: FlattenedMetaArrangement, clock: Clock) -> [(FSMType, [Dependency])] {
         func _makeMachine<Gateway: VerifiableGateway>(dependency: FlattenedMetaDependency, gateway: Gateway, caller: FSM_ID? = nil) -> (FSMType, [Dependency]) {
             let id = gateway.id(of: dependency.prefixedName)
             let caller = caller ?? id
@@ -112,7 +112,7 @@ public struct Swiftfsm {
             let (fsmType, shallowDependencies) = fsm.factory(
                 dependency.prefixedName,
                 newGateway,
-                FSMClock(ringletLengths: [:], scheduleLength: 0),
+                clock,
                 caller
             )
             guard let dependencies = shallowDependencies.failMap({
@@ -152,14 +152,14 @@ public struct Swiftfsm {
         )
     }
     
-    public func run(machines: [(FSMType, [Dependency])]) {
+    public func run(machines: [(FSMType, [Dependency])], clock: FSMClock) {
         let args: SwiftfsmArguments
         do {
             args = try SwiftfsmArguments.parse()
         } catch let error {
             SwiftfsmArguments.exit(withError: error)
         }
-        let swiftfsm = SwiftfsmRunner(args: args, machines: machines, gateway: self.gateway)
+        let swiftfsm = SwiftfsmRunner(args: args, machines: machines, gateway: self.gateway, clock: clock)
         swiftfsm.run()
     }
     
