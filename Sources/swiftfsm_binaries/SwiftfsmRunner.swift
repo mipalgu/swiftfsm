@@ -94,7 +94,7 @@ struct SwiftfsmRunner {
             let str = machines.map {
                 self.machineHierarchy($0.fsm, dependencies: $0.dependencies)
             }.joined(separator: "\n\n")
-            print(str)
+            self.printer.message(str: str)
             return
         }
         let machines = self.machines.map { Machine(debug: args.scheduleArgs.debug, name: $0.fsm.name, fsm: $0.fsm, dependencies: $0.dependencies, clock: clock) }
