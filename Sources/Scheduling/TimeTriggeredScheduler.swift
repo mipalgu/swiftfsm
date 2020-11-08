@@ -144,7 +144,7 @@ public class TimeTriggeredScheduler<Tokenizer: SchedulerTokenizer>: Scheduler, V
                     if currentTime < startTime {
                         microsleep(startTime - currentTime)
                     } else {
-                        print("Starting \(currentTime - startTime) microseconds late")
+                        print("Starting \(timeslot.task.fsm.name) \(currentTime - startTime) microseconds late")
                     }
                     let fsm = self.gateway.stacks[timeslot.task.id]?.first?.fsm.asScheduleableFiniteStateMachine ?? timeslot.task.fsm
                     if VERBOSE {
@@ -166,7 +166,7 @@ public class TimeTriggeredScheduler<Tokenizer: SchedulerTokenizer>: Scheduler, V
                     if currentTime2 < endTime {
                         microsleep(endTime - currentTime2)
                     } else {
-                        print("Ending \(currentTime2 - endTime) microseconds late")
+                        print("Ending \(timeslot.task.fsm.name) \(currentTime2 - endTime) microseconds late")
                     }
                     fsm.saveSnapshot()
                 }

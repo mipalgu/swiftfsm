@@ -92,10 +92,10 @@ public final class StackGateway: ModifiableFSMGateway, ModifiableFSMGatewayDefau
 
     public func invoke<R>(_ id: FSM_ID, withParameters parameters: [String: Any], caller: FSM_ID) -> Promise<R> {
         guard let fsm = self.fsms[id]?.asParameterisedFiniteStateMachine else {
-            self.error("Attempting to invoke FSM with id \(id) when it has not been scheduled.")
+            self.error("Attempting to invoke FSM \(self.fsms[id]?.name ?? "with id \(id)") when it has not been scheduled.")
         }
         guard true == self.stacks[id]?.isEmpty else {
-            self.error("Attempting to invoke FSM with id \(id) when it is already running.")
+            self.error("Attempting to invoke FSM \(self.fsms[id]?.name ?? "with id \(id)") when it is already running.")
         }
         let promiseData = self.handleInvocation(id: id, fsm: fsm, withParameters: parameters)
         self.stacks[id]?.insert(promiseData, at: 0)
@@ -105,13 +105,13 @@ public final class StackGateway: ModifiableFSMGateway, ModifiableFSMGatewayDefau
 
     public func call<R>(_ id: FSM_ID, withParameters parameters: [String : Any], caller: FSM_ID) -> Promise<R> {
         guard let fsm = self.fsms[id]?.asParameterisedFiniteStateMachine else {
-            self.error("Attempting to call FSM with id \(id) when it has not been scheduled.")
+            self.error("Attempting to call FSM \(self.fsms[id]?.name ?? "with id \(id)") when it has not been scheduled.")
         }
         guard let stackSize = self.stacks[caller]?.count else {
-            self.error("Unable to fetch stack of fsm with id \(caller)")
+            self.error("Unable to fetch stack of fsm \(self.fsms[id]?.name ?? "with id \(id)")")
         }
         guard stackSize <= self.stackLimit else {
-            self.error("Stack Overflow: Attempting to call FSM with id \(id) more times than the current stack limit (\(self.stackLimit)).")
+            self.error("Stack Overflow: Attempting to call FSM \(self.fsms[id]?.name ?? "with id \(id)") more times than the current stack limit (\(self.stackLimit)).")
         }
         let promiseData = self.handleInvocation(id: id, fsm: fsm, withParameters: parameters)
         self.stacks[caller]?.insert(promiseData, at: 0)
