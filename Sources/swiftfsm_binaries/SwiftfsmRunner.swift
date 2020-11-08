@@ -56,6 +56,12 @@
  *
  */
 
+#if os(macOS)
+import Darwin
+#else
+import Glibc
+#endif
+
 import IO
 import CFSMWrappers
 import Gateways
@@ -68,6 +74,8 @@ import swiftfsm
 import Timers
 
 struct SwiftfsmRunner {
+    
+    private let printer = CommandLinePrinter(errorStream: StderrOutputStream(), messageStream: StdoutOutputStream(), warningStream: StdoutOutputStream())
     
     let args: SwiftfsmArguments
     let machines: [(fsm: FSMType, dependencies: [Dependency])]
@@ -100,9 +108,15 @@ struct SwiftfsmRunner {
             let scheduler = PassiveRoundRobinSchedulerFactory(gateway: self.gateway, scheduleHandler: clfsmMachineLoader, unloader: clfsmMachineLoader).make()
             let generatorFactory = PassiveRoundRobinKripkeStructureGeneratorFactory(gateway: self.gateway)
             self.handleMachines(machines: machines, scheduler: scheduler, generatorFactory: generatorFactory)
-        case .timeTriggered:
-            print("Time-triggered scheduling not yet implemented.")
-            return
+        case .timeTriggered(let path):
+            let parser = MetaDispatchTableParser()
+            guard let dispatchTable = parser.parse(atPath: path) else {
+                printer.error(str: "Unable to parse dispatch table at path \(path).")
+                exit(EXIT_FAILURE)
+            }
+            let scheduler = TimeTriggeredSchedulerFactory(dispatchTable: dispatchTable, gateway: self.gateway, scheduleHandler: clfsmMachineLoader, unloader: clfsmMachineLoader).make()
+            let generatorFactory = TimeTriggeredKripkeStructureGeneratorFactoryCreator(gateway: self.gateway).make(dispatchTable: dispatchTable)
+            self.handleMachines(machines: machines, scheduler: scheduler, generatorFactory: generatorFactory)
         }
     }
     
