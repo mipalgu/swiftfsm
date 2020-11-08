@@ -88,6 +88,7 @@ public final class TimeTriggeredSchedulerFactory: SchedulerFactory {
         let converter = SchedulerTokenToDispatchTableConverter(gateway: self.gateway)
         return TimeTriggeredScheduler(
             dispatchTable: self.dispatchTable,
+            gateway: self.gateway,
             tokenizer: SequentialPerRingletTokenizer(converter: converter),
             unloader: self.unloader,
             scheduleHandler: self.scheduleHandler
