@@ -148,9 +148,11 @@ struct SwiftfsmRunner {
             case .nusmv:
                 return AnyKripkeStructureViewFactory(NuSMVKripkeStructureViewFactory<KripkeState>())
             case .tulip:
-                fatalError("Tulip view is currently unsupported.")
+                self.printer.error(str: "Tulip view is currently unsupported.")
+                exit(EXIT_FAILURE)
             case .gexf:
-                fatalError("Gexf view is currently unsupported.")
+                self.printer.error(str: "Gexf view is currently unsupported.")
+                exit(EXIT_FAILURE)
             }
         }
         let generator = generatorFactory.make(fromMachines: machines, usingViewFactory: AggregateKripkeStructureViewFactory(views: viewFactories))
