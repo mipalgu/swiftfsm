@@ -140,7 +140,8 @@ public class RoundRobinScheduler<Tokenizer: SchedulerTokenizer>: Scheduler, Veri
                     }
                     fsm.next()
                     finish = finish && (fsm.hasFinished || fsm.isSuspended)
-                    if nil != self.gateway.stacks[id]?.first && true == fsm.hasFinished {
+                    print("fsm has finished: \(fsm.hasFinished)")
+                    if nil != self.gateway.stacks[id]?.first && (fsm.hasFinished || fsm.isSuspended) {
                         self.gateway.finish(id)
                         finish = false
                     }

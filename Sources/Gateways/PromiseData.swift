@@ -89,7 +89,9 @@ public final class PromiseData {
                 if let result = self.result {
                     return result as! T
                 }
-                let result = self.fsm.resultContainer.result
+                guard let result = self.fsm.resultContainer.result else {
+                    swiftfsmError("Parameterised machine \(self.fsm.name) is finished with nil result")
+                }
                 self.result = result
                 return result as! T
             }

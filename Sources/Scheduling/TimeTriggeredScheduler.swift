@@ -151,7 +151,7 @@ public class TimeTriggeredScheduler<Tokenizer: SchedulerTokenizer>: Scheduler, V
                     }
                     fsm.next()
                     finish = finish && (fsm.hasFinished || fsm.isSuspended)
-                    if true == fsm.hasFinished {
+                    if nil != self.gateway.stacks[timeslot.task.id]?.first && (fsm.hasFinished || fsm.isSuspended) {
                         self.gateway.finish(timeslot.task.id)
                         finish = false
                     }
