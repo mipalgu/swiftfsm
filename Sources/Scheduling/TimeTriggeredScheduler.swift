@@ -140,12 +140,6 @@ public class TimeTriggeredScheduler<Tokenizer: SchedulerTokenizer>: Scheduler, V
                 for timeslot in timeslots {
                     let startTime = cycleStartTime + timeslot.startTime
                     let endTime = startTime + timeslot.duration
-                    let currentTime = microseconds()
-                    if currentTime < startTime {
-                        microsleep(startTime - currentTime)
-                    } else {
-                        print("Starting \(timeslot.task.fsm.name) \(currentTime - startTime) microseconds late")
-                    }
                     let fsm = self.gateway.stacks[timeslot.task.id]?.first?.fsm.asScheduleableFiniteStateMachine ?? timeslot.task.fsm
                     if VERBOSE {
                         print("\(microseconds() - startTime) - \(timeslot.task.machine.name).\(fsm.name).\(fsm.currentState.name)")
