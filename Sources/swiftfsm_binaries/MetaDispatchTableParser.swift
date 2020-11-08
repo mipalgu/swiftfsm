@@ -62,8 +62,12 @@ import swift_helpers
 
 public final class MetaDispatchTableParser {
     
+    public private(set) var errors: [String] = []
+    
     func parse(atPath path: String) -> MetaDispatchTable? {
+        self.errors = []
         guard let content = try? String(contentsOfFile: path) else {
+            self.errors.append("Unable to read contents of \(path)")
             return nil
         }
         let lines = content.components(separatedBy: .newlines).map { $0.trimmingCharacters(in: .whitespaces) }
@@ -78,15 +82,18 @@ public final class MetaDispatchTableParser {
                     return value.isEmpty ? nil : value
                 }
                 if (data.count != 3) {
+                    self.errors.append("Malformed row \(row)")
                     return nil
                 }
                 guard let startTime = UInt(data[0]), let duration = UInt(data[1]) else {
+                    self.errors.append("Malformed start/duration times in \(row)")
                     return nil
                 }
                 return MetaTimeslot(startTime: startTime, duration: duration, task: data[2])
             }
         })
         else {
+            self.errors.append("Unable to parse timeslots")
             return nil
         }
         return MetaDispatchTable(numberOfThreads: timeslots.count, timeslots: timeslots)

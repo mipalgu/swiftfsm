@@ -111,7 +111,7 @@ struct SwiftfsmRunner {
         case .timeTriggered(let path):
             let parser = MetaDispatchTableParser()
             guard let dispatchTable = parser.parse(atPath: path) else {
-                printer.error(str: "Unable to parse dispatch table at path \(path).")
+                parser.errors.forEach(printer.error)
                 exit(EXIT_FAILURE)
             }
             let scheduler = TimeTriggeredSchedulerFactory(dispatchTable: dispatchTable, gateway: self.gateway, scheduleHandler: clfsmMachineLoader, unloader: clfsmMachineLoader).make()
