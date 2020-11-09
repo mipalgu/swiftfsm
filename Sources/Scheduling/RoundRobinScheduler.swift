@@ -150,7 +150,6 @@ public class RoundRobinScheduler<Tokenizer: SchedulerTokenizer>: Scheduler, Veri
                     }
                     j += 1
                 }
-                print("actuators: \(actuators.map { $0.name })", terminator: "\n\n")
                 actuators.forEach { $0.saveSnapshot() }
                 if (true == jobs[i].isEmpty) {
                     jobs.remove(at: i)
