@@ -128,8 +128,9 @@ public class RoundRobinScheduler<Tokenizer: SchedulerTokenizer>: Scheduler, Veri
             var i = 0
             for job in jobs {
                 var j = 0
-                let machines: Set<Machine> = self.getMachines(fromJob: job)
-                machines.forEach { $0.fsm.takeSnapshot() }
+                job.forEach { (id, fsm, _) in
+                    (self.gateway.stacks[id]?.first?.fsm.asScheduleableFiniteStateMachine ?? fsm).takeSnapshot()
+                }
                 for (id, fsm, machine) in job {
                     let fsm = self.gateway.stacks[id]?.first?.fsm.asScheduleableFiniteStateMachine ?? fsm
                     machine.clock.update(fromFSM: fsm)
@@ -146,7 +147,9 @@ public class RoundRobinScheduler<Tokenizer: SchedulerTokenizer>: Scheduler, Veri
                     }
                     j += 1
                 }
-                machines.forEach { $0.fsm.saveSnapshot() }
+                job.forEach { (id, fsm, _) in
+                    (self.gateway.stacks[id]?.first?.fsm.asScheduleableFiniteStateMachine ?? fsm).saveSnapshot()
+                }
                 if (true == jobs[i].isEmpty) {
                     jobs.remove(at: i)
                     continue
@@ -162,14 +165,6 @@ public class RoundRobinScheduler<Tokenizer: SchedulerTokenizer>: Scheduler, Veri
                 return (self.gateway.id(of: token.fullyQualifiedName), token.fsm, token.machine)
             }
         }
-    }
-
-    private func getMachines(fromJob job: [(FSM_ID, AnyScheduleableFiniteStateMachine, Machine)]) -> Set<Machine> {
-        var machines: Set<Machine> = []
-        job.forEach {
-            machines.insert($2)
-        }
-        return machines
     }
 
     fileprivate func addToGateway(_ fsm: FSMType, dependencies: [Dependency]) {
