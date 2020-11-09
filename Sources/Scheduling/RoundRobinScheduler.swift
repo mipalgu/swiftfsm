@@ -128,11 +128,11 @@ public class RoundRobinScheduler<Tokenizer: SchedulerTokenizer>: Scheduler, Veri
             var i = 0
             for job in jobs {
                 var j = 0
-                job.forEach { (id, fsm, _) in
-                    (self.gateway.stacks[id]?.first?.fsm.asScheduleableFiniteStateMachine ?? fsm).takeSnapshot()
+                let fsms = job.lazy.map { (id, fsm, machine) in
+                    (id, (self.gateway.stacks[id]?.first?.fsm.asScheduleableFiniteStateMachine ?? fsm), machine)
                 }
-                for (id, fsm, machine) in job {
-                    let fsm = self.gateway.stacks[id]?.first?.fsm.asScheduleableFiniteStateMachine ?? fsm
+                fsms.forEach { $0.1.takeSnapshot() }
+                for (id, fsm, machine) in fsms {
                     machine.clock.update(fromFSM: fsm)
                     DEBUG = machine.debug
                     if (true == scheduleHandler.handleUnloadedMachine(fsm)) {
@@ -147,8 +147,8 @@ public class RoundRobinScheduler<Tokenizer: SchedulerTokenizer>: Scheduler, Veri
                     }
                     j += 1
                 }
-                job.forEach { (id, fsm, _) in
-                    (self.gateway.stacks[id]?.first?.fsm.asScheduleableFiniteStateMachine ?? fsm).saveSnapshot()
+                fsms.forEach { (id, fsm, _) in
+                    fsm.saveSnapshot()
                 }
                 if (true == jobs[i].isEmpty) {
                     jobs.remove(at: i)
