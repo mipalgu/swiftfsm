@@ -94,7 +94,7 @@ public final class RestrictiveFSMGateway<Gateway: FSMGateway, _Formatter: Format
         self.formatter = formatter
     }
 
-    public func call<R>(_ id: FSM_ID, withParameters parameters: [String : Any], caller: FSM_ID) -> Promise<R> {
+    public func call<R>(_ id: FSM_ID, withParameters parameters: [String : Any?], caller: FSM_ID) -> Promise<R> {
         guard
             caller == self.selfID,
             true == self.callables.contains(id)
@@ -104,14 +104,14 @@ public final class RestrictiveFSMGateway<Gateway: FSMGateway, _Formatter: Format
         return self.gateway.call(id, withParameters: parameters, caller: self.caller)
     }
 
-    public func callSelf<R>(_ id: FSM_ID, withParameters parameters: [String: Any]) -> Promise<R> {
+    public func callSelf<R>(_ id: FSM_ID, withParameters parameters: [String: Any?]) -> Promise<R> {
         guard id == self.selfID else {
             fatalError("Unable to invoke fsm with id \(id)")
         }
         return self.gateway.callSelf(id, withParameters: parameters)
     }
 
-    public func invoke<R>(_ id: FSM_ID, withParameters parameters: [String: Any], caller: FSM_ID) -> Promise<R> {
+    public func invoke<R>(_ id: FSM_ID, withParameters parameters: [String: Any?], caller: FSM_ID) -> Promise<R> {
         guard true == self.invocables.contains(id) else {
             fatalError("Unable to invoke fsm with id \(id)")
         }

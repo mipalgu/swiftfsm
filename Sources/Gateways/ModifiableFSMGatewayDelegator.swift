@@ -108,15 +108,15 @@ extension ModifiableFSMGateway where Self: ModifiableFSMGatewayDelegator {
         return self.gateway.fsm(fromID: id)
     }
 
-    public func call<R>(_ id: FSM_ID, withParameters parameters: [String : Any], caller: FSM_ID) -> Promise<R> {
+    public func call<R>(_ id: FSM_ID, withParameters parameters: [String : Any?], caller: FSM_ID) -> Promise<R> {
         return self.gateway.call(id, withParameters: parameters, caller: caller)
     }
 
-    public func callSelf<R>(_ id: FSM_ID, withParameters parameters: [String : Any]) -> Promise<R> {
+    public func callSelf<R>(_ id: FSM_ID, withParameters parameters: [String : Any?]) -> Promise<R> {
         return self.gateway.callSelf(id, withParameters: parameters)
     }
 
-    public func invoke<R>(_ id: FSM_ID, withParameters parameters: [String : Any], caller: FSM_ID) -> Promise<R> {
+    public func invoke<R>(_ id: FSM_ID, withParameters parameters: [String : Any?], caller: FSM_ID) -> Promise<R> {
         return self.gateway.invoke(id, withParameters: parameters, caller: caller)
     }
 

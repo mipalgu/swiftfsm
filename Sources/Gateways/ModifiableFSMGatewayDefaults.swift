@@ -83,7 +83,7 @@ extension ModifiableFSMGateway where Self: ModifiableFSMGatewayDefaults {
         return id
     }
 
-    public func callSelf<R>(_ id: FSM_ID, withParameters parameters: [String: Any]) -> Promise<R> {
+    public func callSelf<R>(_ id: FSM_ID, withParameters parameters: [String: Any?]) -> Promise<R> {
         return self.call(id, withParameters: parameters, caller: id)
     }
 

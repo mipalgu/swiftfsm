@@ -90,7 +90,7 @@ public final class StackGateway: ModifiableFSMGateway, ModifiableFSMGatewayDefau
         self.stacks[id] = []
     }
 
-    public func invoke<R>(_ id: FSM_ID, withParameters parameters: [String: Any], caller: FSM_ID) -> Promise<R> {
+    public func invoke<R>(_ id: FSM_ID, withParameters parameters: [String: Any?], caller: FSM_ID) -> Promise<R> {
         guard let fsm = self.fsms[id]?.asParameterisedFiniteStateMachine else {
             self.error("Attempting to invoke FSM \(self.fsms[id]?.name ?? "with id \(id)") when it has not been scheduled.")
         }
@@ -103,7 +103,7 @@ public final class StackGateway: ModifiableFSMGateway, ModifiableFSMGatewayDefau
         return promiseData.makePromise()
     }
 
-    public func call<R>(_ id: FSM_ID, withParameters parameters: [String : Any], caller: FSM_ID) -> Promise<R> {
+    public func call<R>(_ id: FSM_ID, withParameters parameters: [String : Any?], caller: FSM_ID) -> Promise<R> {
         guard let fsm = self.fsms[id]?.asParameterisedFiniteStateMachine else {
             self.error("Attempting to call FSM \(self.fsms[id]?.name ?? "with id \(id)") when it has not been scheduled.")
         }
@@ -119,7 +119,7 @@ public final class StackGateway: ModifiableFSMGateway, ModifiableFSMGatewayDefau
         return promiseData.makePromise()
     }
 
-    fileprivate func handleInvocation(id: FSM_ID, fsm: AnyParameterisedFiniteStateMachine, withParameters parameters: [String: Any]) -> PromiseData {
+    fileprivate func handleInvocation(id: FSM_ID, fsm: AnyParameterisedFiniteStateMachine, withParameters parameters: [String: Any?]) -> PromiseData {
         let promiseData = PromiseData(fsm: fsm.clone(), hasFinished: false)
         guard true == promiseData.fsm.parametersFromDictionary(parameters) else {
             self.error("Unable to initial parameterised fsm \(fsm.name) with id \(id) from its parameters dictionary.")

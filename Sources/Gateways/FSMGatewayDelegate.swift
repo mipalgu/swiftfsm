@@ -62,9 +62,9 @@ public protocol FSMGatewayDelegate: class {
 
     func hasFetchedFsm(inGateway: ModifiableFSMGateway, fsm: AnyControllableFiniteStateMachine, withId: FSM_ID)
 
-    func hasCalled(inGateway: ModifiableFSMGateway, fsm: AnyParameterisedFiniteStateMachine, withId: FSM_ID, withParameters: [String: Any], caller: FSM_ID, storingResultsIn: PromiseData)
+    func hasCalled(inGateway: ModifiableFSMGateway, fsm: AnyParameterisedFiniteStateMachine, withId: FSM_ID, withParameters: [String: Any?], caller: FSM_ID, storingResultsIn: PromiseData)
 
-    func hasInvoked(inGateway: ModifiableFSMGateway, fsm: AnyParameterisedFiniteStateMachine, withId: FSM_ID, withParameters: [String: Any], caller: FSM_ID, storingResultsIn: PromiseData)
+    func hasInvoked(inGateway: ModifiableFSMGateway, fsm: AnyParameterisedFiniteStateMachine, withId: FSM_ID, withParameters: [String: Any?], caller: FSM_ID, storingResultsIn: PromiseData)
 
 }
 
@@ -72,8 +72,8 @@ extension FSMGatewayDelegate {
 
     public func hasFetchedFsm(inGateway _: ModifiableFSMGateway, fsm _: AnyControllableFiniteStateMachine, withId _: FSM_ID) {}
 
-    public func hasCalled(inGateway _: ModifiableFSMGateway, fsm _: AnyParameterisedFiniteStateMachine, withId _: FSM_ID, withParameters _: [String: Any], caller: FSM_ID, storingResultsIn _: PromiseData) {}
+    public func hasCalled(inGateway _: ModifiableFSMGateway, fsm _: AnyParameterisedFiniteStateMachine, withId _: FSM_ID, withParameters _: [String: Any?], caller: FSM_ID, storingResultsIn _: PromiseData) {}
 
-    public func hasInvoked(inGateway _: ModifiableFSMGateway, fsm _: AnyParameterisedFiniteStateMachine, withId _: FSM_ID, withParameters _: [String: Any], caller _: FSM_ID, storingResultsIn _: PromiseData) {}
+    public func hasInvoked(inGateway _: ModifiableFSMGateway, fsm _: AnyParameterisedFiniteStateMachine, withId _: FSM_ID, withParameters _: [String: Any?], caller _: FSM_ID, storingResultsIn _: PromiseData) {}
 
 }
