@@ -96,7 +96,7 @@ public final class RestrictiveFSMGateway<Gateway: FSMGateway, _Formatter: Format
 
     public func call<R>(_ id: FSM_ID, withParameters parameters: [String : Any?], caller: FSM_ID) -> Promise<R> {
         guard
-            caller == self.selfID,
+            caller == self.caller,
             true == self.callables.contains(id)
         else {
             fatalError("Unable to call fsm with id \(id) with caller \(caller)")
