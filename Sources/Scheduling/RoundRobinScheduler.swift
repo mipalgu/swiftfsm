@@ -131,7 +131,10 @@ public class RoundRobinScheduler<Tokenizer: SchedulerTokenizer>: Scheduler, Veri
                 let fsms = job.map { (id, fsm, machine) in
                     (id, (self.gateway.stacks[id]?.first?.fsm.asScheduleableFiniteStateMachine ?? fsm), machine)
                 }
-                fsms.forEach { $0.1.takeSnapshot() }
+                let actuators = fsms.flatMap { (_, fsm, _) -> [AnySnapshotController] in
+                    fsm.snapshotSensors.forEach { $0.takeSnapshot() }
+                    return fsm.snapshotActuators
+                }
                 for (id, fsm, machine) in fsms {
                     machine.clock.update(fromFSM: fsm)
                     DEBUG = machine.debug
@@ -147,7 +150,8 @@ public class RoundRobinScheduler<Tokenizer: SchedulerTokenizer>: Scheduler, Veri
                     }
                     j += 1
                 }
-                fsms.forEach { (_, fsm, _) in fsm.saveSnapshot() }
+                print("actuators: \(actuators.map { $0.name })", terminator: "\n\n")
+                actuators.forEach { $0.saveSnapshot() }
                 if (true == jobs[i].isEmpty) {
                     jobs.remove(at: i)
                     continue

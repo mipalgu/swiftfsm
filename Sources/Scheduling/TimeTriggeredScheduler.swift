@@ -143,7 +143,8 @@ public class TimeTriggeredScheduler<Tokenizer: SchedulerTokenizer>: Scheduler, V
                     if VERBOSE {
                         print("\(microseconds() - startTime) - \(timeslot.task.machine.name).\(fsm.name).\(fsm.currentState.name)")
                     }
-                    fsm.takeSnapshot()
+                    fsm.snapshotSensors.forEach { $0.takeSnapshot() }
+                    let actuators = fsm.snapshotActuators
                     timeslot.task.machine.clock.update(fromFSM: fsm)
                     DEBUG = timeslot.task.machine.debug
                     if (true == self.scheduleHandler.handleUnloadedMachine(fsm)) {
@@ -161,7 +162,7 @@ public class TimeTriggeredScheduler<Tokenizer: SchedulerTokenizer>: Scheduler, V
                     } else {
                         print("Ending \(timeslot.task.fsm.name) \(currentTime2 - endTime) microseconds late")
                     }
-                    fsm.saveSnapshot()
+                    actuators.forEach { $0.saveSnapshot() }
                 }
             }
         }
