@@ -62,6 +62,12 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+int REFL_UNKNOWN_ERROR;
+int REFL_BUFFER_OVERFLOW;
+int REFL_INVALID_ARGS;
+int REFL_INVALID_CALL;
+int REFL_SUCCESS;
+
 static void *handle;
 static void (*_refl_registerMetaMachine)(refl_metaMachine, unsigned int, CLReflectResult *) = NULL;
 static refl_metaMachine (*_refl_getMetaMachine)(unsigned int, CLReflectResult *) = NULL;

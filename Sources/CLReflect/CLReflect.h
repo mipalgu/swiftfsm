@@ -63,11 +63,11 @@
 extern "C" {
 #endif
 
-int REFL_UNKNOWN_ERROR;
-int REFL_BUFFER_OVERFLOW;
-int REFL_INVALID_ARGS;
-int REFL_INVALID_CALL;
-int REFL_SUCCESS;
+extern int REFL_UNKNOWN_ERROR;
+extern int REFL_BUFFER_OVERFLOW;
+extern int REFL_INVALID_ARGS;
+extern int REFL_INVALID_CALL;
+extern int REFL_SUCCESS;
 
 typedef int CLReflectResult;
 typedef void* refl_metaMachine;
