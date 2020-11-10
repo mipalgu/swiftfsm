@@ -111,7 +111,7 @@ public final class VerificationTokenExecuter<StateGenerator: KripkeStateGenerato
             worldType: .beforeExecution
         )
         let clockName = self.clockName(forToken: tokens[executing][offset])
-        let time = (lastState == nil ? 0 : self.timeSinceLastStart(in: tokens, executing: executing, offset: offset)) ?? 0
+        let time = lastState == nil ? 0 : (self.timeSinceLastStart(in: tokens, executing: executing, offset: offset) ?? 0)
         let resetClock = token.data.map {
             guard let stateName = $0.lastFSMStateName else {
                 return true
