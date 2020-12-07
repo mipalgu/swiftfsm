@@ -10,6 +10,10 @@ PRODUCT_MODULES=swiftfsm ExternalVariables FSM Utilities
 PRODUCT_LIBS=FSM CFSMS
 PRODUCT_BINARIES=swiftfsm swiftfsm-run swiftfsm-show swiftfsm-build swiftfsm-verify swiftfsm-update swiftfsm-add swiftfsm-init swiftfsm-remove swiftfsm-clean
 
+.include "../../../mk/prefs.mk"
+
+BUILDDIR=.build/${SWIFT_BUILD_CONFIG}
+
 .ifndef TARGET
 install: host
 .else
@@ -24,9 +28,14 @@ install: cross
 	install -m 644 ${BUILDDIR}/${module}.swiftsourceinfo ${DST:Q}/include/${MODULE_BASE}
 .endfor
 .endif
+.ifdef PRODUCT_LIBS
+	mkdir -p ${DST:Q}/lib
 .for lib in ${PRODUCT_LIBS}
 	install -m 755 ${BUILDDIR}/${SOPREFIX}${lib}${SOEXT} ${DST:Q}/lib
 .endfor
+.endif
+.ifdef PRODUCT_BINARIES
+	mkdir -p ${DST:Q}/bin
 .for bin in ${PRODUCT_BINARIES}
 	if [ -d ${BUILDDIR}/${bin:Q} ]; then \
 		cp -pR ${BUILDDIR}/${bin:Q} ${DST:Q}/bin;\
@@ -34,6 +43,7 @@ install: cross
 		install -m 755 ${BUILDDIR}/${bin} ${DST:Q}/bin;\
 	fi
 .endfor
+.endif
 
 .ifdef TARGET
 cross-install: install
