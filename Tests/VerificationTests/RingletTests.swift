@@ -75,7 +75,7 @@ class RingletTests: XCTestCase {
 
     func test_canComputePropertyLists() throws {
         let fsm = AnyScheduleableFiniteStateMachine(TempFiniteStateMachine())
-        let ringlet = Ringlet(fsm: fsm, time: 0)
+        let ringlet = Ringlet(fsm: fsm)
         XCTAssertEqual(ringlet.preSnapshot["value"], KripkeStateProperty(type: .Bool, value: Bool(false)))
         XCTAssertEqual(ringlet.postSnapshot["value"], KripkeStateProperty(type: .Bool, value: Bool(true)))
         XCTAssertTrue(ringlet.calls.isEmpty)

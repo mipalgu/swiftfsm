@@ -59,23 +59,44 @@
 import KripkeStructure
 import swiftfsm
 
+/// Represents a single ringlet execution at a specific time for a specific
+/// FSM.
+///
+/// This struct generates a `KripkeStatePropertyList` before and after the
+/// ringlet execution. This struct also records and calls that were made to
+/// parameterised machines as well as any calls to the fsms clock.
 struct Ringlet {
     
+    /// The evaluation of all the variables within the FSM before the
+    /// ringlet has executed.
     var preSnapshot: KripkeStatePropertyList
     
+    /// The evaluation of all the variables within the FSM after the ringlet has
+    /// finished executing.
     var postSnapshot: KripkeStatePropertyList
     
+    /// A list of calls made to parameterised machines during the execution of
+    /// the ringlet.
     var calls: [Call]
     
+    /// A list of clock values which were queried during the execution of the
+    /// ringlet.
     var afterCalls: Set<UInt>
     
-    init(fsm: AnyScheduleableFiniteStateMachine, time: UInt) {
+    /// Create a `Ringlet`.
+    ///
+    /// Executes the ringlet of the fsm by calling `next`. Uses introspection
+    /// to query the variables to create the `Ringlet` structure.
+    ///
+    /// - Parameter fsm The fsm being inspected to create this ringlet.
+    init(fsm: AnyScheduleableFiniteStateMachine) {
         let preSnapshot = KripkeStatePropertyList(fsm.base)
         fsm.next()
         let postSnapshot = KripkeStatePropertyList(fsm.base)
         self.init(preSnapshot: preSnapshot, postSnapshot: postSnapshot, calls: [], afterCalls: [])
     }
     
+    /// Create a `Ringlet`.
     init(preSnapshot: KripkeStatePropertyList, postSnapshot: KripkeStatePropertyList, calls: [Call], afterCalls: Set<UInt>) {
         self.preSnapshot = preSnapshot
         self.postSnapshot = postSnapshot
