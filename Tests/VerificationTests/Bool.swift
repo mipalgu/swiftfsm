@@ -59,6 +59,14 @@
 import swiftfsm
 
 extension Bool: ExternalVariables, KripkeVariablesModifier {
+    
+    public init(fromDictionary dictionary: [String : Any?]) {
+        guard let value = dictionary["value"] as? Bool else {
+            fatalError("Unable to convert dictionary to Bool")
+        }
+        self = value
+    }
+    
 
     public var computedVars: [String: Any] {
         return ["value": self]

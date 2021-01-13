@@ -292,7 +292,7 @@ private struct ButtonExternalVariables: ExternalVariables {
         self.button = button
     }
 
-    init(fromDictionary dictionary: [String: Any]) {
+    init(fromDictionary dictionary: [String: Any?]) {
         guard let button = dictionary["button"] as? Bool else {
             fatalError("Unable to convert dictioanry to ButtonExternalVariables")
         }
