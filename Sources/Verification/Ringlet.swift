@@ -62,8 +62,33 @@ import swiftfsm
 struct Ringlet {
     
     var preSnapshot: KripkeStatePropertyList
+    
     var postSnapshot: KripkeStatePropertyList
+    
     var calls: [Call]
+    
     var afterCalls: Set<UInt>
+    
+    init(fsm: AnyScheduleableFiniteStateMachine, time: UInt) {
+        let preSnapshot = KripkeStatePropertyList(fsm.base)
+        fsm.next()
+        let postSnapshot = KripkeStatePropertyList(fsm.base)
+        self.init(preSnapshot: preSnapshot, postSnapshot: postSnapshot, calls: [], afterCalls: [])
+    }
+    
+    init(preSnapshot: KripkeStatePropertyList, postSnapshot: KripkeStatePropertyList, calls: [Call], afterCalls: Set<UInt>) {
+        self.preSnapshot = preSnapshot
+        self.postSnapshot = postSnapshot
+        self.calls = calls
+        self.afterCalls = afterCalls
+    }
+    
+}
+
+extension KripkeStatePropertyList {
+    
+    init<T>(_ object: T) {
+        self = MirrorKripkePropertiesRecorder().takeRecord(of: object)
+    }
     
 }

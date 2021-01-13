@@ -58,6 +58,11 @@
 
 import XCTest
 
+import KripkeStructure
+import swiftfsm
+
+@testable import Verification
+
 class RingletTests: XCTestCase {
 
     override func setUpWithError() throws {
@@ -68,16 +73,13 @@ class RingletTests: XCTestCase {
         // Put teardown code here. This method is called after the invocation of each test method in the class.
     }
 
-    func test_can() throws {
-        // This is an example of a functional test case.
-        // Use XCTAssert and related functions to verify your tests produce the correct results.
-    }
-
-    func testPerformanceExample() throws {
-        // This is an example of a performance test case.
-        self.measure {
-            // Put the code you want to measure the time of here.
-        }
+    func test_canComputePropertyLists() throws {
+        let fsm = AnyScheduleableFiniteStateMachine(TempFiniteStateMachine())
+        let ringlet = Ringlet(fsm: fsm, time: 0)
+        XCTAssertEqual(ringlet.preSnapshot["value"], KripkeStateProperty(type: .Bool, value: Bool(false)))
+        XCTAssertEqual(ringlet.postSnapshot["value"], KripkeStateProperty(type: .Bool, value: Bool(true)))
+        XCTAssertTrue(ringlet.calls.isEmpty)
+        XCTAssertTrue(ringlet.afterCalls.isEmpty)
     }
 
 }

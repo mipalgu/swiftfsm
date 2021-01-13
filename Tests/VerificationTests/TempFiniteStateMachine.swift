@@ -67,7 +67,6 @@ internal final class TempFiniteStateMachine: FiniteStateMachineType,
     StateExecuter,
     Exitable,
     Finishable,
-    KripkePropertiesRecordable,
     Resumeable,
     Restartable,
     Snapshotable,
@@ -83,7 +82,6 @@ internal final class TempFiniteStateMachine: FiniteStateMachineType,
         AnySnapshotController(InMemoryContainer<Bool>(name: "actuators1", initialValue: false)),
         AnySnapshotController(InMemoryContainer<Bool>(name: "actuators2", initialValue: false))
     ]
-    
 
     //swiftlint:disable:next type_name
     typealias _StateType = MiPalState
@@ -91,15 +89,8 @@ internal final class TempFiniteStateMachine: FiniteStateMachineType,
     let name: String = "fsm"
 
     var initialState: MiPalState = EmptyMiPalState("initial")
-
-    var currentRecord: KripkeStatePropertyList {
-        return [
-            "fsm": KripkeStateProperty(
-                type: .Bool,
-                value: true
-            )
-        ]
-    }
+    
+    var value: Bool = false
 
     var currentState: MiPalState = EmptyMiPalState("current")
 
@@ -120,7 +111,9 @@ internal final class TempFiniteStateMachine: FiniteStateMachineType,
 
     func exit() {}
 
-    func next() {}
+    func next() {
+        self.value.toggle()
+    }
 
     func restart() {}
 
