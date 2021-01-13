@@ -57,7 +57,7 @@
  */
 
 import XCTest
-@testable import Verification
+@testable import VerificationOld
 
 public class HashTableCycleDetectorTests: XCTestCase {
 

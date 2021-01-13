@@ -1,9 +1,9 @@
 /*
- * TempFiniteStateMachine.swift 
- * VerificationTests 
+ * KripkeStatePropertySpinnerConverterTests.swift 
+ * ModelCheckingTests 
  *
- * Created by Callum McColl on 17/02/2018.
- * Copyright © 2018 Callum McColl. All rights reserved.
+ * Created by Callum McColl on 06/02/2019.
+ * Copyright © 2019 Callum McColl. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -56,80 +56,56 @@
  *
  */
 
-import FSM
-import KripkeStructure
-import Verification
-import swiftfsm
+import XCTest
+@testable import VerificationOld
 
-internal final class TempFiniteStateMachine: FiniteStateMachineType,
-    Cloneable,
-    ConvertibleToScheduleableFiniteStateMachine,
-    StateExecuter,
-    Exitable,
-    Finishable,
-    KripkePropertiesRecordable,
-    Resumeable,
-    Restartable,
-    Snapshotable,
-    SnapshotControllerContainer,
-    Updateable {
-    
-    var sensors: [AnySnapshotController] = [
-        AnySnapshotController(InMemoryContainer<Bool>(name: "sensors1", initialValue: false)),
-        AnySnapshotController(InMemoryContainer<Bool>(name: "sensors2", initialValue: false))
-    ]
-    
-    var actuators: [AnySnapshotController] = [
-        AnySnapshotController(InMemoryContainer<Bool>(name: "actuators1", initialValue: false)),
-        AnySnapshotController(InMemoryContainer<Bool>(name: "actuators2", initialValue: false))
-    ]
-    
+public class KripkeStatePropertySpinnerConverterTests: XCTestCase {
 
-    //swiftlint:disable:next type_name
-    typealias _StateType = MiPalState
-
-    let name: String = "fsm"
-
-    var initialState: MiPalState = EmptyMiPalState("initial")
-
-    var currentRecord: KripkeStatePropertyList {
+    public static var allTests: [(String, (KripkeStatePropertySpinnerConverterTests) -> () throws -> Void)] {
         return [
-            "fsm": KripkeStateProperty(
-                type: .Bool,
-                value: true
-            )
         ]
     }
 
-    var currentState: MiPalState = EmptyMiPalState("current")
+    fileprivate var converter: KripkeStatePropertySpinnerConverter!
 
-    var externalVariables: [AnySnapshotController] = [
-        AnySnapshotController(InMemoryContainer<Bool>(name: "externals1", initialValue: false)),
-        AnySnapshotController(InMemoryContainer<Bool>(name: "externals2", initialValue: false))
-    ]
-
-    let hasFinished: Bool = true
-
-    let isSuspended: Bool = true
-
-    let submachines: [AnyScheduleableFiniteStateMachine] = []
-
-    func clone() -> TempFiniteStateMachine {
-        return self
+    public override func setUp() {
+        self.converter = KripkeStatePropertySpinnerConverter()
     }
 
-    func exit() {}
+    public func test_canConvertSequence() {
+        /*let arr = [[1, 2], [3, 4, 5]]
+        guard let (defaultValue, spinner) = self.converter.convert(arr) else {
+            XCTFail("Unable to create spinner.")
+            return
+        }
+        var result = defaultValue
+        print(result)
+        while let temp = spinner(result) {
+            result = temp
+            print(result)
+        }*/
+    }
 
-    func next() {}
+    public func test_canConvertCompoundObject() {
+        /*let a = A(bool: false, dependencies: [A(bool: true, dependencies: [])])
+        guard let (defaultValue, spinner) = self.converter.convert(a) else {
+            XCTFail("Unable to create spinner.")
+            return
+        }
+        var result = defaultValue
+        print(result)
+        while let temp = spinner(result) {
+            result = temp
+            print(result)
+        }*/
+    }
 
-    func restart() {}
+    fileprivate struct A: Equatable {
 
-    func resume() {}
+        var bool: Bool
 
-    func saveSnapshot() {}
+        var dependencies: [A]
 
-    func suspend() {}
-
-    func update(fromDictionary: [String: Any]) {}
+    }
 
 }

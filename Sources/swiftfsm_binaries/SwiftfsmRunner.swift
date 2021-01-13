@@ -68,7 +68,7 @@ import Gateways
 import KripkeStructure
 import KripkeStructureViews
 import Scheduling
-import Verification
+import VerificationOld
 import MachineStructure
 import swiftfsm
 import Timers

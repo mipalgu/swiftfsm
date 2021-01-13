@@ -56,7 +56,7 @@
  *
  */
 
-@testable import Verification
+@testable import VerificationOld
 import swiftfsm
 import ExternalVariables
 import KripkeStructure

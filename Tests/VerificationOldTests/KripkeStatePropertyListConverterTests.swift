@@ -56,7 +56,7 @@
  *
  */
 
-@testable import Verification
+@testable import VerificationOld
 import XCTest
 
 import KripkeStructure

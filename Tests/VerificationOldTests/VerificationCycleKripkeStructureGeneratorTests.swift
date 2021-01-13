@@ -58,7 +58,7 @@
 
 import KripkeStructure
 import KripkeStructureViews
-@testable import Verification
+@testable import VerificationOld
 import Gateways
 import MachineStructure
 import Timers

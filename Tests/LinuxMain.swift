@@ -1,7 +1,7 @@
 import XCTest
 
 @testable import swiftfsmTests
-@testable import VerificationTests
+@testable import VerificationOldTests
 
 XCTMain([
 ])

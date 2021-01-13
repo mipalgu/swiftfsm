@@ -84,8 +84,9 @@ let package = Package(
         .target(name: "Scheduling", dependencies: ["MachineStructure", "MachineLoading", "Timers", "Gateways", "FSM"]),
         .target(name: "KripkeStructure", dependencies: ["FSM", "Functional"]),
         .target(name: "KripkeStructureViews", dependencies: ["KripkeStructure", "FSM", "IO"]),
+        .target(name: "VerificationOld", dependencies: ["MachineStructure", "Scheduling", "Timers", "Gateways", "FSM", "KripkeStructure", "KripkeStructureViews", "Hashing"]),
         .target(name: "Verification", dependencies: ["MachineStructure", "Scheduling", "Timers", "Gateways", "FSM", "KripkeStructure", "KripkeStructureViews", "Hashing"]),
-        .target(name: "Parsing", dependencies: ["Scheduling", "Timers", "Verification", "MachineCompiling", "FSM"]),
+        .target(name: "Parsing", dependencies: ["Scheduling", "Timers", "VerificationOld", "MachineCompiling", "FSM"]),
         .target(name: "CFSMWrappers", dependencies: ["Libraries", "Scheduling", "Timers", "FSM", "CLReflect"]),
         .target(
             name: "swiftfsm_binaries",
@@ -99,7 +100,7 @@ let package = Package(
                 "MachineCompiling",
                 "Scheduling",
                 "Timers",
-                "Verification",
+                "VerificationOld",
                 "CFSMWrappers",
                 "Gateways",
                 "FSM"
@@ -168,10 +169,10 @@ let package = Package(
         ),
         .target(name: "CTests", dependencies: []),
         .testTarget(name: "KripkeStructureTests", dependencies: [.target(name: "KripkeStructure")]),
-        .testTarget(name: "VerificationTests", dependencies: [
+        .testTarget(name: "VerificationOldTests", dependencies: [
             .target(name: "KripkeStructure"),
             .target(name: "KripkeStructureViews"),
-            .target(name: "Verification"),
+            .target(name: "VerificationOld"),
             .target(name: "CTests")
         ]),
         .testTarget(name: "swiftfsm_binariesTests", dependencies: [.target(name: "swiftfsm_binaries")])
