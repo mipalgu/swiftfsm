@@ -63,11 +63,3 @@ public protocol KripkePropertiesRecordable {
     var currentRecord: KripkeStatePropertyList { get }
 
 }
-
-extension KripkePropertiesRecordable where Self: KripkePropertiesRecorderDelegator {
-
-    var currentRecord: KripkeStatePropertyList {
-        return self.recorder.takeRecord(of: self)
-    }
-
-}

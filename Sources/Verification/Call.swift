@@ -1,9 +1,9 @@
 /*
- * KripkePropertiesRecorderDelegator.swift 
- * KripkeStructure 
+ * Call.swift
+ * Verification
  *
- * Created by Callum McColl on 08/06/2017.
- * Copyright © 2017 Callum McColl. All rights reserved.
+ * Created by Callum McColl on 14/1/21.
+ * Copyright © 2021 Callum McColl. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -56,21 +56,14 @@
  *
  */
 
-import KripkeStructure
-import Verification
+import swiftfsm
 
-public protocol KripkePropertiesRecorderDelegator {
-
-    associatedtype Recorder: KripkePropertiesRecorder
-
-    var recorder: Recorder { get }
-
-}
-
-extension KripkePropertiesRecordable where Self: KripkePropertiesRecorderDelegator {
-
-    var currentRecord: KripkeStatePropertyList {
-        return self.recorder.takeRecord(of: self)
-    }
-
+struct Call {
+    
+    var caller: FSM_ID
+    
+    var callee: FSM_ID
+    
+    var parameters: [String: Any?]
+    
 }

@@ -1,9 +1,9 @@
 /*
- * KripkePropertiesRecorderDelegator.swift 
- * KripkeStructure 
+ * TempFiniteStateMachine.swift 
+ * VerificationTests 
  *
- * Created by Callum McColl on 08/06/2017.
- * Copyright © 2017 Callum McColl. All rights reserved.
+ * Created by Callum McColl on 17/02/2018.
+ * Copyright © 2018 Callum McColl. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -56,21 +56,78 @@
  *
  */
 
+import FSM
 import KripkeStructure
 import Verification
+import swiftfsm
 
-public protocol KripkePropertiesRecorderDelegator {
+internal final class TempFiniteStateMachine: FiniteStateMachineType,
+    Cloneable,
+    ConvertibleToScheduleableFiniteStateMachine,
+    StateExecuter,
+    Exitable,
+    Finishable,
+    KripkePropertiesRecordable,
+    Resumeable,
+    Restartable,
+    Snapshotable,
+    SnapshotControllerContainer
+{
+    
+    var sensors: [AnySnapshotController] = [
+        AnySnapshotController(InMemoryContainer<Bool>(name: "sensors1", initialValue: false)),
+        AnySnapshotController(InMemoryContainer<Bool>(name: "sensors2", initialValue: false))
+    ]
+    
+    var actuators: [AnySnapshotController] = [
+        AnySnapshotController(InMemoryContainer<Bool>(name: "actuators1", initialValue: false)),
+        AnySnapshotController(InMemoryContainer<Bool>(name: "actuators2", initialValue: false))
+    ]
+    
 
-    associatedtype Recorder: KripkePropertiesRecorder
+    //swiftlint:disable:next type_name
+    typealias _StateType = MiPalState
 
-    var recorder: Recorder { get }
+    let name: String = "fsm"
 
-}
-
-extension KripkePropertiesRecordable where Self: KripkePropertiesRecorderDelegator {
+    var initialState: MiPalState = EmptyMiPalState("initial")
 
     var currentRecord: KripkeStatePropertyList {
-        return self.recorder.takeRecord(of: self)
+        return [
+            "fsm": KripkeStateProperty(
+                type: .Bool,
+                value: true
+            )
+        ]
     }
+
+    var currentState: MiPalState = EmptyMiPalState("current")
+
+    var externalVariables: [AnySnapshotController] = [
+        AnySnapshotController(InMemoryContainer<Bool>(name: "externals1", initialValue: false)),
+        AnySnapshotController(InMemoryContainer<Bool>(name: "externals2", initialValue: false))
+    ]
+
+    let hasFinished: Bool = true
+
+    let isSuspended: Bool = true
+
+    let submachines: [AnyScheduleableFiniteStateMachine] = []
+
+    func clone() -> TempFiniteStateMachine {
+        return self
+    }
+
+    func exit() {}
+
+    func next() {}
+
+    func restart() {}
+
+    func resume() {}
+
+    func saveSnapshot() {}
+
+    func suspend() {}
 
 }

@@ -1,9 +1,9 @@
 /*
- * TempFiniteStateMachine.swift 
- * VerificationTests 
+ * RingletTests.swift
+ * VerificationTests
  *
- * Created by Callum McColl on 17/02/2018.
- * Copyright © 2018 Callum McColl. All rights reserved.
+ * Created by Callum McColl on 14/1/21.
+ * Copyright © 2021 Callum McColl. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -56,80 +56,28 @@
  *
  */
 
-import FSM
-import KripkeStructure
-import VerificationOld
-import swiftfsm
+import XCTest
 
-internal final class TempFiniteStateMachine: FiniteStateMachineType,
-    Cloneable,
-    ConvertibleToScheduleableFiniteStateMachine,
-    StateExecuter,
-    Exitable,
-    Finishable,
-    KripkePropertiesRecordable,
-    Resumeable,
-    Restartable,
-    Snapshotable,
-    SnapshotControllerContainer,
-    Updateable {
-    
-    var sensors: [AnySnapshotController] = [
-        AnySnapshotController(InMemoryContainer<Bool>(name: "sensors1", initialValue: false)),
-        AnySnapshotController(InMemoryContainer<Bool>(name: "sensors2", initialValue: false))
-    ]
-    
-    var actuators: [AnySnapshotController] = [
-        AnySnapshotController(InMemoryContainer<Bool>(name: "actuators1", initialValue: false)),
-        AnySnapshotController(InMemoryContainer<Bool>(name: "actuators2", initialValue: false))
-    ]
-    
+class RingletTests: XCTestCase {
 
-    //swiftlint:disable:next type_name
-    typealias _StateType = MiPalState
-
-    let name: String = "fsm"
-
-    var initialState: MiPalState = EmptyMiPalState("initial")
-
-    var currentRecord: KripkeStatePropertyList {
-        return [
-            "fsm": KripkeStateProperty(
-                type: .Bool,
-                value: true
-            )
-        ]
+    override func setUpWithError() throws {
+        // Put setup code here. This method is called before the invocation of each test method in the class.
     }
 
-    var currentState: MiPalState = EmptyMiPalState("current")
-
-    var externalVariables: [AnySnapshotController] = [
-        AnySnapshotController(InMemoryContainer<Bool>(name: "externals1", initialValue: false)),
-        AnySnapshotController(InMemoryContainer<Bool>(name: "externals2", initialValue: false))
-    ]
-
-    let hasFinished: Bool = true
-
-    let isSuspended: Bool = true
-
-    let submachines: [AnyScheduleableFiniteStateMachine] = []
-
-    func clone() -> TempFiniteStateMachine {
-        return self
+    override func tearDownWithError() throws {
+        // Put teardown code here. This method is called after the invocation of each test method in the class.
     }
 
-    func exit() {}
+    func test_can() throws {
+        // This is an example of a functional test case.
+        // Use XCTAssert and related functions to verify your tests produce the correct results.
+    }
 
-    func next() {}
-
-    func restart() {}
-
-    func resume() {}
-
-    func saveSnapshot() {}
-
-    func suspend() {}
-
-    func update(fromDictionary: [String: Any]) {}
+    func testPerformanceExample() throws {
+        // This is an example of a performance test case.
+        self.measure {
+            // Put the code you want to measure the time of here.
+        }
+    }
 
 }
