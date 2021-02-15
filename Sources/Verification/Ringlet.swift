@@ -110,7 +110,7 @@ struct Ringlet {
     /// - Parameter gateway The `ModifiableFSMGateway` responsible for handling
     /// parameterised machine invocations. A delegate is created and used to
     /// detect when the fsm makes any calls to other machines.
-    init<G: ModifiableFSMGateway>(fsm: AnyScheduleableFiniteStateMachine, gateway: G) {
+    init<Gateway: ModifiableFSMGateway>(fsm: AnyScheduleableFiniteStateMachine, gateway: Gateway) {
         let preSnapshot = KripkeStatePropertyList(fsm.base)
         let delegate = GatewayDelegate()
         gateway.delegate = delegate
