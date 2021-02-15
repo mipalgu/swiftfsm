@@ -131,6 +131,8 @@ struct Ringlet {
     
 }
 
+extension Ringlet: Equatable {}
+
 extension KripkeStatePropertyList {
     
     init<T>(_ object: T) {

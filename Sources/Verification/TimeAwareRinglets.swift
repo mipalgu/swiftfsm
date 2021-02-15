@@ -1,8 +1,8 @@
 /*
- * Call.swift
+ * TimeAwareRinglets.swift
  * Verification
  *
- * Created by Callum McColl on 14/1/21.
+ * Created by Callum McColl on 16/2/21.
  * Copyright © 2021 Callum McColl. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -56,31 +56,20 @@
  *
  */
 
+import Gateways
+import Timers
 import swiftfsm
-import KripkeStructure
 
-struct Call {
+struct TimeAwareRinglets {
     
-    var caller: FSM_ID
+    var ringlets: [Ringlet]
     
-    var callee: FSM_ID
+    init<Gateway: ModifiableFSMGateway, Timer: Clock>(fsm: AnyScheduleableFiniteStateMachine, gateway: Gateway, timer: Timer) {
+        self.init(ringlets: [])
+    }
     
-    var parameters: [String: Any?]
-    
-}
-
-extension Call: Equatable {
-    
-    static func ==(lhs: Call, rhs: Call) -> Bool {
-        guard lhs.caller == rhs.caller, lhs.callee == rhs.callee, lhs.parameters.keys == rhs.parameters.keys else {
-            return false
-        }
-        for key in lhs.parameters.keys {
-            if KripkeStatePropertyList(lhs.parameters[key]) != KripkeStatePropertyList(rhs.parameters[key]) {
-                return false
-            }
-        }
-        return true
+    init(ringlets: [Ringlet]) {
+        self.ringlets = ringlets
     }
     
 }

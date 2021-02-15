@@ -94,7 +94,7 @@ class TimeAwareRingletTests: XCTestCase {
                 afterCalls: [time]
             )
         ]
-        XCTAssertEqual(ringlets, expected)
+        XCTAssertEqual(ringlets.ringlets, expected)
     }
 
 }
