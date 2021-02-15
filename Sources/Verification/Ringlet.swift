@@ -118,7 +118,7 @@ struct Ringlet {
         fsm.next()
         let postSnapshot = KripkeStatePropertyList(fsm.base)
         let calls = delegate.invocations + delegate.calls
-        self.init(preSnapshot: preSnapshot, postSnapshot: postSnapshot, calls: calls, afterCalls: [])
+        self.init(preSnapshot: preSnapshot, postSnapshot: postSnapshot, calls: calls, afterCalls: Set(timer.lastClockValues))
     }
     
     /// Create a `Ringlet`.
