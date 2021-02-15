@@ -1,5 +1,5 @@
 /*
- * TimeAwareRinglets.swift
+ * TimeAwareRinglet.swift
  * Verification
  *
  * Created by Callum McColl on 16/2/21.
@@ -56,20 +56,39 @@
  *
  */
 
-import Gateways
-import Timers
-import swiftfsm
+import KripkeStructure
 
-struct TimeAwareRinglets {
+struct TimeAwareRinglet {
     
-    var ringlets: [TimeAwareRinglet]
-    
-    init<Gateway: ModifiableFSMGateway, Timer: Clock>(fsm: AnyScheduleableFiniteStateMachine, gateway: Gateway, timer: Timer) {
-        self.init(ringlets: [])
+    enum Timing: Equatable {
+        case beforeOrEqual(UInt)
+        case after(UInt)
     }
     
-    init(ringlets: [TimeAwareRinglet]) {
-        self.ringlets = ringlets
+    /// The evaluation of all the variables within the FSM before the
+    /// ringlet has executed.
+    var preSnapshot: KripkeStatePropertyList
+    
+    /// The evaluation of all the variables within the FSM after the ringlet has
+    /// finished executing.
+    var postSnapshot: KripkeStatePropertyList
+    
+    /// A list of calls made to parameterised machines during the execution of
+    /// the ringlet.
+    var calls: [Call]
+    
+    /// A list of clock values which were queried during the execution of the
+    /// ringlet.
+    var time: Timing
+    
+    /// Create a `TimeAwareRinglet`.
+    init(preSnapshot: KripkeStatePropertyList, postSnapshot: KripkeStatePropertyList, calls: [Call], time: Timing) {
+        self.preSnapshot = preSnapshot
+        self.postSnapshot = postSnapshot
+        self.calls = calls
+        self.time = time
     }
     
 }
+
+extension TimeAwareRinglet: Equatable {}

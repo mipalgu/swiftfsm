@@ -74,24 +74,24 @@ class TimeAwareRingletTests: XCTestCase {
     }
     
     func test_computesAllPossibleRinglets() throws {
-        let fsm = ToggleFiniteStateMachine()
+        let fsm = TimeConditionalFiniteStateMachine()
         let id = fsm.gateway.id(of: fsm.name)
         let ringlets = TimeAwareRinglets(fsm: AnyScheduleableFiniteStateMachine(fsm), gateway: fsm.gateway, timer: fsm.timer)
         let falseProperties = KripkeStatePropertyList(["value": KripkeStateProperty(type: .Bool, value: Bool(false))])
         let trueProperties = KripkeStatePropertyList(["value": KripkeStateProperty(type: .Bool, value: Bool(true))])
         let time: UInt = 2000000
         let expected = [
-            Ringlet(
+            TimeAwareRinglet(
                 preSnapshot: falseProperties,
                 postSnapshot: trueProperties,
                 calls: [],
-                afterCalls: [time]
+                time: .beforeOrEqual(time)
             ),
-            Ringlet(
+            TimeAwareRinglet(
                 preSnapshot: falseProperties,
                 postSnapshot: falseProperties,
                 calls: [Call(caller: id, callee: id, parameters: ["value": true])],
-                afterCalls: [time]
+                time: .after(time)
             )
         ]
         XCTAssertEqual(ringlets.ringlets, expected)
