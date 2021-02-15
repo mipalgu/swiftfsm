@@ -139,9 +139,9 @@ internal final class TimeConditionalFiniteStateMachine: ParameterisedMachineProt
         self.results.vars = ResultContainerType.Vars()
     }
     
-    let gateway = StackGateway()
+    private(set) var gateway = StackGateway()
     
-    let timer = FSMClock(ringletLengths: ["conditional": 10], scheduleLength: 10)
+    private(set) var timer = FSMClock(ringletLengths: ["conditional": 10], scheduleLength: 10)
     
     var ringlet: MiPalRinglet = MiPalRinglet()
     
@@ -177,6 +177,8 @@ internal final class TimeConditionalFiniteStateMachine: ParameterisedMachineProt
             if self.timer.after(2) {
                 let id = self.gateway.id(of: self.name)
                 let _: Promise<Bool> = self.gateway.call(id, withParameters: ["value": true], caller: id)
+            } else if self.timer.after(3) {
+                // do nothing.
             } else {
                 self.value.toggle()
             }
@@ -192,7 +194,11 @@ internal final class TimeConditionalFiniteStateMachine: ParameterisedMachineProt
     var submachines: [AnyScheduleableFiniteStateMachine] = []
 
     func clone() -> TimeConditionalFiniteStateMachine {
-        return self
+        let clone = TimeConditionalFiniteStateMachine()
+        clone.timer = timer
+        clone.gateway = gateway
+        clone.value = value
+        return clone
     }
     
     func restart() {}

@@ -76,25 +76,40 @@ class TimeAwareRingletTests: XCTestCase {
     func test_computesAllPossibleRinglets() throws {
         let fsm = TimeConditionalFiniteStateMachine()
         let id = fsm.gateway.id(of: fsm.name)
-        let ringlets = TimeAwareRinglets(fsm: AnyScheduleableFiniteStateMachine(fsm), gateway: fsm.gateway, timer: fsm.timer)
+        fsm.gateway.fsms[id] = .parameterisedFSM(AnyParameterisedFiniteStateMachine(fsm))
+        fsm.gateway.stacks[id] = []
+        let ringlets = TimeAwareRinglets(fsm: AnyScheduleableFiniteStateMachine(fsm), gateway: fsm.gateway, timer: fsm.timer, startingTime: 0)
         let falseProperties = KripkeStatePropertyList(["value": KripkeStateProperty(type: .Bool, value: Bool(false))])
         let trueProperties = KripkeStatePropertyList(["value": KripkeStateProperty(type: .Bool, value: Bool(true))])
-        let time: UInt = 2000000
+        let firstTime: UInt = 2000000
+        let secondTime: UInt = 3000000
         let expected = [
             TimeAwareRinglet(
                 preSnapshot: falseProperties,
                 postSnapshot: trueProperties,
                 calls: [],
-                time: .beforeOrEqual(time)
+                time: .beforeOrEqual(firstTime)
             ),
             TimeAwareRinglet(
                 preSnapshot: falseProperties,
                 postSnapshot: falseProperties,
                 calls: [Call(caller: id, callee: id, parameters: ["value": true])],
-                time: .after(time)
+                time: .after(firstTime)
+            ),
+            TimeAwareRinglet(
+                preSnapshot: falseProperties,
+                postSnapshot: falseProperties,
+                calls: [Call(caller: id, callee: id, parameters: ["value": true])],
+                time: .after(secondTime)
             )
         ]
-        XCTAssertEqual(ringlets.ringlets, expected)
+        XCTAssertEqual(ringlets.ringlets.count, expected.count)
+        for (result, expected) in zip(ringlets.ringlets, expected) {
+            XCTAssertEqual(result.preSnapshot["value"], expected.preSnapshot["value"])
+            XCTAssertEqual(result.postSnapshot["value"], expected.postSnapshot["value"])
+            XCTAssertEqual(result.calls, expected.calls)
+            XCTAssertEqual(result.time, expected.time)
+        }
     }
 
 }

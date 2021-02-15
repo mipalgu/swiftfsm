@@ -59,13 +59,36 @@
 import Gateways
 import Timers
 import swiftfsm
+import swift_helpers
 
 struct TimeAwareRinglets {
     
     var ringlets: [TimeAwareRinglet]
     
-    init<Gateway: ModifiableFSMGateway, Timer: Clock>(fsm: AnyScheduleableFiniteStateMachine, gateway: Gateway, timer: Timer) {
-        self.init(ringlets: [])
+    init<Gateway: ModifiableFSMGateway, Timer: Clock>(fsm: AnyScheduleableFiniteStateMachine, gateway: Gateway, timer: Timer, startingTime: UInt) {
+        var lastTime = startingTime
+        var times: SortedCollection<UInt> = []
+        var ringlets: [TimeAwareRinglet] = []
+        func calculate(time: TimeAwareRinglet.Timing) {
+            let clone = fsm.clone()
+            timer.forceRunningTime(time.timeValue)
+            let ringlet = Ringlet(fsm: clone, gateway: gateway, timer: timer)
+            for newTime in ringlet.afterCalls where newTime > lastTime {
+                times.insert(newTime)
+            }
+            ringlets.append(TimeAwareRinglet(preSnapshot: ringlet.preSnapshot, postSnapshot: ringlet.postSnapshot, calls: ringlet.calls, time: time))
+        }
+        if startingTime == 0 {
+            calculate(time: .beforeOrEqual(startingTime))
+            if let firstAfter = times.first {
+                ringlets[0].time = .beforeOrEqual(firstAfter)
+            }
+        }
+        while !times.isEmpty {
+            lastTime = times.remove(at: times.startIndex)
+            calculate(time: .after(lastTime))
+        }
+        self.init(ringlets: ringlets)
     }
     
     init(ringlets: [TimeAwareRinglet]) {

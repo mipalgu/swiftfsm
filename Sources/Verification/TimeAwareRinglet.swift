@@ -63,6 +63,15 @@ struct TimeAwareRinglet {
     enum Timing: Equatable {
         case beforeOrEqual(UInt)
         case after(UInt)
+        
+        var timeValue: UInt {
+            switch self {
+            case .beforeOrEqual(let time):
+                return time
+            case .after(let time):
+                return time + 1
+            }
+        }
     }
     
     /// The evaluation of all the variables within the FSM before the
