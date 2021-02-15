@@ -74,7 +74,9 @@ struct TimeAwareRinglets {
             timer.forceRunningTime(time.timeValue)
             let ringlet = Ringlet(fsm: clone, gateway: gateway, timer: timer)
             for newTime in ringlet.afterCalls where newTime > lastTime {
-                times.insert(newTime)
+                if !times.contains(newTime) {
+                    times.insert(newTime)
+                }
             }
             ringlets.append(TimeAwareRinglet(preSnapshot: ringlet.preSnapshot, postSnapshot: ringlet.postSnapshot, calls: ringlet.calls, time: time))
         }
