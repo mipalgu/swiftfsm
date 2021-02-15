@@ -86,5 +86,18 @@ class RingletTests: XCTestCase {
         XCTAssertTrue(ringlet2.calls.isEmpty)
         XCTAssertTrue(ringlet2.afterCalls.isEmpty)
     }
+    
+    func test_canDetectCalls() throws {
+        let fsm = AnyScheduleableFiniteStateMachine(ToggleFiniteStateMachine())
+        let ringlet = Ringlet(fsm: fsm)
+        XCTAssertEqual(ringlet.calls.count, 1)
+        if ringlet.calls.count != 1 {
+            return
+        }
+        XCTAssertEqual(ringlet.calls[0].caller, 0)
+        XCTAssertEqual(ringlet.calls[0].callee, 1)
+        XCTAssertEqual(ringlet.calls[0].parameters.count, 1)
+        XCTAssertEqual(ringlet.calls[0].parameters["value"] as? Bool, true)
+    }
 
 }
