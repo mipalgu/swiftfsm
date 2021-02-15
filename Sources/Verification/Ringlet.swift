@@ -58,6 +58,7 @@
 
 import KripkeStructure
 import Gateways
+import Timers
 import swiftfsm
 
 /// Represents a single ringlet execution at a specific time for a specific
@@ -110,7 +111,7 @@ struct Ringlet {
     /// - Parameter gateway The `ModifiableFSMGateway` responsible for handling
     /// parameterised machine invocations. A delegate is created and used to
     /// detect when the fsm makes any calls to other machines.
-    init<Gateway: ModifiableFSMGateway>(fsm: AnyScheduleableFiniteStateMachine, gateway: Gateway) {
+    init<Gateway: ModifiableFSMGateway, Timer: Clock>(fsm: AnyScheduleableFiniteStateMachine, gateway: Gateway, timer: Timer) {
         let preSnapshot = KripkeStatePropertyList(fsm.base)
         let delegate = GatewayDelegate()
         gateway.delegate = delegate

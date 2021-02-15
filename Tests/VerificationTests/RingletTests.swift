@@ -75,12 +75,12 @@ class RingletTests: XCTestCase {
 
     func test_canComputePropertyLists() throws {
         let fsm = ToggleFiniteStateMachine()
-        let ringlet = Ringlet(fsm: AnyScheduleableFiniteStateMachine(fsm), gateway: fsm.gateway)
+        let ringlet = Ringlet(fsm: AnyScheduleableFiniteStateMachine(fsm), gateway: fsm.gateway, timer: fsm.timer)
         XCTAssertEqual(ringlet.preSnapshot["value"], KripkeStateProperty(type: .Bool, value: Bool(false)))
         XCTAssertEqual(ringlet.postSnapshot["value"], KripkeStateProperty(type: .Bool, value: Bool(true)))
         XCTAssertTrue(ringlet.calls.isEmpty)
         XCTAssertTrue(ringlet.afterCalls.isEmpty)
-        let ringlet2 = Ringlet(fsm: AnyScheduleableFiniteStateMachine(fsm), gateway: fsm.gateway)
+        let ringlet2 = Ringlet(fsm: AnyScheduleableFiniteStateMachine(fsm), gateway: fsm.gateway, timer: fsm.timer)
         XCTAssertEqual(ringlet2.preSnapshot["value"], KripkeStateProperty(type: .Bool, value: Bool(true)))
         XCTAssertEqual(ringlet2.postSnapshot["value"], KripkeStateProperty(type: .Bool, value: Bool(false)))
         XCTAssertTrue(ringlet2.calls.isEmpty)
@@ -92,7 +92,7 @@ class RingletTests: XCTestCase {
         let id = fsm.gateway.id(of: fsm.name)
         fsm.gateway.fsms[id] = .parameterisedFSM(AnyParameterisedFiniteStateMachine(fsm))
         fsm.gateway.stacks[id] = []
-        let ringlet = Ringlet(fsm: AnyScheduleableFiniteStateMachine(fsm), gateway: fsm.gateway)
+        let ringlet = Ringlet(fsm: AnyScheduleableFiniteStateMachine(fsm), gateway: fsm.gateway, timer: fsm.timer)
         XCTAssertEqual(ringlet.calls.count, 1)
         if ringlet.calls.count != 1 {
             return
@@ -101,6 +101,16 @@ class RingletTests: XCTestCase {
         XCTAssertEqual(ringlet.calls[0].callee, id)
         XCTAssertEqual(ringlet.calls[0].parameters.count, 1)
         XCTAssertEqual(ringlet.calls[0].parameters["value"] as? Bool, true)
+    }
+    
+    func test_canDetectAfterCalls() throws {
+        let fsm = ToggleFiniteStateMachine()
+        let ringlet = Ringlet(fsm: AnyScheduleableFiniteStateMachine(fsm), gateway: fsm.gateway, timer: fsm.timer)
+        XCTAssertEqual(fsm.timer.lastClockValues.count, 1)
+        if fsm.timer.lastClockValues.count != 1 {
+            return
+        }
+        XCTAssertEqual(fsm.timer.lastClockValues[0], 4000)
     }
 
 }

@@ -59,6 +59,7 @@
 import FSM
 import KripkeStructure
 import Gateways
+import Timers
 import Verification
 import swiftfsm
 
@@ -75,6 +76,8 @@ internal final class ToggleFiniteStateMachine: FiniteStateMachineType,
 {
     
     let gateway = StackGateway()
+    
+    let timer = FSMClock(ringletLengths: ["toggle": 10], scheduleLength: 10)
     
     var sensors: [AnySnapshotController] = []
     

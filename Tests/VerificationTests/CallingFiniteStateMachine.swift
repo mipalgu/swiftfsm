@@ -58,6 +58,7 @@
 
 import FSM
 import Gateways
+import Timers
 import KripkeStructure
 import Verification
 import swiftfsm
@@ -139,6 +140,8 @@ internal final class CallingFiniteStateMachine: ParameterisedMachineProtocol
     }
     
     let gateway = StackGateway()
+    
+    let timer = FSMClock(ringletLengths: ["toggle": 10], scheduleLength: 10)
     
     var ringlet: MiPalRinglet = MiPalRinglet()
     
