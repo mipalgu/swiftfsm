@@ -74,13 +74,13 @@ class RingletTests: XCTestCase {
     }
 
     func test_canComputePropertyLists() throws {
-        let fsm = AnyScheduleableFiniteStateMachine(ToggleFiniteStateMachine())
-        let ringlet = Ringlet(fsm: fsm)
+        let fsm = ToggleFiniteStateMachine()
+        let ringlet = Ringlet(fsm: AnyScheduleableFiniteStateMachine(fsm), gateway: fsm.gateway)
         XCTAssertEqual(ringlet.preSnapshot["value"], KripkeStateProperty(type: .Bool, value: Bool(false)))
         XCTAssertEqual(ringlet.postSnapshot["value"], KripkeStateProperty(type: .Bool, value: Bool(true)))
         XCTAssertTrue(ringlet.calls.isEmpty)
         XCTAssertTrue(ringlet.afterCalls.isEmpty)
-        let ringlet2 = Ringlet(fsm: fsm)
+        let ringlet2 = Ringlet(fsm: AnyScheduleableFiniteStateMachine(fsm), gateway: fsm.gateway)
         XCTAssertEqual(ringlet2.preSnapshot["value"], KripkeStateProperty(type: .Bool, value: Bool(true)))
         XCTAssertEqual(ringlet2.postSnapshot["value"], KripkeStateProperty(type: .Bool, value: Bool(false)))
         XCTAssertTrue(ringlet2.calls.isEmpty)
@@ -88,14 +88,17 @@ class RingletTests: XCTestCase {
     }
     
     func test_canDetectCalls() throws {
-        let fsm = AnyScheduleableFiniteStateMachine(ToggleFiniteStateMachine())
-        let ringlet = Ringlet(fsm: fsm)
+        let fsm = CallingFiniteStateMachine()
+        let id = fsm.gateway.id(of: fsm.name)
+        fsm.gateway.fsms[id] = .parameterisedFSM(AnyParameterisedFiniteStateMachine(fsm))
+        fsm.gateway.stacks[id] = []
+        let ringlet = Ringlet(fsm: AnyScheduleableFiniteStateMachine(fsm), gateway: fsm.gateway)
         XCTAssertEqual(ringlet.calls.count, 1)
         if ringlet.calls.count != 1 {
             return
         }
-        XCTAssertEqual(ringlet.calls[0].caller, 0)
-        XCTAssertEqual(ringlet.calls[0].callee, 1)
+        XCTAssertEqual(ringlet.calls[0].caller, id)
+        XCTAssertEqual(ringlet.calls[0].callee, id)
         XCTAssertEqual(ringlet.calls[0].parameters.count, 1)
         XCTAssertEqual(ringlet.calls[0].parameters["value"] as? Bool, true)
     }

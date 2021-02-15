@@ -58,6 +58,7 @@
 
 import FSM
 import KripkeStructure
+import Gateways
 import Verification
 import swiftfsm
 
@@ -72,6 +73,8 @@ internal final class ToggleFiniteStateMachine: FiniteStateMachineType,
     Snapshotable,
     SnapshotControllerContainer
 {
+    
+    let gateway = StackGateway()
     
     var sensors: [AnySnapshotController] = []
     

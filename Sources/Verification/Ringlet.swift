@@ -57,6 +57,7 @@
  */
 
 import KripkeStructure
+import Gateways
 import swiftfsm
 
 /// Represents a single ringlet execution at a specific time for a specific
@@ -66,6 +67,22 @@ import swiftfsm
 /// ringlet execution. This struct also records and calls that were made to
 /// parameterised machines as well as any calls to the fsms clock.
 struct Ringlet {
+    
+    private final class GatewayDelegate: FSMGatewayDelegate {
+        
+        var invocations: [Call] = []
+        
+        var calls: [Call] = []
+        
+        func hasCalled(inGateway _: ModifiableFSMGateway, fsm _: AnyParameterisedFiniteStateMachine, withId callee: FSM_ID, withParameters parameters: [String: Any?], caller: FSM_ID, storingResultsIn _: PromiseData) {
+            self.calls.append(Call(caller: caller, callee: callee, parameters: parameters))
+        }
+
+        func hasInvoked(inGateway _: ModifiableFSMGateway, fsm _: AnyParameterisedFiniteStateMachine, withId callee: FSM_ID, withParameters parameters: [String: Any?], caller: FSM_ID, storingResultsIn _: PromiseData) {
+            self.invocations.append(Call(caller: caller, callee: callee, parameters: parameters))
+        }
+        
+    }
     
     /// The evaluation of all the variables within the FSM before the
     /// ringlet has executed.
@@ -89,11 +106,14 @@ struct Ringlet {
     /// to query the variables to create the `Ringlet` structure.
     ///
     /// - Parameter fsm The fsm being inspected to create this ringlet.
-    init(fsm: AnyScheduleableFiniteStateMachine) {
+    init<G: ModifiableFSMGateway>(fsm: AnyScheduleableFiniteStateMachine, gateway: G) {
         let preSnapshot = KripkeStatePropertyList(fsm.base)
+        let delegate = GatewayDelegate()
+        gateway.delegate = delegate
         fsm.next()
         let postSnapshot = KripkeStatePropertyList(fsm.base)
-        self.init(preSnapshot: preSnapshot, postSnapshot: postSnapshot, calls: [], afterCalls: [])
+        let calls = delegate.invocations + delegate.calls
+        self.init(preSnapshot: preSnapshot, postSnapshot: postSnapshot, calls: calls, afterCalls: [])
     }
     
     /// Create a `Ringlet`.

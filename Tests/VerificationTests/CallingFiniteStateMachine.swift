@@ -57,6 +57,7 @@
  */
 
 import FSM
+import Gateways
 import KripkeStructure
 import Verification
 import swiftfsm
@@ -137,6 +138,8 @@ internal final class CallingFiniteStateMachine: ParameterisedMachineProtocol
         self.results.vars = ResultContainerType.Vars()
     }
     
+    let gateway = StackGateway()
+    
     var ringlet: MiPalRinglet = MiPalRinglet()
     
     var parameters: ParametersContainerType = ParametersContainerType()
@@ -162,11 +165,16 @@ internal final class CallingFiniteStateMachine: ParameterisedMachineProtocol
 
     let name: String = "calling"
 
-    var initialState: MiPalState = EmptyMiPalState("initial")
+    lazy var initialState: MiPalState = EmptyMiPalState("initial")
     
     var value: Bool = false
 
-    var currentState: MiPalState = EmptyMiPalState("current")
+    lazy var currentState: MiPalState = {
+        CallbackMiPalState("Call", onEntry: { [unowned self] in
+            let id = self.gateway.id(of: self.name)
+            let _: Promise<Bool> = self.gateway.call(id, withParameters: ["value": true], caller: id)
+        })
+    }()
 
     var externalVariables: [AnySnapshotController] = []
 
