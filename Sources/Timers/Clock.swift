@@ -67,6 +67,8 @@ public protocol Clock: class, Timer {
      */
     var lastClockValues: [UInt] { get }
 
+    func forceRunningTime(_ time: UInt)
+    
     func update(fromFSM: AnyScheduleableFiniteStateMachine)
 
 }

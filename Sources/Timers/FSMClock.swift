@@ -111,6 +111,11 @@ public final class FSMClock: Clock {
         }
         return UInt(microseconds()) - data.startTime > interval
     }
+    
+    public func forceRunningTime(_ time: UInt) {
+        self.forcedRunningTime = time
+        self.lastClockValues = []
+    }
 
     public func update(fromFSM fsm: AnyScheduleableFiniteStateMachine) {
         self.lastClockValues = []
