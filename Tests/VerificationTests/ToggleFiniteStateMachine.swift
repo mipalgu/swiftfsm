@@ -1,8 +1,8 @@
 /*
- * RingletTests.swift
+ * ToggleFiniteStateMachine.swift
  * VerificationTests
  *
- * Created by Callum McColl on 14/1/21.
+ * Created by Callum McColl on 16/2/21.
  * Copyright © 2021 Callum McColl. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -56,35 +56,62 @@
  *
  */
 
-import XCTest
-
+import FSM
 import KripkeStructure
+import Verification
 import swiftfsm
 
-@testable import Verification
+internal final class ToggleFiniteStateMachine: FiniteStateMachineType,
+    Cloneable,
+    ConvertibleToScheduleableFiniteStateMachine,
+    StateExecuter,
+    Exitable,
+    Finishable,
+    Resumeable,
+    Restartable,
+    Snapshotable,
+    SnapshotControllerContainer
+{
+    
+    var sensors: [AnySnapshotController] = []
+    
+    var actuators: [AnySnapshotController] = []
 
-class RingletTests: XCTestCase {
+    //swiftlint:disable:next type_name
+    typealias _StateType = MiPalState
 
-    override func setUpWithError() throws {
-        // Put setup code here. This method is called before the invocation of each test method in the class.
+    let name: String = "toggle"
+
+    var initialState: MiPalState = EmptyMiPalState("initial")
+    
+    var value: Bool = false
+
+    var currentState: MiPalState = EmptyMiPalState("current")
+
+    var externalVariables: [AnySnapshotController] = []
+
+    let hasFinished: Bool = true
+
+    let isSuspended: Bool = true
+
+    let submachines: [AnyScheduleableFiniteStateMachine] = []
+
+    func clone() -> ToggleFiniteStateMachine {
+        return self
     }
 
-    override func tearDownWithError() throws {
-        // Put teardown code here. This method is called after the invocation of each test method in the class.
+    func exit() {}
+
+    func next() {
+        self.value.toggle()
     }
 
-    func test_canComputePropertyLists() throws {
-        let fsm = AnyScheduleableFiniteStateMachine(ToggleFiniteStateMachine())
-        let ringlet = Ringlet(fsm: fsm)
-        XCTAssertEqual(ringlet.preSnapshot["value"], KripkeStateProperty(type: .Bool, value: Bool(false)))
-        XCTAssertEqual(ringlet.postSnapshot["value"], KripkeStateProperty(type: .Bool, value: Bool(true)))
-        XCTAssertTrue(ringlet.calls.isEmpty)
-        XCTAssertTrue(ringlet.afterCalls.isEmpty)
-        let ringlet2 = Ringlet(fsm: fsm)
-        XCTAssertEqual(ringlet2.preSnapshot["value"], KripkeStateProperty(type: .Bool, value: Bool(true)))
-        XCTAssertEqual(ringlet2.postSnapshot["value"], KripkeStateProperty(type: .Bool, value: Bool(false)))
-        XCTAssertTrue(ringlet2.calls.isEmpty)
-        XCTAssertTrue(ringlet2.afterCalls.isEmpty)
-    }
+    func restart() {}
+
+    func resume() {}
+
+    func saveSnapshot() {}
+
+    func suspend() {}
 
 }
