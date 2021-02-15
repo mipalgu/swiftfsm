@@ -141,7 +141,7 @@ internal final class CallingFiniteStateMachine: ParameterisedMachineProtocol
     
     let gateway = StackGateway()
     
-    let timer = FSMClock(ringletLengths: ["toggle": 10], scheduleLength: 10)
+    let timer = FSMClock(ringletLengths: ["calling": 10], scheduleLength: 10)
     
     var ringlet: MiPalRinglet = MiPalRinglet()
     

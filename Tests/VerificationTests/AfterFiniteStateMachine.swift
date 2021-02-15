@@ -1,8 +1,8 @@
 /*
- * RingletTests.swift
+ * AfterFiniteStateMachine.swift
  * VerificationTests
  *
- * Created by Callum McColl on 14/1/21.
+ * Created by Callum McColl on 16/2/21.
  * Copyright © 2021 Callum McColl. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -56,62 +56,68 @@
  *
  */
 
-import XCTest
-
+import FSM
 import KripkeStructure
+import Gateways
+import Timers
+import Verification
 import swiftfsm
 
-@testable import Verification
-
-class RingletTests: XCTestCase {
-
-    override func setUpWithError() throws {
-        // Put setup code here. This method is called before the invocation of each test method in the class.
-    }
-
-    override func tearDownWithError() throws {
-        // Put teardown code here. This method is called after the invocation of each test method in the class.
-    }
-
-    func test_canComputePropertyLists() throws {
-        let fsm = ToggleFiniteStateMachine()
-        let ringlet = Ringlet(fsm: AnyScheduleableFiniteStateMachine(fsm), gateway: fsm.gateway, timer: fsm.timer)
-        XCTAssertEqual(ringlet.preSnapshot["value"], KripkeStateProperty(type: .Bool, value: Bool(false)))
-        XCTAssertEqual(ringlet.postSnapshot["value"], KripkeStateProperty(type: .Bool, value: Bool(true)))
-        XCTAssertTrue(ringlet.calls.isEmpty)
-        XCTAssertTrue(ringlet.afterCalls.isEmpty)
-        let ringlet2 = Ringlet(fsm: AnyScheduleableFiniteStateMachine(fsm), gateway: fsm.gateway, timer: fsm.timer)
-        XCTAssertEqual(ringlet2.preSnapshot["value"], KripkeStateProperty(type: .Bool, value: Bool(true)))
-        XCTAssertEqual(ringlet2.postSnapshot["value"], KripkeStateProperty(type: .Bool, value: Bool(false)))
-        XCTAssertTrue(ringlet2.calls.isEmpty)
-        XCTAssertTrue(ringlet2.afterCalls.isEmpty)
-    }
+internal final class AfterFiniteStateMachine: FiniteStateMachineType,
+    Cloneable,
+    ConvertibleToScheduleableFiniteStateMachine,
+    StateExecuter,
+    Exitable,
+    Finishable,
+    Resumeable,
+    Restartable,
+    Snapshotable,
+    SnapshotControllerContainer
+{
     
-    func test_canDetectCalls() throws {
-        let fsm = CallingFiniteStateMachine()
-        let id = fsm.gateway.id(of: fsm.name)
-        fsm.gateway.fsms[id] = .parameterisedFSM(AnyParameterisedFiniteStateMachine(fsm))
-        fsm.gateway.stacks[id] = []
-        let ringlet = Ringlet(fsm: AnyScheduleableFiniteStateMachine(fsm), gateway: fsm.gateway, timer: fsm.timer)
-        XCTAssertEqual(ringlet.calls.count, 1)
-        if ringlet.calls.count != 1 {
-            return
-        }
-        XCTAssertEqual(ringlet.calls[0].caller, id)
-        XCTAssertEqual(ringlet.calls[0].callee, id)
-        XCTAssertEqual(ringlet.calls[0].parameters.count, 1)
-        XCTAssertEqual(ringlet.calls[0].parameters["value"] as? Bool, true)
-    }
+    let gateway = StackGateway()
     
-    func test_canDetectAfterCalls() throws {
-        let fsm = AfterFiniteStateMachine()
-        fsm.timer.update(fromFSM: AnyScheduleableFiniteStateMachine(fsm))
-        let ringlet = Ringlet(fsm: AnyScheduleableFiniteStateMachine(fsm), gateway: fsm.gateway, timer: fsm.timer)
-        XCTAssertEqual(ringlet.afterCalls.count, 1)
-        if ringlet.afterCalls.count != 1 {
-            return
-        }
-        XCTAssertTrue(ringlet.afterCalls.contains(4000000))
+    let timer = FSMClock(ringletLengths: ["after": 10], scheduleLength: 10)
+    
+    var sensors: [AnySnapshotController] = []
+    
+    var actuators: [AnySnapshotController] = []
+
+    //swiftlint:disable:next type_name
+    typealias _StateType = MiPalState
+
+    let name: String = "after"
+
+    var initialState: MiPalState = EmptyMiPalState("initial")
+    
+    var value: Bool = false
+
+    var currentState: MiPalState = EmptyMiPalState("current")
+
+    var externalVariables: [AnySnapshotController] = []
+
+    let hasFinished: Bool = true
+
+    let isSuspended: Bool = true
+
+    let submachines: [AnyScheduleableFiniteStateMachine] = []
+
+    func clone() -> AfterFiniteStateMachine {
+        return self
     }
+
+    func exit() {}
+
+    func next() {
+        self.timer.after(4)
+    }
+
+    func restart() {}
+
+    func resume() {}
+
+    func saveSnapshot() {}
+
+    func suspend() {}
 
 }
