@@ -94,6 +94,12 @@ class TimeAwareRingletTests: XCTestCase {
                 postSnapshot: falseProperties,
                 calls: [Call(caller: id, callee: id, parameters: ["value": true])],
                 condition: .or(lhs: .greaterThan(value: time), rhs: .greaterThan(value: 3000000))
+            ),
+            ConditionalRinglet(
+                preSnapshot: falseProperties,
+                postSnapshot: falseProperties,
+                calls: [Call(caller: id, callee: id, parameters: ["value": true]), Call(caller: id, callee: id, parameters: ["value": false])],
+                condition: .greaterThan(value: 4000000)
             )
         ]
         XCTAssertEqual(ringlets.ringlets.count, expected.count)

@@ -194,11 +194,13 @@ internal final class TimeConditionalFiniteStateMachine: ParameterisedMachineProt
 
     lazy var currentState: MiPalState = {
         CallbackMiPalState("Call", onEntry: { [unowned self] in
-            if self.timer.after(2) {
+            if self.timer.after(4) {
                 let id = self.gateway.id(of: self.name)
                 let _: Promise<Bool> = self.gateway.call(id, withParameters: ["value": true], caller: id)
-            } else if self.timer.after(3) {
-                // do nothing.
+                let _: Promise<Bool> = self.gateway.call(id, withParameters: ["value": false], caller: id)
+            } else if self.timer.after(2) || self.timer.after(3) {
+                let id = self.gateway.id(of: self.name)
+                let _: Promise<Bool> = self.gateway.call(id, withParameters: ["value": true], caller: id)
             } else {
                 self.value.toggle()
             }

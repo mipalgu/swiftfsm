@@ -90,7 +90,7 @@ extension Call: Hashable {
     func hash(into hasher: inout Hasher) {
         hasher.combine(self.caller)
         hasher.combine(self.callee)
-        hasher.combine(KripkeStatePropertyList(self.parameters))
+        hasher.combine(KripkeStatePropertyList(self.parameters.sorted { $0.key < $1.key }))
     }
     
 }
