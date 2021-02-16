@@ -69,8 +69,8 @@ struct TimeAwareRinglets {
     init<Gateway: ModifiableFSMGateway, Timer: Clock>(fsm: AnyScheduleableFiniteStateMachine, gateway: Gateway, timer: Timer, startingTime: UInt) {
         var lastTime = startingTime
         var times: SortedCollection<UInt> = []
-        var ringlets: [RingletResult: [TimeAwareRinglet]] = [:]
-        func calculate(time: TimeAwareRinglet.Timing) {
+        var ringlets: [RingletResult: ConditionalRinglet] = [:]
+        func calculate(time: Timing) {
             let clone = fsm.clone()
             timer.forceRunningTime(time.timeValue)
             let ringlet = Ringlet(fsm: clone, gateway: gateway, timer: timer)
@@ -79,34 +79,24 @@ struct TimeAwareRinglets {
                     times.insert(newTime)
                 }
             }
-            let timeAwareRinglet = TimeAwareRinglet(preSnapshot: ringlet.preSnapshot, postSnapshot: ringlet.postSnapshot, calls: ringlet.calls, time: time)
             let result = RingletResult(postSnapshot: ringlet.postSnapshot, calls: ringlet.calls)
-            if ringlets[result] == nil {
-                ringlets[result] = [timeAwareRinglet]
+            if let previousCondition = ringlets[result]?.condition {
+                ringlets[result]?.condition = .or(lhs: previousCondition, rhs: time.condition)
             } else {
-                ringlets[result]?.append(timeAwareRinglet)
+                ringlets[result] = ConditionalRinglet(preSnapshot: ringlet.preSnapshot, postSnapshot: ringlet.postSnapshot, calls: ringlet.calls, condition: time.condition)
             }
         }
         if startingTime == 0 {
             calculate(time: .beforeOrEqual(startingTime))
             if let firstAfter = times.first, let firstKey = ringlets.first?.key {
-                ringlets[firstKey]?[0].time = .beforeOrEqual(firstAfter)
+                ringlets[firstKey]?.condition = .lessThanEqual(value: firstAfter)
             }
         }
         while !times.isEmpty {
             lastTime = times.remove(at: times.startIndex)
             calculate(time: .after(lastTime))
         }
-        let conditionalRinglets: [ConditionalRinglet] = ringlets.compactMap {
-            guard let first = $1.first else {
-                return nil
-            }
-            let condition: Constraint<UInt> = $1.dropFirst().reduce(first.time.condition) {
-                .or(lhs: $0, rhs: $1.time.condition)
-            }
-            return ConditionalRinglet(preSnapshot: first.preSnapshot, postSnapshot: first.postSnapshot, calls: first.calls, condition: condition.reduced)
-        }
-        self.init(ringlets: conditionalRinglets)
+        self.init(ringlets: Array(ringlets.values))
     }
     
     init(ringlets: [ConditionalRinglet]) {

@@ -1,5 +1,5 @@
 /*
- * TimeAwareRinglet.swift
+ * Timing.swift
  * Verification
  *
  * Created by Callum McColl on 16/2/21.
@@ -58,56 +58,27 @@
 
 import KripkeStructure
 
-struct TimeAwareRinglet {
+enum Timing: Equatable {
     
-    enum Timing: Equatable {
-        case beforeOrEqual(UInt)
-        case after(UInt)
-        
-        var timeValue: UInt {
-            switch self {
-            case .beforeOrEqual(let time):
-                return time
-            case .after(let time):
-                return time + 1
-            }
+    case beforeOrEqual(UInt)
+    case after(UInt)
+    
+    var timeValue: UInt {
+        switch self {
+        case .beforeOrEqual(let time):
+            return time
+        case .after(let time):
+            return time + 1
         }
-        
-        var condition: Constraint<UInt> {
-            switch self {
-            case .beforeOrEqual(let time):
-                return .lessThanEqual(value: time)
-            case .after(let time):
-                return .greaterThan(value: time)
-            }
-        }
-        
     }
     
-    /// The evaluation of all the variables within the FSM before the
-    /// ringlet has executed.
-    var preSnapshot: KripkeStatePropertyList
-    
-    /// The evaluation of all the variables within the FSM after the ringlet has
-    /// finished executing.
-    var postSnapshot: KripkeStatePropertyList
-    
-    /// A list of calls made to parameterised machines during the execution of
-    /// the ringlet.
-    var calls: [Call]
-    
-    /// A list of clock values which were queried during the execution of the
-    /// ringlet.
-    var time: Timing
-    
-    /// Create a `TimeAwareRinglet`.
-    init(preSnapshot: KripkeStatePropertyList, postSnapshot: KripkeStatePropertyList, calls: [Call], time: Timing) {
-        self.preSnapshot = preSnapshot
-        self.postSnapshot = postSnapshot
-        self.calls = calls
-        self.time = time
+    var condition: Constraint<UInt> {
+        switch self {
+        case .beforeOrEqual(let time):
+            return .lessThanEqual(value: time)
+        case .after(let time):
+            return .greaterThan(value: time)
+        }
     }
     
 }
-
-extension TimeAwareRinglet: Equatable {}

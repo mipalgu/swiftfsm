@@ -88,10 +88,6 @@ struct ConditionalRinglet {
 
     var condition: Constraint<UInt>
     
-    init(_ other: TimeAwareRinglet) {
-        self.init(preSnapshot: other.preSnapshot, postSnapshot: other.postSnapshot, calls: other.calls, condition: other.time.condition)
-    }
-    
     /// Create a `ConditionalRinglet`.
     init(preSnapshot: KripkeStatePropertyList, postSnapshot: KripkeStatePropertyList, calls: [Call], condition: Constraint<UInt>) {
         self.preSnapshot = preSnapshot
