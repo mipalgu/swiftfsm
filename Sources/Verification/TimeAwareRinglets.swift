@@ -69,7 +69,8 @@ struct TimeAwareRinglets {
     init<Gateway: ModifiableFSMGateway, Timer: Clock>(fsm: AnyScheduleableFiniteStateMachine, gateway: Gateway, timer: Timer, startingTime: UInt) {
         var lastTime = startingTime
         var times: SortedCollection<UInt> = []
-        var ringlets: [RingletResult: ConditionalRinglet] = [:]
+        var ringlets: [ConditionalRinglet] = []
+        var indexes: [RingletResult: Int] = [:]
         func calculate(time: Timing) {
             let clone = fsm.clone()
             timer.forceRunningTime(time.timeValue)
@@ -80,23 +81,24 @@ struct TimeAwareRinglets {
                 }
             }
             let result = RingletResult(postSnapshot: ringlet.postSnapshot, calls: ringlet.calls)
-            if let previousCondition = ringlets[result]?.condition {
-                ringlets[result]?.condition = .or(lhs: previousCondition, rhs: time.condition)
+            if let index = indexes[result] {
+                ringlets[index].condition = .or(lhs: ringlets[index].condition, rhs: time.condition)
             } else {
-                ringlets[result] = ConditionalRinglet(preSnapshot: ringlet.preSnapshot, postSnapshot: ringlet.postSnapshot, calls: ringlet.calls, condition: time.condition)
+                indexes[result] = ringlets.count
+                ringlets.append(ConditionalRinglet(preSnapshot: ringlet.preSnapshot, postSnapshot: ringlet.postSnapshot, calls: ringlet.calls, condition: time.condition))
             }
         }
         if startingTime == 0 {
             calculate(time: .beforeOrEqual(startingTime))
-            if let firstAfter = times.first, let firstKey = ringlets.first?.key {
-                ringlets[firstKey]?.condition = .lessThanEqual(value: firstAfter)
+            if let firstAfter = times.first {
+                ringlets[0].condition = .lessThanEqual(value: firstAfter)
             }
         }
         while !times.isEmpty {
             lastTime = times.remove(at: times.startIndex)
             calculate(time: .after(lastTime))
         }
-        self.init(ringlets: Array(ringlets.values))
+        self.init(ringlets: ringlets)
     }
     
     init(ringlets: [ConditionalRinglet]) {
