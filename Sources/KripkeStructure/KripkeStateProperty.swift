@@ -73,6 +73,113 @@ public struct KripkeStateProperty: Equatable {
      *  The value of the property.
      */
     public let value: Any
+    
+    public init(_ value: Bool) {
+        self.init(type: .Bool, value: value)
+    }
+    
+    public init(_ value: Int) {
+        self.init(type: .Int, value: value)
+    }
+    
+    public init(_ value: Int8) {
+        self.init(type: .Int8, value: value)
+    }
+    
+    public init(_ value: Int16) {
+        self.init(type: .Int16, value: value)
+    }
+    
+    public init(_ value: Int32) {
+        self.init(type: .Int32, value: value)
+    }
+    
+    public init(_ value: Int64) {
+        self.init(type: .Int64, value: value)
+    }
+    
+    public init(_ value: UInt) {
+        self.init(type: .UInt, value: value)
+    }
+    
+    public init(_ value: UInt8) {
+        self.init(type: .UInt8, value: value)
+    }
+    
+    public init(_ value: UInt16) {
+        self.init(type: .UInt16, value: value)
+    }
+    
+    public init(_ value: UInt32) {
+        self.init(type: .UInt32, value: value)
+    }
+    
+    public init(_ value: UInt64) {
+        self.init(type: .UInt64, value: value)
+    }
+    
+    public init(_ value: Float) {
+        self.init(type: .Float, value: value)
+    }
+    
+    public init(_ value: Float80) {
+        self.init(type: .Float80, value: value)
+    }
+    
+    public init(_ value: Double) {
+        self.init(type: .Double, value: value)
+    }
+    
+    public init(_ value: String) {
+        self.init(type: .String, value: value)
+    }
+    
+    public init<S: Sequence>(_ value: S) {
+        self.init(type: .Collection(value.map { KripkeStateProperty($0) }), value: value)
+    }
+    
+    public init(_ value: Any) {
+        switch value {
+        case let b as Bool:
+            self.init(b)
+        case let i as Int:
+            self.init(i)
+        case let i8 as Int8:
+            self.init(i8)
+        case let i16 as Int16:
+            self.init(i16)
+        case let i32 as Int32:
+            self.init(i32)
+        case let i64 as Int64:
+            self.init(i64)
+        case let u as UInt:
+            self.init(u)
+        case let u8 as UInt8:
+            self.init(u8)
+        case let u16 as UInt16:
+            self.init(u16)
+        case let u32 as UInt32:
+            self.init(u32)
+        case let u64 as UInt64:
+            self.init(u64)
+        case let f as Float:
+            self.init(f)
+        case let f80 as Float80:
+            self.init(f80)
+        case let d as Double:
+            self.init(d)
+        case let s as String:
+            self.init(s)
+        default:
+            let mirror = Mirror(reflecting: value)
+            if mirror.displayStyle == .collection || mirror.displayStyle == .set {
+                let values = mirror.children.map { $0.value }
+                self.init(type: .Collection(values.map { KripkeStateProperty($0) }), value: values)
+                return
+            }
+            self.init(type: .Compound(KripkeStatePropertyList(value)), value: value)
+        }
+    }
 
     /**
      *  Create a new `KripkeStateProperty`.

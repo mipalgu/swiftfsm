@@ -62,15 +62,15 @@ import swiftfsm
 //swiftlint:disable force_cast
 //swiftlint:disable line_length
 
-public final class MirrorKripkePropertiesRecorder {
+final class MirrorKripkePropertiesRecorder {
 
-    public init() {}
+    init() {}
 
-    public func takeRecord(of object: Any) -> KripkeStatePropertyList {
+    func takeRecord(of object: Any) -> KripkeStatePropertyList {
         return self._takeRecord(of: object, withMemoryCache: [])
     }
 
-    public func getKripkeStatePropertyType(_ val: Any) -> (KripkeStatePropertyTypes, Any) {
+    func getKripkeStatePropertyType(_ val: Any) -> (KripkeStatePropertyTypes, Any) {
         return self.getKripkeStatePropertyType(val, validValues: [val], withMemoryCache: [])
     }
 

@@ -75,6 +75,10 @@ public struct KripkeStatePropertyList {
         }
         return d
     }
+    
+    public init<T>(_ object: T) {
+        self = MirrorKripkePropertiesRecorder().takeRecord(of: object)
+    }
 
     public init(_ properties: [String: KripkeStateProperty] = [:]) {
         self.properties = properties

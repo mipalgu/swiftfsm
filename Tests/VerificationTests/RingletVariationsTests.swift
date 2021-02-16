@@ -73,7 +73,7 @@ class RingletVariationsTests: XCTestCase {
         // Put teardown code here. This method is called after the invocation of each test method in the class.
     }
     
-    func test_canGenerateAllPossibleRinglets() throws {
+    func test_canGenerateRingletsForOneMachine() throws {
         let fsm = ExternalsFiniteStateMachine()
         let ringlets = RingletVariations(fsms: [AnyScheduleableFiniteStateMachine(fsm)], gateway: fsm.gateway, timer: fsm.timer, startingTime: 0)
         let expected = [ // (externals, sensors, actuators)
