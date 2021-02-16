@@ -169,12 +169,12 @@ let package = Package(
         ),
         .target(name: "CTests", dependencies: []),
         .testTarget(name: "KripkeStructureTests", dependencies: [.target(name: "KripkeStructure")]),
-        .testTarget(name: "VerificationOldTests", dependencies: [
+        /*.testTarget(name: "VerificationOldTests", dependencies: [
             .target(name: "KripkeStructure"),
             .target(name: "KripkeStructureViews"),
             .target(name: "VerificationOld"),
             .target(name: "CTests")
-        ]),
+        ]),*/
         .testTarget(name: "VerificationTests", dependencies: [
             .target(name: "KripkeStructure"),
             .target(name: "KripkeStructureViews"),
