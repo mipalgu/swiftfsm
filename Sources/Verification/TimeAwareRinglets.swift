@@ -63,7 +63,7 @@ import swift_helpers
 
 struct TimeAwareRinglets {
     
-    var ringlets: [TimeAwareRinglet]
+    var ringlets: [ConditionalRinglet]
     
     init<Gateway: ModifiableFSMGateway, Timer: Clock>(fsm: AnyScheduleableFiniteStateMachine, gateway: Gateway, timer: Timer, startingTime: UInt) {
         var lastTime = startingTime
@@ -90,10 +90,10 @@ struct TimeAwareRinglets {
             lastTime = times.remove(at: times.startIndex)
             calculate(time: .after(lastTime))
         }
-        self.init(ringlets: ringlets)
+        self.init(ringlets: ringlets.map { ConditionalRinglet($0) })
     }
     
-    init(ringlets: [TimeAwareRinglet]) {
+    init(ringlets: [ConditionalRinglet]) {
         self.ringlets = ringlets
     }
     

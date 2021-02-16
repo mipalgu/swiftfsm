@@ -1,6 +1,6 @@
 /*
- * TimeAwareRingletTests.swift
- * VerificationTests
+ * ConditionalRinglet.swift
+ * Verification
  *
  * Created by Callum McColl on 16/2/21.
  * Copyright © 2021 Callum McColl. All rights reserved.
@@ -56,60 +56,50 @@
  *
  */
 
-import XCTest
-
 import KripkeStructure
-import swiftfsm
 
-@testable import Verification
-
-class TimeAwareRingletTests: XCTestCase {
-
-    override func setUpWithError() throws {
-        // Put setup code here. This method is called before the invocation of each test method in the class.
-    }
-
-    override func tearDownWithError() throws {
-        // Put teardown code here. This method is called after the invocation of each test method in the class.
-    }
+struct ConditionalRinglet {
     
-    func test_computesAllPossibleRinglets() throws {
-        let fsm = TimeConditionalFiniteStateMachine()
-        let id = fsm.gateway.id(of: fsm.name)
-        fsm.gateway.fsms[id] = .parameterisedFSM(AnyParameterisedFiniteStateMachine(fsm))
-        fsm.gateway.stacks[id] = []
-        let ringlets = TimeAwareRinglets(fsm: AnyScheduleableFiniteStateMachine(fsm), gateway: fsm.gateway, timer: fsm.timer, startingTime: 0)
-        let falseProperties = KripkeStatePropertyList(["value": KripkeStateProperty(type: .Bool, value: Bool(false))])
-        let trueProperties = KripkeStatePropertyList(["value": KripkeStateProperty(type: .Bool, value: Bool(true))])
-        let firstTime: UInt = 2000000
-        let secondTime: UInt = 3000000
-        let expected = [
-            ConditionalRinglet(
-                preSnapshot: falseProperties,
-                postSnapshot: trueProperties,
-                calls: [],
-                condition: .lessThanEqual(value: firstTime)
-            ),
-            ConditionalRinglet(
-                preSnapshot: falseProperties,
-                postSnapshot: falseProperties,
-                calls: [Call(caller: id, callee: id, parameters: ["value": true])],
-                condition: .greaterThan(value: firstTime)
-            ),
-            ConditionalRinglet(
-                preSnapshot: falseProperties,
-                postSnapshot: falseProperties,
-                calls: [Call(caller: id, callee: id, parameters: ["value": true])],
-                condition: .greaterThan(value: secondTime)
-            )
-        ]
-        XCTAssertEqual(ringlets.ringlets.count, expected.count)
-        for (result, expected) in zip(ringlets.ringlets, expected) {
-            XCTAssertEqual(result.preSnapshot["value"], expected.preSnapshot["value"])
-            XCTAssertEqual(result.postSnapshot["value"], expected.postSnapshot["value"])
-            XCTAssertEqual(result.calls, expected.calls)
-            XCTAssertEqual(result.condition, expected.condition)
+    enum Timing: Equatable {
+        case beforeOrEqual(UInt)
+        case after(UInt)
+        
+        var timeValue: UInt {
+            switch self {
+            case .beforeOrEqual(let time):
+                return time
+            case .after(let time):
+                return time + 1
+            }
         }
     }
+    
+    /// The evaluation of all the variables within the FSM before the
+    /// ringlet has executed.
+    var preSnapshot: KripkeStatePropertyList
+    
+    /// The evaluation of all the variables within the FSM after the ringlet has
+    /// finished executing.
+    var postSnapshot: KripkeStatePropertyList
+    
+    /// A list of calls made to parameterised machines during the execution of
+    /// the ringlet.
+    var calls: [Call]
 
+    var condition: Constraint<UInt>
+    
+    init(_ other: TimeAwareRinglet) {
+        self.init(preSnapshot: other.preSnapshot, postSnapshot: other.postSnapshot, calls: other.calls, condition: other.time.condition)
+    }
+    
+    /// Create a `ConditionalRinglet`.
+    init(preSnapshot: KripkeStatePropertyList, postSnapshot: KripkeStatePropertyList, calls: [Call], condition: Constraint<UInt>) {
+        self.preSnapshot = preSnapshot
+        self.postSnapshot = postSnapshot
+        self.calls = calls
+        self.condition = condition
+    }
+    
 }
+
+extension ConditionalRinglet: Equatable {}

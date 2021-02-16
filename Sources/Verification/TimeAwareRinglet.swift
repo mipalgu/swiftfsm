@@ -72,6 +72,16 @@ struct TimeAwareRinglet {
                 return time + 1
             }
         }
+        
+        var condition: Constraint<UInt> {
+            switch self {
+            case .beforeOrEqual(let time):
+                return .lessThanEqual(value: time)
+            case .after(let time):
+                return .greaterThan(value: time)
+            }
+        }
+        
     }
     
     /// The evaluation of all the variables within the FSM before the
