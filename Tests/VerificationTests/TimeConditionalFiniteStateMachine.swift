@@ -63,7 +63,7 @@ import KripkeStructure
 import Verification
 import swiftfsm
 
-internal final class TimeConditionalFiniteStateMachine: ParameterisedMachineProtocol
+internal final class TimeConditionalFiniteStateMachine: ParameterisedMachineProtocol, KripkeVariablesModifier
 {
     
     typealias RingletType = MiPalRinglet
@@ -135,6 +135,26 @@ internal final class TimeConditionalFiniteStateMachine: ParameterisedMachineProt
         
     }
     
+    public var validVars: [String : [Any]] {
+        [
+            "gateway": [],
+            "timer": [],
+            "exitState": [],
+            "initialPreviousState": [],
+            "previousState": [],
+            "suspendedState": [],
+            "suspendState": [],
+            "sensors": [],
+            "actuators": [],
+            "initialState": [],
+            "currentState": [],
+            "externalVariables": [],
+            "hasFinished": [],
+            "isSuspended": [],
+            "submachines": []
+        ]
+    }
+    
     func resetResult() {
         self.results.vars = ResultContainerType.Vars()
     }
@@ -168,7 +188,7 @@ internal final class TimeConditionalFiniteStateMachine: ParameterisedMachineProt
 
     let name: String = "conditional"
 
-    lazy var initialState: MiPalState = EmptyMiPalState("initial")
+    var initialState: MiPalState = EmptyMiPalState("initial")
     
     var value: Bool = false
 
