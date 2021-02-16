@@ -81,26 +81,19 @@ class TimeAwareRingletTests: XCTestCase {
         let ringlets = TimeAwareRinglets(fsm: AnyScheduleableFiniteStateMachine(fsm), gateway: fsm.gateway, timer: fsm.timer, startingTime: 0)
         let falseProperties = KripkeStatePropertyList(["value": KripkeStateProperty(type: .Bool, value: Bool(false))])
         let trueProperties = KripkeStatePropertyList(["value": KripkeStateProperty(type: .Bool, value: Bool(true))])
-        let firstTime: UInt = 2000000
-        let secondTime: UInt = 3000000
+        let time: UInt = 2000000
         let expected = [
             ConditionalRinglet(
                 preSnapshot: falseProperties,
                 postSnapshot: trueProperties,
                 calls: [],
-                condition: .lessThanEqual(value: firstTime)
+                condition: .lessThanEqual(value: time)
             ),
             ConditionalRinglet(
                 preSnapshot: falseProperties,
                 postSnapshot: falseProperties,
                 calls: [Call(caller: id, callee: id, parameters: ["value": true])],
-                condition: .greaterThan(value: firstTime)
-            ),
-            ConditionalRinglet(
-                preSnapshot: falseProperties,
-                postSnapshot: falseProperties,
-                calls: [Call(caller: id, callee: id, parameters: ["value": true])],
-                condition: .greaterThan(value: secondTime)
+                condition: .greaterThan(value: time)
             )
         ]
         XCTAssertEqual(ringlets.ringlets.count, expected.count)
