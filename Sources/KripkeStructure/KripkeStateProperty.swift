@@ -138,6 +138,15 @@ public struct KripkeStateProperty: Equatable {
         self.init(type: .Collection(value.map { KripkeStateProperty($0) }), value: value)
     }
     
+    public init<T>(_ value: T?) {
+        guard let unwrapped = value else {
+            self.init(type: .Optional(nil), value: value as Any)
+            return
+        }
+        let property = KripkeStateProperty(unwrapped)
+        self.init(type: .Optional(property), value: value as Any)
+    }
+    
     public init(_ value: Any) {
         switch value {
         case let b as Bool:
@@ -172,6 +181,14 @@ public struct KripkeStateProperty: Equatable {
             self.init(s)
         default:
             let mirror = Mirror(reflecting: value)
+            if mirror.displayStyle == .optional {
+                guard let (_, value) = mirror.children.first else {
+                    self.init(type: .Optional(nil), value: Optional<Any>.none as Any)
+                    return
+                }
+                self.init(type: .Optional(KripkeStateProperty(value)), value: Optional<Any>.some(value) as Any)
+                return
+            }
             if mirror.displayStyle == .collection || mirror.displayStyle == .set {
                 let values = mirror.children.map { $0.value }
                 self.init(type: .Collection(values.map { KripkeStateProperty($0) }), value: values)
