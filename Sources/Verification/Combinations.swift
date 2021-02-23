@@ -149,7 +149,7 @@ extension Combinations where Element: ConvertibleFromDictionary {
                     }
                 }
             }
-            let initial: [(String, Combinations<Any>)] = Array(combinations)
+            let initial: [(String, Combinations<Any>)] = Array(combinations.sorted { $0.key < $1.key })
             let initialPos = initial.count - 1
             return Combinations<[String: Any?]> {
                 var iterators = initial.map { ($0, $1.makeIterator()) }

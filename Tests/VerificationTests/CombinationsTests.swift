@@ -202,6 +202,27 @@ class CombinationsTests: XCTestCase {
             XCTAssertEqual(rn, en, "index: \(index)")
         }
     }
+    
+    func test_boolsStruct() throws {
+        let combinations = Combinations(reflecting: Bools())
+        let expected: [(Bool, Bool, Bool)] = [
+            (false, false, false),
+            (false, false, true),
+            (false, true, false),
+            (false, true, true),
+            (true, false, false),
+            (true, false, true),
+            (true, true, false),
+            (true, true, true)
+        ]
+        let result = combinations.map { ($0.bool1, $0.bool2, $0.bool3) }
+        XCTAssertEqual(result.count, expected.count)
+        for (index, ((rb1, rb2, rb3), (eb1, eb2, eb3))) in zip(result, expected).enumerated() {
+            XCTAssertEqual(rb1, eb1, "b1 index: \(index)")
+            XCTAssertEqual(rb2, eb2, "b2 index: \(index)")
+            XCTAssertEqual(rb3, eb3, "b3 index: \(index)")
+        }
+    }
 
 }
 
@@ -221,6 +242,33 @@ fileprivate struct TestStruct: ConvertibleFromDictionary {
             fatalError("Unable to convert dictionary to TestStruct.")
         }
         self.init(bool: bool, num: num)
+    }
+    
+}
+
+fileprivate struct Bools: ConvertibleFromDictionary {
+    
+    var bool1: Bool
+    
+    var bool2: Bool
+    
+    var bool3: Bool
+    
+    init(bool1: Bool = false, bool2: Bool = false, bool3: Bool = false) {
+        self.bool1 = bool1
+        self.bool2 = bool2
+        self.bool3 = bool3
+    }
+    
+    init(fromDictionary dictionary: [String : Any?]) {
+        guard
+            let bool1 = dictionary["bool1"] as? Bool,
+            let bool2 = dictionary["bool2"] as? Bool,
+            let bool3 = dictionary["bool3"] as? Bool
+        else {
+            fatalError("Unable to create bools from dictionary.")
+        }
+        self.init(bool1: bool1, bool2: bool2, bool3: bool3)
     }
     
 }
