@@ -57,10 +57,24 @@
  */
 
 import swiftfsm
+import KripkeStructure
 
 struct Combinations<Element>: Sequence {
     
     private let iterator: () -> AnyIterator<Element>
+    
+    private init(iterator: @escaping () -> AnyIterator<Element>) {
+        self.iterator = iterator
+    }
+    
+    func erased() -> Combinations<Any> {
+        return Combinations<Any> {
+            let iterator = self.makeIterator()
+            return AnyIterator<Any> {
+                iterator.next() as Any?
+            }
+        }
+    }
     
     func makeIterator() -> AnyIterator<Element> {
         return self.iterator()
@@ -122,7 +136,88 @@ extension Combinations where Element: FloatingPoint {
 extension Combinations where Element: ConvertibleFromDictionary {
     
     init(reflecting element: Element) {
-        self.iterator = { AnyIterator { nil } }
+        func flatten(_ combinations: [String: Combinations<Any>]) -> Combinations<[String: Any?]> {
+            if combinations.isEmpty {
+                return Combinations<[String: Any?]> {
+                    var value: [String: Any]? = [:]
+                    return AnyIterator {
+                        guard let out = value else {
+                            return nil
+                        }
+                        value = nil
+                        return out
+                    }
+                }
+            }
+            let initial: [(String, Combinations<Any>)] = Array(combinations)
+            let initialPos = initial.count - 1
+            return Combinations<[String: Any?]> {
+                var iterators = initial.map { ($0, $1.makeIterator()) }
+                var pos = initialPos
+                var current: [String: Any?] = Dictionary(uniqueKeysWithValues: iterators.map { ($0, $1.next()) })
+                return AnyIterator {
+                    if pos < 0 {
+                        return nil
+                    }
+                    let out = current
+                    var nextValue: Any?
+                    while pos >= 0 {
+                        nextValue = iterators[pos].1.next()
+                        if nextValue != nil {
+                            current[iterators[pos].0] = nextValue
+                            break
+                        }
+                        iterators[pos].1 = initial[pos].1.makeIterator()
+                        current[iterators[pos].0] = iterators[pos].1.next()
+                        pos -= 1
+                    }
+                    if nextValue == nil {
+                        return out
+                    }
+                    pos = initialPos
+                    return out
+                }
+            }
+            
+        }
+        func createFromProperties(_ properties: KripkeStatePropertyList) -> [String: Combinations<Any>] {
+            return properties.properties.mapValues { (value: KripkeStateProperty) -> Combinations<Any> in
+                switch value.type {
+                case .Bool:
+                    return Combinations<Bool>().erased()
+                case .Int:
+                    return Combinations<Int>().erased()
+                case .Int8:
+                    return Combinations<Int8>().erased()
+                case .Int16:
+                    return Combinations<Int16>().erased()
+                case .Int32:
+                    return Combinations<Int32>().erased()
+                case .Int64:
+                    return Combinations<Int64>().erased()
+                case .UInt:
+                    return Combinations<UInt>().erased()
+                case .UInt8:
+                    return Combinations<UInt8>().erased()
+                case .UInt16:
+                    return Combinations<UInt16>().erased()
+                case .UInt32:
+                    return Combinations<UInt32>().erased()
+                case .UInt64:
+                    return Combinations<UInt64>().erased()
+                case .Compound(let compoundProperties):
+                    return flatten(createFromProperties(compoundProperties)).erased()
+                default:
+                    fatalError("Attempting to create combinations of unsupported type: \(Element.self)")
+                }
+            }
+        }
+        let properties: KripkeStatePropertyList = KripkeStatePropertyList(element)
+        let dictionaryCombinations = flatten(createFromProperties(properties))
+        self.init() {
+            let iterator = dictionaryCombinations.makeIterator()
+            return AnyIterator { iterator.next().map { Element(fromDictionary: $0) } }
+        }
     }
     
 }
