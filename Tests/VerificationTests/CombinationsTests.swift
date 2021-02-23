@@ -223,6 +223,86 @@ class CombinationsTests: XCTestCase {
             XCTAssertEqual(rb3, eb3, "b3 index: \(index)")
         }
     }
+    
+    func test_innerStruct() throws {
+        let combinations = Combinations(reflecting: InnerStruct())
+        let expected: [(Bool, Bool, Bool, Bool, Bool, Bool)] = [
+            (false, false, false, false, false, false),
+            (false, false, false, false, false, true),
+            (false, false, false, false, true, false),
+            (false, false, false, false, true, true),
+            (false, false, false, true, false, false),
+            (false, false, false, true, false, true),
+            (false, false, false, true, true, false),
+            (false, false, false, true, true, true),
+            (false, false, true, false, false, false),
+            (false, false, true, false, false, true),
+            (false, false, true, false, true, false),
+            (false, false, true, false, true, true),
+            (false, false, true, true, false, false),
+            (false, false, true, true, false, true),
+            (false, false, true, true, true, false),
+            (false, false, true, true, true, true),
+            (false, true, false, false, false, false),
+            (false, true, false, false, false, true),
+            (false, true, false, false, true, false),
+            (false, true, false, false, true, true),
+            (false, true, false, true, false, false),
+            (false, true, false, true, false, true),
+            (false, true, false, true, true, false),
+            (false, true, false, true, true, true),
+            (false, true, true, false, false, false),
+            (false, true, true, false, false, true),
+            (false, true, true, false, true, false),
+            (false, true, true, false, true, true),
+            (false, true, true, true, false, false),
+            (false, true, true, true, false, true),
+            (false, true, true, true, true, false),
+            (false, true, true, true, true, true),
+            (true, false, false, false, false, false),
+            (true, false, false, false, false, true),
+            (true, false, false, false, true, false),
+            (true, false, false, false, true, true),
+            (true, false, false, true, false, false),
+            (true, false, false, true, false, true),
+            (true, false, false, true, true, false),
+            (true, false, false, true, true, true),
+            (true, false, true, false, false, false),
+            (true, false, true, false, false, true),
+            (true, false, true, false, true, false),
+            (true, false, true, false, true, true),
+            (true, false, true, true, false, false),
+            (true, false, true, true, false, true),
+            (true, false, true, true, true, false),
+            (true, false, true, true, true, true),
+            (true, true, false, false, false, false),
+            (true, true, false, false, false, true),
+            (true, true, false, false, true, false),
+            (true, true, false, false, true, true),
+            (true, true, false, true, false, false),
+            (true, true, false, true, false, true),
+            (true, true, false, true, true, false),
+            (true, true, false, true, true, true),
+            (true, true, true, false, false, false),
+            (true, true, true, false, false, true),
+            (true, true, true, false, true, false),
+            (true, true, true, false, true, true),
+            (true, true, true, true, false, false),
+            (true, true, true, true, false, true),
+            (true, true, true, true, true, false),
+            (true, true, true, true, true, true),
+        ]
+        let result = combinations.map { ($0.strct1.bool1, $0.strct1.bool2, $0.strct1.bool3, $0.strct2.bool1, $0.strct2.bool2, $0.strct2.bool3) }
+        XCTAssertEqual(result.count, expected.count)
+        for (index, ((rb1, rb2, rb3, rb4, rb5, rb6), (eb1, eb2, eb3, eb4, eb5, eb6))) in zip(result, expected).enumerated() {
+            XCTAssertEqual(rb1, eb1, "b1 index: \(index)")
+            XCTAssertEqual(rb2, eb2, "b2 index: \(index)")
+            XCTAssertEqual(rb3, eb3, "b3 index: \(index)")
+            XCTAssertEqual(rb4, eb4, "b4 index: \(index)")
+            XCTAssertEqual(rb5, eb5, "b5 index: \(index)")
+            XCTAssertEqual(rb6, eb6, "b6 index: \(index)")
+        }
+    }
 
 }
 
@@ -269,6 +349,29 @@ fileprivate struct Bools: ConvertibleFromDictionary {
             fatalError("Unable to create bools from dictionary.")
         }
         self.init(bool1: bool1, bool2: bool2, bool3: bool3)
+    }
+    
+}
+
+fileprivate struct InnerStruct: ConvertibleFromDictionary {
+    
+    var strct1: Bools
+    
+    var strct2: Bools
+    
+    init(strct1: Bools = Bools(), strct2: Bools = Bools()) {
+        self.strct1 = strct1
+        self.strct2 = strct2
+    }
+    
+    init(fromDictionary dictionary: [String : Any?]) {
+        guard
+            let d1 = dictionary["strct1"] as? [String: Any?],
+            let d2 = dictionary["strct2"] as? [String: Any?]
+        else {
+            fatalError("Unable to create InnerStruct from dictionary.")
+        }
+        self.init(strct1: Bools(fromDictionary: d1), strct2: Bools(fromDictionary: d2))
     }
     
 }
