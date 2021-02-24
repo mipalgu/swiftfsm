@@ -303,6 +303,86 @@ class CombinationsTests: XCTestCase {
             XCTAssertEqual(rb6, eb6, "b6 index: \(index)")
         }
     }
+    
+    func test_boolsInArray() throws {
+        let combinations = Combinations(flatten: [Combinations(reflecting: Bools()), Combinations(reflecting: Bools())])
+        let expected: [(Bool, Bool, Bool, Bool, Bool, Bool)] = [
+            (false, false, false, false, false, false),
+            (false, false, false, false, false, true),
+            (false, false, false, false, true, false),
+            (false, false, false, false, true, true),
+            (false, false, false, true, false, false),
+            (false, false, false, true, false, true),
+            (false, false, false, true, true, false),
+            (false, false, false, true, true, true),
+            (false, false, true, false, false, false),
+            (false, false, true, false, false, true),
+            (false, false, true, false, true, false),
+            (false, false, true, false, true, true),
+            (false, false, true, true, false, false),
+            (false, false, true, true, false, true),
+            (false, false, true, true, true, false),
+            (false, false, true, true, true, true),
+            (false, true, false, false, false, false),
+            (false, true, false, false, false, true),
+            (false, true, false, false, true, false),
+            (false, true, false, false, true, true),
+            (false, true, false, true, false, false),
+            (false, true, false, true, false, true),
+            (false, true, false, true, true, false),
+            (false, true, false, true, true, true),
+            (false, true, true, false, false, false),
+            (false, true, true, false, false, true),
+            (false, true, true, false, true, false),
+            (false, true, true, false, true, true),
+            (false, true, true, true, false, false),
+            (false, true, true, true, false, true),
+            (false, true, true, true, true, false),
+            (false, true, true, true, true, true),
+            (true, false, false, false, false, false),
+            (true, false, false, false, false, true),
+            (true, false, false, false, true, false),
+            (true, false, false, false, true, true),
+            (true, false, false, true, false, false),
+            (true, false, false, true, false, true),
+            (true, false, false, true, true, false),
+            (true, false, false, true, true, true),
+            (true, false, true, false, false, false),
+            (true, false, true, false, false, true),
+            (true, false, true, false, true, false),
+            (true, false, true, false, true, true),
+            (true, false, true, true, false, false),
+            (true, false, true, true, false, true),
+            (true, false, true, true, true, false),
+            (true, false, true, true, true, true),
+            (true, true, false, false, false, false),
+            (true, true, false, false, false, true),
+            (true, true, false, false, true, false),
+            (true, true, false, false, true, true),
+            (true, true, false, true, false, false),
+            (true, true, false, true, false, true),
+            (true, true, false, true, true, false),
+            (true, true, false, true, true, true),
+            (true, true, true, false, false, false),
+            (true, true, true, false, false, true),
+            (true, true, true, false, true, false),
+            (true, true, true, false, true, true),
+            (true, true, true, true, false, false),
+            (true, true, true, true, false, true),
+            (true, true, true, true, true, false),
+            (true, true, true, true, true, true),
+        ]
+        let result = combinations.map { ($0[0].bool1, $0[0].bool2, $0[0].bool3, $0[1].bool1, $0[1].bool2, $0[1].bool3) }
+        XCTAssertEqual(result.count, expected.count)
+        for (index, ((rb1, rb2, rb3, rb4, rb5, rb6), (eb1, eb2, eb3, eb4, eb5, eb6))) in zip(result, expected).enumerated() {
+            XCTAssertEqual(rb1, eb1, "b1 index: \(index)")
+            XCTAssertEqual(rb2, eb2, "b2 index: \(index)")
+            XCTAssertEqual(rb3, eb3, "b3 index: \(index)")
+            XCTAssertEqual(rb4, eb4, "b4 index: \(index)")
+            XCTAssertEqual(rb5, eb5, "b5 index: \(index)")
+            XCTAssertEqual(rb6, eb6, "b6 index: \(index)")
+        }
+    }
 
 }
 
