@@ -65,9 +65,9 @@ struct RingletVariations {
     var ringlets: [ConditionalRinglet]
     
     init<Gateway: ModifiableFSMGateway, Timer: Clock>(fsms: [AnyScheduleableFiniteStateMachine], gateway: Gateway, timer: Timer, startingTime: UInt) {
-//        fsms.map {
-//            $0.snapshotSensors.map { Combinations(reflecting: $0.val) }
-//        }
+        let sensorCombinations = Combinations(flatten: fsms.map {
+            Combinations(flatten: $0.snapshotSensors.map { Combinations(snapshotController: $0) })
+        })
         self.init(ringlets: [])
     }
     
