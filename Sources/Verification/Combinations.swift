@@ -67,11 +67,11 @@ struct Combinations<Element>: Sequence {
         self.iterator = iterator
     }
     
-    func erased() -> Combinations<Any> {
-        return Combinations<Any> {
+    func erased() -> Combinations<Any?> {
+        return Combinations<Any?> {
             let iterator = self.makeIterator()
-            return AnyIterator<Any> {
-                iterator.next() as Any?
+            return AnyIterator<Any?> {
+                iterator.next() as Any??
             }
         }
     }
@@ -200,8 +200,8 @@ extension Combinations {
 extension Combinations where Element: ConvertibleFromDictionary {
     
     init(reflecting element: Element) {
-        func createFromProperties(_ properties: KripkeStatePropertyList) -> [String: Combinations<Any>] {
-            return properties.properties.mapValues { (value: KripkeStateProperty) -> Combinations<Any> in
+        func createFromProperties(_ properties: KripkeStatePropertyList) -> [String: Combinations<Any?>] {
+            return properties.properties.mapValues { (value: KripkeStateProperty) -> Combinations<Any?> in
                 switch value.type {
                 case .Bool:
                     return Combinations<Bool>().erased()
@@ -226,14 +226,14 @@ extension Combinations where Element: ConvertibleFromDictionary {
                 case .UInt64:
                     return Combinations<UInt64>().erased()
                 case .Compound(let compoundProperties):
-                    return Combinations<[String: Any]>(flatten: createFromProperties(compoundProperties)).erased()
+                    return Combinations<[String: Any?]>(flatten: createFromProperties(compoundProperties)).erased()
                 default:
                     fatalError("Attempting to create combinations of unsupported type: \(Element.self)")
                 }
             }
         }
         let properties: KripkeStatePropertyList = KripkeStatePropertyList(element)
-        let dictionaryCombinations = Combinations<[String: Any]>(flatten: createFromProperties(properties))
+        let dictionaryCombinations = Combinations<[String: Any?]>(flatten: createFromProperties(properties))
         self.init() {
             let iterator = dictionaryCombinations.makeIterator()
             return AnyIterator { iterator.next().map { Element(fromDictionary: $0) } }
