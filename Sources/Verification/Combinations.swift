@@ -197,9 +197,13 @@ extension Combinations {
     
 }
 
-extension Combinations where Element: ConvertibleFromDictionary {
+extension Combinations where Element == [String: Any?] {
     
-    init(reflecting element: Element) {
+    init(properties: [String: Any?]) {
+        self.init(properties: KripkeStatePropertyList(properties))
+    }
+    
+    init(properties: KripkeStatePropertyList) {
         func createFromProperties(_ properties: KripkeStatePropertyList) -> [String: Combinations<Any?>] {
             return properties.properties.mapValues { (value: KripkeStateProperty) -> Combinations<Any?> in
                 switch value.type {
@@ -232,8 +236,16 @@ extension Combinations where Element: ConvertibleFromDictionary {
                 }
             }
         }
+        self.init(flatten: createFromProperties(properties))
+    }
+    
+}
+
+extension Combinations where Element: ConvertibleFromDictionary {
+    
+    init(reflecting element: Element) {
         let properties: KripkeStatePropertyList = KripkeStatePropertyList(element)
-        let dictionaryCombinations = Combinations<[String: Any?]>(flatten: createFromProperties(properties))
+        let dictionaryCombinations = Combinations<[String: Any?]>(properties: properties)
         self.init() {
             let iterator = dictionaryCombinations.makeIterator()
             return AnyIterator { iterator.next().map { Element(fromDictionary: $0) } }
