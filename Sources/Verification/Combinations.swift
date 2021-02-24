@@ -253,3 +253,16 @@ extension Combinations where Element: ConvertibleFromDictionary {
     }
     
 }
+
+extension Combinations where Element == Any {
+    
+    init(snapshotController: AnySnapshotController) {
+        let properties: KripkeStatePropertyList = KripkeStatePropertyList(snapshotController.val)
+        let dictionaryCombinations = Combinations<[String: Any?]>(properties: properties)
+        self.init() {
+            let iterator = dictionaryCombinations.makeIterator()
+            return AnyIterator { iterator.next().map { snapshotController.create(fromDictionary: $0 as [String: Any]) } }
+        }
+    }
+    
+}
