@@ -133,53 +133,73 @@ extension Combinations where Element: FloatingPoint {
     
 }
 
+extension Combinations {
+    
+    init<C: Collection, T>(flatten combinations: C) where C.Element == Combinations<T>, Element == [T] {
+        if combinations.isEmpty {
+            self.init {
+                var value = true
+                return AnyIterator {
+                    guard value else {
+                        return nil
+                    }
+                    value = false
+                    return []
+                }
+            }
+            return
+        }
+        let initial: [Combinations<T>] = Array(combinations)
+        let initialPos = initial.count - 1
+        self.init {
+            var iterators = initial.map { $0.makeIterator() }
+            var pos = initialPos
+            var current: [T] = iterators.map { $0.next()! }
+            return AnyIterator {
+                if pos < 0 {
+                    return nil
+                }
+                let out = current
+                var nextValue: T?
+                while pos >= 0 {
+                    nextValue = iterators[pos].next()
+                    if let value = nextValue {
+                        current[pos] = value
+                        break
+                    }
+                    iterators[pos] = initial[pos].makeIterator()
+                    current[pos] = iterators[pos].next()!
+                    pos -= 1
+                }
+                if nextValue == nil {
+                    return out
+                }
+                pos = initialPos
+                return out
+            }
+        }
+    }
+    
+    init<Key: Hashable, Value>(flatten combinations: [Key: Combinations<Value>]) where Key: Comparable, Element == [Key: Value] {
+        let sorted = combinations.sorted { $0.key < $1.key }
+        let keys = sorted.map { $0.key }
+        let flattened = Combinations<[Value]>(flatten: sorted.map { $0.value })
+        self.init {
+            let iterator = flattened.makeIterator()
+            return AnyIterator {
+                guard let values = iterator.next() else {
+                    return nil
+                }
+                return Dictionary(uniqueKeysWithValues: zip(keys, values))
+            }
+        }
+    }
+    
+}
+
 extension Combinations where Element: ConvertibleFromDictionary {
     
     init(reflecting element: Element) {
-        func flatten(_ combinations: [String: Combinations<Any>]) -> Combinations<[String: Any?]> {
-            if combinations.isEmpty {
-                return Combinations<[String: Any?]> {
-                    var value: [String: Any]? = [:]
-                    return AnyIterator {
-                        guard let out = value else {
-                            return nil
-                        }
-                        value = nil
-                        return out
-                    }
-                }
-            }
-            let initial: [(String, Combinations<Any>)] = Array(combinations.sorted { $0.key < $1.key })
-            let initialPos = initial.count - 1
-            return Combinations<[String: Any?]> {
-                var iterators = initial.map { ($0, $1.makeIterator()) }
-                var pos = initialPos
-                var current: [String: Any?] = Dictionary(uniqueKeysWithValues: iterators.map { ($0, $1.next()) })
-                return AnyIterator {
-                    if pos < 0 {
-                        return nil
-                    }
-                    let out = current
-                    var nextValue: Any?
-                    while pos >= 0 {
-                        nextValue = iterators[pos].1.next()
-                        if nextValue != nil {
-                            current[iterators[pos].0] = nextValue
-                            break
-                        }
-                        iterators[pos].1 = initial[pos].1.makeIterator()
-                        current[iterators[pos].0] = iterators[pos].1.next()
-                        pos -= 1
-                    }
-                    if nextValue == nil {
-                        return out
-                    }
-                    pos = initialPos
-                    return out
-                }
-            }
-            
-        }
         func createFromProperties(_ properties: KripkeStatePropertyList) -> [String: Combinations<Any>] {
             return properties.properties.mapValues { (value: KripkeStateProperty) -> Combinations<Any> in
                 switch value.type {
@@ -206,14 +226,14 @@ extension Combinations where Element: ConvertibleFromDictionary {
                 case .UInt64:
                     return Combinations<UInt64>().erased()
                 case .Compound(let compoundProperties):
-                    return flatten(createFromProperties(compoundProperties)).erased()
+                    return Combinations<[String: Any]>(flatten: createFromProperties(compoundProperties)).erased()
                 default:
                     fatalError("Attempting to create combinations of unsupported type: \(Element.self)")
                 }
             }
         }
         let properties: KripkeStatePropertyList = KripkeStatePropertyList(element)
-        let dictionaryCombinations = flatten(createFromProperties(properties))
+        let dictionaryCombinations = Combinations<[String: Any]>(flatten: createFromProperties(properties))
         self.init() {
             let iterator = dictionaryCombinations.makeIterator()
             return AnyIterator { iterator.next().map { Element(fromDictionary: $0) } }
