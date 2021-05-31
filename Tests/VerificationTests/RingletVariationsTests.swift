@@ -95,9 +95,9 @@ class RingletVariationsTests: XCTestCase {
             ([true, true], [true, true], [false, false]),
         ]
         XCTAssertEqual(ringlets.ringlets.count, expected.count)
-        for (ringlet, (externals, sensors, actuators)) in zip(ringlets.ringlets, expected) {
-            
-        }
+//        for (ringlet, (externals, sensors, actuators)) in zip(ringlets.ringlets.map { $0[0] }, expected) {
+//            ringlet.preSnapshot["sensors"]?.
+//        }
     }
 
 }

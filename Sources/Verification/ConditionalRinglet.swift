@@ -88,6 +88,10 @@ struct ConditionalRinglet {
 
     var condition: Constraint<UInt>
     
+    init(ringlet: Ringlet, condition: Constraint<UInt>) {
+        self.init(preSnapshot: ringlet.preSnapshot, postSnapshot: ringlet.postSnapshot, calls: ringlet.calls, condition: condition)
+    }
+    
     /// Create a `ConditionalRinglet`.
     init(preSnapshot: KripkeStatePropertyList, postSnapshot: KripkeStatePropertyList, calls: [Call], condition: Constraint<UInt>) {
         self.preSnapshot = preSnapshot

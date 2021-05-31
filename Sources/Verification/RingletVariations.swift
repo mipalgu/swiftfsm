@@ -59,19 +59,42 @@
 import swiftfsm
 import Gateways
 import Timers
+import KripkeStructure
 
 struct RingletVariations {
    
-    var ringlets: [ConditionalRinglet]
+    var ringlets: [[ConditionalRinglet]]
     
     init<Gateway: ModifiableFSMGateway, Timer: Clock>(fsms: [AnyScheduleableFiniteStateMachine], gateway: Gateway, timer: Timer, startingTime: UInt) {
         let sensorCombinations = Combinations(flatten: fsms.map {
             Combinations(flatten: $0.snapshotSensors.map { Combinations(snapshotController: $0) })
         })
-        self.init(ringlets: [])
+        print("combinations: \(Array(sensorCombinations))")
+        let scenarios: [[ConditionalRinglet]] = sensorCombinations.flatMap { (combinations) -> [[ConditionalRinglet]] in
+            func process(path: [ConditionalRinglet], index: Int) -> [[ConditionalRinglet]] {
+                if index >= combinations.count || index >= fsms.count {
+                    return [path]
+                }
+                let clone = fsms[index].clone()
+                for (sensor, val) in zip(clone.snapshotSensors, combinations[index]) {
+                    sensor.val = val
+                }
+                let ringlets = TimeAwareRinglets(fsm: clone, gateway: gateway, timer: timer, startingTime: startingTime).ringlets
+                return ringlets.flatMap { (ringlet) -> [[ConditionalRinglet]] in
+                    var path = path
+                    path.append(ringlet)
+                    return process(path: path, index: index + 1)
+                }
+            }
+            var arr: [ConditionalRinglet] = []
+            arr.reserveCapacity(min(fsms.count, combinations.count))
+            return process(path: arr, index: 0)
+        }
+        print("scenarios: \(scenarios.map { $0.map { $0.preSnapshot["externalVariables"] } })")
+        self.init(ringlets: scenarios)
     }
     
-    init(ringlets: [ConditionalRinglet]) {
+    init(ringlets: [[ConditionalRinglet]]) {
         self.ringlets = ringlets
     }
     

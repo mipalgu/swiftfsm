@@ -122,7 +122,7 @@ public final class SwiftMachinesCompiler: MachineCompiler {
             ext = "so"
         }
         #endif
-        guard nil != self.compiler.compileTree(
+        guard self.compiler.compile(
             machine,
             withBuildDir: buildDir,
             libExtension: ext,

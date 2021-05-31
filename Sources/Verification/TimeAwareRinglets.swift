@@ -85,7 +85,7 @@ struct TimeAwareRinglets {
                 ringlets[index].condition = .or(lhs: ringlets[index].condition, rhs: time.condition)
             } else {
                 indexes[result] = ringlets.count
-                ringlets.append(ConditionalRinglet(preSnapshot: ringlet.preSnapshot, postSnapshot: ringlet.postSnapshot, calls: ringlet.calls, condition: time.condition))
+                ringlets.append(ConditionalRinglet(ringlet: ringlet, condition: time.condition))
             }
         }
         if startingTime == 0 {

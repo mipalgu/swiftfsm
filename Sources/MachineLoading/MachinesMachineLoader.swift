@@ -230,33 +230,34 @@ public final class MachinesMachineLoader: MachineLoader {
         }) else {
             return nil
         }
-        let ext = self.calculateExt()
-        if false == self.compiler.shouldCompile(machine, inDirectory: self.buildDir, libExtension: ext) {
-            let outputPath = self.compiler.outputPath(forMachine: machine, builtInDirectory: self.buildDir, libExtension: ext)
-            guard let fsm = self.loadSymbol(inMachine: machine.name, gateway: newGateway, clock: clock, path: outputPath, caller: caller) else {
-                return nil
-            }
-            return (fsm, recursed)
-        }
-        guard
-            let outputPath = self.compiler.compile(
-                machine,
-                withBuildDir: self.buildDir,
-                libExtension: ext,
-                withCCompilerFlags: self.cCompilerFlags,
-                andCXXCompilerFlags: self.cxxCompilerFlags,
-                andLinkerFlags: self.linkerFlags,
-                andSwiftCompilerFlags: self.swiftCompilerFlags,
-                andSwiftBuildFlags: self.swiftBuildFlags
-            )
-        else {
-            self.compiler.errors.forEach(self.printer.error)
-            return nil
-        }
-        guard let fsm = self.loadSymbol(inMachine: machine.name, gateway: newGateway, clock: clock, path: outputPath, caller: caller) else {
-            return nil
-        }
-        return (fsm, recursed)
+        return nil
+//        let ext = self.calculateExt()
+//        if false == self.compiler.shouldCompile(machine, inDirectory: self.buildDir, libExtension: ext) {
+//            let outputPath = self.compiler.outputPath(forMachine: machine, builtInDirectory: self.buildDir, libExtension: ext)
+//            guard let fsm = self.loadSymbol(inMachine: machine.name, gateway: newGateway, clock: clock, path: outputPath, caller: caller) else {
+//                return nil
+//            }
+//            return (fsm, recursed)
+//        }
+//        guard
+//            let outputPath = self.compiler.compile(
+//                machine,
+//                withBuildDir: self.buildDir,
+//                libExtension: ext,
+//                withCCompilerFlags: self.cCompilerFlags,
+//                andCXXCompilerFlags: self.cxxCompilerFlags,
+//                andLinkerFlags: self.linkerFlags,
+//                andSwiftCompilerFlags: self.swiftCompilerFlags,
+//                andSwiftBuildFlags: self.swiftBuildFlags
+//            )
+//        else {
+//            self.compiler.errors.forEach(self.printer.error)
+//            return nil
+//        }
+//        guard let fsm = self.loadSymbol(inMachine: machine.name, gateway: newGateway, clock: clock, path: outputPath, caller: caller) else {
+//            return nil
+//        }
+//        return (fsm, recursed)
     }
 
     fileprivate func loadSymbol<G: FSMGateway>(inMachine name: String, gateway: G, clock: Timer, path: String, caller: FSM_ID) -> FSMType? {
