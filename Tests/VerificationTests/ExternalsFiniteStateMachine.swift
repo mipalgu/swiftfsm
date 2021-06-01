@@ -135,7 +135,11 @@ internal final class ExternalsFiniteStateMachine: FiniteStateMachineType,
 
     func exit() {}
 
-    func next() {}
+    func next() {
+        (sensors + externalVariables + actuators).forEach {
+            $0.val = !($0.val as! Bool)
+        }
+    }
 
     func restart() {}
 

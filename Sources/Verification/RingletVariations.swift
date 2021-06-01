@@ -69,8 +69,8 @@ struct RingletVariations {
         let sensorCombinations = Combinations(flatten: fsms.map {
             Combinations(flatten: $0.snapshotSensors.map { Combinations(snapshotController: $0) })
         })
-        print("combinations: \(Array(sensorCombinations))")
-        let scenarios: [[ConditionalRinglet]] = sensorCombinations.flatMap { (combinations) -> [[ConditionalRinglet]] in
+        print("sensorCombinations: \(Array(sensorCombinations))")
+        let scenarios = sensorCombinations.flatMap { (combinations) -> [[ConditionalRinglet]] in
             func process(path: [ConditionalRinglet], index: Int) -> [[ConditionalRinglet]] {
                 if index >= combinations.count || index >= fsms.count {
                     return [path]
@@ -81,7 +81,6 @@ struct RingletVariations {
                 }
                 let ringlets = TimeAwareRinglets(fsm: clone, gateway: gateway, timer: timer, startingTime: startingTime).ringlets
                 return ringlets.flatMap { (ringlet) -> [[ConditionalRinglet]] in
-                    KripkeStatePropertyList()
                     var path = path
                     path.append(ringlet)
                     return process(path: path, index: index + 1)
@@ -91,7 +90,7 @@ struct RingletVariations {
             arr.reserveCapacity(min(fsms.count, combinations.count))
             return process(path: arr, index: 0)
         }
-        print("scenarios: \(scenarios.map { $0.map { $0.preSnapshot["externalVariables"] } })")
+        print("scenarios: \(scenarios.reduce("") { $0 + "\n\($1.map { $0.externalsPreSnapshot.map(\.value.value) })" })")
         self.init(ringlets: scenarios)
     }
     
