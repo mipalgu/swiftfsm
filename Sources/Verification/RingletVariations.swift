@@ -81,6 +81,7 @@ struct RingletVariations {
                 }
                 let ringlets = TimeAwareRinglets(fsm: clone, gateway: gateway, timer: timer, startingTime: startingTime).ringlets
                 return ringlets.flatMap { (ringlet) -> [[ConditionalRinglet]] in
+                    KripkeStatePropertyList()
                     var path = path
                     path.append(ringlet)
                     return process(path: path, index: index + 1)

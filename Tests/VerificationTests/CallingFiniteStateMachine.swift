@@ -63,7 +63,7 @@ import KripkeStructure
 import Verification
 import swiftfsm
 
-internal final class CallingFiniteStateMachine: ParameterisedMachineProtocol
+internal final class CallingFiniteStateMachine: ParameterisedMachineProtocol, KripkeVariablesModifier
 {
     
     typealias RingletType = MiPalRinglet
@@ -137,6 +137,25 @@ internal final class CallingFiniteStateMachine: ParameterisedMachineProtocol
     
     func resetResult() {
         self.results.vars = ResultContainerType.Vars()
+    }
+    
+    var validVars: [String: [Any]] {
+        [
+            "gateway": [],
+            "timer": [],
+            "actuators": [],
+            "sensors": [],
+            "externalVariables": [],
+            "initialState": [],
+            "currentState": []
+        ]
+    }
+    
+    var computedVars: [String: Any] {
+        [
+            "initialState": initialState.name,
+            "currentState": currentState.name
+        ]
     }
     
     let gateway = StackGateway()

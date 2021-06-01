@@ -72,8 +72,28 @@ internal final class AfterFiniteStateMachine: FiniteStateMachineType,
     Resumeable,
     Restartable,
     Snapshotable,
-    SnapshotControllerContainer
+    SnapshotControllerContainer,
+    KripkeVariablesModifier
 {
+    
+    var validVars: [String: [Any]] {
+        [
+            "gateway": [],
+            "timer": [],
+            "actuators": [],
+            "sensors": [],
+            "externalVariables": [],
+            "initialState": [],
+            "currentState": []
+        ]
+    }
+    
+    var computedVars: [String: Any] {
+        [
+            "initialState": initialState.name,
+            "currentState": currentState.name
+        ]
+    }
     
     let gateway = StackGateway()
     

@@ -56,9 +56,16 @@
  *
  */
 
+import FSM
 import swiftfsm
 
-final class InMemoryContainer<T: ExternalVariables>: ExternalVariablesContainer, Snapshotable {
+final class InMemoryContainer<T: ExternalVariables>: ExternalVariablesContainer, Snapshotable, KripkeVariablesModifier {
+    
+    var validVars: [String: [Any]] {
+        [
+            "_val": []
+        ]
+    }
     
     let name: String
     
