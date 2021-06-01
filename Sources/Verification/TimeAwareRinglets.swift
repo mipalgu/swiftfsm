@@ -71,8 +71,20 @@ struct TimeAwareRinglets {
         var times: SortedCollection<UInt> = []
         var ringlets: [ConditionalRinglet] = []
         var indexes: [RingletResult: Int] = [:]
+        let initialActuators = fsm.actuators.map { ($0.val as? Cloneable)?.clone() ?? $0.val }
+        let initalSensors = fsm.sensors.map { ($0.val as? Cloneable)?.clone() ?? $0.val }
+        let initialExternalVariables = fsm.externalVariables.map { ($0.val as? Cloneable)?.clone() ?? $0.val }
         func calculate(time: Timing) {
             let clone = fsm.clone()
+            zip(clone.actuators, initialActuators).forEach {
+                $0.val = $1
+            }
+            zip(clone.sensors, initalSensors).forEach {
+                $0.val = $1
+            }
+            zip(clone.externalVariables, initialExternalVariables).forEach {
+                $0.val = $1
+            }
             timer.forceRunningTime(time.timeValue)
             let ringlet = Ringlet(fsm: clone, gateway: gateway, timer: timer)
             for newTime in ringlet.afterCalls where newTime > lastTime {
@@ -80,7 +92,7 @@ struct TimeAwareRinglets {
                     times.insert(newTime)
                 }
             }
-            let result = RingletResult(postSnapshot: ringlet.postSnapshot, calls: ringlet.calls)
+            let result = RingletResult(ringlet: ringlet)
             if let index = indexes[result] {
                 ringlets[index].condition = .or(lhs: ringlets[index].condition, rhs: time.condition)
             } else {

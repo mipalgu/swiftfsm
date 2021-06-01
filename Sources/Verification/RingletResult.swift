@@ -60,8 +60,20 @@ import KripkeStructure
 
 struct RingletResult: Hashable {
     
+    var externalsPostSnapshot: KripkeStatePropertyList
+    
     var postSnapshot: KripkeStatePropertyList
     
     var calls: [Call]
+    
+    init(ringlet: Ringlet) {
+        self.init(externalsPostSnapshot: ringlet.externalsPostSnapshot, postSnapshot: ringlet.postSnapshot, calls: ringlet.calls)
+    }
+    
+    init(externalsPostSnapshot: KripkeStatePropertyList, postSnapshot: KripkeStatePropertyList, calls: [Call]) {
+        self.externalsPostSnapshot = externalsPostSnapshot
+        self.postSnapshot = postSnapshot
+        self.calls = calls
+    }
     
 }
