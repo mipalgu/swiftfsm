@@ -85,6 +85,14 @@ struct Ringlet {
         
     }
     
+    /// The evaluation of all external variables of the FSM before the ringlet
+    /// was executed.
+    var externalsPreSnapshot: KripkeStatePropertyList
+    
+    /// The evaluation of all external variables of the FSM after the ringlet
+    /// was executed.
+    var externalsPostSnapshot: KripkeStatePropertyList
+    
     /// The evaluation of all the variables within the FSM before the
     /// ringlet has executed.
     var preSnapshot: KripkeStatePropertyList
@@ -112,17 +120,29 @@ struct Ringlet {
     /// parameterised machine invocations. A delegate is created and used to
     /// detect when the fsm makes any calls to other machines.
     init<Gateway: ModifiableFSMGateway, Timer: Clock>(fsm: AnyScheduleableFiniteStateMachine, gateway: Gateway, timer: Timer) {
+        let allExternalVariables = (fsm.sensors + fsm.externalVariables + fsm.actuators)
+        let externalsPreSnapshot = KripkeStatePropertyList(Dictionary(uniqueKeysWithValues: allExternalVariables.map { ($0.name, KripkeStateProperty($0.val)) }))
         let preSnapshot = KripkeStatePropertyList(fsm.base)
         let delegate = GatewayDelegate()
         gateway.delegate = delegate
         fsm.next()
+        let externalsPostSnapshot = KripkeStatePropertyList(Dictionary(uniqueKeysWithValues: allExternalVariables.map { ($0.name, KripkeStateProperty($0.val)) }))
         let postSnapshot = KripkeStatePropertyList(fsm.base)
         let calls = delegate.invocations + delegate.calls
-        self.init(preSnapshot: preSnapshot, postSnapshot: postSnapshot, calls: calls, afterCalls: Set(timer.lastClockValues))
+        self.init(
+            externalsPreSnapshot: externalsPreSnapshot,
+            externalsPostSnapshot: externalsPostSnapshot,
+            preSnapshot: preSnapshot,
+            postSnapshot: postSnapshot,
+            calls: calls,
+            afterCalls: Set(timer.lastClockValues)
+        )
     }
     
     /// Create a `Ringlet`.
-    init(preSnapshot: KripkeStatePropertyList, postSnapshot: KripkeStatePropertyList, calls: [Call], afterCalls: Set<UInt>) {
+    init(externalsPreSnapshot: KripkeStatePropertyList, externalsPostSnapshot: KripkeStatePropertyList, preSnapshot: KripkeStatePropertyList, postSnapshot: KripkeStatePropertyList, calls: [Call], afterCalls: Set<UInt>) {
+        self.externalsPreSnapshot = externalsPreSnapshot
+        self.externalsPostSnapshot = externalsPostSnapshot
         self.preSnapshot = preSnapshot
         self.postSnapshot = postSnapshot
         self.calls = calls

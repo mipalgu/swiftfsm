@@ -113,5 +113,17 @@ class RingletTests: XCTestCase {
         }
         XCTAssertTrue(ringlet.afterCalls.contains(4000000))
     }
+    
+    func test_includesExternalVariables() throws {
+        let fsm = ExternalsFiniteStateMachine()
+        let ringlet = Ringlet(fsm: AnyScheduleableFiniteStateMachine(fsm), gateway: fsm.gateway, timer: fsm.timer)
+        print(ringlet.externalsPreSnapshot)
+        XCTAssertNotNil(ringlet.externalsPreSnapshot["InMemoryContainer-sensors1"])
+        XCTAssertNotNil(ringlet.externalsPreSnapshot["InMemoryContainer-sensors2"])
+        XCTAssertNotNil(ringlet.externalsPreSnapshot["InMemoryContainer-externals1"])
+        XCTAssertNotNil(ringlet.externalsPreSnapshot["InMemoryContainer-externals2"])
+        XCTAssertNotNil(ringlet.externalsPreSnapshot["InMemoryContainer-actuators1"])
+        XCTAssertNotNil(ringlet.externalsPreSnapshot["InMemoryContainer-actuators2"])
+    }
 
 }
