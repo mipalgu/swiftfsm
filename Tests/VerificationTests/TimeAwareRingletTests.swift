@@ -84,18 +84,24 @@ class TimeAwareRingletTests: XCTestCase {
         let time: UInt = 2000000
         let expected = [
             ConditionalRinglet(
+                externalsPreSnapshot: KripkeStatePropertyList(),
+                externalsPostSnapshot: KripkeStatePropertyList(),
                 preSnapshot: falseProperties,
                 postSnapshot: trueProperties,
                 calls: [],
                 condition: .lessThanEqual(value: time)
             ),
             ConditionalRinglet(
+                externalsPreSnapshot: KripkeStatePropertyList(),
+                externalsPostSnapshot: KripkeStatePropertyList(),
                 preSnapshot: falseProperties,
                 postSnapshot: falseProperties,
                 calls: [Call(caller: id, callee: id, parameters: ["value": true])],
                 condition: .or(lhs: .greaterThan(value: time), rhs: .greaterThan(value: 3000000))
             ),
             ConditionalRinglet(
+                externalsPreSnapshot: KripkeStatePropertyList(),
+                externalsPostSnapshot: KripkeStatePropertyList(),
                 preSnapshot: falseProperties,
                 postSnapshot: falseProperties,
                 calls: [Call(caller: id, callee: id, parameters: ["value": true]), Call(caller: id, callee: id, parameters: ["value": false])],
