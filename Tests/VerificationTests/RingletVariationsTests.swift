@@ -95,9 +95,29 @@ class RingletVariationsTests: XCTestCase {
             ([true, true], [true, true], [false, false]),
         ]
         XCTAssertEqual(ringlets.ringlets.count, expected.count)
-//        for (ringlet, (externals, sensors, actuators)) in zip(ringlets.ringlets.map { $0[0] }, expected) {
-//            ringlet.preSnapshot["sensors"]?.
-//        }
+        for (row, (ringlet, (externals, sensors, actuators))) in zip(ringlets.ringlets.map { $0[0] }, expected).enumerated() {
+            for (col, (externalVariable, expected)) in zip(fsm.externalVariables, externals).enumerated() {
+                guard let value = ringlet.externalsPreSnapshot[externalVariable.name]?.value as? Bool else {
+                    XCTFail("Ringlet does not contain a value for \(externalVariable.name)")
+                    continue
+                }
+                XCTAssertEqual(value, expected, "External variable \(externalVariable.name) does not equal expected value in row \(row), col \(col).")
+            }
+            for (col, (externalVariable, expected)) in zip(fsm.sensors, sensors).enumerated() {
+                guard let value = ringlet.externalsPreSnapshot[externalVariable.name]?.value as? Bool else {
+                    XCTFail("Ringlet does not contain a value for \(externalVariable.name)")
+                    continue
+                }
+                XCTAssertEqual(value, expected, "External variable \(externalVariable.name) does not equal expected value in row \(row), col \(col).")
+            }
+            for (col, (externalVariable, expected)) in zip(fsm.actuators, actuators).enumerated() {
+                guard let value = ringlet.externalsPreSnapshot[externalVariable.name]?.value as? Bool else {
+                    XCTFail("Ringlet does not contain a value for \(externalVariable.name)")
+                    continue
+                }
+                XCTAssertEqual(value, expected, "External variable \(externalVariable.name) does not equal expected value in row \(row), col \(col).")
+            }
+        }
     }
 
 }
