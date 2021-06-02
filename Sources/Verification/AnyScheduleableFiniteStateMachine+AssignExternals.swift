@@ -1,8 +1,8 @@
 /*
- * TimeAwareRinglets.swift
- * Verification
+ * AnyScheduleableFiniteStateMachine+AssignExternals.swift
+ * 
  *
- * Created by Callum McColl on 16/2/21.
+ * Created by Callum McColl on 2/6/21.
  * Copyright © 2021 Callum McColl. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -56,56 +56,18 @@
  *
  */
 
-import KripkeStructure
-import Gateways
-import Timers
 import swiftfsm
-import swift_helpers
 
-struct TimeAwareRinglets {
+extension AnyScheduleableFiniteStateMachine {
     
-    var ringlets: [ConditionalRinglet]
-    
-    init<Gateway: ModifiableFSMGateway, Timer: Clock>(fsm: AnyScheduleableFiniteStateMachine, gateway: Gateway, timer: Timer, startingTime: UInt) {
-        var lastTime = startingTime
-        var times: SortedCollection<UInt> = []
-        var ringlets: [ConditionalRinglet] = []
-        var indexes: [RingletResult: Int] = [:]
-        let initialExternalValues = fsm.externalValues
-        func calculate(time: Timing) {
-            let clone = fsm.clone()
-            clone.externalValues = initialExternalValues
-            timer.forceRunningTime(time.timeValue)
-            let ringlet = Ringlet(fsm: clone, gateway: gateway, timer: timer)
-            for newTime in ringlet.afterCalls where newTime > lastTime {
-                if !times.contains(newTime) {
-                    times.insert(newTime)
-                }
-            }
-            let result = RingletResult(ringlet: ringlet)
-            if let index = indexes[result] {
-                ringlets[index].condition = .or(lhs: ringlets[index].condition, rhs: time.condition)
-            } else {
-                indexes[result] = ringlets.count
-                ringlets.append(ConditionalRinglet(ringlet: ringlet, condition: time.condition))
+    var externalValues: [Any] {
+        get {
+            (actuators + externalVariables + sensors).map(\.val)
+        } nonmutating set {
+            zip(actuators + externalVariables + sensors, newValue).forEach {
+                $0.val = $1
             }
         }
-        if startingTime == 0 {
-            calculate(time: .beforeOrEqual(startingTime))
-            if let firstAfter = times.first {
-                ringlets[0].condition = .lessThanEqual(value: firstAfter)
-            }
-        }
-        while !times.isEmpty {
-            lastTime = times.remove(at: times.startIndex)
-            calculate(time: .after(lastTime))
-        }
-        fsm.externalValues = initialExternalValues
-        self.init(ringlets: ringlets)
-    }
-    
-    init(ringlets: [ConditionalRinglet]) {
-        self.ringlets = ringlets
     }
     
 }
