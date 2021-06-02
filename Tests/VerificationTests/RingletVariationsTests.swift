@@ -75,8 +75,9 @@ class RingletVariationsTests: XCTestCase {
     
     func test_canGenerateRingletsForOneMachine() throws {
         let fsm = ExternalsFiniteStateMachine()
-        let ringlets = RingletVariations(fsms: [AnyScheduleableFiniteStateMachine(fsm)], gateway: fsm.gateway, timer: fsm.timer, startingTime: 0)
-        var preExpected = [ // (actuators, externals, sensors)
+        let variations = RingletVariations(fsms: [AnyScheduleableFiniteStateMachine(fsm)], gateway: fsm.gateway, timer: fsm.timer, startingTime: 0)
+        // [actuators, externalVariables, sensors].
+        var preExpected = [
             [false, false, false, false, false, false],
             [false, false, false, false, false, true],
             [false, false, false, false, true, false],
@@ -95,27 +96,21 @@ class RingletVariationsTests: XCTestCase {
             [false, false, true, true, true, true],
         ]
         var postExpected = preExpected.map { $0.map { !$0 } }
-        XCTAssertEqual(ringlets.ringlets.count, preExpected.count)
-        for ringlet in ringlets.ringlets {
-            let result = ringlet[0].externalsPreSnapshot.sorted {
-                $0.key < $1.key
-            }.map { $1.value as! Bool }
-            guard let index = preExpected.firstIndex(where: { $0 == result }) else {
-                XCTFail("Unexpected preSnapshot result found: \(result)")
-                continue
+        XCTAssertEqual(variations.ringlets.count, preExpected.count)
+        func check(expected: inout [[Bool]], target: KeyPath<ConditionalRinglet, KripkeStatePropertyList>, name: String) {
+            for ringlet in variations.ringlets {
+                let result = ringlet[0][keyPath: target].sorted {
+                    $0.key < $1.key
+                }.map { $1.value as! Bool }
+                guard let index = expected.firstIndex(where: { $0 == result }) else {
+                    XCTFail("Unexpected \(name) result found: \(result)")
+                    continue
+                }
+                expected.remove(at: index)
             }
-            preExpected.remove(at: index)
         }
-        for ringlet in ringlets.ringlets {
-            let result = ringlet[0].externalsPostSnapshot.sorted {
-                $0.key < $1.key
-            }.map { $1.value as! Bool }
-            guard let index = postExpected.firstIndex(where: { $0 == result }) else {
-                XCTFail("Unexpected postSnapshot result found: \(result)")
-                continue
-            }
-            postExpected.remove(at: index)
-        }
+        check(expected: &preExpected, target: \.externalsPreSnapshot, name: "preSnapshot")
+        check(expected: &postExpected, target: \.externalsPostSnapshot, name: "postSnapshot")
     }
 
 }
