@@ -76,73 +76,47 @@ class RingletVariationsTests: XCTestCase {
     func test_canGenerateRingletsForOneMachine() throws {
         let fsm = ExternalsFiniteStateMachine()
         let ringlets = RingletVariations(fsms: [AnyScheduleableFiniteStateMachine(fsm)], gateway: fsm.gateway, timer: fsm.timer, startingTime: 0)
-        let preExpected = [ // (externals, sensors, actuators)
+        var preExpected = [ // (actuators, externals, sensors)
             ([false, false], [false, false], [false, false]),
+            ([false, false], [false, false], [false, true]),
+            ([false, false], [false, false], [true, false]),
             ([false, false], [false, true], [false, false]),
             ([false, false], [true, false], [false, false]),
-            ([false, true], [false, false], [false, false]),
-            ([true, false], [false, false], [false, false]),
+            ([false, false], [false, false], [true, true]),
+            ([false, false], [false, true], [false, true]),
+            ([false, false], [true, false], [false, true]),
+            ([false, false], [false, true], [true, false]),
+            ([false, false], [true, false], [true, false]),
             ([false, false], [true, true], [false, false]),
-            ([false, true], [false, true], [false, false]),
-            ([true, false], [false, true], [false, false]),
-            ([false, true], [true, false], [false, false]),
-            ([true, false], [true, false], [false, false]),
-            ([true, true], [false, false], [false, false]),
-            ([false, true], [true, true], [false, false]),
-            ([true, false], [true, true], [false, false]),
-            ([true, true], [false, true], [false, false]),
-            ([true, true], [true, false], [false, false]),
-            ([true, true], [true, true], [false, false]),
+            ([false, false], [false, true], [true, true]),
+            ([false, false], [true, false], [true, true]),
+            ([false, false], [true, true], [false, true]),
+            ([false, false], [true, true], [true, false]),
+            ([false, false], [true, true], [true, true]),
         ]
-        let postExpected = preExpected.map {
+        var postExpected = preExpected.map {
             ($0.map { !$0 }, $1.map { !$0 }, $2.map { !$0 })
         }
         XCTAssertEqual(ringlets.ringlets.count, preExpected.count)
-        for (row, (ringlet, (externals, sensors, actuators))) in zip(ringlets.ringlets.map { $0[0] }, preExpected).enumerated() {
-            for (col, (externalVariable, expected)) in zip(fsm.externalVariables, externals).enumerated() {
-                guard let value = ringlet.externalsPreSnapshot[externalVariable.name]?.value as? Bool else {
-                    XCTFail("Ringlet does not contain a value for \(externalVariable.name)")
-                    continue
-                }
-                XCTAssertEqual(value, expected, "External variable \(externalVariable.name) does not equal expected value in row \(row), col \(col).")
+        for ringlet in ringlets.ringlets {
+            let result = ringlet[0].externalsPreSnapshot.sorted {
+                $0.key < $1.key
+            }.map { $1.value as! Bool }
+            guard let index = preExpected.firstIndex(where: { $0.0 + $0.1 + $0.2 == result }) else {
+                XCTFail("Unexpected preSnapshot result found: \(result)")
+                continue
             }
-            for (col, (externalVariable, expected)) in zip(fsm.sensors, sensors).enumerated() {
-                guard let value = ringlet.externalsPreSnapshot[externalVariable.name]?.value as? Bool else {
-                    XCTFail("Ringlet does not contain a value for \(externalVariable.name)")
-                    continue
-                }
-                XCTAssertEqual(value, expected, "External variable \(externalVariable.name) does not equal expected value in row \(row), col \(col).")
-            }
-            for (col, (externalVariable, expected)) in zip(fsm.actuators, actuators).enumerated() {
-                guard let value = ringlet.externalsPreSnapshot[externalVariable.name]?.value as? Bool else {
-                    XCTFail("Ringlet does not contain a value for \(externalVariable.name)")
-                    continue
-                }
-                XCTAssertEqual(value, expected, "External variable \(externalVariable.name) does not equal expected value in row \(row), col \(col).")
-            }
+            preExpected.remove(at: index)
         }
-        for (row, (ringlet, (externals, sensors, actuators))) in zip(ringlets.ringlets.map { $0[0] }, postExpected).enumerated() {
-            for (col, (externalVariable, expected)) in zip(fsm.externalVariables, externals).enumerated() {
-                guard let value = ringlet.externalsPostSnapshot[externalVariable.name]?.value as? Bool else {
-                    XCTFail("Ringlet does not contain a value for \(externalVariable.name)")
-                    continue
-                }
-                XCTAssertEqual(value, expected, "External variable \(externalVariable.name) does not equal expected value in row \(row), col \(col).")
+        for ringlet in ringlets.ringlets {
+            let result = ringlet[0].externalsPostSnapshot.sorted {
+                $0.key < $1.key
+            }.map { $1.value as! Bool }
+            guard let index = postExpected.firstIndex(where: { $0.0 + $0.1 + $0.2 == result }) else {
+                XCTFail("Unexpected preSnapshot result found: \(result)")
+                continue
             }
-            for (col, (externalVariable, expected)) in zip(fsm.sensors, sensors).enumerated() {
-                guard let value = ringlet.externalsPostSnapshot[externalVariable.name]?.value as? Bool else {
-                    XCTFail("Ringlet does not contain a value for \(externalVariable.name)")
-                    continue
-                }
-                XCTAssertEqual(value, expected, "External variable \(externalVariable.name) does not equal expected value in row \(row), col \(col).")
-            }
-            for (col, (externalVariable, expected)) in zip(fsm.actuators, actuators).enumerated() {
-                guard let value = ringlet.externalsPostSnapshot[externalVariable.name]?.value as? Bool else {
-                    XCTFail("Ringlet does not contain a value for \(externalVariable.name)")
-                    continue
-                }
-                XCTAssertEqual(value, expected, "External variable \(externalVariable.name) does not equal expected value in row \(row), col \(col).")
-            }
+            postExpected.remove(at: index)
         }
     }
 
