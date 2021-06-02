@@ -1,5 +1,5 @@
 /*
- * RingletVariations.swift
+ * SnapshotSectionVariations.swift
  * Verification
  *
  * Created by Callum McColl on 17/2/21.
@@ -61,24 +61,32 @@ import Gateways
 import Timers
 import KripkeStructure
 
-struct RingletVariations {
+/// Represents all possible execution paths through a single external variable
+/// snapshot section in the scheduler.
+///
+/// The snapshot section represents the exection of all fsms within the
+/// scheduler that are between the reading of a snapshot for the external
+/// variables, and the saving of the external variable snapshot after the fsms
+/// have finished executing.
+///
+/// Since swiftfsm provides the ability to specify a set of fsms that take part
+/// in a single snapshot section, this struct represents all possible pathways
+/// through the snapshot section.
+struct SnapshotSectionVariations {
    
-    var ringlets: [[ConditionalRinglet]]
+    var sections: [SnapshotSection]
     
     init<Gateway: ModifiableFSMGateway, Timer: Clock>(fsms: [AnyScheduleableFiniteStateMachine], gateway: Gateway, timer: Timer, startingTime: UInt) {
         let sensorCombinations = Combinations(flatten: fsms.map {
             Combinations(flatten: $0.snapshotSensors.map { Combinations(snapshotController: $0) })
         })
-        print("sensorCombinations: \(Array(sensorCombinations))")
-        let scenarios = sensorCombinations.flatMap { (combinations) -> [[ConditionalRinglet]] in
+        let sections = sensorCombinations.flatMap { (combinations) -> [[ConditionalRinglet]] in
             func process(path: [ConditionalRinglet], index: Int) -> [[ConditionalRinglet]] {
                 if index >= combinations.count || index >= fsms.count {
                     return [path]
                 }
                 let clone = fsms[index].clone()
-                for (sensor, val) in zip(clone.snapshotSensors, combinations[index]) {
-                    sensor.val = val
-                }
+                clone.snapshotSensorValues = combinations[index]
                 let ringlets = TimeAwareRinglets(fsm: clone, gateway: gateway, timer: timer, startingTime: startingTime).ringlets
                 return ringlets.flatMap { (ringlet) -> [[ConditionalRinglet]] in
                     var path = path
@@ -90,12 +98,11 @@ struct RingletVariations {
             arr.reserveCapacity(min(fsms.count, combinations.count))
             return process(path: arr, index: 0)
         }
-        print("scenarios: \(scenarios.reduce("") { $0 + "\n\($1.map { $0.externalsPreSnapshot.map(\.value.value) })" })")
-        self.init(ringlets: scenarios)
+        self.init(sections: sections.map { SnapshotSection(ringlets: $0) })
     }
     
-    init(ringlets: [[ConditionalRinglet]]) {
-        self.ringlets = ringlets
+    init(sections: [SnapshotSection]) {
+        self.sections = sections
     }
     
 }

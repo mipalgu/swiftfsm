@@ -1,5 +1,5 @@
 /*
- * RingletVariationsTests.swift
+ * SnapshotSectionVariationsTests.swift
  * VerificationTests
  *
  * Created by Callum McColl on 17/2/21.
@@ -63,7 +63,7 @@ import swiftfsm
 
 @testable import Verification
 
-class RingletVariationsTests: XCTestCase {
+class SnapshotSectionVariationsTests: XCTestCase {
 
     override func setUpWithError() throws {
         // Put setup code here. This method is called before the invocation of each test method in the class.
@@ -75,7 +75,7 @@ class RingletVariationsTests: XCTestCase {
     
     func test_canGenerateRingletsForOneMachine() throws {
         let fsm = ExternalsFiniteStateMachine()
-        let variations = RingletVariations(fsms: [AnyScheduleableFiniteStateMachine(fsm)], gateway: fsm.gateway, timer: fsm.timer, startingTime: 0)
+        let variations = SnapshotSectionVariations(fsms: [AnyScheduleableFiniteStateMachine(fsm)], gateway: fsm.gateway, timer: fsm.timer, startingTime: 0)
         // [actuators, externalVariables, sensors].
         var preExpected = [
             [false, false, false, false, false, false],
@@ -96,10 +96,10 @@ class RingletVariationsTests: XCTestCase {
             [false, false, true, true, true, true],
         ]
         var postExpected = preExpected.map { $0.map { !$0 } }
-        XCTAssertEqual(variations.ringlets.count, preExpected.count)
+        XCTAssertEqual(variations.sections.count, preExpected.count)
         func check(expected: inout [[Bool]], target: KeyPath<ConditionalRinglet, KripkeStatePropertyList>, name: String) {
-            for ringlet in variations.ringlets {
-                let result = ringlet[0][keyPath: target].sorted {
+            for section in variations.sections {
+                let result = section.ringlets[0][keyPath: target].sorted {
                     $0.key < $1.key
                 }.map { $1.value as! Bool }
                 guard let index = expected.firstIndex(where: { $0 == result }) else {

@@ -1,6 +1,6 @@
 /*
- * AnyScheduleableFiniteStateMachine+AssignExternals.swift
- * 
+ * SnapshotSection.swift
+ * Verification
  *
  * Created by Callum McColl on 2/6/21.
  * Copyright © 2021 Callum McColl. All rights reserved.
@@ -56,28 +56,13 @@
  *
  */
 
-import swiftfsm
-
-extension AnyScheduleableFiniteStateMachine {
+/// Represents a particular execution of ringlets within the schedule between
+/// taking a snapshot of the external variables and saving the snapshot of
+/// external variables.
+struct SnapshotSection {
     
-    var snapshotSensorValues: [Any] {
-        get {
-            snapshotSensors.map(\.val)
-        } nonmutating set {
-            zip(snapshotSensors, newValue).forEach {
-                $0.val = $1
-            }
-        }
-    }
-    
-    var externalValues: [Any] {
-        get {
-            (actuators + externalVariables + sensors).map(\.val)
-        } nonmutating set {
-            zip(actuators + externalVariables + sensors, newValue).forEach {
-                $0.val = $1
-            }
-        }
-    }
+    /// The ringlets that were executed within an external variable snapshot
+    /// phase.
+    var ringlets: [ConditionalRinglet]
     
 }
