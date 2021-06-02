@@ -116,5 +116,13 @@ class TimeAwareRingletTests: XCTestCase {
             XCTAssertEqual(result.condition, expected.condition)
         }
     }
+    
+    func test_doesNotHaveSideEffectsOnExternalVariables() throws {
+        let fsm = ExternalsFiniteStateMachine()
+        let initialExternalValues = (fsm.actuators + fsm.externalVariables + fsm.sensors).map { $0.val as! Bool }
+        _ = TimeAwareRinglets(fsm: AnyScheduleableFiniteStateMachine(fsm), gateway: fsm.gateway, timer: fsm.timer, startingTime: 0)
+        let resultingExternalValues = (fsm.actuators + fsm.externalVariables + fsm.sensors).map { $0.val as! Bool }
+        XCTAssertEqual(initialExternalValues, resultingExternalValues)
+    }
 
 }
