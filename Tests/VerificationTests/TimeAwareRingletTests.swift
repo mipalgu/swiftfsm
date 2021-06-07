@@ -76,7 +76,7 @@ class TimeAwareRingletTests: XCTestCase {
     func test_computesAllPossibleRinglets() throws {
         let fsm = TimeConditionalFiniteStateMachine()
         let id = fsm.gateway.id(of: fsm.name)
-        fsm.gateway.fsms[id] = .parameterisedFSM(AnyParameterisedFiniteStateMachine(fsm))
+        fsm.gateway.fsms[id] = .parameterisedFSM(AnyParameterisedFiniteStateMachine(fsm, newMachine: { _ in fatalError("Should not be called.") }))
         fsm.gateway.stacks[id] = []
         let ringlets = TimeAwareRinglets(fsm: AnyScheduleableFiniteStateMachine(fsm), gateway: fsm.gateway, timer: fsm.timer, startingTime: 0)
         let falseProperties = KripkeStatePropertyList(["value": KripkeStateProperty(type: .Bool, value: Bool(false))])

@@ -90,7 +90,7 @@ class RingletTests: XCTestCase {
     func test_canDetectCalls() throws {
         let fsm = CallingFiniteStateMachine()
         let id = fsm.gateway.id(of: fsm.name)
-        fsm.gateway.fsms[id] = .parameterisedFSM(AnyParameterisedFiniteStateMachine(fsm))
+        fsm.gateway.fsms[id] = .parameterisedFSM(AnyParameterisedFiniteStateMachine(fsm, newMachine: { _ in fatalError("Should not be called.") }))
         fsm.gateway.stacks[id] = []
         let ringlet = Ringlet(fsm: AnyScheduleableFiniteStateMachine(fsm), gateway: fsm.gateway, timer: fsm.timer)
         XCTAssertEqual(ringlet.calls.count, 1)
