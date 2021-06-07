@@ -61,18 +61,28 @@ import KripkeStructure
 
 struct Call {
     
+    enum Method: String, Codable, CaseIterable {
+        
+        case synchronous
+        
+        case asynchronous
+        
+    }
+    
     var caller: FSM_ID
     
     var callee: FSM_ID
     
     var parameters: [String: Any?]
     
+    var method: Method
+    
 }
 
 extension Call: Equatable {
     
     static func ==(lhs: Call, rhs: Call) -> Bool {
-        guard lhs.caller == rhs.caller, lhs.callee == rhs.callee, lhs.parameters.keys == rhs.parameters.keys else {
+        guard lhs.caller == rhs.caller, lhs.callee == rhs.callee, lhs.parameters.keys == rhs.parameters.keys, lhs.method == rhs.method else {
             return false
         }
         for key in lhs.parameters.keys {

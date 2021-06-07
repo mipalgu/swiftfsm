@@ -125,7 +125,7 @@
       </BuildableProductRunnable>
       <CommandLineArguments>
          <CommandLineArgument
-            argument = "PMSighting.machine -Xswiftc -I/usr/local/include -Xlinker -L/usr/local/lib"
+            argument = "Vision.arrangement -Xswiftc -I/usr/local/include/swiftfsm -Xlinker -L/usr/local/lib"
             isEnabled = "YES">
          </CommandLineArgument>
       </CommandLineArguments>

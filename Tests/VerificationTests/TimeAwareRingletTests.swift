@@ -76,7 +76,15 @@ class TimeAwareRingletTests: XCTestCase {
     func test_computesAllPossibleRinglets() throws {
         let fsm = TimeConditionalFiniteStateMachine()
         let id = fsm.gateway.id(of: fsm.name)
-        fsm.gateway.fsms[id] = .parameterisedFSM(AnyParameterisedFiniteStateMachine(fsm, newMachine: { _ in fatalError("Should not be called.") }))
+        let newMachine: ([String: Any?]) -> AnyParameterisedFiniteStateMachine = {
+            let tempFSM = AnyParameterisedFiniteStateMachine(CallingFiniteStateMachine(), newMachine: { _ in fatalError("Should never be called.") })
+            let result = tempFSM.parametersFromDictionary($0)
+            if result == false {
+                fatalError("Unable to call fsm with parameters \($0)")
+            }
+            return tempFSM
+        }
+        fsm.gateway.fsms[id] = .parameterisedFSM(AnyParameterisedFiniteStateMachine(fsm, newMachine: newMachine))
         fsm.gateway.stacks[id] = []
         let ringlets = TimeAwareRinglets(fsm: AnyScheduleableFiniteStateMachine(fsm), gateway: fsm.gateway, timer: fsm.timer, startingTime: 0)
         let falseProperties = KripkeStatePropertyList(["value": KripkeStateProperty(type: .Bool, value: Bool(false))])
@@ -96,7 +104,7 @@ class TimeAwareRingletTests: XCTestCase {
                 externalsPostSnapshot: KripkeStatePropertyList(),
                 preSnapshot: falseProperties,
                 postSnapshot: falseProperties,
-                calls: [Call(caller: id, callee: id, parameters: ["value": true])],
+                calls: [Call(caller: id, callee: id, parameters: ["value": true], method: .synchronous)],
                 condition: .or(lhs: .greaterThan(value: time), rhs: .greaterThan(value: 3000000))
             ),
             ConditionalRinglet(
@@ -104,7 +112,7 @@ class TimeAwareRingletTests: XCTestCase {
                 externalsPostSnapshot: KripkeStatePropertyList(),
                 preSnapshot: falseProperties,
                 postSnapshot: falseProperties,
-                calls: [Call(caller: id, callee: id, parameters: ["value": true]), Call(caller: id, callee: id, parameters: ["value": false])],
+                calls: [Call(caller: id, callee: id, parameters: ["value": true], method: .synchronous), Call(caller: id, callee: id, parameters: ["value": false], method: .synchronous)],
                 condition: .greaterThan(value: 4000000)
             )
         ]
