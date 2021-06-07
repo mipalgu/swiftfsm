@@ -59,7 +59,7 @@
 import Gateways
 import KripkeStructure
 import Scheduling
-import Verification
+import VerificationOld
 
 
 public enum SupportedSchedulers {

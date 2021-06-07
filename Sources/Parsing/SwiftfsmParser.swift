@@ -67,7 +67,7 @@ import KripkeStructure
 import KripkeStructureViews
 import MachineCompiling
 import Scheduling
-import Verification
+import VerificationOld
 
 /**
  *  The standard `Parser`.
