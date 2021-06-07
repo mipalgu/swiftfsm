@@ -1,8 +1,9 @@
+//
 /*
- * Call.swift
- * Verification
+ * File.swift
+ * 
  *
- * Created by Callum McColl on 14/1/21.
+ * Created by Callum McColl on 7/6/21.
  * Copyright © 2021 Callum McColl. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -56,55 +57,10 @@
  *
  */
 
-import swiftfsm
-import KripkeStructure
-
-struct Call {
+struct CallAwareRinglet {
     
-    enum Method: String, Codable, CaseIterable {
-        
-        case synchronous
-        
-        case asynchronous
-        
-    }
+    var callChain: CallChain
     
-    var caller: FSM_ID
-    
-    var callee: FSM_ID
-    
-    var parameters: [String: Any?]
-    
-    var method: Method
-    
-    var fsm: AnyParameterisedFiniteStateMachine
-    
-}
-
-extension Call: Equatable {
-    
-    static func ==(lhs: Call, rhs: Call) -> Bool {
-        guard lhs.caller == rhs.caller, lhs.callee == rhs.callee, lhs.parameters.keys == rhs.parameters.keys, lhs.method == rhs.method, lhs.fsm == rhs.fsm else {
-            return false
-        }
-        for key in lhs.parameters.keys {
-            if KripkeStatePropertyList(lhs.parameters[key]) != KripkeStatePropertyList(rhs.parameters[key]) {
-                return false
-            }
-        }
-        return true
-    }
-    
-}
-
-extension Call: Hashable {
-    
-    func hash(into hasher: inout Hasher) {
-        hasher.combine(self.caller)
-        hasher.combine(self.callee)
-        hasher.combine(KripkeStatePropertyList(self.parameters.sorted { $0.key < $1.key }))
-        hasher.combine(self.method)
-        hasher.combine(self.fsm.name)
-    }
+    var ringlet: ConditionalRinglet
     
 }

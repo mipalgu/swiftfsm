@@ -75,7 +75,7 @@ class SnapshotSectionVariationsTests: XCTestCase {
     
     func test_canGenerateRingletsForOneMachine() throws {
         let fsm = ExternalsFiniteStateMachine()
-        let variations = SnapshotSectionVariations(fsms: [AnyScheduleableFiniteStateMachine(fsm)], gateway: fsm.gateway, timer: fsm.timer, startingTime: 0)
+        let variations = SnapshotSectionVariations(fsms: [CallChain(root: AnyScheduleableFiniteStateMachine(fsm), calls: [])], gateway: fsm.gateway, timer: fsm.timer, startingTime: 0)
         // [actuators, externalVariables, sensors].
         var preExpected = [
             [false, false, false, false, false, false],
@@ -99,7 +99,7 @@ class SnapshotSectionVariationsTests: XCTestCase {
         XCTAssertEqual(variations.sections.count, preExpected.count)
         func check(expected: inout [[Bool]], target: KeyPath<ConditionalRinglet, KripkeStatePropertyList>, name: String) {
             for section in variations.sections {
-                let result = section.ringlets[0][keyPath: target].sorted {
+                let result = section.ringlets[0].ringlet[keyPath: target].sorted {
                     $0.key < $1.key
                 }.map { $1.value as! Bool }
                 guard let index = expected.firstIndex(where: { $0 == result }) else {

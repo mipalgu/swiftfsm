@@ -63,6 +63,6 @@ struct SnapshotSection {
     
     /// The ringlets that were executed within an external variable snapshot
     /// phase.
-    var ringlets: [ConditionalRinglet]
+    var ringlets: [CallAwareRinglet]
     
 }

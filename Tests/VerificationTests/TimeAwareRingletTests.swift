@@ -104,7 +104,7 @@ class TimeAwareRingletTests: XCTestCase {
                 externalsPostSnapshot: KripkeStatePropertyList(),
                 preSnapshot: falseProperties,
                 postSnapshot: falseProperties,
-                calls: [Call(caller: id, callee: id, parameters: ["value": true], method: .synchronous)],
+                calls: [Call(caller: id, callee: id, parameters: ["value": true], method: .synchronous, fsm: newMachine(["value": true]))],
                 condition: .or(lhs: .greaterThan(value: time), rhs: .greaterThan(value: 3000000))
             ),
             ConditionalRinglet(
@@ -112,7 +112,7 @@ class TimeAwareRingletTests: XCTestCase {
                 externalsPostSnapshot: KripkeStatePropertyList(),
                 preSnapshot: falseProperties,
                 postSnapshot: falseProperties,
-                calls: [Call(caller: id, callee: id, parameters: ["value": true], method: .synchronous), Call(caller: id, callee: id, parameters: ["value": false], method: .synchronous)],
+                calls: [Call(caller: id, callee: id, parameters: ["value": true], method: .synchronous, fsm: newMachine(["value": true])), Call(caller: id, callee: id, parameters: ["value": false], method: .synchronous, fsm: newMachine(["value": false]))],
                 condition: .greaterThan(value: 4000000)
             )
         ]
