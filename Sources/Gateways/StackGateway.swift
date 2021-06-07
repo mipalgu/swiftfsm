@@ -69,7 +69,7 @@ public final class StackGateway: ModifiableFSMGateway, ModifiableFSMGatewayDefau
 
     private let printer: Printer
 
-    fileprivate let stackLimit: Int
+    public let stackLimit: Int
 
     public var stacks: [FSM_ID: [PromiseData]] = [:]
 

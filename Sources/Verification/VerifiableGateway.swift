@@ -1,6 +1,7 @@
+//
 /*
- * CallChain.swift
- * Verification
+ * File.swift
+ * 
  *
  * Created by Callum McColl on 7/6/21.
  * Copyright © 2021 Callum McColl. All rights reserved.
@@ -56,24 +57,42 @@
  *
  */
 
-import swiftfsm
+public protocol NewVerifiableGateway {
+    
+    func setScenario(_ calls: [CallChain])
+    
+    func isValid(_ chain: CallChain) -> Bool
+    
+}
 
-public struct CallChain: Hashable {
+import Gateways
+
+extension StackGateway: NewVerifiableGateway {
     
-    var root: AnyScheduleableFiniteStateMachine
-    
-    var calls: [Call]
-    
-    var fsm: AnyScheduleableFiniteStateMachine {
-        guard let last = calls.last else {
-            return root
+    public func setScenario(_ calls: [CallChain]) {
+        self.stacks = [:]
+        for call in calls {
+            guard let last = call.calls.last else {
+                continue
+            }
+            let promiseData = PromiseData(fsm: last.fsm, hasFinished: last.fsm.hasFinished && last.fsm.resultContainer.result != nil)
+            switch last.method {
+            case .asynchronous:
+                if nil != self.stacks[last.callee] {
+                    fatalError("Detected calling the same fsm more than once.")
+                }
+                self.stacks[last.callee] = [promiseData]
+            case .synchronous:
+                if nil != self.stacks[last.caller] {
+                    fatalError("Detected calling the same fsm more than once.")
+                }
+                self.stacks[last.caller] = [promiseData]
+            }
         }
-        return last.fsm.asScheduleableFiniteStateMachine
     }
     
-    public func hash(into hasher: inout Hasher) {
-        hasher.combine(root.name)
-        hasher.combine(calls)
+    public func isValid(_ chain: CallChain) -> Bool {
+        chain.calls.count < self.stackLimit
     }
     
 }
