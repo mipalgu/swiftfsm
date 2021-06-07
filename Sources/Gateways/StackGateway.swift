@@ -120,12 +120,7 @@ public final class StackGateway: ModifiableFSMGateway, ModifiableFSMGatewayDefau
     }
 
     fileprivate func handleInvocation(id: FSM_ID, fsm: AnyParameterisedFiniteStateMachine, withParameters parameters: [String: Any?]) -> PromiseData {
-        let promiseData = PromiseData(fsm: fsm.clone(), hasFinished: false)
-        guard true == promiseData.fsm.parametersFromDictionary(parameters) else {
-            self.error("Unable to initial parameterised fsm \(fsm.name) with id \(id) from its parameters dictionary.")
-        }
-        promiseData.fsm.restart()
-        return promiseData
+        return PromiseData(fsm: fsm.newMachine(parameters: parameters), hasFinished: false)
     }
 
     fileprivate func error(_ str: String) -> Never {
