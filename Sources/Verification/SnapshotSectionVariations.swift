@@ -88,10 +88,8 @@ struct SnapshotSectionVariations {
                 let clone = fsms[index].fsm.clone()
                 clone.snapshotSensorValues = combinations[index]
                 let ringlets = TimeAwareRinglets(fsm: clone, gateway: gateway, timer: timer, startingTime: startingTime).ringlets
-                return ringlets.flatMap { (ringlet) -> [[ConditionalRinglet]] in
-                    var path = path
-                    path.append(ringlet)
-                    return process(path: path, index: index + 1)
+                return ringlets.flatMap {
+                    process(path: path + [$0], index: index + 1)
                 }
             }
             var arr: [ConditionalRinglet] = []
