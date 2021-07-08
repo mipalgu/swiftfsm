@@ -459,7 +459,6 @@ class SnapshotSectionVariationsTests: XCTestCase {
                     $0.key < $1.key
                 }.map { $1.value as! Bool }
             }
-            print(result)
             guard let index = expected.firstIndex(where: { $0 == result }) else {
                 XCTFail("Unexpected \(name) result found: \(result)")
                 continue
