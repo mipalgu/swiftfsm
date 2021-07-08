@@ -95,9 +95,9 @@ internal final class ExternalsFiniteStateMachine: FiniteStateMachineType,
         ]
     }
     
-    let gateway = StackGateway()
+    var gateway = StackGateway()
     
-    let timer = FSMClock(ringletLengths: ["toggle": 10], scheduleLength: 10)
+    var timer = FSMClock(ringletLengths: ["toggle": 10], scheduleLength: 10)
     
     var sensors: [AnySnapshotController] = [
         AnySnapshotController(InMemoryContainer<Bool>(name: "sensors1", initialValue: false)),
@@ -117,7 +117,7 @@ internal final class ExternalsFiniteStateMachine: FiniteStateMachineType,
     //swiftlint:disable:next type_name
     typealias _StateType = MiPalState
 
-    let name: String = "toggle"
+    var name: String = "toggle"
 
     var initialState: MiPalState = EmptyMiPalState("initial")
 

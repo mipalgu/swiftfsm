@@ -67,6 +67,31 @@ struct Combinations<Element>: Sequence {
         self.iterator = iterator
     }
     
+    init<S: Sequence>(fsms: S) where Element == [[Any]], S.Element == AnyScheduleableFiniteStateMachine {
+        var snapshotSensors: [String: Combinations<Any>] = [:]
+        for fsm in fsms {
+            for sensor in fsm.snapshotSensors {
+                if snapshotSensors[sensor.name] == nil {
+                    snapshotSensors[sensor.name] = Combinations<Any>(snapshotController: sensor)
+                }
+            }
+        }
+        let combinations = Combinations<[String: Any]>(flatten: snapshotSensors)
+        self.iterator = {
+            let iterator = combinations.makeIterator()
+            return AnyIterator {
+                guard let values = iterator.next() else {
+                    return nil
+                }
+                return fsms.map {
+                    $0.snapshotSensors.map {
+                        values[$0.name]!
+                    }
+                }
+            }
+        }
+    }
+    
     func erased() -> Combinations<Any?> {
         return Combinations<Any?> {
             let iterator = self.makeIterator()

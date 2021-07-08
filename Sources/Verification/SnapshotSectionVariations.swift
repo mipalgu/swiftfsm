@@ -77,9 +77,15 @@ struct SnapshotSectionVariations {
     var sections: [SnapshotSection]
     
     init<Gateway: ModifiableFSMGateway, Timer: Clock>(fsms: [CallChain], gateway: Gateway, timer: Timer, startingTime: UInt) {
-        let sensorCombinations = Combinations(flatten: fsms.map {
-            Combinations(flatten: $0.fsm.snapshotSensors.map { Combinations(snapshotController: $0) })
-        })
+        var allCombinations: [String: Combinations<Any>] = [:]
+        for chain in fsms {
+            for sensor in chain.fsm.snapshotSensors {
+                if allCombinations[sensor.name] == nil {
+                    allCombinations[sensor.name] = Combinations(snapshotController: sensor)
+                }
+            }
+        }
+        let sensorCombinations = Combinations(fsms: fsms.lazy.map { $0.fsm })
         let sections = sensorCombinations.flatMap { (combinations) -> [[ConditionalRinglet]] in
             func process(path: [ConditionalRinglet], index: Int) -> [[ConditionalRinglet]] {
                 if index >= combinations.count || index >= fsms.count {
