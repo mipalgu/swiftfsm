@@ -77,22 +77,18 @@ struct SnapshotSectionVariations {
     var sections: [SnapshotSection]
     
     init<Gateway: ModifiableFSMGateway, Timer: Clock>(fsms: [CallChain], gateway: Gateway, timer: Timer, startingTime: UInt) {
-        var allCombinations: [String: Combinations<Any>] = [:]
-        for chain in fsms {
-            for sensor in chain.fsm.snapshotSensors {
-                if allCombinations[sensor.name] == nil {
-                    allCombinations[sensor.name] = Combinations(snapshotController: sensor)
-                }
-            }
-        }
         let sensorCombinations = Combinations(fsms: fsms.lazy.map { $0.fsm })
         let sections = sensorCombinations.flatMap { (combinations) -> [[ConditionalRinglet]] in
+            let clones: [AnyScheduleableFiniteStateMachine] = fsms.enumerated().map {
+                let clone = $1.fsm.clone()
+                clone.snapshotSensorValues = combinations[$0]
+                return clone
+            }
             func process(path: [ConditionalRinglet], index: Int) -> [[ConditionalRinglet]] {
                 if index >= combinations.count || index >= fsms.count {
                     return [path]
                 }
-                let clone = fsms[index].fsm.clone()
-                clone.snapshotSensorValues = combinations[index]
+                let clone = clones[index].clone()
                 let ringlets = TimeAwareRinglets(fsm: clone, gateway: gateway, timer: timer, startingTime: startingTime).ringlets
                 return ringlets.flatMap {
                     process(path: path + [$0], index: index + 1)
