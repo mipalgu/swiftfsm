@@ -143,7 +143,6 @@ class SnapshotSectionVariationsTests: XCTestCase {
         ]
         let postExpected = preExpected.map { $0.map { !$0 } }
         XCTAssertEqual(variations.sections.count, preExpected.count)
-        
         var preExpectedCopy = Array(zip(preExpected, preExpected).lazy.map { [$0, $1] })
         var postExpectedCopy = Array(zip(postExpected, postExpected).lazy.map { [$0, $1] })
         check(variations, expected: &preExpectedCopy, target: \.externalsPreSnapshot, name: "preSnapshot")
@@ -445,7 +444,7 @@ class SnapshotSectionVariationsTests: XCTestCase {
             [[false, false, true, true, true, true], [false, false, true, true, true, true]]
         ]
         var postExpected = preExpected.map { $0.map { $0.map { !$0 } } }
-        XCTAssertEqual(variations.sections.count, 256)
+        XCTAssertEqual(variations.sections.count, preExpected.count)
         check(variations, expected: &preExpected, target: \.externalsPreSnapshot, name: "preSnapshot")
         check(variations, expected: &postExpected, target: \.externalsPostSnapshot, name: "postSnapshot")
         XCTAssertTrue(preExpected.isEmpty)
