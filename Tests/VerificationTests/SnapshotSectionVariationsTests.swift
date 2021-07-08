@@ -112,6 +112,8 @@ class SnapshotSectionVariationsTests: XCTestCase {
         }
         check(expected: &preExpected, target: \.externalsPreSnapshot, name: "preSnapshot")
         check(expected: &postExpected, target: \.externalsPostSnapshot, name: "postSnapshot")
+        XCTAssertTrue(preExpected.isEmpty)
+        XCTAssertTrue(postExpected.isEmpty)
     }
     
     func test_canGenerateRingletsForTwoSameMachines() throws {
@@ -172,6 +174,323 @@ class SnapshotSectionVariationsTests: XCTestCase {
         var postExpectedCopy = Array(zip(postExpected, postExpected).lazy.map { [$0, $1] })
         check(expected: &preExpectedCopy, target: \.externalsPreSnapshot, name: "preSnapshot")
         check(expected: &postExpectedCopy, target: \.externalsPostSnapshot, name: "postSnapshot")
+        XCTAssertTrue(preExpectedCopy.isEmpty)
+        XCTAssertTrue(postExpectedCopy.isEmpty)
+    }
+    
+    func test_canGenerateRingletsForTwoDifferentMachines() throws {
+        let fsm1 = ExternalsFiniteStateMachine()
+        let fsm2 = ExternalsFiniteStateMachine2()
+        fsm1.name += "1"
+        fsm2.name += "2"
+        let timer = FSMClock(ringletLengths: [fsm1.name: 10, fsm2.name: 10], scheduleLength: 20)
+        fsm1.timer = timer
+        fsm2.timer = timer
+        fsm2.gateway = fsm1.gateway
+        let variations = SnapshotSectionVariations(
+            fsms: [
+                CallChain(root: AnyScheduleableFiniteStateMachine(fsm1), calls: []),
+                CallChain(root: AnyScheduleableFiniteStateMachine(fsm2), calls: [])
+            ],
+            gateway: fsm1.gateway,
+            timer: fsm1.timer,
+            startingTime: 0
+        )
+        // [actuators, externalVariables, sensors].
+        var preExpected = [
+            [[false, false, false, false, false, false], [false, false, false, false, false, false]],
+            [[false, false, false, false, false, false], [false, false, false, false, false, true]],
+            [[false, false, false, false, false, false], [false, false, false, false, true, false]],
+            [[false, false, false, false, false, false], [false, false, false, true, false, false]],
+            [[false, false, false, false, false, false], [false, false, true, false, false, false]],
+            [[false, false, false, false, false, false], [false, false, false, false, true, true]],
+            [[false, false, false, false, false, false], [false, false, false, true, false, true]],
+            [[false, false, false, false, false, false], [false, false, true, false, false, true]],
+            [[false, false, false, false, false, false], [false, false, false, true, true, false]],
+            [[false, false, false, false, false, false], [false, false, true, false, true, false]],
+            [[false, false, false, false, false, false], [false, false, true, true, false, false]],
+            [[false, false, false, false, false, false], [false, false, false, true, true, true]],
+            [[false, false, false, false, false, false], [false, false, true, false, true, true]],
+            [[false, false, false, false, false, false], [false, false, true, true, false, true]],
+            [[false, false, false, false, false, false], [false, false, true, true, true, false]],
+            [[false, false, false, false, false, false], [false, false, true, true, true, true]],
+            
+            [[false, false, false, false, false, true], [false, false, false, false, false, false]],
+            [[false, false, false, false, false, true], [false, false, false, false, false, true]],
+            [[false, false, false, false, false, true], [false, false, false, false, true, false]],
+            [[false, false, false, false, false, true], [false, false, false, true, false, false]],
+            [[false, false, false, false, false, true], [false, false, true, false, false, false]],
+            [[false, false, false, false, false, true], [false, false, false, false, true, true]],
+            [[false, false, false, false, false, true], [false, false, false, true, false, true]],
+            [[false, false, false, false, false, true], [false, false, true, false, false, true]],
+            [[false, false, false, false, false, true], [false, false, false, true, true, false]],
+            [[false, false, false, false, false, true], [false, false, true, false, true, false]],
+            [[false, false, false, false, false, true], [false, false, true, true, false, false]],
+            [[false, false, false, false, false, true], [false, false, false, true, true, true]],
+            [[false, false, false, false, false, true], [false, false, true, false, true, true]],
+            [[false, false, false, false, false, true], [false, false, true, true, false, true]],
+            [[false, false, false, false, false, true], [false, false, true, true, true, false]],
+            [[false, false, false, false, false, true], [false, false, true, true, true, true]],
+            
+            [[false, false, false, false, true, false], [false, false, false, false, false, false]],
+            [[false, false, false, false, true, false], [false, false, false, false, false, true]],
+            [[false, false, false, false, true, false], [false, false, false, false, true, false]],
+            [[false, false, false, false, true, false], [false, false, false, true, false, false]],
+            [[false, false, false, false, true, false], [false, false, true, false, false, false]],
+            [[false, false, false, false, true, false], [false, false, false, false, true, true]],
+            [[false, false, false, false, true, false], [false, false, false, true, false, true]],
+            [[false, false, false, false, true, false], [false, false, true, false, false, true]],
+            [[false, false, false, false, true, false], [false, false, false, true, true, false]],
+            [[false, false, false, false, true, false], [false, false, true, false, true, false]],
+            [[false, false, false, false, true, false], [false, false, true, true, false, false]],
+            [[false, false, false, false, true, false], [false, false, false, true, true, true]],
+            [[false, false, false, false, true, false], [false, false, true, false, true, true]],
+            [[false, false, false, false, true, false], [false, false, true, true, false, true]],
+            [[false, false, false, false, true, false], [false, false, true, true, true, false]],
+            [[false, false, false, false, true, false], [false, false, true, true, true, true]],
+            
+            [[false, false, false, true, false, false], [false, false, false, false, false, false]],
+            [[false, false, false, true, false, false], [false, false, false, false, false, true]],
+            [[false, false, false, true, false, false], [false, false, false, false, true, false]],
+            [[false, false, false, true, false, false], [false, false, false, true, false, false]],
+            [[false, false, false, true, false, false], [false, false, true, false, false, false]],
+            [[false, false, false, true, false, false], [false, false, false, false, true, true]],
+            [[false, false, false, true, false, false], [false, false, false, true, false, true]],
+            [[false, false, false, true, false, false], [false, false, true, false, false, true]],
+            [[false, false, false, true, false, false], [false, false, false, true, true, false]],
+            [[false, false, false, true, false, false], [false, false, true, false, true, false]],
+            [[false, false, false, true, false, false], [false, false, true, true, false, false]],
+            [[false, false, false, true, false, false], [false, false, false, true, true, true]],
+            [[false, false, false, true, false, false], [false, false, true, false, true, true]],
+            [[false, false, false, true, false, false], [false, false, true, true, false, true]],
+            [[false, false, false, true, false, false], [false, false, true, true, true, false]],
+            [[false, false, false, true, false, false], [false, false, true, true, true, true]],
+            
+            [[false, false, true, false, false, false], [false, false, false, false, false, false]],
+            [[false, false, true, false, false, false], [false, false, false, false, false, true]],
+            [[false, false, true, false, false, false], [false, false, false, false, true, false]],
+            [[false, false, true, false, false, false], [false, false, false, true, false, false]],
+            [[false, false, true, false, false, false], [false, false, true, false, false, false]],
+            [[false, false, true, false, false, false], [false, false, false, false, true, true]],
+            [[false, false, true, false, false, false], [false, false, false, true, false, true]],
+            [[false, false, true, false, false, false], [false, false, true, false, false, true]],
+            [[false, false, true, false, false, false], [false, false, false, true, true, false]],
+            [[false, false, true, false, false, false], [false, false, true, false, true, false]],
+            [[false, false, true, false, false, false], [false, false, true, true, false, false]],
+            [[false, false, true, false, false, false], [false, false, false, true, true, true]],
+            [[false, false, true, false, false, false], [false, false, true, false, true, true]],
+            [[false, false, true, false, false, false], [false, false, true, true, false, true]],
+            [[false, false, true, false, false, false], [false, false, true, true, true, false]],
+            [[false, false, true, false, false, false], [false, false, true, true, true, true]],
+            
+            [[false, false, false, false, true, true], [false, false, false, false, false, false]],
+            [[false, false, false, false, true, true], [false, false, false, false, false, true]],
+            [[false, false, false, false, true, true], [false, false, false, false, true, false]],
+            [[false, false, false, false, true, true], [false, false, false, true, false, false]],
+            [[false, false, false, false, true, true], [false, false, true, false, false, false]],
+            [[false, false, false, false, true, true], [false, false, false, false, true, true]],
+            [[false, false, false, false, true, true], [false, false, false, true, false, true]],
+            [[false, false, false, false, true, true], [false, false, true, false, false, true]],
+            [[false, false, false, false, true, true], [false, false, false, true, true, false]],
+            [[false, false, false, false, true, true], [false, false, true, false, true, false]],
+            [[false, false, false, false, true, true], [false, false, true, true, false, false]],
+            [[false, false, false, false, true, true], [false, false, false, true, true, true]],
+            [[false, false, false, false, true, true], [false, false, true, false, true, true]],
+            [[false, false, false, false, true, true], [false, false, true, true, false, true]],
+            [[false, false, false, false, true, true], [false, false, true, true, true, false]],
+            [[false, false, false, false, true, true], [false, false, true, true, true, true]],
+            
+            [[false, false, false, true, false, true], [false, false, false, false, false, false]],
+            [[false, false, false, true, false, true], [false, false, false, false, false, true]],
+            [[false, false, false, true, false, true], [false, false, false, false, true, false]],
+            [[false, false, false, true, false, true], [false, false, false, true, false, false]],
+            [[false, false, false, true, false, true], [false, false, true, false, false, false]],
+            [[false, false, false, true, false, true], [false, false, false, false, true, true]],
+            [[false, false, false, true, false, true], [false, false, false, true, false, true]],
+            [[false, false, false, true, false, true], [false, false, true, false, false, true]],
+            [[false, false, false, true, false, true], [false, false, false, true, true, false]],
+            [[false, false, false, true, false, true], [false, false, true, false, true, false]],
+            [[false, false, false, true, false, true], [false, false, true, true, false, false]],
+            [[false, false, false, true, false, true], [false, false, false, true, true, true]],
+            [[false, false, false, true, false, true], [false, false, true, false, true, true]],
+            [[false, false, false, true, false, true], [false, false, true, true, false, true]],
+            [[false, false, false, true, false, true], [false, false, true, true, true, false]],
+            [[false, false, false, true, false, true], [false, false, true, true, true, true]],
+            
+            [[false, false, true, false, false, true], [false, false, false, false, false, false]],
+            [[false, false, true, false, false, true], [false, false, false, false, false, true]],
+            [[false, false, true, false, false, true], [false, false, false, false, true, false]],
+            [[false, false, true, false, false, true], [false, false, false, true, false, false]],
+            [[false, false, true, false, false, true], [false, false, true, false, false, false]],
+            [[false, false, true, false, false, true], [false, false, false, false, true, true]],
+            [[false, false, true, false, false, true], [false, false, false, true, false, true]],
+            [[false, false, true, false, false, true], [false, false, true, false, false, true]],
+            [[false, false, true, false, false, true], [false, false, false, true, true, false]],
+            [[false, false, true, false, false, true], [false, false, true, false, true, false]],
+            [[false, false, true, false, false, true], [false, false, true, true, false, false]],
+            [[false, false, true, false, false, true], [false, false, false, true, true, true]],
+            [[false, false, true, false, false, true], [false, false, true, false, true, true]],
+            [[false, false, true, false, false, true], [false, false, true, true, false, true]],
+            [[false, false, true, false, false, true], [false, false, true, true, true, false]],
+            [[false, false, true, false, false, true], [false, false, true, true, true, true]],
+            
+            [[false, false, false, true, true, false], [false, false, false, false, false, false]],
+            [[false, false, false, true, true, false], [false, false, false, false, false, true]],
+            [[false, false, false, true, true, false], [false, false, false, false, true, false]],
+            [[false, false, false, true, true, false], [false, false, false, true, false, false]],
+            [[false, false, false, true, true, false], [false, false, true, false, false, false]],
+            [[false, false, false, true, true, false], [false, false, false, false, true, true]],
+            [[false, false, false, true, true, false], [false, false, false, true, false, true]],
+            [[false, false, false, true, true, false], [false, false, true, false, false, true]],
+            [[false, false, false, true, true, false], [false, false, false, true, true, false]],
+            [[false, false, false, true, true, false], [false, false, true, false, true, false]],
+            [[false, false, false, true, true, false], [false, false, true, true, false, false]],
+            [[false, false, false, true, true, false], [false, false, false, true, true, true]],
+            [[false, false, false, true, true, false], [false, false, true, false, true, true]],
+            [[false, false, false, true, true, false], [false, false, true, true, false, true]],
+            [[false, false, false, true, true, false], [false, false, true, true, true, false]],
+            [[false, false, false, true, true, false], [false, false, true, true, true, true]],
+            
+            [[false, false, true, false, true, false], [false, false, false, false, false, false]],
+            [[false, false, true, false, true, false], [false, false, false, false, false, true]],
+            [[false, false, true, false, true, false], [false, false, false, false, true, false]],
+            [[false, false, true, false, true, false], [false, false, false, true, false, false]],
+            [[false, false, true, false, true, false], [false, false, true, false, false, false]],
+            [[false, false, true, false, true, false], [false, false, false, false, true, true]],
+            [[false, false, true, false, true, false], [false, false, false, true, false, true]],
+            [[false, false, true, false, true, false], [false, false, true, false, false, true]],
+            [[false, false, true, false, true, false], [false, false, false, true, true, false]],
+            [[false, false, true, false, true, false], [false, false, true, false, true, false]],
+            [[false, false, true, false, true, false], [false, false, true, true, false, false]],
+            [[false, false, true, false, true, false], [false, false, false, true, true, true]],
+            [[false, false, true, false, true, false], [false, false, true, false, true, true]],
+            [[false, false, true, false, true, false], [false, false, true, true, false, true]],
+            [[false, false, true, false, true, false], [false, false, true, true, true, false]],
+            [[false, false, true, false, true, false], [false, false, true, true, true, true]],
+            
+            [[false, false, true, true, false, false], [false, false, false, false, false, false]],
+            [[false, false, true, true, false, false], [false, false, false, false, false, true]],
+            [[false, false, true, true, false, false], [false, false, false, false, true, false]],
+            [[false, false, true, true, false, false], [false, false, false, true, false, false]],
+            [[false, false, true, true, false, false], [false, false, true, false, false, false]],
+            [[false, false, true, true, false, false], [false, false, false, false, true, true]],
+            [[false, false, true, true, false, false], [false, false, false, true, false, true]],
+            [[false, false, true, true, false, false], [false, false, true, false, false, true]],
+            [[false, false, true, true, false, false], [false, false, false, true, true, false]],
+            [[false, false, true, true, false, false], [false, false, true, false, true, false]],
+            [[false, false, true, true, false, false], [false, false, true, true, false, false]],
+            [[false, false, true, true, false, false], [false, false, false, true, true, true]],
+            [[false, false, true, true, false, false], [false, false, true, false, true, true]],
+            [[false, false, true, true, false, false], [false, false, true, true, false, true]],
+            [[false, false, true, true, false, false], [false, false, true, true, true, false]],
+            [[false, false, true, true, false, false], [false, false, true, true, true, true]],
+            
+            [[false, false, false, true, true, true], [false, false, false, false, false, false]],
+            [[false, false, false, true, true, true], [false, false, false, false, false, true]],
+            [[false, false, false, true, true, true], [false, false, false, false, true, false]],
+            [[false, false, false, true, true, true], [false, false, false, true, false, false]],
+            [[false, false, false, true, true, true], [false, false, true, false, false, false]],
+            [[false, false, false, true, true, true], [false, false, false, false, true, true]],
+            [[false, false, false, true, true, true], [false, false, false, true, false, true]],
+            [[false, false, false, true, true, true], [false, false, true, false, false, true]],
+            [[false, false, false, true, true, true], [false, false, false, true, true, false]],
+            [[false, false, false, true, true, true], [false, false, true, false, true, false]],
+            [[false, false, false, true, true, true], [false, false, true, true, false, false]],
+            [[false, false, false, true, true, true], [false, false, false, true, true, true]],
+            [[false, false, false, true, true, true], [false, false, true, false, true, true]],
+            [[false, false, false, true, true, true], [false, false, true, true, false, true]],
+            [[false, false, false, true, true, true], [false, false, true, true, true, false]],
+            [[false, false, false, true, true, true], [false, false, true, true, true, true]],
+            
+            [[false, false, true, false, true, true], [false, false, false, false, false, false]],
+            [[false, false, true, false, true, true], [false, false, false, false, false, true]],
+            [[false, false, true, false, true, true], [false, false, false, false, true, false]],
+            [[false, false, true, false, true, true], [false, false, false, true, false, false]],
+            [[false, false, true, false, true, true], [false, false, true, false, false, false]],
+            [[false, false, true, false, true, true], [false, false, false, false, true, true]],
+            [[false, false, true, false, true, true], [false, false, false, true, false, true]],
+            [[false, false, true, false, true, true], [false, false, true, false, false, true]],
+            [[false, false, true, false, true, true], [false, false, false, true, true, false]],
+            [[false, false, true, false, true, true], [false, false, true, false, true, false]],
+            [[false, false, true, false, true, true], [false, false, true, true, false, false]],
+            [[false, false, true, false, true, true], [false, false, false, true, true, true]],
+            [[false, false, true, false, true, true], [false, false, true, false, true, true]],
+            [[false, false, true, false, true, true], [false, false, true, true, false, true]],
+            [[false, false, true, false, true, true], [false, false, true, true, true, false]],
+            [[false, false, true, false, true, true], [false, false, true, true, true, true]],
+            
+            [[false, false, true, true, false, true], [false, false, false, false, false, false]],
+            [[false, false, true, true, false, true], [false, false, false, false, false, true]],
+            [[false, false, true, true, false, true], [false, false, false, false, true, false]],
+            [[false, false, true, true, false, true], [false, false, false, true, false, false]],
+            [[false, false, true, true, false, true], [false, false, true, false, false, false]],
+            [[false, false, true, true, false, true], [false, false, false, false, true, true]],
+            [[false, false, true, true, false, true], [false, false, false, true, false, true]],
+            [[false, false, true, true, false, true], [false, false, true, false, false, true]],
+            [[false, false, true, true, false, true], [false, false, false, true, true, false]],
+            [[false, false, true, true, false, true], [false, false, true, false, true, false]],
+            [[false, false, true, true, false, true], [false, false, true, true, false, false]],
+            [[false, false, true, true, false, true], [false, false, false, true, true, true]],
+            [[false, false, true, true, false, true], [false, false, true, false, true, true]],
+            [[false, false, true, true, false, true], [false, false, true, true, false, true]],
+            [[false, false, true, true, false, true], [false, false, true, true, true, false]],
+            [[false, false, true, true, false, true], [false, false, true, true, true, true]],
+            
+            [[false, false, true, true, true, false], [false, false, false, false, false, false]],
+            [[false, false, true, true, true, false], [false, false, false, false, false, true]],
+            [[false, false, true, true, true, false], [false, false, false, false, true, false]],
+            [[false, false, true, true, true, false], [false, false, false, true, false, false]],
+            [[false, false, true, true, true, false], [false, false, true, false, false, false]],
+            [[false, false, true, true, true, false], [false, false, false, false, true, true]],
+            [[false, false, true, true, true, false], [false, false, false, true, false, true]],
+            [[false, false, true, true, true, false], [false, false, true, false, false, true]],
+            [[false, false, true, true, true, false], [false, false, false, true, true, false]],
+            [[false, false, true, true, true, false], [false, false, true, false, true, false]],
+            [[false, false, true, true, true, false], [false, false, true, true, false, false]],
+            [[false, false, true, true, true, false], [false, false, false, true, true, true]],
+            [[false, false, true, true, true, false], [false, false, true, false, true, true]],
+            [[false, false, true, true, true, false], [false, false, true, true, false, true]],
+            [[false, false, true, true, true, false], [false, false, true, true, true, false]],
+            [[false, false, true, true, true, false], [false, false, true, true, true, true]],
+            
+            [[false, false, true, true, true, true], [false, false, false, false, false, false]],
+            [[false, false, true, true, true, true], [false, false, false, false, false, true]],
+            [[false, false, true, true, true, true], [false, false, false, false, true, false]],
+            [[false, false, true, true, true, true], [false, false, false, true, false, false]],
+            [[false, false, true, true, true, true], [false, false, true, false, false, false]],
+            [[false, false, true, true, true, true], [false, false, false, false, true, true]],
+            [[false, false, true, true, true, true], [false, false, false, true, false, true]],
+            [[false, false, true, true, true, true], [false, false, true, false, false, true]],
+            [[false, false, true, true, true, true], [false, false, false, true, true, false]],
+            [[false, false, true, true, true, true], [false, false, true, false, true, false]],
+            [[false, false, true, true, true, true], [false, false, true, true, false, false]],
+            [[false, false, true, true, true, true], [false, false, false, true, true, true]],
+            [[false, false, true, true, true, true], [false, false, true, false, true, true]],
+            [[false, false, true, true, true, true], [false, false, true, true, false, true]],
+            [[false, false, true, true, true, true], [false, false, true, true, true, false]],
+            [[false, false, true, true, true, true], [false, false, true, true, true, true]]
+        ]
+        var postExpected = preExpected.map { $0.map { $0.map { !$0 } } }
+        XCTAssertEqual(variations.sections.count, 256)
+        func check(expected: inout [[[Bool]]], target: KeyPath<ConditionalRinglet, KripkeStatePropertyList>, name: String) {
+            for section in variations.sections {
+                let result = section.ringlets.map {
+                    $0.ringlet[keyPath: target].sorted {
+                        $0.key < $1.key
+                    }.map { $1.value as! Bool }
+                }
+                print(result)
+                guard let index = expected.firstIndex(where: { $0 == result }) else {
+                    XCTFail("Unexpected \(name) result found: \(result)")
+                    continue
+                }
+                expected.remove(at: index)
+            }
+        }
+        check(expected: &preExpected, target: \.externalsPreSnapshot, name: "preSnapshot")
+        check(expected: &postExpected, target: \.externalsPostSnapshot, name: "postSnapshot")
+        XCTAssertTrue(preExpected.isEmpty)
+        XCTAssertTrue(postExpected.isEmpty)
     }
 
 }
