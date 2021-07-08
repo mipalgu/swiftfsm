@@ -79,39 +79,27 @@ class SnapshotSectionVariationsTests: XCTestCase {
         let variations = SnapshotSectionVariations(fsms: [CallChain(root: AnyScheduleableFiniteStateMachine(fsm), calls: [])], gateway: fsm.gateway, timer: fsm.timer, startingTime: 0)
         // [actuators, externalVariables, sensors].
         var preExpected = [
-            [false, false, false, false, false, false],
-            [false, false, false, false, false, true],
-            [false, false, false, false, true, false],
-            [false, false, false, true, false, false],
-            [false, false, true, false, false, false],
-            [false, false, false, false, true, true],
-            [false, false, false, true, false, true],
-            [false, false, true, false, false, true],
-            [false, false, false, true, true, false],
-            [false, false, true, false, true, false],
-            [false, false, true, true, false, false],
-            [false, false, false, true, true, true],
-            [false, false, true, false, true, true],
-            [false, false, true, true, false, true],
-            [false, false, true, true, true, false],
-            [false, false, true, true, true, true],
+            [[false, false, false, false, false, false]],
+            [[false, false, false, false, false, true]],
+            [[false, false, false, false, true, false]],
+            [[false, false, false, true, false, false]],
+            [[false, false, true, false, false, false]],
+            [[false, false, false, false, true, true]],
+            [[false, false, false, true, false, true]],
+            [[false, false, true, false, false, true]],
+            [[false, false, false, true, true, false]],
+            [[false, false, true, false, true, false]],
+            [[false, false, true, true, false, false]],
+            [[false, false, false, true, true, true]],
+            [[false, false, true, false, true, true]],
+            [[false, false, true, true, false, true]],
+            [[false, false, true, true, true, false]],
+            [[false, false, true, true, true, true]],
         ]
-        var postExpected = preExpected.map { $0.map { !$0 } }
+        var postExpected = preExpected.map { $0.map { $0.map { !$0 } } }
         XCTAssertEqual(variations.sections.count, preExpected.count)
-        func check(expected: inout [[Bool]], target: KeyPath<ConditionalRinglet, KripkeStatePropertyList>, name: String) {
-            for section in variations.sections {
-                let result = section.ringlets[0].ringlet[keyPath: target].sorted {
-                    $0.key < $1.key
-                }.map { $1.value as! Bool }
-                guard let index = expected.firstIndex(where: { $0 == result }) else {
-                    XCTFail("Unexpected \(name) result found: \(result)")
-                    continue
-                }
-                expected.remove(at: index)
-            }
-        }
-        check(expected: &preExpected, target: \.externalsPreSnapshot, name: "preSnapshot")
-        check(expected: &postExpected, target: \.externalsPostSnapshot, name: "postSnapshot")
+        check(variations, expected: &preExpected, target: \.externalsPreSnapshot, name: "preSnapshot")
+        check(variations, expected: &postExpected, target: \.externalsPostSnapshot, name: "postSnapshot")
         XCTAssertTrue(preExpected.isEmpty)
         XCTAssertTrue(postExpected.isEmpty)
     }
@@ -155,25 +143,11 @@ class SnapshotSectionVariationsTests: XCTestCase {
         ]
         let postExpected = preExpected.map { $0.map { !$0 } }
         XCTAssertEqual(variations.sections.count, preExpected.count)
-        func check(expected: inout [[[Bool]]], target: KeyPath<ConditionalRinglet, KripkeStatePropertyList>, name: String) {
-            for section in variations.sections {
-                let result = section.ringlets.map {
-                    $0.ringlet[keyPath: target].sorted {
-                        $0.key < $1.key
-                    }.map { $1.value as! Bool }
-                }
-                print(result)
-                guard let index = expected.firstIndex(where: { $0 == result }) else {
-                    XCTFail("Unexpected \(name) result found: \(result)")
-                    continue
-                }
-                expected.remove(at: index)
-            }
-        }
+        
         var preExpectedCopy = Array(zip(preExpected, preExpected).lazy.map { [$0, $1] })
         var postExpectedCopy = Array(zip(postExpected, postExpected).lazy.map { [$0, $1] })
-        check(expected: &preExpectedCopy, target: \.externalsPreSnapshot, name: "preSnapshot")
-        check(expected: &postExpectedCopy, target: \.externalsPostSnapshot, name: "postSnapshot")
+        check(variations, expected: &preExpectedCopy, target: \.externalsPreSnapshot, name: "preSnapshot")
+        check(variations, expected: &postExpectedCopy, target: \.externalsPostSnapshot, name: "postSnapshot")
         XCTAssertTrue(preExpectedCopy.isEmpty)
         XCTAssertTrue(postExpectedCopy.isEmpty)
     }
@@ -472,25 +446,26 @@ class SnapshotSectionVariationsTests: XCTestCase {
         ]
         var postExpected = preExpected.map { $0.map { $0.map { !$0 } } }
         XCTAssertEqual(variations.sections.count, 256)
-        func check(expected: inout [[[Bool]]], target: KeyPath<ConditionalRinglet, KripkeStatePropertyList>, name: String) {
-            for section in variations.sections {
-                let result = section.ringlets.map {
-                    $0.ringlet[keyPath: target].sorted {
-                        $0.key < $1.key
-                    }.map { $1.value as! Bool }
-                }
-                print(result)
-                guard let index = expected.firstIndex(where: { $0 == result }) else {
-                    XCTFail("Unexpected \(name) result found: \(result)")
-                    continue
-                }
-                expected.remove(at: index)
-            }
-        }
-        check(expected: &preExpected, target: \.externalsPreSnapshot, name: "preSnapshot")
-        check(expected: &postExpected, target: \.externalsPostSnapshot, name: "postSnapshot")
+        check(variations, expected: &preExpected, target: \.externalsPreSnapshot, name: "preSnapshot")
+        check(variations, expected: &postExpected, target: \.externalsPostSnapshot, name: "postSnapshot")
         XCTAssertTrue(preExpected.isEmpty)
         XCTAssertTrue(postExpected.isEmpty)
+    }
+    
+    private func check(_ variations: SnapshotSectionVariations, expected: inout [[[Bool]]], target: KeyPath<ConditionalRinglet, KripkeStatePropertyList>, name: String) {
+        for section in variations.sections {
+            let result = section.ringlets.map {
+                $0.ringlet[keyPath: target].sorted {
+                    $0.key < $1.key
+                }.map { $1.value as! Bool }
+            }
+            print(result)
+            guard let index = expected.firstIndex(where: { $0 == result }) else {
+                XCTFail("Unexpected \(name) result found: \(result)")
+                continue
+            }
+            expected.remove(at: index)
+        }
     }
 
 }
