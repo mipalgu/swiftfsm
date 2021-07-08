@@ -65,6 +65,7 @@ public protocol NewVerifiableGateway {
     
 }
 
+import swiftfsm
 import Gateways
 
 extension StackGateway: NewVerifiableGateway {
@@ -76,18 +77,17 @@ extension StackGateway: NewVerifiableGateway {
                 continue
             }
             let promiseData = PromiseData(fsm: last.fsm, hasFinished: last.fsm.hasFinished && last.fsm.resultContainer.result != nil)
+            let stackId: FSM_ID
             switch last.method {
             case .asynchronous:
-                if nil != self.stacks[last.callee] {
-                    fatalError("Detected calling the same fsm more than once.")
-                }
-                self.stacks[last.callee] = [promiseData]
+                stackId = last.callee
             case .synchronous:
-                if nil != self.stacks[last.caller] {
-                    fatalError("Detected calling the same fsm more than once.")
-                }
-                self.stacks[last.caller] = [promiseData]
+                stackId = last.caller
             }
+            if nil != self.stacks[stackId] {
+                fatalError("Detected calling the same fsm more than once.")
+            }
+            self.stacks[stackId] = [promiseData]
         }
     }
     
