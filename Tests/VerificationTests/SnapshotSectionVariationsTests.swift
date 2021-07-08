@@ -445,7 +445,7 @@ class SnapshotSectionVariationsTests: XCTestCase {
         XCTAssertEqual(variations.sections.count, expected.count)
         for section in variations.sections {
             let result = section.ringlets.map {
-                $0.ringlet.externalsPreSnapshot.sorted {
+                $0.current.ringlet.externalsPreSnapshot.sorted {
                     $0.key < $1.key
                 }.map { $1.value as! T }
             }
@@ -455,7 +455,7 @@ class SnapshotSectionVariationsTests: XCTestCase {
             }
             expected.remove(result)
             let postResult = section.ringlets.map {
-                $0.ringlet.externalsPostSnapshot.sorted {
+                $0.current.ringlet.externalsPostSnapshot.sorted {
                     $0.key < $1.key
                 }.map { $1.value as! T }
             }

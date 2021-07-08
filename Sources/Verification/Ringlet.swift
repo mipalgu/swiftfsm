@@ -85,6 +85,9 @@ struct Ringlet {
         
     }
     
+    /// The name of the fsm that was executed.
+    var fsmName: String
+    
     /// The evaluation of all external variables of the FSM before the ringlet
     /// was executed.
     var externalsPreSnapshot: KripkeStatePropertyList
@@ -130,6 +133,7 @@ struct Ringlet {
         let postSnapshot = KripkeStatePropertyList(fsm.base)
         let calls = delegate.invocations + delegate.calls
         self.init(
+            fsmName: fsm.name,
             externalsPreSnapshot: externalsPreSnapshot,
             externalsPostSnapshot: externalsPostSnapshot,
             preSnapshot: preSnapshot,
@@ -140,7 +144,8 @@ struct Ringlet {
     }
     
     /// Create a `Ringlet`.
-    init(externalsPreSnapshot: KripkeStatePropertyList, externalsPostSnapshot: KripkeStatePropertyList, preSnapshot: KripkeStatePropertyList, postSnapshot: KripkeStatePropertyList, calls: [Call], afterCalls: Set<UInt>) {
+    init(fsmName: String, externalsPreSnapshot: KripkeStatePropertyList, externalsPostSnapshot: KripkeStatePropertyList, preSnapshot: KripkeStatePropertyList, postSnapshot: KripkeStatePropertyList, calls: [Call], afterCalls: Set<UInt>) {
+        self.fsmName = fsmName
         self.externalsPreSnapshot = externalsPreSnapshot
         self.externalsPostSnapshot = externalsPostSnapshot
         self.preSnapshot = preSnapshot

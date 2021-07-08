@@ -56,13 +56,30 @@
  *
  */
 
+import KripkeStructure
+
 /// Represents a particular execution of ringlets within the schedule between
 /// taking a snapshot of the external variables and saving the snapshot of
 /// external variables.
 struct SnapshotSection {
     
+    struct State {
+        
+        /// The ringlets of the fsms that were executed previously in this snapshot
+        /// phase.
+        var previous: [CallAwareRinglet]
+        
+        /// The ringlet of the last fsm to be executed in this snapshot phase.
+        var current: CallAwareRinglet
+        
+        /// The state of the fsms that are still yet to be executed in this snapshot
+        /// phase.
+        var after: [KripkeStatePropertyList]
+        
+    }
+    
     /// The ringlets that were executed within an external variable snapshot
     /// phase.
-    var ringlets: [CallAwareRinglet]
+    var ringlets: [State]
     
 }

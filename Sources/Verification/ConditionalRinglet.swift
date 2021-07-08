@@ -74,6 +74,9 @@ struct ConditionalRinglet {
         }
     }
     
+    /// The name of the fsm that was executed.
+    var fsmName: String
+    
     /// The evaluation of all external variables of the FSM before the ringlet
     /// was executed.
     var externalsPreSnapshot: KripkeStatePropertyList
@@ -97,11 +100,12 @@ struct ConditionalRinglet {
     var condition: Constraint<UInt>
     
     init(ringlet: Ringlet, condition: Constraint<UInt>) {
-        self.init(externalsPreSnapshot: ringlet.externalsPreSnapshot, externalsPostSnapshot: ringlet.externalsPostSnapshot, preSnapshot: ringlet.preSnapshot, postSnapshot: ringlet.postSnapshot, calls: ringlet.calls, condition: condition)
+        self.init(fsmName: ringlet.fsmName, externalsPreSnapshot: ringlet.externalsPreSnapshot, externalsPostSnapshot: ringlet.externalsPostSnapshot, preSnapshot: ringlet.preSnapshot, postSnapshot: ringlet.postSnapshot, calls: ringlet.calls, condition: condition)
     }
     
     /// Create a `ConditionalRinglet`.
-    init(externalsPreSnapshot: KripkeStatePropertyList, externalsPostSnapshot: KripkeStatePropertyList, preSnapshot: KripkeStatePropertyList, postSnapshot: KripkeStatePropertyList, calls: [Call], condition: Constraint<UInt>) {
+    init(fsmName: String, externalsPreSnapshot: KripkeStatePropertyList, externalsPostSnapshot: KripkeStatePropertyList, preSnapshot: KripkeStatePropertyList, postSnapshot: KripkeStatePropertyList, calls: [Call], condition: Constraint<UInt>) {
+        self.fsmName = fsmName
         self.externalsPreSnapshot = externalsPreSnapshot
         self.externalsPostSnapshot = externalsPostSnapshot
         self.preSnapshot = preSnapshot
