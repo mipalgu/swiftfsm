@@ -76,6 +76,12 @@ struct SnapshotSection {
         /// phase.
         var after: [KripkeStatePropertyList]
         
+        /// A convenience getter that returns `previous` and `current` in a
+        /// single array.
+        var toCurrent: [CallAwareRinglet] {
+            previous + [current]
+        }
+        
     }
     
     /// The ringlets that were executed within an external variable snapshot
