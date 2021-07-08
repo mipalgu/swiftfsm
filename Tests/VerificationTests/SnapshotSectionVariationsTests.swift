@@ -96,12 +96,9 @@ class SnapshotSectionVariationsTests: XCTestCase {
             [[false, false, true, true, true, false]],
             [[false, false, true, true, true, true]],
         ]
-        var postExpected = Set(preExpected.map { $0.map { $0.map { !$0 } } })
-        XCTAssertEqual(variations.sections.count, preExpected.count)
-        check(variations, expected: &preExpected, target: \.externalsPreSnapshot, name: "preSnapshot")
-        check(variations, expected: &postExpected, target: \.externalsPostSnapshot, name: "postSnapshot")
-        XCTAssertTrue(preExpected.isEmpty)
-        XCTAssertTrue(postExpected.isEmpty)
+        check(variations, expected: &preExpected) {
+            $0.map { $0[0..<4].map { !$0 } + $0[4..<6] }
+        }
     }
     
     func test_canGenerateRingletsForTwoSameMachines() throws {
@@ -123,7 +120,7 @@ class SnapshotSectionVariationsTests: XCTestCase {
             startingTime: 0
         )
         // [actuators, externalVariables, sensors].
-        let preExpected = [
+        let singlePreExpected = [
             [false, false, false, false, false, false],
             [false, false, false, false, false, true],
             [false, false, false, false, true, false],
@@ -141,14 +138,10 @@ class SnapshotSectionVariationsTests: XCTestCase {
             [false, false, true, true, true, false],
             [false, false, true, true, true, true],
         ]
-        let postExpected = preExpected.map { $0.map { !$0 } }
-        XCTAssertEqual(variations.sections.count, preExpected.count)
-        var preExpectedCopy = Set(zip(preExpected, preExpected).lazy.map { [$0, $1] })
-        var postExpectedCopy = Set(zip(postExpected, postExpected).lazy.map { [$0, $1] })
-        check(variations, expected: &preExpectedCopy, target: \.externalsPreSnapshot, name: "preSnapshot")
-        check(variations, expected: &postExpectedCopy, target: \.externalsPostSnapshot, name: "postSnapshot")
-        XCTAssertTrue(preExpectedCopy.isEmpty)
-        XCTAssertTrue(postExpectedCopy.isEmpty)
+        var preExpected = Set(zip(singlePreExpected, singlePreExpected).lazy.map { [$0, $1] })
+        check(variations, expected: &preExpected) {
+            $0.map { $0[0..<4].map { !$0 } + $0[4..<6] }
+        }
     }
     
     func test_canGenerateRingletsForTwoDifferentMachines() throws {
@@ -443,27 +436,33 @@ class SnapshotSectionVariationsTests: XCTestCase {
             [[false, false, true, true, true, true], [false, false, true, true, true, false]],
             [[false, false, true, true, true, true], [false, false, true, true, true, true]]
         ]
-        var postExpected = Set(preExpected.map { $0.map { $0.map { !$0 } } })
-        XCTAssertEqual(variations.sections.count, preExpected.count)
-        check(variations, expected: &preExpected, target: \.externalsPreSnapshot, name: "preSnapshot")
-        check(variations, expected: &postExpected, target: \.externalsPostSnapshot, name: "postSnapshot")
-        XCTAssertTrue(preExpected.isEmpty)
-        XCTAssertTrue(postExpected.isEmpty)
+        check(variations, expected: &preExpected) {
+            $0.map { $0[0..<4].map { !$0 } + $0[4..<6] }
+        }
     }
     
-    private func check<T: Hashable>(_ variations: SnapshotSectionVariations, expected: inout Set<[[T]]>, target: KeyPath<ConditionalRinglet, KripkeStatePropertyList>, name: String) {
+    private func check<T: Hashable>(_ variations: SnapshotSectionVariations, expected: inout Set<[[T]]>, postResult convert: ([[T]]) -> [[T]]) {
+        XCTAssertEqual(variations.sections.count, expected.count)
         for section in variations.sections {
             let result = section.ringlets.map {
-                $0.ringlet[keyPath: target].sorted {
+                $0.ringlet.externalsPreSnapshot.sorted {
                     $0.key < $1.key
                 }.map { $1.value as! T }
             }
             guard expected.contains(result) else {
-                XCTFail("Unexpected \(name) result found: \(result)")
+                XCTFail("Unexpected preSnapshot result found: \(result)")
                 continue
             }
             expected.remove(result)
+            let postResult = section.ringlets.map {
+                $0.ringlet.externalsPostSnapshot.sorted {
+                    $0.key < $1.key
+                }.map { $1.value as! T }
+            }
+            let expectedPostResult = convert(result)
+            XCTAssertEqual(postResult, expectedPostResult, "Unexpected postSnapshot result found: \(postResult)")
         }
+        XCTAssertTrue(expected.isEmpty)
     }
 
 }
