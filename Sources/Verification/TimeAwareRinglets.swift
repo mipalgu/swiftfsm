@@ -68,6 +68,7 @@ struct TimeAwareRinglets {
     
     init<Gateway: ModifiableFSMGateway, Timer: Clock>(fsm: AnyScheduleableFiniteStateMachine, gateway: Gateway, timer: Timer, startingTime: UInt) {
         var lastTime = startingTime
+        var smallerTimes: SortedCollection<UInt> = []
         var times: SortedCollection<UInt> = []
         var ringlets: [ConditionalRinglet] = []
         var indexes: [RingletResult: Int] = [:]
@@ -77,8 +78,10 @@ struct TimeAwareRinglets {
             clone.externalValues = initialExternalValues
             timer.forceRunningTime(time.timeValue)
             let ringlet = Ringlet(fsm: clone, gateway: gateway, timer: timer)
-            for newTime in ringlet.afterCalls where newTime > lastTime {
-                if !times.contains(newTime) {
+            for newTime in ringlet.afterCalls {
+                if newTime < lastTime, !smallerTimes.contains(newTime) {
+                    smallerTimes.insert(newTime)
+                } else if newTime > lastTime, !times.contains(newTime) {
                     times.insert(newTime)
                 }
             }
@@ -94,6 +97,13 @@ struct TimeAwareRinglets {
             calculate(time: .beforeOrEqual(startingTime))
             if let firstAfter = times.first {
                 ringlets[0].condition = .lessThanEqual(value: firstAfter)
+            }
+        } else {
+            calculate(time: .after(startingTime - 1))
+            if let lastSmall = smallerTimes.last, let firstBig = times.first {
+                ringlets[0].condition = .and(lhs: .greaterThan(value: lastSmall), rhs: .lessThanEqual(value: firstBig))
+            } else if let lastSmall = smallerTimes.last {
+                ringlets[0].condition = .greaterThan(value: lastSmall)
             }
         }
         while !times.isEmpty {
