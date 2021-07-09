@@ -331,29 +331,32 @@ extension Constraint {
     
 }
 
-extension Constraint where T: Numeric, T: FixedWidthInteger {
+extension Constraint where T: FixedWidthInteger {
     
     private var numericReduced: Constraint<T> {
-        func convertToRange(_ constraint: Constraint<T>) -> Range<T>? {
+        func convertToRange(_ constraint: Constraint<T>) -> ClosedRange<T>? {
             switch constraint {
             case .lessThan(let value):
-                return T.min..<value
+                if value == T.min {
+                    return ClosedRange(T.min..<T.min)
+                }
+                return T.min...(value.advanced(by: -1))
             case .lessThanEqual(let value):
-                return T.min..<(value.advanced(by: 1))
+                return T.min...value
             case .greaterThan(let value):
                 if value == T.max {
-                    return T.max..<T.max
+                    return ClosedRange(T.max..<T.max)
                 }
-                return value.advanced(by: 1)..<T.max
+                return value.advanced(by: 1)...T.max
             case .greaterThanEqual(let value):
-                return value..<T.max
+                return value...T.max
             case .and(let lhs, let rhs):
                 guard let lRange = convertToRange(lhs), let rRange = convertToRange(rhs), rRange.overlaps(lRange) else {
                     return nil
                 }
                 let lowerBound = max(lRange.lowerBound, rRange.lowerBound)
                 let upperBound = min(lRange.upperBound, rRange.upperBound)
-                return lowerBound..<upperBound
+                return lowerBound...upperBound
             default:
                 return nil
             }
@@ -369,7 +372,7 @@ extension Constraint where T: Numeric, T: FixedWidthInteger {
                     }
                     let lowerBound = max(lRange.lowerBound, rRange.lowerBound)
                     let upperBound = min(lRange.upperBound, rRange.upperBound)
-                    return reduce(.and(lhs: .greaterThanEqual(value: lowerBound), rhs: .lessThan(value: upperBound)))
+                    return reduce(.and(lhs: .greaterThanEqual(value: lowerBound), rhs: .lessThanEqual(value: upperBound)))
                 default:
                     break
                 }
@@ -382,24 +385,24 @@ extension Constraint where T: Numeric, T: FixedWidthInteger {
                 guard let lRange = convertToRange(lhs), let rRange = convertToRange(rhs) else {
                     break
                 }
-                let newLRange: Range<T>
+                let newLRange: ClosedRange<T>
                 if lRange.upperBound == T.max {
                     newLRange = lRange
                 } else {
-                    newLRange = lRange.lowerBound..<lRange.upperBound.advanced(by: 1)
+                    newLRange = lRange.lowerBound...lRange.upperBound.advanced(by: 1)
                 }
-                let newRRange: Range<T>
+                let newRRange: ClosedRange<T>
                 if rRange.upperBound == T.max {
                     newRRange = rRange
                 } else {
-                    newRRange = rRange.lowerBound..<rRange.upperBound.advanced(by: 1)
+                    newRRange = rRange.lowerBound...rRange.upperBound.advanced(by: 1)
                 }
                 guard rRange.overlaps(newLRange) || newRRange.overlaps(lRange) else {
                     break
                 }
                 let lowerBound = min(lRange.lowerBound, rRange.lowerBound)
                 let upperBound = max(lRange.upperBound, rRange.upperBound)
-                return reduce(.and(lhs: .greaterThanEqual(value: lowerBound), rhs: .lessThan(value: upperBound)))
+                return reduce(.and(lhs: .greaterThanEqual(value: lowerBound), rhs: .lessThanEqual(value: upperBound)))
             default:
                 break
             }
@@ -412,10 +415,10 @@ extension Constraint where T: Numeric, T: FixedWidthInteger {
                         break
                     }
                     if range.lowerBound > value, range.lowerBound.advanced(by: -1) == value {
-                        return reduce(.and(lhs: .greaterThanEqual(value: value), rhs: .lessThan(value: range.upperBound)))
+                        return reduce(.and(lhs: .greaterThanEqual(value: value), rhs: .lessThanEqual(value: range.upperBound)))
                     }
                     if range.upperBound < value, range.upperBound.advanced(by: 1) == value {
-                        return reduce(.and(lhs: .greaterThanEqual(value: range.lowerBound), rhs: .lessThan(value: value)))
+                        return reduce(.and(lhs: .greaterThanEqual(value: range.lowerBound), rhs: .lessThanEqual(value: value)))
                     }
                 default:
                     break

@@ -193,7 +193,7 @@ public class ConstraintTests: KripkeStructureTestCase {
         let expected: Constraint<UInt> = .lessThanEqual(value: 2)
         XCTAssertEqual(constraint.reduced, expected)
         let complexConstraint: Constraint<UInt> = .and(lhs: .and(lhs: .greaterThan(value: 3), rhs: .lessThan(value: 10)), rhs: .greaterThan(value: 5))
-        let complexExpected: Constraint<UInt> = .and(lhs: .greaterThanEqual(value: 6), rhs: .lessThanEqual(value: 9))
+        let complexExpected: Constraint<UInt> = .and(lhs: .greaterThanEqual(value: 6), rhs: .lessThan(value: 10))
         XCTAssertEqual(complexConstraint.reduced, complexExpected)
     }
     
