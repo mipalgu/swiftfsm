@@ -73,6 +73,21 @@ struct TimeAwareRinglets {
         var ringlets: [ConditionalRinglet] = []
         var indexes: [RingletResult: Int] = [:]
         let initialExternalValues = fsm.externalValues
+        func createCondition(runningAt time: Timing, result: RingletResult) -> Constraint<UInt> {
+            let condition: Constraint<UInt>
+            if let index = indexes[result] {
+                condition = .or(lhs: ringlets[index].condition, rhs: time.condition).reduced
+            } else {
+                condition = time.condition.reduced
+            }
+            let finalCondition: Constraint<UInt>
+            if let big = times.first {
+                finalCondition = .and(lhs: condition, rhs: .lessThanEqual(value: big)).reduced
+            } else {
+                finalCondition = condition
+            }
+            return finalCondition
+        }
         func calculate(time: Timing) {
             let clone = fsm.clone()
             clone.externalValues = initialExternalValues
@@ -86,11 +101,12 @@ struct TimeAwareRinglets {
                 }
             }
             let result = RingletResult(ringlet: ringlet)
+            let condition = createCondition(runningAt: time, result: result)
             if let index = indexes[result] {
-                ringlets[index].condition = .or(lhs: ringlets[index].condition, rhs: time.condition)
+                ringlets[index].condition = condition.reduced
             } else {
                 indexes[result] = ringlets.count
-                ringlets.append(ConditionalRinglet(ringlet: ringlet, condition: time.condition))
+                ringlets.append(ConditionalRinglet(ringlet: ringlet, condition: condition.reduced))
             }
         }
         if startingTime == 0 {
@@ -103,7 +119,7 @@ struct TimeAwareRinglets {
             lastTime = startingTime - 1
             calculate(time: .after(lastTime))
             if let lastSmall = smallerTimes.last, let firstBig = times.first {
-                ringlets[0].condition = .and(lhs: .greaterThan(value: lastSmall), rhs: .lessThanEqual(value: firstBig))
+                ringlets[0].condition = .and(lhs: .greaterThan(value: lastSmall), rhs: .lessThanEqual(value: firstBig)).reduced
             } else if let lastSmall = smallerTimes.last {
                 ringlets[0].condition = .greaterThan(value: lastSmall)
             } else if let firstBig = times.first {
