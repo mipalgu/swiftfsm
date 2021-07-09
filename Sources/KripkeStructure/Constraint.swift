@@ -337,9 +337,9 @@ extension Constraint where T: Numeric, T: FixedWidthInteger {
         func convertToRange(_ constraint: Constraint<T>) -> Range<T>? {
             switch constraint {
             case .lessThan(let value):
-                return T.min..<value.advanced(by: -1)
-            case .lessThanEqual(let value):
                 return T.min..<value
+            case .lessThanEqual(let value):
+                return T.min..<(value.advanced(by: 1))
             case .greaterThan(let value):
                 if value == T.max {
                     return T.max..<T.max
@@ -353,7 +353,7 @@ extension Constraint where T: Numeric, T: FixedWidthInteger {
                 }
                 let lowerBound = max(lRange.lowerBound, rRange.lowerBound)
                 let upperBound = min(lRange.upperBound, rRange.upperBound)
-                return Range(uncheckedBounds: (lowerBound, upperBound))
+                return lowerBound..<upperBound
             default:
                 return nil
             }
@@ -369,7 +369,7 @@ extension Constraint where T: Numeric, T: FixedWidthInteger {
                     }
                     let lowerBound = max(lRange.lowerBound, rRange.lowerBound)
                     let upperBound = min(lRange.upperBound, rRange.upperBound)
-                    return reduce(.and(lhs: .greaterThanEqual(value: lowerBound), rhs: .lessThanEqual(value: upperBound)))
+                    return reduce(.and(lhs: .greaterThanEqual(value: lowerBound), rhs: .lessThan(value: upperBound)))
                 default:
                     break
                 }
@@ -384,7 +384,7 @@ extension Constraint where T: Numeric, T: FixedWidthInteger {
                 }
                 let lowerBound = min(lRange.lowerBound, rRange.lowerBound)
                 let upperBound = max(lRange.upperBound, rRange.upperBound)
-                return reduce(.and(lhs: .greaterThanEqual(value: lowerBound), rhs: .lessThanEqual(value: upperBound)))
+                return reduce(.and(lhs: .greaterThanEqual(value: lowerBound), rhs: .lessThan(value: upperBound)))
             default:
                 break
             }
@@ -397,10 +397,10 @@ extension Constraint where T: Numeric, T: FixedWidthInteger {
                         break
                     }
                     if range.lowerBound > value, range.lowerBound.advanced(by: -1) == value {
-                        return reduce(.and(lhs: .greaterThanEqual(value: value), rhs: .lessThanEqual(value: range.upperBound)))
+                        return reduce(.and(lhs: .greaterThanEqual(value: value), rhs: .lessThan(value: range.upperBound)))
                     }
                     if range.upperBound < value, range.upperBound.advanced(by: 1) == value {
-                        return reduce(.and(lhs: .greaterThanEqual(value: range.lowerBound), rhs: .lessThanEqual(value: value)))
+                        return reduce(.and(lhs: .greaterThanEqual(value: range.lowerBound), rhs: .lessThan(value: value)))
                     }
                 default:
                     break
