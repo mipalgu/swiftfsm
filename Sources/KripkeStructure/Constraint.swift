@@ -464,6 +464,28 @@ extension Constraint where T: Numeric, T: FixedWidthInteger {
             default:
                 break;
             }
+            // Make values divisible by 10 (end in a zero) if possible to
+            // improve readability.
+            switch constraint {
+            case .lessThan(let value):
+                if value != T.min, value % 10 == 1 {
+                    return .lessThanEqual(value: value.advanced(by: -1))
+                }
+            case .lessThanEqual(let value):
+                if value != T.max, value % 10 == 9 {
+                    return .lessThan(value: value.advanced(by: 1))
+                }
+            case .greaterThan(let value):
+                if value != T.max, value % 10 == 9 {
+                    return .greaterThanEqual(value: value.advanced(by: 1))
+                }
+            case .greaterThanEqual(let value):
+                if value != T.min, value % 10 == 1 {
+                    return .greaterThan(value: value.advanced(by: -1))
+                }
+            default:
+                break
+            }
             return constraint
         }
         return reduce(self)
