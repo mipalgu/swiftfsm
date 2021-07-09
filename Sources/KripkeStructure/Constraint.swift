@@ -379,7 +379,22 @@ extension Constraint where T: Numeric, T: FixedWidthInteger {
             // Remove overlapping ranges.
             switch constraint {
             case .or(let lhs, let rhs):
-                guard let lRange = convertToRange(lhs), let rRange = convertToRange(rhs), rRange.overlaps(lRange) else {
+                guard let lRange = convertToRange(lhs), let rRange = convertToRange(rhs) else {
+                    break
+                }
+                let newLRange: Range<T>
+                if lRange.upperBound == T.max {
+                    newLRange = lRange
+                } else {
+                    newLRange = lRange.lowerBound..<lRange.upperBound.advanced(by: 1)
+                }
+                let newRRange: Range<T>
+                if rRange.upperBound == T.max {
+                    newRRange = rRange
+                } else {
+                    newRRange = rRange.lowerBound..<rRange.upperBound.advanced(by: 1)
+                }
+                guard rRange.overlaps(newLRange) || newRRange.overlaps(lRange) else {
                     break
                 }
                 let lowerBound = min(lRange.lowerBound, rRange.lowerBound)
