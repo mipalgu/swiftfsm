@@ -95,7 +95,13 @@ struct SnapshotSectionVariations {
                 }
                 return ringlets.flatMap { (ringlet) -> [[SnapshotSectionPath.State]] in
                     let newRinglet = CallAwareRinglet(callChain: CallChain(root: section.timeslots[index].callChain.calls.isEmpty ? clone : section.timeslots[index].callChain.root, calls: section.timeslots[index].callChain.calls), ringlet: ringlet)
-                    let newState = SnapshotSectionPath.State(previous: path.last?.toCurrent ?? [], current: newRinglet, after: after)
+                    let newState = SnapshotSectionPath.State(
+                        previous: path.last?.toCurrent ?? [],
+                        current: newRinglet,
+                        after: after,
+                        fsm: clone,
+                        cyclesExecuted: ringlet.transitioned ? 0 : section.timeslots[index].cyclesExecuted + 1
+                    )
                     return process(path: path + [newState], index: index + 1)
                 }
             }

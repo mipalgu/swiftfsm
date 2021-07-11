@@ -56,6 +56,7 @@
  *
  */
 
+import swiftfsm
 import KripkeStructure
 
 /// Represents a particular execution of ringlets within the schedule between
@@ -75,6 +76,10 @@ struct SnapshotSectionPath {
         /// The state of the fsms that are still yet to be executed in this snapshot
         /// phase.
         var after: [KripkeStatePropertyList]
+        
+        var fsm: AnyScheduleableFiniteStateMachine
+        
+        var cyclesExecuted: UInt
         
         /// A convenience getter that returns `previous` and `current` in a
         /// single array.

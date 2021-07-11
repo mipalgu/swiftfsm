@@ -93,6 +93,7 @@ class TimeAwareRingletTests: XCTestCase {
         let expected = [
             ConditionalRinglet(
                 fsmName: fsm.name,
+                transitioned: false,
                 externalsPreSnapshot: KripkeStatePropertyList(),
                 externalsPostSnapshot: KripkeStatePropertyList(),
                 preSnapshot: falseProperties,
@@ -102,6 +103,7 @@ class TimeAwareRingletTests: XCTestCase {
             ),
             ConditionalRinglet(
                 fsmName: fsm.name,
+                transitioned: false,
                 externalsPreSnapshot: KripkeStatePropertyList(),
                 externalsPostSnapshot: KripkeStatePropertyList(),
                 preSnapshot: falseProperties,
@@ -111,6 +113,7 @@ class TimeAwareRingletTests: XCTestCase {
             ),
             ConditionalRinglet(
                 fsmName: fsm.name,
+                transitioned: false,
                 externalsPreSnapshot: KripkeStatePropertyList(),
                 externalsPostSnapshot: KripkeStatePropertyList(),
                 preSnapshot: falseProperties,
@@ -147,6 +150,7 @@ class TimeAwareRingletTests: XCTestCase {
         let expected = [
             ConditionalRinglet(
                 fsmName: fsm.name,
+                transitioned: false,
                 externalsPreSnapshot: KripkeStatePropertyList(),
                 externalsPostSnapshot: KripkeStatePropertyList(),
                 preSnapshot: falseProperties,
@@ -156,6 +160,7 @@ class TimeAwareRingletTests: XCTestCase {
             ),
             ConditionalRinglet(
                 fsmName: fsm.name,
+                transitioned: false,
                 externalsPreSnapshot: KripkeStatePropertyList(),
                 externalsPostSnapshot: KripkeStatePropertyList(),
                 preSnapshot: falseProperties,
@@ -193,6 +198,7 @@ class TimeAwareRingletTests: XCTestCase {
         let expected = [
             ConditionalRinglet(
                 fsmName: fsm.name,
+                transitioned: false,
                 externalsPreSnapshot: KripkeStatePropertyList(),
                 externalsPostSnapshot: KripkeStatePropertyList(),
                 preSnapshot: falseProperties,
@@ -202,6 +208,7 @@ class TimeAwareRingletTests: XCTestCase {
             ),
             ConditionalRinglet(
                 fsmName: fsm.name,
+                transitioned: false,
                 externalsPreSnapshot: KripkeStatePropertyList(),
                 externalsPostSnapshot: KripkeStatePropertyList(),
                 preSnapshot: falseProperties,
@@ -211,6 +218,7 @@ class TimeAwareRingletTests: XCTestCase {
             ),
             ConditionalRinglet(
                 fsmName: fsm.name,
+                transitioned: false,
                 externalsPreSnapshot: KripkeStatePropertyList(),
                 externalsPostSnapshot: KripkeStatePropertyList(),
                 preSnapshot: falseProperties,
@@ -247,6 +255,7 @@ class TimeAwareRingletTests: XCTestCase {
         let expected = [
             ConditionalRinglet(
                 fsmName: fsm.name,
+                transitioned: false,
                 externalsPreSnapshot: KripkeStatePropertyList(),
                 externalsPostSnapshot: KripkeStatePropertyList(),
                 preSnapshot: falseProperties,

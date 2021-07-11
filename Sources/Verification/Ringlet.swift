@@ -88,6 +88,9 @@ struct Ringlet {
     /// The name of the fsm that was executed.
     var fsmName: String
     
+    /// Did the fsm transition during the ringlet execution?
+    var transitioned: Bool
+    
     /// The evaluation of all external variables of the FSM before the ringlet
     /// was executed.
     var externalsPreSnapshot: KripkeStatePropertyList
@@ -128,12 +131,15 @@ struct Ringlet {
         let preSnapshot = KripkeStatePropertyList(fsm.base)
         let delegate = GatewayDelegate()
         gateway.delegate = delegate
+        let currentState = fsm.currentState.name
         fsm.next()
+        let transitioned = currentState != fsm.currentState.name
         let externalsPostSnapshot = KripkeStatePropertyList(Dictionary(uniqueKeysWithValues: allExternalVariables.map { ($0.name, KripkeStateProperty($0.val)) }))
         let postSnapshot = KripkeStatePropertyList(fsm.base)
         let calls = delegate.invocations + delegate.calls
         self.init(
             fsmName: fsm.name,
+            transitioned: transitioned,
             externalsPreSnapshot: externalsPreSnapshot,
             externalsPostSnapshot: externalsPostSnapshot,
             preSnapshot: preSnapshot,
@@ -144,8 +150,9 @@ struct Ringlet {
     }
     
     /// Create a `Ringlet`.
-    init(fsmName: String, externalsPreSnapshot: KripkeStatePropertyList, externalsPostSnapshot: KripkeStatePropertyList, preSnapshot: KripkeStatePropertyList, postSnapshot: KripkeStatePropertyList, calls: [Call], afterCalls: Set<UInt>) {
+    init(fsmName: String, transitioned: Bool, externalsPreSnapshot: KripkeStatePropertyList, externalsPostSnapshot: KripkeStatePropertyList, preSnapshot: KripkeStatePropertyList, postSnapshot: KripkeStatePropertyList, calls: [Call], afterCalls: Set<UInt>) {
         self.fsmName = fsmName
+        self.transitioned = transitioned
         self.externalsPreSnapshot = externalsPreSnapshot
         self.externalsPostSnapshot = externalsPostSnapshot
         self.preSnapshot = preSnapshot
