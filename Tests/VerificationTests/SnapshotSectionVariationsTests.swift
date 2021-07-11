@@ -76,7 +76,10 @@ class SnapshotSectionVariationsTests: XCTestCase {
     
     func test_canGenerateRingletsForOneMachine() throws {
         let fsm = ExternalsFiniteStateMachine()
-        let variations = SnapshotSectionVariations(fsms: [CallChain(root: AnyScheduleableFiniteStateMachine(fsm), calls: [])], gateway: fsm.gateway, timer: fsm.timer, startingTime: 0)
+        let timeslots = [
+            Timeslot(callChain: CallChain(root: AnyScheduleableFiniteStateMachine(fsm), calls: []), startingTime: 0, duration: 20)
+        ]
+        let variations = SnapshotSectionVariations(timeslots: timeslots, gateway: fsm.gateway, timer: fsm.timer)
         // [actuators, externalVariables, sensors].
         var preExpected: Set<[[Bool]]> = [
             [[false, false, false, false, false, false]],
@@ -110,14 +113,14 @@ class SnapshotSectionVariationsTests: XCTestCase {
         fsm1.timer = timer
         fsm2.timer = timer
         fsm2.gateway = fsm1.gateway
+        let timeslots = [
+            Timeslot(callChain: CallChain(root: AnyScheduleableFiniteStateMachine(fsm1), calls: []), startingTime: 0, duration: 20),
+            Timeslot(callChain: CallChain(root: AnyScheduleableFiniteStateMachine(fsm2), calls: []), startingTime: 30, duration: 30)
+        ]
         let variations = SnapshotSectionVariations(
-            fsms: [
-                CallChain(root: AnyScheduleableFiniteStateMachine(fsm1), calls: []),
-                CallChain(root: AnyScheduleableFiniteStateMachine(fsm2), calls: [])
-            ],
+            timeslots: timeslots,
             gateway: fsm1.gateway,
-            timer: fsm1.timer,
-            startingTime: 0
+            timer: fsm1.timer
         )
         // [actuators, externalVariables, sensors].
         let singlePreExpected = [
@@ -153,14 +156,14 @@ class SnapshotSectionVariationsTests: XCTestCase {
         fsm1.timer = timer
         fsm2.timer = timer
         fsm2.gateway = fsm1.gateway
+        let timeslots = [
+            Timeslot(callChain: CallChain(root: AnyScheduleableFiniteStateMachine(fsm1), calls: []), startingTime: 0, duration: 20),
+            Timeslot(callChain: CallChain(root: AnyScheduleableFiniteStateMachine(fsm2), calls: []), startingTime: 30, duration: 30)
+        ]
         let variations = SnapshotSectionVariations(
-            fsms: [
-                CallChain(root: AnyScheduleableFiniteStateMachine(fsm1), calls: []),
-                CallChain(root: AnyScheduleableFiniteStateMachine(fsm2), calls: [])
-            ],
+            timeslots: timeslots,
             gateway: fsm1.gateway,
-            timer: fsm1.timer,
-            startingTime: 0
+            timer: fsm1.timer
         )
         // [actuators, externalVariables, sensors].
         var preExpected: Set<[[Bool]]> = [
