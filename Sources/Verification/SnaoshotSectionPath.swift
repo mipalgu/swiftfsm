@@ -1,5 +1,5 @@
 /*
- * SnapshotSection.swift
+ * SnapshotSectionPath.swift
  * Verification
  *
  * Created by Callum McColl on 2/6/21.
@@ -61,7 +61,7 @@ import KripkeStructure
 /// Represents a particular execution of ringlets within the schedule between
 /// taking a snapshot of the external variables and saving the snapshot of
 /// external variables.
-struct SnapshotSection {
+struct SnaoshotSectionPath {
     
     struct State {
         
