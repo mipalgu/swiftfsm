@@ -64,4 +64,6 @@ struct Timeslot {
     
     var duration: UInt
     
+    var cyclesExecuted: UInt
+    
 }

@@ -77,7 +77,7 @@ class SnapshotSectionVariationsTests: XCTestCase {
     func test_canGenerateRingletsForOneMachine() throws {
         let fsm = ExternalsFiniteStateMachine()
         let timeslots = [
-            Timeslot(callChain: CallChain(root: AnyScheduleableFiniteStateMachine(fsm), calls: []), startingTime: 0, duration: 20)
+            Timeslot(callChain: CallChain(root: AnyScheduleableFiniteStateMachine(fsm), calls: []), startingTime: 0, duration: 20, cyclesExecuted: 0)
         ]
         let variations = SnapshotSectionVariations(
             section: SnapshotSection(timeslots: timeslots),
@@ -118,8 +118,8 @@ class SnapshotSectionVariationsTests: XCTestCase {
         fsm2.timer = timer
         fsm2.gateway = fsm1.gateway
         let timeslots = [
-            Timeslot(callChain: CallChain(root: AnyScheduleableFiniteStateMachine(fsm1), calls: []), startingTime: 0, duration: 20),
-            Timeslot(callChain: CallChain(root: AnyScheduleableFiniteStateMachine(fsm2), calls: []), startingTime: 30, duration: 30)
+            Timeslot(callChain: CallChain(root: AnyScheduleableFiniteStateMachine(fsm1), calls: []), startingTime: 0, duration: 20, cyclesExecuted: 0),
+            Timeslot(callChain: CallChain(root: AnyScheduleableFiniteStateMachine(fsm2), calls: []), startingTime: 30, duration: 30, cyclesExecuted: 0)
         ]
         let variations = SnapshotSectionVariations(
             section: SnapshotSection(timeslots: timeslots),
@@ -161,8 +161,8 @@ class SnapshotSectionVariationsTests: XCTestCase {
         fsm2.timer = timer
         fsm2.gateway = fsm1.gateway
         let timeslots = [
-            Timeslot(callChain: CallChain(root: AnyScheduleableFiniteStateMachine(fsm1), calls: []), startingTime: 0, duration: 20),
-            Timeslot(callChain: CallChain(root: AnyScheduleableFiniteStateMachine(fsm2), calls: []), startingTime: 30, duration: 30)
+            Timeslot(callChain: CallChain(root: AnyScheduleableFiniteStateMachine(fsm1), calls: []), startingTime: 0, duration: 20, cyclesExecuted: 0),
+            Timeslot(callChain: CallChain(root: AnyScheduleableFiniteStateMachine(fsm2), calls: []), startingTime: 30, duration: 30, cyclesExecuted: 0)
         ]
         let variations = SnapshotSectionVariations(
             section: SnapshotSection(timeslots: timeslots),
