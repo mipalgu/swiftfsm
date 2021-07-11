@@ -74,17 +74,17 @@ import KripkeStructure
 /// through the snapshot section.
 struct SnapshotSectionVariations {
    
-    var sections: [SnaoshotSectionPath]
+    var sections: [SnapshotSectionPath]
     
     init<Gateway: ModifiableFSMGateway, Timer: Clock>(timeslots: [Timeslot], gateway: Gateway, timer: Timer) {
         let sensorCombinations = Combinations(fsms: timeslots.lazy.map { $0.callChain.fsm })
-        let sections = sensorCombinations.flatMap { (combinations) -> [[SnaoshotSectionPath.State]] in
+        let sections = sensorCombinations.flatMap { (combinations) -> [[SnapshotSectionPath.State]] in
             let clones: [AnyScheduleableFiniteStateMachine] = timeslots.enumerated().map {
                 let clone = $1.callChain.fsm.clone()
                 clone.snapshotSensorValues = combinations[$0]
                 return clone
             }
-            func process(path: [SnaoshotSectionPath.State], index: Int) -> [[SnaoshotSectionPath.State]] {
+            func process(path: [SnapshotSectionPath.State], index: Int) -> [[SnapshotSectionPath.State]] {
                 if index >= combinations.count || index >= timeslots.count {
                     return [path]
                 }
@@ -93,22 +93,22 @@ struct SnapshotSectionVariations {
                 let after = clones[(index + 1)..<clones.count].map {
                     KripkeStatePropertyList($0.base)
                 }
-                return ringlets.flatMap { (ringlet) -> [[SnaoshotSectionPath.State]] in
+                return ringlets.flatMap { (ringlet) -> [[SnapshotSectionPath.State]] in
                     let newRinglet = CallAwareRinglet(callChain: CallChain(root: timeslots[index].callChain.calls.isEmpty ? clone : timeslots[index].callChain.root, calls: timeslots[index].callChain.calls), ringlet: ringlet)
-                    let newState = SnaoshotSectionPath.State(previous: path.last?.toCurrent ?? [], current: newRinglet, after: after)
+                    let newState = SnapshotSectionPath.State(previous: path.last?.toCurrent ?? [], current: newRinglet, after: after)
                     return process(path: path + [newState], index: index + 1)
                 }
             }
-            var arr: [SnaoshotSectionPath.State] = []
+            var arr: [SnapshotSectionPath.State] = []
             arr.reserveCapacity(min(timeslots.count, combinations.count))
             return process(path: arr, index: 0)
         }
         self.init(sections: sections.map {
-            SnaoshotSectionPath(ringlets: $0)
+            SnapshotSectionPath(ringlets: $0)
         })
     }
     
-    init(sections: [SnaoshotSectionPath]) {
+    init(sections: [SnapshotSectionPath]) {
         self.sections = sections
     }
     

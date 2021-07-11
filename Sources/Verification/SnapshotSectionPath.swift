@@ -61,7 +61,7 @@ import KripkeStructure
 /// Represents a particular execution of ringlets within the schedule between
 /// taking a snapshot of the external variables and saving the snapshot of
 /// external variables.
-struct SnaoshotSectionPath {
+struct SnapshotSectionPath {
     
     struct State {
         
