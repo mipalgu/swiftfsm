@@ -76,31 +76,31 @@ struct SnapshotSectionVariations {
    
     var sections: [SnapshotSectionPath]
     
-    init<Gateway: ModifiableFSMGateway, Timer: Clock>(timeslots: [Timeslot], gateway: Gateway, timer: Timer) {
-        let sensorCombinations = Combinations(fsms: timeslots.lazy.map { $0.callChain.fsm })
+    init<Gateway: ModifiableFSMGateway, Timer: Clock>(section: SnapshotSection, gateway: Gateway, timer: Timer) {
+        let sensorCombinations = Combinations(fsms: section.timeslots.lazy.map { $0.callChain.fsm })
         let sections = sensorCombinations.flatMap { (combinations) -> [[SnapshotSectionPath.State]] in
-            let clones: [AnyScheduleableFiniteStateMachine] = timeslots.enumerated().map {
+            let clones: [AnyScheduleableFiniteStateMachine] = section.timeslots.enumerated().map {
                 let clone = $1.callChain.fsm.clone()
                 clone.snapshotSensorValues = combinations[$0]
                 return clone
             }
             func process(path: [SnapshotSectionPath.State], index: Int) -> [[SnapshotSectionPath.State]] {
-                if index >= combinations.count || index >= timeslots.count {
+                if index >= combinations.count || index >= section.timeslots.count {
                     return [path]
                 }
                 let clone = clones[index].clone()
-                let ringlets = TimeAwareRinglets(fsm: clone, gateway: gateway, timer: timer, startingTime: timeslots[index].startingTime).ringlets
+                let ringlets = TimeAwareRinglets(fsm: clone, gateway: gateway, timer: timer, startingTime: section.timeslots[index].startingTime).ringlets
                 let after = clones[(index + 1)..<clones.count].map {
                     KripkeStatePropertyList($0.base)
                 }
                 return ringlets.flatMap { (ringlet) -> [[SnapshotSectionPath.State]] in
-                    let newRinglet = CallAwareRinglet(callChain: CallChain(root: timeslots[index].callChain.calls.isEmpty ? clone : timeslots[index].callChain.root, calls: timeslots[index].callChain.calls), ringlet: ringlet)
+                    let newRinglet = CallAwareRinglet(callChain: CallChain(root: section.timeslots[index].callChain.calls.isEmpty ? clone : section.timeslots[index].callChain.root, calls: section.timeslots[index].callChain.calls), ringlet: ringlet)
                     let newState = SnapshotSectionPath.State(previous: path.last?.toCurrent ?? [], current: newRinglet, after: after)
                     return process(path: path + [newState], index: index + 1)
                 }
             }
             var arr: [SnapshotSectionPath.State] = []
-            arr.reserveCapacity(min(timeslots.count, combinations.count))
+            arr.reserveCapacity(min(section.timeslots.count, combinations.count))
             return process(path: arr, index: 0)
         }
         self.init(sections: sections.map {
