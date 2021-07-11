@@ -57,8 +57,21 @@
  *
  */
 
+import swiftfsm
+import Gateways
+import Timers
+import KripkeStructure
+
 struct ScheduleCycleVariations {
     
+    var pathways: [ScheduleCyclePath]
     
+    init<Gateway: ModifiableFSMGateway, Timer: Clock>(cycle: ScheduleCycle, gateway: Gateway, timer: Timer) {
+        self.init(pathways: [])
+    }
+    
+    init(pathways: [ScheduleCyclePath]) {
+        self.pathways = pathways
+    }
     
 }

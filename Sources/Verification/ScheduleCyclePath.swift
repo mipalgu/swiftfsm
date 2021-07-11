@@ -63,10 +63,26 @@ struct ScheduleCyclePath {
     
     struct State {
         
-        var paths: [SnapshotSectionPath]
+        /// The ringlets of the fsms that were executed previously in the
+        /// schedule cycle.
+        var previous: [CallAwareRinglet]
+        
+        /// The ringlet of the last fsm to be executed during the schedule
+        /// cycle.
+        var current: CallAwareRinglet
+        
+        /// The state of the fsms that are still yet to be executed in this
+        /// schedule cycle.
+        var after: [KripkeStatePropertyList]
+        
+        /// A convenience getter that returns `previous` and `current` in a
+        /// single array.
+        var toCurrent: [CallAwareRinglet] {
+            previous + [current]
+        }
         
     }
     
-    var pathways: [State]
+    var path: [State]
     
 }
