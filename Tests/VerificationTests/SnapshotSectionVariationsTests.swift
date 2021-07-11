@@ -74,6 +74,61 @@ class SnapshotSectionVariationsTests: XCTestCase {
         // Put teardown code here. This method is called after the invocation of each test method in the class.
     }
     
+    func test_cyclesExecutedIncreasesWhenNoTransitionsFire() throws {
+        let fsm = ToggleFiniteStateMachine()
+        let timeslots = [
+            Timeslot(
+                callChain: CallChain(root: AnyScheduleableFiniteStateMachine(fsm), calls: []),
+                startingTime: 0,
+                duration: 20,
+                cyclesExecuted: 0
+            )
+        ]
+        let variations = SnapshotSectionVariations(
+            section: SnapshotSection(timeslots: timeslots),
+            gateway: fsm.gateway,
+            timer: fsm.timer,
+            cycleLength: 100
+        )
+        XCTAssertEqual(variations.sections.count, 1)
+        if variations.sections.isEmpty {
+            return
+        }
+        XCTAssertEqual(variations.sections[0].ringlets.count, 1)
+        if variations.sections[0].ringlets.isEmpty {
+            return
+        }
+        XCTAssertEqual(variations.sections[0].ringlets[0].cyclesExecuted, 1)
+    }
+    
+    func test_cyclesExecutedDoesNotIncreaseWhenTransitionsFire() throws {
+        let fsm = TransitioningFiniteStateMachine()
+        let timeslots = [
+            Timeslot(
+                callChain: CallChain(root: AnyScheduleableFiniteStateMachine(fsm), calls: []),
+                startingTime: 0,
+                duration: 20,
+                cyclesExecuted: 0
+            )
+        ]
+        let variations = SnapshotSectionVariations(
+            section: SnapshotSection(timeslots: timeslots),
+            gateway: fsm.gateway,
+            timer: fsm.timer,
+            cycleLength: 100
+        )
+        XCTAssertEqual(variations.sections.count, 1)
+        if variations.sections.isEmpty {
+            return
+        }
+        XCTAssertEqual(variations.sections[0].ringlets.count, 1)
+        if variations.sections[0].ringlets.isEmpty {
+            return
+        }
+        XCTAssertEqual(variations.sections[0].ringlets[0].cyclesExecuted, 0)
+    }
+        
+    
     func test_canGenerateRingletsForOneMachine() throws {
         let fsm = ExternalsFiniteStateMachine()
         let timeslots = [
