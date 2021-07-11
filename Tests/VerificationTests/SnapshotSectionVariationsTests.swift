@@ -82,7 +82,8 @@ class SnapshotSectionVariationsTests: XCTestCase {
         let variations = SnapshotSectionVariations(
             section: SnapshotSection(timeslots: timeslots),
             gateway: fsm.gateway,
-            timer: fsm.timer
+            timer: fsm.timer,
+            cycleLength: 100
         )
         // [actuators, externalVariables, sensors].
         var preExpected: Set<[[Bool]]> = [
@@ -124,7 +125,8 @@ class SnapshotSectionVariationsTests: XCTestCase {
         let variations = SnapshotSectionVariations(
             section: SnapshotSection(timeslots: timeslots),
             gateway: fsm1.gateway,
-            timer: fsm1.timer
+            timer: fsm1.timer,
+            cycleLength: 100
         )
         // [actuators, externalVariables, sensors].
         let singlePreExpected = [
@@ -167,7 +169,8 @@ class SnapshotSectionVariationsTests: XCTestCase {
         let variations = SnapshotSectionVariations(
             section: SnapshotSection(timeslots: timeslots),
             gateway: fsm1.gateway,
-            timer: fsm1.timer
+            timer: fsm1.timer,
+            cycleLength: 100
         )
         // [actuators, externalVariables, sensors].
         var preExpected: Set<[[Bool]]> = [

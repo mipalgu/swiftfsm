@@ -76,7 +76,7 @@ struct SnapshotSectionVariations {
    
     var sections: [SnapshotSectionPath]
     
-    init<Gateway: ModifiableFSMGateway, Timer: Clock>(section: SnapshotSection, gateway: Gateway, timer: Timer) {
+    init<Gateway: ModifiableFSMGateway, Timer: Clock>(section: SnapshotSection, gateway: Gateway, timer: Timer, cycleLength: UInt) {
         let sensorCombinations = Combinations(fsms: section.timeslots.lazy.map { $0.callChain.fsm })
         let sections = sensorCombinations.flatMap { (combinations) -> [[SnapshotSectionPath.State]] in
             let clones: [AnyScheduleableFiniteStateMachine] = section.timeslots.enumerated().map {
@@ -89,18 +89,19 @@ struct SnapshotSectionVariations {
                     return [path]
                 }
                 let clone = clones[index].clone()
-                let ringlets = TimeAwareRinglets(fsm: clone, gateway: gateway, timer: timer, startingTime: section.timeslots[index].startingTime).ringlets
+                let timeslot = section.timeslots[index]
+                let ringlets = TimeAwareRinglets(fsm: clone, gateway: gateway, timer: timer, startingTime: timeslot.cyclesExecuted * cycleLength + timeslot.startingTime).ringlets
                 let after = clones[(index + 1)..<clones.count].map {
                     KripkeStatePropertyList($0.base)
                 }
                 return ringlets.flatMap { (ringlet) -> [[SnapshotSectionPath.State]] in
-                    let newRinglet = CallAwareRinglet(callChain: CallChain(root: section.timeslots[index].callChain.calls.isEmpty ? clone : section.timeslots[index].callChain.root, calls: section.timeslots[index].callChain.calls), ringlet: ringlet)
+                    let newRinglet = CallAwareRinglet(callChain: CallChain(root: timeslot.callChain.calls.isEmpty ? clone : timeslot.callChain.root, calls: timeslot.callChain.calls), ringlet: ringlet)
                     let newState = SnapshotSectionPath.State(
                         previous: path.last?.toCurrent ?? [],
                         current: newRinglet,
                         after: after,
                         fsm: clone,
-                        cyclesExecuted: ringlet.transitioned ? 0 : section.timeslots[index].cyclesExecuted + 1
+                        cyclesExecuted: ringlet.transitioned ? 0 : timeslot.cyclesExecuted + 1
                     )
                     return process(path: path + [newState], index: index + 1)
                 }
