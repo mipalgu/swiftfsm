@@ -57,8 +57,22 @@
  *
  */
 
-struct ScheduleCycle {
+import swiftfsm
+import Gateways
+import Timers
+import KripkeStructure
+
+/// Represents all possible variations for a single `ScheduleThread`.
+struct ScheduleThreadVariations {
     
-    var sections: [SnapshotSection]
+    var pathways: [ScheduleThreadPath]
+    
+    init<Gateway: ModifiableFSMGateway, Timer: Clock>(cycle: ScheduleThread, gateway: Gateway, timer: Timer) {
+        self.init(pathways: [])
+    }
+    
+    init(pathways: [ScheduleThreadPath]) {
+        self.pathways = pathways
+    }
     
 }

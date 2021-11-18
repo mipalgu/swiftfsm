@@ -57,21 +57,35 @@
  *
  */
 
-import swiftfsm
-import Gateways
-import Timers
 import KripkeStructure
 
-struct ScheduleCycleVariations {
+/// Represents a single possible execution path through a `ScheduleThread`.
+struct ScheduleThreadPath {
     
-    var pathways: [ScheduleCyclePath]
-    
-    init<Gateway: ModifiableFSMGateway, Timer: Clock>(cycle: ScheduleCycle, gateway: Gateway, timer: Timer) {
-        self.init(pathways: [])
+    struct State {
+        
+        /// The ringlets of the fsms that were executed previously in the
+        /// schedule cycle.
+        var previous: [CallAwareRinglet]
+        
+        /// The ringlet of the last fsm to be executed during the schedule
+        /// cycle.
+        var current: CallAwareRinglet
+        
+        /// The state of the fsms that are still yet to be executed in this
+        /// schedule cycle.
+        var after: [KripkeStatePropertyList]
+        
+        /// A convenience getter that returns `previous` and `current` in a
+        /// single array.
+        var toCurrent: [CallAwareRinglet] {
+            previous + [current]
+        }
+        
     }
     
-    init(pathways: [ScheduleCyclePath]) {
-        self.pathways = pathways
-    }
+    /// The sequential execution steps making up the pathway through the
+    /// `ScheduleThread`.
+    var path: [State]
     
 }
