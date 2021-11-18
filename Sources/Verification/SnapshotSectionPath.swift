@@ -77,8 +77,11 @@ struct SnapshotSectionPath {
         /// phase.
         var after: [KripkeStatePropertyList]
         
+        /// The fsm that was executed.
         var fsm: AnyScheduleableFiniteStateMachine
         
+        /// The number of consecutive ringlets that have been executed without
+        /// the fsm transitioning.
         var cyclesExecuted: UInt
         
         /// A convenience getter that returns `previous` and `current` in a

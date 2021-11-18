@@ -57,8 +57,12 @@
  *
  */
 
+// A single section within a schedule marked by when reading from the
+// environment occurs, and ended when writing to the environment occurs.
 struct SnapshotSection {
     
+    // The time slots that are being executed within this section of the
+    // schedule.
     var timeslots: [Timeslot]
     
 }
