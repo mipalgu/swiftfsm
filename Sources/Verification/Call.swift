@@ -92,7 +92,7 @@ extension Call: Equatable {
                 return false
             }
         }
-        return true
+        return KripkeStatePropertyList(lhs.fsm.base) == KripkeStatePropertyList(rhs.fsm.base)
     }
     
 }
@@ -104,7 +104,7 @@ extension Call: Hashable {
         hasher.combine(self.callee)
         hasher.combine(KripkeStatePropertyList(self.parameters.sorted { $0.key < $1.key }))
         hasher.combine(self.method)
-        hasher.combine(self.fsm.name)
+        hasher.combine(KripkeStatePropertyList(self.fsm.base))
     }
     
 }

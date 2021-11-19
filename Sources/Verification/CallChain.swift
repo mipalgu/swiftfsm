@@ -57,6 +57,7 @@
  */
 
 import swiftfsm
+import KripkeStructure
 
 public struct CallChain: Hashable {
     
@@ -69,6 +70,10 @@ public struct CallChain: Hashable {
             return root
         }
         return last.fsm.asScheduleableFiniteStateMachine
+    }
+    
+    public static func ==(lhs: CallChain, rhs: CallChain) -> Bool {
+        lhs.calls == rhs.calls && KripkeStatePropertyList(lhs.fsm.base) == KripkeStatePropertyList(rhs.fsm.base)
     }
     
     public func hash(into hasher: inout Hasher) {

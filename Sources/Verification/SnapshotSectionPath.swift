@@ -62,9 +62,9 @@ import KripkeStructure
 /// Represents a particular execution of ringlets within the schedule between
 /// taking a snapshot of the external variables and saving the snapshot of
 /// external variables.
-struct SnapshotSectionPath {
+struct SnapshotSectionPath: Hashable {
     
-    struct State {
+    struct State: Hashable {
         
         /// The ringlets of the fsms that were executed previously in this snapshot
         /// phase.
@@ -88,6 +88,22 @@ struct SnapshotSectionPath {
         /// single array.
         var toCurrent: [CallAwareRinglet] {
             previous + [current]
+        }
+        
+        static func ==(lhs: State, rhs: State) -> Bool {
+            return lhs.previous == rhs.previous
+            && lhs.current == rhs.current
+            && lhs.after == rhs.after
+            && lhs.cyclesExecuted == rhs.cyclesExecuted
+            && KripkeStatePropertyList(lhs.fsm.base) == KripkeStatePropertyList(rhs.fsm.base)
+        }
+        
+        func hash(into hasher: inout Hasher) {
+            hasher.combine(previous)
+            hasher.combine(current)
+            hasher.combine(after)
+            hasher.combine(KripkeStatePropertyList(fsm.base))
+            hasher.combine(cyclesExecuted)
         }
         
     }

@@ -385,5 +385,5 @@ extension KripkeStateProperty: Hashable {
 }
 
 public func == (lhs: KripkeStateProperty, rhs: KripkeStateProperty) -> Bool {
-    return lhs.equals(other: rhs)
+    lhs.equals(other: rhs)
 }

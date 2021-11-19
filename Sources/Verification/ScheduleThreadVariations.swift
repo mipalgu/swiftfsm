@@ -63,7 +63,7 @@ import Timers
 import KripkeStructure
 
 /// Represents all possible variations for a single `ScheduleThread`.
-struct ScheduleThreadVariations {
+struct ScheduleThreadVariations: Hashable {
     
     var pathways: [ScheduleThreadPath]
     

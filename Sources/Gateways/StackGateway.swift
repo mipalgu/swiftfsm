@@ -65,7 +65,7 @@ import Glibc
 import IO
 import swiftfsm
 
-public final class StackGateway: ModifiableFSMGateway, ModifiableFSMGatewayDefaults {
+public final class StackGateway: ModifiableFSMGateway, ModifiableFSMGatewayDefaults, KripkeVariablesModifier {
 
     private let printer: Printer
 
@@ -80,6 +80,10 @@ public final class StackGateway: ModifiableFSMGateway, ModifiableFSMGatewayDefau
     public var fsms: [FSM_ID : FSMType] = [:]
 
     public var ids: [String: FSM_ID] = [:]
+    
+    public var validVars: [String: [Any]] {
+        ["delegate": []]
+    }
 
     public init(stackLimit: Int = 8192, printer: Printer = CommandLinePrinter(errorStream: StderrOutputStream(), messageStream: StdoutOutputStream(), warningStream: StdoutOutputStream())) {
         self.stackLimit = stackLimit

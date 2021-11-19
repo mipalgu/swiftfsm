@@ -72,7 +72,7 @@ import KripkeStructure
 /// Since swiftfsm provides the ability to specify a set of fsms that take part
 /// in a single snapshot section, this struct represents all possible pathways
 /// through the snapshot section.
-struct SnapshotSectionVariations {
+struct SnapshotSectionVariations: Hashable {
    
     var sections: [SnapshotSectionPath]
     

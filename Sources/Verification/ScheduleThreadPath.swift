@@ -61,7 +61,7 @@ import KripkeStructure
 import swiftfsm
 
 /// Represents a single possible execution path through a `ScheduleThread`.
-struct ScheduleThreadPath {
+struct ScheduleThreadPath: Hashable {
     
     /// The sequential execution steps making up the pathway through the
     /// `ScheduleThread`.
