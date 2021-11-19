@@ -67,12 +67,45 @@ struct ScheduleThreadVariations {
     
     var pathways: [ScheduleThreadPath]
     
-    init<Gateway: ModifiableFSMGateway, Timer: Clock>(cycle: ScheduleThread, gateway: Gateway, timer: Timer) {
-        self.init(pathways: [])
+    init<Gateway: ModifiableFSMGateway, Timer: Clock>(thread: ScheduleThread, gateway: Gateway, timer: Timer, cycleLength: UInt) {
+        guard !thread.sections.isEmpty else {
+            self.init(pathways: [])
+            return
+        }
+        func process(executing: Int) -> [[SnapshotSectionPath]] {
+            guard executing < thread.sections.count else {
+                return []
+            }
+            let section = thread.sections[executing]
+            let variations = SnapshotSectionVariations(section: section, gateway: gateway, timer: timer, cycleLength: cycleLength)
+            guard executing + 1 < thread.sections.count else {
+                return [variations.sections]
+            }
+            return variations.sections.flatMap { variation in
+                process(executing: executing + 1).map {
+                    [variation] + $0
+                }
+            }
+        }
+        let pathways = process(executing: 0)
+        self.init(pathways: pathways.map { ScheduleThreadPath(sections: $0) })
     }
     
     init(pathways: [ScheduleThreadPath]) {
         self.pathways = pathways
+    }
+    
+}
+
+extension KripkeStatePropertyList {
+    
+    init(thread: ScheduleThread) {
+        let individualStates = thread.sections.flatMap {
+            $0.timeslots.map {
+                ($0.callChain.fsm.name, KripkeStatePropertyList($0.callChain.fsm.base))
+            }
+        }
+        self.init(Dictionary<String, KripkeStatePropertyList>(uniqueKeysWithValues: individualStates))
     }
     
 }
