@@ -76,6 +76,7 @@ class ScheduleCycleVariationsTests: XCTestCase {
     
     func test_cyclesExecutedIncreasesWhenNoTransitionsFire() throws {
         let fsm = ToggleFiniteStateMachine()
+        let fsm2 = ToggleFiniteStateMachine()
         let timeslots = [
             Timeslot(
                 callChain: CallChain(root: AnyScheduleableFiniteStateMachine(fsm), calls: []),
@@ -84,21 +85,30 @@ class ScheduleCycleVariationsTests: XCTestCase {
                 cyclesExecuted: 0
             )
         ]
-        let variations = SnapshotSectionVariations(
+        let timeslots2 = [
+            Timeslot(
+                callChain: CallChain(root: AnyScheduleableFiniteStateMachine(fsm2), calls: []),
+                startingTime: 0,
+                duration: 20,
+                cyclesExecuted: 0
+            )
+        ]
+        let sectionVariations = SnapshotSectionVariations(
             section: SnapshotSection(timeslots: timeslots),
             gateway: fsm.gateway,
             timer: fsm.timer,
             cycleLength: 100
         )
-        XCTAssertEqual(variations.sections.count, 1)
-        if variations.sections.isEmpty {
-            return
-        }
-        XCTAssertEqual(variations.sections[0].ringlets.count, 1)
-        if variations.sections[0].ringlets.isEmpty {
-            return
-        }
-        XCTAssertEqual(variations.sections[0].ringlets[0].cyclesExecuted, 1)
+        let variations = ScheduleThreadVariations(
+            thread: ScheduleThread(sections: [SnapshotSection(timeslots: timeslots2)]),
+            gateway: fsm2.gateway,
+            timer: fsm2.timer,
+            cycleLength: 100
+        )
+        XCTAssertEqual(variations.pathways.count, sectionVariations.sections.count)
+        let sections1 = [sectionVariations.sections]
+        let sections2 = variations.pathways.map { $0.sections }
+        XCTAssertEqual(sections2, sections1)
     }
     
     func test_cyclesExecutedDoesNotIncreaseWhenTransitionsFire() throws {

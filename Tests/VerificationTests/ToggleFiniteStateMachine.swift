@@ -75,9 +75,9 @@ internal final class ToggleFiniteStateMachine: FiniteStateMachineType,
     SnapshotControllerContainer
 {
     
-    let gateway = StackGateway()
+    private(set) var gateway = StackGateway()
     
-    let timer = FSMClock(ringletLengths: ["toggle": 10], scheduleLength: 10)
+    private(set) var timer = FSMClock(ringletLengths: ["toggle": 10], scheduleLength: 10)
     
     var sensors: [AnySnapshotController] = []
     
@@ -103,7 +103,11 @@ internal final class ToggleFiniteStateMachine: FiniteStateMachineType,
     let submachines: [AnyScheduleableFiniteStateMachine] = []
 
     func clone() -> ToggleFiniteStateMachine {
-        return self
+        let fsm = ToggleFiniteStateMachine()
+        fsm.gateway = gateway
+        fsm.timer = timer
+        fsm.value = value
+        return fsm
     }
 
     func exit() {}
