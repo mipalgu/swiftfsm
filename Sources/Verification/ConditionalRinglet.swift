@@ -60,20 +60,6 @@ import KripkeStructure
 
 struct ConditionalRinglet {
     
-    enum Timing: Equatable {
-        case beforeOrEqual(UInt)
-        case after(UInt)
-        
-        var timeValue: UInt {
-            switch self {
-            case .beforeOrEqual(let time):
-                return time
-            case .after(let time):
-                return time + 1
-            }
-        }
-    }
-    
     /// The name of the fsm that was executed.
     var fsmName: String
     
@@ -120,4 +106,4 @@ struct ConditionalRinglet {
     
 }
 
-extension ConditionalRinglet: Equatable {}
+extension ConditionalRinglet: Hashable {}

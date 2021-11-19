@@ -57,7 +57,7 @@
  *
  */
 
-struct CallAwareRinglet {
+struct CallAwareRinglet: Hashable {
     
     var callChain: CallChain
     

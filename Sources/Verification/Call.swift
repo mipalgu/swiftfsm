@@ -61,7 +61,7 @@ import KripkeStructure
 
 struct Call {
     
-    enum Method: String, Codable, CaseIterable {
+    enum Method: String, Codable, CaseIterable, Hashable {
         
         case synchronous
         
