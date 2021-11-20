@@ -63,8 +63,22 @@ import swiftfsm
 /// Represents a single possible execution path through a `ScheduleThread`.
 struct ScheduleThreadPath: Hashable {
     
+    struct State: Hashable {
+        
+        var sections: [SnapshotSectionPath]
+        
+    }
+    
     /// The sequential execution steps making up the pathway through the
     /// `ScheduleThread`.
-    var sections: [SnapshotSectionPath]
+    var sections: [State]
+    
+    init(sections: [State]) {
+        self.sections = sections
+    }
+    
+    init(sections: [SnapshotSectionPath]) {
+        self.init(sections: [State(sections: sections)])
+    }
     
 }
