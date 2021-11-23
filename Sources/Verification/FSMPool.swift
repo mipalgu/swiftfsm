@@ -59,23 +59,37 @@
 import swiftfsm
 import KripkeStructure
 
-struct FSMPool: Hashable {
+struct FSMPool {
     
-    private var fsms: [AnyScheduleableFiniteStateMachine]
+    typealias Data = [AnyScheduleableFiniteStateMachine]
     
-    private var indexes: [String: Int]
+    private var fsms: Data
+    
+    private var indexes: [String: Data.Index]
     
     init(fsms: [AnyScheduleableFiniteStateMachine]) {
         self.fsms = fsms
         self.indexes = Dictionary(uniqueKeysWithValues: fsms.enumerated().map { ($1.name, $0) })
     }
     
-    func fsm(_ name: String) -> AnyScheduleableFiniteStateMachine {
+    func index(of name: String) -> Data.Index {
         guard let index = indexes[name] else {
-            fatalError("Attempting to fetch an fsm that doesn't exist within the pool.")
+            fatalError("Attempting to fetch index of fsm that doesn't exist within the pool.")
         }
+        return index
+    }
+    
+    func fsm(atIndex index: Data.Index) -> AnyScheduleableFiniteStateMachine {
         return fsms[index]
     }
+    
+    func fsm(_ name: String) -> AnyScheduleableFiniteStateMachine {
+        return fsm(atIndex: index(of: name))
+    }
+    
+}
+
+extension FSMPool: Hashable {
     
     static func ==(lhs: FSMPool, rhs: FSMPool) -> Bool {
         lhs.fsms.map { KripkeStatePropertyList($0.base) } == rhs.fsms.map { KripkeStatePropertyList($0.base) }
