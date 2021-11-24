@@ -79,27 +79,24 @@ struct SnapshotSectionVariations: Hashable {
     init<Gateway: ModifiableFSMGateway, Timer: Clock>(pool: FSMPool, section: SnapshotSection, gateway: Gateway, timer: Timer, cycleLength: UInt) where Gateway: NewVerifiableGateway {
         let sensorCombinations = Combinations(fsms: section.timeslots.lazy.map { $0.callChain.fsm(fromPool: pool).asScheduleableFiniteStateMachine })
         let sections = sensorCombinations.flatMap { (combinations) -> [[SnapshotSectionPath.State]] in
-            var pool = pool.cloned
-            let clones: [FSMType] = section.timeslots.enumerated().map {
-                let clone = $1.callChain.fsm(fromPool: pool).clone()
-                clone.asScheduleableFiniteStateMachine.snapshotSensorValues = combinations[$0]
-                pool.insert(clone)
-                return clone
+            let pool = pool.cloned
+            for (index, timeslot) in section.timeslots.enumerated() {
+                let fsm = timeslot.callChain.fsm(fromPool: pool).clone()
+                fsm.asScheduleableFiniteStateMachine.snapshotSensorValues = combinations[index]
             }
             func process(path: [SnapshotSectionPath.State], index: Int, pool: FSMPool) -> [[SnapshotSectionPath.State]] {
                 if index >= combinations.count || index >= section.timeslots.count {
                     return [path]
                 }
-                var beforePool = pool.cloned
-                let clone = clones[index].clone()
-                beforePool.insert(clone)
-                gateway.pool = beforePool
+                let pool = pool.cloned
+                let fsm = section.timeslots[index].callChain.fsm(fromPool: pool)
+                gateway.pool = pool
                 let timeslot = section.timeslots[index]
-                let ringlets = TimeAwareRinglets(fsm: clone, gateway: gateway, timer: timer, startingTime: timeslot.cyclesExecuted * cycleLength + timeslot.startingTime).ringlets
+                let ringlets = TimeAwareRinglets(fsm: fsm, gateway: gateway, timer: timer, startingTime: timeslot.cyclesExecuted * cycleLength + timeslot.startingTime).ringlets
                 return ringlets.flatMap { (ringlet) -> [[SnapshotSectionPath.State]] in
                     let newRinglet = CallAwareRinglet(
                         callChain: CallChain(
-                            root: timeslot.callChain.calls.isEmpty ? clone.name : timeslot.callChain.root,
+                            root: timeslot.callChain.calls.isEmpty ? fsm.name : timeslot.callChain.root,
                             calls: timeslot.callChain.calls
                         ),
                         ringlet: ringlet
