@@ -1,8 +1,8 @@
 /*
- * ToggleFiniteStateMachine.swift
+ * FSMPoolTests.swift
  * VerificationTests
  *
- * Created by Callum McColl on 16/2/21.
+ * Created by Callum McColl on 24/11/21.
  * Copyright © 2021 Callum McColl. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -56,104 +56,52 @@
  *
  */
 
-import FSM
+import XCTest
+
 import KripkeStructure
-import Gateways
-import Timers
-import Verification
 import swiftfsm
 
-internal final class ToggleFiniteStateMachine: FiniteStateMachineType,
-    Cloneable,
-    ConvertibleToScheduleableFiniteStateMachine,
-    StateExecuter,
-    Exitable,
-    Finishable,
-    Resumeable,
-    Restartable,
-    Snapshotable,
-    SnapshotControllerContainer,
-    KripkeVariablesModifier
-{
-    
-    var computedVars: [String : Any] {
-        [
-            "currentState": currentState.name
-        ]
-    }
-    
-    var validVars: [String: [Any]] {
-        [
-            "gateway": [],
-            "timer": [],
-            "name": [],
-            "initialState": [],
-            "initialPreviousState": [],
-            "fsmVars": [],
-            "snapshotSensors": [],
-            "snapshotActuators": [],
-            "sensors": [],
-            "actuators": [],
-            "externalVariables": [],
-            "exitState": [],
-            "currentState": [],
-            "parameters": [],
-            "previousState": [],
-            "results": [],
-            "submachineFunctions": [],
-            "submachines": [],
-            "suspendState": [],
-            "suspendedState": []
-        ]
-    }
-    
-    private(set) var gateway = StackGateway()
-    
-    private(set) var timer = FSMClock(ringletLengths: ["toggle": 10], scheduleLength: 10)
-    
-    var sensors: [AnySnapshotController] = []
-    
-    var actuators: [AnySnapshotController] = []
+@testable import Verification
 
-    //swiftlint:disable:next type_name
-    typealias _StateType = MiPalState
+class FSMPoolTests: XCTestCase {
 
-    let name: String = "toggle"
-
-    var initialState: MiPalState = EmptyMiPalState("initial")
-    
-    var value: Bool = false
-
-    var currentState: MiPalState = EmptyMiPalState("current")
-
-    var externalVariables: [AnySnapshotController] = []
-
-    let hasFinished: Bool = true
-
-    let isSuspended: Bool = true
-
-    let submachines: [AnyScheduleableFiniteStateMachine] = []
-
-    func clone() -> ToggleFiniteStateMachine {
-        let fsm = ToggleFiniteStateMachine()
-        fsm.gateway = gateway
-        fsm.timer = timer
-        fsm.value = value
-        return fsm
+    override func setUpWithError() throws {
+        // Put setup code here. This method is called before the invocation of each test method in the class.
     }
 
-    func exit() {}
-
-    func next() {
-        self.value.toggle()
+    override func tearDownWithError() throws {
+        // Put teardown code here. This method is called after the invocation of each test method in the class.
     }
 
-    func restart() {}
-
-    func resume() {}
-
-    func saveSnapshot() {}
-
-    func suspend() {}
-
+    func test_canConvertToPropertyList() throws {
+        let fsm = AnyControllableFiniteStateMachine(ToggleFiniteStateMachine())
+        let base = { fsm.base as! ToggleFiniteStateMachine }
+        let pool = FSMPool(fsms: [.controllableFSM(fsm)])
+        let result = pool.propertyList(.read(fsm.name))
+        let expected = KripkeStatePropertyList(
+            [
+                "fsms": KripkeStateProperty(
+                    type: .Compound(KripkeStatePropertyList(
+                        [
+                            fsm.name: KripkeStateProperty(
+                                type: .Compound(KripkeStatePropertyList(
+                                    [
+                                        "currentState": KripkeStateProperty(type: .String, value: "current"),
+                                        "isSuspended": KripkeStateProperty(type: .Bool, value: true),
+                                        "hasFinished": KripkeStateProperty(type: .Bool, value: true),
+                                        "value": KripkeStateProperty(type: .Bool, value: false)
+                                    ]
+                                )),
+                                value: base()
+                            )
+                        ]
+                    )),
+                    value: [fsm.name: base()]
+                ),
+                "pc": KripkeStateProperty(type: .String, value: fsm.name + ".R")
+            ]
+        )
+        XCTAssertEqual(result, expected)
+    }
+    
 }
