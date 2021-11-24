@@ -89,7 +89,10 @@ internal final class ExternalsFiniteStateMachine: FiniteStateMachineType,
     }
     
     var computedVars: [String: Any] {
-        [
+        return [
+            "actuators": Dictionary(uniqueKeysWithValues: actuators.map { ($0.name, $0.val) }),
+            "sensors": Dictionary(uniqueKeysWithValues: sensors.map { ($0.name, $0.val) }),
+            "externalVariables": Dictionary(uniqueKeysWithValues: externalVariables.map { ($0.name, $0.val) }),
             "initialState": initialState.name,
             "currentState": currentState.name
         ]
