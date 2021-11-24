@@ -61,9 +61,58 @@ import KripkeStructure
 
 public struct CallChain: Hashable {
     
+    private struct CallID: Hashable {
+        
+        var callee: FSM_ID
+        
+        var parameters: [String: Any?]
+        
+        static func ==(lhs: CallID, rhs: CallID) -> Bool {
+            guard lhs.callee == rhs.callee, lhs.parameters.keys == rhs.parameters.keys else {
+                return false
+            }
+            for key in lhs.parameters.keys {
+                if KripkeStatePropertyList(lhs.parameters[key]) != KripkeStatePropertyList(rhs.parameters[key]) {
+                    return false
+                }
+            }
+            return true
+        }
+        
+        func hash(into hasher: inout Hasher) {
+            hasher.combine(self.callee)
+            hasher.combine(KripkeStatePropertyList(self.parameters.sorted { $0.key < $1.key }))
+        }
+        
+    }
+    
     var root: String
     
-    var calls: [Call]
+    private var indexes: [CallID: Int] = [:]
+    
+    private(set) var calls: [Call]
+    
+    private init(root: String, indexes: [CallID: Int], calls: [Call]) {
+        self.root = root
+        self.indexes = indexes
+        self.calls = calls
+    }
+    
+    init(root: String, calls: [Call]) {
+        let indexes = Dictionary(uniqueKeysWithValues: calls.enumerated().map {
+            (CallID(callee: $1.callee, parameters: $1.parameters), $0)
+        })
+        self.init(root: root, indexes: indexes, calls: calls)
+    }
+    
+    mutating func add(_ call: Call) {
+        let id = CallID(callee: call.callee, parameters: call.parameters)
+        if let index = indexes[id] {
+            fatalError("Cyclic call detected: \(calls[index..<calls.count])")
+        }
+        indexes[id] = calls.count
+        calls.append(call)
+    }
     
     func fsm(fromPool pool: FSMPool) -> FSMType {
         guard let last = calls.last else {
