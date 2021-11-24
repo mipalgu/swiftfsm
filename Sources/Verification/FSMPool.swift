@@ -130,6 +130,14 @@ public struct FSMPool {
     }
     
     func propertyList(_ programCounter: ProgramCounter) -> KripkeStatePropertyList {
+        let externalValues = Dictionary(uniqueKeysWithValues: fsms.flatMap {
+            ($0.sensors + $0.externalVariables + $0.actuators).map {
+                ($0.name, $0.base)
+            }
+        })
+        let externalProperties = KripkeStatePropertyList(externalValues.mapValues {
+            KripkeStateProperty($0)
+        })
         let fsmValues = Dictionary(uniqueKeysWithValues: fsms.map {
             ($0.name, $0.asScheduleableFiniteStateMachine.base)
         })
@@ -138,6 +146,7 @@ public struct FSMPool {
         })
         return KripkeStatePropertyList(
             [
+                "environment": KripkeStateProperty(type: .Compound(externalProperties), value: externalValues),
                 "fsms": KripkeStateProperty(type: .Compound(fsmProperties), value: fsmValues),
                 "pc": programCounter.property
             ]

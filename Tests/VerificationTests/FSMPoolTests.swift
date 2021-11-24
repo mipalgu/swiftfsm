@@ -73,13 +73,14 @@ class FSMPoolTests: XCTestCase {
         // Put teardown code here. This method is called after the invocation of each test method in the class.
     }
 
-    func test_canConvertToPropertyList() throws {
+    func test_toggleCanConvertToPropertyList() throws {
         let fsm = AnyControllableFiniteStateMachine(ToggleFiniteStateMachine())
         let base = { fsm.base as! ToggleFiniteStateMachine }
         let pool = FSMPool(fsms: [.controllableFSM(fsm)])
         let result = pool.propertyList(.read(fsm.name))
         let expected = KripkeStatePropertyList(
             [
+                "environment": KripkeStateProperty(type: .Compound(KripkeStatePropertyList([:])), value: [:]),
                 "fsms": KripkeStateProperty(
                     type: .Compound(KripkeStatePropertyList(
                         [
