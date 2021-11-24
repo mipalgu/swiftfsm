@@ -84,15 +84,16 @@ class TimeAwareRingletTests: XCTestCase {
             }
             return tempFSM
         }
+        let controllableFSM: FSMType = .controllableFSM(AnyControllableFiniteStateMachine(fsm))
         fsm.gateway.fsms[id] = .parameterisedFSM(AnyParameterisedFiniteStateMachine(fsm, newMachine: newMachine))
         fsm.gateway.stacks[id] = []
-        let ringlets = TimeAwareRinglets(fsm: AnyScheduleableFiniteStateMachine(fsm), gateway: fsm.gateway, timer: fsm.timer, startingTime: 0)
+        let ringlets = TimeAwareRinglets(fsm: controllableFSM, gateway: fsm.gateway, timer: fsm.timer, startingTime: 0)
         let falseProperties = KripkeStatePropertyList(["value": KripkeStateProperty(type: .Bool, value: Bool(false))])
         let trueProperties = KripkeStatePropertyList(["value": KripkeStateProperty(type: .Bool, value: Bool(true))])
         let time: UInt = 2000000
-        let expected = [
+        let expected: [ConditionalRinglet] = [
             ConditionalRinglet(
-                fsmName: fsm.name,
+                fsm: controllableFSM,
                 transitioned: false,
                 externalsPreSnapshot: KripkeStatePropertyList(),
                 externalsPostSnapshot: KripkeStatePropertyList(),
@@ -102,23 +103,23 @@ class TimeAwareRingletTests: XCTestCase {
                 condition: .lessThanEqual(value: time)
             ),
             ConditionalRinglet(
-                fsmName: fsm.name,
+                fsm: controllableFSM,
                 transitioned: false,
                 externalsPreSnapshot: KripkeStatePropertyList(),
                 externalsPostSnapshot: KripkeStatePropertyList(),
                 preSnapshot: falseProperties,
                 postSnapshot: falseProperties,
-                calls: [Call(caller: id, callee: id, parameters: ["value": true], method: .synchronous, fsm: newMachine(["value": true]))],
+                calls: [Call(caller: id, callee: id, parameters: ["value": true], method: .synchronous, fsm: newMachine(["value": true]).name)],
                 condition: .and(lhs: .greaterThan(value: time), rhs: .lessThanEqual(value: 4000000))
             ),
             ConditionalRinglet(
-                fsmName: fsm.name,
+                fsm: controllableFSM,
                 transitioned: false,
                 externalsPreSnapshot: KripkeStatePropertyList(),
                 externalsPostSnapshot: KripkeStatePropertyList(),
                 preSnapshot: falseProperties,
                 postSnapshot: falseProperties,
-                calls: [Call(caller: id, callee: id, parameters: ["value": true], method: .synchronous, fsm: newMachine(["value": true])), Call(caller: id, callee: id, parameters: ["value": false], method: .synchronous, fsm: newMachine(["value": false]))],
+                calls: [Call(caller: id, callee: id, parameters: ["value": true], method: .synchronous, fsm: newMachine(["value": true]).name), Call(caller: id, callee: id, parameters: ["value": false], method: .synchronous, fsm: newMachine(["value": false]).name)],
                 condition: .greaterThan(value: 4000000)
             )
         ]
@@ -145,27 +146,27 @@ class TimeAwareRingletTests: XCTestCase {
         fsm.gateway.fsms[id] = .parameterisedFSM(AnyParameterisedFiniteStateMachine(fsm, newMachine: newMachine))
         fsm.gateway.stacks[id] = []
         let time: UInt = 3500000
-        let ringlets = TimeAwareRinglets(fsm: AnyScheduleableFiniteStateMachine(fsm), gateway: fsm.gateway, timer: fsm.timer, startingTime: time)
+        let ringlets = TimeAwareRinglets(fsm: .controllableFSM(AnyControllableFiniteStateMachine(fsm)), gateway: fsm.gateway, timer: fsm.timer, startingTime: time)
         let falseProperties = KripkeStatePropertyList(["value": KripkeStateProperty(type: .Bool, value: Bool(false))])
-        let expected = [
+        let expected: [ConditionalRinglet] = [
             ConditionalRinglet(
-                fsmName: fsm.name,
+                fsm: .controllableFSM(AnyControllableFiniteStateMachine(fsm)),
                 transitioned: false,
                 externalsPreSnapshot: KripkeStatePropertyList(),
                 externalsPostSnapshot: KripkeStatePropertyList(),
                 preSnapshot: falseProperties,
                 postSnapshot: falseProperties,
-                calls: [Call(caller: id, callee: id, parameters: ["value": true], method: .synchronous, fsm: newMachine(["value": true]))],
+                calls: [Call(caller: id, callee: id, parameters: ["value": true], method: .synchronous, fsm: newMachine(["value": true]).name)],
                 condition: .and(lhs: .greaterThan(value: 2000000), rhs: .lessThanEqual(value: 4000000))
             ),
             ConditionalRinglet(
-                fsmName: fsm.name,
+                fsm: .controllableFSM(AnyControllableFiniteStateMachine(fsm)),
                 transitioned: false,
                 externalsPreSnapshot: KripkeStatePropertyList(),
                 externalsPostSnapshot: KripkeStatePropertyList(),
                 preSnapshot: falseProperties,
                 postSnapshot: falseProperties,
-                calls: [Call(caller: id, callee: id, parameters: ["value": true], method: .synchronous, fsm: newMachine(["value": true])), Call(caller: id, callee: id, parameters: ["value": false], method: .synchronous, fsm: newMachine(["value": false]))],
+                calls: [Call(caller: id, callee: id, parameters: ["value": true], method: .synchronous, fsm: newMachine(["value": true]).name), Call(caller: id, callee: id, parameters: ["value": false], method: .synchronous, fsm: newMachine(["value": false]).name)],
                 condition: .greaterThan(value: 4000000)
             )
         ]
@@ -192,12 +193,12 @@ class TimeAwareRingletTests: XCTestCase {
         fsm.gateway.fsms[id] = .parameterisedFSM(AnyParameterisedFiniteStateMachine(fsm, newMachine: newMachine))
         fsm.gateway.stacks[id] = []
         let time: UInt = 2000000
-        let ringlets = TimeAwareRinglets(fsm: AnyScheduleableFiniteStateMachine(fsm), gateway: fsm.gateway, timer: fsm.timer, startingTime: time)
+        let ringlets = TimeAwareRinglets(fsm: .controllableFSM(AnyControllableFiniteStateMachine(fsm)), gateway: fsm.gateway, timer: fsm.timer, startingTime: time)
         let falseProperties = KripkeStatePropertyList(["value": KripkeStateProperty(type: .Bool, value: Bool(false))])
         let trueProperties = KripkeStatePropertyList(["value": KripkeStateProperty(type: .Bool, value: Bool(true))])
-        let expected = [
+        let expected: [ConditionalRinglet] = [
             ConditionalRinglet(
-                fsmName: fsm.name,
+                fsm: .controllableFSM(AnyControllableFiniteStateMachine(fsm)),
                 transitioned: false,
                 externalsPreSnapshot: KripkeStatePropertyList(),
                 externalsPostSnapshot: KripkeStatePropertyList(),
@@ -207,23 +208,23 @@ class TimeAwareRingletTests: XCTestCase {
                 condition: .lessThanEqual(value: time)
             ),
             ConditionalRinglet(
-                fsmName: fsm.name,
+                fsm: .controllableFSM(AnyControllableFiniteStateMachine(fsm)),
                 transitioned: false,
                 externalsPreSnapshot: KripkeStatePropertyList(),
                 externalsPostSnapshot: KripkeStatePropertyList(),
                 preSnapshot: falseProperties,
                 postSnapshot: falseProperties,
-                calls: [Call(caller: id, callee: id, parameters: ["value": true], method: .synchronous, fsm: newMachine(["value": true]))],
+                calls: [Call(caller: id, callee: id, parameters: ["value": true], method: .synchronous, fsm: newMachine(["value": true]).name)],
                 condition: .and(lhs: .greaterThan(value: 2000000), rhs: .lessThanEqual(value: 4000000))
             ),
             ConditionalRinglet(
-                fsmName: fsm.name,
+                fsm: .controllableFSM(AnyControllableFiniteStateMachine(fsm)),
                 transitioned: false,
                 externalsPreSnapshot: KripkeStatePropertyList(),
                 externalsPostSnapshot: KripkeStatePropertyList(),
                 preSnapshot: falseProperties,
                 postSnapshot: falseProperties,
-                calls: [Call(caller: id, callee: id, parameters: ["value": true], method: .synchronous, fsm: newMachine(["value": true])), Call(caller: id, callee: id, parameters: ["value": false], method: .synchronous, fsm: newMachine(["value": false]))],
+                calls: [Call(caller: id, callee: id, parameters: ["value": true], method: .synchronous, fsm: newMachine(["value": true]).name), Call(caller: id, callee: id, parameters: ["value": false], method: .synchronous, fsm: newMachine(["value": false]).name)],
                 condition: .greaterThan(value: 4000000)
             )
         ]
@@ -250,17 +251,17 @@ class TimeAwareRingletTests: XCTestCase {
         fsm.gateway.fsms[id] = .parameterisedFSM(AnyParameterisedFiniteStateMachine(fsm, newMachine: newMachine))
         fsm.gateway.stacks[id] = []
         let maxTime: UInt = 4000000
-        let ringlets = TimeAwareRinglets(fsm: AnyScheduleableFiniteStateMachine(fsm), gateway: fsm.gateway, timer: fsm.timer, startingTime: maxTime + 5000)
+        let ringlets = TimeAwareRinglets(fsm: .controllableFSM(AnyControllableFiniteStateMachine(fsm)), gateway: fsm.gateway, timer: fsm.timer, startingTime: maxTime + 5000)
         let falseProperties = KripkeStatePropertyList(["value": KripkeStateProperty(type: .Bool, value: Bool(false))])
-        let expected = [
+        let expected: [ConditionalRinglet] = [
             ConditionalRinglet(
-                fsmName: fsm.name,
+                fsm: .controllableFSM(AnyControllableFiniteStateMachine(fsm)),
                 transitioned: false,
                 externalsPreSnapshot: KripkeStatePropertyList(),
                 externalsPostSnapshot: KripkeStatePropertyList(),
                 preSnapshot: falseProperties,
                 postSnapshot: falseProperties,
-                calls: [Call(caller: id, callee: id, parameters: ["value": true], method: .synchronous, fsm: newMachine(["value": true])), Call(caller: id, callee: id, parameters: ["value": false], method: .synchronous, fsm: newMachine(["value": false]))],
+                calls: [Call(caller: id, callee: id, parameters: ["value": true], method: .synchronous, fsm: newMachine(["value": true]).name), Call(caller: id, callee: id, parameters: ["value": false], method: .synchronous, fsm: newMachine(["value": false]).name)],
                 condition: .greaterThan(value: maxTime)
             )
         ]
@@ -274,10 +275,11 @@ class TimeAwareRingletTests: XCTestCase {
     }
     
     func test_doesNotHaveSideEffectsOnExternalVariables() throws {
-        let fsm = ExternalsFiniteStateMachine()
-        let initialExternalValues = (fsm.actuators + fsm.externalVariables + fsm.sensors).map { $0.val as! Bool }
-        _ = TimeAwareRinglets(fsm: AnyScheduleableFiniteStateMachine(fsm), gateway: fsm.gateway, timer: fsm.timer, startingTime: 0)
-        let resultingExternalValues = (fsm.actuators + fsm.externalVariables + fsm.sensors).map { $0.val as! Bool }
+        let fsm = AnyControllableFiniteStateMachine(ExternalsFiniteStateMachine())
+        let base = { fsm.base as! ExternalsFiniteStateMachine }
+        let initialExternalValues = (base().actuators + base().externalVariables + base().sensors).map { $0.val as! Bool }
+        _ = TimeAwareRinglets(fsm: .controllableFSM(fsm), gateway: base().gateway, timer: base().timer, startingTime: 0)
+        let resultingExternalValues = (base().actuators + base().externalVariables + base().sensors).map { $0.val as! Bool }
         XCTAssertEqual(initialExternalValues, resultingExternalValues)
     }
 

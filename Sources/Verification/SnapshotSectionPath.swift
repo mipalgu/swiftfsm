@@ -78,11 +78,15 @@ struct SnapshotSectionPath: Hashable {
         var after: [KripkeStatePropertyList]
         
         /// The fsm that was executed.
-        var fsm: AnyScheduleableFiniteStateMachine
+        var fsm: FSMType
         
         /// The number of consecutive ringlets that have been executed without
         /// the fsm transitioning.
         var cyclesExecuted: UInt
+        
+        /// The state of all fsms after this particular ringlet has finished
+        /// executing.
+        var pool: FSMPool
         
         /// A convenience getter that returns `previous` and `current` in a
         /// single array.
@@ -95,15 +99,17 @@ struct SnapshotSectionPath: Hashable {
             && lhs.current == rhs.current
             && lhs.after == rhs.after
             && lhs.cyclesExecuted == rhs.cyclesExecuted
-            && KripkeStatePropertyList(lhs.fsm.base) == KripkeStatePropertyList(rhs.fsm.base)
+            && lhs.pool == rhs.pool
+            && KripkeStatePropertyList(lhs.fsm.asScheduleableFiniteStateMachine.base) == KripkeStatePropertyList(rhs.fsm.asScheduleableFiniteStateMachine.base)
         }
         
         func hash(into hasher: inout Hasher) {
             hasher.combine(previous)
             hasher.combine(current)
             hasher.combine(after)
-            hasher.combine(KripkeStatePropertyList(fsm.base))
+            hasher.combine(KripkeStatePropertyList(fsm.asScheduleableFiniteStateMachine.base))
             hasher.combine(cyclesExecuted)
+            hasher.combine(pool)
         }
         
     }

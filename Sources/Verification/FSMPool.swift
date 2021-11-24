@@ -58,32 +58,53 @@
 
 import swiftfsm
 import KripkeStructure
+import FSM
 
-struct FSMPool {
+public struct FSMPool {
     
-    typealias Data = [AnyScheduleableFiniteStateMachine]
+    private var fsms: [FSMType]
     
-    private var fsms: Data
+    private var indexes: [String: Int]
     
-    private var indexes: [String: Data.Index]
-    
-    init(fsms: [AnyScheduleableFiniteStateMachine]) {
-        self.fsms = fsms
-        self.indexes = Dictionary(uniqueKeysWithValues: fsms.enumerated().map { ($1.name, $0) })
+    var cloned: FSMPool {
+        FSMPool(fsms: fsms.map { $0.clone() }, indexes: indexes)
     }
     
-    func index(of name: String) -> Data.Index {
+    private init(fsms: [FSMType], indexes: [String: Int]) {
+        self.fsms = fsms
+        self.indexes = indexes
+    }
+    
+    init(fsms: [FSMType]) {
+        self.init(fsms: fsms, indexes: Dictionary(uniqueKeysWithValues: fsms.enumerated().map { ($1.name, $0) }))
+    }
+    
+    mutating func insert(_ fsm: FSMType) {
+        guard let index = indexes[fsm.name] else {
+            let index = fsms.count
+            fsms.append(fsm)
+            indexes[fsm.name] = index
+            return
+        }
+        fsms[index] = fsm
+    }
+    
+    func has(_ name: String) -> Bool {
+        return indexes[name] != nil
+    }
+    
+    func index(of name: String) -> Int {
         guard let index = indexes[name] else {
             fatalError("Attempting to fetch index of fsm that doesn't exist within the pool.")
         }
         return index
     }
     
-    func fsm(atIndex index: Data.Index) -> AnyScheduleableFiniteStateMachine {
+    func fsm(atIndex index: Int) -> FSMType {
         return fsms[index]
     }
     
-    func fsm(_ name: String) -> AnyScheduleableFiniteStateMachine {
+    func fsm(_ name: String) -> FSMType {
         return fsm(atIndex: index(of: name))
     }
     
@@ -91,12 +112,12 @@ struct FSMPool {
 
 extension FSMPool: Hashable {
     
-    static func ==(lhs: FSMPool, rhs: FSMPool) -> Bool {
-        lhs.fsms.map { KripkeStatePropertyList($0.base) } == rhs.fsms.map { KripkeStatePropertyList($0.base) }
+    public static func ==(lhs: FSMPool, rhs: FSMPool) -> Bool {
+        lhs.fsms.map { KripkeStatePropertyList($0.asScheduleableFiniteStateMachine.base) } == rhs.fsms.map { KripkeStatePropertyList($0.asScheduleableFiniteStateMachine.base) }
     }
     
-    func hash(into hasher: inout Hasher) {
-        hasher.combine(fsms.map { KripkeStatePropertyList($0.base) })
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(fsms.map { KripkeStatePropertyList($0.asScheduleableFiniteStateMachine.base) })
     }
     
 }

@@ -75,11 +75,13 @@ class ScheduleThreadVariationsTests: XCTestCase {
     }
     
     func test_canGenerateSectionsForSingleMachine() throws {
-        let fsm = ToggleFiniteStateMachine()
-        let fsm2 = ToggleFiniteStateMachine()
+        let fsm = AnyControllableFiniteStateMachine(ToggleFiniteStateMachine())
+        let fsm2 = AnyControllableFiniteStateMachine(ToggleFiniteStateMachine())
+        let pool1 = FSMPool(fsms: [.controllableFSM(fsm)])
+        let pool2 = FSMPool(fsms: [.controllableFSM(fsm2)])
         let timeslots = [
             Timeslot(
-                callChain: CallChain(root: AnyScheduleableFiniteStateMachine(fsm), calls: []),
+                callChain: CallChain(root: fsm.name, calls: []),
                 startingTime: 0,
                 duration: 20,
                 cyclesExecuted: 0
@@ -87,22 +89,24 @@ class ScheduleThreadVariationsTests: XCTestCase {
         ]
         let timeslots2 = [
             Timeslot(
-                callChain: CallChain(root: AnyScheduleableFiniteStateMachine(fsm2), calls: []),
+                callChain: CallChain(root: fsm2.name, calls: []),
                 startingTime: 0,
                 duration: 20,
                 cyclesExecuted: 0
             )
         ]
         let sectionVariations = SnapshotSectionVariations(
+            pool: pool1,
             section: SnapshotSection(timeslots: timeslots),
-            gateway: fsm.gateway,
-            timer: fsm.timer,
+            gateway: (fsm.base as! ToggleFiniteStateMachine).gateway,
+            timer: (fsm.base as! ToggleFiniteStateMachine).timer,
             cycleLength: 100
         )
         let variations = ScheduleThreadVariations(
+            pool: pool2,
             thread: ScheduleThread(sections: [SnapshotSection(timeslots: timeslots2)]),
-            gateway: fsm2.gateway,
-            timer: fsm2.timer,
+            gateway: (fsm2.base as! ToggleFiniteStateMachine).gateway,
+            timer: (fsm2.base as! ToggleFiniteStateMachine).timer,
             cycleLength: 100
         )
         XCTAssertEqual(variations.pathways.count, sectionVariations.sections.count)

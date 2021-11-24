@@ -61,24 +61,15 @@ import KripkeStructure
 
 public struct CallChain: Hashable {
     
-    var root: AnyScheduleableFiniteStateMachine
+    var root: String
     
     var calls: [Call]
     
-    var fsm: AnyScheduleableFiniteStateMachine {
+    func fsm(fromPool pool: FSMPool) -> FSMType {
         guard let last = calls.last else {
-            return root
+            return pool.fsm(root)
         }
-        return last.fsm.asScheduleableFiniteStateMachine
-    }
-    
-    public static func ==(lhs: CallChain, rhs: CallChain) -> Bool {
-        lhs.calls == rhs.calls && KripkeStatePropertyList(lhs.fsm.base) == KripkeStatePropertyList(rhs.fsm.base)
-    }
-    
-    public func hash(into hasher: inout Hasher) {
-        hasher.combine(root.name)
-        hasher.combine(calls)
+        return pool.fsm(last.fsm)
     }
     
 }

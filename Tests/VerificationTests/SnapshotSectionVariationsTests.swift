@@ -75,19 +75,22 @@ class SnapshotSectionVariationsTests: XCTestCase {
     }
     
     func test_cyclesExecutedIncreasesWhenNoTransitionsFire() throws {
-        let fsm = ToggleFiniteStateMachine()
+        let fsm = AnyControllableFiniteStateMachine(ToggleFiniteStateMachine())
+        let base = { fsm.base as! ToggleFiniteStateMachine }
+        let pool = FSMPool(fsms: [.controllableFSM(fsm)])
         let timeslots = [
             Timeslot(
-                callChain: CallChain(root: AnyScheduleableFiniteStateMachine(fsm), calls: []),
+                callChain: CallChain(root: fsm.name, calls: []),
                 startingTime: 0,
                 duration: 20,
                 cyclesExecuted: 0
             )
         ]
         let variations = SnapshotSectionVariations(
+            pool: pool,
             section: SnapshotSection(timeslots: timeslots),
-            gateway: fsm.gateway,
-            timer: fsm.timer,
+            gateway: base().gateway,
+            timer: base().timer,
             cycleLength: 100
         )
         XCTAssertEqual(variations.sections.count, 1)
@@ -102,19 +105,22 @@ class SnapshotSectionVariationsTests: XCTestCase {
     }
     
     func test_cyclesExecutedDoesNotIncreaseWhenTransitionsFire() throws {
-        let fsm = TransitioningFiniteStateMachine()
+        let fsm = AnyControllableFiniteStateMachine(TransitioningFiniteStateMachine())
+        let base = { fsm.base as! TransitioningFiniteStateMachine }
+        let pool = FSMPool(fsms: [.controllableFSM(fsm)])
         let timeslots = [
             Timeslot(
-                callChain: CallChain(root: AnyScheduleableFiniteStateMachine(fsm), calls: []),
+                callChain: CallChain(root: fsm.name, calls: []),
                 startingTime: 0,
                 duration: 20,
                 cyclesExecuted: 0
             )
         ]
         let variations = SnapshotSectionVariations(
+            pool: pool,
             section: SnapshotSection(timeslots: timeslots),
-            gateway: fsm.gateway,
-            timer: fsm.timer,
+            gateway: base().gateway,
+            timer: base().timer,
             cycleLength: 100
         )
         XCTAssertEqual(variations.sections.count, 1)
@@ -130,14 +136,22 @@ class SnapshotSectionVariationsTests: XCTestCase {
         
     
     func test_canGenerateRingletsForOneMachine() throws {
-        let fsm = ExternalsFiniteStateMachine()
+        let fsm = AnyControllableFiniteStateMachine(ExternalsFiniteStateMachine())
+        let base = { fsm.base as! ExternalsFiniteStateMachine }
+        let pool = FSMPool(fsms: [.controllableFSM(fsm)])
         let timeslots = [
-            Timeslot(callChain: CallChain(root: AnyScheduleableFiniteStateMachine(fsm), calls: []), startingTime: 0, duration: 20, cyclesExecuted: 0)
+            Timeslot(
+                callChain: CallChain(root: fsm.name, calls: []),
+                startingTime: 0,
+                duration: 20,
+                cyclesExecuted: 0
+            )
         ]
         let variations = SnapshotSectionVariations(
+            pool: pool,
             section: SnapshotSection(timeslots: timeslots),
-            gateway: fsm.gateway,
-            timer: fsm.timer,
+            gateway: base().gateway,
+            timer: base().timer,
             cycleLength: 100
         )
         // [actuators, externalVariables, sensors].
@@ -165,22 +179,36 @@ class SnapshotSectionVariationsTests: XCTestCase {
     }
     
     func test_canGenerateRingletsForTwoSameMachines() throws {
-        let fsm1 = ExternalsFiniteStateMachine()
-        let fsm2 = ExternalsFiniteStateMachine()
-        fsm1.name += "1"
-        fsm2.name += "2"
+        let fsm1 = AnyControllableFiniteStateMachine(ExternalsFiniteStateMachine())
+        let base1 = { fsm1.base as! ExternalsFiniteStateMachine }
+        let fsm2 = AnyControllableFiniteStateMachine(ExternalsFiniteStateMachine())
+        let base2 = { fsm2.base as! ExternalsFiniteStateMachine }
+        base1().name += "1"
+        base2().name += "2"
         let timer = FSMClock(ringletLengths: [fsm1.name: 10, fsm2.name: 10], scheduleLength: 20)
-        fsm1.timer = timer
-        fsm2.timer = timer
-        fsm2.gateway = fsm1.gateway
+        base1().timer = timer
+        base2().timer = timer
+        base2().gateway = base1().gateway
+        let pool = FSMPool(fsms: [.controllableFSM(fsm1), .controllableFSM(fsm2)])
         let timeslots = [
-            Timeslot(callChain: CallChain(root: AnyScheduleableFiniteStateMachine(fsm1), calls: []), startingTime: 0, duration: 20, cyclesExecuted: 0),
-            Timeslot(callChain: CallChain(root: AnyScheduleableFiniteStateMachine(fsm2), calls: []), startingTime: 30, duration: 30, cyclesExecuted: 0)
+            Timeslot(
+                callChain: CallChain(root: fsm1.name, calls: []),
+                startingTime: 0,
+                duration: 20,
+                cyclesExecuted: 0
+            ),
+            Timeslot(
+                callChain: CallChain(root: fsm2.name, calls: []),
+                startingTime: 30,
+                duration: 30,
+                cyclesExecuted: 0
+            )
         ]
         let variations = SnapshotSectionVariations(
+            pool: pool,
             section: SnapshotSection(timeslots: timeslots),
-            gateway: fsm1.gateway,
-            timer: fsm1.timer,
+            gateway: base1().gateway,
+            timer: base1().timer,
             cycleLength: 100
         )
         // [actuators, externalVariables, sensors].
@@ -209,22 +237,36 @@ class SnapshotSectionVariationsTests: XCTestCase {
     }
     
     func test_canGenerateRingletsForTwoDifferentMachines() throws {
-        let fsm1 = ExternalsFiniteStateMachine()
-        let fsm2 = ExternalsFiniteStateMachine2()
-        fsm1.name += "1"
-        fsm2.name += "2"
+        let fsm1 = AnyControllableFiniteStateMachine(ExternalsFiniteStateMachine())
+        let base1 = { fsm1.base as! ExternalsFiniteStateMachine }
+        let fsm2 = AnyControllableFiniteStateMachine(ExternalsFiniteStateMachine2())
+        let base2 = { fsm2.base as! ExternalsFiniteStateMachine2 }
+        base1().name += "1"
+        base2().name += "2"
         let timer = FSMClock(ringletLengths: [fsm1.name: 10, fsm2.name: 10], scheduleLength: 20)
-        fsm1.timer = timer
-        fsm2.timer = timer
-        fsm2.gateway = fsm1.gateway
+        base1().timer = timer
+        base2().timer = timer
+        base2().gateway = base1().gateway
+        let pool = FSMPool(fsms: [.controllableFSM(fsm1), .controllableFSM(fsm2)])
         let timeslots = [
-            Timeslot(callChain: CallChain(root: AnyScheduleableFiniteStateMachine(fsm1), calls: []), startingTime: 0, duration: 20, cyclesExecuted: 0),
-            Timeslot(callChain: CallChain(root: AnyScheduleableFiniteStateMachine(fsm2), calls: []), startingTime: 30, duration: 30, cyclesExecuted: 0)
+            Timeslot(
+                callChain: CallChain(root: fsm1.name, calls: []),
+                startingTime: 0,
+                duration: 20,
+                cyclesExecuted: 0
+            ),
+            Timeslot(
+                callChain: CallChain(root: fsm2.name, calls: []),
+                startingTime: 30,
+                duration: 30,
+                cyclesExecuted: 0
+            )
         ]
         let variations = SnapshotSectionVariations(
+            pool: pool,
             section: SnapshotSection(timeslots: timeslots),
-            gateway: fsm1.gateway,
-            timer: fsm1.timer,
+            gateway: base1().gateway,
+            timer: base1().timer,
             cycleLength: 100
         )
         // [actuators, externalVariables, sensors].

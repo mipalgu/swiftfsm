@@ -66,13 +66,13 @@ struct TimeAwareRinglets {
     
     var ringlets: [ConditionalRinglet]
     
-    init<Gateway: ModifiableFSMGateway, Timer: Clock>(fsm: AnyScheduleableFiniteStateMachine, gateway: Gateway, timer: Timer, startingTime: UInt) {
+    init<Gateway: ModifiableFSMGateway, Timer: Clock>(fsm: FSMType, gateway: Gateway, timer: Timer, startingTime: UInt) {
         var lastTime: UInt
         var smallerTimes: SortedCollection<UInt> = []
         var times: SortedCollection<UInt> = []
         var ringlets: [ConditionalRinglet] = []
         var indexes: [RingletResult: Int] = [:]
-        let initialExternalValues = fsm.externalValues
+        let initialExternalValues = fsm.asScheduleableFiniteStateMachine.externalValues
         func createCondition(runningAt time: Timing, result: RingletResult) -> Constraint<UInt> {
             let condition: Constraint<UInt>
             if let index = indexes[result] {
@@ -90,7 +90,7 @@ struct TimeAwareRinglets {
         }
         func calculate(time: Timing) {
             let clone = fsm.clone()
-            clone.externalValues = initialExternalValues
+            clone.asScheduleableFiniteStateMachine.externalValues = initialExternalValues
             timer.forceRunningTime(time.timeValue)
             let ringlet = Ringlet(fsm: clone, gateway: gateway, timer: timer)
             for newTime in ringlet.afterCalls where newTime != lastTime {
@@ -130,7 +130,7 @@ struct TimeAwareRinglets {
             lastTime = times.remove(at: times.startIndex)
             calculate(time: .after(lastTime))
         }
-        fsm.externalValues = initialExternalValues
+        fsm.asScheduleableFiniteStateMachine.externalValues = initialExternalValues
         self.init(ringlets: ringlets)
     }
     

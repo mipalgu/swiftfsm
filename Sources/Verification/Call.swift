@@ -77,7 +77,7 @@ struct Call {
     
     var method: Method
     
-    var fsm: AnyParameterisedFiniteStateMachine
+    var fsm: String
     
 }
 
@@ -92,7 +92,7 @@ extension Call: Equatable {
                 return false
             }
         }
-        return KripkeStatePropertyList(lhs.fsm.base) == KripkeStatePropertyList(rhs.fsm.base)
+        return true
     }
     
 }
@@ -104,7 +104,7 @@ extension Call: Hashable {
         hasher.combine(self.callee)
         hasher.combine(KripkeStatePropertyList(self.parameters.sorted { $0.key < $1.key }))
         hasher.combine(self.method)
-        hasher.combine(KripkeStatePropertyList(self.fsm.base))
+        hasher.combine(self.fsm)
     }
     
 }

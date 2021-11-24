@@ -66,7 +66,7 @@ struct ScheduleThreadVariations: Hashable {
     
     var pathways: [ScheduleThreadPath]
     
-    init<Gateway: ModifiableFSMGateway, Timer: Clock>(thread: ScheduleThread, gateway: Gateway, timer: Timer, cycleLength: UInt) {
+    init<Gateway: ModifiableFSMGateway, Timer: Clock>(pool: FSMPool, thread: ScheduleThread, gateway: Gateway, timer: Timer, cycleLength: UInt) {
         guard !thread.sections.isEmpty else {
             self.init(pathways: [])
             return
@@ -76,7 +76,7 @@ struct ScheduleThreadVariations: Hashable {
                 return []
             }
             let section = thread.sections[executing]
-            let variations = SnapshotSectionVariations(section: section, gateway: gateway, timer: timer, cycleLength: cycleLength)
+            let variations = SnapshotSectionVariations(pool: pool, section: section, gateway: gateway, timer: timer, cycleLength: cycleLength)
             guard executing + 1 < thread.sections.count else {
                 return variations.sections.map {
                     ScheduleThreadPath(sections: path + [$0])

@@ -76,17 +76,17 @@ struct Ringlet {
         var calls: [Call] = []
         
         func hasCalled(inGateway _: ModifiableFSMGateway, fsm: AnyParameterisedFiniteStateMachine, withId callee: FSM_ID, withParameters parameters: [String: Any?], caller: FSM_ID, storingResultsIn _: PromiseData) {
-            self.calls.append(Call(caller: caller, callee: callee, parameters: parameters, method: .synchronous, fsm: fsm))
+            self.calls.append(Call(caller: caller, callee: callee, parameters: parameters, method: .synchronous, fsm: fsm.name))
         }
 
         func hasInvoked(inGateway _: ModifiableFSMGateway, fsm: AnyParameterisedFiniteStateMachine, withId callee: FSM_ID, withParameters parameters: [String: Any?], caller: FSM_ID, storingResultsIn _: PromiseData) {
-            self.invocations.append(Call(caller: caller, callee: callee, parameters: parameters, method: .asynchronous, fsm: fsm))
+            self.invocations.append(Call(caller: caller, callee: callee, parameters: parameters, method: .asynchronous, fsm: fsm.name))
         }
         
     }
     
-    /// The name of the fsm that was executed.
-    var fsmName: String
+    /// The fsm that was executed.
+    var fsm: FSMType
     
     /// Did the fsm transition during the ringlet execution?
     var transitioned: Bool
@@ -125,20 +125,21 @@ struct Ringlet {
     /// - Parameter gateway The `ModifiableFSMGateway` responsible for handling
     /// parameterised machine invocations. A delegate is created and used to
     /// detect when the fsm makes any calls to other machines.
-    init<Gateway: ModifiableFSMGateway, Timer: Clock>(fsm: AnyScheduleableFiniteStateMachine, gateway: Gateway, timer: Timer) {
+    init<Gateway: ModifiableFSMGateway, Timer: Clock>(fsm: FSMType, gateway: Gateway, timer: Timer) {
         let allExternalVariables = (fsm.sensors + fsm.externalVariables + fsm.actuators)
         let externalsPreSnapshot = KripkeStatePropertyList(Dictionary(uniqueKeysWithValues: allExternalVariables.map { ($0.name, KripkeStateProperty($0.val)) }))
-        let preSnapshot = KripkeStatePropertyList(fsm.base)
+        let preSnapshot = KripkeStatePropertyList(fsm.asScheduleableFiniteStateMachine.base)
         let delegate = GatewayDelegate()
         gateway.delegate = delegate
         let currentState = fsm.currentState.name
+        var fsm = fsm
         fsm.next()
         let transitioned = currentState != fsm.currentState.name
         let externalsPostSnapshot = KripkeStatePropertyList(Dictionary(uniqueKeysWithValues: allExternalVariables.map { ($0.name, KripkeStateProperty($0.val)) }))
-        let postSnapshot = KripkeStatePropertyList(fsm.base)
+        let postSnapshot = KripkeStatePropertyList(fsm.asScheduleableFiniteStateMachine.base)
         let calls = delegate.invocations + delegate.calls
         self.init(
-            fsmName: fsm.name,
+            fsm: fsm,
             transitioned: transitioned,
             externalsPreSnapshot: externalsPreSnapshot,
             externalsPostSnapshot: externalsPostSnapshot,
@@ -150,8 +151,8 @@ struct Ringlet {
     }
     
     /// Create a `Ringlet`.
-    init(fsmName: String, transitioned: Bool, externalsPreSnapshot: KripkeStatePropertyList, externalsPostSnapshot: KripkeStatePropertyList, preSnapshot: KripkeStatePropertyList, postSnapshot: KripkeStatePropertyList, calls: [Call], afterCalls: Set<UInt>) {
-        self.fsmName = fsmName
+    init(fsm: FSMType, transitioned: Bool, externalsPreSnapshot: KripkeStatePropertyList, externalsPostSnapshot: KripkeStatePropertyList, preSnapshot: KripkeStatePropertyList, postSnapshot: KripkeStatePropertyList, calls: [Call], afterCalls: Set<UInt>) {
+        self.fsm = fsm
         self.transitioned = transitioned
         self.externalsPreSnapshot = externalsPreSnapshot
         self.externalsPostSnapshot = externalsPostSnapshot
@@ -163,4 +164,28 @@ struct Ringlet {
     
 }
 
-extension Ringlet: Equatable {}
+extension Ringlet: Hashable {
+    
+    static func ==(lhs: Ringlet, rhs: Ringlet) -> Bool {
+        lhs.transitioned == rhs.transitioned
+        && lhs.externalsPreSnapshot == rhs.externalsPreSnapshot
+        && lhs.externalsPostSnapshot == rhs.externalsPostSnapshot
+        && lhs.preSnapshot == rhs.preSnapshot
+        && lhs.postSnapshot == rhs.postSnapshot
+        && lhs.calls == rhs.calls
+        && lhs.afterCalls == rhs.afterCalls
+        && KripkeStatePropertyList(lhs.fsm.asScheduleableFiniteStateMachine.base) == KripkeStatePropertyList(rhs.fsm.asScheduleableFiniteStateMachine.base)
+    }
+    
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(transitioned)
+        hasher.combine(externalsPreSnapshot)
+        hasher.combine(externalsPostSnapshot)
+        hasher.combine(preSnapshot)
+        hasher.combine(postSnapshot)
+        hasher.combine(calls)
+        hasher.combine(afterCalls)
+        hasher.combine(KripkeStatePropertyList(fsm.asScheduleableFiniteStateMachine.base))
+    }
+    
+}

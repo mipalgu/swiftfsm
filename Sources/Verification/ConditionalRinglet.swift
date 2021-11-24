@@ -57,11 +57,12 @@
  */
 
 import KripkeStructure
+import swiftfsm
 
 struct ConditionalRinglet {
     
-    /// The name of the fsm that was executed.
-    var fsmName: String
+    /// The fsm that was executed.
+    var fsm: FSMType
     
     /// Did the fsm transition during the ringlet execution?
     var transitioned: Bool
@@ -89,12 +90,12 @@ struct ConditionalRinglet {
     var condition: Constraint<UInt>
     
     init(ringlet: Ringlet, condition: Constraint<UInt>) {
-        self.init(fsmName: ringlet.fsmName, transitioned: ringlet.transitioned, externalsPreSnapshot: ringlet.externalsPreSnapshot, externalsPostSnapshot: ringlet.externalsPostSnapshot, preSnapshot: ringlet.preSnapshot, postSnapshot: ringlet.postSnapshot, calls: ringlet.calls, condition: condition)
+        self.init(fsm: ringlet.fsm, transitioned: ringlet.transitioned, externalsPreSnapshot: ringlet.externalsPreSnapshot, externalsPostSnapshot: ringlet.externalsPostSnapshot, preSnapshot: ringlet.preSnapshot, postSnapshot: ringlet.postSnapshot, calls: ringlet.calls, condition: condition)
     }
     
     /// Create a `ConditionalRinglet`.
-    init(fsmName: String, transitioned: Bool, externalsPreSnapshot: KripkeStatePropertyList, externalsPostSnapshot: KripkeStatePropertyList, preSnapshot: KripkeStatePropertyList, postSnapshot: KripkeStatePropertyList, calls: [Call], condition: Constraint<UInt>) {
-        self.fsmName = fsmName
+    init(fsm: FSMType, transitioned: Bool, externalsPreSnapshot: KripkeStatePropertyList, externalsPostSnapshot: KripkeStatePropertyList, preSnapshot: KripkeStatePropertyList, postSnapshot: KripkeStatePropertyList, calls: [Call], condition: Constraint<UInt>) {
+        self.fsm = fsm
         self.transitioned = transitioned
         self.externalsPreSnapshot = externalsPreSnapshot
         self.externalsPostSnapshot = externalsPostSnapshot
@@ -106,4 +107,28 @@ struct ConditionalRinglet {
     
 }
 
-extension ConditionalRinglet: Hashable {}
+extension ConditionalRinglet: Hashable {
+    
+    static func ==(lhs: ConditionalRinglet, rhs: ConditionalRinglet) -> Bool {
+        lhs.transitioned == rhs.transitioned
+        && lhs.externalsPreSnapshot == rhs.externalsPreSnapshot
+        && lhs.externalsPostSnapshot == rhs.externalsPostSnapshot
+        && lhs.preSnapshot == rhs.preSnapshot
+        && lhs.postSnapshot == rhs.postSnapshot
+        && lhs.calls == rhs.calls
+        && lhs.condition == rhs.condition
+        && KripkeStatePropertyList(lhs.fsm.asScheduleableFiniteStateMachine.base) == KripkeStatePropertyList(rhs.fsm.asScheduleableFiniteStateMachine.base)
+    }
+    
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(transitioned)
+        hasher.combine(externalsPreSnapshot)
+        hasher.combine(externalsPostSnapshot)
+        hasher.combine(preSnapshot)
+        hasher.combine(postSnapshot)
+        hasher.combine(calls)
+        hasher.combine(condition)
+        hasher.combine(KripkeStatePropertyList(fsm.asScheduleableFiniteStateMachine.base))
+    }
+    
+}

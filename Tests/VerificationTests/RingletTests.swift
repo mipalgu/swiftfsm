@@ -75,12 +75,12 @@ class RingletTests: XCTestCase {
 
     func test_canComputePropertyLists() throws {
         let fsm = ToggleFiniteStateMachine()
-        let ringlet = Ringlet(fsm: AnyScheduleableFiniteStateMachine(fsm), gateway: fsm.gateway, timer: fsm.timer)
+        let ringlet = Ringlet(fsm: .controllableFSM(AnyControllableFiniteStateMachine(fsm)), gateway: fsm.gateway, timer: fsm.timer)
         XCTAssertEqual(ringlet.preSnapshot["value"], KripkeStateProperty(type: .Bool, value: Bool(false)))
         XCTAssertEqual(ringlet.postSnapshot["value"], KripkeStateProperty(type: .Bool, value: Bool(true)))
         XCTAssertTrue(ringlet.calls.isEmpty)
         XCTAssertTrue(ringlet.afterCalls.isEmpty)
-        let ringlet2 = Ringlet(fsm: AnyScheduleableFiniteStateMachine(fsm), gateway: fsm.gateway, timer: fsm.timer)
+        let ringlet2 = Ringlet(fsm: .controllableFSM(AnyControllableFiniteStateMachine(fsm)), gateway: fsm.gateway, timer: fsm.timer)
         XCTAssertEqual(ringlet2.preSnapshot["value"], KripkeStateProperty(type: .Bool, value: Bool(true)))
         XCTAssertEqual(ringlet2.postSnapshot["value"], KripkeStateProperty(type: .Bool, value: Bool(false)))
         XCTAssertTrue(ringlet2.calls.isEmpty)
@@ -100,7 +100,7 @@ class RingletTests: XCTestCase {
         }
         fsm.gateway.fsms[id] = .parameterisedFSM(AnyParameterisedFiniteStateMachine(fsm, newMachine: newMachine))
         fsm.gateway.stacks[id] = []
-        let ringlet = Ringlet(fsm: AnyScheduleableFiniteStateMachine(fsm), gateway: fsm.gateway, timer: fsm.timer)
+        let ringlet = Ringlet(fsm: .controllableFSM(AnyControllableFiniteStateMachine(fsm)), gateway: fsm.gateway, timer: fsm.timer)
         XCTAssertEqual(ringlet.calls.count, 1)
         if ringlet.calls.count != 1 {
             return
@@ -114,7 +114,7 @@ class RingletTests: XCTestCase {
     func test_canDetectAfterCalls() throws {
         let fsm = AfterFiniteStateMachine()
         fsm.timer.update(fromFSM: AnyScheduleableFiniteStateMachine(fsm))
-        let ringlet = Ringlet(fsm: AnyScheduleableFiniteStateMachine(fsm), gateway: fsm.gateway, timer: fsm.timer)
+        let ringlet = Ringlet(fsm: .controllableFSM(AnyControllableFiniteStateMachine(fsm)), gateway: fsm.gateway, timer: fsm.timer)
         XCTAssertEqual(ringlet.afterCalls.count, 1)
         if ringlet.afterCalls.count != 1 {
             return
@@ -124,7 +124,7 @@ class RingletTests: XCTestCase {
     
     func test_includesExternalVariables() throws {
         let fsm = ExternalsFiniteStateMachine()
-        let ringlet = Ringlet(fsm: AnyScheduleableFiniteStateMachine(fsm), gateway: fsm.gateway, timer: fsm.timer)
+        let ringlet = Ringlet(fsm: .controllableFSM(AnyControllableFiniteStateMachine(fsm)), gateway: fsm.gateway, timer: fsm.timer)
         print(ringlet.externalsPreSnapshot)
         XCTAssertNotNil(ringlet.externalsPreSnapshot["InMemoryContainer-sensors1"])
         XCTAssertNotNil(ringlet.externalsPreSnapshot["InMemoryContainer-sensors2"])

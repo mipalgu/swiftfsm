@@ -59,7 +59,7 @@
 
 public protocol NewVerifiableGateway {
     
-    func setScenario(_ calls: [CallChain])
+    func setScenario(_ calls: [CallChain], pool: FSMPool)
     
     func isValid(_ chain: CallChain) -> Bool
     
@@ -70,13 +70,18 @@ import Gateways
 
 extension StackGateway: NewVerifiableGateway {
     
-    public func setScenario(_ calls: [CallChain]) {
+    public func setScenario(_ calls: [CallChain], pool: FSMPool) {
         self.stacks = [:]
         for call in calls {
-            guard let last = call.calls.last else {
+            guard
+                let last = call.calls.last
+            else {
                 continue
             }
-            let promiseData = PromiseData(fsm: last.fsm, hasFinished: last.fsm.hasFinished && last.fsm.resultContainer.result != nil)
+            guard let fsm = pool.fsm(last.fsm).asParameterisedFiniteStateMachine else {
+                fatalError("Unable to convert fsm \(last.fsm) to parameterised machine.")
+            }
+            let promiseData = PromiseData(fsm: fsm, hasFinished: fsm.hasFinished && fsm.resultContainer.result != nil)
             let stackId: FSM_ID
             switch last.method {
             case .asynchronous:
