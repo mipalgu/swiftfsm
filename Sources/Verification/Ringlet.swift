@@ -88,6 +88,10 @@ struct Ringlet {
     /// The fsm that was executed.
     var fsm: FSMType
     
+    var before: FSMPool
+    
+    var after: FSMPool
+    
     /// Did the fsm transition during the ringlet execution?
     var transitioned: Bool
     
@@ -125,21 +129,25 @@ struct Ringlet {
     /// - Parameter gateway The `ModifiableFSMGateway` responsible for handling
     /// parameterised machine invocations. A delegate is created and used to
     /// detect when the fsm makes any calls to other machines.
-    init<Gateway: ModifiableFSMGateway, Timer: Clock>(fsm: FSMType, gateway: Gateway, timer: Timer) {
+    init<Gateway: ModifiableFSMGateway, Timer: Clock>(fsm: FSMType, gateway: Gateway, timer: Timer) where Gateway: NewVerifiableGateway {
         let allExternalVariables = (fsm.sensors + fsm.externalVariables + fsm.actuators)
         let externalsPreSnapshot = KripkeStatePropertyList(Dictionary(uniqueKeysWithValues: allExternalVariables.map { ($0.name, KripkeStateProperty($0.val)) }))
         let preSnapshot = KripkeStatePropertyList(fsm.asScheduleableFiniteStateMachine.base)
         let delegate = GatewayDelegate()
         gateway.delegate = delegate
+        let before = gateway.pool
         let currentState = fsm.currentState.name
         var fsm = fsm
         fsm.next()
+        let after = gateway.pool
         let transitioned = currentState != fsm.currentState.name
         let externalsPostSnapshot = KripkeStatePropertyList(Dictionary(uniqueKeysWithValues: allExternalVariables.map { ($0.name, KripkeStateProperty($0.val)) }))
         let postSnapshot = KripkeStatePropertyList(fsm.asScheduleableFiniteStateMachine.base)
         let calls = delegate.invocations + delegate.calls
         self.init(
             fsm: fsm,
+            before: before,
+            after: after,
             transitioned: transitioned,
             externalsPreSnapshot: externalsPreSnapshot,
             externalsPostSnapshot: externalsPostSnapshot,
@@ -151,8 +159,10 @@ struct Ringlet {
     }
     
     /// Create a `Ringlet`.
-    init(fsm: FSMType, transitioned: Bool, externalsPreSnapshot: KripkeStatePropertyList, externalsPostSnapshot: KripkeStatePropertyList, preSnapshot: KripkeStatePropertyList, postSnapshot: KripkeStatePropertyList, calls: [Call], afterCalls: Set<UInt>) {
+    init(fsm: FSMType, before: FSMPool, after: FSMPool, transitioned: Bool, externalsPreSnapshot: KripkeStatePropertyList, externalsPostSnapshot: KripkeStatePropertyList, preSnapshot: KripkeStatePropertyList, postSnapshot: KripkeStatePropertyList, calls: [Call], afterCalls: Set<UInt>) {
         self.fsm = fsm
+        self.before = before
+        self.after = after
         self.transitioned = transitioned
         self.externalsPreSnapshot = externalsPreSnapshot
         self.externalsPostSnapshot = externalsPostSnapshot

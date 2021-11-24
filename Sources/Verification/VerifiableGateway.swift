@@ -57,7 +57,9 @@
  *
  */
 
-public protocol NewVerifiableGateway {
+public protocol NewVerifiableGateway: AnyObject {
+    
+    var pool: FSMPool { get set }
     
     func setScenario(_ calls: [CallChain], pool: FSMPool)
     
@@ -69,6 +71,17 @@ import swiftfsm
 import Gateways
 
 extension StackGateway: NewVerifiableGateway {
+    
+    public var pool: FSMPool {
+        get {
+            FSMPool(fsms: Array(fsms.values))
+        } set {
+            for fsm in newValue.fsms {
+                fsms[id(of: fsm.name)] = fsm
+                stacks = [:]
+            }
+        }
+    }
     
     public func setScenario(_ calls: [CallChain], pool: FSMPool) {
         self.stacks = [:]

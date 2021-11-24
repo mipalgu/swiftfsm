@@ -83,7 +83,7 @@ public struct FSMPool {
         
     }
     
-    private var fsms: [FSMType]
+    private(set) var fsms: [FSMType]
     
     private var indexes: [String: Int]
     

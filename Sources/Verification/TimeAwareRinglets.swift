@@ -66,7 +66,7 @@ struct TimeAwareRinglets {
     
     var ringlets: [ConditionalRinglet]
     
-    init<Gateway: ModifiableFSMGateway, Timer: Clock>(fsm: FSMType, gateway: Gateway, timer: Timer, startingTime: UInt) {
+    init<Gateway: ModifiableFSMGateway, Timer: Clock>(fsm: FSMType, gateway: Gateway, timer: Timer, startingTime: UInt) where Gateway: NewVerifiableGateway {
         var lastTime: UInt
         var smallerTimes: SortedCollection<UInt> = []
         var times: SortedCollection<UInt> = []

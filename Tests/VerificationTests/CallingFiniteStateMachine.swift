@@ -164,7 +164,7 @@ internal final class CallingFiniteStateMachine: ParameterisedMachineProtocol, Kr
     
     var ringlet: MiPalRinglet = MiPalRinglet()
     
-    var parameters: ParametersContainerType = ParametersContainerType()
+    var parameters: ParametersContainerType
     
     var results: ResultContainerType = ResultContainerType()
     
@@ -205,6 +205,10 @@ internal final class CallingFiniteStateMachine: ParameterisedMachineProtocol, Kr
     let isSuspended: Bool = true
 
     var submachines: [AnyScheduleableFiniteStateMachine] = []
+    
+    init(parameterValue: Bool = false) {
+        self.parameters = ParametersContainerType(vars: ParametersContainerType.Vars(value: parameterValue))
+    }
 
     func clone() -> CallingFiniteStateMachine {
         return self

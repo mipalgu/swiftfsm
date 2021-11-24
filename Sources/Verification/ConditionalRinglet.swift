@@ -64,6 +64,10 @@ struct ConditionalRinglet {
     /// The fsm that was executed.
     var fsm: FSMType
     
+    var before: FSMPool
+    
+    var after: FSMPool
+    
     /// Did the fsm transition during the ringlet execution?
     var transitioned: Bool
     
@@ -90,12 +94,14 @@ struct ConditionalRinglet {
     var condition: Constraint<UInt>
     
     init(ringlet: Ringlet, condition: Constraint<UInt>) {
-        self.init(fsm: ringlet.fsm, transitioned: ringlet.transitioned, externalsPreSnapshot: ringlet.externalsPreSnapshot, externalsPostSnapshot: ringlet.externalsPostSnapshot, preSnapshot: ringlet.preSnapshot, postSnapshot: ringlet.postSnapshot, calls: ringlet.calls, condition: condition)
+        self.init(fsm: ringlet.fsm, before: ringlet.before, after: ringlet.after, transitioned: ringlet.transitioned, externalsPreSnapshot: ringlet.externalsPreSnapshot, externalsPostSnapshot: ringlet.externalsPostSnapshot, preSnapshot: ringlet.preSnapshot, postSnapshot: ringlet.postSnapshot, calls: ringlet.calls, condition: condition)
     }
     
     /// Create a `ConditionalRinglet`.
-    init(fsm: FSMType, transitioned: Bool, externalsPreSnapshot: KripkeStatePropertyList, externalsPostSnapshot: KripkeStatePropertyList, preSnapshot: KripkeStatePropertyList, postSnapshot: KripkeStatePropertyList, calls: [Call], condition: Constraint<UInt>) {
+    init(fsm: FSMType, before: FSMPool, after: FSMPool, transitioned: Bool, externalsPreSnapshot: KripkeStatePropertyList, externalsPostSnapshot: KripkeStatePropertyList, preSnapshot: KripkeStatePropertyList, postSnapshot: KripkeStatePropertyList, calls: [Call], condition: Constraint<UInt>) {
         self.fsm = fsm
+        self.before = before
+        self.after = after
         self.transitioned = transitioned
         self.externalsPreSnapshot = externalsPreSnapshot
         self.externalsPostSnapshot = externalsPostSnapshot

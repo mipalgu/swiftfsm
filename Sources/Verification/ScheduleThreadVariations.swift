@@ -66,7 +66,7 @@ struct ScheduleThreadVariations: Hashable {
     
     var pathways: [ScheduleThreadPath]
     
-    init<Gateway: ModifiableFSMGateway, Timer: Clock>(pool: FSMPool, thread: ScheduleThread, gateway: Gateway, timer: Timer, cycleLength: UInt) {
+    init<Gateway: ModifiableFSMGateway, Timer: Clock>(pool: FSMPool, thread: ScheduleThread, gateway: Gateway, timer: Timer, cycleLength: UInt) where Gateway: NewVerifiableGateway {
         guard !thread.sections.isEmpty else {
             self.init(pathways: [])
             return

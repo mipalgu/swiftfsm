@@ -76,7 +76,7 @@ struct SnapshotSectionVariations: Hashable {
    
     var sections: [SnapshotSectionPath]
     
-    init<Gateway: ModifiableFSMGateway, Timer: Clock>(pool: FSMPool, section: SnapshotSection, gateway: Gateway, timer: Timer, cycleLength: UInt) {
+    init<Gateway: ModifiableFSMGateway, Timer: Clock>(pool: FSMPool, section: SnapshotSection, gateway: Gateway, timer: Timer, cycleLength: UInt) where Gateway: NewVerifiableGateway {
         let sensorCombinations = Combinations(fsms: section.timeslots.lazy.map { $0.callChain.fsm(fromPool: pool).asScheduleableFiniteStateMachine })
         let sections = sensorCombinations.flatMap { (combinations) -> [[SnapshotSectionPath.State]] in
             var pool = pool.cloned
@@ -86,16 +86,16 @@ struct SnapshotSectionVariations: Hashable {
                 pool.insert(clone)
                 return clone
             }
-            func process(path: [SnapshotSectionPath.State], index: Int) -> [[SnapshotSectionPath.State]] {
+            func process(path: [SnapshotSectionPath.State], index: Int, pool: FSMPool) -> [[SnapshotSectionPath.State]] {
                 if index >= combinations.count || index >= section.timeslots.count {
                     return [path]
                 }
+                var beforePool = pool.cloned
                 let clone = clones[index].clone()
+                beforePool.insert(clone)
+                gateway.pool = beforePool
                 let timeslot = section.timeslots[index]
                 let ringlets = TimeAwareRinglets(fsm: clone, gateway: gateway, timer: timer, startingTime: timeslot.cyclesExecuted * cycleLength + timeslot.startingTime).ringlets
-                let after = clones[(index + 1)..<clones.count].map {
-                    KripkeStatePropertyList($0.asScheduleableFiniteStateMachine.base)
-                }
                 return ringlets.flatMap { (ringlet) -> [[SnapshotSectionPath.State]] in
                     let newRinglet = CallAwareRinglet(
                         callChain: CallChain(
@@ -104,22 +104,20 @@ struct SnapshotSectionVariations: Hashable {
                         ),
                         ringlet: ringlet
                     )
-                    var pool = pool.cloned
-                    pool.insert(ringlet.fsm)
                     let newState = SnapshotSectionPath.State(
                         previous: path.last?.toCurrent ?? [],
                         current: newRinglet,
-                        after: after,
+                        before: ringlet.before,
+                        after: ringlet.after,
                         fsm: ringlet.fsm,
-                        cyclesExecuted: ringlet.transitioned ? 0 : timeslot.cyclesExecuted + 1,
-                        pool: pool
+                        cyclesExecuted: ringlet.transitioned ? 0 : timeslot.cyclesExecuted + 1
                     )
-                    return process(path: path + [newState], index: index + 1)
+                    return process(path: path + [newState], index: index + 1, pool: ringlet.after)
                 }
             }
             var arr: [SnapshotSectionPath.State] = []
             arr.reserveCapacity(min(section.timeslots.count, combinations.count))
-            return process(path: arr, index: 0)
+            return process(path: arr, index: 0, pool: pool)
         }
         self.init(sections: sections.map {
             SnapshotSectionPath(ringlets: $0)

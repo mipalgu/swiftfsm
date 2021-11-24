@@ -190,7 +190,7 @@ internal final class TimeConditionalFiniteStateMachine: ParameterisedMachineProt
 
     var initialState: MiPalState = EmptyMiPalState("initial")
     
-    var value: Bool = false
+    var value: Bool
 
     lazy var currentState: MiPalState = {
         CallbackMiPalState("Call", onEntry: { [unowned self] in
@@ -214,6 +214,10 @@ internal final class TimeConditionalFiniteStateMachine: ParameterisedMachineProt
     let isSuspended: Bool = true
 
     var submachines: [AnyScheduleableFiniteStateMachine] = []
+    
+    init(value: Bool = false) {
+        self.value = value
+    }
 
     func clone() -> TimeConditionalFiniteStateMachine {
         let clone = TimeConditionalFiniteStateMachine()
