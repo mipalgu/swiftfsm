@@ -110,8 +110,8 @@ class ScheduleThreadVariationsTests: XCTestCase {
             cycleLength: 100
         )
         XCTAssertEqual(variations.pathways.count, sectionVariations.sections.count)
-        let sections1 = [[sectionVariations.sections]]
-        let sections2 = variations.pathways.map { $0.sections.map(\.sections) }
+        let sections1 = sectionVariations.sections.map { [$0] }
+        let sections2 = variations.pathways.map { $0.sections }
         XCTAssertEqual(sections2, sections1)
     }
     
