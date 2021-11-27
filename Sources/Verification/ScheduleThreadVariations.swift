@@ -83,7 +83,7 @@ struct ScheduleThreadVariations: Hashable {
                 }
             }
             return variations.sections.flatMap { variation in
-                process(executing: executing + 1, path: path + [variation], pool: variation.ringlets.last!.after)
+                process(executing: executing + 1, path: path + [variation], pool: variation.after)
             }
         }
         self.init(pathways: process(executing: 0, path: [], pool: pool))

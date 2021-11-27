@@ -124,4 +124,20 @@ struct SnapshotSectionPath: Hashable {
     /// phase.
     var ringlets: [State]
     
+    var before: FSMPool {
+        get {
+            ringlets.first!.before
+        } set {
+            ringlets[0].before = newValue
+        }
+    }
+    
+    var after: FSMPool {
+        get {
+            ringlets.last!.after
+        } set {
+            ringlets[ringlets.count - 1].after = newValue
+        }
+    }
+    
 }
