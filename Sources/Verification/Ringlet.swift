@@ -88,8 +88,10 @@ struct Ringlet {
     /// The fsm that was executed.
     var fsm: FSMType
     
+    /// The state of all fsms before this ringlet executed.
     var before: FSMPool
     
+    /// The state of all fsms after this ringlet executed.
     var after: FSMPool
     
     /// Did the fsm transition during the ringlet execution?

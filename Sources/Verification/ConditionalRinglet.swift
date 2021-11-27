@@ -64,8 +64,10 @@ struct ConditionalRinglet {
     /// The fsm that was executed.
     var fsm: FSMType
     
+    /// The state of all fsms before this ringlet executed.
     var before: FSMPool
     
+    /// The state of all fsms after this ringlet executed.
     var after: FSMPool
     
     /// Did the fsm transition during the ringlet execution?
@@ -91,6 +93,7 @@ struct ConditionalRinglet {
     /// the ringlet.
     var calls: [Call]
 
+    /// The condition on the clock when this ringlet is able to execute.
     var condition: Constraint<UInt>
     
     init(ringlet: Ringlet, condition: Constraint<UInt>) {
