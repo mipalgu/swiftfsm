@@ -74,10 +74,22 @@ struct SnapshotSectionPath: Hashable {
         var current: CallAwareRinglet
         
         /// The state of all fsms before this ringlet was executed.
-        var before: FSMPool
+        var before: FSMPool {
+            get {
+                current.ringlet.before
+            } set {
+                current.ringlet.before = newValue
+            }
+        }
         
         /// The state of all fsms after this ringlet was executed.
-        var after: FSMPool
+        var after: FSMPool {
+            get {
+                current.ringlet.after
+            } set {
+                current.ringlet.after = newValue
+            }
+        }
         
         /// The fsm that was executed.
         var fsm: FSMType
@@ -95,8 +107,6 @@ struct SnapshotSectionPath: Hashable {
         static func ==(lhs: State, rhs: State) -> Bool {
             return lhs.previous == rhs.previous
             && lhs.current == rhs.current
-            && lhs.before == rhs.before
-            && lhs.after == rhs.after
             && lhs.cyclesExecuted == rhs.cyclesExecuted
             && KripkeStatePropertyList(lhs.fsm.asScheduleableFiniteStateMachine.base) == KripkeStatePropertyList(rhs.fsm.asScheduleableFiniteStateMachine.base)
         }
@@ -104,8 +114,6 @@ struct SnapshotSectionPath: Hashable {
         func hash(into hasher: inout Hasher) {
             hasher.combine(previous)
             hasher.combine(current)
-            hasher.combine(before)
-            hasher.combine(after)
             hasher.combine(KripkeStatePropertyList(fsm.asScheduleableFiniteStateMachine.base))
             hasher.combine(cyclesExecuted)
         }

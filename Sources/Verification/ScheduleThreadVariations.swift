@@ -71,7 +71,7 @@ struct ScheduleThreadVariations: Hashable {
             self.init(pathways: [])
             return
         }
-        func process(executing: Int, path: [SnapshotSectionPath]) -> [ScheduleThreadPath] {
+        func process(executing: Int, path: [SnapshotSectionPath], pool: FSMPool) -> [ScheduleThreadPath] {
             guard executing < thread.sections.count else {
                 return []
             }
@@ -83,10 +83,10 @@ struct ScheduleThreadVariations: Hashable {
                 }
             }
             return variations.sections.flatMap { variation in
-                process(executing: executing + 1, path: path + [variation])
+                process(executing: executing + 1, path: path + [variation], pool: variation.ringlets.last!.after)
             }
         }
-        self.init(pathways: process(executing: 0, path: []))
+        self.init(pathways: process(executing: 0, path: [], pool: pool))
     }
     
     init(pathways: [ScheduleThreadPath]) {

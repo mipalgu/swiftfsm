@@ -114,5 +114,113 @@ class ScheduleThreadVariationsTests: XCTestCase {
         let sections2 = variations.pathways.map { $0.sections.map(\.sections) }
         XCTAssertEqual(sections2, sections1)
     }
+    
+    func test_canGenerateSectionsForTwoMachineInSeparateSections() throws {
+        let fsm = AnyControllableFiniteStateMachine(ToggleFiniteStateMachine())
+        let fsm2 = AnyControllableFiniteStateMachine(ToggleFiniteStateMachine(name: "toggle2"))
+        let base = { fsm.base as! ToggleFiniteStateMachine }
+        let base2 = { fsm2.base as! ToggleFiniteStateMachine }
+        base2().timer = base().timer
+        base2().gateway = base().gateway
+        let pool = FSMPool(fsms: [.controllableFSM(fsm), .controllableFSM(fsm2)])
+        let timeslots = [
+            Timeslot(
+                callChain: CallChain(root: fsm.name, calls: []),
+                startingTime: 0,
+                duration: 20,
+                cyclesExecuted: 0
+            )
+        ]
+        let timeslots2 = [
+            Timeslot(
+                callChain: CallChain(root: fsm2.name, calls: []),
+                startingTime: 30,
+                duration: 20,
+                cyclesExecuted: 0
+            )
+        ]
+        let expectedFsm1 = AnyControllableFiniteStateMachine(ToggleFiniteStateMachine())
+        expectedFsm1.next()
+        let expectedFsm2 = AnyControllableFiniteStateMachine(ToggleFiniteStateMachine(name: "toggle2"))
+        expectedFsm2.next()
+        let expectedPool1 = FSMPool(fsms: [.controllableFSM(expectedFsm1), .controllableFSM(fsm2)])
+        let expectedPool2 = FSMPool(fsms: [.controllableFSM(expectedFsm1), .controllableFSM(expectedFsm2)])
+        let expected = ScheduleThreadVariations(pathways: [
+            ScheduleThreadPath(sections: [
+                SnapshotSectionPath(ringlets: [
+                    SnapshotSectionPath.State(
+                        previous: [],
+                        current: CallAwareRinglet(
+                            callChain: CallChain(root: fsm.name, calls: []),
+                            ringlet: ConditionalRinglet(
+                                fsm: .controllableFSM(expectedFsm1),
+                                before: pool,
+                                after: expectedPool1,
+                                transitioned: false,
+                                externalsPreSnapshot: KripkeStatePropertyList(),
+                                externalsPostSnapshot: KripkeStatePropertyList(),
+                                preSnapshot: KripkeStatePropertyList([
+                                    "hasFinished": KripkeStateProperty(type: .Bool, value: true),
+                                    "isSuspended": KripkeStateProperty(type: .Bool, value: true),
+                                    "value": KripkeStateProperty(type: .Bool, value: false),
+                                    "currentState": KripkeStateProperty(type: .String, value: "current")
+                                ]),
+                                postSnapshot: KripkeStatePropertyList([
+                                    "hasFinished": KripkeStateProperty(type: .Bool, value: true),
+                                    "isSuspended": KripkeStateProperty(type: .Bool, value: true),
+                                    "value": KripkeStateProperty(type: .Bool, value: true),
+                                    "currentState": KripkeStateProperty(type: .String, value: "current")
+                                ]),
+                                calls: [],
+                                condition: .lessThanEqual(value: 0)
+                            )
+                        ),
+                        fsm: .controllableFSM(expectedFsm1),
+                        cyclesExecuted: 1
+                    )
+                ]),
+                SnapshotSectionPath(ringlets: [
+                    SnapshotSectionPath.State(
+                        previous: [],
+                        current: CallAwareRinglet(
+                            callChain: CallChain(root: fsm2.name, calls: []),
+                            ringlet: ConditionalRinglet(
+                                fsm: .controllableFSM(expectedFsm2),
+                                before: expectedPool1,
+                                after: expectedPool2,
+                                transitioned: false,
+                                externalsPreSnapshot: KripkeStatePropertyList(),
+                                externalsPostSnapshot: KripkeStatePropertyList(),
+                                preSnapshot: KripkeStatePropertyList([
+                                    "hasFinished": KripkeStateProperty(type: .Bool, value: true),
+                                    "isSuspended": KripkeStateProperty(type: .Bool, value: true),
+                                    "value": KripkeStateProperty(type: .Bool, value: false),
+                                    "currentState": KripkeStateProperty(type: .String, value: "current")
+                                ]),
+                                postSnapshot: KripkeStatePropertyList([
+                                    "hasFinished": KripkeStateProperty(type: .Bool, value: true),
+                                    "isSuspended": KripkeStateProperty(type: .Bool, value: true),
+                                    "value": KripkeStateProperty(type: .Bool, value: true),
+                                    "currentState": KripkeStateProperty(type: .String, value: "current")
+                                ]),
+                                calls: [],
+                                condition: .greaterThanEqual(value: 30)
+                            )
+                        ),
+                        fsm: .controllableFSM(expectedFsm2),
+                        cyclesExecuted: 1
+                    )
+                ])
+            ])
+        ])
+        let variations = ScheduleThreadVariations(
+            pool: pool,
+            thread: ScheduleThread(sections: [SnapshotSection(timeslots: timeslots), SnapshotSection(timeslots: timeslots2)]),
+            gateway: base().gateway,
+            timer: base().timer,
+            cycleLength: 100
+        )
+        XCTAssertEqual(variations, expected)
+    }
 
 }

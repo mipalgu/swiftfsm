@@ -76,9 +76,9 @@ extension StackGateway: NewVerifiableGateway {
         get {
             FSMPool(fsms: Array(fsms.values))
         } set {
+            stacks = [:]
             for fsm in newValue.fsms {
                 fsms[id(of: fsm.name)] = fsm
-                stacks = [:]
             }
         }
     }

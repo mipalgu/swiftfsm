@@ -107,9 +107,9 @@ internal final class ToggleFiniteStateMachine: FiniteStateMachineType,
         ]
     }
     
-    private(set) var gateway = StackGateway()
+    var gateway = StackGateway()
     
-    private(set) var timer = FSMClock(ringletLengths: ["toggle": 10], scheduleLength: 10)
+    var timer = FSMClock(ringletLengths: ["toggle": 10], scheduleLength: 10)
     
     var sensors: [AnySnapshotController] = []
     
@@ -118,11 +118,11 @@ internal final class ToggleFiniteStateMachine: FiniteStateMachineType,
     //swiftlint:disable:next type_name
     typealias _StateType = MiPalState
 
-    let name: String = "toggle"
+    let name: String
 
     var initialState: MiPalState = EmptyMiPalState("initial")
     
-    var value: Bool = false
+    var value: Bool
 
     var currentState: MiPalState = EmptyMiPalState("current")
 
@@ -133,12 +133,16 @@ internal final class ToggleFiniteStateMachine: FiniteStateMachineType,
     let isSuspended: Bool = true
 
     let submachines: [AnyScheduleableFiniteStateMachine] = []
+    
+    init(name: String = "toggle", value: Bool = false) {
+        self.name = name
+        self.value = value
+    }
 
     func clone() -> ToggleFiniteStateMachine {
-        let fsm = ToggleFiniteStateMachine()
+        let fsm = ToggleFiniteStateMachine(name: self.name, value: self.value)
         fsm.gateway = gateway
         fsm.timer = timer
-        fsm.value = value
         return fsm
     }
 

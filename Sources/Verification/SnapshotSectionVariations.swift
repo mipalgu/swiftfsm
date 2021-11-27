@@ -104,8 +104,6 @@ struct SnapshotSectionVariations: Hashable {
                     let newState = SnapshotSectionPath.State(
                         previous: path.last?.toCurrent ?? [],
                         current: newRinglet,
-                        before: ringlet.before,
-                        after: ringlet.after,
                         fsm: ringlet.fsm,
                         cyclesExecuted: ringlet.transitioned ? 0 : timeslot.cyclesExecuted + 1
                     )
