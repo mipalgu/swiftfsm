@@ -124,6 +124,7 @@ struct SnapshotSectionPath: Hashable {
     /// phase.
     var ringlets: [State]
     
+    // The state of all fsms before this snapshot section executed.
     var before: FSMPool {
         get {
             ringlets.first!.before
@@ -132,6 +133,7 @@ struct SnapshotSectionPath: Hashable {
         }
     }
     
+    /// The state of all fsms after this snapshot section executed.
     var after: FSMPool {
         get {
             ringlets.last!.after
