@@ -138,7 +138,7 @@ class ScheduleVerifierTests: XCTestCase {
             let fsm = SensorFiniteStateMachine()
             let properties = propertyList(readState: readState, sensorValue: sensorValue, currentState: currentState, previousState: previousState)
             let edges = targets.map {
-                KripkeEdge(clockName: fsm.name, constraint: nil, resetClock: $0, takeSnapshot: !readState, time: 0, target: $1)
+                KripkeEdge(clockName: fsm.name, constraint: nil, resetClock: $0, takeSnapshot: !readState, time: readState ? 30 : 0, target: $1)
             }
             let state = KripkeState(isInitial: previousState == fsm.initialPreviousState.name, properties: properties)
             for edge in edges {
@@ -167,8 +167,25 @@ class ScheduleVerifierTests: XCTestCase {
                 previousState: initial,
                 targets: [
                     target(readState: true, sensorValue: false, currentState: initial, previousState: initial),
-                    target(readState: true, sensorValue: true, currentState: initial, previousState: initial),
-                    target(readState: true, sensorValue: true, currentState: exit, previousState: initial)
+                    target(readState: true, sensorValue: true, currentState: initial, previousState: initial)
+                ]
+            ),
+            kripkeState(
+                readState: true,
+                sensorValue: false,
+                currentState: initial,
+                previousState: initial,
+                targets: [
+                    (resetClock: false, target: propertyList(readState: false, sensorValue: false, currentState: initial, previousState: initial))
+                ]
+            ),
+            kripkeState(
+                readState: true,
+                sensorValue: true,
+                currentState: initial,
+                previousState: initial,
+                targets: [
+                    (resetClock: true, target: propertyList(readState: false, sensorValue: true, currentState: exit, previousState: initial))
                 ]
             ),
             kripkeState(
@@ -177,16 +194,7 @@ class ScheduleVerifierTests: XCTestCase {
                 currentState: initial,
                 previousState: previous,
                 targets: [
-                    target(readState: false, sensorValue: true, currentState: exit, previousState: initial)
-                ]
-            ),
-            kripkeState(
-                readState: false,
-                sensorValue: true,
-                currentState: exit,
-                previousState: initial,
-                targets: [
-                    target(readState: true, sensorValue: true, currentState: exit, previousState: initial)
+                    (resetClock: true, target: propertyList(readState: false, sensorValue: true, currentState: exit, previousState: initial))
                 ]
             ),
             kripkeState(
@@ -195,7 +203,7 @@ class ScheduleVerifierTests: XCTestCase {
                 currentState: exit,
                 previousState: initial,
                 targets: [
-                    target(readState: false, sensorValue: true, currentState: exit, previousState: exit)
+                    (resetClock: false, target: propertyList(readState: false, sensorValue: true, currentState: exit, previousState: exit))
                 ]
             ),
             kripkeState(
@@ -203,7 +211,9 @@ class ScheduleVerifierTests: XCTestCase {
                 sensorValue: true,
                 currentState: exit,
                 previousState: exit,
-                targets: []
+                targets: [
+                    (resetClock: false, target: propertyList(readState: true, sensorValue: true, currentState: exit, previousState: exit))
+                ]
             )
         ]
         let gateway = StackGateway()
@@ -228,6 +238,12 @@ class ScheduleVerifierTests: XCTestCase {
         let verifier = ScheduleVerifier(schedule: schedule, allFsms: pool)
         verifier.verify(gateway: gateway, timer: timer, view: view, cycleDetector: cycleDetector)
         XCTAssertEqual(view.result, view.expected)
+        if view.expected != view.result {
+            let missingElements = view.expected.subtracting(view.result)
+            print("missing results: \(missingElements)")
+            let extraneousElements = view.result.subtracting(view.expected)
+            print("extraneous results: \(extraneousElements)")
+        }
         XCTAssertTrue(view.finishCalled)
     }
 

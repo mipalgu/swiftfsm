@@ -139,6 +139,10 @@ struct SnapshotSectionPath: Hashable {
             }
         }
         
+        var hasFinished: Bool {
+            fsmAfter.hasFinished
+        }
+        
         /// The number of consecutive ringlets that have been executed without
         /// the fsm transitioning.
         var cyclesExecuted: UInt
@@ -191,6 +195,10 @@ struct SnapshotSectionPath: Hashable {
     
     var afterProperties: KripkeStatePropertyList {
         ringlets.last!.afterProperties
+    }
+    
+    var hasFinished: Bool {
+        nil == ringlets.first { !$0.hasFinished }
     }
     
 }

@@ -146,6 +146,7 @@ struct Ringlet {
         let before = gateway.pool
         let currentState = fsm.currentState.name
         var clone = fsm.clone()
+        gateway.replace(clone)
         clone.next()
         let after = gateway.pool
         let transitioned = currentState != clone.currentState.name

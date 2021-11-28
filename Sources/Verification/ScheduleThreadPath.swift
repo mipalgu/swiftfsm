@@ -89,6 +89,10 @@ struct ScheduleThreadPath: Hashable {
         sections.last!.afterProperties
     }
     
+    var hasFinished: Bool {
+        nil == sections.first { !$0.hasFinished }
+    }
+    
     init(sections: [SnapshotSectionPath]) {
         self.sections = sections
     }

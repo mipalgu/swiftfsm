@@ -68,31 +68,6 @@ final class SensorFiniteStateMachine: MachineProtocol {
     typealias _StateType = MiPalState
     typealias Ringlet = MiPalRinglet
     
-    /*
-     str += "            \"currentState\": [],\n"
-     str += "            \"exitState\": [],\n"
-     str += "            \"externalVariables\": [],\n"
-     str += "            \"sensors\": [],\n"
-     str += "            \"actuators\": [],\n"
-     str += "            \"snapshotSensors\": [],\n"
-     str += "            \"snapshotActuators\": [],\n"
-     str += "            \"fsmVars\": [],\n"
-     str += "            \"initialPreviousState\": [],\n"
-     str += "            \"initialState\": [],\n"
-     str += "            \"name\": [],\n"
-     if nil != machine.parameters {
-         str += "            \"parameters\": [],\n"
-     }
-     str += "            \"previousState\": [],\n"
-     if nil != machine.parameters {
-         str += "            \"results\": [],\n"
-     }
-     str += "            \"submachineFunctions\": [],\n"
-     str += "            \"submachines\": [],\n"
-     str += "            \"suspendedState\": [],\n"
-     str += "            \"suspendState\": [],\n"
-     */
-    
     var validVars: [String: [Any]] {
         [
             "currentState": [],
@@ -155,7 +130,7 @@ final class SensorFiniteStateMachine: MachineProtocol {
     lazy var initialState: MiPalState = {
         CallbackMiPalState(
             "initial",
-            transitions: [Transition(EmptyMiPalState("exit")) { [self] _ in sensors1.val }],
+            transitions: [Transition(exitState) { [self] _ in sensors1.val }],
             snapshotSensors: [sensors1.name],
             snapshotActuators: []
         )
@@ -183,6 +158,7 @@ final class SensorFiniteStateMachine: MachineProtocol {
         fsm.previousState = previousState.clone()
         fsm.suspendedState = suspendedState?.clone()
         fsm.sensors1.val = sensors1.val
+        fsm.ringlet = ringlet.clone()
         return fsm
     }
 

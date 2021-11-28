@@ -140,7 +140,7 @@ struct ScheduleVerifier {
                             beforeState.addEdge(
                                 KripkeEdge(
                                     clockName: ringlet.fsmBefore.name,
-                                    constraint: ringlet.condition,
+                                    constraint: ringlet.condition == .lessThanEqual(value: 0) ? nil : ringlet.condition,
                                     resetClock: ringlet.transitioned,
                                     takeSnapshot: false,
                                     time: ringlet.timeslot.duration,
@@ -152,8 +152,12 @@ struct ScheduleVerifier {
                             newPrevious = Previous(state: afterState, timeslot: ringlet.timeslot)
                         }
                     }
-                    if !inCycle {
+                    let hasFinished = path.hasFinished
+                    if !inCycle && !hasFinished {
                         jobs.append(Job(thread: job.thread, pool: path.after, previous: newPrevious))
+                    }
+                    if let newPrevious = newPrevious, hasFinished {
+                        view.commit(state: newPrevious.state)
                     }
                 }
                 if let previous = previous {

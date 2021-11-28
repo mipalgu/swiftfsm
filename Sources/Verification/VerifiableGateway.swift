@@ -61,6 +61,8 @@ public protocol NewVerifiableGateway: AnyObject {
     
     var pool: FSMPool { get set }
     
+    func replace(_ fsm: FSMType)
+    
     func setScenario(_ calls: [CallChain], pool: FSMPool)
     
     func isValid(_ chain: CallChain) -> Bool
@@ -81,6 +83,11 @@ extension StackGateway: NewVerifiableGateway {
                 fsms[id(of: fsm.name)] = fsm
             }
         }
+    }
+    
+    public func replace(_ fsm: FSMType) {
+        fsms[id(of: fsm.name)] = fsm
+        
     }
     
     public func setScenario(_ calls: [CallChain], pool: FSMPool) {
