@@ -146,15 +146,6 @@ final class SensorFiniteStateMachine: MachineProtocol {
         }
     }
     
-    var snapshotSensors: [AnySnapshotController] {
-        guard let snapshotSensors = currentState.snapshotSensors else {
-            return sensors
-        }
-        return sensors.filter { snapshotSensors.contains($0.name) }
-    }
-    
-    let snapshotActuators: [AnySnapshotController] = []
-    
     var actuators: [AnySnapshotController] = []
     
     var externalVariables: [AnySnapshotController] = []
@@ -165,7 +156,7 @@ final class SensorFiniteStateMachine: MachineProtocol {
         CallbackMiPalState(
             "initial",
             transitions: [Transition(EmptyMiPalState("exit")) { [self] _ in sensors1.val }],
-            snapshotSensors: ["sensors1"],
+            snapshotSensors: [sensors1.name],
             snapshotActuators: []
         )
     }()

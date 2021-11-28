@@ -81,7 +81,7 @@ struct SnapshotSectionVariations: Hashable {
         let sections = sensorCombinations.flatMap { (combinations) -> [[SnapshotSectionPath.State]] in
             let pool = pool.cloned
             for (index, timeslot) in section.timeslots.enumerated() {
-                let fsm = timeslot.callChain.fsm(fromPool: pool).clone()
+                let fsm = timeslot.callChain.fsm(fromPool: pool)
                 fsm.asScheduleableFiniteStateMachine.snapshotSensorValues = combinations[index]
             }
             func process(path: [SnapshotSectionPath.State], index: Int, pool: FSMPool) -> [[SnapshotSectionPath.State]] {
