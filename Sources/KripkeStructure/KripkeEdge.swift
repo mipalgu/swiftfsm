@@ -79,6 +79,25 @@ public struct KripkeEdge {
         self.target = target
     }
     
+    public func canMerge(_ other: KripkeEdge) -> Bool {
+        self.clockName == other.clockName
+        && self.resetClock == other.resetClock
+        && self.takeSnapshot == other.takeSnapshot
+        && self.time == other.time
+        && self.target == other.target
+    }
+    
+    public mutating func mergeConstraint(_ other: ClockConstraint?) {
+        guard let other = other else {
+            self.constraint = nil
+            return
+        }
+        guard let constraint = self.constraint else {
+            return
+        }
+        self.constraint = .or(lhs: constraint, rhs: other)
+    }
+    
 }
 
 extension KripkeEdge: CustomStringConvertible {

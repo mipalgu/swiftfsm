@@ -67,7 +67,7 @@ public protocol _KripkeStateType: class, Equatable {
 
     var properties: KripkeStatePropertyList { get }
 
-    var edges: Set<KripkeEdge> { get set }
+    var edges: Set<KripkeEdge> { get }
 
 }
 

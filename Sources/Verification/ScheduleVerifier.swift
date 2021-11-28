@@ -66,11 +66,15 @@ struct ScheduleVerifier {
     
     private struct Job {
         
-        var initial: Bool
+        var initial: Bool {
+            previous == nil
+        }
         
         var thread: ScheduleThread
         
         var pool: FSMPool
+        
+        var previous: KripkeState?
         
     }
     
@@ -83,12 +87,14 @@ struct ScheduleVerifier {
         self.allFsms = allFsms
     }
     
-    func verify<Gateway: ModifiableFSMGateway, Timer: Clock, View: KripkeStructureView, Detector: CycleDetector>(gateway: Gateway, timer: Timer, view: View, cycleDetector: Detector) where Gateway: NewVerifiableGateway, Detector.Element == KripkeStatePropertyList {
+    func verify<Gateway: ModifiableFSMGateway, Timer: Clock, View: KripkeStructureView, Detector: CycleDetector>(gateway: Gateway, timer: Timer, view: View, cycleDetector: Detector) where Gateway: NewVerifiableGateway, Detector.Element == KripkeStatePropertyList, View.State == KripkeState {
         let isolatedThreads = ScheduleIsolator(schedule: schedule, allFsms: allFsms)
         let cycleLength = schedule.cycleLength
         for thread in isolatedThreads.threads {
             var cycleData = cycleDetector.initialData
-            var jobs = [Job(initial: true, thread: thread.thread, pool: thread.pool)]
+            var jobs = [Job(thread: thread.thread, pool: thread.pool, previous: nil)]
+            var states: [KripkeStatePropertyList: KripkeState] = [:]
+            states.reserveCapacity(1000000)
             while !jobs.isEmpty {
                 let job = jobs.removeFirst()
                 let variations = ScheduleThreadVariations(
@@ -99,14 +105,37 @@ struct ScheduleVerifier {
                     cycleLength: cycleLength
                 )
                 for path in variations.pathways {
+                    let previous = job.previous
                     for sectionPath in path.sections {
                         for ringlet in sectionPath.ringlets {
-                            let before = ringlet.before.propertyList(.read(ringlet.fsm.name))
-                            let after = ringlet.after.propertyList(.write(ringlet.fsm.name))
+                            let beforeProperties = ringlet.before.propertyList(.read(ringlet.fsm.name))
+                            let beforeState = states[beforeProperties] ?? KripkeState(isInitial: previous == nil, properties: beforeProperties)
+                            if let previous = previous {
+                                previous.addEdge(
+                                    KripkeEdge(
+                                        clockName: nil,
+                                        constraint: nil,
+                                        resetClock: false,
+                                        target: beforeProperties
+                                    )
+                                )
+                            }
+                            let afterProperties = ringlet.after.propertyList(.write(ringlet.fsm.name))
+                            beforeState.addEdge(
+                                KripkeEdge(
+                                    clockName: ringlet.fsm.name,
+                                    constraint: ringlet.current.ringlet.condition,
+                                    resetClock: ringlet.cyclesExecuted == 0,
+                                    target: beforeProperties
+                                )
+                            )
+                            states[beforeProperties] = beforeState
+                            let afterState = states[afterProperties] ?? KripkeState(isInitial: false, properties: afterProperties)
+                            states[afterProperties] = afterState
                         }
                     }
                     if !cycleDetector.inCycle(data: &cycleData, element: path.afterProperties) {
-                        jobs.append(Job(initial: false, thread: job.thread, pool: path.after))
+                        jobs.append(Job(thread: job.thread, pool: path.after))
                     }
                 }
             }

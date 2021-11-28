@@ -68,7 +68,9 @@ public final class KripkeState: KripkeStateType {
      */
     public let properties: KripkeStatePropertyList
 
-    public var edges: Set<KripkeEdge>
+    public private(set) var edges: Set<KripkeEdge> = []
+    
+    private var lookup: [KripkeStatePropertyList: [KripkeEdge]] = [:]
 
     /**
      *  Create a new `KripkeState`.
@@ -77,14 +79,29 @@ public final class KripkeState: KripkeStateType {
      *
      *  - Parameter effects: All changes to properties.
      */
-    public init(
-        isInitial: Bool,
-        properties: KripkeStatePropertyList,
-        edges: Set<KripkeEdge> = []
-    ) {
+    public init(isInitial: Bool, properties: KripkeStatePropertyList) {
         self.isInitial = isInitial
         self.properties = properties
-        self.edges = edges
+    }
+    
+    public func addEdge(_ edge: KripkeEdge) {
+        guard let existingEdges = lookup[edge.target] else {
+            lookup[edge.target] = [edge]
+            edges.insert(edge)
+            return
+        }
+        for (index, existingEdge) in existingEdges.enumerated() {
+            if existingEdge.canMerge(edge) {
+                edges.remove(existingEdge)
+                var newEdges = existingEdges
+                newEdges[index].mergeConstraint(edge.constraint)
+                lookup[edge.target] = newEdges
+                edges.insert(newEdges[index])
+                return
+            }
+        }
+        lookup[edge.target]?.append(edge)
+        edges.insert(edge)
     }
 
 }
