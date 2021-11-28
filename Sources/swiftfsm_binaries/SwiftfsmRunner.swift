@@ -68,7 +68,7 @@ import Gateways
 import KripkeStructure
 import KripkeStructureViews
 import Scheduling
-import VerificationOld
+import Verification
 import MachineStructure
 import swiftfsm
 import Timers
@@ -99,25 +99,25 @@ struct SwiftfsmRunner {
         }
         let machines = self.machines.map { Machine(debug: args.scheduleArgs.debug, name: $0.fsm.name, fsm: $0.fsm, dependencies: $0.dependencies, clock: clock) }
         let clfsmMachineLoader = CLFSMMachineLoader()
-        switch self.args.scheduleArgs.scheduler {
-        case .roundRobin:
-            let scheduler = RoundRobinSchedulerFactory(gateway: self.gateway, scheduleHandler: clfsmMachineLoader, unloader: clfsmMachineLoader).make()
-            let generatorFactory = RoundRobinKripkeStructureGeneratorFactory(gateway: self.gateway)
-            self.handleMachines(machines: machines, scheduler: scheduler, generatorFactory: generatorFactory)
-        case .passiveRoundRobin:
-            let scheduler = PassiveRoundRobinSchedulerFactory(gateway: self.gateway, scheduleHandler: clfsmMachineLoader, unloader: clfsmMachineLoader).make()
-            let generatorFactory = PassiveRoundRobinKripkeStructureGeneratorFactory(gateway: self.gateway)
-            self.handleMachines(machines: machines, scheduler: scheduler, generatorFactory: generatorFactory)
-        case .timeTriggered(let path):
-            let parser = MetaDispatchTableParser()
-            guard let dispatchTable = parser.parse(atPath: path) else {
-                parser.errors.forEach(printer.error)
-                exit(EXIT_FAILURE)
-            }
-            let scheduler = TimeTriggeredSchedulerFactory(dispatchTable: dispatchTable, gateway: self.gateway, scheduleHandler: clfsmMachineLoader, unloader: clfsmMachineLoader).make()
-            let generatorFactory = TimeTriggeredKripkeStructureGeneratorFactoryCreator(gateway: self.gateway).make(dispatchTable: dispatchTable)
-            self.handleMachines(machines: machines, scheduler: scheduler, generatorFactory: generatorFactory)
-        }
+//        switch self.args.scheduleArgs.scheduler {
+//        case .roundRobin:
+//            let scheduler = RoundRobinSchedulerFactory(gateway: self.gateway, scheduleHandler: clfsmMachineLoader, unloader: clfsmMachineLoader).make()
+//            let generatorFactory = RoundRobinKripkeStructureGeneratorFactory(gateway: self.gateway)
+//            self.handleMachines(machines: machines, scheduler: scheduler, generatorFactory: generatorFactory)
+//        case .passiveRoundRobin:
+//            let scheduler = PassiveRoundRobinSchedulerFactory(gateway: self.gateway, scheduleHandler: clfsmMachineLoader, unloader: clfsmMachineLoader).make()
+//            let generatorFactory = PassiveRoundRobinKripkeStructureGeneratorFactory(gateway: self.gateway)
+//            self.handleMachines(machines: machines, scheduler: scheduler, generatorFactory: generatorFactory)
+//        case .timeTriggered(let path):
+//            let parser = MetaDispatchTableParser()
+//            guard let dispatchTable = parser.parse(atPath: path) else {
+//                parser.errors.forEach(printer.error)
+//                exit(EXIT_FAILURE)
+//            }
+//            let scheduler = TimeTriggeredSchedulerFactory(dispatchTable: dispatchTable, gateway: self.gateway, scheduleHandler: clfsmMachineLoader, unloader: clfsmMachineLoader).make()
+//            let generatorFactory = TimeTriggeredKripkeStructureGeneratorFactoryCreator(gateway: self.gateway).make(dispatchTable: dispatchTable)
+//            self.handleMachines(machines: machines, scheduler: scheduler, generatorFactory: generatorFactory)
+//        }
     }
     
     private func machineHierarchy(_ fsm: FSMType, dependencies: [Dependency], indent: String = "") -> String {
@@ -131,31 +131,31 @@ struct SwiftfsmRunner {
         return str + ":\n" + deps
     }
     
-    private func handleMachines<S: Scheduler, F: KripkeStructureGeneratorFactory>(machines: [Machine], scheduler: S, generatorFactory: F) where F.ViewFactory == AggregateKripkeStructureViewFactory<KripkeState> {
-        if self.args.generateKripkeStructures {
-            self.generateKripkeStructure(machines: machines, generatorFactory: generatorFactory, formats: self.args.verifyArgs.formats)
-            return
-        }
-        scheduler.run(machines)
-    }
-    
-    private func generateKripkeStructure<F: KripkeStructureGeneratorFactory>(machines: [Machine], generatorFactory: F, formats: [VerifyArguments.KripkeStructureFormats]) where F.ViewFactory == AggregateKripkeStructureViewFactory<KripkeState> {
-        let formats = formats.isEmpty ? [.nusmv] : formats
-        let viewFactories: [AnyKripkeStructureViewFactory<KripkeState>] = formats.map {
-            switch $0 {
-            case .graphviz:
-                return AnyKripkeStructureViewFactory(GraphVizKripkeStructureViewFactory<KripkeState>())
-            case .nusmv:
-                return AnyKripkeStructureViewFactory(NuSMVKripkeStructureViewFactory<KripkeState>())
-            case .tulip:
-                self.printer.error(str: "Tulip view is currently unsupported.")
-                exit(EXIT_FAILURE)
-            case .gexf:
-                self.printer.error(str: "Gexf view is currently unsupported.")
-                exit(EXIT_FAILURE)
-            }
-        }
-        let generator = generatorFactory.make(fromMachines: machines, usingViewFactory: AggregateKripkeStructureViewFactory(views: viewFactories))
-        generator.generate(usingGateway: gateway)
-    }
+//    private func handleMachines<S: Scheduler, F: KripkeStructureGeneratorFactory>(machines: [Machine], scheduler: S, generatorFactory: F) where F.ViewFactory == AggregateKripkeStructureViewFactory<KripkeState> {
+//        if self.args.generateKripkeStructures {
+//            self.generateKripkeStructure(machines: machines, generatorFactory: generatorFactory, formats: self.args.verifyArgs.formats)
+//            return
+//        }
+//        scheduler.run(machines)
+//    }
+//    
+//    private func generateKripkeStructure<F: KripkeStructureGeneratorFactory>(machines: [Machine], generatorFactory: F, formats: [VerifyArguments.KripkeStructureFormats]) where F.ViewFactory == AggregateKripkeStructureViewFactory<KripkeState> {
+//        let formats = formats.isEmpty ? [.nusmv] : formats
+//        let viewFactories: [AnyKripkeStructureViewFactory<KripkeState>] = formats.map {
+//            switch $0 {
+//            case .graphviz:
+//                return AnyKripkeStructureViewFactory(GraphVizKripkeStructureViewFactory<KripkeState>())
+//            case .nusmv:
+//                return AnyKripkeStructureViewFactory(NuSMVKripkeStructureViewFactory<KripkeState>())
+//            case .tulip:
+//                self.printer.error(str: "Tulip view is currently unsupported.")
+//                exit(EXIT_FAILURE)
+//            case .gexf:
+//                self.printer.error(str: "Gexf view is currently unsupported.")
+//                exit(EXIT_FAILURE)
+//            }
+//        }
+//        let generator = generatorFactory.make(fromMachines: machines, usingViewFactory: AggregateKripkeStructureViewFactory(views: viewFactories))
+//        generator.generate(usingGateway: gateway)
+//    }
 }

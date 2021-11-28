@@ -67,7 +67,7 @@ import KripkeStructure
 import KripkeStructureViews
 import MachineCompiling
 import Scheduling
-import VerificationOld
+import Verification
 
 /**
  *  The standard `Parser`.
@@ -169,30 +169,30 @@ public class SwiftfsmParser: HelpableParser {
 
     fileprivate let passiveRoundRobinFactory: PassiveRoundRobinSchedulerFactory
     
-    private let passiveRoundRobinKripkeFactory: PassiveRoundRobinKripkeStructureGeneratorFactory
+//    private let passiveRoundRobinKripkeFactory: PassiveRoundRobinKripkeStructureGeneratorFactory
 
     fileprivate let roundRobinFactory: RoundRobinSchedulerFactory
     
-    private let roundRobinKripkeFactory: RoundRobinKripkeStructureGeneratorFactory
+//    private let roundRobinKripkeFactory: RoundRobinKripkeStructureGeneratorFactory
     
     fileprivate let timeTriggeredFactory: TimeTriggeredSchedulerFactoryCreator
     
-    private let timeTriggeredKripkeFactory: TimeTriggeredKripkeStructureGeneratorFactoryCreator
+//    private let timeTriggeredKripkeFactory: TimeTriggeredKripkeStructureGeneratorFactoryCreator
 
     public init(
         passiveRoundRobinFactory: PassiveRoundRobinSchedulerFactory,
-        passiveRoundRobinKripkeFactory: PassiveRoundRobinKripkeStructureGeneratorFactory,
+//        passiveRoundRobinKripkeFactory: PassiveRoundRobinKripkeStructureGeneratorFactory,
         roundRobinFactory: RoundRobinSchedulerFactory,
-        roundRobinKripkeFactory: RoundRobinKripkeStructureGeneratorFactory,
-        timeTriggeredFactory: TimeTriggeredSchedulerFactoryCreator,
-        timeTriggeredKripkeFactory: TimeTriggeredKripkeStructureGeneratorFactoryCreator
+//        roundRobinKripkeFactory: RoundRobinKripkeStructureGeneratorFactory,
+        timeTriggeredFactory: TimeTriggeredSchedulerFactoryCreator//,
+//        timeTriggeredKripkeFactory: TimeTriggeredKripkeStructureGeneratorFactoryCreator
     ) {
         self.passiveRoundRobinFactory = passiveRoundRobinFactory
-        self.passiveRoundRobinKripkeFactory = passiveRoundRobinKripkeFactory
+//        self.passiveRoundRobinKripkeFactory = passiveRoundRobinKripkeFactory
         self.roundRobinFactory = roundRobinFactory
-        self.roundRobinKripkeFactory = roundRobinKripkeFactory
+//        self.roundRobinKripkeFactory = roundRobinKripkeFactory
         self.timeTriggeredFactory = timeTriggeredFactory
-        self.timeTriggeredKripkeFactory = timeTriggeredKripkeFactory
+//        self.timeTriggeredKripkeFactory = timeTriggeredKripkeFactory
     }
 
     /**
@@ -526,11 +526,11 @@ public class SwiftfsmParser: HelpableParser {
         switch scheduler {
         case "rr", "RoundRobin":
             var temp: Task = t
-            temp.scheduler = .roundRobin(self.roundRobinFactory, self.roundRobinKripkeFactory)
+            //temp.scheduler = .roundRobin(self.roundRobinFactory, self.roundRobinKripkeFactory)
             return temp
         case "prr", "PassiveRoundRobin":
             var temp: Task = t
-            temp.scheduler = .passiveRoundRobin(self.passiveRoundRobinFactory, self.passiveRoundRobinKripkeFactory)
+            //temp.scheduler = .passiveRoundRobin(self.passiveRoundRobinFactory, self.passiveRoundRobinKripkeFactory)
             return temp
         default:
 #if canImport(Foundation) && !NO_FOUNDATION
@@ -538,10 +538,10 @@ public class SwiftfsmParser: HelpableParser {
                 throw ParsingErrors.generalError(error: "Unable to parse scheduler \(scheduler)")
             }
             var temp: Task = t
-            temp.scheduler = .timeTriggered(
-                self.timeTriggeredFactory.make(dispatchTable: table),
-                self.timeTriggeredKripkeFactory.make(dispatchTable: table)
-            )
+//            temp.scheduler = .timeTriggered(
+//                self.timeTriggeredFactory.make(dispatchTable: table),
+//                self.timeTriggeredKripkeFactory.make(dispatchTable: table)
+//            )
             return temp
 #else
             throw ParsingErrors.generalError(error: "Unrecognised scheduler: \(scheduler).")

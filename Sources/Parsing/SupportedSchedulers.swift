@@ -59,13 +59,13 @@
 import Gateways
 import KripkeStructure
 import Scheduling
-import VerificationOld
+import Verification
 
 
 public enum SupportedSchedulers {
 
-    case passiveRoundRobin(PassiveRoundRobinSchedulerFactory, PassiveRoundRobinKripkeStructureGeneratorFactory)
-    case roundRobin(RoundRobinSchedulerFactory, RoundRobinKripkeStructureGeneratorFactory)
-    case timeTriggered(TimeTriggeredSchedulerFactory, TimeTriggeredKripkeStructureGeneratorFactory)
+//    case passiveRoundRobin(PassiveRoundRobinSchedulerFactory, PassiveRoundRobinKripkeStructureGeneratorFactory)
+//    case roundRobin(RoundRobinSchedulerFactory, RoundRobinKripkeStructureGeneratorFactory)
+//    case timeTriggered(TimeTriggeredSchedulerFactory, TimeTriggeredKripkeStructureGeneratorFactory)
 
 }
