@@ -64,6 +64,14 @@ import KripkeStructureViews
 
 struct ScheduleVerifier {
     
+    private struct Previous {
+        
+        var state: KripkeState
+        
+        var timeslot: Timeslot
+        
+    }
+    
     private struct Job {
         
         var initial: Bool {
@@ -74,27 +82,24 @@ struct ScheduleVerifier {
         
         var pool: FSMPool
         
-        var previous: KripkeState?
+        var previous: Previous?
         
     }
     
-    var schedule: Schedule
-    
-    var allFsms: FSMPool
+    var isolatedThreads: ScheduleIsolator
     
     init(schedule: Schedule, allFsms: FSMPool) {
-        self.schedule = schedule
-        self.allFsms = allFsms
+        self.init(isolatedThreads: ScheduleIsolator(schedule: schedule, allFsms: allFsms))
+    }
+    
+    init(isolatedThreads: ScheduleIsolator) {
+        self.isolatedThreads = isolatedThreads
     }
     
     func verify<Gateway: ModifiableFSMGateway, Timer: Clock, View: KripkeStructureView, Detector: CycleDetector>(gateway: Gateway, timer: Timer, view: View, cycleDetector: Detector) where Gateway: NewVerifiableGateway, Detector.Element == KripkeStatePropertyList, View.State == KripkeState {
-        let isolatedThreads = ScheduleIsolator(schedule: schedule, allFsms: allFsms)
-        let cycleLength = schedule.cycleLength
         for thread in isolatedThreads.threads {
             var cycleData = cycleDetector.initialData
             var jobs = [Job(thread: thread.thread, pool: thread.pool, previous: nil)]
-            var states: [KripkeStatePropertyList: KripkeState] = [:]
-            states.reserveCapacity(1000000)
             while !jobs.isEmpty {
                 let job = jobs.removeFirst()
                 let variations = ScheduleThreadVariations(
@@ -102,20 +107,31 @@ struct ScheduleVerifier {
                     thread: job.thread,
                     gateway: gateway,
                     timer: timer,
-                    cycleLength: cycleLength
+                    cycleLength: isolatedThreads.cycleLength
                 )
+                let previous = job.previous
                 for path in variations.pathways {
-                    let previous = job.previous
+                    var newPrevious: Previous? = nil
+                    var inCycle = true
                     for sectionPath in path.sections {
+                        if cycleDetector.inCycle(data: &cycleData, element: sectionPath.beforeProperties) {
+                            continue
+                        }
+                        inCycle = false
                         for ringlet in sectionPath.ringlets {
                             let beforeProperties = ringlet.beforeProperties
-                            let beforeState = states[beforeProperties] ?? KripkeState(isInitial: previous == nil, properties: beforeProperties)
+                            let beforeState = KripkeState(isInitial: previous == nil, properties: beforeProperties)
                             if let previous = previous {
-                                previous.addEdge(
+                                previous.state.addEdge(
                                     KripkeEdge(
                                         clockName: nil,
                                         constraint: nil,
                                         resetClock: false,
+                                        takeSnapshot: true,
+                                        time: previous.timeslot.afterExecutingTimeUntil(
+                                            timeslot: ringlet.timeslot,
+                                            cycleLength: isolatedThreads.cycleLength
+                                        ),
                                         target: beforeProperties
                                     )
                                 )
@@ -124,20 +140,24 @@ struct ScheduleVerifier {
                             beforeState.addEdge(
                                 KripkeEdge(
                                     clockName: ringlet.fsmBefore.name,
-                                    constraint: ringlet.current.ringlet.condition,
+                                    constraint: ringlet.condition,
                                     resetClock: ringlet.transitioned,
-                                    time: ringlet.current.ringlet.timeslot.duration,
-                                    target: beforeProperties
+                                    takeSnapshot: false,
+                                    time: ringlet.timeslot.duration,
+                                    target: afterProperties
                                 )
                             )
-                            states[beforeProperties] = beforeState
-                            let afterState = states[afterProperties] ?? KripkeState(isInitial: false, properties: afterProperties)
-                            states[afterProperties] = afterState
+                            view.commit(state: beforeState)
+                            let afterState = KripkeState(isInitial: false, properties: afterProperties)
+                            newPrevious = Previous(state: afterState, timeslot: ringlet.timeslot)
                         }
                     }
-                    if !cycleDetector.inCycle(data: &cycleData, element: path.afterProperties) {
-                        jobs.append(Job(thread: job.thread, pool: path.after))
+                    if !inCycle {
+                        jobs.append(Job(thread: job.thread, pool: path.after, previous: newPrevious))
                     }
+                }
+                if let previous = previous {
+                    view.commit(state: previous.state)
                 }
             }
         }

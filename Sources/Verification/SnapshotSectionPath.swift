@@ -123,6 +123,22 @@ struct SnapshotSectionPath: Hashable {
             after.propertyList(.write(fsmBefore.name + "." + fsmBefore.currentState.name))
         }
         
+        var timeslot: Timeslot {
+            get {
+                current.ringlet.timeslot
+            } set {
+                current.ringlet.timeslot = newValue
+            }
+        }
+        
+        var condition: Constraint<UInt> {
+            get {
+                current.ringlet.condition
+            } set {
+                current.ringlet.condition = newValue
+            }
+        }
+        
         /// The number of consecutive ringlets that have been executed without
         /// the fsm transitioning.
         var cyclesExecuted: UInt

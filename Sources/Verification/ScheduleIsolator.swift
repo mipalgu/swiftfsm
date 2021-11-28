@@ -70,12 +70,15 @@ struct ScheduleIsolator {
     
     var threads: [IsolatedThread]
     
+    var cycleLength: UInt
+    
     init(schedule: Schedule, allFsms: FSMPool) {
-        self.init(threads: [])
+        self.init(threads: [], cycleLength: schedule.cycleLength)
     }
     
-    init(threads: [IsolatedThread]) {
+    init(threads: [IsolatedThread], cycleLength: UInt) {
         self.threads = threads
+        self.cycleLength = cycleLength
     }
     
 }

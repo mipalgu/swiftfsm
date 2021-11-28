@@ -70,7 +70,7 @@ public struct KripkeEdge {
     
     public var target: KripkeStatePropertyList
     
-    public init(clockName: String? = nil, constraint: ClockConstraint? = nil, resetClock: Bool = false, takeSnapshot: Bool = false, time: UInt = 0, target: KripkeStatePropertyList) {
+    public init(clockName: String?, constraint: ClockConstraint?, resetClock: Bool, takeSnapshot: Bool, time: UInt, target: KripkeStatePropertyList) {
         self.clockName = clockName
         self.constraint = constraint
         self.resetClock = resetClock

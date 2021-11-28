@@ -66,4 +66,13 @@ struct Timeslot: Hashable {
     
     var cyclesExecuted: UInt
     
+    func afterExecutingTimeUntil(timeslot: Timeslot, cycleLength: UInt) -> UInt {
+        let currentTime = startingTime + duration
+        if timeslot.startingTime >= currentTime {
+            return timeslot.startingTime - currentTime
+        } else {
+            return (cycleLength - currentTime) + timeslot.startingTime
+        }
+    }
+    
 }
