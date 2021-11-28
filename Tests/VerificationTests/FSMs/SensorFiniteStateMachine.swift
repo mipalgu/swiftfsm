@@ -56,4 +56,105 @@
  *
  */
 
-import Foundation
+import FSM
+import KripkeStructure
+import Gateways
+import Timers
+import Verification
+import swiftfsm
+
+final class SensorFiniteStateMachine: MachineProtocol {
+    
+    typealias _StateType = MiPalState
+    typealias Ringlet = MiPalRinglet
+    
+    var validVars: [String: [Any]] {
+        [
+            "gateway": [],
+            "timer": [],
+            "actuators": [],
+            "sensors": [],
+            "allSensors": [],
+            "sensors1": [],
+            "externalVariables": [],
+            "initialState": [],
+            "currentState": []
+        ]
+    }
+    
+    var computedVars: [String: Any] {
+        return [
+            "actuators": Dictionary(uniqueKeysWithValues: actuators.map { ($0.name, $0.val) }),
+            "sensors": Dictionary(uniqueKeysWithValues: sensors.map { ($0.name, $0.val) }),
+            "externalVariables": Dictionary(uniqueKeysWithValues: externalVariables.map { ($0.name, $0.val) }),
+            "initialState": initialState.name,
+            "currentState": currentState.name
+        ]
+    }
+    
+    var gateway = StackGateway()
+    
+    var timer = FSMClock(ringletLengths: ["toggle": 10], scheduleLength: 10)
+    
+    var sensors1 = InMemoryContainer<Bool>(name: "sensors1", initialValue: false)
+    
+    private var allSensors: [AnySnapshotController] {
+        [AnySnapshotController(sensors1)]
+    }
+    
+    var sensors: [AnySnapshotController] {
+        get {
+            guard let snapshotSensors = currentState.snapshotSensors else {
+                return allSensors
+            }
+            return allSensors.filter { snapshotSensors.contains($0.name) }
+        } set {
+            for sensor in allSensors {
+                if let val = newValue.first(where: { $0.name == sensor.name })?.val {
+                    sensor.val = val
+                }
+            }
+        }
+    }
+    
+    var actuators: [AnySnapshotController] = []
+    
+    var externalVariables: [AnySnapshotController] = []
+
+    var name: String = "toggle"
+
+    lazy var initialState: MiPalState = {
+        CallbackMiPalState(
+            "initial",
+            transitions: [Transition(EmptyMiPalState("exit")) { [self] _ in sensors1.val }],
+            snapshotSensors: ["sensors1"],
+            snapshotActuators: []
+        )
+    }()
+
+    var currentState: MiPalState = EmptyMiPalState("current")
+    
+    var previousState: MiPalState = EmptyMiPalState("previous")
+    
+    var suspendedState: MiPalState? = nil
+    
+    var suspendState: MiPalState = EmptyMiPalState("suspend")
+    
+    var exitState: MiPalState = EmptyMiPalState("exit")
+    
+    var submachines: [SensorFiniteStateMachine] = []
+    
+    var initialPreviousState: MiPalState = EmptyMiPalState("previous")
+    
+    var ringlet = MiPalRinglet(previousState: EmptyMiPalState("previous"))
+
+    func clone() -> SensorFiniteStateMachine {
+        let fsm = SensorFiniteStateMachine()
+        fsm.currentState = currentState.clone()
+        fsm.previousState = previousState.clone()
+        fsm.suspendedState = suspendedState?.clone()
+        fsm.sensors[0].val = sensors[0].val
+        return fsm
+    }
+
+}

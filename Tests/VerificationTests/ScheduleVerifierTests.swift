@@ -58,6 +58,8 @@
 
 import XCTest
 
+import Gateways
+import KripkeStructureViews
 import KripkeStructure
 import swiftfsm
 import Timers
@@ -65,6 +67,36 @@ import Timers
 @testable import Verification
 
 class ScheduleVerifierTests: XCTestCase {
+    
+    class TestableView: KripkeStructureView {
+        
+        typealias State = KripkeState
+        
+        var expected: Set<KripkeState>
+        
+        private(set) var result: Set<KripkeState>
+        
+        private(set) var finishCalled: Bool = false
+        
+        init(expected: Set<KripkeState>) {
+            self.expected = expected
+            self.result = Set<KripkeState>(minimumCapacity: expected.count)
+        }
+        
+        func commit(state: KripkeState) {
+            result.insert(state)
+        }
+
+        func finish() {
+            finishCalled = true
+        }
+
+        func reset(usingClocks: Bool) {
+            result.removeAll(keepingCapacity: true)
+            finishCalled = false
+        }
+        
+    }
 
     override func setUpWithError() throws {
         // Put setup code here. This method is called before the invocation of each test method in the class.
@@ -72,6 +104,131 @@ class ScheduleVerifierTests: XCTestCase {
 
     override func tearDownWithError() throws {
         // Put teardown code here. This method is called after the invocation of each test method in the class.
+    }
+    
+    func test_canGenerateAllStatesOfSensorFSM() {
+        func propertyList(readState: Bool, sensorValue: Bool, currentState: String, previousState: String) -> KripkeStatePropertyList {
+            let fsm = SensorFiniteStateMachine()
+            fsm.sensors1.val = sensorValue
+            if currentState == "initial" {
+                fsm.currentState = fsm.initialState
+            } else {
+                fsm.currentState = EmptyMiPalState(currentState)
+            }
+            if previousState == "initial" {
+                fsm.previousState = fsm.initialState
+            } else {
+                fsm.previousState = EmptyMiPalState(previousState)
+            }
+            let fsmProperties = KripkeStatePropertyList(fsm)
+            return [
+                "fsms": KripkeStateProperty(
+                    type: .Compound([
+                        fsm.name: KripkeStateProperty(type: .Compound(fsmProperties), value: fsm)
+                    ]),
+                    value: [fsm.name: fsm]
+                ),
+                "pc": KripkeStateProperty(type: .String, value: fsm.name + "." + (readState ? currentState : previousState) + "." + (readState ? "R" : "W"))
+            ]
+        }
+        func target(readState: Bool, sensorValue: Bool, currentState: String, previousState: String) -> (Bool, KripkeStatePropertyList) {
+            return (!readState, propertyList(readState: readState, sensorValue: sensorValue, currentState: currentState, previousState: previousState))
+        }
+        func kripkeState(readState: Bool, sensorValue: Bool, currentState: String, previousState: String, targets: [(resetClock: Bool, target: KripkeStatePropertyList)]) -> KripkeState {
+            let fsm = SensorFiniteStateMachine()
+            let properties = propertyList(readState: readState, sensorValue: sensorValue, currentState: currentState, previousState: previousState)
+            let edges = targets.map {
+                KripkeEdge(clockName: fsm.name, constraint: nil, resetClock: $0, takeSnapshot: !readState, time: 0, target: $1)
+            }
+            let state = KripkeState(isInitial: previousState == fsm.initialPreviousState.name, properties: properties)
+            for edge in edges {
+                state.addEdge(edge)
+            }
+            return state
+        }
+        let fsm = SensorFiniteStateMachine()
+        let initial = fsm.initialState.name
+        let previous = fsm.initialPreviousState.name
+        let exit = fsm.exitState.name
+        let states: Set<KripkeState> = [
+            kripkeState(
+                readState: true,
+                sensorValue: false,
+                currentState: initial,
+                previousState: previous,
+                targets: [
+                    (resetClock: false, target: propertyList(readState: false, sensorValue: false, currentState: initial, previousState: initial))
+                ]
+            ),
+            kripkeState(
+                readState: false,
+                sensorValue: false,
+                currentState: initial,
+                previousState: initial,
+                targets: [
+                    target(readState: true, sensorValue: false, currentState: initial, previousState: initial),
+                    target(readState: true, sensorValue: true, currentState: initial, previousState: initial),
+                    target(readState: true, sensorValue: true, currentState: exit, previousState: initial)
+                ]
+            ),
+            kripkeState(
+                readState: true,
+                sensorValue: true,
+                currentState: initial,
+                previousState: previous,
+                targets: [
+                    target(readState: false, sensorValue: true, currentState: exit, previousState: initial)
+                ]
+            ),
+            kripkeState(
+                readState: false,
+                sensorValue: true,
+                currentState: exit,
+                previousState: initial,
+                targets: [
+                    target(readState: true, sensorValue: true, currentState: exit, previousState: initial)
+                ]
+            ),
+            kripkeState(
+                readState: true,
+                sensorValue: true,
+                currentState: exit,
+                previousState: initial,
+                targets: [
+                    target(readState: false, sensorValue: true, currentState: exit, previousState: exit)
+                ]
+            ),
+            kripkeState(
+                readState: false,
+                sensorValue: true,
+                currentState: exit,
+                previousState: exit,
+                targets: []
+            )
+        ]
+        let gateway = StackGateway()
+        let timer = FSMClock(ringletLengths: [fsm.name: 30], scheduleLength: 30)
+        fsm.gateway = gateway
+        fsm.timer = timer
+        let cycleDetector = HashTableCycleDetector<KripkeStatePropertyList>()
+        let view = TestableView(expected: states)
+        let schedule = Schedule(threads: [
+            ScheduleThread(sections: [
+                SnapshotSection(timeslots: [
+                    Timeslot(
+                        callChain: CallChain(root: fsm.name, calls: []),
+                        startingTime: 0,
+                        duration: 30,
+                        cyclesExecuted: 0
+                    )
+                ])
+            ])
+        ])
+        let pool = FSMPool(fsms: [.controllableFSM(AnyControllableFiniteStateMachine(fsm))])
+        let verifier = ScheduleVerifier(schedule: schedule, allFsms: pool)
+        verifier.verify(gateway: gateway, timer: timer, view: view, cycleDetector: cycleDetector)
+        XCTAssertEqual(view.result, view.expected)
+        XCTAssertTrue(view.finishCalled)
     }
 
 }
