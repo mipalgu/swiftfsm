@@ -73,7 +73,7 @@ struct ScheduleIsolator {
     var cycleLength: UInt
     
     init(schedule: Schedule, allFsms: FSMPool) {
-        self.init(threads: [], cycleLength: schedule.cycleLength)
+        self.init(threads: schedule.threads.map { IsolatedThread(thread: $0, pool: allFsms) }, cycleLength: schedule.cycleLength)
     }
     
     init(threads: [IsolatedThread], cycleLength: UInt) {
