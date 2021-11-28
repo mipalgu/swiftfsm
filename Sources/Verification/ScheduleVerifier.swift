@@ -108,7 +108,7 @@ struct ScheduleVerifier {
                     let previous = job.previous
                     for sectionPath in path.sections {
                         for ringlet in sectionPath.ringlets {
-                            let beforeProperties = ringlet.before.propertyList(.read(ringlet.fsm.name))
+                            let beforeProperties = ringlet.beforeProperties
                             let beforeState = states[beforeProperties] ?? KripkeState(isInitial: previous == nil, properties: beforeProperties)
                             if let previous = previous {
                                 previous.addEdge(
@@ -120,12 +120,13 @@ struct ScheduleVerifier {
                                     )
                                 )
                             }
-                            let afterProperties = ringlet.after.propertyList(.write(ringlet.fsm.name))
+                            let afterProperties = ringlet.afterProperties
                             beforeState.addEdge(
                                 KripkeEdge(
-                                    clockName: ringlet.fsm.name,
+                                    clockName: ringlet.fsmBefore.name,
                                     constraint: ringlet.current.ringlet.condition,
-                                    resetClock: ringlet.cyclesExecuted == 0,
+                                    resetClock: ringlet.transitioned,
+                                    time: ringlet.current.ringlet.timeslot.duration,
                                     target: beforeProperties
                                 )
                             )

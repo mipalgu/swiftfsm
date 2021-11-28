@@ -73,6 +73,22 @@ struct SnapshotSectionPath: Hashable {
         /// The ringlet of the last fsm to be executed in this snapshot phase.
         var current: CallAwareRinglet
         
+        var fsmBefore: FSMType {
+            get {
+                current.ringlet.fsmBefore
+            } set {
+                current.ringlet.fsmBefore = newValue
+            }
+        }
+        
+        var fsmAfter: FSMType {
+            get {
+                current.ringlet.fsmAfter
+            } set {
+                current.ringlet.fsmAfter = newValue
+            }
+        }
+        
         /// The state of all fsms before this ringlet was executed.
         var before: FSMPool {
             get {
@@ -91,12 +107,21 @@ struct SnapshotSectionPath: Hashable {
             }
         }
         
-        var afterProperties: KripkeStatePropertyList {
-            after.propertyList(.write(fsm.name))
+        var transitioned: Bool {
+            get {
+                current.ringlet.transitioned
+            } set {
+                current.ringlet.transitioned = newValue
+            }
         }
         
-        /// The fsm that was executed.
-        var fsm: FSMType
+        var beforeProperties: KripkeStatePropertyList {
+            before.propertyList(.read(fsmBefore.name + "." + fsmBefore.currentState.name))
+        }
+        
+        var afterProperties: KripkeStatePropertyList {
+            after.propertyList(.write(fsmBefore.name + "." + fsmBefore.currentState.name))
+        }
         
         /// The number of consecutive ringlets that have been executed without
         /// the fsm transitioning.
@@ -112,13 +137,11 @@ struct SnapshotSectionPath: Hashable {
             return lhs.previous == rhs.previous
             && lhs.current == rhs.current
             && lhs.cyclesExecuted == rhs.cyclesExecuted
-            && KripkeStatePropertyList(lhs.fsm.asScheduleableFiniteStateMachine.base) == KripkeStatePropertyList(rhs.fsm.asScheduleableFiniteStateMachine.base)
         }
         
         func hash(into hasher: inout Hasher) {
             hasher.combine(previous)
             hasher.combine(current)
-            hasher.combine(KripkeStatePropertyList(fsm.asScheduleableFiniteStateMachine.base))
             hasher.combine(cyclesExecuted)
         }
         
@@ -144,6 +167,10 @@ struct SnapshotSectionPath: Hashable {
         } set {
             ringlets[ringlets.count - 1].after = newValue
         }
+    }
+    
+    var beforeProperties: KripkeStatePropertyList {
+        ringlets.first!.beforeProperties
     }
     
     var afterProperties: KripkeStatePropertyList {

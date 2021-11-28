@@ -153,7 +153,9 @@ class ScheduleThreadVariationsTests: XCTestCase {
                         current: CallAwareRinglet(
                             callChain: CallChain(root: fsm.name, calls: []),
                             ringlet: ConditionalRinglet(
-                                fsm: .controllableFSM(expectedFsm1),
+                                fsmBefore: .controllableFSM(fsm),
+                                fsmAfter: .controllableFSM(expectedFsm1),
+                                timeslot: timeslots[0],
                                 before: pool,
                                 after: expectedPool1,
                                 transitioned: false,
@@ -175,7 +177,6 @@ class ScheduleThreadVariationsTests: XCTestCase {
                                 condition: .lessThanEqual(value: 0)
                             )
                         ),
-                        fsm: .controllableFSM(expectedFsm1),
                         cyclesExecuted: 1
                     )
                 ]),
@@ -185,7 +186,9 @@ class ScheduleThreadVariationsTests: XCTestCase {
                         current: CallAwareRinglet(
                             callChain: CallChain(root: fsm2.name, calls: []),
                             ringlet: ConditionalRinglet(
-                                fsm: .controllableFSM(expectedFsm2),
+                                fsmBefore: .controllableFSM(fsm2),
+                                fsmAfter: .controllableFSM(expectedFsm2),
+                                timeslot: timeslots2[0],
                                 before: expectedPool1,
                                 after: expectedPool2,
                                 transitioned: false,
@@ -207,7 +210,6 @@ class ScheduleThreadVariationsTests: XCTestCase {
                                 condition: .greaterThanEqual(value: 30)
                             )
                         ),
-                        fsm: .controllableFSM(expectedFsm2),
                         cyclesExecuted: 1
                     )
                 ])

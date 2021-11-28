@@ -61,8 +61,14 @@ import swiftfsm
 
 struct ConditionalRinglet {
     
-    /// The fsm that was executed.
-    var fsm: FSMType
+    /// The fsm before executing the ringlet.
+    var fsmBefore: FSMType
+    
+    /// The fsm after executing the ringlet.
+    var fsmAfter: FSMType
+    
+    /// The timeslot where the fsm was executing.
+    var timeslot: Timeslot
     
     /// The state of all fsms before this ringlet executed.
     var before: FSMPool
@@ -97,12 +103,14 @@ struct ConditionalRinglet {
     var condition: Constraint<UInt>
     
     init(ringlet: Ringlet, condition: Constraint<UInt>) {
-        self.init(fsm: ringlet.fsm, before: ringlet.before, after: ringlet.after, transitioned: ringlet.transitioned, externalsPreSnapshot: ringlet.externalsPreSnapshot, externalsPostSnapshot: ringlet.externalsPostSnapshot, preSnapshot: ringlet.preSnapshot, postSnapshot: ringlet.postSnapshot, calls: ringlet.calls, condition: condition)
+        self.init(fsmBefore: ringlet.fsmBefore, fsmAfter: ringlet.fsmAfter, timeslot: ringlet.timeslot, before: ringlet.before, after: ringlet.after, transitioned: ringlet.transitioned, externalsPreSnapshot: ringlet.externalsPreSnapshot, externalsPostSnapshot: ringlet.externalsPostSnapshot, preSnapshot: ringlet.preSnapshot, postSnapshot: ringlet.postSnapshot, calls: ringlet.calls, condition: condition)
     }
     
     /// Create a `ConditionalRinglet`.
-    init(fsm: FSMType, before: FSMPool, after: FSMPool, transitioned: Bool, externalsPreSnapshot: KripkeStatePropertyList, externalsPostSnapshot: KripkeStatePropertyList, preSnapshot: KripkeStatePropertyList, postSnapshot: KripkeStatePropertyList, calls: [Call], condition: Constraint<UInt>) {
-        self.fsm = fsm
+    init(fsmBefore: FSMType, fsmAfter: FSMType, timeslot: Timeslot, before: FSMPool, after: FSMPool, transitioned: Bool, externalsPreSnapshot: KripkeStatePropertyList, externalsPostSnapshot: KripkeStatePropertyList, preSnapshot: KripkeStatePropertyList, postSnapshot: KripkeStatePropertyList, calls: [Call], condition: Constraint<UInt>) {
+        self.fsmBefore = fsmBefore
+        self.fsmAfter = fsmAfter
+        self.timeslot = timeslot
         self.before = before
         self.after = after
         self.transitioned = transitioned
@@ -126,7 +134,9 @@ extension ConditionalRinglet: Hashable {
         && lhs.postSnapshot == rhs.postSnapshot
         && lhs.calls == rhs.calls
         && lhs.condition == rhs.condition
-        && KripkeStatePropertyList(lhs.fsm.asScheduleableFiniteStateMachine.base) == KripkeStatePropertyList(rhs.fsm.asScheduleableFiniteStateMachine.base)
+        && lhs.timeslot == rhs.timeslot
+        && KripkeStatePropertyList(lhs.fsmBefore.asScheduleableFiniteStateMachine.base) == KripkeStatePropertyList(rhs.fsmBefore.asScheduleableFiniteStateMachine.base)
+        && KripkeStatePropertyList(lhs.fsmAfter.asScheduleableFiniteStateMachine.base) == KripkeStatePropertyList(rhs.fsmAfter.asScheduleableFiniteStateMachine.base)
     }
     
     func hash(into hasher: inout Hasher) {
@@ -137,7 +147,9 @@ extension ConditionalRinglet: Hashable {
         hasher.combine(postSnapshot)
         hasher.combine(calls)
         hasher.combine(condition)
-        hasher.combine(KripkeStatePropertyList(fsm.asScheduleableFiniteStateMachine.base))
+        hasher.combine(timeslot)
+        hasher.combine(KripkeStatePropertyList(fsmBefore.asScheduleableFiniteStateMachine.base))
+        hasher.combine(KripkeStatePropertyList(fsmAfter.asScheduleableFiniteStateMachine.base))
     }
     
 }

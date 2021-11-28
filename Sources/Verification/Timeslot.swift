@@ -56,7 +56,7 @@
  *
  */
 
-struct Timeslot {
+struct Timeslot: Hashable {
     
     var callChain: CallChain
     

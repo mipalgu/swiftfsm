@@ -85,8 +85,14 @@ struct Ringlet {
         
     }
     
-    /// The fsm that was executed.
-    var fsm: FSMType
+    /// The fsm before executing the ringlet.
+    var fsmBefore: FSMType
+    
+    /// The fsm after executing the ringlet
+    var fsmAfter: FSMType
+    
+    /// The timeslot where the fsm was executed.
+    var timeslot: Timeslot
     
     /// The state of all fsms before this ringlet executed.
     var before: FSMPool
@@ -131,7 +137,7 @@ struct Ringlet {
     /// - Parameter gateway The `ModifiableFSMGateway` responsible for handling
     /// parameterised machine invocations. A delegate is created and used to
     /// detect when the fsm makes any calls to other machines.
-    init<Gateway: ModifiableFSMGateway, Timer: Clock>(fsm: FSMType, gateway: Gateway, timer: Timer) where Gateway: NewVerifiableGateway {
+    init<Gateway: ModifiableFSMGateway, Timer: Clock>(fsm: FSMType, timeslot: Timeslot, gateway: Gateway, timer: Timer) where Gateway: NewVerifiableGateway {
         let allExternalVariables = (fsm.sensors + fsm.externalVariables + fsm.actuators)
         let externalsPreSnapshot = KripkeStatePropertyList(Dictionary(uniqueKeysWithValues: allExternalVariables.map { ($0.name, KripkeStateProperty($0.val)) }))
         let preSnapshot = KripkeStatePropertyList(fsm.asScheduleableFiniteStateMachine.base)
@@ -139,15 +145,17 @@ struct Ringlet {
         gateway.delegate = delegate
         let before = gateway.pool
         let currentState = fsm.currentState.name
-        var fsm = fsm
-        fsm.next()
+        var clone = fsm.clone()
+        clone.next()
         let after = gateway.pool
-        let transitioned = currentState != fsm.currentState.name
+        let transitioned = currentState != clone.currentState.name
         let externalsPostSnapshot = KripkeStatePropertyList(Dictionary(uniqueKeysWithValues: allExternalVariables.map { ($0.name, KripkeStateProperty($0.val)) }))
-        let postSnapshot = KripkeStatePropertyList(fsm.asScheduleableFiniteStateMachine.base)
+        let postSnapshot = KripkeStatePropertyList(clone.asScheduleableFiniteStateMachine.base)
         let calls = delegate.invocations + delegate.calls
         self.init(
-            fsm: fsm,
+            fsmBefore: fsm,
+            fsmAfter: clone,
+            timeslot: timeslot,
             before: before,
             after: after,
             transitioned: transitioned,
@@ -161,8 +169,10 @@ struct Ringlet {
     }
     
     /// Create a `Ringlet`.
-    init(fsm: FSMType, before: FSMPool, after: FSMPool, transitioned: Bool, externalsPreSnapshot: KripkeStatePropertyList, externalsPostSnapshot: KripkeStatePropertyList, preSnapshot: KripkeStatePropertyList, postSnapshot: KripkeStatePropertyList, calls: [Call], afterCalls: Set<UInt>) {
-        self.fsm = fsm
+    init(fsmBefore: FSMType, fsmAfter: FSMType, timeslot: Timeslot, before: FSMPool, after: FSMPool, transitioned: Bool, externalsPreSnapshot: KripkeStatePropertyList, externalsPostSnapshot: KripkeStatePropertyList, preSnapshot: KripkeStatePropertyList, postSnapshot: KripkeStatePropertyList, calls: [Call], afterCalls: Set<UInt>) {
+        self.fsmBefore = fsmBefore
+        self.fsmAfter = fsmAfter
+        self.timeslot = timeslot
         self.before = before
         self.after = after
         self.transitioned = transitioned
@@ -186,7 +196,9 @@ extension Ringlet: Hashable {
         && lhs.postSnapshot == rhs.postSnapshot
         && lhs.calls == rhs.calls
         && lhs.afterCalls == rhs.afterCalls
-        && KripkeStatePropertyList(lhs.fsm.asScheduleableFiniteStateMachine.base) == KripkeStatePropertyList(rhs.fsm.asScheduleableFiniteStateMachine.base)
+        && lhs.timeslot == rhs.timeslot
+        && KripkeStatePropertyList(lhs.fsmBefore.asScheduleableFiniteStateMachine.base) == KripkeStatePropertyList(rhs.fsmBefore.asScheduleableFiniteStateMachine.base)
+        && KripkeStatePropertyList(lhs.fsmAfter.asScheduleableFiniteStateMachine.base) == KripkeStatePropertyList(rhs.fsmAfter.asScheduleableFiniteStateMachine.base)
     }
     
     func hash(into hasher: inout Hasher) {
@@ -197,7 +209,9 @@ extension Ringlet: Hashable {
         hasher.combine(postSnapshot)
         hasher.combine(calls)
         hasher.combine(afterCalls)
-        hasher.combine(KripkeStatePropertyList(fsm.asScheduleableFiniteStateMachine.base))
+        hasher.combine(timeslot)
+        hasher.combine(KripkeStatePropertyList(fsmBefore.asScheduleableFiniteStateMachine.base))
+        hasher.combine(KripkeStatePropertyList(fsmAfter.asScheduleableFiniteStateMachine.base))
     }
     
 }

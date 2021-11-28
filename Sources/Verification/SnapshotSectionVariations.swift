@@ -92,7 +92,7 @@ struct SnapshotSectionVariations: Hashable {
                 let fsm = section.timeslots[index].callChain.fsm(fromPool: pool)
                 gateway.pool = pool
                 let timeslot = section.timeslots[index]
-                let ringlets = TimeAwareRinglets(fsm: fsm, gateway: gateway, timer: timer, startingTime: timeslot.cyclesExecuted * cycleLength + timeslot.startingTime).ringlets
+                let ringlets = TimeAwareRinglets(fsm: fsm, timeslot: timeslot, gateway: gateway, timer: timer, startingTime: timeslot.cyclesExecuted * cycleLength + timeslot.startingTime).ringlets
                 return ringlets.flatMap { (ringlet) -> [[SnapshotSectionPath.State]] in
                     let newRinglet = CallAwareRinglet(
                         callChain: CallChain(
@@ -104,7 +104,6 @@ struct SnapshotSectionVariations: Hashable {
                     let newState = SnapshotSectionPath.State(
                         previous: path.last?.toCurrent ?? [],
                         current: newRinglet,
-                        fsm: ringlet.fsm,
                         cyclesExecuted: ringlet.transitioned ? 0 : timeslot.cyclesExecuted + 1
                     )
                     return process(path: path + [newState], index: index + 1, pool: ringlet.after)
