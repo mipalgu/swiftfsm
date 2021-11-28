@@ -113,7 +113,6 @@ final class SensorFiniteStateMachine: MachineProtocol {
             "suspendState": [],
             "gateway": [],
             "timer": [],
-            "allSensors": [],
             "sensors1": [],
             "$__lazy_storage_$_currentState": [],
             "$__lazy_storage_$_initialState": []
@@ -135,24 +134,26 @@ final class SensorFiniteStateMachine: MachineProtocol {
     
     var sensors1 = InMemoryContainer<Bool>(name: "sensors1", initialValue: false)
     
-    private var allSensors: [AnySnapshotController] {
-        [AnySnapshotController(sensors1)]
-    }
-    
     var sensors: [AnySnapshotController] {
         get {
-            guard let snapshotSensors = currentState.snapshotSensors else {
-                return allSensors
-            }
-            return allSensors.filter { snapshotSensors.contains($0.name) }
+            [AnySnapshotController(sensors1)]
         } set {
-            for sensor in allSensors {
+            for sensor in sensors {
                 if let val = newValue.first(where: { $0.name == sensor.name })?.val {
                     sensor.val = val
                 }
             }
         }
     }
+    
+    var snapshotSensors: [AnySnapshotController] {
+        guard let snapshotSensors = currentState.snapshotSensors else {
+            return sensors
+        }
+        return sensors.filter { snapshotSensors.contains($0.name) }
+    }
+    
+    let snapshotActuators: [AnySnapshotController] = []
     
     var actuators: [AnySnapshotController] = []
     
