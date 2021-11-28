@@ -1,9 +1,9 @@
 /*
- * ScheduleIsolator.swift
- * Verification
+ * TeleportingTurtleCycleDetector.swift 
+ * FSM 
  *
- * Created by Callum McColl on 28/11/21.
- * Copyright © 2021 Callum McColl. All rights reserved.
+ * Created by Callum McColl on 23/10/2016.
+ * Copyright © 2016 Callum McColl. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -56,26 +56,47 @@
  *
  */
 
-/// Is responsible for splitting a schedule into discrete verifiable
-/// subcomponents based on the communication lines between fsms.
-struct ScheduleIsolator {
-    
-    struct IsolatedThread {
-        
-        var thread: ScheduleThread
-        
-        var pool: FSMPool
-        
+/**
+ *  A `CycleDetector` that uses the Teleporting Turtle method of cycle
+ *  detection.
+ */
+public class TeleportingTurtleCycleDetector<E: Equatable>: CycleDetector {
+
+    /**
+     *  A tuple containing the turtle, the current power and the length of the
+     *  cycle.
+     */
+    public typealias Data = (turtle: Element?, power: Int, length: Int)
+
+    /**
+     *  The elements of the cycle.
+     *
+     *  - Attention: Must be `Equatable`.
+     */
+    public typealias Element = E
+
+    /**
+     *  Start without a turtle, with a power of 1 and a length of 1.
+     */
+    public let initialData: Data = (nil, 1, 1)
+
+    /**
+     *  Is `element` equal to the turtle?
+     *
+     *  - Parameter data: The current turtle, power and cycle length.
+     *
+     *  - Parameter element: The current element in the series.
+     *
+     *  - Returns: A Bool indicating whether a cycle has been found.
+     */
+    public func inCycle(data: inout Data, element: Element) -> Bool {
+        let inCycle = nil == data.turtle ? false : data.turtle! == element
+        if data.length >= data.power {
+            data = (element, data.power * 2, 1)
+            return inCycle
+        }
+        data = (data.turtle, data.power, data.length + 1)
+        return inCycle
     }
-    
-    var threads: [IsolatedThread]
-    
-    init(schedule: Schedule, allFsms: FSMPool) {
-        self.init(threads: [])
-    }
-    
-    init(threads: [IsolatedThread]) {
-        self.threads = threads
-    }
-    
+
 }

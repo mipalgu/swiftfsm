@@ -1,9 +1,9 @@
 /*
- * ScheduleIsolator.swift
- * Verification
+ * HashTableCycleDetector.swift 
+ * FSM 
  *
- * Created by Callum McColl on 28/11/21.
- * Copyright © 2021 Callum McColl. All rights reserved.
+ * Created by Callum McColl on 23/10/2016.
+ * Copyright © 2016 Callum McColl. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -56,26 +56,50 @@
  *
  */
 
-/// Is responsible for splitting a schedule into discrete verifiable
-/// subcomponents based on the communication lines between fsms.
-struct ScheduleIsolator {
-    
-    struct IsolatedThread {
-        
-        var thread: ScheduleThread
-        
-        var pool: FSMPool
-        
+import Hashing
+
+/**
+ *  Detects cycles using a hash table.
+ */
+public class HashTableCycleDetector<E: Hashable>: CycleDetector {
+
+    /**
+     *  A Set of `Element`s.
+     *
+     */
+    public typealias Data = HashSink<Element, Element>
+
+    /**
+     *  The elements of the cycle.
+     *
+     *  - Attention: This must be `Hashable`.
+     */
+    public typealias Element = E
+
+    /**
+     *  An empty hash table.
+     */
+    public var initialData: Data {
+        return HashSink<Element, Element>(minimumCapacity: 500000)
     }
-    
-    var threads: [IsolatedThread]
-    
-    init(schedule: Schedule, allFsms: FSMPool) {
-        self.init(threads: [])
+
+    public init() {}
+
+    /**
+     *  Is this element in the hash table?
+     *
+     *  - Parameter data: The current hash table.
+     *
+     *  - Parameter element: The current element in the series.
+     *
+     *  - Returns: A Bool indicating whether a cycle has been found.
+     */
+    public func inCycle(data: inout Data, element: Element) -> Bool {
+        if true == data.contains(element) {
+            return true
+        }
+        data.insert(element)
+        return false
     }
-    
-    init(threads: [IsolatedThread]) {
-        self.threads = threads
-    }
-    
+
 }

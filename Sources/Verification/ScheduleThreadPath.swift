@@ -85,6 +85,10 @@ struct ScheduleThreadPath: Hashable {
         }
     }
     
+    var afterProperties: KripkeStatePropertyList {
+        sections.last!.afterProperties
+    }
+    
     init(sections: [SnapshotSectionPath]) {
         self.sections = sections
     }

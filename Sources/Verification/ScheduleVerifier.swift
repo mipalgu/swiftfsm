@@ -64,6 +64,16 @@ import KripkeStructureViews
 
 struct ScheduleVerifier {
     
+    private struct Job {
+        
+        var initial: Bool
+        
+        var thread: ScheduleThread
+        
+        var pool: FSMPool
+        
+    }
+    
     var schedule: Schedule
     
     var allFsms: FSMPool
@@ -73,10 +83,33 @@ struct ScheduleVerifier {
         self.allFsms = allFsms
     }
     
-    func verify<Gateway: ModifiableFSMGateway, Timer: Clock, View: KripkeStructureView>(gateway: Gateway, timer: Timer, view: View) where Gateway: NewVerifiableGateway {
+    func verify<Gateway: ModifiableFSMGateway, Timer: Clock, View: KripkeStructureView, Detector: CycleDetector>(gateway: Gateway, timer: Timer, view: View, cycleDetector: Detector) where Gateway: NewVerifiableGateway, Detector.Element == KripkeStatePropertyList {
         let isolatedThreads = ScheduleIsolator(schedule: schedule, allFsms: allFsms)
+        let cycleLength = schedule.cycleLength
         for thread in isolatedThreads.threads {
-            var pool = thread.pool
+            var cycleData = cycleDetector.initialData
+            var jobs = [Job(initial: true, thread: thread.thread, pool: thread.pool)]
+            while !jobs.isEmpty {
+                let job = jobs.removeFirst()
+                let variations = ScheduleThreadVariations(
+                    pool: job.pool,
+                    thread: job.thread,
+                    gateway: gateway,
+                    timer: timer,
+                    cycleLength: cycleLength
+                )
+                for path in variations.pathways {
+                    for sectionPath in path.sections {
+                        for ringlet in sectionPath.ringlets {
+                            let before = ringlet.before.propertyList(.read(ringlet.fsm.name))
+                            let after = ringlet.after.propertyList(.write(ringlet.fsm.name))
+                        }
+                    }
+                    if !cycleDetector.inCycle(data: &cycleData, element: path.afterProperties) {
+                        jobs.append(Job(initial: false, thread: job.thread, pool: path.after))
+                    }
+                }
+            }
         }
     }
     

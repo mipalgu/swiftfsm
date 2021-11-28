@@ -58,17 +58,16 @@
 
 struct Schedule {
     
-    struct SnapshotSection {
-        
-        var timeslots: [Timeslot]
-        
-    }
-    
-    
-    struct Thread {
-        
-        var sections: [SnapshotSection]
-        
+    var cycleLength: UInt {
+        threads.map {
+            guard let last = $0.sections.last else {
+                fatalError("Schedule must contain at least one section")
+            }
+            guard let lastTimeslot = last.timeslots.last else {
+                fatalError("Schedule snapshot section must contain at least one timeslot")
+            }
+            return lastTimeslot.startingTime + lastTimeslot.duration
+        }.max() ?? 0
     }
     
     var threads: [ScheduleThread]

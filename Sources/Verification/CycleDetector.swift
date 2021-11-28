@@ -1,9 +1,9 @@
 /*
- * ScheduleIsolator.swift
- * Verification
+ * CycleDetector.swift 
+ * FSM 
  *
- * Created by Callum McColl on 28/11/21.
- * Copyright © 2021 Callum McColl. All rights reserved.
+ * Created by Callum McColl on 23/10/2016.
+ * Copyright © 2016 Callum McColl. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -56,26 +56,55 @@
  *
  */
 
-/// Is responsible for splitting a schedule into discrete verifiable
-/// subcomponents based on the communication lines between fsms.
-struct ScheduleIsolator {
-    
-    struct IsolatedThread {
-        
-        var thread: ScheduleThread
-        
-        var pool: FSMPool
-        
-    }
-    
-    var threads: [IsolatedThread]
-    
-    init(schedule: Schedule, allFsms: FSMPool) {
-        self.init(threads: [])
-    }
-    
-    init(threads: [IsolatedThread]) {
-        self.threads = threads
-    }
-    
+/**
+ *  Conforming types are responsible for detecting cycles within sequences.
+ *
+ *  The general procedure for using a `CycleDetector` is to create a `Data`
+ *  variable that you would initialize to `initialData`.  You would then
+ *  pass every `Element` within the sequence into `inCycle(data:element:)`
+ *  and update the `Data` variable with the new values that are returned
+ *  from `inCycle(data:element:)`.
+ *
+ */
+public protocol CycleDetector {
+
+    /**
+     *  Cycle detector generally use some data structures to keep track of
+     *  nodes that they have already seen in the sequence.  A `CycleDetector`
+     *  therefore supplies this with the `Data` associated type.
+     *
+     *  Types that use `CycleDetector`s should start with the `initialData` and
+     *  then pass the `Data` to `inCycle(data:,element:)` so that the
+     *  `CycleDetector` can keep track of which `Element`s it has seen before.
+     */
+    associatedtype Data
+
+    /**
+     *  The type of the elements of the sequence.
+     *
+     *  Different `CycleDetectors` will have different restrictions of the 
+     *  types that are supported for the elements of the sequence.  For instance
+     *  a hash table would require the Elements to be `Hashable` in order to
+     *  store them within the hash table.  This way they can specify their
+     *  restrictions using the `Element` associated type.
+     */
+    associatedtype Element
+
+    /**
+     *  The starting `Data` structure.
+     */
+    var initialData: Data { get }
+
+    /**
+     *  Uses the current `Data` to inspect `element` and determine whether it
+     *  has appeared before.
+     *
+     *  - Parameter data: The current `Data` of the sequence.
+     *
+     *  - Parameter element: The current `Element` within the sequence.
+     *
+     *  - Returns: Whether a cycle has been found.
+     */
+    func inCycle(data: inout Data, element: Element) -> Bool
+
 }

@@ -91,6 +91,10 @@ struct SnapshotSectionPath: Hashable {
             }
         }
         
+        var afterProperties: KripkeStatePropertyList {
+            after.propertyList(.write(fsm.name))
+        }
+        
         /// The fsm that was executed.
         var fsm: FSMType
         
@@ -140,6 +144,10 @@ struct SnapshotSectionPath: Hashable {
         } set {
             ringlets[ringlets.count - 1].after = newValue
         }
+    }
+    
+    var afterProperties: KripkeStatePropertyList {
+        ringlets.last!.afterProperties
     }
     
 }
