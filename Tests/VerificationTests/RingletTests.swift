@@ -114,7 +114,7 @@ class RingletTests: XCTestCase {
         fsm.gateway.fsms[id] = .parameterisedFSM(AnyParameterisedFiniteStateMachine(fsm, newMachine: newMachine))
         fsm.gateway.stacks[id] = []
         let ringlet = Ringlet(
-            fsm: .controllableFSM(AnyControllableFiniteStateMachine(fsm)),
+            fsm: .parameterisedFSM(AnyParameterisedFiniteStateMachine(fsm, newMachine: newMachine)),
             timeslot: timeslot,
             gateway: fsm.gateway,
             timer: fsm.timer
