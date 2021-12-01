@@ -120,6 +120,8 @@ class ScheduleVerifierTests: XCTestCase {
             } else {
                 fsm.previousState = EmptyMiPalState(previousState)
             }
+            fsm.ringlet.previousState = fsm.previousState
+            fsm.ringlet.shouldExecuteOnEntry = fsm.previousState != fsm.currentState
             let fsmProperties = KripkeStatePropertyList(fsm)
             return [
                 "fsms": KripkeStateProperty(
