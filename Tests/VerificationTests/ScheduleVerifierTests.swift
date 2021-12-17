@@ -62,6 +62,7 @@ import Gateways
 import KripkeStructureViews
 import KripkeStructure
 import swiftfsm
+import Foundation
 import Timers
 
 @testable import Verification
@@ -96,6 +97,34 @@ class ScheduleVerifierTests: XCTestCase {
             finishCalled = false
         }
         
+        func explain(name: String = "") {
+            guard expected != result else {
+                return
+            }
+            let missingElements = expected.subtracting(result)
+            print("missing results: \(missingElements)")
+            let extraneousElements = result.subtracting(expected)
+            print("extraneous results: \(extraneousElements)")
+            let expectedView = GraphVizKripkeStructureView<KripkeState>(filename: "\(name)expected.gv")
+            expectedView.reset(usingClocks: true)
+            let resultView = GraphVizKripkeStructureView<KripkeState>(filename: "\(name)result.gv")
+            resultView.reset(usingClocks: true)
+            for state in expected.sorted(by: { $0.properties.description < $1.properties.description }) {
+                expectedView.commit(state: state)
+            }
+            for state in result.sorted(by: { $0.properties.description < $1.properties.description }) {
+                resultView.commit(state: state)
+            }
+            expectedView.finish()
+            resultView.finish()
+            print("Writing expected to: \(FileManager.default.currentDirectoryPath)/\(name)expected.gv")
+            print("Writing result to: \(FileManager.default.currentDirectoryPath)/\(name)result.gv")
+        }
+        
+    }
+    
+    var readableName: String {
+        self.name.dropFirst(2).dropLast().components(separatedBy: .whitespacesAndNewlines).joined(separator: "_")
     }
 
     override func setUpWithError() throws {
@@ -133,8 +162,8 @@ class ScheduleVerifierTests: XCTestCase {
                 "pc": KripkeStateProperty(type: .String, value: fsm.name + "." + (readState ? currentState : previousState) + "." + (readState ? "R" : "W"))
             ]
         }
-        func target(readState: Bool, sensorValue: Bool, currentState: String, previousState: String) -> (Bool, KripkeStatePropertyList) {
-            return (!readState, propertyList(readState: readState, sensorValue: sensorValue, currentState: currentState, previousState: previousState))
+        func target(readState: Bool, resetClock: Bool, sensorValue: Bool, currentState: String, previousState: String) -> (Bool, KripkeStatePropertyList) {
+            return (resetClock, propertyList(readState: readState, sensorValue: sensorValue, currentState: currentState, previousState: previousState))
         }
         func kripkeState(readState: Bool, sensorValue: Bool, currentState: String, previousState: String, targets: [(resetClock: Bool, target: KripkeStatePropertyList)]) -> KripkeState {
             let fsm = SensorFiniteStateMachine()
@@ -159,7 +188,7 @@ class ScheduleVerifierTests: XCTestCase {
                 currentState: initial,
                 previousState: previous,
                 targets: [
-                    (resetClock: false, target: propertyList(readState: false, sensorValue: false, currentState: initial, previousState: initial))
+                    target(readState: false, resetClock: false, sensorValue: false, currentState: initial, previousState: initial)
                 ]
             ),
             kripkeState(
@@ -168,8 +197,8 @@ class ScheduleVerifierTests: XCTestCase {
                 currentState: initial,
                 previousState: initial,
                 targets: [
-                    target(readState: true, sensorValue: false, currentState: initial, previousState: initial),
-                    target(readState: true, sensorValue: true, currentState: initial, previousState: initial)
+                    target(readState: true, resetClock: false, sensorValue: false, currentState: initial, previousState: initial),
+                    target(readState: true, resetClock: false, sensorValue: true, currentState: initial, previousState: initial)
                 ]
             ),
             kripkeState(
@@ -178,7 +207,7 @@ class ScheduleVerifierTests: XCTestCase {
                 currentState: initial,
                 previousState: initial,
                 targets: [
-                    (resetClock: false, target: propertyList(readState: false, sensorValue: false, currentState: initial, previousState: initial))
+                    target(readState: false, resetClock: false, sensorValue: false, currentState: initial, previousState: initial)
                 ]
             ),
             kripkeState(
@@ -187,7 +216,16 @@ class ScheduleVerifierTests: XCTestCase {
                 currentState: initial,
                 previousState: initial,
                 targets: [
-                    (resetClock: true, target: propertyList(readState: false, sensorValue: true, currentState: exit, previousState: initial))
+                    target(readState: false, resetClock: false, sensorValue: true, currentState: exit, previousState: initial)
+                ]
+            ),
+            kripkeState(
+                readState: false,
+                sensorValue: true,
+                currentState: exit,
+                previousState: initial,
+                targets: [
+                    target(readState: true, resetClock: true, sensorValue: true, currentState: exit, previousState: initial)
                 ]
             ),
             kripkeState(
@@ -196,7 +234,7 @@ class ScheduleVerifierTests: XCTestCase {
                 currentState: initial,
                 previousState: previous,
                 targets: [
-                    (resetClock: true, target: propertyList(readState: false, sensorValue: true, currentState: exit, previousState: initial))
+                    target(readState: false, resetClock: false, sensorValue: true, currentState: exit, previousState: initial)
                 ]
             ),
             kripkeState(
@@ -205,7 +243,7 @@ class ScheduleVerifierTests: XCTestCase {
                 currentState: exit,
                 previousState: initial,
                 targets: [
-                    (resetClock: false, target: propertyList(readState: false, sensorValue: true, currentState: exit, previousState: exit))
+                    target(readState: false, resetClock: false, sensorValue: true, currentState: exit, previousState: exit)
                 ]
             ),
             kripkeState(
@@ -214,7 +252,7 @@ class ScheduleVerifierTests: XCTestCase {
                 currentState: exit,
                 previousState: exit,
                 targets: [
-                    (resetClock: false, target: propertyList(readState: true, sensorValue: true, currentState: exit, previousState: exit))
+                    target(readState: true, resetClock: false, sensorValue: true, currentState: exit, previousState: exit)
                 ]
             )
         ]
@@ -241,10 +279,7 @@ class ScheduleVerifierTests: XCTestCase {
         verifier.verify(gateway: gateway, timer: timer, view: view, cycleDetector: cycleDetector)
         XCTAssertEqual(view.result, view.expected)
         if view.expected != view.result {
-            let missingElements = view.expected.subtracting(view.result)
-            print("missing results: \(missingElements)")
-            let extraneousElements = view.result.subtracting(view.expected)
-            print("extraneous results: \(extraneousElements)")
+            view.explain(name: readableName + "_")
         }
         XCTAssertTrue(view.finishCalled)
     }

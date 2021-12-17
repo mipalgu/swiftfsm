@@ -70,6 +70,8 @@ struct ScheduleVerifier {
         
         var timeslot: Timeslot
         
+        var resetClock: Bool
+        
     }
     
     private struct Job {
@@ -115,6 +117,23 @@ struct ScheduleVerifier {
                     var inCycle = true
                     for sectionPath in path.sections {
                         if cycleDetector.inCycle(data: &cycleData, element: sectionPath.beforeProperties) {
+                            if let previous = previous {
+                                for ringlet in sectionPath.ringlets {
+                                    previous.state.addEdge(
+                                        KripkeEdge(
+                                            clockName: nil,
+                                            constraint: nil,
+                                            resetClock: previous.resetClock,
+                                            takeSnapshot: true,
+                                            time: previous.timeslot.afterExecutingTimeUntil(
+                                                timeslot: ringlet.timeslot,
+                                                cycleLength: isolatedThreads.cycleLength
+                                            ),
+                                            target: ringlet.beforeProperties
+                                        )
+                                    )
+                                }
+                            }
                             continue
                         }
                         inCycle = false
@@ -126,13 +145,13 @@ struct ScheduleVerifier {
                                     KripkeEdge(
                                         clockName: nil,
                                         constraint: nil,
-                                        resetClock: false,
+                                        resetClock: previous.resetClock,
                                         takeSnapshot: true,
                                         time: previous.timeslot.afterExecutingTimeUntil(
                                             timeslot: ringlet.timeslot,
                                             cycleLength: isolatedThreads.cycleLength
                                         ),
-                                        target: beforeProperties
+                                        target: ringlet.beforeProperties
                                     )
                                 )
                             }
@@ -141,7 +160,7 @@ struct ScheduleVerifier {
                                 KripkeEdge(
                                     clockName: ringlet.fsmBefore.name,
                                     constraint: ringlet.condition == .lessThanEqual(value: 0) ? nil : ringlet.condition,
-                                    resetClock: ringlet.transitioned,
+                                    resetClock: false,
                                     takeSnapshot: false,
                                     time: ringlet.timeslot.duration,
                                     target: afterProperties
@@ -149,7 +168,7 @@ struct ScheduleVerifier {
                             )
                             view.commit(state: beforeState)
                             let afterState = KripkeState(isInitial: false, properties: afterProperties)
-                            newPrevious = Previous(state: afterState, timeslot: ringlet.timeslot)
+                            newPrevious = Previous(state: afterState, timeslot: ringlet.timeslot, resetClock: ringlet.transitioned)
                         }
                     }
                     let hasFinished = path.hasFinished
