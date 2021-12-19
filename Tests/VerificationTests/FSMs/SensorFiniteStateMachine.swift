@@ -63,7 +63,7 @@ import Timers
 import Verification
 import swiftfsm
 
-final class SensorFiniteStateMachine: MachineProtocol {
+final class SensorFiniteStateMachine: MachineProtocol, CustomStringConvertible {
     
     typealias _StateType = MiPalState
     typealias Ringlet = MiPalRinglet
@@ -92,6 +92,10 @@ final class SensorFiniteStateMachine: MachineProtocol {
             "$__lazy_storage_$_currentState": [],
             "$__lazy_storage_$_initialState": []
         ]
+    }
+    
+    var description: String {
+        "\(KripkeStatePropertyList(self))"
     }
     
     var computedVars: [String: Any] {
@@ -160,6 +164,25 @@ final class SensorFiniteStateMachine: MachineProtocol {
         fsm.sensors1.val = sensors1.val
         fsm.ringlet = ringlet.clone()
         return fsm
+    }
+    
+    init() {}
+    
+    convenience init(sensorValue: Bool, currentState: String, previousState: String) {
+        self.init()
+        self.sensors1.val = sensorValue
+        if currentState == "initial" {
+            self.currentState = self.initialState
+        } else {
+            self.currentState = EmptyMiPalState(currentState)
+        }
+        if previousState == "initial" {
+            self.previousState = self.initialState
+        } else {
+            self.previousState = EmptyMiPalState(previousState)
+        }
+        self.ringlet.previousState = self.previousState
+        self.ringlet.shouldExecuteOnEntry = self.previousState != self.currentState
     }
 
 }

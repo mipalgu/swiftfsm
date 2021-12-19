@@ -129,6 +129,7 @@ class ScheduleVerifierTests: XCTestCase {
 
     override func setUpWithError() throws {
         // Put setup code here. This method is called before the invocation of each test method in the class.
+        ScheduleThreadVariationsMock.reset()
     }
 
     override func tearDownWithError() throws {
@@ -262,23 +263,80 @@ class ScheduleVerifierTests: XCTestCase {
         fsm.timer = timer
         let cycleDetector = HashTableCycleDetector<KripkeStatePropertyList>()
         let view = TestableView(expected: states)
+        let timeslot = Timeslot(
+            callChain: CallChain(root: fsm.name, calls: []),
+            startingTime: 0,
+            duration: 30,
+            cyclesExecuted: 0
+        )
         let schedule = Schedule(threads: [
             ScheduleThread(sections: [
                 SnapshotSection(timeslots: [
-                    Timeslot(
-                        callChain: CallChain(root: fsm.name, calls: []),
-                        startingTime: 0,
-                        duration: 30,
-                        cyclesExecuted: 0
-                    )
+                    timeslot
                 ])
             ])
         ])
         let pool = FSMPool(fsms: [.controllableFSM(AnyControllableFiniteStateMachine(fsm))])
         let verifier = ScheduleVerifier(schedule: schedule, allFsms: pool)
-        verifier.verify(gateway: gateway, timer: timer, view: view, cycleDetector: cycleDetector)
+        func createPool(_ fsm: SensorFiniteStateMachine) -> FSMPool {
+            FSMPool(fsms: [.controllableFSM(AnyControllableFiniteStateMachine(fsm))])
+        }
+        func createPool(sensorValue: Bool, currentState: String, previousState: String) -> FSMPool {
+            let fsm = SensorFiniteStateMachine(sensorValue: sensorValue, currentState: currentState, previousState: previousState)
+            return createPool(fsm)
+        }
+        func pair(sensorValue: Bool, currentState: String, previousState: String) -> (FSMPool, [ScheduleThreadPath]) {
+            let fsm = SensorFiniteStateMachine(sensorValue: sensorValue, currentState: currentState, previousState: previousState)
+            if currentState == "initial" {
+                let fsm1 = SensorFiniteStateMachine(sensorValue: false, currentState: currentState, previousState: previousState)
+                var clone1 = fsm1.clone()
+                clone1.next()
+                let fsm2 = SensorFiniteStateMachine(sensorValue: true, currentState: currentState, previousState: previousState)
+                var clone2 = fsm2.clone()
+                clone2.next()
+                return (
+                    createPool(fsm),
+                    [
+                        ScheduleThreadPath(sections: [.init(ringlets: [.init(previous: [], current: .init(callChain: .init(root: fsm.name, calls: []), ringlet: .init(fsmBefore: .controllableFSM(AnyControllableFiniteStateMachine(fsm)), fsmAfter: .controllableFSM(AnyControllableFiniteStateMachine(clone1)), timeslot: timeslot, before: createPool(fsm1), after: createPool(clone1), transitioned: false, externalsPreSnapshot: [:], externalsPostSnapshot: [:], preSnapshot: [:], postSnapshot: [:], calls: [], condition: .lessThanEqual(value: 0))), cyclesExecuted: 1)])]),
+                        ScheduleThreadPath(sections: [.init(ringlets: [.init(previous: [], current: .init(callChain: .init(root: fsm.name, calls: []), ringlet: .init(fsmBefore: .controllableFSM(AnyControllableFiniteStateMachine(fsm2)), fsmAfter: .controllableFSM(AnyControllableFiniteStateMachine(clone2)), timeslot: timeslot, before: createPool(fsm), after: createPool(clone2), transitioned: true, externalsPreSnapshot: [:], externalsPostSnapshot: [:], preSnapshot: [:], postSnapshot: [:], calls: [], condition: .lessThanEqual(value: 0))), cyclesExecuted: 1)])])
+                    ]
+                )
+            } else {
+                var clone = fsm.clone()
+                clone.next()
+                return (
+                    createPool(fsm),
+                    [
+                        ScheduleThreadPath(sections: [.init(ringlets: [.init(previous: [], current: .init(callChain: .init(root: fsm.name, calls: []), ringlet: .init(fsmBefore: .controllableFSM(AnyControllableFiniteStateMachine(fsm)), fsmAfter: .controllableFSM(AnyControllableFiniteStateMachine(clone)), timeslot: timeslot, before: createPool(fsm), after: createPool(clone), transitioned: false, externalsPreSnapshot: [:], externalsPostSnapshot: [:], preSnapshot: [:], postSnapshot: [:], calls: [], condition: .lessThanEqual(value: 0))), cyclesExecuted: 2)])])
+                    ]
+                )
+            }
+        }
+        let map: [FSMPool: [ScheduleThreadPath]] = Dictionary(uniqueKeysWithValues: [
+            pair(sensorValue: false, currentState: "initial", previousState: "previous"),
+            pair(sensorValue: false, currentState: "initial", previousState: "initial"),
+            pair(sensorValue: true, currentState: "initial", previousState: "previous"),
+            pair(sensorValue: true, currentState: "exit", previousState: "initial"),
+            pair(sensorValue: true, currentState: "exit", previousState: "exit")
+        ])
+        ScheduleThreadVariationsMock.generator = {
+            //print(map.keys.map { $0.fsms.map(\.asScheduleableFiniteStateMachine.base) })
+            guard let result = map[$0] else {
+                XCTFail("Unexpected result for pool: \($0)")
+                return []
+            }
+            return result
+        }
+        verifier.verify(gateway: gateway, timer: timer, view: view, cycleDetector: cycleDetector, generator: ScheduleThreadVariationsMock.self)
+        XCTAssertEqual(ScheduleThreadVariationsMock.callCount, map.count)
+        if ScheduleThreadVariationsMock.callCount != map.count {
+            print("calls: " + ScheduleThreadVariationsMock.calls.joined(separator: "\n\n"))
+        }
         XCTAssertEqual(view.result, view.expected)
         if view.expected != view.result {
+            if ScheduleThreadVariationsMock.callCount == map.count {
+                print("calls: " + ScheduleThreadVariationsMock.calls.joined(separator: "\n\n"))
+            }
             view.explain(name: readableName + "_")
         }
         XCTAssertTrue(view.finishCalled)

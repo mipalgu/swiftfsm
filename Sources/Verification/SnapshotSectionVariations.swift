@@ -61,6 +61,15 @@ import Gateways
 import Timers
 import KripkeStructure
 
+protocol SnapshotSectionVariationsProtocol: Hashable {
+    
+    var sections: [SnapshotSectionPath] { get }
+    
+    init<Gateway: ModifiableFSMGateway, Timer: Clock>(pool: FSMPool, section: SnapshotSection, gateway: Gateway, timer: Timer, cycleLength: UInt) where Gateway: NewVerifiableGateway
+    
+    
+}
+
 /// Represents all possible execution paths through a single external variable
 /// snapshot section in the scheduler.
 ///
@@ -72,7 +81,7 @@ import KripkeStructure
 /// Since swiftfsm provides the ability to specify a set of fsms that take part
 /// in a single snapshot section, this struct represents all possible pathways
 /// through the snapshot section.
-struct SnapshotSectionVariations: Hashable {
+struct SnapshotSectionVariations: SnapshotSectionVariationsProtocol {
    
     var sections: [SnapshotSectionPath]
     

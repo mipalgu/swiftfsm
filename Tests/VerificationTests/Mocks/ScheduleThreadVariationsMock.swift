@@ -1,8 +1,8 @@
 /*
- * ScheduleThreadVariations.swift
- * 
+ * ScheduleThreadVariationsMock.swift
+ * Mocks
  *
- * Created by Callum McColl on 11/7/21.
+ * Created by Callum McColl on 19/12/21.
  * Copyright © 2021 Callum McColl. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -56,49 +56,34 @@
  *
  */
 
+@testable import Verification
 import swiftfsm
 import Gateways
 import Timers
 import KripkeStructure
+import XCTest
 
-protocol ScheduleThreadVariationsProtocol: Hashable {
+struct ScheduleThreadVariationsMock: ScheduleThreadVariationsProtocol {
     
-    var pathways: [ScheduleThreadPath] { get }
+    static var generator: (FSMPool) -> [ScheduleThreadPath] = { _ in [] }
     
-    init<Gateway: ModifiableFSMGateway, Timer: Clock>(pool: FSMPool, thread: ScheduleThread, gateway: Gateway, timer: Timer, cycleLength: UInt) where Gateway: NewVerifiableGateway
+    static var calls: [String] = []
     
-}
-
-/// Represents all possible variations for a single `ScheduleThread`.
-struct ScheduleThreadVariations: ScheduleThreadVariationsProtocol {
+    static var callCount: Int = 0
+    
+    static func reset() {
+        callCount = 0
+        calls = []
+        generator = { _ in [] }
+    }
     
     var pathways: [ScheduleThreadPath]
     
-    init<Gateway: ModifiableFSMGateway, Timer: Clock>(pool: FSMPool, thread: ScheduleThread, gateway: Gateway, timer: Timer, cycleLength: UInt) where Gateway: NewVerifiableGateway {
-        guard !thread.sections.isEmpty else {
-            self.init(pathways: [])
-            return
-        }
-        func process(executing: Int, path: [SnapshotSectionPath], pool: FSMPool) -> [ScheduleThreadPath] {
-            guard executing < thread.sections.count else {
-                return []
-            }
-            let section = thread.sections[executing]
-            let variations = SnapshotSectionVariations(pool: pool, section: section, gateway: gateway, timer: timer, cycleLength: cycleLength)
-            guard executing + 1 < thread.sections.count else {
-                return variations.sections.map {
-                    ScheduleThreadPath(sections: path + [$0])
-                }
-            }
-            return variations.sections.flatMap { variation in
-                process(executing: executing + 1, path: path + [variation], pool: variation.after)
-            }
-        }
-        self.init(pathways: process(executing: 0, path: [], pool: pool))
+    init<Gateway, Timer>(pool: FSMPool, thread: ScheduleThread, gateway: Gateway, timer: Timer, cycleLength: UInt) where Gateway : ModifiableFSMGateway, Gateway : NewVerifiableGateway, Timer : Clock {
+        self.pathways = Self.generator(pool)
+        Self.callCount += 1
+        Self.calls.append("\(pool)")
     }
     
-    init(pathways: [ScheduleThreadPath]) {
-        self.pathways = pathways
-    }
     
 }
