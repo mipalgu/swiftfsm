@@ -108,6 +108,11 @@ struct ScheduleVerifier {
             var jobs = [Job(thread: thread.thread, pool: thread.pool, previous: nil)]
             while !jobs.isEmpty {
                 let job = jobs.removeFirst()
+                if cycleDetector.inCycle(data: &cycleData, element: job.pool.propertyList(.read("_cycle"))) {
+                    print("\nDetected cycle for: \(job.pool)\n")
+                    continue
+                }
+                print("\nGenerating variations for: \(job.pool)\n")
                 let variations = generator.init(
                     pool: job.pool,
                     thread: job.thread,
@@ -120,8 +125,9 @@ struct ScheduleVerifier {
                     var newPrevious: Previous? = nil
                     var inCycle = true
                     for sectionPath in path.sections {
+                        print("\nChecking sectionPath: \(sectionPath.ringlets.map { "\($0.before)\n->\n\($0.after)" }.joined(separator: "\n\n"))")
                         if cycleDetector.inCycle(data: &cycleData, element: sectionPath.beforeProperties) {
-                            if let previous = previous {
+                            if let previous = newPrevious ?? previous {
                                 for ringlet in sectionPath.ringlets {
                                     previous.state.addEdge(
                                         KripkeEdge(
@@ -143,8 +149,8 @@ struct ScheduleVerifier {
                         inCycle = false
                         for ringlet in sectionPath.ringlets {
                             let beforeProperties = ringlet.beforeProperties
-                            let beforeState = KripkeState(isInitial: previous == nil, properties: beforeProperties)
-                            if let previous = previous {
+                            let beforeState = KripkeState(isInitial: (newPrevious ?? previous) == nil, properties: beforeProperties)
+                            if let previous = (newPrevious ?? previous) {
                                 previous.state.addEdge(
                                     KripkeEdge(
                                         clockName: nil,
@@ -177,6 +183,7 @@ struct ScheduleVerifier {
                     }
                     let hasFinished = path.hasFinished
                     if !inCycle && !hasFinished {
+                        print("\nAdding variation: \(path.after)\n")
                         jobs.append(Job(thread: job.thread, pool: path.after, previous: newPrevious))
                     }
                     if let newPrevious = newPrevious, hasFinished {
