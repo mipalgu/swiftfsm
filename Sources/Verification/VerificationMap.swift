@@ -1,5 +1,5 @@
 /*
- * VerificationStep.swift
+ * VerificationMap.swift
  * Verification
  *
  * Created by Callum McColl on 21/12/21.
@@ -56,53 +56,8 @@
  *
  */
 
-import KripkeStructure
-
-enum VerificationStep: Hashable, Codable {
+struct VerificationMap {
     
-    case takeSnapshot(fsms: Set<String>)
-    
-    case execute(fsms: Set<String>)
-    
-    case saveSnapshot(fsms: Set<String>)
-    
-    var marker: String {
-        switch self {
-        case.takeSnapshot:
-            return "R"
-        case .execute:
-            return "E"
-        case .saveSnapshot:
-            return "W"
-        }
-    }
-    
-    var fsms: Set<String> {
-        switch self {
-        case .takeSnapshot(let fsms), .execute(let fsms), .saveSnapshot(let fsms):
-            return fsms
-        }
-    }
-    
-    func property(collapseIfPossible: Bool = false) -> KripkeStateProperty {
-        let fsms = self.fsms
-        if let first = fsms.first, fsms.count == 1 && collapseIfPossible {
-            return KripkeStateProperty(type: .String, value: first + marker)
-        } else {
-            let marker = self.marker
-            let names = fsms.sorted()
-            let value: [String: Any] = [
-                "step": marker,
-                "fsms": names
-            ]
-            return KripkeStateProperty(
-                type: .Compound([
-                    "step": KripkeStateProperty(marker),
-                    "fsms": KripkeStateProperty(type: .Collection(names.map { KripkeStateProperty($0) }), value: names)
-                ]),
-                value: value
-            )
-        }
-    }
+    var steps: [VerificationStep]
     
 }
