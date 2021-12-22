@@ -136,9 +136,96 @@ class ScheduleVerifierTests: XCTestCase {
         // Put teardown code here. This method is called after the invocation of each test method in the class.
     }
     
+    func test_canGenerateSeparateKripkeStructures() {
+        let fsm1 = SensorFiniteStateMachine()
+        fsm1.name = fsm1.name + "1"
+        let fsm1StartingTime: UInt = 10
+        let fsm1Duration: UInt = 30
+        let fsm2StartingTime: UInt = 50
+        let fsm2Duration: UInt = 20
+        let cycleLength: UInt = fsm2StartingTime + fsm2Duration
+        let states1 = sensorsKripkeStructure(fsmName: fsm1.name, startingTime: 10, duration: fsm1Duration, cycleLength: cycleLength)
+        let fsm2 = SensorFiniteStateMachine()
+        fsm2.name = fsm2.name + "2"
+        let states2 = sensorsKripkeStructure(fsmName: fsm2.name, startingTime: fsm2StartingTime, duration: fsm2Duration, cycleLength: cycleLength)
+        let gateway = StackGateway()
+        let timer = FSMClock(ringletLengths: [fsm1.name: fsm1Duration, fsm2.name: fsm2Duration], scheduleLength: cycleLength)
+        fsm1.gateway = gateway
+        fsm1.timer = timer
+        fsm2.gateway = gateway
+        fsm2.timer = timer
+        let cycleDetector = HashTableCycleDetector<KripkeStatePropertyList>()
+        let view = TestableView(expected: states1)
+        let fsm1Timeslot = Timeslot(
+            fsms: [fsm1.name],
+            callChain: CallChain(root: fsm1.name, calls: []),
+            startingTime: fsm1StartingTime,
+            duration: fsm1Duration,
+            cyclesExecuted: 0
+        )
+        let fsm2Timeslot = Timeslot(
+            fsms: [fsm2.name],
+            callChain: CallChain(root: fsm2.name, calls: []),
+            startingTime: fsm2StartingTime,
+            duration: fsm2Duration,
+            cyclesExecuted: 0
+        )
+        let schedule = Schedule(threads: [
+            ScheduleThread(sections: [
+                SnapshotSection(timeslots: [fsm1Timeslot]),
+                SnapshotSection(timeslots: [fsm2Timeslot])
+            ])
+        ])
+        let pool = FSMPool(fsms: [.controllableFSM(AnyControllableFiniteStateMachine(fsm1)), .controllableFSM(AnyControllableFiniteStateMachine(fsm2))])
+        let verifier = ScheduleVerifier(schedule: schedule, allFsms: pool)
+        verifier.verify(gateway: gateway, timer: timer, view: view, cycleDetector: cycleDetector)
+        XCTAssertEqual(view.result, view.expected)
+        if view.expected != view.result {
+            view.explain(name: readableName + "_")
+        }
+        XCTAssertTrue(view.finishCalled)
+    }
+    
     func test_canGenerateAllStatesOfSensorFSM() {
+        let fsm = SensorFiniteStateMachine()
+        let startingTime: UInt = 10
+        let duration: UInt = 30
+        let cycleLength = startingTime + duration
+        let states = sensorsKripkeStructure(fsmName: fsm.name, startingTime: startingTime, duration: duration, cycleLength: cycleLength)
+        let gateway = StackGateway()
+        let timer = FSMClock(ringletLengths: [fsm.name: duration], scheduleLength: cycleLength)
+        fsm.gateway = gateway
+        fsm.timer = timer
+        let cycleDetector = HashTableCycleDetector<KripkeStatePropertyList>()
+        let view = TestableView(expected: states)
+        let timeslot = Timeslot(
+            fsms: [fsm.name],
+            callChain: CallChain(root: fsm.name, calls: []),
+            startingTime: startingTime,
+            duration: duration,
+            cyclesExecuted: 0
+        )
+        let schedule = Schedule(threads: [
+            ScheduleThread(sections: [
+                SnapshotSection(timeslots: [
+                    timeslot
+                ])
+            ])
+        ])
+        let pool = FSMPool(fsms: [.controllableFSM(AnyControllableFiniteStateMachine(fsm))])
+        let verifier = ScheduleVerifier(schedule: schedule, allFsms: pool)
+        verifier.verify(gateway: gateway, timer: timer, view: view, cycleDetector: cycleDetector)
+        XCTAssertEqual(view.result, view.expected)
+        if view.expected != view.result {
+            view.explain(name: readableName + "_")
+        }
+        XCTAssertTrue(view.finishCalled)
+    }
+    
+    private func sensorsKripkeStructure(fsmName: String, startingTime: UInt, duration: UInt, cycleLength: UInt) -> Set<KripkeState> {
         func propertyList(readState: Bool, sensorValue: Bool, currentState: String, previousState: String) -> KripkeStatePropertyList {
             let fsm = SensorFiniteStateMachine()
+            fsm.name = fsmName
             fsm.sensors1.val = sensorValue
             if currentState == "initial" {
                 fsm.currentState = fsm.initialState
@@ -168,9 +255,10 @@ class ScheduleVerifierTests: XCTestCase {
         }
         func kripkeState(readState: Bool, sensorValue: Bool, currentState: String, previousState: String, targets: [(resetClock: Bool, target: KripkeStatePropertyList)]) -> KripkeState {
             let fsm = SensorFiniteStateMachine()
+            fsm.name = fsmName
             let properties = propertyList(readState: readState, sensorValue: sensorValue, currentState: currentState, previousState: previousState)
             let edges = targets.map {
-                KripkeEdge(clockName: fsm.name, constraint: nil, resetClock: $0, takeSnapshot: !readState, time: readState ? 30 : 10, target: $1)
+                KripkeEdge(clockName: fsm.name, constraint: nil, resetClock: $0, takeSnapshot: !readState, time: readState ? duration : cycleLength - duration, target: $1)
             }
             let state = KripkeState(isInitial: previousState == fsm.initialPreviousState.name, properties: properties)
             for edge in edges {
@@ -179,6 +267,7 @@ class ScheduleVerifierTests: XCTestCase {
             return state
         }
         let fsm = SensorFiniteStateMachine()
+        fsm.name = fsmName
         let initial = fsm.initialState.name
         let previous = fsm.initialPreviousState.name
         let exit = fsm.exitState.name
@@ -255,34 +344,7 @@ class ScheduleVerifierTests: XCTestCase {
                 targets: []
             )
         ]
-        let gateway = StackGateway()
-        let timer = FSMClock(ringletLengths: [fsm.name: 30], scheduleLength: 30)
-        fsm.gateway = gateway
-        fsm.timer = timer
-        let cycleDetector = HashTableCycleDetector<KripkeStatePropertyList>()
-        let view = TestableView(expected: states)
-        let timeslot = Timeslot(
-            fsms: [fsm.name],
-            callChain: CallChain(root: fsm.name, calls: []),
-            startingTime: 10,
-            duration: 30,
-            cyclesExecuted: 0
-        )
-        let schedule = Schedule(threads: [
-            ScheduleThread(sections: [
-                SnapshotSection(timeslots: [
-                    timeslot
-                ])
-            ])
-        ])
-        let pool = FSMPool(fsms: [.controllableFSM(AnyControllableFiniteStateMachine(fsm))])
-        let verifier = ScheduleVerifier(schedule: schedule, allFsms: pool)
-        verifier.verify(gateway: gateway, timer: timer, view: view, cycleDetector: cycleDetector)
-        XCTAssertEqual(view.result, view.expected)
-        if view.expected != view.result {
-            view.explain(name: readableName + "_")
-        }
-        XCTAssertTrue(view.finishCalled)
+        return states
     }
 
 }

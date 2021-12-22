@@ -164,6 +164,7 @@ final class SensorFiniteStateMachine: MachineProtocol, CustomStringConvertible {
 
     func clone() -> SensorFiniteStateMachine {
         let fsm = SensorFiniteStateMachine()
+        fsm.name = name
         if currentState.name == initialState.name {
             fsm.currentState = fsm.initialState
         } else if currentState.name == exitState.name {
