@@ -170,7 +170,7 @@ class ScheduleVerifierTests: XCTestCase {
             let fsm = SensorFiniteStateMachine()
             let properties = propertyList(readState: readState, sensorValue: sensorValue, currentState: currentState, previousState: previousState)
             let edges = targets.map {
-                KripkeEdge(clockName: fsm.name, constraint: nil, resetClock: $0, takeSnapshot: !readState, time: readState ? 30 : 0, target: $1)
+                KripkeEdge(clockName: fsm.name, constraint: nil, resetClock: $0, takeSnapshot: !readState, time: readState ? 30 : 10, target: $1)
             }
             let state = KripkeState(isInitial: previousState == fsm.initialPreviousState.name, properties: properties)
             for edge in edges {
@@ -266,7 +266,7 @@ class ScheduleVerifierTests: XCTestCase {
         let timeslot = Timeslot(
             fsms: [fsm.name],
             callChain: CallChain(root: fsm.name, calls: []),
-            startingTime: 0,
+            startingTime: 10,
             duration: 30,
             cyclesExecuted: 0
         )

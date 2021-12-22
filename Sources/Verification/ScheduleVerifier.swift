@@ -235,6 +235,15 @@ struct ScheduleVerifier {
                             )
                             previous.state.addEdge(edge)
                         }
+                        switch step.step {
+                        case .executeAndSaveSnapshot:
+                            if hasFinished(map: job.map, forPool: ringlet.after) {
+                                view.commit(state: state)
+                                continue
+                            }
+                        default:
+                            break
+                        }
                         if !cycleDetector.inCycle(data: &cycleData, element: properties) {
                             let resetClocks: Set<String>
                             if ringlet.transitioned {
@@ -265,6 +274,10 @@ struct ScheduleVerifier {
                             target: properties
                         )
                         previous.state.addEdge(edge)
+                    }
+                    if hasFinished(map: job.map, forPool: job.pool) {
+                        view.commit(state: state)
+                        continue
                     }
                     if !cycleDetector.inCycle(data: &cycleData, element: properties) {
                         let newPrevious = Previous(state: state, time: step.time, resetClocks: previous?.resetClocks ?? [])
@@ -348,6 +361,11 @@ struct ScheduleVerifier {
 //                }
             }
         }
+    }
+    
+    private func hasFinished(map: VerificationMap, forPool pool: FSMPool) -> Bool {
+        let fsms: Set<String> = Set(map.steps.lazy.flatMap(\.step.fsms))
+        return nil == fsms.first { !pool.fsm($0).hasFinished }
     }
     
 }
