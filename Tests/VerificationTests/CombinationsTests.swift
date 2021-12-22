@@ -87,6 +87,45 @@ class CombinationsTests: XCTestCase {
         XCTAssertEqual(result, expected)
     }
     
+    func test_snapshotSensors() throws {
+        let fsm = SensorFiniteStateMachine()
+        let combinations = Combinations(fsms: [AnyScheduleableFiniteStateMachine(fsm)])
+        let expected: [[[Bool]]] = [
+            [[false]],
+            [[true]]
+        ]
+        let result = Array(combinations)
+        XCTAssertEqual(expected.count, result.count)
+        for (expected, result) in zip(expected, result) {
+            guard let result = result as? [[Bool]] else {
+                XCTFail("Cannot convert result to [[Bool]]")
+                return
+            }
+            XCTAssertEqual(result.count, expected.count)
+            XCTAssertEqual(result, expected)
+        }
+    }
+    
+    func test_snapshotSensorsIsEmpty() throws {
+        let fsm = SensorFiniteStateMachine()
+        fsm.sensors1.val = true
+        fsm.currentState = fsm.exitState
+        let combinations = Combinations(fsms: [AnyScheduleableFiniteStateMachine(fsm)])
+        let expected: [[[Bool]]] = [
+            [[]],
+        ]
+        let result = Array(combinations)
+        XCTAssertEqual(expected.count, result.count)
+        for (expected, result) in zip(expected, result) {
+            guard let result = result as? [[Bool]] else {
+                XCTFail("Cannot convert result to [[Bool]]")
+                return
+            }
+            XCTAssertEqual(result.count, expected.count)
+            XCTAssertEqual(result, expected)
+        }
+    }
+    
     func test_struct() throws {
         let combinations = Combinations(reflecting: TestStruct())
         let expected: [(Bool, UInt8)] = [

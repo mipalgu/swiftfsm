@@ -69,15 +69,22 @@ final class InMemoryContainer<T: ExternalVariables>: ExternalVariablesContainer,
     
     let name: String
     
+    private var _val: T
+    
     var val: T
     
     init(name: String, initialValue: T) {
         self.name = "InMemoryContainer-" + name
+        self._val = initialValue
         self.val = initialValue
     }
     
-    func saveSnapshot() {}
+    func saveSnapshot() {
+        self._val = val
+    }
     
-    func takeSnapshot() {}
+    func takeSnapshot() {
+        self.val = _val
+    }
     
 }
