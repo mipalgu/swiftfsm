@@ -146,9 +146,13 @@ struct Ringlet {
         let before = gateway.pool
         let currentState = fsm.currentState.name
         var clone = fsm.clone()
+        print("Execute 5: \(clone.asScheduleableFiniteStateMachine.base)")
         gateway.replace(clone)
+        print("Execute 6: \(clone.asScheduleableFiniteStateMachine.base)")
         clone.next()
+        print("Execute 7: \(clone.asScheduleableFiniteStateMachine.base)")
         let after = gateway.pool
+        print("Execute 8: \(after)")
         let transitioned = currentState != clone.currentState.name
         let externalsPostSnapshot = KripkeStatePropertyList(Dictionary(uniqueKeysWithValues: allExternalVariables.map { ($0.name, KripkeStateProperty($0.val)) }))
         let postSnapshot = KripkeStatePropertyList(clone.asScheduleableFiniteStateMachine.base)

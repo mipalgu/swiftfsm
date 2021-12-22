@@ -82,6 +82,32 @@ struct VerificationMap {
     
     init() {}
     
+    mutating func insert(section: [Timeslot], read: UInt, write: UInt) {
+        guard let first = section.first, let last = section.last else {
+            return
+        }
+        guard nil == stepLookup.first(where: { ($0.0.lowerBound >= read && $0.0.lowerBound <= write) || ($0.0.upperBound >= read && $0.0.upperBound <= write) }) else {
+            fatalError("Attempting to insert a verification step that conflicts with a previous verification step.")
+        }
+        let firstStep = Step(time: read, step: .takeSnapshot(fsms: Set(section)))
+        stepLookup.append((read...write, firstStep))
+        steps.insert(firstStep)
+        if section.count == 1, write == first.startingTime + first.duration {
+            steps.insert(Step(time: write, step: .executeAndSaveSnapshot(timeslot: first)))
+            return
+        } else {
+            for timeslot in section {
+                let step = Step(
+                    time: timeslot.startingTime + timeslot.duration,
+                    step: .execute(timeslot: timeslot)
+                )
+                steps.insert(step)
+            }
+            let step = Step(time: write, step: .saveSnapshot(fsms: Set(section)))
+            steps.insert(step)
+        }
+    }
+    
     mutating func insert(step: VerificationStep, atTime time: ClosedRange<UInt>) {
         let lowerBound = time.lowerBound
         let upperBound = time.upperBound

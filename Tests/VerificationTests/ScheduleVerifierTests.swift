@@ -67,7 +67,7 @@ import Timers
 
 @testable import Verification
 
-/*class ScheduleVerifierTests: XCTestCase {
+class ScheduleVerifierTests: XCTestCase {
     
     class TestableView: KripkeStructureView {
         
@@ -264,6 +264,7 @@ import Timers
         let cycleDetector = HashTableCycleDetector<KripkeStatePropertyList>()
         let view = TestableView(expected: states)
         let timeslot = Timeslot(
+            fsms: [fsm.name],
             callChain: CallChain(root: fsm.name, calls: []),
             startingTime: 0,
             duration: 30,
@@ -342,4 +343,4 @@ import Timers
         XCTAssertTrue(view.finishCalled)
     }
 
-}*/
+}

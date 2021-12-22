@@ -136,7 +136,13 @@ final class SensorFiniteStateMachine: MachineProtocol, CustomStringConvertible {
             "initial",
             transitions: [Transition(exitState) { [self] _ in sensors1.val }],
             snapshotSensors: [sensors1.name],
-            snapshotActuators: []
+            snapshotActuators: [],
+            main: {
+                print("Sensor Value: \(self.sensors1.val)")
+            },
+            onExit: {
+                print("Sensor Value: \(self.sensors1.val)")
+            }
         )
     }()
 
@@ -158,9 +164,11 @@ final class SensorFiniteStateMachine: MachineProtocol, CustomStringConvertible {
 
     func clone() -> SensorFiniteStateMachine {
         let fsm = SensorFiniteStateMachine()
-        fsm.currentState = currentState.clone()
-        fsm.previousState = previousState.clone()
-        fsm.suspendedState = suspendedState?.clone()
+        if currentState.name == initialState.name {
+            fsm.currentState = fsm.initialState
+        } else if currentState.name == exitState.name {
+            fsm.currentState = fsm.exitState
+        }
         fsm.sensors1.val = sensors1.val
         fsm.ringlet = ringlet.clone()
         return fsm

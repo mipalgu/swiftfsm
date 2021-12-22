@@ -127,7 +127,7 @@ struct ScheduleVerifier {
             while !jobs.isEmpty {
                 let job = jobs.removeFirst()
                 let step = job.map.steps[job.step]
-                print("\nGenerating variations for: \(job.pool)\n")
+                print("\nGenerating \(step.step.marker) variations for: \(job.pool)\n")
                 let previous = job.previous
                 let newStep = job.step >= (job.map.steps.count - 1) ? 0 : job.step + 1
                 switch step.step {
@@ -159,6 +159,8 @@ struct ScheduleVerifier {
                         }
                     }
                 case .execute(let timeslot), .executeAndSaveSnapshot(let timeslot):
+                    print("Execute: \(timeslot.callChain.fsm(fromPool: job.pool).asScheduleableFiniteStateMachine.base)")
+                    print("Execute: \(job.pool)")
                     let ringlets = generator.execute(timeslot: timeslot, inPool: job.pool, gateway: gateway, timer: timer)
                     for ringlet in ringlets {
                         let properties = ringlet.after.propertyList(forStep: step.step, collapseIfPossible: collapse)

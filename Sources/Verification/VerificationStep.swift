@@ -91,7 +91,7 @@ enum VerificationStep: Hashable {
     func property(collapseIfPossible: Bool = false) -> KripkeStateProperty {
         let fsms = self.fsms
         if let first = fsms.first, fsms.count == 1 && collapseIfPossible {
-            return KripkeStateProperty(type: .String, value: first + marker)
+            return KripkeStateProperty(type: .String, value: first + "." + marker)
         } else {
             let marker = self.marker
             let names = fsms.sorted()

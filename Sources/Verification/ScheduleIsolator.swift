@@ -113,20 +113,16 @@ struct ScheduleIsolator {
             var map = VerificationMap()
             for thread in schedule.threads {
                 for section in thread.sections {
+                    guard let first = section.timeslots.first, let last = section.timeslots.last else {
+                        continue
+                    }
                     let validTimeslots = section.timeslots.filter {
                         nil != $0.fsms.first { group.contains($0) }
                     }
-                    if section.timeslots.count == 1, validTimeslots.count == 1 {
-                        let timeslot = section.timeslots[0]
-                        map.insert(
-                            step: .takeSnapshot(fsms: [timeslot]),
-                            atTime: timeslot.timeRange
-                        )
-                    }
-                    guard let first = section.timeslots.first, !validTimeslots.isEmpty else {
+                    guard !validTimeslots.isEmpty else {
                         continue
                     }
-                    map.insert(step: .takeSnapshot(fsms: Set(validTimeslots)), atTime: first.timeRange)
+                    map.insert(section: validTimeslots, read: first.startingTime, write: last.startingTime + last.duration)
                 }
             }
             let pool = FSMPool(fsms: allFsms.fsms.filter { group.contains($0.name) })

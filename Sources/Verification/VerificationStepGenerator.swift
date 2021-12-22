@@ -81,7 +81,8 @@ struct VerificationStepGenerator {
         gateway: Gateway,
         timer: Timer
     ) -> [ConditionalRinglet] where Gateway: NewVerifiableGateway {
-        TimeAwareRinglets(
+        print("Execute Again: \(timeslot.callChain.fsm(fromPool: pool).asScheduleableFiniteStateMachine.base)")
+        return TimeAwareRinglets(
             fsm: timeslot.callChain.fsm(fromPool: pool),
             timeslot: timeslot,
             gateway: gateway,
