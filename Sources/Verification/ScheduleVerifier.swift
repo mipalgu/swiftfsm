@@ -115,6 +115,9 @@ struct ScheduleVerifier {
     
     func verify<Gateway: ModifiableFSMGateway, Timer: Clock, View: KripkeStructureView, Detector: CycleDetector, VariationsGenerator: ScheduleThreadVariationsProtocol>(gateway: Gateway, timer: Timer, view: View, cycleDetector: Detector, generator: VariationsGenerator.Type) where Gateway: NewVerifiableGateway, Detector.Element == KripkeStatePropertyList, View.State == KripkeState {
         let generator = VerificationStepGenerator()
+        defer {
+            view.finish()
+        }
         for thread in isolatedThreads.threads {
             if thread.map.steps.isEmpty {
                 continue
@@ -134,7 +137,7 @@ struct ScheduleVerifier {
                 case .takeSnapshot(let fsms):
                     let pools = generator.takeSnapshot(forFsms: fsms.map { $0.callChain.fsm(fromPool: job.pool) }, in: job.pool)
                     for pool in pools {
-                        let properties = pool.propertyList(forStep: step.step, collapseIfPossible: collapse)
+                        let properties = pool.propertyList(forStep: step.step, executingState: nil, collapseIfPossible: collapse)
                         let state = states[properties] ?? KripkeState(isInitial: previous == nil, properties: properties)
                         if nil == states[properties] {
                             states[properties] = state
@@ -159,9 +162,10 @@ struct ScheduleVerifier {
                         }
                     }
                 case .takeSnapshotAndStartTimeslot(let timeslot):
-                    let pools = generator.takeSnapshot(forFsms: [timeslot.callChain.fsm(fromPool: job.pool)], in: job.pool)
+                    let fsm = timeslot.callChain.fsm(fromPool: job.pool)
+                    let pools = generator.takeSnapshot(forFsms: [fsm], in: job.pool)
                     for pool in pools {
-                        let properties = pool.propertyList(forStep: step.step, collapseIfPossible: collapse)
+                        let properties = pool.propertyList(forStep: step.step, executingState: fsm.currentState.name, collapseIfPossible: collapse)
                         let state = states[properties] ?? KripkeState(isInitial: previous == nil, properties: properties)
                         if nil == states[properties] {
                             states[properties] = state
@@ -187,7 +191,8 @@ struct ScheduleVerifier {
                         }
                     }
                 case .startTimeslot(let timeslot):
-                    let properties = job.pool.propertyList(forStep: step.step, collapseIfPossible: collapse)
+                    let fsm = timeslot.callChain.fsm(fromPool: job.pool)
+                    let properties = job.pool.propertyList(forStep: step.step, executingState: fsm.currentState.name, collapseIfPossible: collapse)
                     let state = states[properties] ?? KripkeState(isInitial: previous == nil, properties: properties)
                     if nil == states[properties] {
                         states[properties] = state
@@ -214,9 +219,10 @@ struct ScheduleVerifier {
                 case .execute(let timeslot), .executeAndSaveSnapshot(let timeslot):
                     print("Execute: \(timeslot.callChain.fsm(fromPool: job.pool).asScheduleableFiniteStateMachine.base)")
                     print("Execute: \(job.pool)")
+                    let currentState = timeslot.callChain.fsm(fromPool: job.pool).currentState.name
                     let ringlets = generator.execute(timeslot: timeslot, inPool: job.pool, gateway: gateway, timer: timer)
                     for ringlet in ringlets {
-                        let properties = ringlet.after.propertyList(forStep: step.step, collapseIfPossible: collapse)
+                        let properties = ringlet.after.propertyList(forStep: step.step, executingState: currentState, collapseIfPossible: collapse)
                         let state = states[properties] ?? KripkeState(isInitial: previous == nil, properties: properties)
                         if nil == states[properties] {
                             states[properties] = state
@@ -224,7 +230,7 @@ struct ScheduleVerifier {
                         if let previous = previous {
                             let edge = KripkeEdge(
                                 clockName: timeslot.callChain.fsm,
-                                constraint: ringlet.condition,
+                                constraint: ringlet.condition == .lessThanEqual(value: 0) ? nil : ringlet.condition,
                                 resetClock: false,
                                 takeSnapshot: false,
                                 time: previous.afterExecutingTimeUntil(
@@ -256,7 +262,7 @@ struct ScheduleVerifier {
                         }
                     }
                 case .saveSnapshot:
-                    let properties = job.pool.propertyList(forStep: step.step, collapseIfPossible: collapse)
+                    let properties = job.pool.propertyList(forStep: step.step, executingState: nil, collapseIfPossible: collapse)
                     let state = states[properties] ?? KripkeState(isInitial: previous == nil, properties: properties)
                     if nil == states[properties] {
                         states[properties] = state
@@ -287,78 +293,6 @@ struct ScheduleVerifier {
                 if let previous = previous {
                     view.commit(state: previous.state)
                 }
-//                for path in variations.pathways {
-//                    var newPrevious: Previous? = nil
-//                    var inCycle = true
-//                    for sectionPath in path.sections {
-//                        print("\nChecking sectionPath: \(sectionPath.ringlets.map { "\($0.before)\n->\n\($0.after)" }.joined(separator: "\n\n"))")
-//                        if cycleDetector.inCycle(data: &cycleData, element: sectionPath.beforeProperties) {
-//                            if let previous = newPrevious ?? previous {
-//                                for ringlet in sectionPath.ringlets {
-//                                    previous.state.addEdge(
-//                                        KripkeEdge(
-//                                            clockName: nil,
-//                                            constraint: nil,
-//                                            resetClock: previous.resetClock,
-//                                            takeSnapshot: true,
-//                                            time: previous.timeslot.afterExecutingTimeUntil(
-//                                                timeslot: ringlet.timeslot,
-//                                                cycleLength: isolatedThreads.cycleLength
-//                                            ),
-//                                            target: ringlet.beforeProperties
-//                                        )
-//                                    )
-//                                }
-//                            }
-//                            continue
-//                        }
-//                        inCycle = false
-//                        for ringlet in sectionPath.ringlets {
-//                            let beforeProperties = ringlet.beforeProperties
-//                            let beforeState = KripkeState(isInitial: (newPrevious ?? previous) == nil, properties: beforeProperties)
-//                            if let previous = (newPrevious ?? previous) {
-//                                previous.state.addEdge(
-//                                    KripkeEdge(
-//                                        clockName: nil,
-//                                        constraint: nil,
-//                                        resetClock: previous.resetClock,
-//                                        takeSnapshot: true,
-//                                        time: previous.timeslot.afterExecutingTimeUntil(
-//                                            timeslot: ringlet.timeslot,
-//                                            cycleLength: isolatedThreads.cycleLength
-//                                        ),
-//                                        target: ringlet.beforeProperties
-//                                    )
-//                                )
-//                            }
-//                            let afterProperties = ringlet.afterProperties
-//                            beforeState.addEdge(
-//                                KripkeEdge(
-//                                    clockName: ringlet.fsmBefore.name,
-//                                    constraint: ringlet.condition == .lessThanEqual(value: 0) ? nil : ringlet.condition,
-//                                    resetClock: false,
-//                                    takeSnapshot: false,
-//                                    time: ringlet.timeslot.duration,
-//                                    target: afterProperties
-//                                )
-//                            )
-//                            view.commit(state: beforeState)
-//                            let afterState = KripkeState(isInitial: false, properties: afterProperties)
-//                            newPrevious = Previous(state: afterState, timeslot: ringlet.timeslot, resetClock: ringlet.transitioned)
-//                        }
-//                    }
-//                    let hasFinished = path.hasFinished
-//                    if !inCycle && !hasFinished {
-//                        print("\nAdding variation: \(path.after)\n")
-//                        jobs.append(Job(thread: job.thread, pool: path.after, previous: newPrevious))
-//                    }
-//                    if let newPrevious = newPrevious, hasFinished {
-//                        view.commit(state: newPrevious.state)
-//                    }
-//                }
-//                if let previous = previous {
-//                    view.commit(state: previous.state)
-//                }
             }
         }
     }

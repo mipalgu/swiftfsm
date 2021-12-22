@@ -108,7 +108,7 @@ public struct FSMPool {
         return fsm(atIndex: index(of: name))
     }
     
-    func propertyList(forStep step: VerificationStep, collapseIfPossible collapse: Bool = false) -> KripkeStatePropertyList {
+    func propertyList(forStep step: VerificationStep, executingState state: String?, collapseIfPossible collapse: Bool = false) -> KripkeStatePropertyList {
         let fsmValues = Dictionary(uniqueKeysWithValues: fsms.map {
             ($0.name, $0.asScheduleableFiniteStateMachine.base)
         })
@@ -118,7 +118,7 @@ public struct FSMPool {
         return KripkeStatePropertyList(
             [
                 "fsms": KripkeStateProperty(type: .Compound(fsmProperties), value: fsmValues),
-                "pc": step.property(collapseIfPossible: collapse)
+                "pc": step.property(state: state, collapseIfPossible: collapse)
             ]
         )
     }

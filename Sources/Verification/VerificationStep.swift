@@ -94,10 +94,10 @@ enum VerificationStep: Hashable {
         }
     }
     
-    func property(collapseIfPossible: Bool = false) -> KripkeStateProperty {
+    func property(state: String?, collapseIfPossible: Bool = false) -> KripkeStateProperty {
         let fsms = self.fsms
-        if let first = fsms.first, fsms.count == 1 && collapseIfPossible {
-            return KripkeStateProperty(type: .String, value: first + "." + marker)
+        if let first = fsms.first, fsms.count == 1 && collapseIfPossible, let state = state {
+            return KripkeStateProperty(type: .String, value: first + "." + state + "." + marker)
         } else {
             let marker = self.marker
             let names = fsms.sorted()

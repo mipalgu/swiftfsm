@@ -252,9 +252,7 @@ class ScheduleVerifierTests: XCTestCase {
                 sensorValue: true,
                 currentState: exit,
                 previousState: exit,
-                targets: [
-                    target(readState: true, resetClock: false, sensorValue: true, currentState: exit, previousState: exit)
-                ]
+                targets: []
             )
         ]
         let gateway = StackGateway()
@@ -329,10 +327,6 @@ class ScheduleVerifierTests: XCTestCase {
             return result
         }
         verifier.verify(gateway: gateway, timer: timer, view: view, cycleDetector: cycleDetector, generator: ScheduleThreadVariationsMock.self)
-        XCTAssertEqual(ScheduleThreadVariationsMock.callCount, map.count)
-        if ScheduleThreadVariationsMock.callCount != map.count {
-            print("calls: " + ScheduleThreadVariationsMock.calls.joined(separator: "\n\n"))
-        }
         XCTAssertEqual(view.result, view.expected)
         if view.expected != view.result {
             if ScheduleThreadVariationsMock.callCount == map.count {
