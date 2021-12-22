@@ -110,10 +110,6 @@ struct ScheduleVerifier {
     }
     
     func verify<Gateway: ModifiableFSMGateway, Timer: Clock, View: KripkeStructureView, Detector: CycleDetector>(gateway: Gateway, timer: Timer, view: View, cycleDetector: Detector) where Gateway: NewVerifiableGateway, Detector.Element == KripkeStatePropertyList, View.State == KripkeState {
-        verify(gateway: gateway, timer: timer, view: view, cycleDetector: cycleDetector, generator: ScheduleThreadVariations.self)
-    }
-    
-    func verify<Gateway: ModifiableFSMGateway, Timer: Clock, View: KripkeStructureView, Detector: CycleDetector, VariationsGenerator: ScheduleThreadVariationsProtocol>(gateway: Gateway, timer: Timer, view: View, cycleDetector: Detector, generator: VariationsGenerator.Type) where Gateway: NewVerifiableGateway, Detector.Element == KripkeStatePropertyList, View.State == KripkeState {
         let generator = VerificationStepGenerator()
         defer {
             view.finish()
