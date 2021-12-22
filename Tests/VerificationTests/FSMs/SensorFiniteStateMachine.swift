@@ -154,7 +154,7 @@ final class SensorFiniteStateMachine: MachineProtocol, CustomStringConvertible {
     
     var suspendState: MiPalState = EmptyMiPalState("suspend")
     
-    var exitState: MiPalState = EmptyMiPalState("exit")
+    var exitState: MiPalState = EmptyMiPalState("exit", snapshotSensors: [])
     
     var submachines: [SensorFiniteStateMachine] = []
     
