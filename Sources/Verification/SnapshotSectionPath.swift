@@ -115,14 +115,6 @@ struct SnapshotSectionPath: Hashable {
             }
         }
         
-        var beforeProperties: KripkeStatePropertyList {
-            before.propertyList(.read(fsmBefore.name + "." + fsmBefore.currentState.name))
-        }
-        
-        var afterProperties: KripkeStatePropertyList {
-            after.propertyList(.write(fsmBefore.name + "." + fsmBefore.currentState.name))
-        }
-        
         var timeslot: Timeslot {
             get {
                 current.ringlet.timeslot
@@ -187,14 +179,6 @@ struct SnapshotSectionPath: Hashable {
         } set {
             ringlets[ringlets.count - 1].after = newValue
         }
-    }
-    
-    var beforeProperties: KripkeStatePropertyList {
-        ringlets.first!.beforeProperties
-    }
-    
-    var afterProperties: KripkeStatePropertyList {
-        ringlets.last!.afterProperties
     }
     
     var hasFinished: Bool {

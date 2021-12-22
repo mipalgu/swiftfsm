@@ -58,6 +58,8 @@
 
 struct Timeslot: Hashable {
     
+    var fsms: Set<String>
+    
     var callChain: CallChain
     
     var startingTime: UInt
@@ -66,13 +68,21 @@ struct Timeslot: Hashable {
     
     var cyclesExecuted: UInt
     
-    func afterExecutingTimeUntil(timeslot: Timeslot, cycleLength: UInt) -> UInt {
+    var timeRange: ClosedRange<UInt> {
+        startingTime...(startingTime + duration)
+    }
+    
+    func afterExecutingTimeUntil(time: UInt, cycleLength: UInt) -> UInt {
         let currentTime = startingTime + duration
-        if timeslot.startingTime >= currentTime {
-            return timeslot.startingTime - currentTime
+        if time >= currentTime {
+            return time - currentTime
         } else {
-            return (cycleLength - currentTime) + timeslot.startingTime
+            return (cycleLength - currentTime) + time
         }
+    }
+    
+    func afterExecutingTimeUntil(timeslot: Timeslot, cycleLength: UInt) -> UInt {
+        afterExecutingTimeUntil(time: timeslot.startingTime, cycleLength: cycleLength)
     }
     
 }

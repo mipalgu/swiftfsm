@@ -80,6 +80,7 @@ class SnapshotSectionVariationsTests: XCTestCase {
         let pool = FSMPool(fsms: [.controllableFSM(fsm)])
         let timeslots = [
             Timeslot(
+                fsms: [fsm.name],
                 callChain: CallChain(root: fsm.name, calls: []),
                 startingTime: 0,
                 duration: 20,
@@ -110,6 +111,7 @@ class SnapshotSectionVariationsTests: XCTestCase {
         let pool = FSMPool(fsms: [.controllableFSM(fsm)])
         let timeslots = [
             Timeslot(
+                fsms: [fsm.name],
                 callChain: CallChain(root: fsm.name, calls: []),
                 startingTime: 0,
                 duration: 20,
@@ -141,6 +143,7 @@ class SnapshotSectionVariationsTests: XCTestCase {
         let pool = FSMPool(fsms: [.controllableFSM(fsm)])
         let timeslots = [
             Timeslot(
+                fsms: [fsm.name],
                 callChain: CallChain(root: fsm.name, calls: []),
                 startingTime: 0,
                 duration: 20,
@@ -192,12 +195,14 @@ class SnapshotSectionVariationsTests: XCTestCase {
         let pool = FSMPool(fsms: [.controllableFSM(fsm1), .controllableFSM(fsm2)])
         let timeslots = [
             Timeslot(
+                fsms: [fsm1.name],
                 callChain: CallChain(root: fsm1.name, calls: []),
                 startingTime: 0,
                 duration: 20,
                 cyclesExecuted: 0
             ),
             Timeslot(
+                fsms: [fsm2.name],
                 callChain: CallChain(root: fsm2.name, calls: []),
                 startingTime: 30,
                 duration: 30,
@@ -250,12 +255,14 @@ class SnapshotSectionVariationsTests: XCTestCase {
         let pool = FSMPool(fsms: [.controllableFSM(fsm1), .controllableFSM(fsm2)])
         let timeslots = [
             Timeslot(
+                fsms: [fsm1.name],
                 callChain: CallChain(root: fsm1.name, calls: []),
                 startingTime: 0,
                 duration: 20,
                 cyclesExecuted: 0
             ),
             Timeslot(
+                fsms: [fsm2.name],
                 callChain: CallChain(root: fsm2.name, calls: []),
                 startingTime: 30,
                 duration: 30,

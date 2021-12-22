@@ -67,7 +67,7 @@ import Timers
 
 @testable import Verification
 
-class ScheduleVerifierTests: XCTestCase {
+/*class ScheduleVerifierTests: XCTestCase {
     
     class TestableView: KripkeStructureView {
         
@@ -342,4 +342,4 @@ class ScheduleVerifierTests: XCTestCase {
         XCTAssertTrue(view.finishCalled)
     }
 
-}
+}*/

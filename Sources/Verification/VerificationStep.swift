@@ -58,13 +58,15 @@
 
 import KripkeStructure
 
-enum VerificationStep: Hashable, Codable {
+enum VerificationStep: Hashable {
     
-    case takeSnapshot(fsms: Set<String>)
+    case takeSnapshot(fsms: Set<Timeslot>)
     
-    case execute(fsms: Set<String>)
+    case execute(timeslot: Timeslot)
     
-    case saveSnapshot(fsms: Set<String>)
+    case executeAndSaveSnapshot(timeslot: Timeslot)
+    
+    case saveSnapshot(fsms: Set<Timeslot>)
     
     var marker: String {
         switch self {
@@ -72,15 +74,17 @@ enum VerificationStep: Hashable, Codable {
             return "R"
         case .execute:
             return "E"
-        case .saveSnapshot:
+        case .executeAndSaveSnapshot, .saveSnapshot:
             return "W"
         }
     }
     
     var fsms: Set<String> {
         switch self {
-        case .takeSnapshot(let fsms), .execute(let fsms), .saveSnapshot(let fsms):
-            return fsms
+        case .takeSnapshot(let fsms), .saveSnapshot(let fsms):
+            return Set(fsms.map { $0.callChain.calls.last?.fsm ?? $0.callChain.root })
+        case .execute(let timeslot), .executeAndSaveSnapshot(let timeslot):
+            return [timeslot.callChain.calls.last?.fsm ?? timeslot.callChain.root]
         }
     }
     

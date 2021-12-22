@@ -56,13 +56,15 @@
  *
  */
 
+import swiftfsm
+
 /// Is responsible for splitting a schedule into discrete verifiable
 /// subcomponents based on the communication lines between fsms.
 struct ScheduleIsolator {
     
     struct IsolatedThread {
         
-        var thread: ScheduleThread
+        var map: VerificationMap
         
         var pool: FSMPool
         
@@ -73,12 +75,95 @@ struct ScheduleIsolator {
     var cycleLength: UInt
     
     init(schedule: Schedule, allFsms: FSMPool) {
-        self.init(threads: schedule.threads.map { IsolatedThread(thread: $0, pool: allFsms) }, cycleLength: schedule.cycleLength)
+        typealias FSM_Name = String
+        typealias External_Name = String
+        let fsms: [FSM_Name: FSMType] = Dictionary(uniqueKeysWithValues: allFsms.fsms.map { ($0.name, $0) })
+        var fsmBins: [Int: Set<FSM_Name>] = [:]
+        var bins: [Int: Set<External_Name>] = [:]
+        var binIds: [External_Name: Int] = [:]
+        var latestId = 0
+        for fsm in allFsms.fsms {
+            for external in fsm.sensors + fsm.externalVariables + fsm.actuators {
+                let id = binIds[external.name] ?? latestId
+                if nil == binIds[external.name] {
+                    binIds[external.name] = id
+                    latestId += 1
+                }
+                bins.insert(external.name, into: id)
+                fsmBins.insert(fsm.name, into: id)
+            }
+        }
+        binsLoop: for i in 0..<latestId {
+            guard let bin = bins[i] else {
+                continue
+            }
+            for j in (i + 1)...latestId {
+                guard let otherBin = bins[j], otherBin.intersection(bin).isEmpty else {
+                    continue
+                }
+                bins[j] = otherBin.union(bin)
+                bins[i] = nil
+                fsmBins[j] = (fsmBins[j] ?? Set()).union(fsmBins[i] ?? Set())
+                fsmBins[i] = nil
+                continue binsLoop
+            }
+        }
+        let groups = Array(fsmBins.values)
+        let maps: [(VerificationMap, FSMPool)] = groups.map { group in
+            var map = VerificationMap()
+            for thread in schedule.threads {
+                for section in thread.sections {
+                    let validTimeslots = section.timeslots.filter {
+                        nil != $0.fsms.first { group.contains($0) }
+                    }
+                    if section.timeslots.count == 1, validTimeslots.count == 1 {
+                        let timeslot = section.timeslots[0]
+                        map.insert(
+                            step: .takeSnapshot(fsms: [timeslot]),
+                            atTime: timeslot.timeRange
+                        )
+                    }
+                    guard let first = section.timeslots.first, !validTimeslots.isEmpty else {
+                        continue
+                    }
+                    map.insert(step: .takeSnapshot(fsms: Set(validTimeslots)), atTime: first.timeRange)
+                }
+            }
+            let pool = FSMPool(fsms: allFsms.fsms.filter { group.contains($0.name) })
+            return (map, pool)
+        }
+        self.init(threads: maps.map { IsolatedThread(map: $0, pool: $1) }, cycleLength: schedule.cycleLength)
     }
     
     init(threads: [IsolatedThread], cycleLength: UInt) {
         self.threads = threads
         self.cycleLength = cycleLength
+    }
+    
+}
+
+extension Dictionary where Value: RangeReplaceableCollection {
+    
+    mutating func insert(_ value: Value.Element, into key: Key) {
+        if self[key] == nil {
+            self[key] = Value([value])
+        } else {
+            self[key]?.append(value)
+        }
+    }
+    
+}
+
+extension Dictionary where Value: SetAlgebra {
+    
+    mutating func insert(_ value: Value.Element, into key: Key) {
+        if self[key] == nil {
+            var collection = Value()
+            collection.insert(value)
+            self[key] = collection
+        } else {
+            self[key]?.insert(value)
+        }
     }
     
 }

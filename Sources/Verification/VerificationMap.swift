@@ -56,8 +56,41 @@
  *
  */
 
+import swift_helpers
+
 struct VerificationMap {
     
-    var steps: [VerificationStep]
+    struct Step {
+        
+        var time: UInt
+        
+        var step: VerificationStep
+        
+    }
+    
+    private var stepLookup: [(ClosedRange<UInt>, Step)] = []
+    
+    private(set) var steps: SortedCollection<Step> = SortedCollection {
+        if $0.time < $1.time {
+            return .orderedAscending
+        }
+        if $0.time > $1.time {
+            return .orderedDescending
+        }
+        return .orderedSame
+    }
+    
+    init() {}
+    
+    mutating func insert(step: VerificationStep, atTime time: ClosedRange<UInt>) {
+        let lowerBound = time.lowerBound
+        let upperBound = time.upperBound
+        guard nil == stepLookup.first(where: { ($0.0.lowerBound >= lowerBound && $0.0.lowerBound <= upperBound) || ($0.0.upperBound >= lowerBound && $0.0.upperBound <= upperBound) }) else {
+            fatalError("Attempting to insert a verification step that conflicts with a previous verification step.")
+        }
+        let step = Step(time: upperBound, step: step)
+        stepLookup.append((lowerBound...upperBound, step))
+        steps.insert(step)
+    }
     
 }

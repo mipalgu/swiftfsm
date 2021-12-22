@@ -75,7 +75,7 @@ class RingletTests: XCTestCase {
 
     func test_canComputePropertyLists() throws {
         let fsm = ToggleFiniteStateMachine()
-        let timeslot = Timeslot(callChain: CallChain(root: fsm.name, calls: []), startingTime: 0, duration: 30, cyclesExecuted: 0)
+        let timeslot = Timeslot(fsms: [fsm.name], callChain: CallChain(root: fsm.name, calls: []), startingTime: 0, duration: 30, cyclesExecuted: 0)
         let ringlet = Ringlet(
             fsm: .controllableFSM(AnyControllableFiniteStateMachine(fsm)),
             timeslot: timeslot,
@@ -101,7 +101,7 @@ class RingletTests: XCTestCase {
     
     func test_canDetectCalls() throws {
         let fsm = CallingFiniteStateMachine()
-        let timeslot = Timeslot(callChain: CallChain(root: fsm.name, calls: []), startingTime: 0, duration: 30, cyclesExecuted: 0)
+        let timeslot = Timeslot(fsms: [fsm.name], callChain: CallChain(root: fsm.name, calls: []), startingTime: 0, duration: 30, cyclesExecuted: 0)
         let id = fsm.gateway.id(of: fsm.name)
         let newMachine: ([String: Any?]) -> AnyParameterisedFiniteStateMachine = {
             let tempFSM = AnyParameterisedFiniteStateMachine(CallingFiniteStateMachine(), newMachine: { _ in fatalError("Should never be called.") })
@@ -131,7 +131,7 @@ class RingletTests: XCTestCase {
     
     func test_canDetectAfterCalls() throws {
         let fsm = AfterFiniteStateMachine()
-        let timeslot = Timeslot(callChain: CallChain(root: fsm.name, calls: []), startingTime: 0, duration: 30, cyclesExecuted: 0)
+        let timeslot = Timeslot(fsms: [fsm.name], callChain: CallChain(root: fsm.name, calls: []), startingTime: 0, duration: 30, cyclesExecuted: 0)
         fsm.timer.update(fromFSM: AnyScheduleableFiniteStateMachine(fsm))
         let ringlet = Ringlet(fsm: .controllableFSM(AnyControllableFiniteStateMachine(fsm)), timeslot: timeslot, gateway: fsm.gateway, timer: fsm.timer)
         XCTAssertEqual(ringlet.afterCalls.count, 1)
@@ -143,7 +143,7 @@ class RingletTests: XCTestCase {
     
     func test_includesExternalVariables() throws {
         let fsm = ExternalsFiniteStateMachine()
-        let timeslot = Timeslot(callChain: CallChain(root: fsm.name, calls: []), startingTime: 0, duration: 30, cyclesExecuted: 0)
+        let timeslot = Timeslot(fsms: [fsm.name], callChain: CallChain(root: fsm.name, calls: []), startingTime: 0, duration: 30, cyclesExecuted: 0)
         let ringlet = Ringlet(fsm: .controllableFSM(AnyControllableFiniteStateMachine(fsm)), timeslot: timeslot, gateway: fsm.gateway, timer: fsm.timer)
         print(ringlet.externalsPreSnapshot)
         XCTAssertNotNil(ringlet.externalsPreSnapshot["InMemoryContainer-sensors1"])

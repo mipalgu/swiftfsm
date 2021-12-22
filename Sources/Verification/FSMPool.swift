@@ -62,27 +62,6 @@ import FSM
 
 public struct FSMPool {
     
-    enum ProgramCounter: Hashable, CustomStringConvertible {
-        
-        case read(String)
-        
-        case write(String)
-        
-        var description: String {
-            switch self {
-            case .read(let name):
-                return name + ".R"
-            case .write(let name):
-                return name + ".W"
-            }
-        }
-        
-        var property: KripkeStateProperty {
-            KripkeStateProperty(type: .String, value: "\(self)")
-        }
-        
-    }
-    
     private(set) var fsms: [FSMType]
     
     private var indexes: [String: Int]
@@ -129,7 +108,7 @@ public struct FSMPool {
         return fsm(atIndex: index(of: name))
     }
     
-    func propertyList(_ programCounter: ProgramCounter) -> KripkeStatePropertyList {
+    func propertyList(forStep step: VerificationStep, collapseIfPossible collapse: Bool = false) -> KripkeStatePropertyList {
         let fsmValues = Dictionary(uniqueKeysWithValues: fsms.map {
             ($0.name, $0.asScheduleableFiniteStateMachine.base)
         })
@@ -139,7 +118,7 @@ public struct FSMPool {
         return KripkeStatePropertyList(
             [
                 "fsms": KripkeStateProperty(type: .Compound(fsmProperties), value: fsmValues),
-                "pc": programCounter.property
+                "pc": step.property(collapseIfPossible: collapse)
             ]
         )
     }

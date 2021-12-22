@@ -76,13 +76,18 @@ struct VerificationStepGenerator {
     }
     
     func execute<Gateway: ModifiableFSMGateway, Timer: Clock>(
-        fsm: FSMType,
         timeslot: Timeslot,
+        inPool pool: FSMPool,
         gateway: Gateway,
-        timer: Timer,
-        startingTime: UInt
+        timer: Timer
     ) -> [ConditionalRinglet] where Gateway: NewVerifiableGateway {
-        TimeAwareRinglets(fsm: fsm, timeslot: timeslot, gateway: gateway, timer: timer, startingTime: startingTime).ringlets
+        TimeAwareRinglets(
+            fsm: timeslot.callChain.fsm(fromPool: pool),
+            timeslot: timeslot,
+            gateway: gateway,
+            timer: timer,
+            startingTime: timeslot.startingTime
+        ).ringlets
     }
     
 }

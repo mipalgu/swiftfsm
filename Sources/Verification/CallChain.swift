@@ -92,6 +92,10 @@ public struct CallChain: Hashable {
     
     private(set) var calls: [Call]
     
+    var fsm: String {
+        calls.last?.fsm ?? root
+    }
+    
     private init(root: String, indexes: [CallID: Int], calls: [Call]) {
         self.root = root
         self.indexes = indexes

@@ -85,10 +85,6 @@ struct ScheduleThreadPath: Hashable {
         }
     }
     
-    var afterProperties: KripkeStatePropertyList {
-        sections.last!.afterProperties
-    }
-    
     var hasFinished: Bool {
         nil == sections.first { !$0.hasFinished }
     }

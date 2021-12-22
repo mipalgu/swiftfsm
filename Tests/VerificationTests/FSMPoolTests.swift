@@ -73,7 +73,7 @@ class FSMPoolTests: XCTestCase {
         // Put teardown code here. This method is called after the invocation of each test method in the class.
     }
 
-    func test_canConvertToPropertyList() throws {
+    /*func test_canConvertToPropertyList() throws {
         let fsm = AnyControllableFiniteStateMachine(ToggleFiniteStateMachine())
         let base = { fsm.base as! ToggleFiniteStateMachine }
         let pool = FSMPool(fsms: [.controllableFSM(fsm)])
@@ -102,6 +102,6 @@ class FSMPoolTests: XCTestCase {
             ]
         )
         XCTAssertEqual(result, expected)
-    }
+    }*/
     
 }
