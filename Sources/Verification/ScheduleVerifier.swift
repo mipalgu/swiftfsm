@@ -70,7 +70,7 @@ struct ScheduleVerifier {
         
         var time: UInt
         
-        var resetClock: Bool
+        var resetClocks: Set<String>
         
         func afterExecutingTimeUntil(time: UInt, cycleLength: UInt) -> UInt {
             let currentTime = self.time
@@ -143,7 +143,7 @@ struct ScheduleVerifier {
                             let edge = KripkeEdge(
                                 clockName: nil,
                                 constraint: nil,
-                                resetClock: previous.resetClock,
+                                resetClock: false,
                                 takeSnapshot: true,
                                 time: previous.afterExecutingTimeUntil(
                                     time: step.time,
@@ -154,9 +154,62 @@ struct ScheduleVerifier {
                             previous.state.addEdge(edge)
                         }
                         if !cycleDetector.inCycle(data: &cycleData, element: properties) {
-                            let newPrevious = Previous(state: state, time: step.time, resetClock: false)
+                            let newPrevious = Previous(state: state, time: step.time, resetClocks: previous?.resetClocks ?? [])
                             jobs.append(Job(step: newStep, map: job.map, pool: pool, previous: newPrevious))
                         }
+                    }
+                case .takeSnapshotAndStartTimeslot(let timeslot):
+                    let pools = generator.takeSnapshot(forFsms: [timeslot.callChain.fsm(fromPool: job.pool)], in: job.pool)
+                    for pool in pools {
+                        let properties = pool.propertyList(forStep: step.step, collapseIfPossible: collapse)
+                        let state = states[properties] ?? KripkeState(isInitial: previous == nil, properties: properties)
+                        if nil == states[properties] {
+                            states[properties] = state
+                        }
+                        if let previous = previous {
+                            let edge = KripkeEdge(
+                                clockName: timeslot.callChain.fsm,
+                                constraint: nil,
+                                resetClock: previous.resetClocks.contains(timeslot.callChain.fsm),
+                                takeSnapshot: true,
+                                time: previous.afterExecutingTimeUntil(
+                                    time: step.time,
+                                    cycleLength: isolatedThreads.cycleLength
+                                ),
+                                target: properties
+                            )
+                            previous.state.addEdge(edge)
+                        }
+                        if !cycleDetector.inCycle(data: &cycleData, element: properties) {
+                            let resetClocks = previous?.resetClocks.subtracting([timeslot.callChain.fsm]) ?? []
+                            let newPrevious = Previous(state: state, time: step.time, resetClocks: resetClocks)
+                            jobs.append(Job(step: newStep, map: job.map, pool: pool, previous: newPrevious))
+                        }
+                    }
+                case .startTimeslot(let timeslot):
+                    let properties = job.pool.propertyList(forStep: step.step, collapseIfPossible: collapse)
+                    let state = states[properties] ?? KripkeState(isInitial: previous == nil, properties: properties)
+                    if nil == states[properties] {
+                        states[properties] = state
+                    }
+                    if let previous = previous {
+                        let edge = KripkeEdge(
+                            clockName: timeslot.callChain.fsm,
+                            constraint: nil,
+                            resetClock: previous.resetClocks.contains(timeslot.callChain.fsm),
+                            takeSnapshot: true,
+                            time: previous.afterExecutingTimeUntil(
+                                time: step.time,
+                                cycleLength: isolatedThreads.cycleLength
+                            ),
+                            target: properties
+                        )
+                        previous.state.addEdge(edge)
+                    }
+                    if !cycleDetector.inCycle(data: &cycleData, element: properties) {
+                        let resetClocks = previous?.resetClocks.subtracting([timeslot.callChain.fsm]) ?? []
+                        let newPrevious = Previous(state: state, time: step.time, resetClocks: resetClocks)
+                        jobs.append(Job(step: newStep, map: job.map, pool: job.pool, previous: newPrevious))
                     }
                 case .execute(let timeslot), .executeAndSaveSnapshot(let timeslot):
                     print("Execute: \(timeslot.callChain.fsm(fromPool: job.pool).asScheduleableFiniteStateMachine.base)")
@@ -172,7 +225,7 @@ struct ScheduleVerifier {
                             let edge = KripkeEdge(
                                 clockName: timeslot.callChain.fsm,
                                 constraint: ringlet.condition,
-                                resetClock: ringlet.transitioned,
+                                resetClock: false,
                                 takeSnapshot: false,
                                 time: previous.afterExecutingTimeUntil(
                                     time: step.time,
@@ -183,12 +236,40 @@ struct ScheduleVerifier {
                             previous.state.addEdge(edge)
                         }
                         if !cycleDetector.inCycle(data: &cycleData, element: properties) {
-                            let newPrevious = Previous(state: state, time: step.time, resetClock: false)
+                            let resetClocks: Set<String>
+                            if ringlet.transitioned {
+                                resetClocks = (previous?.resetClocks ?? []).union([timeslot.callChain.fsm])
+                            } else {
+                                resetClocks = previous?.resetClocks ?? []
+                            }
+                            let newPrevious = Previous(state: state, time: step.time, resetClocks: resetClocks)
                             jobs.append(Job(step: newStep, map: job.map, pool: ringlet.after, previous: newPrevious))
                         }
                     }
                 case .saveSnapshot:
-                    break
+                    let properties = job.pool.propertyList(forStep: step.step, collapseIfPossible: collapse)
+                    let state = states[properties] ?? KripkeState(isInitial: previous == nil, properties: properties)
+                    if nil == states[properties] {
+                        states[properties] = state
+                    }
+                    if let previous = previous {
+                        let edge = KripkeEdge(
+                            clockName: nil,
+                            constraint: nil,
+                            resetClock: false,
+                            takeSnapshot: false,
+                            time: previous.afterExecutingTimeUntil(
+                                time: step.time,
+                                cycleLength: isolatedThreads.cycleLength
+                            ),
+                            target: properties
+                        )
+                        previous.state.addEdge(edge)
+                    }
+                    if !cycleDetector.inCycle(data: &cycleData, element: properties) {
+                        let newPrevious = Previous(state: state, time: step.time, resetClocks: previous?.resetClocks ?? [])
+                        jobs.append(Job(step: newStep, map: job.map, pool: job.pool, previous: newPrevious))
+                    }
                 }
                 if let previous = previous {
                     view.commit(state: previous.state)

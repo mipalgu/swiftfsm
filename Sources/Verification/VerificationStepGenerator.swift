@@ -87,7 +87,7 @@ struct VerificationStepGenerator {
             timeslot: timeslot,
             gateway: gateway,
             timer: timer,
-            startingTime: timeslot.startingTime
+            startingTime: 0
         ).ringlets
     }
     

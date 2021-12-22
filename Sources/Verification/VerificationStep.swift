@@ -62,6 +62,10 @@ enum VerificationStep: Hashable {
     
     case takeSnapshot(fsms: Set<Timeslot>)
     
+    case takeSnapshotAndStartTimeslot(timeslot: Timeslot)
+    
+    case startTimeslot(timeslot: Timeslot)
+    
     case execute(timeslot: Timeslot)
     
     case executeAndSaveSnapshot(timeslot: Timeslot)
@@ -70,8 +74,10 @@ enum VerificationStep: Hashable {
     
     var marker: String {
         switch self {
-        case.takeSnapshot:
+        case .takeSnapshot, .takeSnapshotAndStartTimeslot:
             return "R"
+        case .startTimeslot:
+            return "S"
         case .execute:
             return "E"
         case .executeAndSaveSnapshot, .saveSnapshot:
@@ -83,7 +89,7 @@ enum VerificationStep: Hashable {
         switch self {
         case .takeSnapshot(let fsms), .saveSnapshot(let fsms):
             return Set(fsms.map { $0.callChain.calls.last?.fsm ?? $0.callChain.root })
-        case .execute(let timeslot), .executeAndSaveSnapshot(let timeslot):
+        case .takeSnapshotAndStartTimeslot(let timeslot), .startTimeslot(let timeslot), .execute(let timeslot), .executeAndSaveSnapshot(let timeslot):
             return [timeslot.callChain.calls.last?.fsm ?? timeslot.callChain.root]
         }
     }
