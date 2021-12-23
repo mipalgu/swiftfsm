@@ -92,6 +92,9 @@ extension StackGateway: NewVerifiableGateway {
     
     public func setScenario(_ calls: [CallChain], pool: FSMPool) {
         self.stacks = [:]
+        self.fsms = Dictionary(uniqueKeysWithValues: pool.fsms.enumerated().map { (FSM_ID($0), $1) })
+        self.ids = Dictionary(uniqueKeysWithValues: pool.fsms.enumerated().map { ($1.name, FSM_ID($0)) })
+        self.latestID = pool.fsms.count
         for call in calls {
             guard
                 let last = call.calls.last

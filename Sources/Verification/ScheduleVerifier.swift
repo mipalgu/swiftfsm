@@ -134,6 +134,7 @@ struct ScheduleVerifier<Isolator: ScheduleIsolatorProtocol> {
             let viewName = allFsmNames.count == 1 ? allFsmNames.first ?? "\(index)" : "\(index)"
             let view = viewFactory.make(identifier: viewName)
             defer { view.finish() }
+            gateway.setScenario([], pool: thread.pool)
             let collapse = nil == thread.map.steps.first { $0.step.fsms.count > 1 }
             var cycleData = cycleDetector.initialData
             var jobs = [Job(step: 0, map: thread.map, pool: thread.pool, previous: nil)]

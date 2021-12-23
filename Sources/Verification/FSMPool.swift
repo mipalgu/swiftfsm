@@ -64,13 +64,13 @@ public struct FSMPool {
     
     private(set) var fsms: [FSMType]
     
-    private var indexes: [String: Int]
+    private var indexes: [String: FSM_ID]
     
     var cloned: FSMPool {
         FSMPool(fsms: fsms.map { $0.clone() }, indexes: indexes)
     }
     
-    private init(fsms: [FSMType], indexes: [String: Int]) {
+    private init(fsms: [FSMType], indexes: [String: FSM_ID]) {
         self.fsms = fsms
         self.indexes = indexes
     }
@@ -93,7 +93,7 @@ public struct FSMPool {
         return indexes[name] != nil
     }
     
-    func index(of name: String) -> Int {
+    func index(of name: String) -> FSM_ID {
         guard let index = indexes[name] else {
             fatalError("Attempting to fetch index of fsm that doesn't exist within the pool.")
         }
