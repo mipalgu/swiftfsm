@@ -143,27 +143,27 @@ public struct SwiftfsmClean: ParsableCommand {
             return
         }
         let parser = MachineArrangementParser()
-        guard let arrangement = parser.parseArrangement(atDirectory: URL(fileURLWithPath: arrangement, isDirectory: true)) else {
+        guard let arrangement = parser.parseArrangement(atDirectory: url) else {
             parser.errors.forEach(printer.error)
             throw ExitCode.failure
         }
         do {
-            try clean(arrangement: arrangement, buildDir: actualBuildDir, printer: printer)
+            try clean(arrangement: arrangement, atDirectory: url, buildDir: actualBuildDir, printer: printer)
         } catch let e {
             printer.error(str: "\(e)")
             throw ExitCode.failure
         }
     }
     
-    private func clean<P: Printer>(arrangement: Arrangement, buildDir: String, printer: P) throws {
+    private func clean<P: Printer>(arrangement: Arrangement, atDirectory path: URL, buildDir: String, printer: P) throws {
         let fm = FileManager.default
         var processed: Set<URL> = []
-        func _process(_ dependency: Machine.Dependency) throws {
-            if processed.contains(dependency.filePath) {
+        func _process(_ dependency: Machine.Dependency, parent: URL) throws {
+            if processed.contains(dependency.filePath(relativeTo: parent)) {
                 return
             }
-            processed.insert(dependency.filePath)
-            let buildDir = dependency.filePath.appendingPathComponent(buildDir, isDirectory: true).path
+            processed.insert(dependency.filePath(relativeTo: parent))
+            let buildDir = dependency.filePath(relativeTo: parent).appendingPathComponent(buildDir, isDirectory: true).path
             printer.message(str: "Removing " + buildDir)
             do {
                 try fm.removeItem(atPath: buildDir)
@@ -172,9 +172,13 @@ public struct SwiftfsmClean: ParsableCommand {
                     throw CleanError.error(message: e.localizedDescription)
                 }
             }
-            try dependency.machine.dependencies.forEach(_process)
+            try dependency.machine(relativeTo: parent).dependencies.forEach {
+                try _process($0, parent: dependency.filePath(relativeTo: parent))
+            }
         }
-        try arrangement.dependencies.forEach(_process)
+        try arrangement.dependencies.forEach {
+            try _process($0, parent: path)
+        }
     }
     
     private enum CleanError: Error {

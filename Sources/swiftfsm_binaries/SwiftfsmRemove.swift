@@ -82,12 +82,13 @@ public struct SwiftfsmRemove: ParsableCommand {
         let printer = CommandLinePrinter(errorStream: StderrOutputStream(), messageStream: StdoutOutputStream(), warningStream: StdoutOutputStream())
         let parser = MachineArrangementParser()
         let generator = MachineArrangementGenerator()
-        guard var arrangement = parser.parseArrangement(atDirectory: URL(fileURLWithPath: arrangementPath, isDirectory: true)) else {
+        let url = URL(fileURLWithPath: arrangementPath, isDirectory: true)
+        guard var arrangement = parser.parseArrangement(atDirectory: url) else {
             parser.errors.forEach(printer.error)
             throw ExitCode.failure
         }
         arrangement.dependencies.removeAll { ($0.name ?? $0.machineName) == self.name }
-        guard nil != generator.generateArrangement(arrangement) else {
+        guard nil != generator.generateArrangement(arrangement, atDirectory: url) else {
             generator.errors.forEach(printer.error)
             throw ExitCode.failure
         }

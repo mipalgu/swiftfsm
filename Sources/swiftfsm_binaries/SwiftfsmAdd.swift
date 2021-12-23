@@ -85,10 +85,13 @@ public struct SwiftfsmAdd: ParsableCommand {
         let printer = CommandLinePrinter(errorStream: StderrOutputStream(), messageStream: StdoutOutputStream(), warningStream: StdoutOutputStream())
         let parser = MachineArrangementParser()
         let generator = MachineArrangementGenerator()
-        guard let dependency = Machine.Dependency(name: name, filePath: URL(fileURLWithPath: path, isDirectory: true)) else {
+        let arrangementPath = URL(fileURLWithPath: arrangementPath, isDirectory: true)
+        let url = URL(fileURLWithPath: path, isDirectory: true)
+        let relativePath = url.relativePathString(relativeto: arrangementPath)
+        guard let dependency = Machine.Dependency(name: name, pathComponent: relativePath) else {
             throw ValidationError("Cannot parse machines name from path \(path)")
         }
-        guard var arrangement = parser.parseArrangement(atDirectory: URL(fileURLWithPath: arrangementPath, isDirectory: true)) else {
+        guard var arrangement = parser.parseArrangement(atDirectory: arrangementPath) else {
             parser.errors.forEach(printer.error)
             throw ExitCode.failure
         }
@@ -98,7 +101,7 @@ public struct SwiftfsmAdd: ParsableCommand {
             }
         }
         arrangement.dependencies.append(dependency)
-        guard nil != generator.generateArrangement(arrangement) else {
+        guard nil != generator.generateArrangement(arrangement, atDirectory: url) else {
             generator.errors.forEach(printer.error)
             throw ExitCode.failure
         }

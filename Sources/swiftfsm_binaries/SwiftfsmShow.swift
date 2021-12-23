@@ -79,25 +79,26 @@ public struct SwiftfsmShow: ParsableCommand {
     public func run() throws {
         let printer = CommandLinePrinter(errorStream: StderrOutputStream(), messageStream: StdoutOutputStream(), warningStream: StdoutOutputStream())
         let parser = MachineArrangementParser()
-        guard let arrangement = parser.parseArrangement(atDirectory: URL(fileURLWithPath: arrangement, isDirectory: true)) else {
+        let url = URL(fileURLWithPath: arrangement, isDirectory: true)
+        guard let arrangement = parser.parseArrangement(atDirectory: url) else {
             parser.errors.forEach(printer.error)
             throw ExitCode.failure
         }
         let str: String
         if false == all {
-            str = arrangement.dependencies.map { ($0.name ?? $0.machineName) + " -> " + $0.filePath.path }.joined(separator: "\n")
+            str = arrangement.dependencies.map { ($0.name ?? $0.machineName) + " -> " + $0.filePath(relativeTo: url).path }.joined(separator: "\n")
         } else {
-            str = self.hierarchy(of: arrangement)
+            str = self.hierarchy(of: arrangement, atDirectory: url)
         }
         printer.message(str: str)
     }
     
-    private func hierarchy(of arrangement: Arrangement) -> String {
-        func process(_ dependency: Machine.Dependency, prefix: String = "", indent: String = "") -> String {
+    private func hierarchy(of arrangement: Arrangement, atDirectory url: URL) -> String {
+        func process(_ dependency: Machine.Dependency, parent: URL, prefix: String = "", indent: String = "") -> String {
             let name = (dependency.name ?? dependency.machineName)
-            let str = indent + prefix + name + " -> " + dependency.filePath.path
-            let deps = dependency.machine.dependencies.map {
-                process($0, prefix: name + ".", indent: indent + "    ")
+            let str = indent + prefix + name + " -> " + dependency.filePath(relativeTo: parent).path
+            let deps = dependency.machine(relativeTo: parent).dependencies.map {
+                process($0, parent: dependency.filePath(relativeTo: parent), prefix: name + ".", indent: indent + "    ")
             }.joined(separator: "\n")
             let spacing = deps.isEmpty ? "" : "\n"
             if deps.isEmpty {
@@ -105,7 +106,7 @@ public struct SwiftfsmShow: ParsableCommand {
             }
             return str + "\n" + deps + spacing
         }
-        return arrangement.dependencies.map { process($0) }.joined(separator: "\n")
+        return arrangement.dependencies.map { process($0, parent: url) }.joined(separator: "\n")
     }
     
 }

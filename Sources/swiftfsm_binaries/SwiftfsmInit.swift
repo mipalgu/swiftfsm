@@ -115,8 +115,8 @@ public struct SwiftfsmInit: ParsableCommand {
         guard let name = self.executableName else {
             throw ValidationError("Cannot calcualte name of arrangement from arrangement path: " + self.arrangementPath)
         }
-        let arrangement = Arrangement(name: name, filePath: url, dependencies: [])
-        guard nil != generator.generateArrangement(arrangement) else {
+        let arrangement = Arrangement(name: name, dependencies: [])
+        guard nil != generator.generateArrangement(arrangement, atDirectory: url) else {
             generator.errors.forEach(printer.error)
             throw ExitCode.failure
         }

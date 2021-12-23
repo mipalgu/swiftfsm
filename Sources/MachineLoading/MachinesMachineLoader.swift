@@ -70,6 +70,10 @@ import IO
 import Gateways
 import swift_helpers
 
+#if !NO_FOUNDATION && canImport(Foundation)
+import Foundation
+#endif
+
 @available(macOS 10.11, *)
 public final class MachinesMachineLoader: MachineLoader {
 
@@ -144,7 +148,7 @@ public final class MachinesMachineLoader: MachineLoader {
     
     #endif
     
-    public func load<Gateway: FSMGateway>(name: String, gateway: Gateway, clock: Timer, path: String) -> (FSMType, [Dependency])? {
+    public func load<Gateway: FSMGateway>(name: String, gateway: Gateway, clock: swiftfsm.Timer, path: String) -> (FSMType, [Dependency])? {
         // Attempt to load the machine from the compiled libs.
         let buildDir = path + "/" + self.buildDir
         guard let lastComponent = path.split(separator: "/").last else {
@@ -161,7 +165,7 @@ public final class MachinesMachineLoader: MachineLoader {
         #if !NO_FOUNDATION && canImport(Foundation)
         // If we can't load the machine because it is not compiled, then compile and try to load it again.
         if let machine = self.parser.parseMachine(atPath: path) {
-            return load(machine: machine, gateway: gateway, clock: clock, prefix: name)
+            return load(machine: machine, atPath: path, gateway: gateway, clock: clock, prefix: name)
         }
         self.parser.errors.forEach(self.printer.error)
         #endif
@@ -203,7 +207,7 @@ public final class MachinesMachineLoader: MachineLoader {
     
 #if !NO_FOUNDATION && canImport(Foundation)
 
-    fileprivate func load<Gateway: FSMGateway>(machine: Machine, gateway: Gateway, clock: Timer, prefix: String, caller: FSM_ID? = nil) -> (FSMType, [Dependency])? {
+    fileprivate func load<Gateway: FSMGateway>(machine: Machine, atPath path: String, gateway: Gateway, clock: swiftfsm.Timer, prefix: String, caller: FSM_ID? = nil) -> (FSMType, [Dependency])? {
         let dependantMachines = machine.dependencies
         let selfID: FSM_ID = gateway.id(of: prefix + "." + machine.name)
         let caller = caller ?? selfID
@@ -220,8 +224,10 @@ public final class MachinesMachineLoader: MachineLoader {
         guard let recursed = dependantMachines.failMap({ (m: Machine.Dependency) -> Dependency? in
             let id = newGateway.id(of: m.callName)
             let caller = true == machine.callables.lazy.map { $0.callName }.contains(m.callName) ? caller : id
+            let url = URL(fileURLWithPath: path)
             return load(
-                machine: m.machine,
+                machine: m.machine(relativeTo: url),
+                atPath: m.filePath(relativeTo: url).path,
                 gateway: gateway,
                 clock: clock,
                 prefix: prefix + "." + machine.name,
@@ -260,7 +266,7 @@ public final class MachinesMachineLoader: MachineLoader {
 //        return (fsm, recursed)
     }
 
-    fileprivate func loadSymbol<G: FSMGateway>(inMachine name: String, gateway: G, clock: Timer, path: String, caller: FSM_ID) -> FSMType? {
+    fileprivate func loadSymbol<G: FSMGateway>(inMachine name: String, gateway: G, clock: swiftfsm.Timer, path: String, caller: FSM_ID) -> FSMType? {
         return self.libraryLoader.load(name: name, gateway: gateway, clock: clock, path: path)?.0
     }
 
@@ -278,7 +284,7 @@ public final class MachinesMachineLoader: MachineLoader {
     
 #endif
     
-    fileprivate func loadCompiledMachine<Gateway: FSMGateway>(name: String, gateway: Gateway, clock: Timer, path: String, prefix: String, caller: FSM_ID? = nil) -> (FSMType, [Dependency])? {
+    fileprivate func loadCompiledMachine<Gateway: FSMGateway>(name: String, gateway: Gateway, clock: swiftfsm.Timer, path: String, prefix: String, caller: FSM_ID? = nil) -> (FSMType, [Dependency])? {
         let ext = self.calculateExt()
         let libPath = path + "/" + name + "." + ext
         let nullGateway = StackGateway()

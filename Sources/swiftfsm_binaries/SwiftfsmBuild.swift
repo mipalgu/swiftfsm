@@ -198,14 +198,16 @@ public struct SwiftfsmBuild: ParsableCommand {
         let buildDir = self.actualBuildDir
         let compiler = MachineArrangementCompiler()
         let parser = MachineArrangementParser()
+        let url = URL(fileURLWithPath: self.arrangmentPath, isDirectory: true)
         // Parse machines
-        guard let arrangement = parser.parseArrangement(atDirectory: URL(fileURLWithPath: self.arrangmentPath, isDirectory: true)) else {
+        guard let arrangement = parser.parseArrangement(atDirectory: url) else {
             parser.errors.forEach(printer.error)
             throw ExitCode.failure
         }
         // Compile the arrangement.
         guard nil != compiler.compileArrangement(
             arrangement,
+            atDirectory: url,
             machineBuildDir: buildDir,
             libExtension: self.libExtension,
             swiftBuildConfig: self.config,

@@ -60,6 +60,7 @@
 
 import IO
 import SwiftMachines
+import Foundation
 
 @available(macOS 10.11, *)
 public final class SwiftMachinesCompiler: MachineCompiler {
@@ -124,6 +125,7 @@ public final class SwiftMachinesCompiler: MachineCompiler {
         #endif
         guard self.compiler.compile(
             machine,
+            atDirectory: URL(fileURLWithPath: path),
             withBuildDir: buildDir,
             libExtension: ext,
             withCCompilerFlags: compilerFlags,
