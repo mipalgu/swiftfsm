@@ -498,7 +498,7 @@ class ScheduleVerifierTests: XCTestCase {
                     constraint: nil,
                     resetClock: $1,
                     takeSnapshot: !readState,
-                    time: readState ? $3 : cycleLength - $3,
+                    time: $3,
                     target: $2
                 )
             }
@@ -517,7 +517,7 @@ class ScheduleVerifierTests: XCTestCase {
         let previous = fsm.initialPreviousState.name
         let exit = fsm.exitState.name
         let fsm1Gap = fsm2.startingTime - fsm1.duration - fsm1.startingTime
-        let fsm2Gap = fsm2.startingTime
+        let fsm2Gap = fsm1.startingTime
         let states: Set<KripkeState> = [
             kripkeState(
                 executing: fsm1Name,
