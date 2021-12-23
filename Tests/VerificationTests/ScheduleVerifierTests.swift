@@ -281,9 +281,13 @@ class ScheduleVerifierTests: XCTestCase {
         let fsm2StartingTime: UInt = 50
         let fsm2Duration: UInt = 20
         let cycleLength: UInt = fsm2StartingTime + fsm2Duration
-        let states = sensorsKripkeStructure(fsmName: fsm1.name, startingTime: 10, duration: fsm1Duration, cycleLength: cycleLength)
         let fsm2 = SensorFiniteStateMachine()
         fsm2.name = fsm2.name + "2"
+        let states = twoSensorKripkeStructure(
+            fsm1: (name: fsm1.name, startingTime: fsm1StartingTime, duration: fsm1Duration),
+            fsm2: (name: fsm2.name, startingTime: fsm2StartingTime, duration: fsm2Duration),
+            cycleLength: cycleLength
+        )
         let gateway = StackGateway()
         let timer = FSMClock(ringletLengths: [fsm1.name: fsm1Duration, fsm2.name: fsm2Duration], scheduleLength: cycleLength)
         fsm1.gateway = gateway
@@ -411,6 +415,8 @@ class ScheduleVerifierTests: XCTestCase {
     ) -> Set<KripkeState> {
         let fsm1Name = fsm1.name
         let fsm2Name = fsm2.name
+        var statesLookup: [KripkeStatePropertyList: KripkeState] = [:]
+        statesLookup.reserveCapacity(64)
         func propertyList(
             executing: String,
             readState: Bool,
@@ -434,12 +440,12 @@ class ScheduleVerifierTests: XCTestCase {
                 if data.2 == "initial" {
                     fsm.currentState = fsm.initialState
                 } else {
-                    fsm.currentState = EmptyMiPalState(currentState)
+                    fsm.currentState = EmptyMiPalState(data.2)
                 }
                 if data.3 == "initial" {
                     fsm.previousState = fsm.initialState
                 } else {
-                    fsm.previousState = EmptyMiPalState(previousState)
+                    fsm.previousState = EmptyMiPalState(data.3)
                 }
                 fsm.ringlet.previousState = fsm.previousState
                 fsm.ringlet.shouldExecuteOnEntry = fsm.previousState != fsm.currentState
@@ -453,7 +459,7 @@ class ScheduleVerifierTests: XCTestCase {
                     }))),
                     value: [fsm.name: fsm]
                 ),
-                "pc": KripkeStateProperty(type: .String, value: fsm.name + "." + (readState ? currentState! : previousState!) + "." + (readState ? "R" : "W"))
+                "pc": KripkeStateProperty(type: .String, value: executing + "." + (readState ? currentState! : previousState!) + "." + (readState ? "R" : "W"))
             ]
         }
         func target(
@@ -496,7 +502,10 @@ class ScheduleVerifierTests: XCTestCase {
                     target: $2
                 )
             }
-            let state = KripkeState(isInitial: fsm1.previousState == fsm.initialPreviousState.name, properties: properties)
+            let state = statesLookup[properties] ?? KripkeState(isInitial: fsm1.previousState == fsm.initialPreviousState.name, properties: properties)
+            if nil == statesLookup[properties] {
+                statesLookup[properties] = state
+            }
             for edge in edges {
                 state.addEdge(edge)
             }
@@ -507,6 +516,8 @@ class ScheduleVerifierTests: XCTestCase {
         let initial = fsm.initialState.name
         let previous = fsm.initialPreviousState.name
         let exit = fsm.exitState.name
+        let fsm1Gap = fsm2.startingTime - fsm1.duration - fsm1.startingTime
+        let fsm2Gap = fsm2.startingTime
         let states: Set<KripkeState> = [
             kripkeState(
                 executing: fsm1Name,
@@ -515,12 +526,890 @@ class ScheduleVerifierTests: XCTestCase {
                 fsm2: (sensorValue: false, currentState: initial, previousState: previous),
                 targets: [
                     target(
+                        executing: fsm1Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm1.duration,
+                        fsm1: (sensorValue: false, currentState: initial, previousState: initial),
+                        fsm2: (sensorValue: false, currentState: initial, previousState: previous)
+                    )
+                ]
+            ),
+            kripkeState(
+                executing: fsm1Name,
+                readState: false,
+                fsm1: (sensorValue: false, currentState: initial, previousState: initial),
+                fsm2: (sensorValue: false, currentState: initial, previousState: previous),
+                targets: [
+                    target(
+                        executing: fsm2Name,
+                        readState: true,
+                        resetClock: false,
+                        duration: fsm1Gap,
+                        fsm1: (sensorValue: false, currentState: initial, previousState: initial),
+                        fsm2: (sensorValue: false, currentState: initial, previousState: previous)
+                    ),
+                    target(
+                        executing: fsm2Name,
+                        readState: true,
+                        resetClock: false,
+                        duration: fsm1Gap,
+                        fsm1: (sensorValue: false, currentState: initial, previousState: initial),
+                        fsm2: (sensorValue: true, currentState: initial, previousState: previous)
+                    )
+                ]
+            ),
+            kripkeState(
+                executing: fsm2Name,
+                readState: true,
+                fsm1: (sensorValue: false, currentState: initial, previousState: initial),
+                fsm2: (sensorValue: false, currentState: initial, previousState: previous),
+                targets: [
+                    target(
                         executing: fsm2Name,
                         readState: false,
                         resetClock: false,
-                        duration: fsm2.startingTime - (fsm1.startingTime + fsm1.duration),
+                        duration: fsm2.duration,
                         fsm1: (sensorValue: false, currentState: initial, previousState: initial),
+                        fsm2: (sensorValue: false, currentState: initial, previousState: initial)
+                    )
+                ]
+            ),
+            kripkeState(
+                executing: fsm2Name,
+                readState: false,
+                fsm1: (sensorValue: false, currentState: initial, previousState: initial),
+                fsm2: (sensorValue: false, currentState: initial, previousState: initial),
+                targets: [
+                    target(
+                        executing: fsm1Name,
+                        readState: true,
+                        resetClock: false,
+                        duration: fsm2Gap,
+                        fsm1: (sensorValue: false, currentState: initial, previousState: initial),
+                        fsm2: (sensorValue: false, currentState: initial, previousState: initial)
+                    ),
+                    target(
+                        executing: fsm1Name,
+                        readState: true,
+                        resetClock: false,
+                        duration: fsm2Gap,
+                        fsm1: (sensorValue: true, currentState: initial, previousState: initial),
+                        fsm2: (sensorValue: false, currentState: initial, previousState: initial)
+                    )
+                ]
+            ),
+            kripkeState(
+                executing: fsm1Name,
+                readState: true,
+                fsm1: (sensorValue: false, currentState: initial, previousState: initial),
+                fsm2: (sensorValue: false, currentState: initial, previousState: initial),
+                targets: [
+                    target(
+                        executing: fsm1Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm1.duration,
+                        fsm1: (sensorValue: false, currentState: initial, previousState: initial),
+                        fsm2: (sensorValue: false, currentState: initial, previousState: initial)
+                    )
+                ]
+            ),
+            kripkeState(
+                executing: fsm1Name,
+                readState: false,
+                fsm1: (sensorValue: false, currentState: initial, previousState: initial),
+                fsm2: (sensorValue: false, currentState: initial, previousState: initial),
+                targets: [
+                    target(
+                        executing: fsm2Name,
+                        readState: true,
+                        resetClock: false,
+                        duration: fsm1Gap,
+                        fsm1: (sensorValue: false, currentState: initial, previousState: initial),
+                        fsm2: (sensorValue: false, currentState: initial, previousState: initial)
+                    ),
+                    target(
+                        executing: fsm2Name,
+                        readState: true,
+                        resetClock: false,
+                        duration: fsm1Gap,
+                        fsm1: (sensorValue: false, currentState: initial, previousState: initial),
+                        fsm2: (sensorValue: true, currentState: initial, previousState: initial)
+                    )
+                ]
+            ),
+            kripkeState(
+                executing: fsm2Name,
+                readState: true,
+                fsm1: (sensorValue: false, currentState: initial, previousState: initial),
+                fsm2: (sensorValue: true, currentState: initial, previousState: initial),
+                targets: [
+                    target(
+                        executing: fsm2Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm2.duration,
+                        fsm1: (sensorValue: false, currentState: initial, previousState: initial),
+                        fsm2: (sensorValue: true, currentState: exit, previousState: initial)
+                    )
+                ]
+            ),
+            kripkeState(
+                executing: fsm2Name,
+                readState: true,
+                fsm1: (sensorValue: false, currentState: initial, previousState: initial),
+                fsm2: (sensorValue: false, currentState: initial, previousState: initial),
+                targets: [
+                    target(
+                        executing: fsm2Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm2.duration,
+                        fsm1: (sensorValue: false, currentState: initial, previousState: initial),
+                        fsm2: (sensorValue: false, currentState: initial, previousState: initial)
+                    )
+                ]
+            ),
+            kripkeState(
+                executing: fsm2Name,
+                readState: false,
+                fsm1: (sensorValue: false, currentState: initial, previousState: initial),
+                fsm2: (sensorValue: false, currentState: initial, previousState: initial),
+                targets: [
+                    target(
+                        executing: fsm1Name,
+                        readState: true,
+                        resetClock: false,
+                        duration: fsm2Gap,
+                        fsm1: (sensorValue: false, currentState: initial, previousState: initial),
+                        fsm2: (sensorValue: false, currentState: initial, previousState: initial)
+                    ),
+                    target(
+                        executing: fsm1Name,
+                        readState: true,
+                        resetClock: false,
+                        duration: fsm2Gap,
+                        fsm1: (sensorValue: true, currentState: initial, previousState: initial),
+                        fsm2: (sensorValue: false, currentState: initial, previousState: initial)
+                    )
+                ]
+            ),
+            kripkeState(
+                executing: fsm1Name,
+                readState: true,
+                fsm1: (sensorValue: true, currentState: initial, previousState: initial),
+                fsm2: (sensorValue: false, currentState: initial, previousState: initial),
+                targets: [
+                    target(
+                        executing: fsm1Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm1.duration,
+                        fsm1: (sensorValue: true, currentState: exit, previousState: initial),
+                        fsm2: (sensorValue: false, currentState: initial, previousState: initial)
+                    ),
+                ]
+            ),
+            kripkeState(
+                executing: fsm1Name,
+                readState: false,
+                fsm1: (sensorValue: true, currentState: exit, previousState: initial),
+                fsm2: (sensorValue: false, currentState: initial, previousState: initial),
+                targets: [
+                    target(
+                        executing: fsm2Name,
+                        readState: true,
+                        resetClock: false,
+                        duration: fsm1Gap,
+                        fsm1: (sensorValue: true, currentState: exit, previousState: initial),
+                        fsm2: (sensorValue: false, currentState: initial, previousState: initial)
+                    ),
+                    target(
+                        executing: fsm2Name,
+                        readState: true,
+                        resetClock: false,
+                        duration: fsm1Gap,
+                        fsm1: (sensorValue: true, currentState: exit, previousState: initial),
+                        fsm2: (sensorValue: true, currentState: initial, previousState: initial)
+                    )
+                ]
+            ),
+            kripkeState(
+                executing: fsm2Name,
+                readState: true,
+                fsm1: (sensorValue: true, currentState: exit, previousState: initial),
+                fsm2: (sensorValue: true, currentState: initial, previousState: initial),
+                targets: [
+                    target(
+                        executing: fsm2Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm2.duration,
+                        fsm1: (sensorValue: true, currentState: exit, previousState: initial),
+                        fsm2: (sensorValue: true, currentState: exit, previousState: initial)
+                    )
+                ]
+            ),
+            kripkeState(
+                executing: fsm2Name,
+                readState: false,
+                fsm1: (sensorValue: true, currentState: exit, previousState: initial),
+                fsm2: (sensorValue: true, currentState: exit, previousState: initial),
+                targets: [
+                    target(
+                        executing: fsm1Name,
+                        readState: true,
+                        resetClock: true,
+                        duration: fsm2Gap,
+                        fsm1: (sensorValue: true, currentState: exit, previousState: initial),
+                        fsm2: (sensorValue: true, currentState: exit, previousState: initial)
+                    )
+                ]
+            ),
+            kripkeState(
+                executing: fsm1Name,
+                readState: true,
+                fsm1: (sensorValue: true, currentState: exit, previousState: initial),
+                fsm2: (sensorValue: true, currentState: exit, previousState: initial),
+                targets: [
+                    target(
+                        executing: fsm1Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm1.duration,
+                        fsm1: (sensorValue: true, currentState: exit, previousState: exit),
+                        fsm2: (sensorValue: true, currentState: exit, previousState: initial)
+                    )
+                ]
+            ),
+            kripkeState(
+                executing: fsm1Name,
+                readState: false,
+                fsm1: (sensorValue: true, currentState: exit, previousState: exit),
+                fsm2: (sensorValue: true, currentState: exit, previousState: initial),
+                targets: [
+                    target(
+                        executing: fsm2Name,
+                        readState: true,
+                        resetClock: true,
+                        duration: fsm1Gap,
+                        fsm1: (sensorValue: true, currentState: exit, previousState: exit),
+                        fsm2: (sensorValue: true, currentState: exit, previousState: initial)
+                    )
+                ]
+            ),
+            kripkeState(
+                executing: fsm2Name,
+                readState: true,
+                fsm1: (sensorValue: true, currentState: exit, previousState: initial),
+                fsm2: (sensorValue: false, currentState: initial, previousState: initial),
+                targets: [
+                    target(
+                        executing: fsm2Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm2.duration,
+                        fsm1: (sensorValue: true, currentState: exit, previousState: initial),
+                        fsm2: (sensorValue: false, currentState: initial, previousState: initial)
+                    )
+                ]
+            ),
+            kripkeState(
+                executing: fsm2Name,
+                readState: false,
+                fsm1: (sensorValue: true, currentState: exit, previousState: initial),
+                fsm2: (sensorValue: false, currentState: initial, previousState: initial),
+                targets: [
+                    target(
+                        executing: fsm1Name,
+                        readState: true,
+                        resetClock: true,
+                        duration: fsm2Gap,
+                        fsm1: (sensorValue: true, currentState: exit, previousState: initial),
+                        fsm2: (sensorValue: false, currentState: initial, previousState: initial)
+                    )
+                ]
+            ),
+            kripkeState(
+                executing: fsm1Name,
+                readState: true,
+                fsm1: (sensorValue: true, currentState: exit, previousState: initial),
+                fsm2: (sensorValue: false, currentState: initial, previousState: initial),
+                targets: [
+                    target(
+                        executing: fsm1Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm1.duration,
+                        fsm1: (sensorValue: true, currentState: exit, previousState: exit),
+                        fsm2: (sensorValue: false, currentState: initial, previousState: initial)
+                    )
+                ]
+            ),
+            kripkeState(
+                executing: fsm1Name,
+                readState: false,
+                fsm1: (sensorValue: true, currentState: exit, previousState: exit),
+                fsm2: (sensorValue: false, currentState: initial, previousState: initial),
+                targets: [
+                    target(
+                        executing: fsm2Name,
+                        readState: true,
+                        resetClock: false,
+                        duration: fsm1Gap,
+                        fsm1: (sensorValue: true, currentState: exit, previousState: exit),
+                        fsm2: (sensorValue: false, currentState: initial, previousState: initial)
+                    ),
+                    target(
+                        executing: fsm2Name,
+                        readState: true,
+                        resetClock: false,
+                        duration: fsm1Gap,
+                        fsm1: (sensorValue: true, currentState: exit, previousState: exit),
+                        fsm2: (sensorValue: true, currentState: initial, previousState: initial)
+                    )
+                ]
+            ),
+            kripkeState(
+                executing: fsm2Name,
+                readState: true,
+                fsm1: (sensorValue: true, currentState: exit, previousState: exit),
+                fsm2: (sensorValue: true, currentState: initial, previousState: initial),
+                targets: [
+                    target(
+                        executing: fsm2Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm2.duration,
+                        fsm1: (sensorValue: true, currentState: exit, previousState: exit),
+                        fsm2: (sensorValue: true, currentState: exit, previousState: initial)
+                    )
+                ]
+            ),
+            kripkeState(
+                executing: fsm2Name,
+                readState: false,
+                fsm1: (sensorValue: true, currentState: exit, previousState: exit),
+                fsm2: (sensorValue: true, currentState: exit, previousState: initial),
+                targets: [
+                    target(
+                        executing: fsm1Name,
+                        readState: true,
+                        resetClock: false,
+                        duration: fsm2Gap,
+                        fsm1: (sensorValue: true, currentState: exit, previousState: exit),
+                        fsm2: (sensorValue: true, currentState: exit, previousState: initial)
+                    )
+                ]
+            ),
+            kripkeState(
+                executing: fsm1Name,
+                readState: true,
+                fsm1: (sensorValue: true, currentState: exit, previousState: exit),
+                fsm2: (sensorValue: true, currentState: exit, previousState: initial),
+                targets: [
+                    target(
+                        executing: fsm1Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm1.duration,
+                        fsm1: (sensorValue: true, currentState: exit, previousState: exit),
+                        fsm2: (sensorValue: true, currentState: exit, previousState: initial)
+                    )
+                ]
+            ),
+            kripkeState(
+                executing: fsm1Name,
+                readState: false,
+                fsm1: (sensorValue: true, currentState: exit, previousState: exit),
+                fsm2: (sensorValue: true, currentState: exit, previousState: initial),
+                targets: [
+                    target(
+                        executing: fsm2Name,
+                        readState: true,
+                        resetClock: true,
+                        duration: fsm1Gap,
+                        fsm1: (sensorValue: true, currentState: exit, previousState: exit),
+                        fsm2: (sensorValue: true, currentState: exit, previousState: initial)
+                    )
+                ]
+            ),
+            kripkeState(
+                executing: fsm2Name,
+                readState: true,
+                fsm1: (sensorValue: true, currentState: exit, previousState: exit),
+                fsm2: (sensorValue: true, currentState: exit, previousState: initial),
+                targets: [
+                    target(
+                        executing: fsm2Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm2.duration,
+                        fsm1: (sensorValue: true, currentState: exit, previousState: exit),
+                        fsm2: (sensorValue: true, currentState: exit, previousState: exit)
+                    )
+                ]
+            ),
+            kripkeState(
+                executing: fsm2Name,
+                readState: false,
+                fsm1: (sensorValue: true, currentState: exit, previousState: exit),
+                fsm2: (sensorValue: true, currentState: exit, previousState: exit),
+                targets: []
+            ),
+            kripkeState(
+                executing: fsm2Name,
+                readState: true,
+                fsm1: (sensorValue: true, currentState: exit, previousState: exit),
+                fsm2: (sensorValue: false, currentState: initial, previousState: initial),
+                targets: [
+                    target(
+                        executing: fsm2Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm2.duration,
+                        fsm1: (sensorValue: true, currentState: exit, previousState: exit),
+                        fsm2: (sensorValue: false, currentState: initial, previousState: initial)
+                    )
+                ]
+            ),
+            kripkeState(
+                executing: fsm2Name,
+                readState: false,
+                fsm1: (sensorValue: true, currentState: exit, previousState: exit),
+                fsm2: (sensorValue: false, currentState: initial, previousState: initial),
+                targets: [
+                    target(
+                        executing: fsm1Name,
+                        readState: true,
+                        resetClock: false,
+                        duration: fsm2Gap,
+                        fsm1: (sensorValue: true, currentState: exit, previousState: exit),
+                        fsm2: (sensorValue: false, currentState: initial, previousState: initial)
+                    )
+                ]
+            ),
+            kripkeState(
+                executing: fsm1Name,
+                readState: true,
+                fsm1: (sensorValue: true, currentState: exit, previousState: exit),
+                fsm2: (sensorValue: false, currentState: initial, previousState: initial),
+                targets: [
+                    target(
+                        executing: fsm1Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm1.duration,
+                        fsm1: (sensorValue: true, currentState: exit, previousState: exit),
+                        fsm2: (sensorValue: false, currentState: initial, previousState: initial)
+                    )
+                ]
+            ),
+            kripkeState(
+                executing: fsm1Name,
+                readState: false,
+                fsm1: (sensorValue: true, currentState: exit, previousState: exit),
+                fsm2: (sensorValue: false, currentState: initial, previousState: initial),
+                targets: [
+                    target(
+                        executing: fsm2Name,
+                        readState: true,
+                        resetClock: false,
+                        duration: fsm1Gap,
+                        fsm1: (sensorValue: true, currentState: exit, previousState: exit),
+                        fsm2: (sensorValue: false, currentState: initial, previousState: initial)
+                    ),
+                    target(
+                        executing: fsm2Name,
+                        readState: true,
+                        resetClock: false,
+                        duration: fsm1Gap,
+                        fsm1: (sensorValue: true, currentState: exit, previousState: exit),
+                        fsm2: (sensorValue: true, currentState: initial, previousState: initial)
+                    )
+                ]
+            ),
+            kripkeState(
+                executing: fsm2Name,
+                readState: true,
+                fsm1: (sensorValue: false, currentState: initial, previousState: initial),
+                fsm2: (sensorValue: true, currentState: initial, previousState: previous),
+                targets: [
+                    target(
+                        executing: fsm2Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm2.duration,
+                        fsm1: (sensorValue: false, currentState: initial, previousState: initial),
+                        fsm2: (sensorValue: true, currentState: exit, previousState: initial)
+                    )
+                ]
+            ),
+            kripkeState(
+                executing: fsm2Name,
+                readState: false,
+                fsm1: (sensorValue: false, currentState: initial, previousState: initial),
+                fsm2: (sensorValue: true, currentState: exit, previousState: initial),
+                targets: [
+                    target(
+                        executing: fsm1Name,
+                        readState: true,
+                        resetClock: false,
+                        duration: fsm2Gap,
+                        fsm1: (sensorValue: false, currentState: initial, previousState: initial),
+                        fsm2: (sensorValue: true, currentState: exit, previousState: initial)
+                    ),
+                    target(
+                        executing: fsm1Name,
+                        readState: true,
+                        resetClock: false,
+                        duration: fsm2Gap,
+                        fsm1: (sensorValue: true, currentState: initial, previousState: initial),
+                        fsm2: (sensorValue: true, currentState: exit, previousState: initial)
+                    )
+                ]
+            ),
+            kripkeState(
+                executing: fsm1Name,
+                readState: true,
+                fsm1: (sensorValue: false, currentState: initial, previousState: initial),
+                fsm2: (sensorValue: true, currentState: exit, previousState: initial),
+                targets: [
+                    target(
+                        executing: fsm1Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm1.duration,
+                        fsm1: (sensorValue: false, currentState: initial, previousState: initial),
+                        fsm2: (sensorValue: true, currentState: exit, previousState: initial)
+                    )
+                ]
+            ),
+            kripkeState(
+                executing: fsm1Name,
+                readState: false,
+                fsm1: (sensorValue: false, currentState: initial, previousState: initial),
+                fsm2: (sensorValue: true, currentState: exit, previousState: initial),
+                targets: [
+                    target(
+                        executing: fsm2Name,
+                        readState: true,
+                        resetClock: true,
+                        duration: fsm1Gap,
+                        fsm1: (sensorValue: false, currentState: initial, previousState: initial),
+                        fsm2: (sensorValue: true, currentState: exit, previousState: initial)
+                    )
+                ]
+            ),
+            kripkeState(
+                executing: fsm2Name,
+                readState: true,
+                fsm1: (sensorValue: false, currentState: initial, previousState: initial),
+                fsm2: (sensorValue: true, currentState: exit, previousState: initial),
+                targets: [
+                    target(
+                        executing: fsm2Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm2.duration,
+                        fsm1: (sensorValue: false, currentState: initial, previousState: initial),
+                        fsm2: (sensorValue: true, currentState: exit, previousState: exit)
+                    )
+                ]
+            ),
+            kripkeState(
+                executing: fsm2Name,
+                readState: false,
+                fsm1: (sensorValue: false, currentState: initial, previousState: initial),
+                fsm2: (sensorValue: true, currentState: exit, previousState: exit),
+                targets: [
+                    target(
+                        executing: fsm1Name,
+                        readState: true,
+                        resetClock: false,
+                        duration: fsm2Gap,
+                        fsm1: (sensorValue: false, currentState: initial, previousState: initial),
+                        fsm2: (sensorValue: true, currentState: exit, previousState: exit)
+                    ),
+                    target(
+                        executing: fsm1Name,
+                        readState: true,
+                        resetClock: false,
+                        duration: fsm2Gap,
+                        fsm1: (sensorValue: true, currentState: initial, previousState: initial),
+                        fsm2: (sensorValue: true, currentState: exit, previousState: exit)
+                    )
+                ]
+            ),
+            kripkeState(
+                executing: fsm1Name,
+                readState: true,
+                fsm1: (sensorValue: false, currentState: initial, previousState: initial),
+                fsm2: (sensorValue: true, currentState: exit, previousState: exit),
+                targets: [
+                    target(
+                        executing: fsm1Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm1.duration,
+                        fsm1: (sensorValue: false, currentState: initial, previousState: initial),
+                        fsm2: (sensorValue: true, currentState: exit, previousState: exit)
+                    )
+                ]
+            ),
+            kripkeState(
+                executing: fsm1Name,
+                readState: false,
+                fsm1: (sensorValue: false, currentState: initial, previousState: initial),
+                fsm2: (sensorValue: true, currentState: exit, previousState: exit),
+                targets: [
+                    target(
+                        executing: fsm2Name,
+                        readState: true,
+                        resetClock: false,
+                        duration: fsm1Gap,
+                        fsm1: (sensorValue: false, currentState: initial, previousState: initial),
+                        fsm2: (sensorValue: true, currentState: exit, previousState: exit)
+                    )
+                ]
+            ),
+            kripkeState(
+                executing: fsm2Name,
+                readState: true,
+                fsm1: (sensorValue: false, currentState: initial, previousState: initial),
+                fsm2: (sensorValue: true, currentState: exit, previousState: exit),
+                targets: [
+                    target(
+                        executing: fsm2Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm2.duration,
+                        fsm1: (sensorValue: false, currentState: initial, previousState: initial),
+                        fsm2: (sensorValue: true, currentState: exit, previousState: exit)
+                    )
+                ]
+            ),
+            kripkeState(
+                executing: fsm1Name,
+                readState: false,
+                fsm1: (sensorValue: true, currentState: exit, previousState: initial),
+                fsm2: (sensorValue: true, currentState: exit, previousState: exit),
+                targets: [
+                    target(
+                        executing: fsm2Name,
+                        readState: true,
+                        resetClock: false,
+                        duration: fsm1Gap,
+                        fsm1: (sensorValue: true, currentState: exit, previousState: initial),
+                        fsm2: (sensorValue: true, currentState: exit, previousState: exit)
+                    )
+                ]
+            ),
+            kripkeState(
+                executing: fsm2Name,
+                readState: true,
+                fsm1: (sensorValue: true, currentState: exit, previousState: initial),
+                fsm2: (sensorValue: true, currentState: exit, previousState: exit),
+                targets: [
+                    target(
+                        executing: fsm2Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm2.duration,
+                        fsm1: (sensorValue: true, currentState: exit, previousState: initial),
+                        fsm2: (sensorValue: true, currentState: exit, previousState: exit)
+                    )
+                ]
+            ),
+            kripkeState(
+                executing: fsm2Name,
+                readState: false,
+                fsm1: (sensorValue: true, currentState: exit, previousState: initial),
+                fsm2: (sensorValue: true, currentState: exit, previousState: exit),
+                targets: [
+                    target(
+                        executing: fsm1Name,
+                        readState: true,
+                        resetClock: true,
+                        duration: fsm2Gap,
+                        fsm1: (sensorValue: true, currentState: exit, previousState: initial),
+                        fsm2: (sensorValue: true, currentState: exit, previousState: exit)
+                    )
+                ]
+            ),
+            kripkeState(
+                executing: fsm1Name,
+                readState: true,
+                fsm1: (sensorValue: true, currentState: initial, previousState: initial),
+                fsm2: (sensorValue: true, currentState: exit, previousState: exit),
+                targets: [
+                    target(
+                        executing: fsm1Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm1.duration,
+                        fsm1: (sensorValue: true, currentState: exit, previousState: initial),
+                        fsm2: (sensorValue: true, currentState: exit, previousState: exit)
+                    )
+                ]
+            ),
+            kripkeState(
+                executing: fsm1Name,
+                readState: true,
+                fsm1: (sensorValue: true, currentState: initial, previousState: initial),
+                fsm2: (sensorValue: true, currentState: exit, previousState: initial),
+                targets: [
+                    target(
+                        executing: fsm1Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm1.duration,
+                        fsm1: (sensorValue: true, currentState: exit, previousState: initial),
+                        fsm2: (sensorValue: true, currentState: exit, previousState: initial)
+                    )
+                ]
+            ),
+            kripkeState(
+                executing: fsm1Name,
+                readState: false,
+                fsm1: (sensorValue: true, currentState: exit, previousState: initial),
+                fsm2: (sensorValue: true, currentState: exit, previousState: initial),
+                targets: [
+                    target(
+                        executing: fsm2Name,
+                        readState: true,
+                        resetClock: true,
+                        duration: fsm1Gap,
+                        fsm1: (sensorValue: true, currentState: exit, previousState: initial),
+                        fsm2: (sensorValue: true, currentState: exit, previousState: initial)
+                    )
+                ]
+            ),
+            kripkeState(
+                executing: fsm2Name,
+                readState: true,
+                fsm1: (sensorValue: true, currentState: exit, previousState: initial),
+                fsm2: (sensorValue: true, currentState: exit, previousState: initial),
+                targets: [
+                    target(
+                        executing: fsm2Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm2.duration,
+                        fsm1: (sensorValue: true, currentState: exit, previousState: initial),
+                        fsm2: (sensorValue: true, currentState: exit, previousState: exit)
+                    )
+                ]
+            ),
+            kripkeState(
+                executing: fsm2Name,
+                readState: false,
+                fsm1: (sensorValue: true, currentState: exit, previousState: initial),
+                fsm2: (sensorValue: true, currentState: exit, previousState: exit),
+                targets: [
+                    target(
+                        executing: fsm1Name,
+                        readState: true,
+                        resetClock: true,
+                        duration: fsm2Gap,
+                        fsm1: (sensorValue: true, currentState: exit, previousState: initial),
+                        fsm2: (sensorValue: true, currentState: exit, previousState: exit)
+                    )
+                ]
+            ),
+            kripkeState(
+                executing: fsm1Name,
+                readState: true,
+                fsm1: (sensorValue: true, currentState: exit, previousState: initial),
+                fsm2: (sensorValue: true, currentState: exit, previousState: exit),
+                targets: [
+                    target(
+                        executing: fsm1Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm1.duration,
+                        fsm1: (sensorValue: true, currentState: exit, previousState: exit),
+                        fsm2: (sensorValue: true, currentState: exit, previousState: exit)
+                    )
+                ]
+            ),
+            kripkeState(
+                executing: fsm1Name,
+                readState: false,
+                fsm1: (sensorValue: true, currentState: exit, previousState: exit),
+                fsm2: (sensorValue: true, currentState: exit, previousState: exit),
+                targets: []
+            ),
+            kripkeState(
+                executing: fsm1Name,
+                readState: true,
+                fsm1: (sensorValue: true, currentState: initial, previousState: previous),
+                fsm2: (sensorValue: false, currentState: initial, previousState: previous),
+                targets: [
+                    target(
+                        executing: fsm1Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm2.startingTime - (fsm1.startingTime + fsm1.duration),
+                        fsm1: (sensorValue: true, currentState: exit, previousState: initial),
                         fsm2: (sensorValue: false, currentState: initial, previousState: previous)
+                    )
+                ]
+            ),
+            kripkeState(
+                executing: fsm1Name,
+                readState: false,
+                fsm1: (sensorValue: true, currentState: exit, previousState: initial),
+                fsm2: (sensorValue: false, currentState: initial, previousState: previous),
+                targets: [
+                    target(
+                        executing: fsm2Name,
+                        readState: true,
+                        resetClock: false,
+                        duration: fsm1Gap,
+                        fsm1: (sensorValue: true, currentState: exit, previousState: initial),
+                        fsm2: (sensorValue: false, currentState: initial, previousState: previous)
+                    ),
+                    target(
+                        executing: fsm2Name,
+                        readState: true,
+                        resetClock: false,
+                        duration: fsm1Gap,
+                        fsm1: (sensorValue: true, currentState: exit, previousState: initial),
+                        fsm2: (sensorValue: true, currentState: initial, previousState: previous)
+                    )
+                ]
+            ),
+            kripkeState(
+                executing: fsm2Name,
+                readState: true,
+                fsm1: (sensorValue: true, currentState: exit, previousState: initial),
+                fsm2: (sensorValue: false, currentState: initial, previousState: previous),
+                targets: [
+                    target(
+                        executing: fsm2Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm2.duration,
+                        fsm1: (sensorValue: true, currentState: exit, previousState: initial),
+                        fsm2: (sensorValue: false, currentState: initial, previousState: initial)
+                    )
+                ]
+            ),
+            kripkeState(
+                executing: fsm2Name,
+                readState: true,
+                fsm1: (sensorValue: true, currentState: exit, previousState: initial),
+                fsm2: (sensorValue: true, currentState: initial, previousState: previous),
+                targets: [
+                    target(
+                        executing: fsm2Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm2.duration,
+                        fsm1: (sensorValue: true, currentState: exit, previousState: initial),
+                        fsm2: (sensorValue: true, currentState: exit, previousState: initial)
                     )
                 ]
             )
