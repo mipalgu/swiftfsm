@@ -69,9 +69,33 @@ import Timers
 
 class ScheduleVerifierTests: XCTestCase {
     
-    class TestableView: KripkeStructureView {
+    final class TestableViewFactory: KripkeStructureViewFactory {
+        
+        private let make: (String) -> TestableView
+        
+        private(set) var createdViews: [TestableView] = []
+        
+        var lastView: TestableView! {
+            createdViews.last!
+        }
+        
+        init(make: @escaping (String) -> TestableView) {
+            self.make = make
+        }
+        
+        func make(identifier: String) -> TestableView {
+            let view = self.make(identifier)
+            createdViews.append(view)
+            return view
+        }
+        
+    }
+    
+    final class TestableView: KripkeStructureView {
         
         typealias State = KripkeState
+        
+        let identifier: String
         
         var expected: Set<KripkeState>
         
@@ -79,7 +103,8 @@ class ScheduleVerifierTests: XCTestCase {
         
         private(set) var finishCalled: Bool = false
         
-        init(expected: Set<KripkeState>) {
+        init(identifier: String, expected: Set<KripkeState>) {
+            self.identifier = identifier
             self.expected = expected
             self.result = Set<KripkeState>(minimumCapacity: expected.count)
         }
@@ -95,6 +120,14 @@ class ScheduleVerifierTests: XCTestCase {
         func reset(usingClocks: Bool) {
             result.removeAll(keepingCapacity: true)
             finishCalled = false
+        }
+        
+        func check(readableName: String) {
+            XCTAssertEqual(result, expected)
+            if expected != result {
+                explain(name: readableName + "_")
+            }
+            XCTAssertTrue(finishCalled)
         }
         
         func explain(name: String = "") {
@@ -155,7 +188,17 @@ class ScheduleVerifierTests: XCTestCase {
         fsm2.gateway = gateway
         fsm2.timer = timer
         let cycleDetector = HashTableCycleDetector<KripkeStatePropertyList>()
-        let view = TestableView(expected: states1)
+        let viewFactory = TestableViewFactory {
+            switch $0 {
+            case fsm1.name:
+                return TestableView(identifier: $0, expected: states1)
+            case fsm2.name:
+                return TestableView(identifier: $0, expected: states2)
+            default:
+                XCTFail("Got incorrect identifier for view: \($0)")
+                return TestableView(identifier: "_bad", expected: [])
+            }
+        }
         let fsm1Timeslot = Timeslot(
             fsms: [fsm1.name],
             callChain: CallChain(root: fsm1.name, calls: []),
@@ -178,12 +221,15 @@ class ScheduleVerifierTests: XCTestCase {
         ])
         let pool = FSMPool(fsms: [.controllableFSM(AnyControllableFiniteStateMachine(fsm1)), .controllableFSM(AnyControllableFiniteStateMachine(fsm2))])
         let verifier = ScheduleVerifier(schedule: schedule, allFsms: pool)
-        verifier.verify(gateway: gateway, timer: timer, view: view, cycleDetector: cycleDetector)
-        XCTAssertEqual(view.result, view.expected)
-        if view.expected != view.result {
-            view.explain(name: readableName + "_")
+        verifier.verify(gateway: gateway, timer: timer, viewFactory: viewFactory, cycleDetector: cycleDetector)
+        if viewFactory.createdViews.count != 2 {
+            XCTFail("Incorrect number of views created: \(viewFactory.createdViews.count)")
+            return
         }
-        XCTAssertTrue(view.finishCalled)
+        let view1 = viewFactory.createdViews[0]
+        let view2 = viewFactory.createdViews[1]
+        view1.check(readableName: readableName)
+        view2.check(readableName: readableName)
     }
     
     func test_canGenerateAllStatesOfSensorFSM() {
@@ -197,7 +243,9 @@ class ScheduleVerifierTests: XCTestCase {
         fsm.gateway = gateway
         fsm.timer = timer
         let cycleDetector = HashTableCycleDetector<KripkeStatePropertyList>()
-        let view = TestableView(expected: states)
+        let viewFactory = TestableViewFactory {
+            TestableView(identifier: $0, expected: states)
+        }
         let timeslot = Timeslot(
             fsms: [fsm.name],
             callChain: CallChain(root: fsm.name, calls: []),
@@ -214,12 +262,12 @@ class ScheduleVerifierTests: XCTestCase {
         ])
         let pool = FSMPool(fsms: [.controllableFSM(AnyControllableFiniteStateMachine(fsm))])
         let verifier = ScheduleVerifier(schedule: schedule, allFsms: pool)
-        verifier.verify(gateway: gateway, timer: timer, view: view, cycleDetector: cycleDetector)
-        XCTAssertEqual(view.result, view.expected)
-        if view.expected != view.result {
-            view.explain(name: readableName + "_")
+        verifier.verify(gateway: gateway, timer: timer, viewFactory: viewFactory, cycleDetector: cycleDetector)
+        guard let view: TestableView = viewFactory.lastView else {
+            XCTFail("Failed to create Kripke Structure View.")
+            return
         }
-        XCTAssertTrue(view.finishCalled)
+        view.check(readableName: readableName)
     }
     
     private func sensorsKripkeStructure(fsmName: String, startingTime: UInt, duration: UInt, cycleLength: UInt) -> Set<KripkeState> {

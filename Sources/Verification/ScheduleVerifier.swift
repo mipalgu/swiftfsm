@@ -109,15 +109,29 @@ struct ScheduleVerifier {
         self.isolatedThreads = isolatedThreads
     }
     
-    func verify<Gateway: ModifiableFSMGateway, Timer: Clock, View: KripkeStructureView, Detector: CycleDetector>(gateway: Gateway, timer: Timer, view: View, cycleDetector: Detector) where Gateway: NewVerifiableGateway, Detector.Element == KripkeStatePropertyList, View.State == KripkeState {
+    func verify<
+        Gateway: ModifiableFSMGateway,
+        Timer: Clock,
+        ViewFactory: KripkeStructureViewFactory,
+        Detector: CycleDetector
+    >(
+        gateway: Gateway,
+        timer: Timer,
+        viewFactory: ViewFactory,
+        cycleDetector: Detector
+    ) where Gateway: NewVerifiableGateway,
+            Detector.Element == KripkeStatePropertyList,
+            ViewFactory.View.State == KripkeState
+    {
         let generator = VerificationStepGenerator()
-        defer {
-            view.finish()
-        }
-        for thread in isolatedThreads.threads {
+        for (index, thread) in isolatedThreads.threads.enumerated() {
             if thread.map.steps.isEmpty {
                 continue
             }
+            let allFsmNames: Set<String> = Set(thread.map.steps.flatMap(\.step.fsms))
+            let viewName = allFsmNames.count == 1 ? allFsmNames.first ?? "\(index)" : "\(index)"
+            let view = viewFactory.make(identifier: viewName)
+            defer { view.finish() }
             let collapse = nil == thread.map.steps.first { $0.step.fsms.count > 1 }
             var cycleData = cycleDetector.initialData
             var jobs = [Job(step: 0, map: thread.map, pool: thread.pool, previous: nil)]
