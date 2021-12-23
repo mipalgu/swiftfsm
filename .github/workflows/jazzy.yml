@@ -18,6 +18,9 @@ jobs:
       with:
         repository: mipalgu/swiftfsm
 
+    - name: Reconfigure Package Repo URLs
+      run: sed -i '' 's/git@github.com:/https:\/\/${{ secrets.SWIFTFSM_WORKFLOW_PAT }}@github.com\//g' Package.swift
+
     - name: Compile swiftfsm
       run: swift build
 
