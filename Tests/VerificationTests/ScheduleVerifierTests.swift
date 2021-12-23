@@ -97,14 +97,17 @@ class ScheduleVerifierTests: XCTestCase {
         
         let identifier: String
         
+        let expectedIdentifier: String
+        
         var expected: Set<KripkeState>
         
         private(set) var result: Set<KripkeState>
         
         private(set) var finishCalled: Bool = false
         
-        init(identifier: String, expected: Set<KripkeState>) {
+        init(identifier: String, expectedIdentifier: String, expected: Set<KripkeState>) {
             self.identifier = identifier
+            self.expectedIdentifier = expectedIdentifier
             self.expected = expected
             self.result = Set<KripkeState>(minimumCapacity: expected.count)
         }
@@ -123,6 +126,7 @@ class ScheduleVerifierTests: XCTestCase {
         }
         
         func check(readableName: String) {
+            XCTAssertEqual(identifier, expectedIdentifier)
             XCTAssertEqual(result, expected)
             if expected != result {
                 explain(name: readableName + "_")
@@ -191,12 +195,12 @@ class ScheduleVerifierTests: XCTestCase {
         let viewFactory = TestableViewFactory {
             switch $0 {
             case fsm1.name:
-                return TestableView(identifier: $0, expected: states1)
+                return TestableView(identifier: $0, expectedIdentifier: fsm1.name, expected: states1)
             case fsm2.name:
-                return TestableView(identifier: $0, expected: states2)
+                return TestableView(identifier: $0, expectedIdentifier: fsm2.name, expected: states2)
             default:
                 XCTFail("Got incorrect identifier for view: \($0)")
-                return TestableView(identifier: "_bad", expected: [])
+                return TestableView(identifier: "_bad", expectedIdentifier: fsm1.name, expected: [])
             }
         }
         let fsm1Timeslot = Timeslot(
@@ -244,7 +248,7 @@ class ScheduleVerifierTests: XCTestCase {
         fsm.timer = timer
         let cycleDetector = HashTableCycleDetector<KripkeStatePropertyList>()
         let viewFactory = TestableViewFactory {
-            TestableView(identifier: $0, expected: states)
+            TestableView(identifier: $0, expectedIdentifier: fsm.name, expected: states)
         }
         let timeslot = Timeslot(
             fsms: [fsm.name],
