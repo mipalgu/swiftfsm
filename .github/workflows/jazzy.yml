@@ -25,7 +25,7 @@ jobs:
       run: swift build
 
     - name: Jazzy Action
-      uses: callummccoll/swifty-docs-action@v1.3.0
+      uses: callummccoll/swifty-docs-action@ignore-targets
       with:
         source: ${{github.workspace}}
         output: docs
