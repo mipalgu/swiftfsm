@@ -1,9 +1,9 @@
 /*
- *  cfsm_current_state_of_machine.h
- *  CFSM
+ * CFSMs.h 
+ * CFSMs 
  *
- *  Created by Bren Moushall on 08/08/2017.
- *  Copyright (c) 2017 Rene Hexel. All rights reserved.
+ * Created by Callum McColl on 23/12/2021.
+ * Copyright © 2021 Callum McColl. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -20,7 +20,7 @@
  * 3. All advertising materials mentioning features or use of this
  *    software must display the following acknowledgement:
  *
- *        This product includes software developed by Rene Hexel.
+ *        This product includes software developed by Callum McColl.
  *
  * 4. Neither the name of the author nor the names of contributors
  *    may be used to endorse or promote products derived from this
@@ -55,9 +55,10 @@
  * Fifth Floor, Boston, MA  02110-1301, USA.
  *
  */
-#ifndef _CFSM_CURRENT_STATE_OF_MACHINE_INCLUDED_
-#define _CFSM_CURRENT_STATE_OF_MACHINE_INCLUDED_
 
-#include "CLMacros.h"
+#ifndef CFSMS_CFSMS_H
+#define CFSMS_CFSMS_H
 
-#endif
+#include "../../CLMacros.h"
+
+#endif  /* CFSMS_CFSMS_H */

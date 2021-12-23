@@ -1,0 +1,5 @@
+author: Callum McColl
+theme: fullwidth
+
+exclude:
+    - Sources/CFSMs
