@@ -273,6 +273,85 @@ class ScheduleVerifierTests: XCTestCase {
         view2.check(readableName: readableName)
     }
     
+    func test_canGenerateCombinedKripkeStructure() {
+        let fsm1 = SensorFiniteStateMachine()
+        fsm1.name = fsm1.name + "1"
+        let fsm1StartingTime: UInt = 10
+        let fsm1Duration: UInt = 30
+        let fsm2StartingTime: UInt = 50
+        let fsm2Duration: UInt = 20
+        let cycleLength: UInt = fsm2StartingTime + fsm2Duration
+        let states = sensorsKripkeStructure(fsmName: fsm1.name, startingTime: 10, duration: fsm1Duration, cycleLength: cycleLength)
+        let fsm2 = SensorFiniteStateMachine()
+        fsm2.name = fsm2.name + "2"
+        let gateway = StackGateway()
+        let timer = FSMClock(ringletLengths: [fsm1.name: fsm1Duration, fsm2.name: fsm2Duration], scheduleLength: cycleLength)
+        fsm1.gateway = gateway
+        fsm1.timer = timer
+        fsm2.gateway = gateway
+        fsm2.timer = timer
+        let cycleDetector = HashTableCycleDetector<KripkeStatePropertyList>()
+        let viewFactory = TestableViewFactory {
+            TestableView(identifier: $0, expectedIdentifier: "0", expected: states)
+        }
+        let fsm1Timeslot = Timeslot(
+            fsms: [fsm1.name],
+            callChain: CallChain(root: fsm1.name, calls: []),
+            startingTime: fsm1StartingTime,
+            duration: fsm1Duration,
+            cyclesExecuted: 0
+        )
+        let fsm2Timeslot = Timeslot(
+            fsms: [fsm2.name],
+            callChain: CallChain(root: fsm2.name, calls: []),
+            startingTime: fsm2StartingTime,
+            duration: fsm2Duration,
+            cyclesExecuted: 0
+        )
+        let pool = FSMPool(
+            fsms: [
+                .controllableFSM(AnyControllableFiniteStateMachine(fsm1)),
+                .controllableFSM(AnyControllableFiniteStateMachine(fsm2))
+            ]
+        )
+        let isolator = ScheduleIsolator(
+            threads: [
+                IsolatedThread(
+                    map: VerificationMap(
+                        steps: [
+                            VerificationMap.Step(
+                                time: fsm1Timeslot.startingTime,
+                                step: .takeSnapshotAndStartTimeslot(timeslot: fsm1Timeslot)
+                            ),
+                            VerificationMap.Step(
+                                time: fsm1Timeslot.startingTime + fsm1Timeslot.duration,
+                                step: .executeAndSaveSnapshot(timeslot: fsm1Timeslot)
+                            ),
+                            VerificationMap.Step(
+                                time: fsm2Timeslot.startingTime,
+                                step: .takeSnapshotAndStartTimeslot(timeslot: fsm2Timeslot)
+                            ),
+                            VerificationMap.Step(
+                                time: fsm2Timeslot.startingTime + fsm2Timeslot.duration,
+                                step: .executeAndSaveSnapshot(timeslot: fsm2Timeslot)
+                            )
+                        ],
+                        stepLookup: []
+                    ),
+                    pool: pool
+                )
+            ],
+            cycleLength: cycleLength
+        )
+        let verifier = ScheduleVerifier(isolatedThreads: isolator)
+        verifier.verify(gateway: gateway, timer: timer, viewFactory: viewFactory, cycleDetector: cycleDetector)
+        guard let view = viewFactory.lastView else {
+            XCTFail("Incorrect number of views created: \(viewFactory.createdViews.count)")
+            return
+        }
+        view.check(readableName: readableName)
+    }
+    
     func test_canGenerateAllStatesOfSensorFSM() {
         let fsm = SensorFiniteStateMachine()
         let startingTime: UInt = 10
@@ -323,6 +402,130 @@ class ScheduleVerifierTests: XCTestCase {
             return
         }
         view.check(readableName: readableName)
+    }
+    
+    private func twoSensorKripkeStructure(
+        fsm1: (name: String, startingTime: UInt, duration: UInt),
+        fsm2: (name: String, startingTime: UInt, duration: UInt),
+        cycleLength: UInt
+    ) -> Set<KripkeState> {
+        let fsm1Name = fsm1.name
+        let fsm2Name = fsm2.name
+        func propertyList(
+            executing: String,
+            readState: Bool,
+            fsm1: (sensorValue: Bool, currentState: String, previousState: String),
+            fsm2: (sensorValue: Bool, currentState: String, previousState: String)
+        ) -> KripkeStatePropertyList {
+            var currentState: String!
+            var previousState: String!
+            let configurations = [
+                (fsm1Name, fsm1.sensorValue, fsm1.currentState, fsm1.previousState),
+                (fsm2Name, fsm2.sensorValue, fsm2.currentState, fsm2.previousState)
+            ]
+            let fsms = configurations.map { (data) -> (String, KripkeStatePropertyList, SensorFiniteStateMachine) in
+                let fsm = SensorFiniteStateMachine()
+                fsm.name = data.0
+                fsm.sensors1.val = data.1
+                if data.0 == executing {
+                    currentState = data.2
+                    previousState = data.3
+                }
+                if data.2 == "initial" {
+                    fsm.currentState = fsm.initialState
+                } else {
+                    fsm.currentState = EmptyMiPalState(currentState)
+                }
+                if data.3 == "initial" {
+                    fsm.previousState = fsm.initialState
+                } else {
+                    fsm.previousState = EmptyMiPalState(previousState)
+                }
+                fsm.ringlet.previousState = fsm.previousState
+                fsm.ringlet.shouldExecuteOnEntry = fsm.previousState != fsm.currentState
+                let fsmProperties = KripkeStatePropertyList(fsm)
+                return (fsm.name, fsmProperties, fsm)
+            }
+            return [
+                "fsms": KripkeStateProperty(
+                    type: .Compound(KripkeStatePropertyList(Dictionary<String, KripkeStateProperty>(uniqueKeysWithValues: fsms.map {
+                        ($0, KripkeStateProperty(type: .Compound($1), value: $2))
+                    }))),
+                    value: [fsm.name: fsm]
+                ),
+                "pc": KripkeStateProperty(type: .String, value: fsm.name + "." + (readState ? currentState! : previousState!) + "." + (readState ? "R" : "W"))
+            ]
+        }
+        func target(
+            executing: String,
+            readState: Bool,
+            resetClock: Bool,
+            duration: UInt,
+            fsm1: (sensorValue: Bool, currentState: String, previousState: String),
+            fsm2: (sensorValue: Bool, currentState: String, previousState: String)
+        ) -> (String, Bool, KripkeStatePropertyList, UInt) {
+            return (
+                executing,
+                resetClock,
+                propertyList(executing: executing, readState: readState, fsm1: fsm1, fsm2: fsm2),
+                duration
+            )
+        }
+        func kripkeState(
+            executing: String,
+            readState: Bool,
+            fsm1: (sensorValue: Bool, currentState: String, previousState: String),
+            fsm2: (sensorValue: Bool, currentState: String, previousState: String),
+            targets: [(executing: String, resetClock: Bool, target: KripkeStatePropertyList, duration: UInt)]
+        ) -> KripkeState {
+            let fsm = SensorFiniteStateMachine()
+            fsm.name = fsm1Name
+            let properties = propertyList(
+                executing: executing,
+                readState: readState,
+                fsm1: fsm1,
+                fsm2: fsm2
+            )
+            let edges = targets.map {
+                KripkeEdge(
+                    clockName: $0,
+                    constraint: nil,
+                    resetClock: $1,
+                    takeSnapshot: !readState,
+                    time: readState ? $3 : cycleLength - $3,
+                    target: $2
+                )
+            }
+            let state = KripkeState(isInitial: fsm1.previousState == fsm.initialPreviousState.name, properties: properties)
+            for edge in edges {
+                state.addEdge(edge)
+            }
+            return state
+        }
+        let fsm = SensorFiniteStateMachine()
+        fsm.name = fsm1Name
+        let initial = fsm.initialState.name
+        let previous = fsm.initialPreviousState.name
+        let exit = fsm.exitState.name
+        let states: Set<KripkeState> = [
+            kripkeState(
+                executing: fsm1Name,
+                readState: true,
+                fsm1: (sensorValue: false, currentState: initial, previousState: previous),
+                fsm2: (sensorValue: false, currentState: initial, previousState: previous),
+                targets: [
+                    target(
+                        executing: fsm2Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm2.startingTime - (fsm1.startingTime + fsm1.duration),
+                        fsm1: (sensorValue: false, currentState: initial, previousState: initial),
+                        fsm2: (sensorValue: false, currentState: initial, previousState: previous)
+                    )
+                ]
+            )
+        ]
+        return states
     }
     
     private func sensorsKripkeStructure(fsmName: String, startingTime: UInt, duration: UInt, cycleLength: UInt) -> Set<KripkeState> {
