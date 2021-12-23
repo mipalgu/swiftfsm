@@ -85,13 +85,17 @@ enum VerificationStep: Hashable {
         }
     }
     
-    var fsms: Set<String> {
+    var timeslots: Set<Timeslot> {
         switch self {
         case .takeSnapshot(let fsms), .saveSnapshot(let fsms):
-            return Set(fsms.map { $0.callChain.calls.last?.fsm ?? $0.callChain.root })
+            return fsms
         case .takeSnapshotAndStartTimeslot(let timeslot), .startTimeslot(let timeslot), .execute(let timeslot), .executeAndSaveSnapshot(let timeslot):
-            return [timeslot.callChain.calls.last?.fsm ?? timeslot.callChain.root]
+            return [timeslot]
         }
+    }
+    
+    var fsms: Set<String> {
+        Set(timeslots.map(\.callChain.fsm))
     }
     
     func property(state: String?, collapseIfPossible: Bool = false) -> KripkeStateProperty {

@@ -128,7 +128,9 @@ struct ScheduleVerifier {
             if thread.map.steps.isEmpty {
                 continue
             }
-            let allFsmNames: Set<String> = Set(thread.map.steps.flatMap(\.step.fsms))
+            let allFsmNames: Set<String> = Set(thread.map.steps.flatMap {
+                $0.step.timeslots.flatMap(\.fsms)
+            })
             let viewName = allFsmNames.count == 1 ? allFsmNames.first ?? "\(index)" : "\(index)"
             let view = viewFactory.make(identifier: viewName)
             defer { view.finish() }
