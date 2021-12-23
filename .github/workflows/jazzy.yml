@@ -25,10 +25,12 @@ jobs:
       run: swift build
 
     - name: Jazzy Action
-      uses: sersoft-gmbh/swifty-docs-action@v1.2.0
+      uses: callummccoll/swifty-docs-action@ignore-targets
       with:
         source: ${{github.workspace}}
         output: docs
+        ignore-targets:
+          - CFSMs
 
     - name: Pages Deployment
       uses: peaceiris/actions-gh-pages@v3
