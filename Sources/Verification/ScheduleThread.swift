@@ -59,7 +59,7 @@
 
 /// Represents a single sequential static schedule composed of
 /// `SnapshotSection`s.
-struct ScheduleThread {
+struct ScheduleThread: Hashable {
     
     /// All `SnapshotSection`s making up the sequential schedule.
     var sections: [SnapshotSection]

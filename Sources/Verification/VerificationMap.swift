@@ -68,19 +68,27 @@ struct VerificationMap {
         
     }
     
-    private var stepLookup: [(ClosedRange<UInt>, Step)] = []
+    private var stepLookup: [(ClosedRange<UInt>, Step)]
     
-    private(set) var steps: SortedCollection<Step> = SortedCollection {
-        if $0.time < $1.time {
-            return .orderedAscending
-        }
-        if $0.time > $1.time {
-            return .orderedDescending
-        }
-        return .orderedSame
+    private(set) var steps: SortedCollection<Step>
+    
+    init() {
+        self.init(steps: [], stepLookup: [])
     }
     
-    init() {}
+    init(steps: [Step], stepLookup: [(ClosedRange<UInt>, Step)]) {
+        let collection = SortedCollection<Step>.init(unsortedSequence: steps) {
+            if $0.time < $1.time {
+                return .orderedAscending
+            }
+            if $0.time > $1.time {
+                return .orderedDescending
+            }
+            return .orderedSame
+        }
+        self.stepLookup = stepLookup
+        self.steps = collection
+    }
     
     mutating func insert(section: [Timeslot], read: UInt, write: UInt) {
         guard let first = section.first else {

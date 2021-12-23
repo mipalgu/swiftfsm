@@ -1,9 +1,8 @@
-//
 /*
- * File.swift
- * 
+ * ScheduleIsolatorMock.swift
+ * Verification
  *
- * Created by Callum McColl on 11/7/21.
+ * Created by Callum McColl on 23/12/21.
  * Copyright © 2021 Callum McColl. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -57,12 +56,28 @@
  *
  */
 
-// A single section within a schedule marked by when reading from the
-// environment occurs, and ended when writing to the environment occurs.
-struct SnapshotSection: Hashable {
+@testable import Verification
+
+struct ScheduleIsolatorMock: ScheduleIsolatorProtocol {
     
-    // The time slots that are being executed within this section of the
-    // schedule.
-    var timeslots: [Timeslot]
+    static var make: (Schedule, FSMPool) -> ([IsolatedThread], UInt) = { _,_ in ([], 0)}
+    
+    static var calls: [(Schedule, FSMPool)] = []
+    
+    var threads: [IsolatedThread]
+    
+    var cycleLength: UInt
+    
+    init(schedule: Schedule, allFsms: FSMPool) {
+        Self.calls.append((schedule, allFsms))
+        let (threads, cycleLength) = Self.make(schedule, allFsms)
+        self.threads = threads
+        self.cycleLength = cycleLength
+    }
+    
+    static func reset() {
+        Self.calls = []
+        Self.make = { _,_ in ([], 0)}
+    }
     
 }

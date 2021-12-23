@@ -56,7 +56,7 @@
  *
  */
 
-struct Schedule {
+struct Schedule: Hashable {
     
     var cycleLength: UInt {
         threads.map {

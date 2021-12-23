@@ -64,6 +64,7 @@ import KripkeStructure
 import swiftfsm
 import Foundation
 import Timers
+import swift_helpers
 
 @testable import Verification
 
@@ -125,13 +126,15 @@ class ScheduleVerifierTests: XCTestCase {
             finishCalled = false
         }
         
-        func check(readableName: String) {
+        @discardableResult
+        func check(readableName: String) -> Bool {
             XCTAssertEqual(identifier, expectedIdentifier)
             XCTAssertEqual(result, expected)
             if expected != result {
                 explain(name: readableName + "_")
             }
             XCTAssertTrue(finishCalled)
+            return identifier == expectedIdentifier && result == expected && finishCalled
         }
         
         func explain(name: String = "") {
@@ -217,14 +220,46 @@ class ScheduleVerifierTests: XCTestCase {
             duration: fsm2Duration,
             cyclesExecuted: 0
         )
-        let schedule = Schedule(threads: [
-            ScheduleThread(sections: [
-                SnapshotSection(timeslots: [fsm1Timeslot]),
-                SnapshotSection(timeslots: [fsm2Timeslot])
-            ])
-        ])
-        let pool = FSMPool(fsms: [.controllableFSM(AnyControllableFiniteStateMachine(fsm1)), .controllableFSM(AnyControllableFiniteStateMachine(fsm2))])
-        let verifier = ScheduleVerifier(schedule: schedule, allFsms: pool)
+        let fsm1Pool = FSMPool(fsms: [.controllableFSM(AnyControllableFiniteStateMachine(fsm1))])
+        let fsm2Pool = FSMPool(fsms: [.controllableFSM(AnyControllableFiniteStateMachine(fsm2))])
+        let isolator = ScheduleIsolator(
+            threads: [
+                IsolatedThread(
+                    map: VerificationMap(
+                        steps: [
+                            VerificationMap.Step(
+                                time: fsm1Timeslot.startingTime,
+                                step: .takeSnapshotAndStartTimeslot(timeslot: fsm1Timeslot)
+                            ),
+                            VerificationMap.Step(
+                                time: fsm1Timeslot.startingTime + fsm1Timeslot.duration,
+                                step: .executeAndSaveSnapshot(timeslot: fsm1Timeslot)
+                            )
+                        ],
+                        stepLookup: []
+                    ),
+                    pool: fsm1Pool
+                ),
+                IsolatedThread(
+                    map: VerificationMap(
+                        steps: [
+                            VerificationMap.Step(
+                                time: fsm2Timeslot.startingTime,
+                                step: .takeSnapshotAndStartTimeslot(timeslot: fsm2Timeslot)
+                            ),
+                            VerificationMap.Step(
+                                time: fsm2Timeslot.startingTime + fsm2Timeslot.duration,
+                                step: .executeAndSaveSnapshot(timeslot: fsm2Timeslot)
+                            )
+                        ],
+                        stepLookup: []
+                    ),
+                    pool: fsm2Pool
+                )
+            ],
+            cycleLength: cycleLength
+        )
+        let verifier = ScheduleVerifier(isolatedThreads: isolator)
         verifier.verify(gateway: gateway, timer: timer, viewFactory: viewFactory, cycleDetector: cycleDetector)
         if viewFactory.createdViews.count != 2 {
             XCTFail("Incorrect number of views created: \(viewFactory.createdViews.count)")
@@ -232,7 +267,9 @@ class ScheduleVerifierTests: XCTestCase {
         }
         let view1 = viewFactory.createdViews[0]
         let view2 = viewFactory.createdViews[1]
-        view1.check(readableName: readableName)
+        if !view1.check(readableName: readableName) {
+            return
+        }
         view2.check(readableName: readableName)
     }
     
@@ -257,15 +294,29 @@ class ScheduleVerifierTests: XCTestCase {
             duration: duration,
             cyclesExecuted: 0
         )
-        let schedule = Schedule(threads: [
-            ScheduleThread(sections: [
-                SnapshotSection(timeslots: [
-                    timeslot
-                ])
-            ])
-        ])
         let pool = FSMPool(fsms: [.controllableFSM(AnyControllableFiniteStateMachine(fsm))])
-        let verifier = ScheduleVerifier(schedule: schedule, allFsms: pool)
+        let isolator = ScheduleIsolator(
+            threads: [
+                IsolatedThread(
+                    map: VerificationMap(
+                        steps: [
+                            VerificationMap.Step(
+                                time: timeslot.startingTime,
+                                step: .takeSnapshotAndStartTimeslot(timeslot: timeslot)
+                            ),
+                            VerificationMap.Step(
+                                time: timeslot.startingTime + timeslot.duration,
+                                step: .executeAndSaveSnapshot(timeslot: timeslot)
+                            )
+                        ],
+                        stepLookup: []
+                    ),
+                    pool: pool
+                )
+            ],
+            cycleLength: timeslot.startingTime + timeslot.duration
+        )
+        let verifier = ScheduleVerifier(isolatedThreads: isolator)
         verifier.verify(gateway: gateway, timer: timer, viewFactory: viewFactory, cycleDetector: cycleDetector)
         guard let view: TestableView = viewFactory.lastView else {
             XCTFail("Failed to create Kripke Structure View.")
