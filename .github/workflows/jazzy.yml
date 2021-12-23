@@ -1,0 +1,35 @@
+name: Jazzy Documentation
+
+on:
+  push:
+    branches: [ verification ]
+
+jobs:
+
+  exec-jazzy:
+    runs-on: macos-11
+
+    steps:
+    - name: Install Ninja
+      run: brew install ninja
+
+    - name: Clone Repository 
+      uses: actions/checkout@v2
+      with:
+        repository: mipalgu/swiftfsm
+
+    - name: Compile swiftfsm
+      run: swift build
+
+    - name: Jazzy Action
+      uses: sersoft-gmbh/swifty-docs-action@v1.2.0
+      with:
+        source: ${{github.workspace}}
+        output: docs
+
+    - name: Pages Deployment
+      uses: peaceiris/actions-gh-pages@v3
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: ./docs
+        force_orphan: true
