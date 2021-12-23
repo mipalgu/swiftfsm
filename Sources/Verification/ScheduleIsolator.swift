@@ -60,15 +60,7 @@ import swiftfsm
 
 /// Is responsible for splitting a schedule into discrete verifiable
 /// subcomponents based on the communication lines between fsms.
-struct ScheduleIsolator {
-    
-    struct IsolatedThread {
-        
-        var map: VerificationMap
-        
-        var pool: FSMPool
-        
-    }
+struct ScheduleIsolator: ScheduleIsolatorProtocol {
     
     var threads: [IsolatedThread]
     

@@ -62,7 +62,7 @@ import Timers
 import KripkeStructure
 import KripkeStructureViews
 
-struct ScheduleVerifier {
+struct ScheduleVerifier<Isolator: ScheduleIsolatorProtocol> {
     
     private struct Previous {
         
@@ -99,13 +99,13 @@ struct ScheduleVerifier {
         
     }
     
-    var isolatedThreads: ScheduleIsolator
+    var isolatedThreads: Isolator
     
-    init(schedule: Schedule, allFsms: FSMPool) {
+    init(schedule: Schedule, allFsms: FSMPool) where Isolator == ScheduleIsolator {
         self.init(isolatedThreads: ScheduleIsolator(schedule: schedule, allFsms: allFsms))
     }
     
-    init(isolatedThreads: ScheduleIsolator) {
+    init(isolatedThreads: Isolator) {
         self.isolatedThreads = isolatedThreads
     }
     
