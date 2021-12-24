@@ -116,6 +116,7 @@ class ScheduleVerifierTests: XCTestCase {
         }
         
         func commit(state: KripkeState) {
+            print("Committing: \(state.properties)")
             commits.append(state)
             result.insert(state)
         }
@@ -125,17 +126,19 @@ class ScheduleVerifierTests: XCTestCase {
         }
 
         func reset(usingClocks: Bool) {
+            commits.removeAll(keepingCapacity: true)
             result.removeAll(keepingCapacity: true)
             finishCalled = false
         }
         
         @discardableResult
         func check(readableName: String) -> Bool {
-            XCTAssertEqual(identifier, expectedIdentifier)
             XCTAssertEqual(result, expected)
             if expected != result {
                 explain(name: readableName + "_")
             }
+            XCTAssertEqual(identifier, expectedIdentifier)
+            XCTAssertEqual(commits.count, result.count) // Make sure all states are only ever committed once.
             XCTAssertTrue(finishCalled)
             return identifier == expectedIdentifier && result == expected && finishCalled
         }

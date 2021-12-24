@@ -63,6 +63,7 @@ import Timers
 struct VerificationStepGenerator {
     
     func takeSnapshot(forFsms fsms: [FSMType], in pool: FSMPool) -> [FSMPool] {
+        let pool = pool.cloned
         let combinations = Combinations(fsms: fsms.map(\.asScheduleableFiniteStateMachine))
         return combinations.flatMap { combination in
             fsms.enumerated().map {
@@ -81,6 +82,7 @@ struct VerificationStepGenerator {
         gateway: Gateway,
         timer: Timer
     ) -> [ConditionalRinglet] where Gateway: NewVerifiableGateway {
+        gateway.pool = pool.cloned
         return TimeAwareRinglets(
             fsm: timeslot.callChain.fsm(fromPool: pool),
             timeslot: timeslot,

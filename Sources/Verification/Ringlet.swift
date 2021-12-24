@@ -138,17 +138,20 @@ struct Ringlet {
     /// parameterised machine invocations. A delegate is created and used to
     /// detect when the fsm makes any calls to other machines.
     init<Gateway: ModifiableFSMGateway, Timer: Clock>(fsm: FSMType, timeslot: Timeslot, gateway: Gateway, timer: Timer) where Gateway: NewVerifiableGateway {
+        print(fsm.name)
         let allExternalVariables = (fsm.sensors + fsm.externalVariables + fsm.actuators)
         let externalsPreSnapshot = KripkeStatePropertyList(Dictionary(uniqueKeysWithValues: allExternalVariables.map { ($0.name, KripkeStateProperty($0.val)) }))
         let preSnapshot = KripkeStatePropertyList(fsm.asScheduleableFiniteStateMachine.base)
         let delegate = GatewayDelegate()
         gateway.delegate = delegate
         let before = gateway.pool
+        print("before: \(before)")
         let currentState = fsm.currentState.name
         var clone = fsm.clone()
         gateway.replace(clone)
         clone.next()
         let after = gateway.pool
+        print("after: \(after)")
         let transitioned = currentState != clone.currentState.name
         let externalsPostSnapshot = KripkeStatePropertyList(Dictionary(uniqueKeysWithValues: allExternalVariables.map { ($0.name, KripkeStateProperty($0.val)) }))
         let postSnapshot = KripkeStatePropertyList(clone.asScheduleableFiniteStateMachine.base)

@@ -171,6 +171,11 @@ final class SensorFiniteStateMachine: MachineProtocol, CustomStringConvertible {
         }
         fsm.sensors1.val = sensors1.val
         fsm.ringlet = ringlet.clone()
+        if fsm.ringlet.previousState.name == initialState.name {
+            fsm.ringlet.previousState = fsm.initialState
+        } else if fsm.ringlet.previousState.name == exitState.name {
+            fsm.ringlet.previousState = fsm.exitState
+        }
         return fsm
     }
     
