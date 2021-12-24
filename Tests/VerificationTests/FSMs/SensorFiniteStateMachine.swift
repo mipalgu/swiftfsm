@@ -136,13 +136,7 @@ final class SensorFiniteStateMachine: MachineProtocol, CustomStringConvertible {
             "initial",
             transitions: [Transition(exitState) { [self] _ in sensors1.val }],
             snapshotSensors: [sensors1.name],
-            snapshotActuators: [],
-            main: {
-                print("Sensor Value: \(self.sensors1.val)")
-            },
-            onExit: {
-                print("Sensor Value: \(self.sensors1.val)")
-            }
+            snapshotActuators: []
         )
     }()
 

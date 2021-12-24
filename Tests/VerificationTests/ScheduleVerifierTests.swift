@@ -214,8 +214,64 @@ class ScheduleVerifierTests: XCTestCase {
         }
     }
     
-    func test_measureMultipleCombinedTime() {
-        multipleCombinedSensors { (verifier, gateway, timer, viewFactory, cycleDetector) in
+    func test_measure32SeparateTime() {
+        multipleSeparateSensors(32) { (verifier, gateway, timer, viewFactory, cycleDetector) in
+            measure {
+                verifier.verify(gateway: gateway, timer: timer, viewFactory: viewFactory, cycleDetector: cycleDetector)
+            }
+        }
+    }
+    
+    func test_measure32CombinedTime() {
+        multipleCombinedSensors(32) { (verifier, gateway, timer, viewFactory, cycleDetector) in
+            measure {
+                verifier.verify(gateway: gateway, timer: timer, viewFactory: viewFactory, cycleDetector: cycleDetector)
+            }
+        }
+    }
+    
+    func test_measure16SeparateTime() {
+        multipleSeparateSensors(16) { (verifier, gateway, timer, viewFactory, cycleDetector) in
+            measure {
+                verifier.verify(gateway: gateway, timer: timer, viewFactory: viewFactory, cycleDetector: cycleDetector)
+            }
+        }
+    }
+    
+    func test_measure16CombinedTime() {
+        multipleCombinedSensors(16) { (verifier, gateway, timer, viewFactory, cycleDetector) in
+            measure {
+                verifier.verify(gateway: gateway, timer: timer, viewFactory: viewFactory, cycleDetector: cycleDetector)
+            }
+        }
+    }
+    
+    func test_measureEightSeparateTime() {
+        multipleSeparateSensors(8) { (verifier, gateway, timer, viewFactory, cycleDetector) in
+            measure {
+                verifier.verify(gateway: gateway, timer: timer, viewFactory: viewFactory, cycleDetector: cycleDetector)
+            }
+        }
+    }
+    
+    func test_measureEightCombinedTime() {
+        multipleCombinedSensors(8) { (verifier, gateway, timer, viewFactory, cycleDetector) in
+            measure {
+                verifier.verify(gateway: gateway, timer: timer, viewFactory: viewFactory, cycleDetector: cycleDetector)
+            }
+        }
+    }
+    
+    func test_measureFourSeparateTime() {
+        multipleSeparateSensors(4) { (verifier, gateway, timer, viewFactory, cycleDetector) in
+            measure {
+                verifier.verify(gateway: gateway, timer: timer, viewFactory: viewFactory, cycleDetector: cycleDetector)
+            }
+        }
+    }
+    
+    func test_measureFourCombinedTime() {
+        multipleCombinedSensors(4) { (verifier, gateway, timer, viewFactory, cycleDetector) in
             measure {
                 verifier.verify(gateway: gateway, timer: timer, viewFactory: viewFactory, cycleDetector: cycleDetector)
             }
@@ -333,121 +389,100 @@ class ScheduleVerifierTests: XCTestCase {
         return make(verifier, gateway, timer, viewFactory, cycleDetector)
     }
     
-    private func multipleCombinedSensors<T>(_ make: (ScheduleVerifier<ScheduleIsolator>, StackGateway, FSMClock, TestableViewFactory, HashTableCycleDetector<KripkeStatePropertyList>) -> T) -> T {
-        let fsm1 = SensorFiniteStateMachine()
-        fsm1.name += "1"
-        let fsm1StartingTime: UInt = 10
-        let fsm1Duration: UInt = 30
-        let fsm2 = SensorFiniteStateMachine()
-        fsm2.name += "2"
-        let fsm2StartingTime: UInt = 50
-        let fsm2Duration: UInt = 20
-        let fsm3 = SensorFiniteStateMachine()
-        fsm3.name += "3"
-        let fsm3StartingTime: UInt = 90
-        let fsm3Duration: UInt = 35
-        let fsm4 = SensorFiniteStateMachine()
-        fsm4.name += "4"
-        let fsm4StartingTime: UInt = 130
-        let fsm4Duration: UInt = 15
-        let cycleLength: UInt = fsm4StartingTime + fsm4Duration
+    private func multipleSensors<T>(_ number: Int, use: ([(Timeslot, SensorFiniteStateMachine)], UInt, StackGateway, FSMClock, TestableViewFactory, HashTableCycleDetector<KripkeStatePropertyList>) -> T) -> T {
+        let fsms = (0..<number).map { (i: Int) -> (SensorFiniteStateMachine, UInt, UInt) in
+            let fsm = SensorFiniteStateMachine()
+            fsm.name += "\(i)"
+            return (fsm, UInt(i * 30 + 10), UInt(25))
+        }
+        guard let last = fsms.last else {
+            fatalError("Attempting to create multiple separate sensors with no fsms.")
+        }
+        let cycleLength: UInt = last.1 + last.2
+        let ringletLengths = Dictionary(uniqueKeysWithValues: fsms.map {
+            ($0.name, $2)
+        })
         let gateway = StackGateway()
-        let timer = FSMClock(ringletLengths: [fsm1.name: fsm1Duration, fsm2.name: fsm2Duration, fsm3.name: fsm3Duration, fsm4.name: fsm4Duration], scheduleLength: cycleLength)
-        fsm1.gateway = gateway
-        fsm1.timer = timer
-        fsm2.gateway = gateway
-        fsm2.timer = timer
-        fsm3.gateway = gateway
-        fsm3.timer = timer
-        fsm4.gateway = gateway
-        fsm4.timer = timer
+        let timer = FSMClock(ringletLengths: ringletLengths, scheduleLength: cycleLength)
+        for (fsm, _, _) in fsms {
+            fsm.gateway = gateway
+            fsm.timer = timer
+        }
         let cycleDetector = HashTableCycleDetector<KripkeStatePropertyList>()
         let viewFactory = TestableViewFactory {
             TestableView(identifier: $0, expectedIdentifier: "0", expected: [])
         }
-        let fsm1Timeslot = Timeslot(
-            fsms: [fsm1.name],
-            callChain: CallChain(root: fsm1.name, calls: []),
-            startingTime: fsm1StartingTime,
-            duration: fsm1Duration,
-            cyclesExecuted: 0
-        )
-        let fsm2Timeslot = Timeslot(
-            fsms: [fsm2.name],
-            callChain: CallChain(root: fsm2.name, calls: []),
-            startingTime: fsm2StartingTime,
-            duration: fsm2Duration,
-            cyclesExecuted: 0
-        )
-        let fsm3Timeslot = Timeslot(
-            fsms: [fsm3.name],
-            callChain: CallChain(root: fsm3.name, calls: []),
-            startingTime: fsm3StartingTime,
-            duration: fsm3Duration,
-            cyclesExecuted: 0
-        )
-        let fsm4Timeslot = Timeslot(
-            fsms: [fsm2.name],
-            callChain: CallChain(root: fsm4.name, calls: []),
-            startingTime: fsm4StartingTime,
-            duration: fsm4Duration,
-            cyclesExecuted: 0
-        )
-        let pool = FSMPool(
-            fsms: [
-                .controllableFSM(AnyControllableFiniteStateMachine(fsm1)),
-                .controllableFSM(AnyControllableFiniteStateMachine(fsm2)),
-                .controllableFSM(AnyControllableFiniteStateMachine(fsm3)),
-                .controllableFSM(AnyControllableFiniteStateMachine(fsm4))
-            ]
-        )
-        let isolator = ScheduleIsolator(
-            threads: [
+        let timeslots: [(Timeslot, SensorFiniteStateMachine)] = fsms.map {
+            let timeslot = Timeslot(
+                fsms: [$0.name],
+                callChain: CallChain(root: $0.name, calls: []),
+                startingTime: $1,
+                duration: $2,
+                cyclesExecuted: 0
+            )
+            return (timeslot, $0)
+        }
+        return use(timeslots, cycleLength, gateway, timer, viewFactory, cycleDetector)
+    }
+    
+    private func multipleSeparateSensors<T>(_ number: Int, _ make: (ScheduleVerifier<ScheduleIsolator>, StackGateway, FSMClock, TestableViewFactory, HashTableCycleDetector<KripkeStatePropertyList>) -> T) -> T {
+        multipleSensors(number) { (timeslots, cycleLength, gateway, timer, viewFactory, cycleDetector) in
+            let threads = timeslots.map {
                 IsolatedThread(
                     map: VerificationMap(
                         steps: [
                             VerificationMap.Step(
-                                time: fsm1Timeslot.startingTime,
-                                step: .takeSnapshotAndStartTimeslot(timeslot: fsm1Timeslot)
+                                time: $0.startingTime,
+                                step: .takeSnapshotAndStartTimeslot(timeslot: $0)
                             ),
                             VerificationMap.Step(
-                                time: fsm1Timeslot.startingTime + fsm1Timeslot.duration,
-                                step: .executeAndSaveSnapshot(timeslot: fsm1Timeslot)
-                            ),
-                            VerificationMap.Step(
-                                time: fsm2Timeslot.startingTime,
-                                step: .takeSnapshotAndStartTimeslot(timeslot: fsm2Timeslot)
-                            ),
-                            VerificationMap.Step(
-                                time: fsm2Timeslot.startingTime + fsm2Timeslot.duration,
-                                step: .executeAndSaveSnapshot(timeslot: fsm2Timeslot)
-                            ),
-                            VerificationMap.Step(
-                                time: fsm3Timeslot.startingTime,
-                                step: .takeSnapshotAndStartTimeslot(timeslot: fsm3Timeslot)
-                            ),
-                            VerificationMap.Step(
-                                time: fsm3Timeslot.startingTime + fsm3Timeslot.duration,
-                                step: .executeAndSaveSnapshot(timeslot: fsm3Timeslot)
-                            ),
-                            VerificationMap.Step(
-                                time: fsm4Timeslot.startingTime,
-                                step: .takeSnapshotAndStartTimeslot(timeslot: fsm4Timeslot)
-                            ),
-                            VerificationMap.Step(
-                                time: fsm4Timeslot.startingTime + fsm4Timeslot.duration,
-                                step: .executeAndSaveSnapshot(timeslot: fsm4Timeslot)
+                                time: $0.startingTime + $0.duration,
+                                step: .executeAndSaveSnapshot(timeslot: $0)
                             )
                         ],
                         stepLookup: []
                     ),
-                    pool: pool
+                    pool: FSMPool(fsms: [.controllableFSM(AnyControllableFiniteStateMachine($1))])
                 )
-            ],
-            cycleLength: cycleLength
-        )
-        let verifier = ScheduleVerifier(isolatedThreads: isolator)
-        return make(verifier, gateway, timer, viewFactory, cycleDetector)
+            }
+            let isolator = ScheduleIsolator(threads: threads, cycleLength: cycleLength)
+            let verifier = ScheduleVerifier(isolatedThreads: isolator)
+            return make(verifier, gateway, timer, viewFactory, cycleDetector)
+        }
+    }
+    
+    private func multipleCombinedSensors<T>(_ number: Int, _ make: (ScheduleVerifier<ScheduleIsolator>, StackGateway, FSMClock, TestableViewFactory, HashTableCycleDetector<KripkeStatePropertyList>) -> T) -> T {
+        multipleSensors(number) { (timeslots, cycleLength, gateway, timer, viewFactory, cycleDetector) in
+            let pool = FSMPool(fsms: timeslots.map {
+                    .controllableFSM(AnyControllableFiniteStateMachine($1))
+            })
+            let steps = timeslots.flatMap {
+                [
+                    VerificationMap.Step(
+                        time: $0.0.startingTime,
+                        step: .takeSnapshotAndStartTimeslot(timeslot: $0.0)
+                    ),
+                    VerificationMap.Step(
+                        time: $0.0.startingTime + $0.0.duration,
+                        step: .executeAndSaveSnapshot(timeslot: $0.0)
+                    )
+                ]
+            }
+            let isolator = ScheduleIsolator(
+                threads: [
+                    IsolatedThread(
+                        map: VerificationMap(
+                            steps: steps,
+                            stepLookup: []
+                        ),
+                        pool: pool
+                    )
+                ],
+                cycleLength: cycleLength
+            )
+            let verifier = ScheduleVerifier(isolatedThreads: isolator)
+            return make(verifier, gateway, timer, viewFactory, cycleDetector)
+        }
     }
     
     private func combinedSensors<T>(_ make: (ScheduleVerifier<ScheduleIsolator>, StackGateway, FSMClock, TestableViewFactory, HashTableCycleDetector<KripkeStatePropertyList>) -> T) -> T {
