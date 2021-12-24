@@ -73,11 +73,18 @@ class FSMPoolTests: XCTestCase {
         // Put teardown code here. This method is called after the invocation of each test method in the class.
     }
 
-    /*func test_canConvertToPropertyList() throws {
+    func test_canConvertToPropertyList() throws {
         let fsm = AnyControllableFiniteStateMachine(ToggleFiniteStateMachine())
         let base = { fsm.base as! ToggleFiniteStateMachine }
         let pool = FSMPool(fsms: [.controllableFSM(fsm)])
-        let result = pool.propertyList(.read(fsm.name))
+        let timeslot = Timeslot(
+            fsms: [fsm.name],
+            callChain: CallChain(root: fsm.name, calls: []),
+            startingTime: 0,
+            duration: 30,
+            cyclesExecuted: 0
+        )
+        let result = pool.propertyList(forStep: .takeSnapshotAndStartTimeslot(timeslot: timeslot), executingState: fsm.currentState.name, collapseIfPossible: true)
         let expected = KripkeStatePropertyList(
             [
                 "fsms": KripkeStateProperty(
@@ -98,10 +105,10 @@ class FSMPoolTests: XCTestCase {
                     )),
                     value: [fsm.name: base()]
                 ),
-                "pc": KripkeStateProperty(type: .String, value: fsm.name + ".R")
+                "pc": KripkeStateProperty(type: .String, value: fsm.name + "." + fsm.currentState.name + ".R")
             ]
         )
         XCTAssertEqual(result, expected)
-    }*/
+    }
     
 }
