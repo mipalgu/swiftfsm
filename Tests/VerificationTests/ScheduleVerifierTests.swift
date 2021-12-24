@@ -102,6 +102,8 @@ class ScheduleVerifierTests: XCTestCase {
         
         var expected: Set<KripkeState>
         
+        private(set) var commits: [KripkeState] = []
+        
         private(set) var result: Set<KripkeState>
         
         private(set) var finishCalled: Bool = false
@@ -114,6 +116,7 @@ class ScheduleVerifierTests: XCTestCase {
         }
         
         func commit(state: KripkeState) {
+            commits.append(state)
             result.insert(state)
         }
 
@@ -195,8 +198,8 @@ class ScheduleVerifierTests: XCTestCase {
     func test_canGenerateCombinedKripkeStructure() {
         combinedSensors { (verifier, gateway, timer, viewFactory, cycleDetector) in
             verifier.verify(gateway: gateway, timer: timer, viewFactory: viewFactory, cycleDetector: cycleDetector)
+            XCTAssertEqual(viewFactory.createdViews.count, 1)
             guard let view = viewFactory.lastView else {
-                XCTFail("Incorrect number of views created: \(viewFactory.createdViews.count)")
                 return
             }
             view.check(readableName: self.readableName)
