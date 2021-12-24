@@ -161,7 +161,7 @@ struct ScheduleVerifier<Isolator: ScheduleIsolatorProtocol> {
                         pools = [job.pool]
                     }
                     for pool in pools {
-                        print("\nGenerating \(step.step.marker)(\(step.step.timeslots.map(\.callChain.fsm).sorted().joined(separator: ", "))) variations for:\n    \("\(pool)".components(separatedBy: .newlines).joined(separator: "\n\n    "))\n\n")
+                        //print("\nGenerating \(step.step.marker)(\(step.step.timeslots.map(\.callChain.fsm).sorted().joined(separator: ", "))) variations for:\n    \("\(pool)".components(separatedBy: .newlines).joined(separator: "\n\n    "))\n\n")
                         let properties = pool.propertyList(forStep: step.step, executingState: fsm?.currentState.name, collapseIfPossible: collapse)
                         if let previous = previous {
                             let edge: KripkeEdge = KripkeEdge(
@@ -185,21 +185,24 @@ struct ScheduleVerifier<Isolator: ScheduleIsolatorProtocol> {
                             view.commit(state: state)
                             continue
                         }
-                        let newPrevious = Previous(state: state, time: step.time, resetClocks: previous?.resetClocks ?? [])
+                        let newResetClocks: Set<String>
+                        if startTimeslot, let fsm = fsm {
+                            newResetClocks = previous?.resetClocks.subtracting([fsm.name]) ?? []
+                        } else {
+                            newResetClocks = previous?.resetClocks ?? []
+                        }
+                        let newPrevious = Previous(state: state, time: step.time, resetClocks: newResetClocks)
                         jobs.append(Job(step: newStep, map: job.map, pool: pool.cloned, previous: newPrevious))
                     }
                 case .execute(let timeslot), .executeAndSaveSnapshot(let timeslot):
-                    print("\nChecking: \(step.step.marker)(\(step.step.timeslots.map(\.callChain.fsm).sorted().joined(separator: ", "))) variations for:\n    \("\(job.pool)".components(separatedBy: .newlines).joined(separator: "\n\n    "))\n\n")
                     let fsm = timeslot.callChain.fsm(fromPool: job.pool)
-                    print(fsm.name)
                     let currentState = fsm.currentState.name
                     let ringlets = generator.execute(timeslot: timeslot, inPool: job.pool, gateway: gateway, timer: timer)
                     for ringlet in ringlets {
-                        print("\nGenerating \(step.step.marker)(\(step.step.timeslots.map(\.callChain.fsm).sorted().joined(separator: ", "))) variations for:\n    \("\(ringlet.after)".components(separatedBy: .newlines).joined(separator: "\n\n    "))\n\n")
+                        //print("\nGenerating \(step.step.marker)(\(step.step.timeslots.map(\.callChain.fsm).sorted().joined(separator: ", "))) variations for:\n    \("\(ringlet.after)".components(separatedBy: .newlines).joined(separator: "\n\n    "))\n\n")
                         let properties = ringlet.after.propertyList(forStep: step.step, executingState: currentState, collapseIfPossible: collapse)
                         let state = structure.state(for: properties, isInitial: previous == nil)
                         if let previous = previous {
-                            print("Previous: \(previous.state.properties)")
                             let edge = KripkeEdge(
                                 clockName: timeslot.callChain.fsm,
                                 constraint: ringlet.condition == .lessThanEqual(value: 0) ? nil : ringlet.condition,

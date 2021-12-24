@@ -77,6 +77,7 @@ class TimeAwareRingletTests: XCTestCase {
         let fsm = TimeConditionalFiniteStateMachine()
         let timeslot = Timeslot(fsms: [fsm.name], callChain: CallChain(root: fsm.name, calls: []), startingTime: 0, duration: 30, cyclesExecuted: 0)
         let id = fsm.gateway.id(of: fsm.name)
+        let id2 = fsm.gateway.id(of: "calling")
         let newMachine: ([String: Any?]) -> AnyParameterisedFiniteStateMachine = {
             let tempFSM = AnyParameterisedFiniteStateMachine(CallingFiniteStateMachine(), newMachine: { _ in fatalError("Should never be called.") })
             let result = tempFSM.parametersFromDictionary($0)
@@ -86,7 +87,8 @@ class TimeAwareRingletTests: XCTestCase {
             return tempFSM
         }
         let parameterisedFSM: FSMType = .parameterisedFSM(AnyParameterisedFiniteStateMachine(fsm, newMachine: newMachine))
-        fsm.gateway.fsms[id] = .parameterisedFSM(AnyParameterisedFiniteStateMachine(CallingFiniteStateMachine(), newMachine: newMachine))
+        fsm.gateway.fsms[id] = parameterisedFSM
+        fsm.gateway.fsms[id2] = .parameterisedFSM(AnyParameterisedFiniteStateMachine(CallingFiniteStateMachine(), newMachine: newMachine))
         fsm.gateway.stacks[id] = []
         let ringlets = TimeAwareRinglets(fsm: parameterisedFSM, timeslot: timeslot, gateway: fsm.gateway, timer: fsm.timer, startingTime: 0)
         let falseProperties = KripkeStatePropertyList(["value": KripkeStateProperty(type: .Bool, value: Bool(false))])
@@ -119,7 +121,7 @@ class TimeAwareRingletTests: XCTestCase {
                 calls: $0.1.map {
                     Call(
                         caller: id,
-                        callee: id,
+                        callee: id2,
                         parameters: ["value": $0],
                         method: .synchronous,
                         fsm: newMachine(["value": $0]).name
@@ -141,6 +143,7 @@ class TimeAwareRingletTests: XCTestCase {
         let fsm = TimeConditionalFiniteStateMachine()
         let timeslot = Timeslot(fsms: [fsm.name], callChain: CallChain(root: fsm.name, calls: []), startingTime: 0, duration: 30, cyclesExecuted: 0)
         let id = fsm.gateway.id(of: fsm.name)
+        let id2 = fsm.gateway.id(of: "calling")
         let newMachine: ([String: Any?]) -> AnyParameterisedFiniteStateMachine = {
             let tempFSM = AnyParameterisedFiniteStateMachine(CallingFiniteStateMachine(), newMachine: { _ in fatalError("Should never be called.") })
             let result = tempFSM.parametersFromDictionary($0)
@@ -149,7 +152,7 @@ class TimeAwareRingletTests: XCTestCase {
             }
             return tempFSM
         }
-        fsm.gateway.fsms[id] = .parameterisedFSM(AnyParameterisedFiniteStateMachine(CallingFiniteStateMachine(), newMachine: newMachine))
+        fsm.gateway.fsms[id2] = .parameterisedFSM(AnyParameterisedFiniteStateMachine(CallingFiniteStateMachine(), newMachine: newMachine))
         fsm.gateway.stacks[id] = []
         let time: UInt = 3500000
         let ringlets = TimeAwareRinglets(fsm: .parameterisedFSM(AnyParameterisedFiniteStateMachine(fsm, newMachine: newMachine)), timeslot: timeslot, gateway: fsm.gateway, timer: fsm.timer, startingTime: time)
@@ -181,7 +184,7 @@ class TimeAwareRingletTests: XCTestCase {
                 calls: $0.1.map {
                     Call(
                         caller: id,
-                        callee: id,
+                        callee: id2,
                         parameters: ["value": $0],
                         method: .synchronous,
                         fsm: newMachine(["value": $0]).name
@@ -203,6 +206,7 @@ class TimeAwareRingletTests: XCTestCase {
         let fsm = TimeConditionalFiniteStateMachine()
         let timeslot = Timeslot(fsms: [fsm.name], callChain: CallChain(root: fsm.name, calls: []), startingTime: 0, duration: 30, cyclesExecuted: 0)
         let id = fsm.gateway.id(of: fsm.name)
+        let id2 = fsm.gateway.id(of: "calling")
         let newMachine: ([String: Any?]) -> AnyParameterisedFiniteStateMachine = {
             let tempFSM = AnyParameterisedFiniteStateMachine(CallingFiniteStateMachine(), newMachine: { _ in fatalError("Should never be called.") })
             let result = tempFSM.parametersFromDictionary($0)
@@ -211,7 +215,7 @@ class TimeAwareRingletTests: XCTestCase {
             }
             return tempFSM
         }
-        fsm.gateway.fsms[id] = .parameterisedFSM(AnyParameterisedFiniteStateMachine(CallingFiniteStateMachine(), newMachine: newMachine))
+        fsm.gateway.fsms[id2] = .parameterisedFSM(AnyParameterisedFiniteStateMachine(CallingFiniteStateMachine(), newMachine: newMachine))
         fsm.gateway.stacks[id] = []
         let time: UInt = 2000000
         let ringlets = TimeAwareRinglets(fsm: .parameterisedFSM(AnyParameterisedFiniteStateMachine(fsm, newMachine: newMachine)), timeslot: timeslot, gateway: fsm.gateway, timer: fsm.timer, startingTime: time)
@@ -245,7 +249,7 @@ class TimeAwareRingletTests: XCTestCase {
                 calls: $0.1.map {
                     Call(
                         caller: id,
-                        callee: id,
+                        callee: id2,
                         parameters: ["value": $0],
                         method: .synchronous,
                         fsm: newMachine(["value": $0]).name
@@ -267,6 +271,7 @@ class TimeAwareRingletTests: XCTestCase {
         let fsm = TimeConditionalFiniteStateMachine()
         let timeslot = Timeslot(fsms: [fsm.name], callChain: CallChain(root: fsm.name, calls: []), startingTime: 0, duration: 30, cyclesExecuted: 0)
         let id = fsm.gateway.id(of: fsm.name)
+        let id2 = fsm.gateway.id(of: "calling")
         let newMachine: ([String: Any?]) -> AnyParameterisedFiniteStateMachine = {
             let tempFSM = AnyParameterisedFiniteStateMachine(CallingFiniteStateMachine(), newMachine: { _ in fatalError("Should never be called.") })
             let result = tempFSM.parametersFromDictionary($0)
@@ -275,7 +280,7 @@ class TimeAwareRingletTests: XCTestCase {
             }
             return tempFSM
         }
-        fsm.gateway.fsms[id] = .parameterisedFSM(AnyParameterisedFiniteStateMachine(CallingFiniteStateMachine(), newMachine: newMachine))
+        fsm.gateway.fsms[id2] = .parameterisedFSM(AnyParameterisedFiniteStateMachine(CallingFiniteStateMachine(), newMachine: newMachine))
         fsm.gateway.stacks[id] = []
         let maxTime: UInt = 4000000
         let ringlets = TimeAwareRinglets(fsm: .parameterisedFSM(AnyParameterisedFiniteStateMachine(fsm, newMachine: newMachine)), timeslot: timeslot, gateway: fsm.gateway, timer: fsm.timer, startingTime: maxTime + 5000)
@@ -306,7 +311,7 @@ class TimeAwareRingletTests: XCTestCase {
                 calls: $0.1.map {
                     Call(
                         caller: id,
-                        callee: id,
+                        callee: id2,
                         parameters: ["value": $0],
                         method: .synchronous,
                         fsm: newMachine(["value": $0]).name

@@ -116,7 +116,6 @@ class ScheduleVerifierTests: XCTestCase {
         }
         
         func commit(state: KripkeState) {
-            print("Committing: \(state.properties)")
             commits.append(state)
             result.insert(state)
         }
@@ -217,54 +216,6 @@ class ScheduleVerifierTests: XCTestCase {
                 return
             }
             view.check(readableName: self.readableName)
-        }
-    }
-    
-    func test_measure32SeparateTime() {
-        multipleSeparateSensors(32) { (verifier, gateway, timer, viewFactory, cycleDetector) in
-            measure {
-                verifier.verify(gateway: gateway, timer: timer, viewFactory: viewFactory, cycleDetector: cycleDetector)
-            }
-        }
-    }
-    
-    func test_measure32CombinedTime() {
-        multipleCombinedSensors(32) { (verifier, gateway, timer, viewFactory, cycleDetector) in
-            measure {
-                verifier.verify(gateway: gateway, timer: timer, viewFactory: viewFactory, cycleDetector: cycleDetector)
-            }
-        }
-    }
-    
-    func test_measure16SeparateTime() {
-        multipleSeparateSensors(16) { (verifier, gateway, timer, viewFactory, cycleDetector) in
-            measure {
-                verifier.verify(gateway: gateway, timer: timer, viewFactory: viewFactory, cycleDetector: cycleDetector)
-            }
-        }
-    }
-    
-    func test_measure16CombinedTime() {
-        multipleCombinedSensors(16) { (verifier, gateway, timer, viewFactory, cycleDetector) in
-            measure {
-                verifier.verify(gateway: gateway, timer: timer, viewFactory: viewFactory, cycleDetector: cycleDetector)
-            }
-        }
-    }
-    
-    func test_measureEightSeparateTime() {
-        multipleSeparateSensors(8) { (verifier, gateway, timer, viewFactory, cycleDetector) in
-            measure {
-                verifier.verify(gateway: gateway, timer: timer, viewFactory: viewFactory, cycleDetector: cycleDetector)
-            }
-        }
-    }
-    
-    func test_measureEightCombinedTime() {
-        multipleCombinedSensors(8) { (verifier, gateway, timer, viewFactory, cycleDetector) in
-            measure {
-                verifier.verify(gateway: gateway, timer: timer, viewFactory: viewFactory, cycleDetector: cycleDetector)
-            }
         }
     }
     
@@ -1559,7 +1510,7 @@ class ScheduleVerifierTests: XCTestCase {
                         executing: fsm1Name,
                         readState: false,
                         resetClock: false,
-                        duration: fsm2.startingTime - (fsm1.startingTime + fsm1.duration),
+                        duration: fsm1.duration,
                         fsm1: (sensorValue: true, currentState: exit, previousState: initial),
                         fsm2: (sensorValue: false, currentState: initial, previousState: previous)
                     )
