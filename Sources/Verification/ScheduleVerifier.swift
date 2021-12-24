@@ -145,6 +145,11 @@ struct ScheduleVerifier<Isolator: ScheduleIsolatorProtocol> {
                 print("\nGenerating \(step.step.marker)(\(step.step.timeslots.map(\.callChain.fsm).sorted().joined(separator: ", "))) variations for:\n    \("\(job.pool)".components(separatedBy: .newlines).joined(separator: "\n\n    "))\n\n")
                 let previous = job.previous
                 let newStep = job.step >= (job.map.steps.count - 1) ? 0 : job.step + 1
+                defer {
+                    if let previous = previous {
+                        view.commit(state: previous.state)
+                    }
+                }
                 switch step.step {
                 case .takeSnapshot, .takeSnapshotAndStartTimeslot, .startTimeslot, .saveSnapshot:
                     let fsms = step.step.timeslots
@@ -232,9 +237,6 @@ struct ScheduleVerifier<Isolator: ScheduleIsolatorProtocol> {
                             jobs.append(Job(step: newStep, map: job.map, pool: ringlet.after, previous: newPrevious))
                         }
                     }
-                }
-                if let previous = previous {
-                    view.commit(state: previous.state)
                 }
             }
         }
