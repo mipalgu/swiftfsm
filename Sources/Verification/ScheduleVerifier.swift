@@ -138,15 +138,7 @@ struct ScheduleVerifier<Isolator: ScheduleIsolatorProtocol> {
             let collapse = nil == thread.map.steps.first { $0.step.fsms.count > 1 }
             var cycleData = cycleDetector.initialData
             var jobs = [Job(step: 0, map: thread.map, pool: thread.pool, previous: nil)]
-            var states: [KripkeStatePropertyList: KripkeState] = [:]
-            states.reserveCapacity(100000)
-            func state(for properties: KripkeStatePropertyList, isInitial: Bool) -> KripkeState {
-                let state = states[properties] ?? KripkeState(isInitial: isInitial, properties: properties)
-                if nil == states[properties] {
-                    states[properties] = state
-                }
-                return state
-            }
+            var structure = KripkeStructure()
             while !jobs.isEmpty {
                 let job = jobs.removeFirst()
                 let step = job.map.steps[job.step]
@@ -165,7 +157,7 @@ struct ScheduleVerifier<Isolator: ScheduleIsolatorProtocol> {
                     }
                     for pool in pools {
                         let properties = pool.propertyList(forStep: step.step, executingState: fsm?.currentState.name, collapseIfPossible: collapse)
-                        let state = state(for: properties, isInitial: previous == nil)
+                        let state = structure.state(for: properties, isInitial: previous == nil)
                         defer {
                             if step.step.saveSnapshot && hasFinished(map: job.map, forPool: job.pool) {
                                 view.commit(state: state)
@@ -210,7 +202,7 @@ struct ScheduleVerifier<Isolator: ScheduleIsolatorProtocol> {
                     let ringlets = generator.execute(timeslot: timeslot, inPool: job.pool, gateway: gateway, timer: timer)
                     for ringlet in ringlets {
                         let properties = ringlet.after.propertyList(forStep: step.step, executingState: currentState, collapseIfPossible: collapse)
-                        let state = state(for: properties, isInitial: previous == nil)
+                        let state = structure.state(for: properties, isInitial: previous == nil)
                         if let previous = previous {
                             let edge = KripkeEdge(
                                 clockName: timeslot.callChain.fsm,
