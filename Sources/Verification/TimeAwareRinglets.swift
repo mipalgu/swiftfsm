@@ -67,7 +67,6 @@ struct TimeAwareRinglets {
     var ringlets: [ConditionalRinglet]
     
     init<Gateway: ModifiableFSMGateway, Timer: Clock>(fsm: FSMType, timeslot: Timeslot, gateway: Gateway, timer: Timer, startingTime: UInt) where Gateway: NewVerifiableGateway {
-        print("Execute 2: \(fsm.asScheduleableFiniteStateMachine.base)")
         var lastTime: UInt
         var smallerTimes: SortedCollection<UInt> = []
         var times: SortedCollection<UInt> = []
@@ -91,9 +90,7 @@ struct TimeAwareRinglets {
         }
         func calculate(time: Timing) {
             let clone = fsm.clone()
-            print("Execute 3: \(clone.asScheduleableFiniteStateMachine.base)")
             clone.asScheduleableFiniteStateMachine.externalValues = initialExternalValues
-            print("Execute 4: \(clone.asScheduleableFiniteStateMachine.base)")
             timer.forceRunningTime(time.timeValue)
             let ringlet = Ringlet(fsm: clone, timeslot: timeslot, gateway: gateway, timer: timer)
             for newTime in ringlet.afterCalls where newTime != lastTime {

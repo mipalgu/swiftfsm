@@ -72,6 +72,33 @@ enum VerificationStep: Hashable {
     
     case saveSnapshot(fsms: Set<Timeslot>)
     
+    var takeSnapshot: Bool {
+        switch self {
+        case .takeSnapshot, .takeSnapshotAndStartTimeslot:
+            return true
+        default:
+            return false
+        }
+    }
+    
+    var startTimeslot: Bool {
+        switch self {
+        case .startTimeslot, .takeSnapshotAndStartTimeslot:
+            return true
+        default:
+            return false
+        }
+    }
+    
+    var saveSnapshot: Bool {
+        switch self {
+        case .saveSnapshot, .executeAndSaveSnapshot:
+            return true
+        default:
+            return false
+        }
+    }
+    
     var marker: String {
         switch self {
         case .takeSnapshot, .takeSnapshotAndStartTimeslot:

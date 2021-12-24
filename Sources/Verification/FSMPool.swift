@@ -140,7 +140,9 @@ extension FSMPool: Hashable {
 extension FSMPool: CustomStringConvertible {
     
     public var description: String {
-        "\(fsms.sorted { $0.name < $1.name }.map(\.asScheduleableFiniteStateMachine.base))"
+        fsms.sorted { $0.name < $1.name }.map(\.asScheduleableFiniteStateMachine).map {
+            $0.name + ": \($0.base)"
+        }.joined(separator: "\n")
     }
     
 }
