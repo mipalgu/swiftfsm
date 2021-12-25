@@ -219,6 +219,17 @@ class ScheduleVerifierTests: XCTestCase {
         }
     }
     
+    func test_canGenerateAllStatesOfTimeFSM() {
+        singleTime { (verifier, gateway, timer, viewFactory, cycleDetector) in
+            verifier.verify(gateway: gateway, timer: timer, viewFactory: viewFactory, cycleDetector: cycleDetector)
+            guard let view: TestableView = viewFactory.lastView else {
+                XCTFail("Failed to create Kripke Structure View.")
+                return
+            }
+            view.check(readableName: self.readableName)
+        }
+    }
+    
     func test_measureFourSeparateTime() {
         multipleSeparateSensors(4) { (verifier, gateway, timer, viewFactory, cycleDetector) in
             measure {
@@ -526,6 +537,53 @@ class ScheduleVerifierTests: XCTestCase {
         let duration: UInt = 30
         let cycleLength = startingTime + duration
         let states = sensorsKripkeStructure(fsmName: fsm.name, startingTime: startingTime, duration: duration, cycleLength: cycleLength)
+        let gateway = StackGateway()
+        let timer = FSMClock(ringletLengths: [fsm.name: duration], scheduleLength: cycleLength)
+        fsm.gateway = gateway
+        fsm.timer = timer
+        let cycleDetector = HashTableCycleDetector<KripkeStatePropertyList>()
+        let viewFactory = TestableViewFactory {
+            TestableView(identifier: $0, expectedIdentifier: fsm.name, expected: states)
+        }
+        let timeslot = Timeslot(
+            fsms: [fsm.name],
+            callChain: CallChain(root: fsm.name, calls: []),
+            startingTime: startingTime,
+            duration: duration,
+            cyclesExecuted: 0
+        )
+        let pool = FSMPool(fsms: [.controllableFSM(AnyControllableFiniteStateMachine(fsm))])
+        let isolator = ScheduleIsolator(
+            threads: [
+                IsolatedThread(
+                    map: VerificationMap(
+                        steps: [
+                            VerificationMap.Step(
+                                time: timeslot.startingTime,
+                                step: .takeSnapshotAndStartTimeslot(timeslot: timeslot)
+                            ),
+                            VerificationMap.Step(
+                                time: timeslot.startingTime + timeslot.duration,
+                                step: .executeAndSaveSnapshot(timeslot: timeslot)
+                            )
+                        ],
+                        stepLookup: []
+                    ),
+                    pool: pool
+                )
+            ],
+            cycleLength: timeslot.startingTime + timeslot.duration
+        )
+        let verifier = ScheduleVerifier(isolatedThreads: isolator)
+        return make(verifier, gateway, timer, viewFactory, cycleDetector)
+    }
+    
+    private func singleTime<T>(_ make: (ScheduleVerifier<ScheduleIsolator>, StackGateway, FSMClock, TestableViewFactory, HashTableCycleDetector<KripkeStatePropertyList>) -> T) -> T {
+        let fsm = SimpleTimeConditionalFiniteStateMachine()
+        let startingTime: UInt = 10
+        let duration: UInt = 30
+        let cycleLength = startingTime + duration
+        let states = timeKripkeStructure(fsmName: fsm.name, startingTime: startingTime, duration: duration, cycleLength: cycleLength)
         let gateway = StackGateway()
         let timer = FSMClock(ringletLengths: [fsm.name: duration], scheduleLength: cycleLength)
         fsm.gateway = gateway
@@ -1697,6 +1755,514 @@ class ScheduleVerifierTests: XCTestCase {
                 previousState: exit,
                 targets: []
             )
+        ]
+        return states
+    }
+    
+    private func timeKripkeStructure(
+        fsmName: String,
+        startingTime: UInt,
+        duration: UInt,
+        cycleLength: UInt
+    ) -> Set<KripkeState> {
+        var statesLookup: [KripkeStatePropertyList: KripkeState] = [:]
+        statesLookup.reserveCapacity(64)
+        func propertyList(
+            executing: String,
+            readState: Bool,
+            value: Int,
+            currentState: String,
+            previousState: String
+        ) -> KripkeStatePropertyList {
+            let configurations: [(String, Int, String, String)] = [
+                (fsmName, value, currentState, previousState)
+            ]
+            var currentState: String!
+            var previousState: String!
+            let fsms = configurations.map { (data) -> (String, KripkeStatePropertyList, SimpleTimeConditionalFiniteStateMachine) in
+                let fsm = SimpleTimeConditionalFiniteStateMachine()
+                fsm.name = data.0
+                fsm.value = data.1
+                if data.0 == executing {
+                    currentState = data.2
+                    previousState = data.3
+                }
+                if data.2 == "initial" {
+                    fsm.currentState = fsm.initialState
+                } else {
+                    fsm.currentState = EmptyMiPalState(data.2)
+                }
+                if data.3 == "initial" {
+                    fsm.previousState = fsm.initialState
+                } else {
+                    fsm.previousState = EmptyMiPalState(data.3)
+                }
+                fsm.ringlet.previousState = fsm.previousState
+                fsm.ringlet.shouldExecuteOnEntry = fsm.previousState != fsm.currentState
+                let fsmProperties = KripkeStatePropertyList(fsm)
+                return (fsm.name, fsmProperties, fsm)
+            }
+            return [
+                "fsms": KripkeStateProperty(
+                    type: .Compound(KripkeStatePropertyList(Dictionary<String, KripkeStateProperty>(uniqueKeysWithValues: fsms.map {
+                        ($0, KripkeStateProperty(type: .Compound($1), value: $2))
+                    }))),
+                    value: [fsm.name: fsm]
+                ),
+                "pc": KripkeStateProperty(type: .String, value: executing + "." + (readState ? currentState! : previousState!) + "." + (readState ? "R" : "W"))
+            ]
+        }
+        func target(
+            executing: String,
+            readState: Bool,
+            resetClock: Bool,
+            duration: UInt,
+            value: Int,
+            currentState: String,
+            previousState: String,
+            constraint: Constraint<UInt>? = nil
+        ) -> (String, Bool, KripkeStatePropertyList, UInt, Constraint<UInt>?) {
+            return (
+                executing,
+                resetClock,
+                propertyList(
+                    executing: executing,
+                    readState: readState,
+                    value: value,
+                    currentState: currentState,
+                    previousState: previousState
+                ),
+                duration,
+                constraint
+            )
+        }
+        func kripkeState(
+            executing: String,
+            readState: Bool,
+            value: Int,
+            currentState: String,
+            previousState: String,
+            targets: [(executing: String, resetClock: Bool, target: KripkeStatePropertyList, duration: UInt, constraint: Constraint<UInt>?)]
+        ) -> KripkeState {
+            let fsm = SimpleTimeConditionalFiniteStateMachine()
+            fsm.name = fsmName
+            let properties = propertyList(
+                executing: executing,
+                readState: readState,
+                value: value,
+                currentState: currentState,
+                previousState: previousState
+            )
+            let edges = targets.map {
+                KripkeEdge(
+                    clockName: $0,
+                    constraint: $4,
+                    resetClock: $1,
+                    takeSnapshot: !readState,
+                    time: $3,
+                    target: $2
+                )
+            }
+            let state = statesLookup[properties] ?? KripkeState(isInitial: previousState == fsm.initialPreviousState.name, properties: properties)
+            if nil == statesLookup[properties] {
+                statesLookup[properties] = state
+            }
+            for edge in edges {
+                state.addEdge(edge)
+            }
+            return state
+        }
+        let fsm = SimpleTimeConditionalFiniteStateMachine()
+        fsm.name = fsmName
+        let initial = fsm.initialState.name
+        let previous = fsm.initialPreviousState.name
+        let exit = fsm.exitState.name
+        let states: Set<KripkeState> = [
+            kripkeState(
+                executing: fsmName,
+                readState: true,
+                value: 0,
+                currentState: initial,
+                previousState: previous,
+                targets: [
+                    target(
+                        executing: fsmName,
+                        readState: false,
+                        resetClock: false,
+                        duration: duration,
+                        value: 0,
+                        currentState: initial,
+                        previousState: initial,
+                        constraint: .lessThanEqual(value: 5)
+                    ),
+                    target(
+                        executing: fsmName,
+                        readState: false,
+                        resetClock: false,
+                        duration: duration,
+                        value: 5,
+                        currentState: initial,
+                        previousState: initial,
+                        constraint: .and(lhs: .greaterThan(value: 5), rhs: .lessThanEqual(value: 15))
+                    ),
+                    target(
+                        executing: fsmName,
+                        readState: false,
+                        resetClock: false,
+                        duration: duration,
+                        value: 15,
+                        currentState: initial,
+                        previousState: initial,
+                        constraint: .and(lhs: .greaterThan(value: 15), rhs: .lessThanEqual(value: 20))
+                    ),
+                    target(
+                        executing: fsmName,
+                        readState: false,
+                        resetClock: false,
+                        duration: duration,
+                        value: 15,
+                        currentState: exit,
+                        previousState: initial,
+                        constraint: .and(lhs: .greaterThan(value: 20), rhs: .lessThanEqual(value: 25))
+                    ),
+                    target(
+                        executing: fsmName,
+                        readState: false,
+                        resetClock: false,
+                        duration: duration,
+                        value: 25,
+                        currentState: exit,
+                        previousState: initial,
+                        constraint: .greaterThan(value: 25)
+                    )
+                ]
+            ),
+            kripkeState(
+                executing: fsmName,
+                readState: false,
+                value: 0,
+                currentState: initial,
+                previousState: initial,
+                targets: [
+                    target(
+                        executing: fsmName,
+                        readState: true,
+                        resetClock: false,
+                        duration: startingTime,
+                        value: 0,
+                        currentState: initial,
+                        previousState: initial,
+                        constraint: nil
+                    )
+                ]
+            ),
+            kripkeState(
+                executing: fsmName,
+                readState: true,
+                value: 0,
+                currentState: initial,
+                previousState: initial,
+                targets: [
+                    target(
+                        executing: fsmName,
+                        readState: false,
+                        resetClock: false,
+                        duration: duration,
+                        value: 0,
+                        currentState: initial,
+                        previousState: initial,
+                        constraint: .lessThanEqual(value: 5)
+                    ),
+                    target(
+                        executing: fsmName,
+                        readState: false,
+                        resetClock: false,
+                        duration: duration,
+                        value: 5,
+                        currentState: initial,
+                        previousState: initial,
+                        constraint: .and(lhs: .greaterThan(value: 5), rhs: .lessThanEqual(value: 15))
+                    ),
+                    target(
+                        executing: fsmName,
+                        readState: false,
+                        resetClock: false,
+                        duration: duration,
+                        value: 15,
+                        currentState: initial,
+                        previousState: initial,
+                        constraint: .and(lhs: .greaterThan(value: 15), rhs: .lessThanEqual(value: 20))
+                    ),
+                    target(
+                        executing: fsmName,
+                        readState: false,
+                        resetClock: false,
+                        duration: duration,
+                        value: 15,
+                        currentState: exit,
+                        previousState: initial,
+                        constraint: .and(lhs: .greaterThan(value: 20), rhs: .lessThanEqual(value: 25))
+                    ),
+                    target(
+                        executing: fsmName,
+                        readState: false,
+                        resetClock: false,
+                        duration: duration,
+                        value: 25,
+                        currentState: exit,
+                        previousState: initial,
+                        constraint: .greaterThan(value: 25)
+                    )
+                ]
+            ),
+            kripkeState(
+                executing: fsmName,
+                readState: false,
+                value: 5,
+                currentState: initial,
+                previousState: initial,
+                targets: [
+                    target(
+                        executing: fsmName,
+                        readState: true,
+                        resetClock: false,
+                        duration: startingTime,
+                        value: 5,
+                        currentState: initial,
+                        previousState: initial,
+                        constraint: nil
+                    )
+                ]
+            ),
+            kripkeState(
+                executing: fsmName,
+                readState: true,
+                value: 5,
+                currentState: initial,
+                previousState: initial,
+                targets: [
+                    target(
+                        executing: fsmName,
+                        readState: false,
+                        resetClock: false,
+                        duration: duration,
+                        value: 0,
+                        currentState: initial,
+                        previousState: initial,
+                        constraint: .lessThanEqual(value: 5)
+                    ),
+                    target(
+                        executing: fsmName,
+                        readState: false,
+                        resetClock: false,
+                        duration: duration,
+                        value: 5,
+                        currentState: initial,
+                        previousState: initial,
+                        constraint: .and(lhs: .greaterThan(value: 5), rhs: .lessThanEqual(value: 15))
+                    ),
+                    target(
+                        executing: fsmName,
+                        readState: false,
+                        resetClock: false,
+                        duration: duration,
+                        value: 15,
+                        currentState: initial,
+                        previousState: initial,
+                        constraint: .and(lhs: .greaterThan(value: 15), rhs: .lessThanEqual(value: 20))
+                    ),
+                    target(
+                        executing: fsmName,
+                        readState: false,
+                        resetClock: false,
+                        duration: duration,
+                        value: 15,
+                        currentState: exit,
+                        previousState: initial,
+                        constraint: .and(lhs: .greaterThan(value: 20), rhs: .lessThanEqual(value: 25))
+                    ),
+                    target(
+                        executing: fsmName,
+                        readState: false,
+                        resetClock: false,
+                        duration: duration,
+                        value: 25,
+                        currentState: exit,
+                        previousState: initial,
+                        constraint: .greaterThan(value: 25)
+                    )
+                ]
+            ),
+            kripkeState(
+                executing: fsmName,
+                readState: false,
+                value: 15,
+                currentState: initial,
+                previousState: initial,
+                targets: [
+                    target(
+                        executing: fsmName,
+                        readState: true,
+                        resetClock: false,
+                        duration: startingTime,
+                        value: 15,
+                        currentState: initial,
+                        previousState: initial,
+                        constraint: nil
+                    )
+                ]
+            ),
+            kripkeState(
+                executing: fsmName,
+                readState: true,
+                value: 15,
+                currentState: initial,
+                previousState: initial,
+                targets: [
+                    target(
+                        executing: fsmName,
+                        readState: false,
+                        resetClock: false,
+                        duration: duration,
+                        value: 0,
+                        currentState: initial,
+                        previousState: initial,
+                        constraint: .lessThanEqual(value: 5)
+                    ),
+                    target(
+                        executing: fsmName,
+                        readState: false,
+                        resetClock: false,
+                        duration: duration,
+                        value: 5,
+                        currentState: initial,
+                        previousState: initial,
+                        constraint: .and(lhs: .greaterThan(value: 5), rhs: .lessThanEqual(value: 15))
+                    ),
+                    target(
+                        executing: fsmName,
+                        readState: false,
+                        resetClock: false,
+                        duration: duration,
+                        value: 15,
+                        currentState: initial,
+                        previousState: initial,
+                        constraint: .and(lhs: .greaterThan(value: 15), rhs: .lessThanEqual(value: 20))
+                    ),
+                    target(
+                        executing: fsmName,
+                        readState: false,
+                        resetClock: false,
+                        duration: duration,
+                        value: 15,
+                        currentState: exit,
+                        previousState: initial,
+                        constraint: .and(lhs: .greaterThan(value: 20), rhs: .lessThanEqual(value: 25))
+                    ),
+                    target(
+                        executing: fsmName,
+                        readState: false,
+                        resetClock: false,
+                        duration: duration,
+                        value: 25,
+                        currentState: exit,
+                        previousState: initial,
+                        constraint: .greaterThan(value: 25)
+                    )
+                ]
+            ),
+            kripkeState(
+                executing: fsmName,
+                readState: false,
+                value: 15,
+                currentState: exit,
+                previousState: initial,
+                targets: [
+                    target(
+                        executing: fsmName,
+                        readState: true,
+                        resetClock: true,
+                        duration: startingTime,
+                        value: 15,
+                        currentState: exit,
+                        previousState: initial,
+                        constraint: nil
+                    )
+                ]
+            ),
+            kripkeState(
+                executing: fsmName,
+                readState: true,
+                value: 15,
+                currentState: exit,
+                previousState: initial,
+                targets: [
+                    target(
+                        executing: fsmName,
+                        readState: false,
+                        resetClock: false,
+                        duration: startingTime,
+                        value: 15,
+                        currentState: exit,
+                        previousState: exit,
+                        constraint: nil
+                    )
+                ]
+            ),
+            kripkeState(
+                executing: fsmName,
+                readState: false,
+                value: 15,
+                currentState: exit,
+                previousState: exit,
+                targets: []
+            ),
+            kripkeState(
+                executing: fsmName,
+                readState: false,
+                value: 25,
+                currentState: exit,
+                previousState: initial,
+                targets: [
+                    target(
+                        executing: fsmName,
+                        readState: true,
+                        resetClock: true,
+                        duration: startingTime,
+                        value: 25,
+                        currentState: exit,
+                        previousState: initial,
+                        constraint: nil
+                    )
+                ]
+            ),
+            kripkeState(
+                executing: fsmName,
+                readState: true,
+                value: 25,
+                currentState: exit,
+                previousState: initial,
+                targets: [
+                    target(
+                        executing: fsmName,
+                        readState: false,
+                        resetClock: false,
+                        duration: duration,
+                        value: 25,
+                        currentState: exit,
+                        previousState: exit,
+                        constraint: nil
+                    )
+                ]
+            ),
+            kripkeState(
+                executing: fsmName,
+                readState: false,
+                value: 25,
+                currentState: exit,
+                previousState: exit,
+                targets: []
+            ),
         ]
         return states
     }
