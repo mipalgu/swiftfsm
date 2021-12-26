@@ -60,6 +60,8 @@ import XCTest
 
 import KripkeStructure
 import swiftfsm
+import Gateways
+import Timers
 
 @testable import Verification
 
@@ -326,6 +328,86 @@ class TimeAwareRingletTests: XCTestCase {
             XCTAssertEqual(result.postSnapshot["value"], expected.postSnapshot["value"])
             XCTAssertEqual(result.calls, expected.calls)
             XCTAssertEqual(result.condition, expected.condition)
+        }
+    }
+    
+    func test_computesAllRingletsforSimpleTimeFSM() throws {
+        let fsm = SimpleTimeConditionalFiniteStateMachine()
+        let gateway = StackGateway()
+        let timeslot = Timeslot(
+            fsms: [fsm.name],
+            callChain: CallChain(root: fsm.name, calls: []),
+            startingTime: 10,
+            duration: 20,
+            cyclesExecuted: 0
+        )
+        let timer = FSMClock(ringletLengths: [fsm.name: timeslot.duration], scheduleLength: timeslot.startingTime + timeslot.duration)
+        fsm.gateway = gateway
+        fsm.timer = timer
+        timer.forceRunningTime(UInt.max) // Check that the TimeAwareRinglets actually set a forced running time.
+        let controllableFSM = FSMType.controllableFSM(AnyControllableFiniteStateMachine(fsm))
+        let results = TimeAwareRinglets(
+            fsm: controllableFSM,
+            timeslot: timeslot,
+            gateway: gateway,
+            timer: timer,
+            startingTime: 0
+        )
+        func expected(startingTime: UInt) -> [ConditionalRinglet] {
+            let times: [UInt] = [startingTime] + [0, 5001, 15001, 20001, 25001].filter { $0 > startingTime }
+            return times.map { time in
+                let fsm = SimpleTimeConditionalFiniteStateMachine()
+                let gateway = StackGateway()
+                let timer = FSMClock(ringletLengths: [fsm.name: timeslot.duration], scheduleLength: timeslot.startingTime + timeslot.duration)
+                fsm.gateway = gateway
+                fsm.timer = timer
+                let controllableFSM = FSMType.controllableFSM(AnyControllableFiniteStateMachine(fsm))
+                let pool = FSMPool(fsms: [controllableFSM])
+                timer.forceRunningTime(time)
+                var clone = controllableFSM.clone()
+                var pool2 = pool.cloned
+                pool2.insert(clone)
+                clone.next()
+                let condition: Constraint<UInt>
+                switch time {
+                case 0...5000:
+                    condition = .lessThanEqual(value: 5000)
+                case 5001...15000:
+                    condition = .and(lhs: .greaterThan(value: 5000), rhs: .lessThanEqual(value: 15000))
+                case 15001...20000:
+                    condition = .and(lhs: .greaterThan(value: 15000), rhs: .lessThanEqual(value: 20000))
+                case 20001...25000:
+                    condition = .and(lhs: .greaterThan(value: 20000), rhs: .lessThanEqual(value: 25000))
+                default:
+                    condition = .greaterThan(value: 25000)
+                }
+                return ConditionalRinglet(
+                    fsmBefore: controllableFSM,
+                    fsmAfter: clone,
+                    timeslot: timeslot,
+                    before: pool,
+                    after: pool2,
+                    transitioned: clone.currentState.name != controllableFSM.currentState.name,
+                    externalsPreSnapshot: KripkeStatePropertyList(),
+                    externalsPostSnapshot: KripkeStatePropertyList(),
+                    preSnapshot: KripkeStatePropertyList(controllableFSM.asScheduleableFiniteStateMachine.base),
+                    postSnapshot: KripkeStatePropertyList(clone.asScheduleableFiniteStateMachine.base),
+                    calls: [],
+                    condition: condition
+                )
+            }
+        }
+        let expected = expected(startingTime: 0)
+        XCTAssertEqual(results.ringlets, expected)
+        if results.ringlets != expected {
+            XCTAssertEqual(results.ringlets.count, expected.count)
+            XCTAssertEqual(results.ringlets.map(\.condition), expected.map(\.condition))
+            for (result, expected) in zip(results.ringlets, expected) {
+                XCTAssertEqual(result.preSnapshot["value"], expected.preSnapshot["value"])
+                XCTAssertEqual(result.postSnapshot["value"], expected.postSnapshot["value"])
+                XCTAssertEqual(result.calls, expected.calls)
+                XCTAssertEqual(result.condition, expected.condition)
+            }
         }
     }
     
