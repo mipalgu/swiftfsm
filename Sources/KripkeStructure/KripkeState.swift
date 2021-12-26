@@ -56,10 +56,34 @@
  *
  */
 
+import swift_helpers
+
 /**
  *  A `KripkeState` represents a node in a `KripkeStructure`.
  */
 public final class KripkeState: KripkeStateType {
+    
+    private struct EdgeKey: Hashable {
+        
+        public var clockName: String?
+        
+        public var resetClock: Bool
+        
+        public var takeSnapshot: Bool
+        
+        public var time: UInt
+        
+        public var target: KripkeStatePropertyList
+        
+        init(edge: KripkeEdge) {
+            self.clockName = edge.clockName
+            self.resetClock = edge.resetClock
+            self.takeSnapshot = edge.takeSnapshot
+            self.time = edge.time
+            self.target = edge.target
+        }
+        
+    }
 
     public let isInitial: Bool
     
@@ -70,7 +94,7 @@ public final class KripkeState: KripkeStateType {
 
     public private(set) var edges: Set<KripkeEdge> = []
     
-    private var lookup: [KripkeStatePropertyList: [KripkeEdge]] = [:]
+    private var lookup: [EdgeKey: KripkeEdge] = [:]
 
     /**
      *  Create a new `KripkeState`.
@@ -85,23 +109,27 @@ public final class KripkeState: KripkeStateType {
     }
     
     public func addEdge(_ edge: KripkeEdge) {
-        guard let existingEdges = lookup[edge.target] else {
-            lookup[edge.target] = [edge]
+        let key = EdgeKey(edge: edge)
+        guard let existingEdge = lookup[key] else {
+            lookup[key] = edge
             edges.insert(edge)
             return
         }
-        for (index, existingEdge) in existingEdges.enumerated() {
-            if existingEdge.canMerge(edge) {
-                edges.remove(existingEdge)
-                var newEdges = existingEdges
-                newEdges[index].mergeConstraint(edge.constraint)
-                lookup[edge.target] = newEdges
-                edges.insert(newEdges[index])
-                return
-            }
+        guard nil != existingEdge.constraint else {
+            return
         }
-        lookup[edge.target]?.append(edge)
-        edges.insert(edge)
+        guard let newConstraint = edge.constraint else {
+            var newEdge = existingEdge
+            newEdge.constraint = nil
+            lookup[key] = newEdge
+            edges.remove(existingEdge)
+            edges.insert(newEdge)
+            return
+        }
+        var newEdge = existingEdge
+        newEdge.mergeConstraint(newConstraint)
+        edges.remove(existingEdge)
+        edges.insert(newEdge)
     }
 
 }
