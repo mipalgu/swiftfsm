@@ -134,6 +134,8 @@ final class SimpleTimeConditionalFiniteStateMachine: MachineProtocol, CustomStri
                     value = 15
                 } else if self.timer.after_ms(5) {
                     value = 5
+                } else {
+                    value = 0
                 }
             },
             onExit: { [unowned self] in
@@ -143,6 +145,8 @@ final class SimpleTimeConditionalFiniteStateMachine: MachineProtocol, CustomStri
                     value = 15
                 } else if self.timer.after_ms(5) {
                     value = 5
+                } else {
+                    value = 0
                 }
             }
         )
