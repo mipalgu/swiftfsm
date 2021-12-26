@@ -95,8 +95,8 @@ struct TimeAwareRinglets {
             timer.forceRunningTime(time.timeValue)
             gateway.pool = pool.cloned
             let ringlet = Ringlet(fsm: clone, timeslot: timeslot, gateway: gateway, timer: timer)
-            for newTime in ringlet.afterCalls where newTime != lastTime {
-                if newTime < lastTime, !smallerTimes.contains(newTime) {
+            for newTime in ringlet.afterCalls {
+                if newTime <= lastTime, !smallerTimes.contains(newTime) {
                     smallerTimes.insert(newTime)
                 } else if newTime > lastTime, !times.contains(newTime) {
                     times.insert(newTime)
@@ -125,7 +125,9 @@ struct TimeAwareRinglets {
             } else if let lastSmall = smallerTimes.last {
                 ringlets[0].condition = .greaterThan(value: lastSmall)
             } else if let firstBig = times.first {
-                ringlets[0].condition = .lessThanEqual(value: firstBig)
+                ringlets[0].condition = .and(lhs: .greaterThan(value: lastTime), rhs: .lessThanEqual(value: firstBig)).reduced
+            } else {
+                ringlets[0].condition = .greaterThan(value: lastTime)
             }
         }
         while !times.isEmpty {

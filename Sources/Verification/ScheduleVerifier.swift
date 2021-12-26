@@ -199,10 +199,13 @@ struct ScheduleVerifier<Isolator: ScheduleIsolatorProtocol> {
                     let currentState = fsm.currentState.name
                     let ringlets = generator.execute(timeslot: timeslot, inPool: job.pool, gateway: gateway, timer: timer)
                     for ringlet in ringlets {
-                        //print("\nGenerating \(step.step.marker)(\(step.step.timeslots.map(\.callChain.fsm).sorted().joined(separator: ", "))) variations for:\n    \("\(ringlet.after)".components(separatedBy: .newlines).joined(separator: "\n\n    "))\n\n")
+                        print("\nGenerating \(step.step.marker)(\(step.step.timeslots.map(\.callChain.fsm).sorted().joined(separator: ", "))) variations for:\n    \("\(ringlet.after)".components(separatedBy: .newlines).joined(separator: "\n\n    "))\n\n")
                         let properties = ringlet.after.propertyList(forStep: step.step, executingState: currentState, collapseIfPossible: collapse)
                         let state = structure.state(for: properties, isInitial: previous == nil)
                         if let previous = previous {
+                            if "\(previous.state.properties)" == "[(key: \"fsms\", value: [(key: \"SimpleTimeConditionalFiniteStateMachine\", value: [(key: \"currentState\", value: initial), (key: \"hasFinished\", value: false), (key: \"isSuspended\", value: false), (key: \"ringlet\", value: [(key: \"shouldExecuteOnEntry\", value: false)]), (key: \"sensors\", value: []), (key: \"value\", value: 15)])]), (key: \"pc\", value: SimpleTimeConditionalFiniteStateMachine.initial.R)]" {
+                                print("here: \(ringlet.fsmAfter.asScheduleableFiniteStateMachine.base)")
+                            }
                             let edge = KripkeEdge(
                                 clockName: timeslot.callChain.fsm,
                                 constraint: ringlet.condition == .lessThanEqual(value: 0) ? nil : ringlet.condition,

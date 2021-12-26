@@ -426,6 +426,36 @@ extension Constraint where T: FixedWidthInteger {
             default:
                 break
             }
+            // Reduce when the range only goes to a single value.
+            switch constraint {
+            case .and(let lhs, let rhs):
+                switch (lhs, rhs) {
+                case (.lessThanEqual(let lvalue), .greaterThanEqual(value: let rvalue)), (.greaterThanEqual(value: let lvalue), .lessThanEqual(value: let rvalue)):
+                    if lvalue == rvalue {
+                        return reduce(.equal(value: lvalue))
+                    }
+                case (.greaterThan(let lvalue), .lessThanEqual(value: let rvalue)):
+                    if lvalue < rvalue && rvalue - 1 == lvalue {
+                        return reduce(.equal(value: rvalue))
+                    }
+                case (.greaterThanEqual(let lvalue), .lessThan(value: let rvalue)):
+                    if lvalue < rvalue && rvalue - 1 == lvalue {
+                        return reduce(.equal(value: lvalue))
+                    }
+                case (.lessThanEqual(let lvalue), .greaterThan(value: let rvalue)):
+                    if lvalue > rvalue && lvalue - 1 == rvalue {
+                        return reduce(.equal(value: lvalue))
+                    }
+                case (.lessThan(let lvalue), .greaterThanEqual(value: let rvalue)):
+                    if lvalue > rvalue && lvalue - 1 == rvalue {
+                        return reduce(.equal(value: rvalue))
+                    }
+                default:
+                    break
+                }
+            default:
+                break
+            }
             // Remove less than equal to max
             switch constraint {
             case .and(let p, let q), .or(let p, let q):

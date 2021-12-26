@@ -232,7 +232,7 @@ class TimeAwareRingletTests: XCTestCase {
         }
         let parameterisedFSM: FSMType = .parameterisedFSM(AnyParameterisedFiniteStateMachine(fsm, newMachine: newMachine))
         let expectedData: [(Bool, [Bool], Constraint<UInt>)] = [
-            (true, [], .lessThanEqual(value: time)),
+            (true, [], .equal(value: time)),
             (false, [true], .and(lhs: .greaterThan(value: 2000000), rhs: .lessThanEqual(value: 4000000))),
             (false, [true, false], .greaterThan(value: 4000000))
         ]
@@ -352,7 +352,7 @@ class TimeAwareRingletTests: XCTestCase {
                 timeslot: timeslot,
                 gateway: gateway,
                 timer: timer,
-                startingTime: 0
+                startingTime: startingTime
             )
             return results.ringlets
         }
