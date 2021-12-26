@@ -135,4 +135,9 @@ struct VerificationMap {
         steps.insert(step)
     }
     
+    func hasFinished(forPool pool: FSMPool) -> Bool {
+        let fsms: Set<String> = Set(steps.lazy.flatMap(\.step.fsms))
+        return nil == fsms.first { !pool.fsm($0).hasFinished }
+    }
+    
 }

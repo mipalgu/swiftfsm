@@ -181,7 +181,7 @@ struct ScheduleVerifier<Isolator: ScheduleIsolatorProtocol> {
                             continue
                         }
                         let state = structure.state(for: properties, isInitial: previous == nil)
-                        if step.step.saveSnapshot && hasFinished(map: job.map, forPool: job.pool) {
+                        if step.step.saveSnapshot && job.map.hasFinished(forPool: pool) {
                             view.commit(state: state)
                             continue
                         }
@@ -219,7 +219,7 @@ struct ScheduleVerifier<Isolator: ScheduleIsolatorProtocol> {
                         guard !cycleDetector.inCycle(data: &cycleData, element: properties) else {
                             continue
                         }
-                        if step.step.saveSnapshot && hasFinished(map: job.map, forPool: ringlet.after) {
+                        if step.step.saveSnapshot && job.map.hasFinished(forPool: ringlet.after) {
                             view.commit(state: state)
                             continue
                         }
@@ -235,11 +235,6 @@ struct ScheduleVerifier<Isolator: ScheduleIsolatorProtocol> {
                 }
             }
         }
-    }
-    
-    private func hasFinished(map: VerificationMap, forPool pool: FSMPool) -> Bool {
-        let fsms: Set<String> = Set(map.steps.lazy.flatMap(\.step.fsms))
-        return nil == fsms.first { !pool.fsm($0).hasFinished }
     }
     
 }
