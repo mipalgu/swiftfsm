@@ -56,8 +56,6 @@
  *
  */
 
-import swift_helpers
-
 /**
  *  A `KripkeState` represents a node in a `KripkeStructure`.
  */
