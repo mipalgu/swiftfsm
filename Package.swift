@@ -181,7 +181,8 @@ let package = Package(
             .target(name: "KripkeStructure"),
             .target(name: "KripkeStructureViews"),
             .target(name: "Verification"),
-            .target(name: "CTests")
+            .target(name: "CTests"),
+            .product(name: "swift_helpers", package: "swift_helpers")
         ]),
         .testTarget(name: "swiftfsm_binariesTests", dependencies: [.target(name: "swiftfsm_binaries")])
     ]
