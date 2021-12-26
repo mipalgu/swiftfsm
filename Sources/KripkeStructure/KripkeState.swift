@@ -116,16 +116,9 @@ public final class KripkeState: KripkeStateType {
         guard nil != existingEdge.constraint else {
             return
         }
-        guard let newConstraint = edge.constraint else {
-            var newEdge = existingEdge
-            newEdge.constraint = nil
-            lookup[key] = newEdge
-            edges.remove(existingEdge)
-            edges.insert(newEdge)
-            return
-        }
         var newEdge = existingEdge
-        newEdge.mergeConstraint(newConstraint)
+        newEdge.mergeConstraint(edge.constraint)
+        lookup[key] = newEdge
         edges.remove(existingEdge)
         edges.insert(newEdge)
     }
