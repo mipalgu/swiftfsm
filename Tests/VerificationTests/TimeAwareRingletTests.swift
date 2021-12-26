@@ -332,31 +332,41 @@ class TimeAwareRingletTests: XCTestCase {
     }
     
     func test_computesAllRingletsforSimpleTimeFSM() throws {
-        let fsm = SimpleTimeConditionalFiniteStateMachine()
-        let gateway = StackGateway()
-        let timeslot = Timeslot(
-            fsms: [fsm.name],
-            callChain: CallChain(root: fsm.name, calls: []),
-            startingTime: 10,
-            duration: 20,
-            cyclesExecuted: 0
-        )
-        let timer = FSMClock(ringletLengths: [fsm.name: timeslot.duration], scheduleLength: timeslot.startingTime + timeslot.duration)
-        fsm.gateway = gateway
-        fsm.timer = timer
-        timer.forceRunningTime(UInt.max) // Check that the TimeAwareRinglets actually set a forced running time.
-        let controllableFSM = FSMType.controllableFSM(AnyControllableFiniteStateMachine(fsm))
-        let results = TimeAwareRinglets(
-            fsm: controllableFSM,
-            timeslot: timeslot,
-            gateway: gateway,
-            timer: timer,
-            startingTime: 0
-        )
+        func ringlets(startingTime: UInt) -> [ConditionalRinglet] {
+            let fsm = SimpleTimeConditionalFiniteStateMachine()
+            let gateway = StackGateway()
+            let timeslot = Timeslot(
+                fsms: [fsm.name],
+                callChain: CallChain(root: fsm.name, calls: []),
+                startingTime: 10,
+                duration: 20,
+                cyclesExecuted: 0
+            )
+            let timer = FSMClock(ringletLengths: [fsm.name: timeslot.duration], scheduleLength: timeslot.startingTime + timeslot.duration)
+            fsm.gateway = gateway
+            fsm.timer = timer
+            timer.forceRunningTime(UInt.max) // Check that the TimeAwareRinglets actually set a forced running time.
+            let controllableFSM = FSMType.controllableFSM(AnyControllableFiniteStateMachine(fsm))
+            let results = TimeAwareRinglets(
+                fsm: controllableFSM,
+                timeslot: timeslot,
+                gateway: gateway,
+                timer: timer,
+                startingTime: 0
+            )
+            return results.ringlets
+        }
         func expected(startingTime: UInt) -> [ConditionalRinglet] {
             let times: [UInt] = [startingTime] + [0, 5001, 15001, 20001, 25001].filter { $0 > startingTime }
             return times.map { time in
                 let fsm = SimpleTimeConditionalFiniteStateMachine()
+                let timeslot = Timeslot(
+                    fsms: [fsm.name],
+                    callChain: CallChain(root: fsm.name, calls: []),
+                    startingTime: 10,
+                    duration: 20,
+                    cyclesExecuted: 0
+                )
                 let gateway = StackGateway()
                 let timer = FSMClock(ringletLengths: [fsm.name: timeslot.duration], scheduleLength: timeslot.startingTime + timeslot.duration)
                 fsm.gateway = gateway
@@ -397,18 +407,26 @@ class TimeAwareRingletTests: XCTestCase {
                 )
             }
         }
-        let expected = expected(startingTime: 0)
-        XCTAssertEqual(results.ringlets, expected)
-        if results.ringlets != expected {
-            XCTAssertEqual(results.ringlets.count, expected.count)
-            XCTAssertEqual(results.ringlets.map(\.condition), expected.map(\.condition))
-            for (result, expected) in zip(results.ringlets, expected) {
-                XCTAssertEqual(result.preSnapshot["value"], expected.preSnapshot["value"])
-                XCTAssertEqual(result.postSnapshot["value"], expected.postSnapshot["value"])
-                XCTAssertEqual(result.calls, expected.calls)
-                XCTAssertEqual(result.condition, expected.condition)
+        func test(startingTime: UInt) {
+            let results = ringlets(startingTime: startingTime)
+            let expected = expected(startingTime: startingTime)
+            XCTAssertEqual(results, expected)
+            if results != expected {
+                XCTAssertEqual(results.count, expected.count)
+                XCTAssertEqual(results.map(\.condition), expected.map(\.condition))
+                for (result, expected) in zip(results, expected) {
+                    XCTAssertEqual(result.preSnapshot["value"], expected.preSnapshot["value"])
+                    XCTAssertEqual(result.postSnapshot["value"], expected.postSnapshot["value"])
+                    XCTAssertEqual(result.calls, expected.calls)
+                    XCTAssertEqual(result.condition, expected.condition)
+                }
             }
         }
+        test(startingTime: 0)
+        test(startingTime: 5001)
+        test(startingTime: 15001)
+        test(startingTime: 20001)
+        test(startingTime: 25001)
     }
     
     func test_doesNotHaveSideEffectsOnExternalVariables() throws {
