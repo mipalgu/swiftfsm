@@ -1893,7 +1893,7 @@ class ScheduleVerifierTests: XCTestCase {
                         value: 0,
                         currentState: initial,
                         previousState: initial,
-                        constraint: .lessThanEqual(value: 5)
+                        constraint: .lessThanEqual(value: 5000)
                     ),
                     target(
                         executing: fsmName,
@@ -1903,7 +1903,7 @@ class ScheduleVerifierTests: XCTestCase {
                         value: 5,
                         currentState: initial,
                         previousState: initial,
-                        constraint: .and(lhs: .greaterThan(value: 5), rhs: .lessThanEqual(value: 15))
+                        constraint: .and(lhs: .greaterThan(value: 5000), rhs: .lessThanEqual(value: 15000))
                     ),
                     target(
                         executing: fsmName,
@@ -1913,7 +1913,7 @@ class ScheduleVerifierTests: XCTestCase {
                         value: 15,
                         currentState: initial,
                         previousState: initial,
-                        constraint: .and(lhs: .greaterThan(value: 15), rhs: .lessThanEqual(value: 20))
+                        constraint: .and(lhs: .greaterThan(value: 15000), rhs: .lessThanEqual(value: 20000))
                     ),
                     target(
                         executing: fsmName,
@@ -1923,7 +1923,7 @@ class ScheduleVerifierTests: XCTestCase {
                         value: 15,
                         currentState: exit,
                         previousState: initial,
-                        constraint: .and(lhs: .greaterThan(value: 20), rhs: .lessThanEqual(value: 25))
+                        constraint: .and(lhs: .greaterThan(value: 20000), rhs: .lessThanEqual(value: 25000))
                     ),
                     target(
                         executing: fsmName,
@@ -1933,7 +1933,7 @@ class ScheduleVerifierTests: XCTestCase {
                         value: 25,
                         currentState: exit,
                         previousState: initial,
-                        constraint: .greaterThan(value: 25)
+                        constraint: .greaterThan(value: 25000)
                     )
                 ]
             ),
@@ -1971,7 +1971,7 @@ class ScheduleVerifierTests: XCTestCase {
                         value: 0,
                         currentState: initial,
                         previousState: initial,
-                        constraint: .lessThanEqual(value: 5)
+                        constraint: .lessThanEqual(value: 5000)
                     ),
                     target(
                         executing: fsmName,
@@ -1981,7 +1981,7 @@ class ScheduleVerifierTests: XCTestCase {
                         value: 5,
                         currentState: initial,
                         previousState: initial,
-                        constraint: .and(lhs: .greaterThan(value: 5), rhs: .lessThanEqual(value: 15))
+                        constraint: .and(lhs: .greaterThan(value: 5000), rhs: .lessThanEqual(value: 15000))
                     ),
                     target(
                         executing: fsmName,
@@ -1991,7 +1991,7 @@ class ScheduleVerifierTests: XCTestCase {
                         value: 15,
                         currentState: initial,
                         previousState: initial,
-                        constraint: .and(lhs: .greaterThan(value: 15), rhs: .lessThanEqual(value: 20))
+                        constraint: .and(lhs: .greaterThan(value: 15000), rhs: .lessThanEqual(value: 20000))
                     ),
                     target(
                         executing: fsmName,
@@ -2001,7 +2001,7 @@ class ScheduleVerifierTests: XCTestCase {
                         value: 15,
                         currentState: exit,
                         previousState: initial,
-                        constraint: .and(lhs: .greaterThan(value: 20), rhs: .lessThanEqual(value: 25))
+                        constraint: .and(lhs: .greaterThan(value: 20000), rhs: .lessThanEqual(value: 25000))
                     ),
                     target(
                         executing: fsmName,
@@ -2011,7 +2011,7 @@ class ScheduleVerifierTests: XCTestCase {
                         value: 25,
                         currentState: exit,
                         previousState: initial,
-                        constraint: .greaterThan(value: 25)
+                        constraint: .greaterThan(value: 25000)
                     )
                 ]
             ),
@@ -2049,7 +2049,7 @@ class ScheduleVerifierTests: XCTestCase {
                         value: 0,
                         currentState: initial,
                         previousState: initial,
-                        constraint: .lessThanEqual(value: 5)
+                        constraint: .lessThanEqual(value: 5000)
                     ),
                     target(
                         executing: fsmName,
@@ -2059,7 +2059,7 @@ class ScheduleVerifierTests: XCTestCase {
                         value: 5,
                         currentState: initial,
                         previousState: initial,
-                        constraint: .and(lhs: .greaterThan(value: 5), rhs: .lessThanEqual(value: 15))
+                        constraint: .and(lhs: .greaterThan(value: 5000), rhs: .lessThanEqual(value: 15000))
                     ),
                     target(
                         executing: fsmName,
@@ -2069,7 +2069,7 @@ class ScheduleVerifierTests: XCTestCase {
                         value: 15,
                         currentState: initial,
                         previousState: initial,
-                        constraint: .and(lhs: .greaterThan(value: 15), rhs: .lessThanEqual(value: 20))
+                        constraint: .and(lhs: .greaterThan(value: 15000), rhs: .lessThanEqual(value: 20000))
                     ),
                     target(
                         executing: fsmName,
@@ -2079,7 +2079,7 @@ class ScheduleVerifierTests: XCTestCase {
                         value: 15,
                         currentState: exit,
                         previousState: initial,
-                        constraint: .and(lhs: .greaterThan(value: 20), rhs: .lessThanEqual(value: 25))
+                        constraint: .and(lhs: .greaterThan(value: 20000), rhs: .lessThanEqual(value: 25000))
                     ),
                     target(
                         executing: fsmName,
@@ -2089,7 +2089,7 @@ class ScheduleVerifierTests: XCTestCase {
                         value: 25,
                         currentState: exit,
                         previousState: initial,
-                        constraint: .greaterThan(value: 25)
+                        constraint: .greaterThan(value: 25000)
                     )
                 ]
             ),
@@ -2127,7 +2127,7 @@ class ScheduleVerifierTests: XCTestCase {
                         value: 0,
                         currentState: initial,
                         previousState: initial,
-                        constraint: .lessThanEqual(value: 5)
+                        constraint: .lessThanEqual(value: 5000)
                     ),
                     target(
                         executing: fsmName,
@@ -2137,7 +2137,7 @@ class ScheduleVerifierTests: XCTestCase {
                         value: 5,
                         currentState: initial,
                         previousState: initial,
-                        constraint: .and(lhs: .greaterThan(value: 5), rhs: .lessThanEqual(value: 15))
+                        constraint: .and(lhs: .greaterThan(value: 5000), rhs: .lessThanEqual(value: 15000))
                     ),
                     target(
                         executing: fsmName,
@@ -2147,7 +2147,7 @@ class ScheduleVerifierTests: XCTestCase {
                         value: 15,
                         currentState: initial,
                         previousState: initial,
-                        constraint: .and(lhs: .greaterThan(value: 15), rhs: .lessThanEqual(value: 20))
+                        constraint: .and(lhs: .greaterThan(value: 15000), rhs: .lessThanEqual(value: 20000))
                     ),
                     target(
                         executing: fsmName,
@@ -2157,7 +2157,7 @@ class ScheduleVerifierTests: XCTestCase {
                         value: 15,
                         currentState: exit,
                         previousState: initial,
-                        constraint: .and(lhs: .greaterThan(value: 20), rhs: .lessThanEqual(value: 25))
+                        constraint: .and(lhs: .greaterThan(value: 20000), rhs: .lessThanEqual(value: 25000))
                     ),
                     target(
                         executing: fsmName,
@@ -2167,7 +2167,7 @@ class ScheduleVerifierTests: XCTestCase {
                         value: 25,
                         currentState: exit,
                         previousState: initial,
-                        constraint: .greaterThan(value: 25)
+                        constraint: .greaterThan(value: 25000)
                     )
                 ]
             ),
@@ -2201,7 +2201,7 @@ class ScheduleVerifierTests: XCTestCase {
                         executing: fsmName,
                         readState: false,
                         resetClock: false,
-                        duration: startingTime,
+                        duration: duration,
                         value: 15,
                         currentState: exit,
                         previousState: exit,

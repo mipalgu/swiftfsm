@@ -124,24 +124,24 @@ final class SimpleTimeConditionalFiniteStateMachine: MachineProtocol, CustomStri
     lazy var initialState: MiPalState = {
         CallbackMiPalState(
             "initial",
-            transitions: [Transition(exitState) { [self] _ in timer.after(20) }],
+            transitions: [Transition(exitState) { [self] _ in timer.after_ms(20) }],
             snapshotSensors: [],
             snapshotActuators: [],
             main: { [self] in
-                if timer.after(25) {
+                if timer.after_ms(25) {
                     value = 25
-                } else if timer.after(15) {
+                } else if timer.after_ms(15) {
                     value = 15
-                } else if timer.after(5) {
+                } else if timer.after_ms(5) {
                     value = 5
                 }
             },
             onExit: { [self] in
-                if timer.after(25) {
+                if timer.after_ms(25) {
                     value = 25
-                } else if timer.after(15) {
+                } else if timer.after_ms(15) {
                     value = 15
-                } else if timer.after(5) {
+                } else if timer.after_ms(5) {
                     value = 5
                 }
             }
