@@ -543,6 +543,7 @@ struct TimedKripkeStructure: KripkeStructureProtocol {
         let fsm1Gap = fsm2.startingTime - fsm1.duration - fsm1.startingTime
         let fsm2Gap = fsm1.startingTime
         return [
+            // MARK: - (R(fsm1), (0, initial, previous), (0, initial, previous))
             kripkeState(
                 executing: fsm1Name,
                 readState: true,
@@ -644,6 +645,6433 @@ struct TimedKripkeStructure: KripkeStructureProtocol {
                     )
                 ]
             ),
+            // MARK: - (R(fsm2), (0, initial, initial), (0, initial, previous))
+            kripkeState(
+                executing: fsm2Name,
+                readState: true,
+                fsm1: (
+                    value: 0,
+                    currentState: initial,
+                    previousState: initial
+                ),
+                fsm2: (
+                    value: 0,
+                    currentState: initial,
+                    previousState: previous
+                ),
+                targets: [
+                    target(
+                        executing: fsm2Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm2.duration,
+                        fsm1: (
+                            value: 0,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 0,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        constraint: .lessThanEqual(value: 5000)
+                    ),
+                    target(
+                        executing: fsm2Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm2.duration,
+                        fsm1: (
+                            value: 0,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 5,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        constraint: .and(lhs: .greaterThan(value: 5000), rhs: .lessThanEqual(value: 15000))
+                    ),
+                    target(
+                        executing: fsm2Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm2.duration,
+                        fsm1: (
+                            value: 0,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 15,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        constraint: .and(lhs: .greaterThan(value: 15000), rhs: .lessThanEqual(value: 20000))
+                    ),
+                    target(
+                        executing: fsm2Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm2.duration,
+                        fsm1: (
+                            value: 0,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 15,
+                            currentState: exit,
+                            previousState: initial
+                        ),
+                        constraint: .and(lhs: .greaterThan(value: 20000), rhs: .lessThanEqual(value: 25000))
+                    ),
+                    target(
+                        executing: fsm2Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm2.duration,
+                        fsm1: (
+                            value: 0,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 25,
+                            currentState: exit,
+                            previousState: initial
+                        ),
+                        constraint: .greaterThan(value: 25000)
+                    )
+                ]
+            ),
+            // MARK: (R(fsm2), (5, initial, initial), (0, initial, previous))
+            kripkeState(
+                executing: fsm2Name,
+                readState: true,
+                fsm1: (
+                    value: 5,
+                    currentState: initial,
+                    previousState: initial
+                ),
+                fsm2: (
+                    value: 0,
+                    currentState: initial,
+                    previousState: previous
+                ),
+                targets: [
+                    target(
+                        executing: fsm2Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm2.duration,
+                        fsm1: (
+                            value: 5,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 0,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        constraint: .lessThanEqual(value: 5000)
+                    ),
+                    target(
+                        executing: fsm2Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm2.duration,
+                        fsm1: (
+                            value: 5,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 5,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        constraint: .and(lhs: .greaterThan(value: 5000), rhs: .lessThanEqual(value: 15000))
+                    ),
+                    target(
+                        executing: fsm2Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm2.duration,
+                        fsm1: (
+                            value: 5,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 15,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        constraint: .and(lhs: .greaterThan(value: 15000), rhs: .lessThanEqual(value: 20000))
+                    ),
+                    target(
+                        executing: fsm2Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm2.duration,
+                        fsm1: (
+                            value: 5,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 15,
+                            currentState: exit,
+                            previousState: initial
+                        ),
+                        constraint: .and(lhs: .greaterThan(value: 20000), rhs: .lessThanEqual(value: 25000))
+                    ),
+                    target(
+                        executing: fsm2Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm2.duration,
+                        fsm1: (
+                            value: 5,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 25,
+                            currentState: exit,
+                            previousState: initial
+                        ),
+                        constraint: .greaterThan(value: 25000)
+                    )
+                ]
+            ),
+            // MARK: (R(fsm2), (15, initial, initial), (0, initial, previous))
+            kripkeState(
+                executing: fsm2Name,
+                readState: true,
+                fsm1: (
+                    value: 15,
+                    currentState: initial,
+                    previousState: initial
+                ),
+                fsm2: (
+                    value: 0,
+                    currentState: initial,
+                    previousState: previous
+                ),
+                targets: [
+                    target(
+                        executing: fsm2Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm2.duration,
+                        fsm1: (
+                            value: 15,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 0,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        constraint: .lessThanEqual(value: 5000)
+                    ),
+                    target(
+                        executing: fsm2Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm2.duration,
+                        fsm1: (
+                            value: 15,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 5,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        constraint: .and(lhs: .greaterThan(value: 5000), rhs: .lessThanEqual(value: 15000))
+                    ),
+                    target(
+                        executing: fsm2Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm2.duration,
+                        fsm1: (
+                            value: 15,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 15,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        constraint: .and(lhs: .greaterThan(value: 15000), rhs: .lessThanEqual(value: 20000))
+                    ),
+                    target(
+                        executing: fsm2Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm2.duration,
+                        fsm1: (
+                            value: 15,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 15,
+                            currentState: exit,
+                            previousState: initial
+                        ),
+                        constraint: .and(lhs: .greaterThan(value: 20000), rhs: .lessThanEqual(value: 25000))
+                    ),
+                    target(
+                        executing: fsm2Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm2.duration,
+                        fsm1: (
+                            value: 15,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 25,
+                            currentState: exit,
+                            previousState: initial
+                        ),
+                        constraint: .greaterThan(value: 25000)
+                    )
+                ]
+            ),
+            // MARK: (R(fsm2), (15, exit, initial), (0, initial, previous))
+            kripkeState(
+                executing: fsm2Name,
+                readState: true,
+                fsm1: (
+                    value: 15,
+                    currentState: exit,
+                    previousState: initial
+                ),
+                fsm2: (
+                    value: 0,
+                    currentState: initial,
+                    previousState: previous
+                ),
+                targets: [
+                    target(
+                        executing: fsm2Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm2.duration,
+                        fsm1: (
+                            value: 15,
+                            currentState: exit,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 0,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        constraint: .lessThanEqual(value: 5000)
+                    ),
+                    target(
+                        executing: fsm2Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm2.duration,
+                        fsm1: (
+                            value: 15,
+                            currentState: exit,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 5,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        constraint: .and(lhs: .greaterThan(value: 5000), rhs: .lessThanEqual(value: 15000))
+                    ),
+                    target(
+                        executing: fsm2Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm2.duration,
+                        fsm1: (
+                            value: 15,
+                            currentState: exit,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 15,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        constraint: .and(lhs: .greaterThan(value: 15000), rhs: .lessThanEqual(value: 20000))
+                    ),
+                    target(
+                        executing: fsm2Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm2.duration,
+                        fsm1: (
+                            value: 15,
+                            currentState: exit,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 15,
+                            currentState: exit,
+                            previousState: initial
+                        ),
+                        constraint: .and(lhs: .greaterThan(value: 20000), rhs: .lessThanEqual(value: 25000))
+                    ),
+                    target(
+                        executing: fsm2Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm2.duration,
+                        fsm1: (
+                            value: 15,
+                            currentState: exit,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 25,
+                            currentState: exit,
+                            previousState: initial
+                        ),
+                        constraint: .greaterThan(value: 25000)
+                    )
+                ]
+            ),
+            // MARK: (R(fsm2), (25, exit, initial), (0, initial, previous))
+            kripkeState(
+                executing: fsm2Name,
+                readState: true,
+                fsm1: (
+                    value: 25,
+                    currentState: exit,
+                    previousState: initial
+                ),
+                fsm2: (
+                    value: 0,
+                    currentState: initial,
+                    previousState: previous
+                ),
+                targets: [
+                    target(
+                        executing: fsm2Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm2.duration,
+                        fsm1: (
+                            value: 25,
+                            currentState: exit,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 0,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        constraint: .lessThanEqual(value: 5000)
+                    ),
+                    target(
+                        executing: fsm2Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm2.duration,
+                        fsm1: (
+                            value: 25,
+                            currentState: exit,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 5,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        constraint: .and(lhs: .greaterThan(value: 5000), rhs: .lessThanEqual(value: 15000))
+                    ),
+                    target(
+                        executing: fsm2Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm2.duration,
+                        fsm1: (
+                            value: 25,
+                            currentState: exit,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 15,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        constraint: .and(lhs: .greaterThan(value: 15000), rhs: .lessThanEqual(value: 20000))
+                    ),
+                    target(
+                        executing: fsm2Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm2.duration,
+                        fsm1: (
+                            value: 25,
+                            currentState: exit,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 15,
+                            currentState: exit,
+                            previousState: initial
+                        ),
+                        constraint: .and(lhs: .greaterThan(value: 20000), rhs: .lessThanEqual(value: 25000))
+                    ),
+                    target(
+                        executing: fsm2Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm2.duration,
+                        fsm1: (
+                            value: 25,
+                            currentState: exit,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 25,
+                            currentState: exit,
+                            previousState: initial
+                        ),
+                        constraint: .greaterThan(value: 25000)
+                    )
+                ]
+            ),
+            // MARK: - (R(fsm1), (0, initial, initial), (0, initial, initial))
+            kripkeState(
+                executing: fsm1Name,
+                readState: true,
+                fsm1: (
+                    value: 0,
+                    currentState: initial,
+                    previousState: initial
+                ),
+                fsm2: (
+                    value: 0,
+                    currentState: initial,
+                    previousState: initial
+                ),
+                targets: [
+                    target(
+                        executing: fsm1Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm1.duration,
+                        fsm1: (
+                            value: 0,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 0,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        constraint: .lessThanEqual(value: 5000)
+                    ),
+                    target(
+                        executing: fsm1Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm1.duration,
+                        fsm1: (
+                            value: 5,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 0,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        constraint: .and(lhs: .greaterThan(value: 5000), rhs: .lessThanEqual(value: 15000))
+                    ),
+                    target(
+                        executing: fsm1Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm1.duration,
+                        fsm1: (
+                            value: 15,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 0,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        constraint: .and(lhs: .greaterThan(value: 15000), rhs: .lessThanEqual(value: 20000))
+                    ),
+                    target(
+                        executing: fsm1Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm1.duration,
+                        fsm1: (
+                            value: 15,
+                            currentState: exit,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 0,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        constraint: .and(lhs: .greaterThan(value: 20000), rhs: .lessThanEqual(value: 25000))
+                    ),
+                    target(
+                        executing: fsm1Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm1.duration,
+                        fsm1: (
+                            value: 25,
+                            currentState: exit,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 0,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        constraint: .greaterThan(value: 25000)
+                    )
+                ]
+            ),
+            // MARK: (R(fsm1), (0, initial, initial), (5, initial, initial))
+            kripkeState(
+                executing: fsm1Name,
+                readState: true,
+                fsm1: (
+                    value: 0,
+                    currentState: initial,
+                    previousState: initial
+                ),
+                fsm2: (
+                    value: 5,
+                    currentState: initial,
+                    previousState: initial
+                ),
+                targets: [
+                    target(
+                        executing: fsm1Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm1.duration,
+                        fsm1: (
+                            value: 0,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 5,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        constraint: .lessThanEqual(value: 5000)
+                    ),
+                    target(
+                        executing: fsm1Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm1.duration,
+                        fsm1: (
+                            value: 5,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 5,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        constraint: .and(lhs: .greaterThan(value: 5000), rhs: .lessThanEqual(value: 15000))
+                    ),
+                    target(
+                        executing: fsm1Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm1.duration,
+                        fsm1: (
+                            value: 15,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 5,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        constraint: .and(lhs: .greaterThan(value: 15000), rhs: .lessThanEqual(value: 20000))
+                    ),
+                    target(
+                        executing: fsm1Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm1.duration,
+                        fsm1: (
+                            value: 15,
+                            currentState: exit,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 5,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        constraint: .and(lhs: .greaterThan(value: 20000), rhs: .lessThanEqual(value: 25000))
+                    ),
+                    target(
+                        executing: fsm1Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm1.duration,
+                        fsm1: (
+                            value: 25,
+                            currentState: exit,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 5,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        constraint: .greaterThan(value: 25000)
+                    )
+                ]
+            ),
+            // MARK: (R(fsm1), (0, initial, initial), (15, initial, initial))
+            kripkeState(
+                executing: fsm1Name,
+                readState: true,
+                fsm1: (
+                    value: 0,
+                    currentState: initial,
+                    previousState: initial
+                ),
+                fsm2: (
+                    value: 15,
+                    currentState: initial,
+                    previousState: initial
+                ),
+                targets: [
+                    target(
+                        executing: fsm1Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm1.duration,
+                        fsm1: (
+                            value: 0,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 15,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        constraint: .lessThanEqual(value: 5000)
+                    ),
+                    target(
+                        executing: fsm1Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm1.duration,
+                        fsm1: (
+                            value: 5,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 15,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        constraint: .and(lhs: .greaterThan(value: 5000), rhs: .lessThanEqual(value: 15000))
+                    ),
+                    target(
+                        executing: fsm1Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm1.duration,
+                        fsm1: (
+                            value: 15,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 15,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        constraint: .and(lhs: .greaterThan(value: 15000), rhs: .lessThanEqual(value: 20000))
+                    ),
+                    target(
+                        executing: fsm1Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm1.duration,
+                        fsm1: (
+                            value: 15,
+                            currentState: exit,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 15,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        constraint: .and(lhs: .greaterThan(value: 20000), rhs: .lessThanEqual(value: 25000))
+                    ),
+                    target(
+                        executing: fsm1Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm1.duration,
+                        fsm1: (
+                            value: 25,
+                            currentState: exit,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 15,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        constraint: .greaterThan(value: 25000)
+                    )
+                ]
+            ),
+            // MARK: (R(fsm1), (0, initial, initial), (15, exit, initial))
+            kripkeState(
+                executing: fsm1Name,
+                readState: true,
+                fsm1: (
+                    value: 0,
+                    currentState: initial,
+                    previousState: initial
+                ),
+                fsm2: (
+                    value: 15,
+                    currentState: exit,
+                    previousState: initial
+                ),
+                targets: [
+                    target(
+                        executing: fsm1Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm1.duration,
+                        fsm1: (
+                            value: 0,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 15,
+                            currentState: exit,
+                            previousState: initial
+                        ),
+                        constraint: .lessThanEqual(value: 5000)
+                    ),
+                    target(
+                        executing: fsm1Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm1.duration,
+                        fsm1: (
+                            value: 5,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 15,
+                            currentState: exit,
+                            previousState: initial
+                        ),
+                        constraint: .and(lhs: .greaterThan(value: 5000), rhs: .lessThanEqual(value: 15000))
+                    ),
+                    target(
+                        executing: fsm1Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm1.duration,
+                        fsm1: (
+                            value: 15,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 15,
+                            currentState: exit,
+                            previousState: initial
+                        ),
+                        constraint: .and(lhs: .greaterThan(value: 15000), rhs: .lessThanEqual(value: 20000))
+                    ),
+                    target(
+                        executing: fsm1Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm1.duration,
+                        fsm1: (
+                            value: 15,
+                            currentState: exit,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 15,
+                            currentState: exit,
+                            previousState: initial
+                        ),
+                        constraint: .and(lhs: .greaterThan(value: 20000), rhs: .lessThanEqual(value: 25000))
+                    ),
+                    target(
+                        executing: fsm1Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm1.duration,
+                        fsm1: (
+                            value: 25,
+                            currentState: exit,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 15,
+                            currentState: exit,
+                            previousState: initial
+                        ),
+                        constraint: .greaterThan(value: 25000)
+                    )
+                ]
+            ),
+            // MARK: (R(fsm1), (0, initial, initial), (25, exit, initial))
+            kripkeState(
+                executing: fsm1Name,
+                readState: true,
+                fsm1: (
+                    value: 0,
+                    currentState: initial,
+                    previousState: initial
+                ),
+                fsm2: (
+                    value: 25,
+                    currentState: exit,
+                    previousState: initial
+                ),
+                targets: [
+                    target(
+                        executing: fsm1Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm1.duration,
+                        fsm1: (
+                            value: 0,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 25,
+                            currentState: exit,
+                            previousState: initial
+                        ),
+                        constraint: .lessThanEqual(value: 5000)
+                    ),
+                    target(
+                        executing: fsm1Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm1.duration,
+                        fsm1: (
+                            value: 5,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 25,
+                            currentState: exit,
+                            previousState: initial
+                        ),
+                        constraint: .and(lhs: .greaterThan(value: 5000), rhs: .lessThanEqual(value: 15000))
+                    ),
+                    target(
+                        executing: fsm1Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm1.duration,
+                        fsm1: (
+                            value: 15,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 25,
+                            currentState: exit,
+                            previousState: initial
+                        ),
+                        constraint: .and(lhs: .greaterThan(value: 15000), rhs: .lessThanEqual(value: 20000))
+                    ),
+                    target(
+                        executing: fsm1Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm1.duration,
+                        fsm1: (
+                            value: 15,
+                            currentState: exit,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 25,
+                            currentState: exit,
+                            previousState: initial
+                        ),
+                        constraint: .and(lhs: .greaterThan(value: 20000), rhs: .lessThanEqual(value: 25000))
+                    ),
+                    target(
+                        executing: fsm1Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm1.duration,
+                        fsm1: (
+                            value: 25,
+                            currentState: exit,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 25,
+                            currentState: exit,
+                            previousState: initial
+                        ),
+                        constraint: .greaterThan(value: 25000)
+                    )
+                ]
+            ),
+            // MARK: - (R(fsm1), (5, initial, initial), (0, initial, initial))
+            kripkeState(
+                executing: fsm1Name,
+                readState: true,
+                fsm1: (
+                    value: 5,
+                    currentState: initial,
+                    previousState: initial
+                ),
+                fsm2: (
+                    value: 0,
+                    currentState: initial,
+                    previousState: initial
+                ),
+                targets: [
+                    target(
+                        executing: fsm1Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm1.duration,
+                        fsm1: (
+                            value: 0,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 0,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        constraint: .lessThanEqual(value: 5000)
+                    ),
+                    target(
+                        executing: fsm1Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm1.duration,
+                        fsm1: (
+                            value: 5,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 0,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        constraint: .and(lhs: .greaterThan(value: 5000), rhs: .lessThanEqual(value: 15000))
+                    ),
+                    target(
+                        executing: fsm1Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm1.duration,
+                        fsm1: (
+                            value: 15,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 0,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        constraint: .and(lhs: .greaterThan(value: 15000), rhs: .lessThanEqual(value: 20000))
+                    ),
+                    target(
+                        executing: fsm1Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm1.duration,
+                        fsm1: (
+                            value: 15,
+                            currentState: exit,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 0,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        constraint: .and(lhs: .greaterThan(value: 20000), rhs: .lessThanEqual(value: 25000))
+                    ),
+                    target(
+                        executing: fsm1Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm1.duration,
+                        fsm1: (
+                            value: 25,
+                            currentState: exit,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 0,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        constraint: .greaterThan(value: 25000)
+                    )
+                ]
+            ),
+            // MARK: (R(fsm1), (5, initial, initial), (5, initial, initial))
+            kripkeState(
+                executing: fsm1Name,
+                readState: true,
+                fsm1: (
+                    value: 5,
+                    currentState: initial,
+                    previousState: initial
+                ),
+                fsm2: (
+                    value: 5,
+                    currentState: initial,
+                    previousState: initial
+                ),
+                targets: [
+                    target(
+                        executing: fsm1Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm1.duration,
+                        fsm1: (
+                            value: 0,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 5,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        constraint: .lessThanEqual(value: 5000)
+                    ),
+                    target(
+                        executing: fsm1Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm1.duration,
+                        fsm1: (
+                            value: 5,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 5,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        constraint: .and(lhs: .greaterThan(value: 5000), rhs: .lessThanEqual(value: 15000))
+                    ),
+                    target(
+                        executing: fsm1Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm1.duration,
+                        fsm1: (
+                            value: 15,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 5,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        constraint: .and(lhs: .greaterThan(value: 15000), rhs: .lessThanEqual(value: 20000))
+                    ),
+                    target(
+                        executing: fsm1Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm1.duration,
+                        fsm1: (
+                            value: 15,
+                            currentState: exit,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 5,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        constraint: .and(lhs: .greaterThan(value: 20000), rhs: .lessThanEqual(value: 25000))
+                    ),
+                    target(
+                        executing: fsm1Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm1.duration,
+                        fsm1: (
+                            value: 25,
+                            currentState: exit,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 5,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        constraint: .greaterThan(value: 25000)
+                    )
+                ]
+            ),
+            // MARK: (R(fsm1), (5, initial, initial), (15, initial, initial))
+            kripkeState(
+                executing: fsm1Name,
+                readState: true,
+                fsm1: (
+                    value: 5,
+                    currentState: initial,
+                    previousState: initial
+                ),
+                fsm2: (
+                    value: 15,
+                    currentState: initial,
+                    previousState: initial
+                ),
+                targets: [
+                    target(
+                        executing: fsm1Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm1.duration,
+                        fsm1: (
+                            value: 0,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 15,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        constraint: .lessThanEqual(value: 5000)
+                    ),
+                    target(
+                        executing: fsm1Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm1.duration,
+                        fsm1: (
+                            value: 5,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 15,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        constraint: .and(lhs: .greaterThan(value: 5000), rhs: .lessThanEqual(value: 15000))
+                    ),
+                    target(
+                        executing: fsm1Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm1.duration,
+                        fsm1: (
+                            value: 15,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 15,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        constraint: .and(lhs: .greaterThan(value: 15000), rhs: .lessThanEqual(value: 20000))
+                    ),
+                    target(
+                        executing: fsm1Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm1.duration,
+                        fsm1: (
+                            value: 15,
+                            currentState: exit,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 15,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        constraint: .and(lhs: .greaterThan(value: 20000), rhs: .lessThanEqual(value: 25000))
+                    ),
+                    target(
+                        executing: fsm1Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm1.duration,
+                        fsm1: (
+                            value: 25,
+                            currentState: exit,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 15,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        constraint: .greaterThan(value: 25000)
+                    )
+                ]
+            ),
+            // MARK: (R(fsm1), (5, initial, initial), (15, exit, initial))
+            kripkeState(
+                executing: fsm1Name,
+                readState: true,
+                fsm1: (
+                    value: 5,
+                    currentState: initial,
+                    previousState: initial
+                ),
+                fsm2: (
+                    value: 15,
+                    currentState: exit,
+                    previousState: initial
+                ),
+                targets: [
+                    target(
+                        executing: fsm1Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm1.duration,
+                        fsm1: (
+                            value: 0,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 15,
+                            currentState: exit,
+                            previousState: initial
+                        ),
+                        constraint: .lessThanEqual(value: 5000)
+                    ),
+                    target(
+                        executing: fsm1Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm1.duration,
+                        fsm1: (
+                            value: 5,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 15,
+                            currentState: exit,
+                            previousState: initial
+                        ),
+                        constraint: .and(lhs: .greaterThan(value: 5000), rhs: .lessThanEqual(value: 15000))
+                    ),
+                    target(
+                        executing: fsm1Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm1.duration,
+                        fsm1: (
+                            value: 15,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 15,
+                            currentState: exit,
+                            previousState: initial
+                        ),
+                        constraint: .and(lhs: .greaterThan(value: 15000), rhs: .lessThanEqual(value: 20000))
+                    ),
+                    target(
+                        executing: fsm1Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm1.duration,
+                        fsm1: (
+                            value: 15,
+                            currentState: exit,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 15,
+                            currentState: exit,
+                            previousState: initial
+                        ),
+                        constraint: .and(lhs: .greaterThan(value: 20000), rhs: .lessThanEqual(value: 25000))
+                    ),
+                    target(
+                        executing: fsm1Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm1.duration,
+                        fsm1: (
+                            value: 25,
+                            currentState: exit,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 15,
+                            currentState: exit,
+                            previousState: initial
+                        ),
+                        constraint: .greaterThan(value: 25000)
+                    )
+                ]
+            ),
+            // MARK: (R(fsm1), (5, initial, initial), (25, exit, initial))
+            kripkeState(
+                executing: fsm1Name,
+                readState: true,
+                fsm1: (
+                    value: 5,
+                    currentState: initial,
+                    previousState: initial
+                ),
+                fsm2: (
+                    value: 25,
+                    currentState: exit,
+                    previousState: initial
+                ),
+                targets: [
+                    target(
+                        executing: fsm1Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm1.duration,
+                        fsm1: (
+                            value: 0,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 25,
+                            currentState: exit,
+                            previousState: initial
+                        ),
+                        constraint: .lessThanEqual(value: 5000)
+                    ),
+                    target(
+                        executing: fsm1Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm1.duration,
+                        fsm1: (
+                            value: 5,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 25,
+                            currentState: exit,
+                            previousState: initial
+                        ),
+                        constraint: .and(lhs: .greaterThan(value: 5000), rhs: .lessThanEqual(value: 15000))
+                    ),
+                    target(
+                        executing: fsm1Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm1.duration,
+                        fsm1: (
+                            value: 15,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 25,
+                            currentState: exit,
+                            previousState: initial
+                        ),
+                        constraint: .and(lhs: .greaterThan(value: 15000), rhs: .lessThanEqual(value: 20000))
+                    ),
+                    target(
+                        executing: fsm1Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm1.duration,
+                        fsm1: (
+                            value: 15,
+                            currentState: exit,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 25,
+                            currentState: exit,
+                            previousState: initial
+                        ),
+                        constraint: .and(lhs: .greaterThan(value: 20000), rhs: .lessThanEqual(value: 25000))
+                    ),
+                    target(
+                        executing: fsm1Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm1.duration,
+                        fsm1: (
+                            value: 25,
+                            currentState: exit,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 25,
+                            currentState: exit,
+                            previousState: initial
+                        ),
+                        constraint: .greaterThan(value: 25000)
+                    )
+                ]
+            ),
+            // MARK: - (R(fsm1), (15, initial, initial), (0, initial, initial))
+            kripkeState(
+                executing: fsm1Name,
+                readState: true,
+                fsm1: (
+                    value: 15,
+                    currentState: initial,
+                    previousState: initial
+                ),
+                fsm2: (
+                    value: 0,
+                    currentState: initial,
+                    previousState: initial
+                ),
+                targets: [
+                    target(
+                        executing: fsm1Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm1.duration,
+                        fsm1: (
+                            value: 0,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 0,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        constraint: .lessThanEqual(value: 5000)
+                    ),
+                    target(
+                        executing: fsm1Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm1.duration,
+                        fsm1: (
+                            value: 5,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 0,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        constraint: .and(lhs: .greaterThan(value: 5000), rhs: .lessThanEqual(value: 15000))
+                    ),
+                    target(
+                        executing: fsm1Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm1.duration,
+                        fsm1: (
+                            value: 15,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 0,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        constraint: .and(lhs: .greaterThan(value: 15000), rhs: .lessThanEqual(value: 20000))
+                    ),
+                    target(
+                        executing: fsm1Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm1.duration,
+                        fsm1: (
+                            value: 15,
+                            currentState: exit,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 0,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        constraint: .and(lhs: .greaterThan(value: 20000), rhs: .lessThanEqual(value: 25000))
+                    ),
+                    target(
+                        executing: fsm1Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm1.duration,
+                        fsm1: (
+                            value: 25,
+                            currentState: exit,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 0,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        constraint: .greaterThan(value: 25000)
+                    )
+                ]
+            ),
+            // MARK: (R(fsm1), (15, initial, initial), (5, initial, initial))
+            kripkeState(
+                executing: fsm1Name,
+                readState: true,
+                fsm1: (
+                    value: 15,
+                    currentState: initial,
+                    previousState: initial
+                ),
+                fsm2: (
+                    value: 5,
+                    currentState: initial,
+                    previousState: initial
+                ),
+                targets: [
+                    target(
+                        executing: fsm1Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm1.duration,
+                        fsm1: (
+                            value: 0,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 5,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        constraint: .lessThanEqual(value: 5000)
+                    ),
+                    target(
+                        executing: fsm1Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm1.duration,
+                        fsm1: (
+                            value: 5,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 5,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        constraint: .and(lhs: .greaterThan(value: 5000), rhs: .lessThanEqual(value: 15000))
+                    ),
+                    target(
+                        executing: fsm1Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm1.duration,
+                        fsm1: (
+                            value: 15,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 5,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        constraint: .and(lhs: .greaterThan(value: 15000), rhs: .lessThanEqual(value: 20000))
+                    ),
+                    target(
+                        executing: fsm1Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm1.duration,
+                        fsm1: (
+                            value: 15,
+                            currentState: exit,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 5,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        constraint: .and(lhs: .greaterThan(value: 20000), rhs: .lessThanEqual(value: 25000))
+                    ),
+                    target(
+                        executing: fsm1Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm1.duration,
+                        fsm1: (
+                            value: 25,
+                            currentState: exit,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 5,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        constraint: .greaterThan(value: 25000)
+                    )
+                ]
+            ),
+            // MARK: (R(fsm1), (15, initial, initial), (15, initial, initial))
+            kripkeState(
+                executing: fsm1Name,
+                readState: true,
+                fsm1: (
+                    value: 15,
+                    currentState: initial,
+                    previousState: initial
+                ),
+                fsm2: (
+                    value: 15,
+                    currentState: initial,
+                    previousState: initial
+                ),
+                targets: [
+                    target(
+                        executing: fsm1Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm1.duration,
+                        fsm1: (
+                            value: 0,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 15,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        constraint: .lessThanEqual(value: 5000)
+                    ),
+                    target(
+                        executing: fsm1Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm1.duration,
+                        fsm1: (
+                            value: 5,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 15,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        constraint: .and(lhs: .greaterThan(value: 5000), rhs: .lessThanEqual(value: 15000))
+                    ),
+                    target(
+                        executing: fsm1Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm1.duration,
+                        fsm1: (
+                            value: 15,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 15,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        constraint: .and(lhs: .greaterThan(value: 15000), rhs: .lessThanEqual(value: 20000))
+                    ),
+                    target(
+                        executing: fsm1Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm1.duration,
+                        fsm1: (
+                            value: 15,
+                            currentState: exit,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 15,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        constraint: .and(lhs: .greaterThan(value: 20000), rhs: .lessThanEqual(value: 25000))
+                    ),
+                    target(
+                        executing: fsm1Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm1.duration,
+                        fsm1: (
+                            value: 25,
+                            currentState: exit,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 15,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        constraint: .greaterThan(value: 25000)
+                    )
+                ]
+            ),
+            // MARK: (R(fsm1), (15, initial, initial), (15, exit, initial))
+            kripkeState(
+                executing: fsm1Name,
+                readState: true,
+                fsm1: (
+                    value: 15,
+                    currentState: initial,
+                    previousState: initial
+                ),
+                fsm2: (
+                    value: 15,
+                    currentState: exit,
+                    previousState: initial
+                ),
+                targets: [
+                    target(
+                        executing: fsm1Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm1.duration,
+                        fsm1: (
+                            value: 0,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 15,
+                            currentState: exit,
+                            previousState: initial
+                        ),
+                        constraint: .lessThanEqual(value: 5000)
+                    ),
+                    target(
+                        executing: fsm1Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm1.duration,
+                        fsm1: (
+                            value: 5,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 15,
+                            currentState: exit,
+                            previousState: initial
+                        ),
+                        constraint: .and(lhs: .greaterThan(value: 5000), rhs: .lessThanEqual(value: 15000))
+                    ),
+                    target(
+                        executing: fsm1Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm1.duration,
+                        fsm1: (
+                            value: 15,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 15,
+                            currentState: exit,
+                            previousState: initial
+                        ),
+                        constraint: .and(lhs: .greaterThan(value: 15000), rhs: .lessThanEqual(value: 20000))
+                    ),
+                    target(
+                        executing: fsm1Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm1.duration,
+                        fsm1: (
+                            value: 15,
+                            currentState: exit,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 15,
+                            currentState: exit,
+                            previousState: initial
+                        ),
+                        constraint: .and(lhs: .greaterThan(value: 20000), rhs: .lessThanEqual(value: 25000))
+                    ),
+                    target(
+                        executing: fsm1Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm1.duration,
+                        fsm1: (
+                            value: 25,
+                            currentState: exit,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 15,
+                            currentState: exit,
+                            previousState: initial
+                        ),
+                        constraint: .greaterThan(value: 25000)
+                    )
+                ]
+            ),
+            // MARK: (R(fsm1), (15, initial, initial), (25, exit, initial))
+            kripkeState(
+                executing: fsm1Name,
+                readState: true,
+                fsm1: (
+                    value: 15,
+                    currentState: initial,
+                    previousState: initial
+                ),
+                fsm2: (
+                    value: 25,
+                    currentState: exit,
+                    previousState: initial
+                ),
+                targets: [
+                    target(
+                        executing: fsm1Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm1.duration,
+                        fsm1: (
+                            value: 0,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 25,
+                            currentState: exit,
+                            previousState: initial
+                        ),
+                        constraint: .lessThanEqual(value: 5000)
+                    ),
+                    target(
+                        executing: fsm1Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm1.duration,
+                        fsm1: (
+                            value: 5,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 25,
+                            currentState: exit,
+                            previousState: initial
+                        ),
+                        constraint: .and(lhs: .greaterThan(value: 5000), rhs: .lessThanEqual(value: 15000))
+                    ),
+                    target(
+                        executing: fsm1Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm1.duration,
+                        fsm1: (
+                            value: 15,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 25,
+                            currentState: exit,
+                            previousState: initial
+                        ),
+                        constraint: .and(lhs: .greaterThan(value: 15000), rhs: .lessThanEqual(value: 20000))
+                    ),
+                    target(
+                        executing: fsm1Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm1.duration,
+                        fsm1: (
+                            value: 15,
+                            currentState: exit,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 25,
+                            currentState: exit,
+                            previousState: initial
+                        ),
+                        constraint: .and(lhs: .greaterThan(value: 20000), rhs: .lessThanEqual(value: 25000))
+                    ),
+                    target(
+                        executing: fsm1Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm1.duration,
+                        fsm1: (
+                            value: 25,
+                            currentState: exit,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 25,
+                            currentState: exit,
+                            previousState: initial
+                        ),
+                        constraint: .greaterThan(value: 25000)
+                    )
+                ]
+            ),
+            // MARK: - (R(fsm1), (15, exit, initial), (0, initial, initial))
+            kripkeState(
+                executing: fsm1Name,
+                readState: true,
+                fsm1: (
+                    value: 15,
+                    currentState: exit,
+                    previousState: initial
+                ),
+                fsm2: (
+                    value: 0,
+                    currentState: initial,
+                    previousState: initial
+                ),
+                targets: [
+                    target(
+                        executing: fsm1Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm1.duration,
+                        fsm1: (
+                            value: 15,
+                            currentState: exit,
+                            previousState: exit
+                        ),
+                        fsm2: (
+                            value: 0,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        constraint: nil
+                    )
+                ]
+            ),
+            // MARK: (R(fsm1), (15, exit, initial), (5, initial, initial))
+            kripkeState(
+                executing: fsm1Name,
+                readState: true,
+                fsm1: (
+                    value: 15,
+                    currentState: exit,
+                    previousState: initial
+                ),
+                fsm2: (
+                    value: 5,
+                    currentState: initial,
+                    previousState: initial
+                ),
+                targets: [
+                    target(
+                        executing: fsm1Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm1.duration,
+                        fsm1: (
+                            value: 15,
+                            currentState: exit,
+                            previousState: exit
+                        ),
+                        fsm2: (
+                            value: 5,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        constraint: nil
+                    )
+                ]
+            ),
+            // MARK: (R(fsm1), (15, exit, initial), (15, initial, initial))
+            kripkeState(
+                executing: fsm1Name,
+                readState: true,
+                fsm1: (
+                    value: 15,
+                    currentState: exit,
+                    previousState: initial
+                ),
+                fsm2: (
+                    value: 15,
+                    currentState: initial,
+                    previousState: initial
+                ),
+                targets: [
+                    target(
+                        executing: fsm1Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm1.duration,
+                        fsm1: (
+                            value: 15,
+                            currentState: exit,
+                            previousState: exit
+                        ),
+                        fsm2: (
+                            value: 15,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        constraint: nil
+                    )
+                ]
+            ),
+            // MARK: (R(fsm1), (15, exit, initial), (15, exit, initial))
+            kripkeState(
+                executing: fsm1Name,
+                readState: true,
+                fsm1: (
+                    value: 15,
+                    currentState: exit,
+                    previousState: initial
+                ),
+                fsm2: (
+                    value: 15,
+                    currentState: exit,
+                    previousState: initial
+                ),
+                targets: [
+                    target(
+                        executing: fsm1Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm1.duration,
+                        fsm1: (
+                            value: 15,
+                            currentState: exit,
+                            previousState: exit
+                        ),
+                        fsm2: (
+                            value: 15,
+                            currentState: exit,
+                            previousState: initial
+                        ),
+                        constraint: nil
+                    )
+                ]
+            ),
+            // MARK: (R(fsm1), (15, exit, initial), (25, exit, initial))
+            kripkeState(
+                executing: fsm1Name,
+                readState: true,
+                fsm1: (
+                    value: 15,
+                    currentState: exit,
+                    previousState: initial
+                ),
+                fsm2: (
+                    value: 25,
+                    currentState: exit,
+                    previousState: initial
+                ),
+                targets: [
+                    target(
+                        executing: fsm1Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm1.duration,
+                        fsm1: (
+                            value: 15,
+                            currentState: exit,
+                            previousState: exit
+                        ),
+                        fsm2: (
+                            value: 25,
+                            currentState: exit,
+                            previousState: initial
+                        ),
+                        constraint: nil
+                    )
+                ]
+            ),
+            // MARK: - (R(fsm1), (25, exit, initial), (0, initial, initial))
+            kripkeState(
+                executing: fsm1Name,
+                readState: true,
+                fsm1: (
+                    value: 25,
+                    currentState: exit,
+                    previousState: initial
+                ),
+                fsm2: (
+                    value: 0,
+                    currentState: initial,
+                    previousState: initial
+                ),
+                targets: [
+                    target(
+                        executing: fsm1Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm1.duration,
+                        fsm1: (
+                            value: 25,
+                            currentState: exit,
+                            previousState: exit
+                        ),
+                        fsm2: (
+                            value: 0,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        constraint: nil
+                    )
+                ]
+            ),
+            // MARK: (R(fsm1), (25, exit, initial), (5, initial, initial))
+            kripkeState(
+                executing: fsm1Name,
+                readState: true,
+                fsm1: (
+                    value: 25,
+                    currentState: exit,
+                    previousState: initial
+                ),
+                fsm2: (
+                    value: 5,
+                    currentState: initial,
+                    previousState: initial
+                ),
+                targets: [
+                    target(
+                        executing: fsm1Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm1.duration,
+                        fsm1: (
+                            value: 25,
+                            currentState: exit,
+                            previousState: exit
+                        ),
+                        fsm2: (
+                            value: 5,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        constraint: nil
+                    )
+                ]
+            ),
+            // MARK: (R(fsm1), (25, exit, initial), (15, initial, initial))
+            kripkeState(
+                executing: fsm1Name,
+                readState: true,
+                fsm1: (
+                    value: 25,
+                    currentState: exit,
+                    previousState: initial
+                ),
+                fsm2: (
+                    value: 15,
+                    currentState: initial,
+                    previousState: initial
+                ),
+                targets: [
+                    target(
+                        executing: fsm1Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm1.duration,
+                        fsm1: (
+                            value: 25,
+                            currentState: exit,
+                            previousState: exit
+                        ),
+                        fsm2: (
+                            value: 15,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        constraint: nil
+                    )
+                ]
+            ),
+            // MARK: (R(fsm1), (25, exit, initial), (15, exit, initial))
+            kripkeState(
+                executing: fsm1Name,
+                readState: true,
+                fsm1: (
+                    value: 25,
+                    currentState: exit,
+                    previousState: initial
+                ),
+                fsm2: (
+                    value: 15,
+                    currentState: exit,
+                    previousState: initial
+                ),
+                targets: [
+                    target(
+                        executing: fsm1Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm1.duration,
+                        fsm1: (
+                            value: 25,
+                            currentState: exit,
+                            previousState: exit
+                        ),
+                        fsm2: (
+                            value: 15,
+                            currentState: exit,
+                            previousState: initial
+                        ),
+                        constraint: nil
+                    )
+                ]
+            ),
+            // MARK: (R(fsm1), (25, exit, initial), (25, exit, initial))
+            kripkeState(
+                executing: fsm1Name,
+                readState: true,
+                fsm1: (
+                    value: 25,
+                    currentState: exit,
+                    previousState: initial
+                ),
+                fsm2: (
+                    value: 25,
+                    currentState: exit,
+                    previousState: initial
+                ),
+                targets: [
+                    target(
+                        executing: fsm1Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm1.duration,
+                        fsm1: (
+                            value: 25,
+                            currentState: exit,
+                            previousState: exit
+                        ),
+                        fsm2: (
+                            value: 25,
+                            currentState: exit,
+                            previousState: initial
+                        ),
+                        constraint: nil
+                    )
+                ]
+            ),
+            // MARK: - (R(fsm2), (0, initial, initial), (0, initial, initial))
+            kripkeState(
+                executing: fsm2Name,
+                readState: true,
+                fsm1: (
+                    value: 0,
+                    currentState: initial,
+                    previousState: initial
+                ),
+                fsm2: (
+                    value: 0,
+                    currentState: initial,
+                    previousState: initial
+                ),
+                targets: [
+                    target(
+                        executing: fsm2Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm2.duration,
+                        fsm1: (
+                            value: 0,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 0,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        constraint: .lessThanEqual(value: 5000)
+                    ),
+                    target(
+                        executing: fsm2Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm2.duration,
+                        fsm1: (
+                            value: 0,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 5,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        constraint: .and(lhs: .greaterThan(value: 5000), rhs: .lessThanEqual(value: 15000))
+                    ),
+                    target(
+                        executing: fsm2Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm2.duration,
+                        fsm1: (
+                            value: 0,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 15,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        constraint: .and(lhs: .greaterThan(value: 15000), rhs: .lessThanEqual(value: 20000))
+                    ),
+                    target(
+                        executing: fsm2Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm2.duration,
+                        fsm1: (
+                            value: 0,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 15,
+                            currentState: exit,
+                            previousState: initial
+                        ),
+                        constraint: .and(lhs: .greaterThan(value: 20000), rhs: .lessThanEqual(value: 25000))
+                    ),
+                    target(
+                        executing: fsm2Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm2.duration,
+                        fsm1: (
+                            value: 0,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 25,
+                            currentState: exit,
+                            previousState: initial
+                        ),
+                        constraint: .greaterThan(value: 25000)
+                    )
+                ]
+            ),
+            // MARK: (R(fsm2), (5, initial, initial), (0, initial, initial))
+            kripkeState(
+                executing: fsm2Name,
+                readState: true,
+                fsm1: (
+                    value: 5,
+                    currentState: initial,
+                    previousState: initial
+                ),
+                fsm2: (
+                    value: 0,
+                    currentState: initial,
+                    previousState: initial
+                ),
+                targets: [
+                    target(
+                        executing: fsm2Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm2.duration,
+                        fsm1: (
+                            value: 5,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 0,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        constraint: .lessThanEqual(value: 5000)
+                    ),
+                    target(
+                        executing: fsm2Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm2.duration,
+                        fsm1: (
+                            value: 5,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 5,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        constraint: .and(lhs: .greaterThan(value: 5000), rhs: .lessThanEqual(value: 15000))
+                    ),
+                    target(
+                        executing: fsm2Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm2.duration,
+                        fsm1: (
+                            value: 5,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 15,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        constraint: .and(lhs: .greaterThan(value: 15000), rhs: .lessThanEqual(value: 20000))
+                    ),
+                    target(
+                        executing: fsm2Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm2.duration,
+                        fsm1: (
+                            value: 5,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 15,
+                            currentState: exit,
+                            previousState: initial
+                        ),
+                        constraint: .and(lhs: .greaterThan(value: 20000), rhs: .lessThanEqual(value: 25000))
+                    ),
+                    target(
+                        executing: fsm2Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm2.duration,
+                        fsm1: (
+                            value: 5,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 25,
+                            currentState: exit,
+                            previousState: initial
+                        ),
+                        constraint: .greaterThan(value: 25000)
+                    )
+                ]
+            ),
+            // MARK: (R(fsm2), (15, initial, initial), (0, initial, initial))
+            kripkeState(
+                executing: fsm2Name,
+                readState: true,
+                fsm1: (
+                    value: 15,
+                    currentState: initial,
+                    previousState: initial
+                ),
+                fsm2: (
+                    value: 0,
+                    currentState: initial,
+                    previousState: initial
+                ),
+                targets: [
+                    target(
+                        executing: fsm2Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm2.duration,
+                        fsm1: (
+                            value: 15,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 0,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        constraint: .lessThanEqual(value: 5000)
+                    ),
+                    target(
+                        executing: fsm2Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm2.duration,
+                        fsm1: (
+                            value: 15,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 5,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        constraint: .and(lhs: .greaterThan(value: 5000), rhs: .lessThanEqual(value: 15000))
+                    ),
+                    target(
+                        executing: fsm2Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm2.duration,
+                        fsm1: (
+                            value: 15,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 15,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        constraint: .and(lhs: .greaterThan(value: 15000), rhs: .lessThanEqual(value: 20000))
+                    ),
+                    target(
+                        executing: fsm2Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm2.duration,
+                        fsm1: (
+                            value: 15,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 15,
+                            currentState: exit,
+                            previousState: initial
+                        ),
+                        constraint: .and(lhs: .greaterThan(value: 20000), rhs: .lessThanEqual(value: 25000))
+                    ),
+                    target(
+                        executing: fsm2Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm2.duration,
+                        fsm1: (
+                            value: 15,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 25,
+                            currentState: exit,
+                            previousState: initial
+                        ),
+                        constraint: .greaterThan(value: 25000)
+                    )
+                ]
+            ),
+            // MARK: (R(fsm2), (15, exit, initial), (0, initial, initial))
+            kripkeState(
+                executing: fsm2Name,
+                readState: true,
+                fsm1: (
+                    value: 15,
+                    currentState: exit,
+                    previousState: initial
+                ),
+                fsm2: (
+                    value: 0,
+                    currentState: initial,
+                    previousState: initial
+                ),
+                targets: [
+                    target(
+                        executing: fsm2Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm2.duration,
+                        fsm1: (
+                            value: 15,
+                            currentState: exit,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 0,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        constraint: .lessThanEqual(value: 5000)
+                    ),
+                    target(
+                        executing: fsm2Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm2.duration,
+                        fsm1: (
+                            value: 15,
+                            currentState: exit,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 5,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        constraint: .and(lhs: .greaterThan(value: 5000), rhs: .lessThanEqual(value: 15000))
+                    ),
+                    target(
+                        executing: fsm2Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm2.duration,
+                        fsm1: (
+                            value: 15,
+                            currentState: exit,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 15,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        constraint: .and(lhs: .greaterThan(value: 15000), rhs: .lessThanEqual(value: 20000))
+                    ),
+                    target(
+                        executing: fsm2Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm2.duration,
+                        fsm1: (
+                            value: 15,
+                            currentState: exit,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 15,
+                            currentState: exit,
+                            previousState: initial
+                        ),
+                        constraint: .and(lhs: .greaterThan(value: 20000), rhs: .lessThanEqual(value: 25000))
+                    ),
+                    target(
+                        executing: fsm2Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm2.duration,
+                        fsm1: (
+                            value: 15,
+                            currentState: exit,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 25,
+                            currentState: exit,
+                            previousState: initial
+                        ),
+                        constraint: .greaterThan(value: 25000)
+                    )
+                ]
+            ),
+            // MARK: (R(fsm2), (25, exit, initial), (0, initial, initial))
+            kripkeState(
+                executing: fsm2Name,
+                readState: true,
+                fsm1: (
+                    value: 25,
+                    currentState: exit,
+                    previousState: initial
+                ),
+                fsm2: (
+                    value: 0,
+                    currentState: initial,
+                    previousState: initial
+                ),
+                targets: [
+                    target(
+                        executing: fsm2Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm2.duration,
+                        fsm1: (
+                            value: 25,
+                            currentState: exit,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 0,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        constraint: .lessThanEqual(value: 5000)
+                    ),
+                    target(
+                        executing: fsm2Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm2.duration,
+                        fsm1: (
+                            value: 25,
+                            currentState: exit,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 5,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        constraint: .and(lhs: .greaterThan(value: 5000), rhs: .lessThanEqual(value: 15000))
+                    ),
+                    target(
+                        executing: fsm2Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm2.duration,
+                        fsm1: (
+                            value: 25,
+                            currentState: exit,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 15,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        constraint: .and(lhs: .greaterThan(value: 15000), rhs: .lessThanEqual(value: 20000))
+                    ),
+                    target(
+                        executing: fsm2Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm2.duration,
+                        fsm1: (
+                            value: 25,
+                            currentState: exit,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 15,
+                            currentState: exit,
+                            previousState: initial
+                        ),
+                        constraint: .and(lhs: .greaterThan(value: 20000), rhs: .lessThanEqual(value: 25000))
+                    ),
+                    target(
+                        executing: fsm2Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm2.duration,
+                        fsm1: (
+                            value: 25,
+                            currentState: exit,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 25,
+                            currentState: exit,
+                            previousState: initial
+                        ),
+                        constraint: .greaterThan(value: 25000)
+                    )
+                ]
+            ),
+            // MARK: - (R(fsm2), (0, initial, initial), (5, initial, initial))
+            kripkeState(
+                executing: fsm2Name,
+                readState: true,
+                fsm1: (
+                    value: 0,
+                    currentState: initial,
+                    previousState: initial
+                ),
+                fsm2: (
+                    value: 5,
+                    currentState: initial,
+                    previousState: initial
+                ),
+                targets: [
+                    target(
+                        executing: fsm2Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm2.duration,
+                        fsm1: (
+                            value: 0,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 0,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        constraint: .lessThanEqual(value: 5000)
+                    ),
+                    target(
+                        executing: fsm2Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm2.duration,
+                        fsm1: (
+                            value: 0,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 5,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        constraint: .and(lhs: .greaterThan(value: 5000), rhs: .lessThanEqual(value: 15000))
+                    ),
+                    target(
+                        executing: fsm2Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm2.duration,
+                        fsm1: (
+                            value: 0,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 15,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        constraint: .and(lhs: .greaterThan(value: 15000), rhs: .lessThanEqual(value: 20000))
+                    ),
+                    target(
+                        executing: fsm2Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm2.duration,
+                        fsm1: (
+                            value: 0,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 15,
+                            currentState: exit,
+                            previousState: initial
+                        ),
+                        constraint: .and(lhs: .greaterThan(value: 20000), rhs: .lessThanEqual(value: 25000))
+                    ),
+                    target(
+                        executing: fsm2Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm2.duration,
+                        fsm1: (
+                            value: 0,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 25,
+                            currentState: exit,
+                            previousState: initial
+                        ),
+                        constraint: .greaterThan(value: 25000)
+                    )
+                ]
+            ),
+            // MARK: (R(fsm2), (5, initial, initial), (5, initial, initial))
+            kripkeState(
+                executing: fsm2Name,
+                readState: true,
+                fsm1: (
+                    value: 5,
+                    currentState: initial,
+                    previousState: initial
+                ),
+                fsm2: (
+                    value: 5,
+                    currentState: initial,
+                    previousState: initial
+                ),
+                targets: [
+                    target(
+                        executing: fsm2Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm2.duration,
+                        fsm1: (
+                            value: 5,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 0,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        constraint: .lessThanEqual(value: 5000)
+                    ),
+                    target(
+                        executing: fsm2Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm2.duration,
+                        fsm1: (
+                            value: 5,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 5,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        constraint: .and(lhs: .greaterThan(value: 5000), rhs: .lessThanEqual(value: 15000))
+                    ),
+                    target(
+                        executing: fsm2Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm2.duration,
+                        fsm1: (
+                            value: 5,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 15,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        constraint: .and(lhs: .greaterThan(value: 15000), rhs: .lessThanEqual(value: 20000))
+                    ),
+                    target(
+                        executing: fsm2Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm2.duration,
+                        fsm1: (
+                            value: 5,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 15,
+                            currentState: exit,
+                            previousState: initial
+                        ),
+                        constraint: .and(lhs: .greaterThan(value: 20000), rhs: .lessThanEqual(value: 25000))
+                    ),
+                    target(
+                        executing: fsm2Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm2.duration,
+                        fsm1: (
+                            value: 5,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 25,
+                            currentState: exit,
+                            previousState: initial
+                        ),
+                        constraint: .greaterThan(value: 25000)
+                    )
+                ]
+            ),
+            // MARK: (R(fsm2), (15, initial, initial), (5, initial, initial))
+            kripkeState(
+                executing: fsm2Name,
+                readState: true,
+                fsm1: (
+                    value: 15,
+                    currentState: initial,
+                    previousState: initial
+                ),
+                fsm2: (
+                    value: 5,
+                    currentState: initial,
+                    previousState: initial
+                ),
+                targets: [
+                    target(
+                        executing: fsm2Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm2.duration,
+                        fsm1: (
+                            value: 15,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 0,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        constraint: .lessThanEqual(value: 5000)
+                    ),
+                    target(
+                        executing: fsm2Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm2.duration,
+                        fsm1: (
+                            value: 15,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 5,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        constraint: .and(lhs: .greaterThan(value: 5000), rhs: .lessThanEqual(value: 15000))
+                    ),
+                    target(
+                        executing: fsm2Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm2.duration,
+                        fsm1: (
+                            value: 15,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 15,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        constraint: .and(lhs: .greaterThan(value: 15000), rhs: .lessThanEqual(value: 20000))
+                    ),
+                    target(
+                        executing: fsm2Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm2.duration,
+                        fsm1: (
+                            value: 15,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 15,
+                            currentState: exit,
+                            previousState: initial
+                        ),
+                        constraint: .and(lhs: .greaterThan(value: 20000), rhs: .lessThanEqual(value: 25000))
+                    ),
+                    target(
+                        executing: fsm2Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm2.duration,
+                        fsm1: (
+                            value: 15,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 25,
+                            currentState: exit,
+                            previousState: initial
+                        ),
+                        constraint: .greaterThan(value: 25000)
+                    )
+                ]
+            ),
+            // MARK: (R(fsm2), (15, exit, initial), (5, initial, initial))
+            kripkeState(
+                executing: fsm2Name,
+                readState: true,
+                fsm1: (
+                    value: 15,
+                    currentState: exit,
+                    previousState: initial
+                ),
+                fsm2: (
+                    value: 5,
+                    currentState: initial,
+                    previousState: initial
+                ),
+                targets: [
+                    target(
+                        executing: fsm2Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm2.duration,
+                        fsm1: (
+                            value: 15,
+                            currentState: exit,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 0,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        constraint: .lessThanEqual(value: 5000)
+                    ),
+                    target(
+                        executing: fsm2Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm2.duration,
+                        fsm1: (
+                            value: 15,
+                            currentState: exit,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 5,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        constraint: .and(lhs: .greaterThan(value: 5000), rhs: .lessThanEqual(value: 15000))
+                    ),
+                    target(
+                        executing: fsm2Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm2.duration,
+                        fsm1: (
+                            value: 15,
+                            currentState: exit,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 15,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        constraint: .and(lhs: .greaterThan(value: 15000), rhs: .lessThanEqual(value: 20000))
+                    ),
+                    target(
+                        executing: fsm2Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm2.duration,
+                        fsm1: (
+                            value: 15,
+                            currentState: exit,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 15,
+                            currentState: exit,
+                            previousState: initial
+                        ),
+                        constraint: .and(lhs: .greaterThan(value: 20000), rhs: .lessThanEqual(value: 25000))
+                    ),
+                    target(
+                        executing: fsm2Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm2.duration,
+                        fsm1: (
+                            value: 15,
+                            currentState: exit,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 25,
+                            currentState: exit,
+                            previousState: initial
+                        ),
+                        constraint: .greaterThan(value: 25000)
+                    )
+                ]
+            ),
+            // MARK: (R(fsm2), (25, exit, initial), (5, initial, initial))
+            kripkeState(
+                executing: fsm2Name,
+                readState: true,
+                fsm1: (
+                    value: 25,
+                    currentState: exit,
+                    previousState: initial
+                ),
+                fsm2: (
+                    value: 5,
+                    currentState: initial,
+                    previousState: initial
+                ),
+                targets: [
+                    target(
+                        executing: fsm2Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm2.duration,
+                        fsm1: (
+                            value: 25,
+                            currentState: exit,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 0,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        constraint: .lessThanEqual(value: 5000)
+                    ),
+                    target(
+                        executing: fsm2Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm2.duration,
+                        fsm1: (
+                            value: 25,
+                            currentState: exit,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 5,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        constraint: .and(lhs: .greaterThan(value: 5000), rhs: .lessThanEqual(value: 15000))
+                    ),
+                    target(
+                        executing: fsm2Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm2.duration,
+                        fsm1: (
+                            value: 25,
+                            currentState: exit,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 15,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        constraint: .and(lhs: .greaterThan(value: 15000), rhs: .lessThanEqual(value: 20000))
+                    ),
+                    target(
+                        executing: fsm2Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm2.duration,
+                        fsm1: (
+                            value: 25,
+                            currentState: exit,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 15,
+                            currentState: exit,
+                            previousState: initial
+                        ),
+                        constraint: .and(lhs: .greaterThan(value: 20000), rhs: .lessThanEqual(value: 25000))
+                    ),
+                    target(
+                        executing: fsm2Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm2.duration,
+                        fsm1: (
+                            value: 25,
+                            currentState: exit,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 25,
+                            currentState: exit,
+                            previousState: initial
+                        ),
+                        constraint: .greaterThan(value: 25000)
+                    )
+                ]
+            ),
+            // MARK: - (R(fsm2), (0, initial, initial), (15, initial, initial))
+            kripkeState(
+                executing: fsm2Name,
+                readState: true,
+                fsm1: (
+                    value: 0,
+                    currentState: initial,
+                    previousState: initial
+                ),
+                fsm2: (
+                    value: 15,
+                    currentState: initial,
+                    previousState: initial
+                ),
+                targets: [
+                    target(
+                        executing: fsm2Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm2.duration,
+                        fsm1: (
+                            value: 0,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 0,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        constraint: .lessThanEqual(value: 5000)
+                    ),
+                    target(
+                        executing: fsm2Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm2.duration,
+                        fsm1: (
+                            value: 0,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 5,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        constraint: .and(lhs: .greaterThan(value: 5000), rhs: .lessThanEqual(value: 15000))
+                    ),
+                    target(
+                        executing: fsm2Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm2.duration,
+                        fsm1: (
+                            value: 0,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 15,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        constraint: .and(lhs: .greaterThan(value: 15000), rhs: .lessThanEqual(value: 20000))
+                    ),
+                    target(
+                        executing: fsm2Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm2.duration,
+                        fsm1: (
+                            value: 0,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 15,
+                            currentState: exit,
+                            previousState: initial
+                        ),
+                        constraint: .and(lhs: .greaterThan(value: 20000), rhs: .lessThanEqual(value: 25000))
+                    ),
+                    target(
+                        executing: fsm2Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm2.duration,
+                        fsm1: (
+                            value: 0,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 25,
+                            currentState: exit,
+                            previousState: initial
+                        ),
+                        constraint: .greaterThan(value: 25000)
+                    )
+                ]
+            ),
+            // MARK: (R(fsm2), (5, initial, initial), (15, initial, initial))
+            kripkeState(
+                executing: fsm2Name,
+                readState: true,
+                fsm1: (
+                    value: 5,
+                    currentState: initial,
+                    previousState: initial
+                ),
+                fsm2: (
+                    value: 15,
+                    currentState: initial,
+                    previousState: initial
+                ),
+                targets: [
+                    target(
+                        executing: fsm2Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm2.duration,
+                        fsm1: (
+                            value: 5,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 0,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        constraint: .lessThanEqual(value: 5000)
+                    ),
+                    target(
+                        executing: fsm2Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm2.duration,
+                        fsm1: (
+                            value: 5,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 5,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        constraint: .and(lhs: .greaterThan(value: 5000), rhs: .lessThanEqual(value: 15000))
+                    ),
+                    target(
+                        executing: fsm2Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm2.duration,
+                        fsm1: (
+                            value: 5,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 15,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        constraint: .and(lhs: .greaterThan(value: 15000), rhs: .lessThanEqual(value: 20000))
+                    ),
+                    target(
+                        executing: fsm2Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm2.duration,
+                        fsm1: (
+                            value: 5,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 15,
+                            currentState: exit,
+                            previousState: initial
+                        ),
+                        constraint: .and(lhs: .greaterThan(value: 20000), rhs: .lessThanEqual(value: 25000))
+                    ),
+                    target(
+                        executing: fsm2Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm2.duration,
+                        fsm1: (
+                            value: 5,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 25,
+                            currentState: exit,
+                            previousState: initial
+                        ),
+                        constraint: .greaterThan(value: 25000)
+                    )
+                ]
+            ),
+            // MARK: (R(fsm2), (15, initial, initial), (15, initial, initial))
+            kripkeState(
+                executing: fsm2Name,
+                readState: true,
+                fsm1: (
+                    value: 15,
+                    currentState: initial,
+                    previousState: initial
+                ),
+                fsm2: (
+                    value: 15,
+                    currentState: initial,
+                    previousState: initial
+                ),
+                targets: [
+                    target(
+                        executing: fsm2Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm2.duration,
+                        fsm1: (
+                            value: 15,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 0,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        constraint: .lessThanEqual(value: 5000)
+                    ),
+                    target(
+                        executing: fsm2Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm2.duration,
+                        fsm1: (
+                            value: 15,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 5,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        constraint: .and(lhs: .greaterThan(value: 5000), rhs: .lessThanEqual(value: 15000))
+                    ),
+                    target(
+                        executing: fsm2Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm2.duration,
+                        fsm1: (
+                            value: 15,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 15,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        constraint: .and(lhs: .greaterThan(value: 15000), rhs: .lessThanEqual(value: 20000))
+                    ),
+                    target(
+                        executing: fsm2Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm2.duration,
+                        fsm1: (
+                            value: 15,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 15,
+                            currentState: exit,
+                            previousState: initial
+                        ),
+                        constraint: .and(lhs: .greaterThan(value: 20000), rhs: .lessThanEqual(value: 25000))
+                    ),
+                    target(
+                        executing: fsm2Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm2.duration,
+                        fsm1: (
+                            value: 15,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 25,
+                            currentState: exit,
+                            previousState: initial
+                        ),
+                        constraint: .greaterThan(value: 25000)
+                    )
+                ]
+            ),
+            // MARK: (R(fsm2), (15, exit, initial), (15, initial, initial))
+            kripkeState(
+                executing: fsm2Name,
+                readState: true,
+                fsm1: (
+                    value: 15,
+                    currentState: exit,
+                    previousState: initial
+                ),
+                fsm2: (
+                    value: 15,
+                    currentState: initial,
+                    previousState: initial
+                ),
+                targets: [
+                    target(
+                        executing: fsm2Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm2.duration,
+                        fsm1: (
+                            value: 15,
+                            currentState: exit,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 0,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        constraint: .lessThanEqual(value: 5000)
+                    ),
+                    target(
+                        executing: fsm2Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm2.duration,
+                        fsm1: (
+                            value: 15,
+                            currentState: exit,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 5,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        constraint: .and(lhs: .greaterThan(value: 5000), rhs: .lessThanEqual(value: 15000))
+                    ),
+                    target(
+                        executing: fsm2Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm2.duration,
+                        fsm1: (
+                            value: 15,
+                            currentState: exit,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 15,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        constraint: .and(lhs: .greaterThan(value: 15000), rhs: .lessThanEqual(value: 20000))
+                    ),
+                    target(
+                        executing: fsm2Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm2.duration,
+                        fsm1: (
+                            value: 15,
+                            currentState: exit,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 15,
+                            currentState: exit,
+                            previousState: initial
+                        ),
+                        constraint: .and(lhs: .greaterThan(value: 20000), rhs: .lessThanEqual(value: 25000))
+                    ),
+                    target(
+                        executing: fsm2Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm2.duration,
+                        fsm1: (
+                            value: 15,
+                            currentState: exit,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 25,
+                            currentState: exit,
+                            previousState: initial
+                        ),
+                        constraint: .greaterThan(value: 25000)
+                    )
+                ]
+            ),
+            // MARK: (R(fsm2), (25, exit, initial), (15, initial, initial))
+            kripkeState(
+                executing: fsm2Name,
+                readState: true,
+                fsm1: (
+                    value: 25,
+                    currentState: exit,
+                    previousState: initial
+                ),
+                fsm2: (
+                    value: 15,
+                    currentState: initial,
+                    previousState: initial
+                ),
+                targets: [
+                    target(
+                        executing: fsm2Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm2.duration,
+                        fsm1: (
+                            value: 25,
+                            currentState: exit,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 0,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        constraint: .lessThanEqual(value: 5000)
+                    ),
+                    target(
+                        executing: fsm2Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm2.duration,
+                        fsm1: (
+                            value: 25,
+                            currentState: exit,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 5,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        constraint: .and(lhs: .greaterThan(value: 5000), rhs: .lessThanEqual(value: 15000))
+                    ),
+                    target(
+                        executing: fsm2Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm2.duration,
+                        fsm1: (
+                            value: 25,
+                            currentState: exit,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 15,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        constraint: .and(lhs: .greaterThan(value: 15000), rhs: .lessThanEqual(value: 20000))
+                    ),
+                    target(
+                        executing: fsm2Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm2.duration,
+                        fsm1: (
+                            value: 25,
+                            currentState: exit,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 15,
+                            currentState: exit,
+                            previousState: initial
+                        ),
+                        constraint: .and(lhs: .greaterThan(value: 20000), rhs: .lessThanEqual(value: 25000))
+                    ),
+                    target(
+                        executing: fsm2Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm2.duration,
+                        fsm1: (
+                            value: 25,
+                            currentState: exit,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 25,
+                            currentState: exit,
+                            previousState: initial
+                        ),
+                        constraint: .greaterThan(value: 25000)
+                    )
+                ]
+            ),
+            // MARK: - (R(fsm2), (0, initial, initial), (15, exit, initial))
+            kripkeState(
+                executing: fsm2Name,
+                readState: true,
+                fsm1: (
+                    value: 0,
+                    currentState: initial,
+                    previousState: initial
+                ),
+                fsm2: (
+                    value: 15,
+                    currentState: exit,
+                    previousState: initial
+                ),
+                targets: [
+                    target(
+                        executing: fsm2Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm2.duration,
+                        fsm1: (
+                            value: 0,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 15,
+                            currentState: exit,
+                            previousState: exit
+                        ),
+                        constraint: nil
+                    ),
+                ]
+            ),
+            // MARK: (R(fsm2), (5, initial, initial), (15, exit, initial))
+            kripkeState(
+                executing: fsm2Name,
+                readState: true,
+                fsm1: (
+                    value: 5,
+                    currentState: initial,
+                    previousState: initial
+                ),
+                fsm2: (
+                    value: 15,
+                    currentState: exit,
+                    previousState: initial
+                ),
+                targets: [
+                    target(
+                        executing: fsm2Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm2.duration,
+                        fsm1: (
+                            value: 5,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 15,
+                            currentState: exit,
+                            previousState: exit
+                        ),
+                        constraint: nil
+                    )
+                ]
+            ),
+            // MARK: (R(fsm2), (15, initial, initial), (15, exit, initial))
+            kripkeState(
+                executing: fsm2Name,
+                readState: true,
+                fsm1: (
+                    value: 15,
+                    currentState: initial,
+                    previousState: initial
+                ),
+                fsm2: (
+                    value: 15,
+                    currentState: exit,
+                    previousState: initial
+                ),
+                targets: [
+                    target(
+                        executing: fsm2Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm2.duration,
+                        fsm1: (
+                            value: 15,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 15,
+                            currentState: exit,
+                            previousState: exit
+                        ),
+                        constraint: nil
+                    )
+                ]
+            ),
+            // MARK: (R(fsm2), (15, exit, initial), (15, exit, initial))
+            kripkeState(
+                executing: fsm2Name,
+                readState: true,
+                fsm1: (
+                    value: 15,
+                    currentState: exit,
+                    previousState: initial
+                ),
+                fsm2: (
+                    value: 15,
+                    currentState: exit,
+                    previousState: initial
+                ),
+                targets: [
+                    target(
+                        executing: fsm2Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm2.duration,
+                        fsm1: (
+                            value: 15,
+                            currentState: exit,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 15,
+                            currentState: exit,
+                            previousState: exit
+                        ),
+                        constraint: nil
+                    )
+                ]
+            ),
+            // MARK: (R(fsm2), (25, exit, initial), (15, exit, initial))
+            kripkeState(
+                executing: fsm2Name,
+                readState: true,
+                fsm1: (
+                    value: 25,
+                    currentState: exit,
+                    previousState: initial
+                ),
+                fsm2: (
+                    value: 15,
+                    currentState: exit,
+                    previousState: initial
+                ),
+                targets: [
+                    target(
+                        executing: fsm2Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm2.duration,
+                        fsm1: (
+                            value: 25,
+                            currentState: exit,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 15,
+                            currentState: exit,
+                            previousState: exit
+                        ),
+                        constraint: nil
+                    )
+                ]
+            ),
+            // MARK: - (R(fsm2), (0, initial, initial), (25, exit, initial))
+            kripkeState(
+                executing: fsm2Name,
+                readState: true,
+                fsm1: (
+                    value: 0,
+                    currentState: initial,
+                    previousState: initial
+                ),
+                fsm2: (
+                    value: 25,
+                    currentState: exit,
+                    previousState: initial
+                ),
+                targets: [
+                    target(
+                        executing: fsm2Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm2.duration,
+                        fsm1: (
+                            value: 0,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 25,
+                            currentState: exit,
+                            previousState: exit
+                        ),
+                        constraint: nil
+                    ),
+                ]
+            ),
+            // MARK: (R(fsm2), (5, initial, initial), (25, exit, initial))
+            kripkeState(
+                executing: fsm2Name,
+                readState: true,
+                fsm1: (
+                    value: 5,
+                    currentState: initial,
+                    previousState: initial
+                ),
+                fsm2: (
+                    value: 25,
+                    currentState: exit,
+                    previousState: initial
+                ),
+                targets: [
+                    target(
+                        executing: fsm2Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm2.duration,
+                        fsm1: (
+                            value: 5,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 25,
+                            currentState: exit,
+                            previousState: exit
+                        ),
+                        constraint: nil
+                    )
+                ]
+            ),
+            // MARK: (R(fsm2), (15, initial, initial), (25, exit, initial))
+            kripkeState(
+                executing: fsm2Name,
+                readState: true,
+                fsm1: (
+                    value: 15,
+                    currentState: initial,
+                    previousState: initial
+                ),
+                fsm2: (
+                    value: 25,
+                    currentState: exit,
+                    previousState: initial
+                ),
+                targets: [
+                    target(
+                        executing: fsm2Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm2.duration,
+                        fsm1: (
+                            value: 15,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 25,
+                            currentState: exit,
+                            previousState: exit
+                        ),
+                        constraint: nil
+                    )
+                ]
+            ),
+            // MARK: (R(fsm2), (15, exit, initial), (25, exit, initial))
+            kripkeState(
+                executing: fsm2Name,
+                readState: true,
+                fsm1: (
+                    value: 15,
+                    currentState: exit,
+                    previousState: initial
+                ),
+                fsm2: (
+                    value: 25,
+                    currentState: exit,
+                    previousState: initial
+                ),
+                targets: [
+                    target(
+                        executing: fsm2Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm2.duration,
+                        fsm1: (
+                            value: 15,
+                            currentState: exit,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 25,
+                            currentState: exit,
+                            previousState: exit
+                        ),
+                        constraint: nil
+                    )
+                ]
+            ),
+            // MARK: (R(fsm2), (25, exit, initial), (25, exit, initial))
+            kripkeState(
+                executing: fsm2Name,
+                readState: true,
+                fsm1: (
+                    value: 25,
+                    currentState: exit,
+                    previousState: initial
+                ),
+                fsm2: (
+                    value: 25,
+                    currentState: exit,
+                    previousState: initial
+                ),
+                targets: [
+                    target(
+                        executing: fsm2Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm2.duration,
+                        fsm1: (
+                            value: 25,
+                            currentState: exit,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 25,
+                            currentState: exit,
+                            previousState: exit
+                        ),
+                        constraint: nil
+                    )
+                ]
+            ),
+            // MARK: - (R(fsm1), (15, exit, exit), (0, initial, initial))
+            kripkeState(
+                executing: fsm1Name,
+                readState: true,
+                fsm1: (
+                    value: 15,
+                    currentState: exit,
+                    previousState: exit
+                ),
+                fsm2: (
+                    value: 0,
+                    currentState: initial,
+                    previousState: initial
+                ),
+                targets: [
+                    target(
+                        executing: fsm1Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm1.duration,
+                        fsm1: (
+                            value: 15,
+                            currentState: exit,
+                            previousState: exit
+                        ),
+                        fsm2: (
+                            value: 0,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        constraint: nil
+                    )
+                ]
+            ),
+            // MARK: (R(fsm1), (15, exit, exit), (5, initial, initial))
+            kripkeState(
+                executing: fsm1Name,
+                readState: true,
+                fsm1: (
+                    value: 15,
+                    currentState: exit,
+                    previousState: exit
+                ),
+                fsm2: (
+                    value: 5,
+                    currentState: initial,
+                    previousState: initial
+                ),
+                targets: [
+                    target(
+                        executing: fsm1Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm1.duration,
+                        fsm1: (
+                            value: 15,
+                            currentState: exit,
+                            previousState: exit
+                        ),
+                        fsm2: (
+                            value: 5,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        constraint: nil
+                    )
+                ]
+            ),
+            // MARK: (R(fsm1), (15, exit, exit), (15, initial, initial))
+            kripkeState(
+                executing: fsm1Name,
+                readState: true,
+                fsm1: (
+                    value: 15,
+                    currentState: exit,
+                    previousState: exit
+                ),
+                fsm2: (
+                    value: 15,
+                    currentState: initial,
+                    previousState: initial
+                ),
+                targets: [
+                    target(
+                        executing: fsm1Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm1.duration,
+                        fsm1: (
+                            value: 15,
+                            currentState: exit,
+                            previousState: exit
+                        ),
+                        fsm2: (
+                            value: 15,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        constraint: nil
+                    )
+                ]
+            ),
+            // MARK: (R(fsm1), (15, exit, exit), (15, exit, initial))
+            kripkeState(
+                executing: fsm1Name,
+                readState: true,
+                fsm1: (
+                    value: 15,
+                    currentState: exit,
+                    previousState: exit
+                ),
+                fsm2: (
+                    value: 15,
+                    currentState: exit,
+                    previousState: initial
+                ),
+                targets: [
+                    target(
+                        executing: fsm1Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm1.duration,
+                        fsm1: (
+                            value: 15,
+                            currentState: exit,
+                            previousState: exit
+                        ),
+                        fsm2: (
+                            value: 15,
+                            currentState: exit,
+                            previousState: initial
+                        ),
+                        constraint: nil
+                    )
+                ]
+            ),
+            // MARK: (R(fsm1), (15, exit, exit), (25, exit, initial))
+            kripkeState(
+                executing: fsm1Name,
+                readState: true,
+                fsm1: (
+                    value: 15,
+                    currentState: exit,
+                    previousState: exit
+                ),
+                fsm2: (
+                    value: 25,
+                    currentState: exit,
+                    previousState: initial
+                ),
+                targets: [
+                    target(
+                        executing: fsm1Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm1.duration,
+                        fsm1: (
+                            value: 15,
+                            currentState: exit,
+                            previousState: exit
+                        ),
+                        fsm2: (
+                            value: 25,
+                            currentState: exit,
+                            previousState: initial
+                        ),
+                        constraint: nil
+                    )
+                ]
+            ),
+            // MARK: - (R(fsm1), (25, exit, exit), (0, initial, initial))
+            kripkeState(
+                executing: fsm1Name,
+                readState: true,
+                fsm1: (
+                    value: 25,
+                    currentState: exit,
+                    previousState: exit
+                ),
+                fsm2: (
+                    value: 0,
+                    currentState: initial,
+                    previousState: initial
+                ),
+                targets: [
+                    target(
+                        executing: fsm1Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm1.duration,
+                        fsm1: (
+                            value: 25,
+                            currentState: exit,
+                            previousState: exit
+                        ),
+                        fsm2: (
+                            value: 0,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        constraint: nil
+                    )
+                ]
+            ),
+            // MARK: (R(fsm1), (25, exit, exit), (5, initial, initial))
+            kripkeState(
+                executing: fsm1Name,
+                readState: true,
+                fsm1: (
+                    value: 25,
+                    currentState: exit,
+                    previousState: exit
+                ),
+                fsm2: (
+                    value: 5,
+                    currentState: initial,
+                    previousState: initial
+                ),
+                targets: [
+                    target(
+                        executing: fsm1Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm1.duration,
+                        fsm1: (
+                            value: 25,
+                            currentState: exit,
+                            previousState: exit
+                        ),
+                        fsm2: (
+                            value: 5,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        constraint: nil
+                    )
+                ]
+            ),
+            // MARK: (R(fsm1), (25, exit, exit), (15, initial, initial))
+            kripkeState(
+                executing: fsm1Name,
+                readState: true,
+                fsm1: (
+                    value: 25,
+                    currentState: exit,
+                    previousState: exit
+                ),
+                fsm2: (
+                    value: 15,
+                    currentState: initial,
+                    previousState: initial
+                ),
+                targets: [
+                    target(
+                        executing: fsm1Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm1.duration,
+                        fsm1: (
+                            value: 25,
+                            currentState: exit,
+                            previousState: exit
+                        ),
+                        fsm2: (
+                            value: 15,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        constraint: nil
+                    )
+                ]
+            ),
+            // MARK: (R(fsm1), (25, exit, exit), (15, exit, initial))
+            kripkeState(
+                executing: fsm1Name,
+                readState: true,
+                fsm1: (
+                    value: 25,
+                    currentState: exit,
+                    previousState: exit
+                ),
+                fsm2: (
+                    value: 15,
+                    currentState: exit,
+                    previousState: initial
+                ),
+                targets: [
+                    target(
+                        executing: fsm1Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm1.duration,
+                        fsm1: (
+                            value: 25,
+                            currentState: exit,
+                            previousState: exit
+                        ),
+                        fsm2: (
+                            value: 15,
+                            currentState: exit,
+                            previousState: initial
+                        ),
+                        constraint: nil
+                    )
+                ]
+            ),
+            // MARK: (R(fsm1), (25, exit, exit), (25, exit, initial))
+            kripkeState(
+                executing: fsm1Name,
+                readState: true,
+                fsm1: (
+                    value: 25,
+                    currentState: exit,
+                    previousState: exit
+                ),
+                fsm2: (
+                    value: 25,
+                    currentState: exit,
+                    previousState: initial
+                ),
+                targets: [
+                    target(
+                        executing: fsm1Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm1.duration,
+                        fsm1: (
+                            value: 25,
+                            currentState: exit,
+                            previousState: exit
+                        ),
+                        fsm2: (
+                            value: 25,
+                            currentState: exit,
+                            previousState: initial
+                        ),
+                        constraint: nil
+                    )
+                ]
+            ),
+            // MARK: - (R(fsm2), (0, initial, initial), (15, exit, exit))
+            kripkeState(
+                executing: fsm2Name,
+                readState: true,
+                fsm1: (
+                    value: 0,
+                    currentState: initial,
+                    previousState: initial
+                ),
+                fsm2: (
+                    value: 15,
+                    currentState: exit,
+                    previousState: exit
+                ),
+                targets: [
+                    target(
+                        executing: fsm2Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm2.duration,
+                        fsm1: (
+                            value: 0,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 15,
+                            currentState: exit,
+                            previousState: exit
+                        ),
+                        constraint: nil
+                    ),
+                ]
+            ),
+            // MARK: (R(fsm2), (5, initial, initial), (15, exit, exit))
+            kripkeState(
+                executing: fsm2Name,
+                readState: true,
+                fsm1: (
+                    value: 5,
+                    currentState: initial,
+                    previousState: initial
+                ),
+                fsm2: (
+                    value: 15,
+                    currentState: exit,
+                    previousState: exit
+                ),
+                targets: [
+                    target(
+                        executing: fsm2Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm2.duration,
+                        fsm1: (
+                            value: 5,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 15,
+                            currentState: exit,
+                            previousState: exit
+                        ),
+                        constraint: nil
+                    )
+                ]
+            ),
+            // MARK: (R(fsm2), (15, initial, initial), (15, exit, exit))
+            kripkeState(
+                executing: fsm2Name,
+                readState: true,
+                fsm1: (
+                    value: 15,
+                    currentState: initial,
+                    previousState: initial
+                ),
+                fsm2: (
+                    value: 15,
+                    currentState: exit,
+                    previousState: exit
+                ),
+                targets: [
+                    target(
+                        executing: fsm2Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm2.duration,
+                        fsm1: (
+                            value: 15,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 15,
+                            currentState: exit,
+                            previousState: exit
+                        ),
+                        constraint: nil
+                    )
+                ]
+            ),
+            // MARK: (R(fsm2), (15, exit, initial), (15, exit, exit))
+            kripkeState(
+                executing: fsm2Name,
+                readState: true,
+                fsm1: (
+                    value: 15,
+                    currentState: exit,
+                    previousState: initial
+                ),
+                fsm2: (
+                    value: 15,
+                    currentState: exit,
+                    previousState: exit
+                ),
+                targets: [
+                    target(
+                        executing: fsm2Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm2.duration,
+                        fsm1: (
+                            value: 15,
+                            currentState: exit,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 15,
+                            currentState: exit,
+                            previousState: exit
+                        ),
+                        constraint: nil
+                    )
+                ]
+            ),
+            // MARK: (R(fsm2), (25, exit, initial), (15, exit, exit))
+            kripkeState(
+                executing: fsm2Name,
+                readState: true,
+                fsm1: (
+                    value: 25,
+                    currentState: exit,
+                    previousState: initial
+                ),
+                fsm2: (
+                    value: 15,
+                    currentState: exit,
+                    previousState: exit
+                ),
+                targets: [
+                    target(
+                        executing: fsm2Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm2.duration,
+                        fsm1: (
+                            value: 25,
+                            currentState: exit,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 15,
+                            currentState: exit,
+                            previousState: exit
+                        ),
+                        constraint: nil
+                    )
+                ]
+            ),
+            // MARK: - (R(fsm2), (0, initial, initial), (25, exit, exit))
+            kripkeState(
+                executing: fsm2Name,
+                readState: true,
+                fsm1: (
+                    value: 0,
+                    currentState: initial,
+                    previousState: initial
+                ),
+                fsm2: (
+                    value: 25,
+                    currentState: exit,
+                    previousState: exit
+                ),
+                targets: [
+                    target(
+                        executing: fsm2Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm2.duration,
+                        fsm1: (
+                            value: 0,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 25,
+                            currentState: exit,
+                            previousState: exit
+                        ),
+                        constraint: nil
+                    ),
+                ]
+            ),
+            // MARK: (R(fsm2), (5, initial, initial), (25, exit, exit))
+            kripkeState(
+                executing: fsm2Name,
+                readState: true,
+                fsm1: (
+                    value: 5,
+                    currentState: initial,
+                    previousState: initial
+                ),
+                fsm2: (
+                    value: 25,
+                    currentState: exit,
+                    previousState: exit
+                ),
+                targets: [
+                    target(
+                        executing: fsm2Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm2.duration,
+                        fsm1: (
+                            value: 5,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 25,
+                            currentState: exit,
+                            previousState: exit
+                        ),
+                        constraint: nil
+                    )
+                ]
+            ),
+            // MARK: (R(fsm2), (15, initial, initial), (25, exit, exit))
+            kripkeState(
+                executing: fsm2Name,
+                readState: true,
+                fsm1: (
+                    value: 15,
+                    currentState: initial,
+                    previousState: initial
+                ),
+                fsm2: (
+                    value: 25,
+                    currentState: exit,
+                    previousState: exit
+                ),
+                targets: [
+                    target(
+                        executing: fsm2Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm2.duration,
+                        fsm1: (
+                            value: 15,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 25,
+                            currentState: exit,
+                            previousState: exit
+                        ),
+                        constraint: nil
+                    )
+                ]
+            ),
+            // MARK: (R(fsm2), (15, exit, initial), (25, exit, exit))
+            kripkeState(
+                executing: fsm2Name,
+                readState: true,
+                fsm1: (
+                    value: 15,
+                    currentState: exit,
+                    previousState: initial
+                ),
+                fsm2: (
+                    value: 25,
+                    currentState: exit,
+                    previousState: exit
+                ),
+                targets: [
+                    target(
+                        executing: fsm2Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm2.duration,
+                        fsm1: (
+                            value: 15,
+                            currentState: exit,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 25,
+                            currentState: exit,
+                            previousState: exit
+                        ),
+                        constraint: nil
+                    )
+                ]
+            ),
+            // MARK: (R(fsm2), (25, exit, initial), (25, exit, exit))
+            kripkeState(
+                executing: fsm2Name,
+                readState: true,
+                fsm1: (
+                    value: 25,
+                    currentState: exit,
+                    previousState: initial
+                ),
+                fsm2: (
+                    value: 25,
+                    currentState: exit,
+                    previousState: exit
+                ),
+                targets: [
+                    target(
+                        executing: fsm2Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm2.duration,
+                        fsm1: (
+                            value: 25,
+                            currentState: exit,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 25,
+                            currentState: exit,
+                            previousState: exit
+                        ),
+                        constraint: nil
+                    )
+                ]
+            ),
+            // MARK: - (R(fsm1), (0, initial, initial), (15, exit, exit))
+            kripkeState(
+                executing: fsm1Name,
+                readState: true,
+                fsm1: (
+                    value: 0,
+                    currentState: initial,
+                    previousState: initial
+                ),
+                fsm2: (
+                    value: 15,
+                    currentState: exit,
+                    previousState: exit
+                ),
+                targets: [
+                    target(
+                        executing: fsm1Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm1.duration,
+                        fsm1: (
+                            value: 0,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 15,
+                            currentState: exit,
+                            previousState: exit
+                        ),
+                        constraint: .lessThanEqual(value: 5000)
+                    ),
+                    target(
+                        executing: fsm1Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm1.duration,
+                        fsm1: (
+                            value: 5,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 15,
+                            currentState: exit,
+                            previousState: exit
+                        ),
+                        constraint: .and(lhs: .greaterThan(value: 5000), rhs: .lessThanEqual(value: 15000))
+                    ),
+                    target(
+                        executing: fsm1Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm1.duration,
+                        fsm1: (
+                            value: 15,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 15,
+                            currentState: exit,
+                            previousState: exit
+                        ),
+                        constraint: .and(lhs: .greaterThan(value: 15000), rhs: .lessThanEqual(value: 20000))
+                    ),
+                    target(
+                        executing: fsm1Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm1.duration,
+                        fsm1: (
+                            value: 15,
+                            currentState: exit,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 15,
+                            currentState: exit,
+                            previousState: exit
+                        ),
+                        constraint: .and(lhs: .greaterThan(value: 20000), rhs: .lessThanEqual(value: 25000))
+                    ),
+                    target(
+                        executing: fsm1Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm1.duration,
+                        fsm1: (
+                            value: 25,
+                            currentState: exit,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 15,
+                            currentState: exit,
+                            previousState: exit
+                        ),
+                        constraint: .greaterThan(value: 25000)
+                    )
+                ]
+            ),
+            // MARK: (R(fsm1), (0, initial, initial), (25, exit, exit))
+            kripkeState(
+                executing: fsm1Name,
+                readState: true,
+                fsm1: (
+                    value: 0,
+                    currentState: initial,
+                    previousState: initial
+                ),
+                fsm2: (
+                    value: 25,
+                    currentState: exit,
+                    previousState: exit
+                ),
+                targets: [
+                    target(
+                        executing: fsm1Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm1.duration,
+                        fsm1: (
+                            value: 0,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 25,
+                            currentState: exit,
+                            previousState: exit
+                        ),
+                        constraint: .lessThanEqual(value: 5000)
+                    ),
+                    target(
+                        executing: fsm1Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm1.duration,
+                        fsm1: (
+                            value: 5,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 25,
+                            currentState: exit,
+                            previousState: exit
+                        ),
+                        constraint: .and(lhs: .greaterThan(value: 5000), rhs: .lessThanEqual(value: 15000))
+                    ),
+                    target(
+                        executing: fsm1Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm1.duration,
+                        fsm1: (
+                            value: 15,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 25,
+                            currentState: exit,
+                            previousState: exit
+                        ),
+                        constraint: .and(lhs: .greaterThan(value: 15000), rhs: .lessThanEqual(value: 20000))
+                    ),
+                    target(
+                        executing: fsm1Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm1.duration,
+                        fsm1: (
+                            value: 15,
+                            currentState: exit,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 25,
+                            currentState: exit,
+                            previousState: exit
+                        ),
+                        constraint: .and(lhs: .greaterThan(value: 20000), rhs: .lessThanEqual(value: 25000))
+                    ),
+                    target(
+                        executing: fsm1Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm1.duration,
+                        fsm1: (
+                            value: 25,
+                            currentState: exit,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 25,
+                            currentState: exit,
+                            previousState: exit
+                        ),
+                        constraint: .greaterThan(value: 25000)
+                    )
+                ]
+            ),
+            // MARK: - (R(fsm1), (5, initial, initial), (15, exit, exit))
+            kripkeState(
+                executing: fsm1Name,
+                readState: true,
+                fsm1: (
+                    value: 5,
+                    currentState: initial,
+                    previousState: initial
+                ),
+                fsm2: (
+                    value: 15,
+                    currentState: exit,
+                    previousState: exit
+                ),
+                targets: [
+                    target(
+                        executing: fsm1Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm1.duration,
+                        fsm1: (
+                            value: 0,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 15,
+                            currentState: exit,
+                            previousState: exit
+                        ),
+                        constraint: .lessThanEqual(value: 5000)
+                    ),
+                    target(
+                        executing: fsm1Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm1.duration,
+                        fsm1: (
+                            value: 5,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 15,
+                            currentState: exit,
+                            previousState: exit
+                        ),
+                        constraint: .and(lhs: .greaterThan(value: 5000), rhs: .lessThanEqual(value: 15000))
+                    ),
+                    target(
+                        executing: fsm1Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm1.duration,
+                        fsm1: (
+                            value: 15,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 15,
+                            currentState: exit,
+                            previousState: exit
+                        ),
+                        constraint: .and(lhs: .greaterThan(value: 15000), rhs: .lessThanEqual(value: 20000))
+                    ),
+                    target(
+                        executing: fsm1Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm1.duration,
+                        fsm1: (
+                            value: 15,
+                            currentState: exit,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 15,
+                            currentState: exit,
+                            previousState: exit
+                        ),
+                        constraint: .and(lhs: .greaterThan(value: 20000), rhs: .lessThanEqual(value: 25000))
+                    ),
+                    target(
+                        executing: fsm1Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm1.duration,
+                        fsm1: (
+                            value: 25,
+                            currentState: exit,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 15,
+                            currentState: exit,
+                            previousState: exit
+                        ),
+                        constraint: .greaterThan(value: 25000)
+                    )
+                ]
+            ),
+            // MARK: (R(fsm1), (5, initial, initial), (25, exit, exit))
+            kripkeState(
+                executing: fsm1Name,
+                readState: true,
+                fsm1: (
+                    value: 5,
+                    currentState: initial,
+                    previousState: initial
+                ),
+                fsm2: (
+                    value: 25,
+                    currentState: exit,
+                    previousState: exit
+                ),
+                targets: [
+                    target(
+                        executing: fsm1Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm1.duration,
+                        fsm1: (
+                            value: 0,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 25,
+                            currentState: exit,
+                            previousState: exit
+                        ),
+                        constraint: .lessThanEqual(value: 5000)
+                    ),
+                    target(
+                        executing: fsm1Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm1.duration,
+                        fsm1: (
+                            value: 5,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 25,
+                            currentState: exit,
+                            previousState: exit
+                        ),
+                        constraint: .and(lhs: .greaterThan(value: 5000), rhs: .lessThanEqual(value: 15000))
+                    ),
+                    target(
+                        executing: fsm1Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm1.duration,
+                        fsm1: (
+                            value: 15,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 25,
+                            currentState: exit,
+                            previousState: exit
+                        ),
+                        constraint: .and(lhs: .greaterThan(value: 15000), rhs: .lessThanEqual(value: 20000))
+                    ),
+                    target(
+                        executing: fsm1Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm1.duration,
+                        fsm1: (
+                            value: 15,
+                            currentState: exit,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 25,
+                            currentState: exit,
+                            previousState: exit
+                        ),
+                        constraint: .and(lhs: .greaterThan(value: 20000), rhs: .lessThanEqual(value: 25000))
+                    ),
+                    target(
+                        executing: fsm1Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm1.duration,
+                        fsm1: (
+                            value: 25,
+                            currentState: exit,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 25,
+                            currentState: exit,
+                            previousState: exit
+                        ),
+                        constraint: .greaterThan(value: 25000)
+                    )
+                ]
+            ),
+            // MARK: - (R(fsm1), (15, initial, initial), (15, exit, exit))
+            kripkeState(
+                executing: fsm1Name,
+                readState: true,
+                fsm1: (
+                    value: 15,
+                    currentState: initial,
+                    previousState: initial
+                ),
+                fsm2: (
+                    value: 15,
+                    currentState: exit,
+                    previousState: exit
+                ),
+                targets: [
+                    target(
+                        executing: fsm1Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm1.duration,
+                        fsm1: (
+                            value: 0,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 15,
+                            currentState: exit,
+                            previousState: exit
+                        ),
+                        constraint: .lessThanEqual(value: 5000)
+                    ),
+                    target(
+                        executing: fsm1Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm1.duration,
+                        fsm1: (
+                            value: 5,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 15,
+                            currentState: exit,
+                            previousState: exit
+                        ),
+                        constraint: .and(lhs: .greaterThan(value: 5000), rhs: .lessThanEqual(value: 15000))
+                    ),
+                    target(
+                        executing: fsm1Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm1.duration,
+                        fsm1: (
+                            value: 15,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 15,
+                            currentState: exit,
+                            previousState: exit
+                        ),
+                        constraint: .and(lhs: .greaterThan(value: 15000), rhs: .lessThanEqual(value: 20000))
+                    ),
+                    target(
+                        executing: fsm1Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm1.duration,
+                        fsm1: (
+                            value: 15,
+                            currentState: exit,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 15,
+                            currentState: exit,
+                            previousState: exit
+                        ),
+                        constraint: .and(lhs: .greaterThan(value: 20000), rhs: .lessThanEqual(value: 25000))
+                    ),
+                    target(
+                        executing: fsm1Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm1.duration,
+                        fsm1: (
+                            value: 25,
+                            currentState: exit,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 15,
+                            currentState: exit,
+                            previousState: exit
+                        ),
+                        constraint: .greaterThan(value: 25000)
+                    )
+                ]
+            ),
+            // MARK: (R(fsm1), (15, initial, initial), (25, exit, exit))
+            kripkeState(
+                executing: fsm1Name,
+                readState: true,
+                fsm1: (
+                    value: 15,
+                    currentState: initial,
+                    previousState: initial
+                ),
+                fsm2: (
+                    value: 25,
+                    currentState: exit,
+                    previousState: exit
+                ),
+                targets: [
+                    target(
+                        executing: fsm1Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm1.duration,
+                        fsm1: (
+                            value: 0,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 25,
+                            currentState: exit,
+                            previousState: exit
+                        ),
+                        constraint: .lessThanEqual(value: 5000)
+                    ),
+                    target(
+                        executing: fsm1Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm1.duration,
+                        fsm1: (
+                            value: 5,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 25,
+                            currentState: exit,
+                            previousState: exit
+                        ),
+                        constraint: .and(lhs: .greaterThan(value: 5000), rhs: .lessThanEqual(value: 15000))
+                    ),
+                    target(
+                        executing: fsm1Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm1.duration,
+                        fsm1: (
+                            value: 15,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 25,
+                            currentState: exit,
+                            previousState: exit
+                        ),
+                        constraint: .and(lhs: .greaterThan(value: 15000), rhs: .lessThanEqual(value: 20000))
+                    ),
+                    target(
+                        executing: fsm1Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm1.duration,
+                        fsm1: (
+                            value: 15,
+                            currentState: exit,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 25,
+                            currentState: exit,
+                            previousState: exit
+                        ),
+                        constraint: .and(lhs: .greaterThan(value: 20000), rhs: .lessThanEqual(value: 25000))
+                    ),
+                    target(
+                        executing: fsm1Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm1.duration,
+                        fsm1: (
+                            value: 25,
+                            currentState: exit,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 25,
+                            currentState: exit,
+                            previousState: exit
+                        ),
+                        constraint: .greaterThan(value: 25000)
+                    )
+                ]
+            ),
+            // MARK: - (R(fsm1), (15, exit, initial), (15, exit, exit))
+            kripkeState(
+                executing: fsm1Name,
+                readState: true,
+                fsm1: (
+                    value: 15,
+                    currentState: exit,
+                    previousState: initial
+                ),
+                fsm2: (
+                    value: 15,
+                    currentState: exit,
+                    previousState: exit
+                ),
+                targets: [
+                    target(
+                        executing: fsm1Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm1.duration,
+                        fsm1: (
+                            value: 15,
+                            currentState: exit,
+                            previousState: exit
+                        ),
+                        fsm2: (
+                            value: 15,
+                            currentState: exit,
+                            previousState: exit
+                        ),
+                        constraint: nil
+                    )
+                ]
+            ),
+            // MARK: (R(fsm1), (15, exit, initial), (25, exit, exit))
+            kripkeState(
+                executing: fsm1Name,
+                readState: true,
+                fsm1: (
+                    value: 15,
+                    currentState: exit,
+                    previousState: initial
+                ),
+                fsm2: (
+                    value: 25,
+                    currentState: exit,
+                    previousState: exit
+                ),
+                targets: [
+                    target(
+                        executing: fsm1Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm1.duration,
+                        fsm1: (
+                            value: 15,
+                            currentState: exit,
+                            previousState: exit
+                        ),
+                        fsm2: (
+                            value: 25,
+                            currentState: exit,
+                            previousState: exit
+                        ),
+                        constraint: nil
+                    )
+                ]
+            ),
+            // MARK: - (R(fsm1), (25, exit, initial), (15, exit, exit))
+            kripkeState(
+                executing: fsm1Name,
+                readState: true,
+                fsm1: (
+                    value: 25,
+                    currentState: exit,
+                    previousState: initial
+                ),
+                fsm2: (
+                    value: 15,
+                    currentState: exit,
+                    previousState: exit
+                ),
+                targets: [
+                    target(
+                        executing: fsm1Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm1.duration,
+                        fsm1: (
+                            value: 25,
+                            currentState: exit,
+                            previousState: exit
+                        ),
+                        fsm2: (
+                            value: 15,
+                            currentState: exit,
+                            previousState: exit
+                        ),
+                        constraint: nil
+                    )
+                ]
+            ),
+            // MARK: (R(fsm1), (25, exit, initial), (25, exit, exit))
+            kripkeState(
+                executing: fsm1Name,
+                readState: true,
+                fsm1: (
+                    value: 25,
+                    currentState: exit,
+                    previousState: initial
+                ),
+                fsm2: (
+                    value: 25,
+                    currentState: exit,
+                    previousState: exit
+                ),
+                targets: [
+                    target(
+                        executing: fsm1Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm1.duration,
+                        fsm1: (
+                            value: 25,
+                            currentState: exit,
+                            previousState: exit
+                        ),
+                        fsm2: (
+                            value: 25,
+                            currentState: exit,
+                            previousState: exit
+                        ),
+                        constraint: nil
+                    )
+                ]
+            ),
+            // MARK: - (R(fsm2), (15, exit, exit), (0, initial, initial))
+            kripkeState(
+                executing: fsm2Name,
+                readState: true,
+                fsm1: (
+                    value: 15,
+                    currentState: exit,
+                    previousState: exit
+                ),
+                fsm2: (
+                    value: 0,
+                    currentState: initial,
+                    previousState: initial
+                ),
+                targets: [
+                    target(
+                        executing: fsm2Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm2.duration,
+                        fsm1: (
+                            value: 15,
+                            currentState: exit,
+                            previousState: exit
+                        ),
+                        fsm2: (
+                            value: 0,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        constraint: .lessThanEqual(value: 5000)
+                    ),
+                    target(
+                        executing: fsm2Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm2.duration,
+                        fsm1: (
+                            value: 15,
+                            currentState: exit,
+                            previousState: exit
+                        ),
+                        fsm2: (
+                            value: 5,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        constraint: .and(lhs: .greaterThan(value: 5000), rhs: .lessThanEqual(value: 15000))
+                    ),
+                    target(
+                        executing: fsm2Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm2.duration,
+                        fsm1: (
+                            value: 15,
+                            currentState: exit,
+                            previousState: exit
+                        ),
+                        fsm2: (
+                            value: 15,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        constraint: .and(lhs: .greaterThan(value: 15000), rhs: .lessThanEqual(value: 20000))
+                    ),
+                    target(
+                        executing: fsm2Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm2.duration,
+                        fsm1: (
+                            value: 15,
+                            currentState: exit,
+                            previousState: exit
+                        ),
+                        fsm2: (
+                            value: 15,
+                            currentState: exit,
+                            previousState: initial
+                        ),
+                        constraint: .and(lhs: .greaterThan(value: 20000), rhs: .lessThanEqual(value: 25000))
+                    ),
+                    target(
+                        executing: fsm2Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm2.duration,
+                        fsm1: (
+                            value: 15,
+                            currentState: exit,
+                            previousState: exit
+                        ),
+                        fsm2: (
+                            value: 25,
+                            currentState: exit,
+                            previousState: initial
+                        ),
+                        constraint: .greaterThan(value: 25000)
+                    )
+                ]
+            ),
+            // MARK: (R(fsm2), (25, exit, exit), (0, initial, initial))
+            kripkeState(
+                executing: fsm2Name,
+                readState: true,
+                fsm1: (
+                    value: 25,
+                    currentState: exit,
+                    previousState: exit
+                ),
+                fsm2: (
+                    value: 0,
+                    currentState: initial,
+                    previousState: initial
+                ),
+                targets: [
+                    target(
+                        executing: fsm2Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm2.duration,
+                        fsm1: (
+                            value: 25,
+                            currentState: exit,
+                            previousState: exit
+                        ),
+                        fsm2: (
+                            value: 0,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        constraint: .lessThanEqual(value: 5000)
+                    ),
+                    target(
+                        executing: fsm2Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm2.duration,
+                        fsm1: (
+                            value: 25,
+                            currentState: exit,
+                            previousState: exit
+                        ),
+                        fsm2: (
+                            value: 5,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        constraint: .and(lhs: .greaterThan(value: 5000), rhs: .lessThanEqual(value: 15000))
+                    ),
+                    target(
+                        executing: fsm2Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm2.duration,
+                        fsm1: (
+                            value: 25,
+                            currentState: exit,
+                            previousState: exit
+                        ),
+                        fsm2: (
+                            value: 15,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        constraint: .and(lhs: .greaterThan(value: 15000), rhs: .lessThanEqual(value: 20000))
+                    ),
+                    target(
+                        executing: fsm2Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm2.duration,
+                        fsm1: (
+                            value: 25,
+                            currentState: exit,
+                            previousState: exit
+                        ),
+                        fsm2: (
+                            value: 15,
+                            currentState: exit,
+                            previousState: initial
+                        ),
+                        constraint: .and(lhs: .greaterThan(value: 20000), rhs: .lessThanEqual(value: 25000))
+                    ),
+                    target(
+                        executing: fsm2Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm2.duration,
+                        fsm1: (
+                            value: 25,
+                            currentState: exit,
+                            previousState: exit
+                        ),
+                        fsm2: (
+                            value: 25,
+                            currentState: exit,
+                            previousState: initial
+                        ),
+                        constraint: .greaterThan(value: 25000)
+                    )
+                ]
+            ),
+            // MARK: - (R(fsm2), (15, exit, exit), (5, initial, initial))
+            kripkeState(
+                executing: fsm2Name,
+                readState: true,
+                fsm1: (
+                    value: 15,
+                    currentState: exit,
+                    previousState: exit
+                ),
+                fsm2: (
+                    value: 5,
+                    currentState: initial,
+                    previousState: initial
+                ),
+                targets: [
+                    target(
+                        executing: fsm2Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm2.duration,
+                        fsm1: (
+                            value: 15,
+                            currentState: exit,
+                            previousState: exit
+                        ),
+                        fsm2: (
+                            value: 0,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        constraint: .lessThanEqual(value: 5000)
+                    ),
+                    target(
+                        executing: fsm2Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm2.duration,
+                        fsm1: (
+                            value: 15,
+                            currentState: exit,
+                            previousState: exit
+                        ),
+                        fsm2: (
+                            value: 5,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        constraint: .and(lhs: .greaterThan(value: 5000), rhs: .lessThanEqual(value: 15000))
+                    ),
+                    target(
+                        executing: fsm2Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm2.duration,
+                        fsm1: (
+                            value: 15,
+                            currentState: exit,
+                            previousState: exit
+                        ),
+                        fsm2: (
+                            value: 15,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        constraint: .and(lhs: .greaterThan(value: 15000), rhs: .lessThanEqual(value: 20000))
+                    ),
+                    target(
+                        executing: fsm2Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm2.duration,
+                        fsm1: (
+                            value: 15,
+                            currentState: exit,
+                            previousState: exit
+                        ),
+                        fsm2: (
+                            value: 15,
+                            currentState: exit,
+                            previousState: initial
+                        ),
+                        constraint: .and(lhs: .greaterThan(value: 20000), rhs: .lessThanEqual(value: 25000))
+                    ),
+                    target(
+                        executing: fsm2Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm2.duration,
+                        fsm1: (
+                            value: 15,
+                            currentState: exit,
+                            previousState: exit
+                        ),
+                        fsm2: (
+                            value: 25,
+                            currentState: exit,
+                            previousState: initial
+                        ),
+                        constraint: .greaterThan(value: 25000)
+                    )
+                ]
+            ),
+            // MARK: (R(fsm2), (25, exit, exit), (5, initial, initial))
+            kripkeState(
+                executing: fsm2Name,
+                readState: true,
+                fsm1: (
+                    value: 25,
+                    currentState: exit,
+                    previousState: exit
+                ),
+                fsm2: (
+                    value: 5,
+                    currentState: initial,
+                    previousState: initial
+                ),
+                targets: [
+                    target(
+                        executing: fsm2Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm2.duration,
+                        fsm1: (
+                            value: 25,
+                            currentState: exit,
+                            previousState: exit
+                        ),
+                        fsm2: (
+                            value: 0,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        constraint: .lessThanEqual(value: 5000)
+                    ),
+                    target(
+                        executing: fsm2Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm2.duration,
+                        fsm1: (
+                            value: 25,
+                            currentState: exit,
+                            previousState: exit
+                        ),
+                        fsm2: (
+                            value: 5,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        constraint: .and(lhs: .greaterThan(value: 5000), rhs: .lessThanEqual(value: 15000))
+                    ),
+                    target(
+                        executing: fsm2Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm2.duration,
+                        fsm1: (
+                            value: 25,
+                            currentState: exit,
+                            previousState: exit
+                        ),
+                        fsm2: (
+                            value: 15,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        constraint: .and(lhs: .greaterThan(value: 15000), rhs: .lessThanEqual(value: 20000))
+                    ),
+                    target(
+                        executing: fsm2Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm2.duration,
+                        fsm1: (
+                            value: 25,
+                            currentState: exit,
+                            previousState: exit
+                        ),
+                        fsm2: (
+                            value: 15,
+                            currentState: exit,
+                            previousState: initial
+                        ),
+                        constraint: .and(lhs: .greaterThan(value: 20000), rhs: .lessThanEqual(value: 25000))
+                    ),
+                    target(
+                        executing: fsm2Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm2.duration,
+                        fsm1: (
+                            value: 25,
+                            currentState: exit,
+                            previousState: exit
+                        ),
+                        fsm2: (
+                            value: 25,
+                            currentState: exit,
+                            previousState: initial
+                        ),
+                        constraint: .greaterThan(value: 25000)
+                    )
+                ]
+            ),
+            // MARK: - (R(fsm2), (15, exit, exit), (15, initial, initial))
+            kripkeState(
+                executing: fsm2Name,
+                readState: true,
+                fsm1: (
+                    value: 15,
+                    currentState: exit,
+                    previousState: exit
+                ),
+                fsm2: (
+                    value: 15,
+                    currentState: initial,
+                    previousState: initial
+                ),
+                targets: [
+                    target(
+                        executing: fsm2Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm2.duration,
+                        fsm1: (
+                            value: 15,
+                            currentState: exit,
+                            previousState: exit
+                        ),
+                        fsm2: (
+                            value: 0,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        constraint: .lessThanEqual(value: 5000)
+                    ),
+                    target(
+                        executing: fsm2Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm2.duration,
+                        fsm1: (
+                            value: 15,
+                            currentState: exit,
+                            previousState: exit
+                        ),
+                        fsm2: (
+                            value: 5,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        constraint: .and(lhs: .greaterThan(value: 5000), rhs: .lessThanEqual(value: 15000))
+                    ),
+                    target(
+                        executing: fsm2Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm2.duration,
+                        fsm1: (
+                            value: 15,
+                            currentState: exit,
+                            previousState: exit
+                        ),
+                        fsm2: (
+                            value: 15,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        constraint: .and(lhs: .greaterThan(value: 15000), rhs: .lessThanEqual(value: 20000))
+                    ),
+                    target(
+                        executing: fsm2Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm2.duration,
+                        fsm1: (
+                            value: 15,
+                            currentState: exit,
+                            previousState: exit
+                        ),
+                        fsm2: (
+                            value: 15,
+                            currentState: exit,
+                            previousState: initial
+                        ),
+                        constraint: .and(lhs: .greaterThan(value: 20000), rhs: .lessThanEqual(value: 25000))
+                    ),
+                    target(
+                        executing: fsm2Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm2.duration,
+                        fsm1: (
+                            value: 15,
+                            currentState: exit,
+                            previousState: exit
+                        ),
+                        fsm2: (
+                            value: 25,
+                            currentState: exit,
+                            previousState: initial
+                        ),
+                        constraint: .greaterThan(value: 25000)
+                    )
+                ]
+            ),
+            // MARK: (R(fsm2), (25, exit, exit), (15, initial, initial))
+            kripkeState(
+                executing: fsm2Name,
+                readState: true,
+                fsm1: (
+                    value: 25,
+                    currentState: exit,
+                    previousState: exit
+                ),
+                fsm2: (
+                    value: 15,
+                    currentState: initial,
+                    previousState: initial
+                ),
+                targets: [
+                    target(
+                        executing: fsm2Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm2.duration,
+                        fsm1: (
+                            value: 25,
+                            currentState: exit,
+                            previousState: exit
+                        ),
+                        fsm2: (
+                            value: 0,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        constraint: .lessThanEqual(value: 5000)
+                    ),
+                    target(
+                        executing: fsm2Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm2.duration,
+                        fsm1: (
+                            value: 25,
+                            currentState: exit,
+                            previousState: exit
+                        ),
+                        fsm2: (
+                            value: 5,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        constraint: .and(lhs: .greaterThan(value: 5000), rhs: .lessThanEqual(value: 15000))
+                    ),
+                    target(
+                        executing: fsm2Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm2.duration,
+                        fsm1: (
+                            value: 25,
+                            currentState: exit,
+                            previousState: exit
+                        ),
+                        fsm2: (
+                            value: 15,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        constraint: .and(lhs: .greaterThan(value: 15000), rhs: .lessThanEqual(value: 20000))
+                    ),
+                    target(
+                        executing: fsm2Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm2.duration,
+                        fsm1: (
+                            value: 25,
+                            currentState: exit,
+                            previousState: exit
+                        ),
+                        fsm2: (
+                            value: 15,
+                            currentState: exit,
+                            previousState: initial
+                        ),
+                        constraint: .and(lhs: .greaterThan(value: 20000), rhs: .lessThanEqual(value: 25000))
+                    ),
+                    target(
+                        executing: fsm2Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm2.duration,
+                        fsm1: (
+                            value: 25,
+                            currentState: exit,
+                            previousState: exit
+                        ),
+                        fsm2: (
+                            value: 25,
+                            currentState: exit,
+                            previousState: initial
+                        ),
+                        constraint: .greaterThan(value: 25000)
+                    )
+                ]
+            ),
+            // MARK: - (R(fsm2), (15, exit, exit), (15, exit, initial))
+            kripkeState(
+                executing: fsm2Name,
+                readState: true,
+                fsm1: (
+                    value: 15,
+                    currentState: exit,
+                    previousState: exit
+                ),
+                fsm2: (
+                    value: 15,
+                    currentState: exit,
+                    previousState: initial
+                ),
+                targets: [
+                    target(
+                        executing: fsm2Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm2.duration,
+                        fsm1: (
+                            value: 15,
+                            currentState: exit,
+                            previousState: exit
+                        ),
+                        fsm2: (
+                            value: 15,
+                            currentState: exit,
+                            previousState: exit
+                        ),
+                        constraint: nil
+                    )
+                ]
+            ),
+            // MARK: (R(fsm2), (25, exit, exit), (15, exit, initial))
+            kripkeState(
+                executing: fsm2Name,
+                readState: true,
+                fsm1: (
+                    value: 25,
+                    currentState: exit,
+                    previousState: exit
+                ),
+                fsm2: (
+                    value: 15,
+                    currentState: exit,
+                    previousState: initial
+                ),
+                targets: [
+                    target(
+                        executing: fsm2Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm2.duration,
+                        fsm1: (
+                            value: 25,
+                            currentState: exit,
+                            previousState: exit
+                        ),
+                        fsm2: (
+                            value: 15,
+                            currentState: exit,
+                            previousState: exit
+                        ),
+                        constraint: nil
+                    )
+                ]
+            ),
+            // MARK: - (R(fsm2), (15, exit, exit), (25, exit, initial))
+            kripkeState(
+                executing: fsm2Name,
+                readState: true,
+                fsm1: (
+                    value: 15,
+                    currentState: exit,
+                    previousState: exit
+                ),
+                fsm2: (
+                    value: 25,
+                    currentState: exit,
+                    previousState: initial
+                ),
+                targets: [
+                    target(
+                        executing: fsm2Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm2.duration,
+                        fsm1: (
+                            value: 15,
+                            currentState: exit,
+                            previousState: exit
+                        ),
+                        fsm2: (
+                            value: 25,
+                            currentState: exit,
+                            previousState: exit
+                        ),
+                        constraint: nil
+                    )
+                ]
+            ),
+            // MARK: (R(fsm2), (25, exit, exit), (25, exit, initial))
+            kripkeState(
+                executing: fsm2Name,
+                readState: true,
+                fsm1: (
+                    value: 25,
+                    currentState: exit,
+                    previousState: exit
+                ),
+                fsm2: (
+                    value: 25,
+                    currentState: exit,
+                    previousState: initial
+                ),
+                targets: [
+                    target(
+                        executing: fsm2Name,
+                        readState: false,
+                        resetClock: false,
+                        duration: fsm2.duration,
+                        fsm1: (
+                            value: 25,
+                            currentState: exit,
+                            previousState: exit
+                        ),
+                        fsm2: (
+                            value: 25,
+                            currentState: exit,
+                            previousState: exit
+                        ),
+                        constraint: nil
+                    )
+                ]
+            ),
+            // MARK: - (W(fsm1) (*, initial|exit, initial), (0, initial, previous))
             kripkeState(
                 executing: fsm1Name,
                 readState: false,
@@ -809,107 +7237,7 @@ struct TimedKripkeStructure: KripkeStructureProtocol {
                     )
                 ]
             ),
-            kripkeState(
-                executing: fsm2Name,
-                readState: true,
-                fsm1: (
-                    value: 0,
-                    currentState: initial,
-                    previousState: initial
-                ),
-                fsm2: (
-                    value: 0,
-                    currentState: initial,
-                    previousState: previous
-                ),
-                targets: [
-                    target(
-                        executing: fsm2Name,
-                        readState: false,
-                        resetClock: false,
-                        duration: fsm2.duration,
-                        fsm1: (
-                            value: 0,
-                            currentState: initial,
-                            previousState: initial
-                        ),
-                        fsm2: (
-                            value: 0,
-                            currentState: initial,
-                            previousState: initial
-                        ),
-                        constraint: .lessThanEqual(value: 5000)
-                    ),
-                    target(
-                        executing: fsm2Name,
-                        readState: false,
-                        resetClock: false,
-                        duration: fsm2.duration,
-                        fsm1: (
-                            value: 0,
-                            currentState: initial,
-                            previousState: initial
-                        ),
-                        fsm2: (
-                            value: 5,
-                            currentState: initial,
-                            previousState: initial
-                        ),
-                        constraint: .and(lhs: .greaterThan(value: 5000), rhs: .lessThanEqual(value: 15000))
-                    ),
-                    target(
-                        executing: fsm2Name,
-                        readState: false,
-                        resetClock: false,
-                        duration: fsm2.duration,
-                        fsm1: (
-                            value: 0,
-                            currentState: initial,
-                            previousState: initial
-                        ),
-                        fsm2: (
-                            value: 15,
-                            currentState: initial,
-                            previousState: initial
-                        ),
-                        constraint: .and(lhs: .greaterThan(value: 15000), rhs: .lessThanEqual(value: 20000))
-                    ),
-                    target(
-                        executing: fsm2Name,
-                        readState: false,
-                        resetClock: false,
-                        duration: fsm2.duration,
-                        fsm1: (
-                            value: 0,
-                            currentState: initial,
-                            previousState: initial
-                        ),
-                        fsm2: (
-                            value: 15,
-                            currentState: exit,
-                            previousState: initial
-                        ),
-                        constraint: .and(lhs: .greaterThan(value: 20000), rhs: .lessThanEqual(value: 25000))
-                    ),
-                    target(
-                        executing: fsm2Name,
-                        readState: false,
-                        resetClock: false,
-                        duration: fsm2.duration,
-                        fsm1: (
-                            value: 0,
-                            currentState: initial,
-                            previousState: initial
-                        ),
-                        fsm2: (
-                            value: 25,
-                            currentState: exit,
-                            previousState: initial
-                        ),
-                        constraint: .greaterThan(value: 25000)
-                    )
-                ]
-            ),
+            // MARK: - (W(fsm2), (0, initial, initial), (*, initial|exit, initial))
             kripkeState(
                 executing: fsm2Name,
                 readState: false,
@@ -1035,7 +7363,7 @@ struct TimedKripkeStructure: KripkeStructureProtocol {
                         ),
                         fsm2: (
                             value: 15,
-                            currentState: initial,
+                            currentState: exit,
                             previousState: initial
                         ),
                         constraint: nil
@@ -1075,107 +7403,7 @@ struct TimedKripkeStructure: KripkeStructureProtocol {
                     )
                 ]
             ),
-            kripkeState(
-                executing: fsm2Name,
-                readState: true,
-                fsm1: (
-                    value: 5,
-                    currentState: initial,
-                    previousState: initial
-                ),
-                fsm2: (
-                    value: 0,
-                    currentState: initial,
-                    previousState: previous
-                ),
-                targets: [
-                    target(
-                        executing: fsm2Name,
-                        readState: false,
-                        resetClock: false,
-                        duration: fsm2.duration,
-                        fsm1: (
-                            value: 5,
-                            currentState: initial,
-                            previousState: initial
-                        ),
-                        fsm2: (
-                            value: 0,
-                            currentState: initial,
-                            previousState: initial
-                        ),
-                        constraint: .lessThanEqual(value: 5000)
-                    ),
-                    target(
-                        executing: fsm2Name,
-                        readState: false,
-                        resetClock: false,
-                        duration: fsm2.duration,
-                        fsm1: (
-                            value: 5,
-                            currentState: initial,
-                            previousState: initial
-                        ),
-                        fsm2: (
-                            value: 5,
-                            currentState: initial,
-                            previousState: initial
-                        ),
-                        constraint: .and(lhs: .greaterThan(value: 5000), rhs: .lessThanEqual(value: 15000))
-                    ),
-                    target(
-                        executing: fsm2Name,
-                        readState: false,
-                        resetClock: false,
-                        duration: fsm2.duration,
-                        fsm1: (
-                            value: 5,
-                            currentState: initial,
-                            previousState: initial
-                        ),
-                        fsm2: (
-                            value: 15,
-                            currentState: initial,
-                            previousState: initial
-                        ),
-                        constraint: .and(lhs: .greaterThan(value: 15000), rhs: .lessThanEqual(value: 20000))
-                    ),
-                    target(
-                        executing: fsm2Name,
-                        readState: false,
-                        resetClock: false,
-                        duration: fsm2.duration,
-                        fsm1: (
-                            value: 5,
-                            currentState: initial,
-                            previousState: initial
-                        ),
-                        fsm2: (
-                            value: 15,
-                            currentState: exit,
-                            previousState: initial
-                        ),
-                        constraint: .and(lhs: .greaterThan(value: 20000), rhs: .lessThanEqual(value: 25000))
-                    ),
-                    target(
-                        executing: fsm2Name,
-                        readState: false,
-                        resetClock: false,
-                        duration: fsm2.duration,
-                        fsm1: (
-                            value: 5,
-                            currentState: initial,
-                            previousState: initial
-                        ),
-                        fsm2: (
-                            value: 25,
-                            currentState: exit,
-                            previousState: initial
-                        ),
-                        constraint: .greaterThan(value: 25000)
-                    )
-                ]
-            ),
+            // MARK: (W(fsm2), (5, initial, initial), (*, initial|exit, initial))
             kripkeState(
                 executing: fsm2Name,
                 readState: false,
@@ -1301,7 +7529,7 @@ struct TimedKripkeStructure: KripkeStructureProtocol {
                         ),
                         fsm2: (
                             value: 15,
-                            currentState: initial,
+                            currentState: exit,
                             previousState: initial
                         ),
                         constraint: nil
@@ -1341,107 +7569,7 @@ struct TimedKripkeStructure: KripkeStructureProtocol {
                     )
                 ]
             ),
-            kripkeState(
-                executing: fsm2Name,
-                readState: true,
-                fsm1: (
-                    value: 15,
-                    currentState: initial,
-                    previousState: initial
-                ),
-                fsm2: (
-                    value: 0,
-                    currentState: initial,
-                    previousState: previous
-                ),
-                targets: [
-                    target(
-                        executing: fsm2Name,
-                        readState: false,
-                        resetClock: false,
-                        duration: fsm2.duration,
-                        fsm1: (
-                            value: 15,
-                            currentState: initial,
-                            previousState: initial
-                        ),
-                        fsm2: (
-                            value: 0,
-                            currentState: initial,
-                            previousState: initial
-                        ),
-                        constraint: .lessThanEqual(value: 5000)
-                    ),
-                    target(
-                        executing: fsm2Name,
-                        readState: false,
-                        resetClock: false,
-                        duration: fsm2.duration,
-                        fsm1: (
-                            value: 15,
-                            currentState: initial,
-                            previousState: initial
-                        ),
-                        fsm2: (
-                            value: 5,
-                            currentState: initial,
-                            previousState: initial
-                        ),
-                        constraint: .and(lhs: .greaterThan(value: 5000), rhs: .lessThanEqual(value: 15000))
-                    ),
-                    target(
-                        executing: fsm2Name,
-                        readState: false,
-                        resetClock: false,
-                        duration: fsm2.duration,
-                        fsm1: (
-                            value: 15,
-                            currentState: initial,
-                            previousState: initial
-                        ),
-                        fsm2: (
-                            value: 15,
-                            currentState: initial,
-                            previousState: initial
-                        ),
-                        constraint: .and(lhs: .greaterThan(value: 15000), rhs: .lessThanEqual(value: 20000))
-                    ),
-                    target(
-                        executing: fsm2Name,
-                        readState: false,
-                        resetClock: false,
-                        duration: fsm2.duration,
-                        fsm1: (
-                            value: 15,
-                            currentState: initial,
-                            previousState: initial
-                        ),
-                        fsm2: (
-                            value: 15,
-                            currentState: exit,
-                            previousState: initial
-                        ),
-                        constraint: .and(lhs: .greaterThan(value: 20000), rhs: .lessThanEqual(value: 25000))
-                    ),
-                    target(
-                        executing: fsm2Name,
-                        readState: false,
-                        resetClock: false,
-                        duration: fsm2.duration,
-                        fsm1: (
-                            value: 15,
-                            currentState: initial,
-                            previousState: initial
-                        ),
-                        fsm2: (
-                            value: 25,
-                            currentState: exit,
-                            previousState: initial
-                        ),
-                        constraint: .greaterThan(value: 25000)
-                    )
-                ]
-            ),
+            // MARK: (W(fsm2), (15, initial, initial), (*, initial|exit, initial))
             kripkeState(
                 executing: fsm2Name,
                 readState: false,
@@ -1567,7 +7695,7 @@ struct TimedKripkeStructure: KripkeStructureProtocol {
                         ),
                         fsm2: (
                             value: 15,
-                            currentState: initial,
+                            currentState: exit,
                             previousState: initial
                         ),
                         constraint: nil
@@ -1607,107 +7735,7 @@ struct TimedKripkeStructure: KripkeStructureProtocol {
                     )
                 ]
             ),
-            kripkeState(
-                executing: fsm2Name,
-                readState: true,
-                fsm1: (
-                    value: 15,
-                    currentState: exit,
-                    previousState: initial
-                ),
-                fsm2: (
-                    value: 0,
-                    currentState: initial,
-                    previousState: previous
-                ),
-                targets: [
-                    target(
-                        executing: fsm2Name,
-                        readState: false,
-                        resetClock: false,
-                        duration: fsm2.duration,
-                        fsm1: (
-                            value: 15,
-                            currentState: exit,
-                            previousState: initial
-                        ),
-                        fsm2: (
-                            value: 0,
-                            currentState: initial,
-                            previousState: initial
-                        ),
-                        constraint: .lessThanEqual(value: 5000)
-                    ),
-                    target(
-                        executing: fsm2Name,
-                        readState: false,
-                        resetClock: false,
-                        duration: fsm2.duration,
-                        fsm1: (
-                            value: 15,
-                            currentState: exit,
-                            previousState: initial
-                        ),
-                        fsm2: (
-                            value: 5,
-                            currentState: initial,
-                            previousState: initial
-                        ),
-                        constraint: .and(lhs: .greaterThan(value: 5000), rhs: .lessThanEqual(value: 15000))
-                    ),
-                    target(
-                        executing: fsm2Name,
-                        readState: false,
-                        resetClock: false,
-                        duration: fsm2.duration,
-                        fsm1: (
-                            value: 15,
-                            currentState: exit,
-                            previousState: initial
-                        ),
-                        fsm2: (
-                            value: 15,
-                            currentState: initial,
-                            previousState: initial
-                        ),
-                        constraint: .and(lhs: .greaterThan(value: 15000), rhs: .lessThanEqual(value: 20000))
-                    ),
-                    target(
-                        executing: fsm2Name,
-                        readState: false,
-                        resetClock: false,
-                        duration: fsm2.duration,
-                        fsm1: (
-                            value: 15,
-                            currentState: exit,
-                            previousState: initial
-                        ),
-                        fsm2: (
-                            value: 15,
-                            currentState: exit,
-                            previousState: initial
-                        ),
-                        constraint: .and(lhs: .greaterThan(value: 20000), rhs: .lessThanEqual(value: 25000))
-                    ),
-                    target(
-                        executing: fsm2Name,
-                        readState: false,
-                        resetClock: false,
-                        duration: fsm2.duration,
-                        fsm1: (
-                            value: 15,
-                            currentState: exit,
-                            previousState: initial
-                        ),
-                        fsm2: (
-                            value: 25,
-                            currentState: exit,
-                            previousState: initial
-                        ),
-                        constraint: .greaterThan(value: 25000)
-                    )
-                ]
-            ),
+            // MARK: (W(fsm2), (15, exit, initial), (*, initial|exit, initial))
             kripkeState(
                 executing: fsm2Name,
                 readState: false,
@@ -1818,7 +7846,7 @@ struct TimedKripkeStructure: KripkeStructureProtocol {
                 fsm2: (
                     value: 15,
                     currentState: exit,
-                    previousState: previous
+                    previousState: initial
                 ),
                 targets: [
                     target(
@@ -1833,7 +7861,7 @@ struct TimedKripkeStructure: KripkeStructureProtocol {
                         ),
                         fsm2: (
                             value: 15,
-                            currentState: initial,
+                            currentState: exit,
                             previousState: initial
                         ),
                         constraint: nil
@@ -1873,107 +7901,7 @@ struct TimedKripkeStructure: KripkeStructureProtocol {
                     )
                 ]
             ),
-            kripkeState(
-                executing: fsm2Name,
-                readState: true,
-                fsm1: (
-                    value: 25,
-                    currentState: exit,
-                    previousState: initial
-                ),
-                fsm2: (
-                    value: 0,
-                    currentState: initial,
-                    previousState: previous
-                ),
-                targets: [
-                    target(
-                        executing: fsm2Name,
-                        readState: false,
-                        resetClock: false,
-                        duration: fsm2.duration,
-                        fsm1: (
-                            value: 25,
-                            currentState: exit,
-                            previousState: initial
-                        ),
-                        fsm2: (
-                            value: 0,
-                            currentState: initial,
-                            previousState: initial
-                        ),
-                        constraint: .lessThanEqual(value: 5000)
-                    ),
-                    target(
-                        executing: fsm2Name,
-                        readState: false,
-                        resetClock: false,
-                        duration: fsm2.duration,
-                        fsm1: (
-                            value: 25,
-                            currentState: exit,
-                            previousState: initial
-                        ),
-                        fsm2: (
-                            value: 5,
-                            currentState: initial,
-                            previousState: initial
-                        ),
-                        constraint: .and(lhs: .greaterThan(value: 5000), rhs: .lessThanEqual(value: 15000))
-                    ),
-                    target(
-                        executing: fsm2Name,
-                        readState: false,
-                        resetClock: false,
-                        duration: fsm2.duration,
-                        fsm1: (
-                            value: 25,
-                            currentState: exit,
-                            previousState: initial
-                        ),
-                        fsm2: (
-                            value: 15,
-                            currentState: initial,
-                            previousState: initial
-                        ),
-                        constraint: .and(lhs: .greaterThan(value: 15000), rhs: .lessThanEqual(value: 20000))
-                    ),
-                    target(
-                        executing: fsm2Name,
-                        readState: false,
-                        resetClock: false,
-                        duration: fsm2.duration,
-                        fsm1: (
-                            value: 25,
-                            currentState: exit,
-                            previousState: initial
-                        ),
-                        fsm2: (
-                            value: 15,
-                            currentState: exit,
-                            previousState: initial
-                        ),
-                        constraint: .and(lhs: .greaterThan(value: 20000), rhs: .lessThanEqual(value: 25000))
-                    ),
-                    target(
-                        executing: fsm2Name,
-                        readState: false,
-                        resetClock: false,
-                        duration: fsm2.duration,
-                        fsm1: (
-                            value: 25,
-                            currentState: exit,
-                            previousState: initial
-                        ),
-                        fsm2: (
-                            value: 25,
-                            currentState: exit,
-                            previousState: initial
-                        ),
-                        constraint: .greaterThan(value: 25000)
-                    )
-                ]
-            ),
+            // MARK: (W(fsm2), (25, exit, initial), (*, initial|exit, initial))
             kripkeState(
                 executing: fsm2Name,
                 readState: false,
@@ -2139,107 +8067,7 @@ struct TimedKripkeStructure: KripkeStructureProtocol {
                     )
                 ]
             ),
-            kripkeState(
-                executing: fsm1Name,
-                readState: true,
-                fsm1: (
-                    value: 0,
-                    currentState: initial,
-                    previousState: initial
-                ),
-                fsm2: (
-                    value: 0,
-                    currentState: initial,
-                    previousState: initial
-                ),
-                targets: [
-                    target(
-                        executing: fsm1Name,
-                        readState: false,
-                        resetClock: false,
-                        duration: fsm1.duration,
-                        fsm1: (
-                            value: 0,
-                            currentState: initial,
-                            previousState: initial
-                        ),
-                        fsm2: (
-                            value: 0,
-                            currentState: initial,
-                            previousState: initial
-                        ),
-                        constraint: .lessThanEqual(value: 5000)
-                    ),
-                    target(
-                        executing: fsm1Name,
-                        readState: false,
-                        resetClock: false,
-                        duration: fsm1.duration,
-                        fsm1: (
-                            value: 5,
-                            currentState: initial,
-                            previousState: initial
-                        ),
-                        fsm2: (
-                            value: 0,
-                            currentState: initial,
-                            previousState: initial
-                        ),
-                        constraint: .and(lhs: .greaterThan(value: 5000), rhs: .lessThanEqual(value: 15000))
-                    ),
-                    target(
-                        executing: fsm1Name,
-                        readState: false,
-                        resetClock: false,
-                        duration: fsm1.duration,
-                        fsm1: (
-                            value: 15,
-                            currentState: initial,
-                            previousState: initial
-                        ),
-                        fsm2: (
-                            value: 0,
-                            currentState: initial,
-                            previousState: initial
-                        ),
-                        constraint: .and(lhs: .greaterThan(value: 15000), rhs: .lessThanEqual(value: 20000))
-                    ),
-                    target(
-                        executing: fsm1Name,
-                        readState: false,
-                        resetClock: false,
-                        duration: fsm1.duration,
-                        fsm1: (
-                            value: 15,
-                            currentState: exit,
-                            previousState: initial
-                        ),
-                        fsm2: (
-                            value: 0,
-                            currentState: initial,
-                            previousState: initial
-                        ),
-                        constraint: .and(lhs: .greaterThan(value: 20000), rhs: .lessThanEqual(value: 25000))
-                    ),
-                    target(
-                        executing: fsm1Name,
-                        readState: false,
-                        resetClock: false,
-                        duration: fsm1.duration,
-                        fsm1: (
-                            value: 25,
-                            currentState: exit,
-                            previousState: initial
-                        ),
-                        fsm2: (
-                            value: 0,
-                            currentState: initial,
-                            previousState: initial
-                        ),
-                        constraint: .greaterThan(value: 25000)
-                    )
-                ]
-            ),
+            // MARK: - (W(fsm1), (*, initial|exit, initial), (0, initial, initial))
             kripkeState(
                 executing: fsm1Name,
                 readState: false,
@@ -2340,7 +8168,7 @@ struct TimedKripkeStructure: KripkeStructureProtocol {
                 ]
             ),
             kripkeState(
-                executing: fsm2Name,
+                executing: fsm1Name,
                 readState: false,
                 fsm1: (
                     value: 15,
@@ -2405,107 +8233,7 @@ struct TimedKripkeStructure: KripkeStructureProtocol {
                     )
                 ]
             ),
-            kripkeState(
-                executing: fsm1Name,
-                readState: true,
-                fsm1: (
-                    value: 0,
-                    currentState: initial,
-                    previousState: initial
-                ),
-                fsm2: (
-                    value: 5,
-                    currentState: initial,
-                    previousState: initial
-                ),
-                targets: [
-                    target(
-                        executing: fsm1Name,
-                        readState: false,
-                        resetClock: false,
-                        duration: fsm1.duration,
-                        fsm1: (
-                            value: 0,
-                            currentState: initial,
-                            previousState: initial
-                        ),
-                        fsm2: (
-                            value: 5,
-                            currentState: initial,
-                            previousState: initial
-                        ),
-                        constraint: .lessThanEqual(value: 5000)
-                    ),
-                    target(
-                        executing: fsm1Name,
-                        readState: false,
-                        resetClock: false,
-                        duration: fsm1.duration,
-                        fsm1: (
-                            value: 5,
-                            currentState: initial,
-                            previousState: initial
-                        ),
-                        fsm2: (
-                            value: 5,
-                            currentState: initial,
-                            previousState: initial
-                        ),
-                        constraint: .and(lhs: .greaterThan(value: 5000), rhs: .lessThanEqual(value: 15000))
-                    ),
-                    target(
-                        executing: fsm1Name,
-                        readState: false,
-                        resetClock: false,
-                        duration: fsm1.duration,
-                        fsm1: (
-                            value: 15,
-                            currentState: initial,
-                            previousState: initial
-                        ),
-                        fsm2: (
-                            value: 5,
-                            currentState: initial,
-                            previousState: initial
-                        ),
-                        constraint: .and(lhs: .greaterThan(value: 15000), rhs: .lessThanEqual(value: 20000))
-                    ),
-                    target(
-                        executing: fsm1Name,
-                        readState: false,
-                        resetClock: false,
-                        duration: fsm1.duration,
-                        fsm1: (
-                            value: 15,
-                            currentState: exit,
-                            previousState: initial
-                        ),
-                        fsm2: (
-                            value: 5,
-                            currentState: initial,
-                            previousState: initial
-                        ),
-                        constraint: .and(lhs: .greaterThan(value: 20000), rhs: .lessThanEqual(value: 25000))
-                    ),
-                    target(
-                        executing: fsm1Name,
-                        readState: false,
-                        resetClock: false,
-                        duration: fsm1.duration,
-                        fsm1: (
-                            value: 25,
-                            currentState: exit,
-                            previousState: initial
-                        ),
-                        fsm2: (
-                            value: 5,
-                            currentState: initial,
-                            previousState: initial
-                        ),
-                        constraint: .greaterThan(value: 25000)
-                    )
-                ]
-            ),
+            // MARK: (W(fsm1), (*, initial|exit, initial), (5, initial, initial))
             kripkeState(
                 executing: fsm1Name,
                 readState: false,
@@ -2606,7 +8334,7 @@ struct TimedKripkeStructure: KripkeStructureProtocol {
                 ]
             ),
             kripkeState(
-                executing: fsm2Name,
+                executing: fsm1Name,
                 readState: false,
                 fsm1: (
                     value: 15,
@@ -2671,107 +8399,7 @@ struct TimedKripkeStructure: KripkeStructureProtocol {
                     )
                 ]
             ),
-            kripkeState(
-                executing: fsm1Name,
-                readState: true,
-                fsm1: (
-                    value: 0,
-                    currentState: initial,
-                    previousState: initial
-                ),
-                fsm2: (
-                    value: 15,
-                    currentState: initial,
-                    previousState: initial
-                ),
-                targets: [
-                    target(
-                        executing: fsm1Name,
-                        readState: false,
-                        resetClock: false,
-                        duration: fsm1.duration,
-                        fsm1: (
-                            value: 0,
-                            currentState: initial,
-                            previousState: initial
-                        ),
-                        fsm2: (
-                            value: 15,
-                            currentState: initial,
-                            previousState: initial
-                        ),
-                        constraint: .lessThanEqual(value: 5000)
-                    ),
-                    target(
-                        executing: fsm1Name,
-                        readState: false,
-                        resetClock: false,
-                        duration: fsm1.duration,
-                        fsm1: (
-                            value: 5,
-                            currentState: initial,
-                            previousState: initial
-                        ),
-                        fsm2: (
-                            value: 15,
-                            currentState: initial,
-                            previousState: initial
-                        ),
-                        constraint: .and(lhs: .greaterThan(value: 5000), rhs: .lessThanEqual(value: 15000))
-                    ),
-                    target(
-                        executing: fsm1Name,
-                        readState: false,
-                        resetClock: false,
-                        duration: fsm1.duration,
-                        fsm1: (
-                            value: 15,
-                            currentState: initial,
-                            previousState: initial
-                        ),
-                        fsm2: (
-                            value: 15,
-                            currentState: initial,
-                            previousState: initial
-                        ),
-                        constraint: .and(lhs: .greaterThan(value: 15000), rhs: .lessThanEqual(value: 20000))
-                    ),
-                    target(
-                        executing: fsm1Name,
-                        readState: false,
-                        resetClock: false,
-                        duration: fsm1.duration,
-                        fsm1: (
-                            value: 15,
-                            currentState: exit,
-                            previousState: initial
-                        ),
-                        fsm2: (
-                            value: 15,
-                            currentState: initial,
-                            previousState: initial
-                        ),
-                        constraint: .and(lhs: .greaterThan(value: 20000), rhs: .lessThanEqual(value: 25000))
-                    ),
-                    target(
-                        executing: fsm1Name,
-                        readState: false,
-                        resetClock: false,
-                        duration: fsm1.duration,
-                        fsm1: (
-                            value: 25,
-                            currentState: exit,
-                            previousState: initial
-                        ),
-                        fsm2: (
-                            value: 15,
-                            currentState: initial,
-                            previousState: initial
-                        ),
-                        constraint: .greaterThan(value: 25000)
-                    )
-                ]
-            ),
+            // MARK: (W(fsm1), (*, initial|exit, initial), (15, initial, initial))
             kripkeState(
                 executing: fsm1Name,
                 readState: false,
@@ -2872,7 +8500,7 @@ struct TimedKripkeStructure: KripkeStructureProtocol {
                 ]
             ),
             kripkeState(
-                executing: fsm2Name,
+                executing: fsm1Name,
                 readState: false,
                 fsm1: (
                     value: 15,
@@ -2937,107 +8565,7 @@ struct TimedKripkeStructure: KripkeStructureProtocol {
                     )
                 ]
             ),
-            kripkeState(
-                executing: fsm1Name,
-                readState: true,
-                fsm1: (
-                    value: 0,
-                    currentState: initial,
-                    previousState: initial
-                ),
-                fsm2: (
-                    value: 15,
-                    currentState: exit,
-                    previousState: initial
-                ),
-                targets: [
-                    target(
-                        executing: fsm1Name,
-                        readState: false,
-                        resetClock: false,
-                        duration: fsm1.duration,
-                        fsm1: (
-                            value: 0,
-                            currentState: initial,
-                            previousState: initial
-                        ),
-                        fsm2: (
-                            value: 15,
-                            currentState: exit,
-                            previousState: initial
-                        ),
-                        constraint: .lessThanEqual(value: 5000)
-                    ),
-                    target(
-                        executing: fsm1Name,
-                        readState: false,
-                        resetClock: false,
-                        duration: fsm1.duration,
-                        fsm1: (
-                            value: 5,
-                            currentState: initial,
-                            previousState: initial
-                        ),
-                        fsm2: (
-                            value: 15,
-                            currentState: exit,
-                            previousState: initial
-                        ),
-                        constraint: .and(lhs: .greaterThan(value: 5000), rhs: .lessThanEqual(value: 15000))
-                    ),
-                    target(
-                        executing: fsm1Name,
-                        readState: false,
-                        resetClock: false,
-                        duration: fsm1.duration,
-                        fsm1: (
-                            value: 15,
-                            currentState: initial,
-                            previousState: initial
-                        ),
-                        fsm2: (
-                            value: 15,
-                            currentState: exit,
-                            previousState: initial
-                        ),
-                        constraint: .and(lhs: .greaterThan(value: 15000), rhs: .lessThanEqual(value: 20000))
-                    ),
-                    target(
-                        executing: fsm1Name,
-                        readState: false,
-                        resetClock: false,
-                        duration: fsm1.duration,
-                        fsm1: (
-                            value: 15,
-                            currentState: exit,
-                            previousState: initial
-                        ),
-                        fsm2: (
-                            value: 15,
-                            currentState: exit,
-                            previousState: initial
-                        ),
-                        constraint: .and(lhs: .greaterThan(value: 20000), rhs: .lessThanEqual(value: 25000))
-                    ),
-                    target(
-                        executing: fsm1Name,
-                        readState: false,
-                        resetClock: false,
-                        duration: fsm1.duration,
-                        fsm1: (
-                            value: 25,
-                            currentState: exit,
-                            previousState: initial
-                        ),
-                        fsm2: (
-                            value: 15,
-                            currentState: exit,
-                            previousState: initial
-                        ),
-                        constraint: .greaterThan(value: 25000)
-                    )
-                ]
-            ),
+            // MARK: (W(fsm1), (*, initial|exit, initial), (15, exit, initial))
             kripkeState(
                 executing: fsm1Name,
                 readState: false,
@@ -3081,247 +8609,645 @@ struct TimedKripkeStructure: KripkeStructureProtocol {
                 ),
                 fsm2: (
                     value: 15,
+                    currentState: exit,
+                    previousState: initial
+                ),
+                targets: [
+                    target(
+                        executing: fsm2Name,
+                        readState: true,
+                        resetClock: true,
+                        duration: fsm1Gap,
+                        fsm1: (
+                            value: 5,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 15,
+                            currentState: exit,
+                            previousState: initial
+                        ),
+                        constraint: nil
+                    )
+                ]
+            ),
+            kripkeState(
+                executing: fsm1Name,
+                readState: false,
+                fsm1: (
+                    value: 15,
                     currentState: initial,
+                    previousState: initial
+                ),
+                fsm2: (
+                    value: 15,
+                    currentState: exit,
+                    previousState: initial
+                ),
+                targets: [
+                    target(
+                        executing: fsm2Name,
+                        readState: true,
+                        resetClock: true,
+                        duration: fsm1Gap,
+                        fsm1: (
+                            value: 15,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 15,
+                            currentState: exit,
+                            previousState: initial
+                        ),
+                        constraint: nil
+                    )
+                ]
+            ),
+            kripkeState(
+                executing: fsm1Name,
+                readState: false,
+                fsm1: (
+                    value: 15,
+                    currentState: exit,
+                    previousState: initial
+                ),
+                fsm2: (
+                    value: 15,
+                    currentState: exit,
+                    previousState: initial
+                ),
+                targets: [
+                    target(
+                        executing: fsm2Name,
+                        readState: true,
+                        resetClock: true,
+                        duration: fsm1Gap,
+                        fsm1: (
+                            value: 15,
+                            currentState: exit,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 15,
+                            currentState: exit,
+                            previousState: initial
+                        ),
+                        constraint: nil
+                    )
+                ]
+            ),
+            kripkeState(
+                executing: fsm1Name,
+                readState: false,
+                fsm1: (
+                    value: 25,
+                    currentState: exit,
+                    previousState: initial
+                ),
+                fsm2: (
+                    value: 15,
+                    currentState: exit,
+                    previousState: initial
+                ),
+                targets: [
+                    target(
+                        executing: fsm2Name,
+                        readState: true,
+                        resetClock: true,
+                        duration: fsm1Gap,
+                        fsm1: (
+                            value: 25,
+                            currentState: exit,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 15,
+                            currentState: exit,
+                            previousState: initial
+                        ),
+                        constraint: nil
+                    )
+                ]
+            ),
+            // MARK: (W(fsm1), (*, initial|exit, initial), (25, exit, initial))
+            kripkeState(
+                executing: fsm1Name,
+                readState: false,
+                fsm1: (
+                    value: 0,
+                    currentState: initial,
+                    previousState: initial
+                ),
+                fsm2: (
+                    value: 25,
+                    currentState: exit,
+                    previousState: initial
+                ),
+                targets: [
+                    target(
+                        executing: fsm2Name,
+                        readState: true,
+                        resetClock: true,
+                        duration: fsm1Gap,
+                        fsm1: (
+                            value: 0,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 25,
+                            currentState: exit,
+                            previousState: initial
+                        ),
+                        constraint: nil
+                    )
+                ]
+            ),
+            kripkeState(
+                executing: fsm1Name,
+                readState: false,
+                fsm1: (
+                    value: 5,
+                    currentState: initial,
+                    previousState: initial
+                ),
+                fsm2: (
+                    value: 25,
+                    currentState: exit,
+                    previousState: initial
+                ),
+                targets: [
+                    target(
+                        executing: fsm2Name,
+                        readState: true,
+                        resetClock: true,
+                        duration: fsm1Gap,
+                        fsm1: (
+                            value: 5,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 25,
+                            currentState: exit,
+                            previousState: initial
+                        ),
+                        constraint: nil
+                    )
+                ]
+            ),
+            kripkeState(
+                executing: fsm1Name,
+                readState: false,
+                fsm1: (
+                    value: 15,
+                    currentState: initial,
+                    previousState: initial
+                ),
+                fsm2: (
+                    value: 25,
+                    currentState: exit,
+                    previousState: initial
+                ),
+                targets: [
+                    target(
+                        executing: fsm2Name,
+                        readState: true,
+                        resetClock: true,
+                        duration: fsm1Gap,
+                        fsm1: (
+                            value: 15,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 25,
+                            currentState: exit,
+                            previousState: initial
+                        ),
+                        constraint: nil
+                    )
+                ]
+            ),
+            kripkeState(
+                executing: fsm1Name,
+                readState: false,
+                fsm1: (
+                    value: 15,
+                    currentState: exit,
+                    previousState: initial
+                ),
+                fsm2: (
+                    value: 25,
+                    currentState: exit,
+                    previousState: initial
+                ),
+                targets: [
+                    target(
+                        executing: fsm2Name,
+                        readState: true,
+                        resetClock: true,
+                        duration: fsm1Gap,
+                        fsm1: (
+                            value: 15,
+                            currentState: exit,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 25,
+                            currentState: exit,
+                            previousState: initial
+                        ),
+                        constraint: nil
+                    )
+                ]
+            ),
+            kripkeState(
+                executing: fsm1Name,
+                readState: false,
+                fsm1: (
+                    value: 25,
+                    currentState: exit,
+                    previousState: initial
+                ),
+                fsm2: (
+                    value: 25,
+                    currentState: exit,
+                    previousState: initial
+                ),
+                targets: [
+                    target(
+                        executing: fsm2Name,
+                        readState: true,
+                        resetClock: true,
+                        duration: fsm1Gap,
+                        fsm1: (
+                            value: 25,
+                            currentState: exit,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 25,
+                            currentState: exit,
+                            previousState: initial
+                        ),
+                        constraint: nil
+                    )
+                ]
+            ),
+            // MARK: - (W(fsm1), (15, exit, exit), (*, initial|exit, initial))
+            kripkeState(
+                executing: fsm1Name,
+                readState: false,
+                fsm1: (
+                    value: 15,
+                    currentState: exit,
+                    previousState: exit
+                ),
+                fsm2: (
+                    value: 0,
+                    currentState: initial,
+                    previousState: initial
+                ),
+                targets: [
+                    target(
+                        executing: fsm2Name,
+                        readState: true,
+                        resetClock: false,
+                        duration: fsm1Gap,
+                        fsm1: (
+                            value: 15,
+                            currentState: exit,
+                            previousState: exit
+                        ),
+                        fsm2: (
+                            value: 0,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        constraint: nil
+                    )
+                ]
+            ),
+            kripkeState(
+                executing: fsm1Name,
+                readState: false,
+                fsm1: (
+                    value: 15,
+                    currentState: exit,
+                    previousState: exit
+                ),
+                fsm2: (
+                    value: 5,
+                    currentState: initial,
+                    previousState: initial
+                ),
+                targets: [
+                    target(
+                        executing: fsm2Name,
+                        readState: true,
+                        resetClock: false,
+                        duration: fsm1Gap,
+                        fsm1: (
+                            value: 15,
+                            currentState: exit,
+                            previousState: exit
+                        ),
+                        fsm2: (
+                            value: 5,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        constraint: nil
+                    )
+                ]
+            ),
+            kripkeState(
+                executing: fsm1Name,
+                readState: false,
+                fsm1: (
+                    value: 15,
+                    currentState: exit,
+                    previousState: exit
+                ),
+                fsm2: (
+                    value: 15,
+                    currentState: initial,
+                    previousState: initial
+                ),
+                targets: [
+                    target(
+                        executing: fsm2Name,
+                        readState: true,
+                        resetClock: false,
+                        duration: fsm1Gap,
+                        fsm1: (
+                            value: 15,
+                            currentState: exit,
+                            previousState: exit
+                        ),
+                        fsm2: (
+                            value: 15,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        constraint: nil
+                    )
+                ]
+            ),
+            kripkeState(
+                executing: fsm1Name,
+                readState: false,
+                fsm1: (
+                    value: 15,
+                    currentState: exit,
+                    previousState: exit
+                ),
+                fsm2: (
+                    value: 15,
+                    currentState: exit,
+                    previousState: initial
+                ),
+                targets: [
+                    target(
+                        executing: fsm2Name,
+                        readState: true,
+                        resetClock: true,
+                        duration: fsm1Gap,
+                        fsm1: (
+                            value: 15,
+                            currentState: exit,
+                            previousState: exit
+                        ),
+                        fsm2: (
+                            value: 15,
+                            currentState: exit,
+                            previousState: initial
+                        ),
+                        constraint: nil
+                    )
+                ]
+            ),
+            kripkeState(
+                executing: fsm1Name,
+                readState: false,
+                fsm1: (
+                    value: 15,
+                    currentState: exit,
+                    previousState: exit
+                ),
+                fsm2: (
+                    value: 25,
+                    currentState: exit,
+                    previousState: initial
+                ),
+                targets: [
+                    target(
+                        executing: fsm2Name,
+                        readState: true,
+                        resetClock: true,
+                        duration: fsm1Gap,
+                        fsm1: (
+                            value: 15,
+                            currentState: exit,
+                            previousState: exit
+                        ),
+                        fsm2: (
+                            value: 25,
+                            currentState: exit,
+                            previousState: initial
+                        ),
+                        constraint: nil
+                    )
+                ]
+            ),
+            // MARK: (W(fsm1), (25, exit, exit), (*, initial|exit, initial))
+            kripkeState(
+                executing: fsm1Name,
+                readState: false,
+                fsm1: (
+                    value: 25,
+                    currentState: exit,
+                    previousState: exit
+                ),
+                fsm2: (
+                    value: 0,
+                    currentState: initial,
+                    previousState: initial
+                ),
+                targets: [
+                    target(
+                        executing: fsm2Name,
+                        readState: true,
+                        resetClock: false,
+                        duration: fsm1Gap,
+                        fsm1: (
+                            value: 25,
+                            currentState: exit,
+                            previousState: exit
+                        ),
+                        fsm2: (
+                            value: 0,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        constraint: nil
+                    )
+                ]
+            ),
+            kripkeState(
+                executing: fsm1Name,
+                readState: false,
+                fsm1: (
+                    value: 25,
+                    currentState: exit,
+                    previousState: exit
+                ),
+                fsm2: (
+                    value: 5,
+                    currentState: initial,
+                    previousState: initial
+                ),
+                targets: [
+                    target(
+                        executing: fsm2Name,
+                        readState: true,
+                        resetClock: false,
+                        duration: fsm1Gap,
+                        fsm1: (
+                            value: 25,
+                            currentState: exit,
+                            previousState: exit
+                        ),
+                        fsm2: (
+                            value: 5,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        constraint: nil
+                    )
+                ]
+            ),
+            kripkeState(
+                executing: fsm1Name,
+                readState: false,
+                fsm1: (
+                    value: 25,
+                    currentState: exit,
+                    previousState: exit
+                ),
+                fsm2: (
+                    value: 15,
+                    currentState: initial,
+                    previousState: initial
+                ),
+                targets: [
+                    target(
+                        executing: fsm2Name,
+                        readState: true,
+                        resetClock: false,
+                        duration: fsm1Gap,
+                        fsm1: (
+                            value: 25,
+                            currentState: exit,
+                            previousState: exit
+                        ),
+                        fsm2: (
+                            value: 15,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        constraint: nil
+                    )
+                ]
+            ),
+            kripkeState(
+                executing: fsm1Name,
+                readState: false,
+                fsm1: (
+                    value: 25,
+                    currentState: exit,
+                    previousState: exit
+                ),
+                fsm2: (
+                    value: 15,
+                    currentState: exit,
+                    previousState: initial
+                ),
+                targets: [
+                    target(
+                        executing: fsm2Name,
+                        readState: true,
+                        resetClock: true,
+                        duration: fsm1Gap,
+                        fsm1: (
+                            value: 25,
+                            currentState: exit,
+                            previousState: exit
+                        ),
+                        fsm2: (
+                            value: 15,
+                            currentState: exit,
+                            previousState: initial
+                        ),
+                        constraint: nil
+                    )
+                ]
+            ),
+            kripkeState(
+                executing: fsm1Name,
+                readState: false,
+                fsm1: (
+                    value: 25,
+                    currentState: exit,
+                    previousState: exit
+                ),
+                fsm2: (
+                    value: 25,
+                    currentState: exit,
+                    previousState: initial
+                ),
+                targets: [
+                    target(
+                        executing: fsm2Name,
+                        readState: true,
+                        resetClock: true,
+                        duration: fsm1Gap,
+                        fsm1: (
+                            value: 25,
+                            currentState: exit,
+                            previousState: exit
+                        ),
+                        fsm2: (
+                            value: 25,
+                            currentState: exit,
+                            previousState: initial
+                        ),
+                        constraint: nil
+                    )
+                ]
+            ),
+            // MARK: - (W(fsm1), (*, initial|exit, initial), (15, exit, exit))
+            kripkeState(
+                executing: fsm1Name,
+                readState: false,
+                fsm1: (
+                    value: 0,
+                    currentState: initial,
+                    previousState: initial
+                ),
+                fsm2: (
+                    value: 15,
+                    currentState: exit,
                     previousState: exit
                 ),
                 targets: [
                     target(
                         executing: fsm2Name,
                         readState: true,
-                        resetClock: true,
-                        duration: fsm1Gap,
-                        fsm1: (
-                            value: 5,
-                            currentState: initial,
-                            previousState: initial
-                        ),
-                        fsm2: (
-                            value: 15,
-                            currentState: exit,
-                            previousState: initial
-                        ),
-                        constraint: nil
-                    )
-                ]
-            ),
-            kripkeState(
-                executing: fsm1Name,
-                readState: false,
-                fsm1: (
-                    value: 15,
-                    currentState: initial,
-                    previousState: initial
-                ),
-                fsm2: (
-                    value: 15,
-                    currentState: exit,
-                    previousState: initial
-                ),
-                targets: [
-                    target(
-                        executing: fsm2Name,
-                        readState: true,
-                        resetClock: true,
-                        duration: fsm1Gap,
-                        fsm1: (
-                            value: 15,
-                            currentState: initial,
-                            previousState: initial
-                        ),
-                        fsm2: (
-                            value: 15,
-                            currentState: exit,
-                            previousState: initial
-                        ),
-                        constraint: nil
-                    )
-                ]
-            ),
-            kripkeState(
-                executing: fsm2Name,
-                readState: false,
-                fsm1: (
-                    value: 15,
-                    currentState: exit,
-                    previousState: initial
-                ),
-                fsm2: (
-                    value: 15,
-                    currentState: exit,
-                    previousState: initial
-                ),
-                targets: [
-                    target(
-                        executing: fsm2Name,
-                        readState: true,
-                        resetClock: true,
-                        duration: fsm1Gap,
-                        fsm1: (
-                            value: 15,
-                            currentState: exit,
-                            previousState: initial
-                        ),
-                        fsm2: (
-                            value: 15,
-                            currentState: exit,
-                            previousState: initial
-                        ),
-                        constraint: nil
-                    )
-                ]
-            ),
-            kripkeState(
-                executing: fsm1Name,
-                readState: false,
-                fsm1: (
-                    value: 25,
-                    currentState: exit,
-                    previousState: initial
-                ),
-                fsm2: (
-                    value: 15,
-                    currentState: exit,
-                    previousState: initial
-                ),
-                targets: [
-                    target(
-                        executing: fsm2Name,
-                        readState: true,
-                        resetClock: true,
-                        duration: fsm1Gap,
-                        fsm1: (
-                            value: 25,
-                            currentState: exit,
-                            previousState: initial
-                        ),
-                        fsm2: (
-                            value: 15,
-                            currentState: exit,
-                            previousState: initial
-                        ),
-                        constraint: nil
-                    )
-                ]
-            ),
-            kripkeState(
-                executing: fsm1Name,
-                readState: true,
-                fsm1: (
-                    value: 0,
-                    currentState: initial,
-                    previousState: initial
-                ),
-                fsm2: (
-                    value: 25,
-                    currentState: exit,
-                    previousState: initial
-                ),
-                targets: [
-                    target(
-                        executing: fsm1Name,
-                        readState: false,
                         resetClock: false,
-                        duration: fsm1.duration,
-                        fsm1: (
-                            value: 0,
-                            currentState: initial,
-                            previousState: initial
-                        ),
-                        fsm2: (
-                            value: 25,
-                            currentState: exit,
-                            previousState: initial
-                        ),
-                        constraint: .lessThanEqual(value: 5000)
-                    ),
-                    target(
-                        executing: fsm1Name,
-                        readState: false,
-                        resetClock: false,
-                        duration: fsm1.duration,
-                        fsm1: (
-                            value: 5,
-                            currentState: initial,
-                            previousState: initial
-                        ),
-                        fsm2: (
-                            value: 25,
-                            currentState: exit,
-                            previousState: initial
-                        ),
-                        constraint: .and(lhs: .greaterThan(value: 5000), rhs: .lessThanEqual(value: 15000))
-                    ),
-                    target(
-                        executing: fsm1Name,
-                        readState: false,
-                        resetClock: false,
-                        duration: fsm1.duration,
-                        fsm1: (
-                            value: 15,
-                            currentState: initial,
-                            previousState: initial
-                        ),
-                        fsm2: (
-                            value: 25,
-                            currentState: exit,
-                            previousState: initial
-                        ),
-                        constraint: .and(lhs: .greaterThan(value: 15000), rhs: .lessThanEqual(value: 20000))
-                    ),
-                    target(
-                        executing: fsm1Name,
-                        readState: false,
-                        resetClock: false,
-                        duration: fsm1.duration,
-                        fsm1: (
-                            value: 15,
-                            currentState: exit,
-                            previousState: initial
-                        ),
-                        fsm2: (
-                            value: 25,
-                            currentState: exit,
-                            previousState: initial
-                        ),
-                        constraint: .and(lhs: .greaterThan(value: 20000), rhs: .lessThanEqual(value: 25000))
-                    ),
-                    target(
-                        executing: fsm1Name,
-                        readState: false,
-                        resetClock: false,
-                        duration: fsm1.duration,
-                        fsm1: (
-                            value: 25,
-                            currentState: exit,
-                            previousState: initial
-                        ),
-                        fsm2: (
-                            value: 25,
-                            currentState: exit,
-                            previousState: initial
-                        ),
-                        constraint: .greaterThan(value: 25000)
-                    )
-                ]
-            ),
-            kripkeState(
-                executing: fsm1Name,
-                readState: false,
-                fsm1: (
-                    value: 0,
-                    currentState: initial,
-                    previousState: initial
-                ),
-                fsm2: (
-                    value: 25,
-                    currentState: exit,
-                    previousState: initial
-                ),
-                targets: [
-                    target(
-                        executing: fsm2Name,
-                        readState: true,
-                        resetClock: true,
                         duration: fsm1Gap,
                         fsm1: (
                             value: 0,
@@ -3329,9 +9255,9 @@ struct TimedKripkeStructure: KripkeStructureProtocol {
                             previousState: initial
                         ),
                         fsm2: (
-                            value: 25,
+                            value: 15,
                             currentState: exit,
-                            previousState: initial
+                            previousState: exit
                         ),
                         constraint: nil
                     )
@@ -3346,15 +9272,15 @@ struct TimedKripkeStructure: KripkeStructureProtocol {
                     previousState: initial
                 ),
                 fsm2: (
-                    value: 25,
-                    currentState: initial,
+                    value: 15,
+                    currentState: exit,
                     previousState: exit
                 ),
                 targets: [
                     target(
                         executing: fsm2Name,
                         readState: true,
-                        resetClock: true,
+                        resetClock: false,
                         duration: fsm1Gap,
                         fsm1: (
                             value: 5,
@@ -3364,7 +9290,173 @@ struct TimedKripkeStructure: KripkeStructureProtocol {
                         fsm2: (
                             value: 15,
                             currentState: exit,
+                            previousState: exit
+                        ),
+                        constraint: nil
+                    )
+                ]
+            ),
+            kripkeState(
+                executing: fsm1Name,
+                readState: false,
+                fsm1: (
+                    value: 15,
+                    currentState: initial,
+                    previousState: initial
+                ),
+                fsm2: (
+                    value: 15,
+                    currentState: exit,
+                    previousState: exit
+                ),
+                targets: [
+                    target(
+                        executing: fsm2Name,
+                        readState: true,
+                        resetClock: false,
+                        duration: fsm1Gap,
+                        fsm1: (
+                            value: 15,
+                            currentState: initial,
                             previousState: initial
+                        ),
+                        fsm2: (
+                            value: 15,
+                            currentState: exit,
+                            previousState: exit
+                        ),
+                        constraint: nil
+                    )
+                ]
+            ),
+            kripkeState(
+                executing: fsm1Name,
+                readState: false,
+                fsm1: (
+                    value: 15,
+                    currentState: exit,
+                    previousState: initial
+                ),
+                fsm2: (
+                    value: 15,
+                    currentState: exit,
+                    previousState: exit
+                ),
+                targets: [
+                    target(
+                        executing: fsm2Name,
+                        readState: true,
+                        resetClock: false,
+                        duration: fsm1Gap,
+                        fsm1: (
+                            value: 15,
+                            currentState: exit,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 15,
+                            currentState: exit,
+                            previousState: exit
+                        ),
+                        constraint: nil
+                    )
+                ]
+            ),
+            kripkeState(
+                executing: fsm1Name,
+                readState: false,
+                fsm1: (
+                    value: 25,
+                    currentState: exit,
+                    previousState: initial
+                ),
+                fsm2: (
+                    value: 15,
+                    currentState: exit,
+                    previousState: exit
+                ),
+                targets: [
+                    target(
+                        executing: fsm2Name,
+                        readState: true,
+                        resetClock: false,
+                        duration: fsm1Gap,
+                        fsm1: (
+                            value: 25,
+                            currentState: exit,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 15,
+                            currentState: exit,
+                            previousState: exit
+                        ),
+                        constraint: nil
+                    )
+                ]
+            ),
+            // MARK: (W(fsm1), (*, initial|exit, initial), (25, exit, exit))
+            kripkeState(
+                executing: fsm1Name,
+                readState: false,
+                fsm1: (
+                    value: 0,
+                    currentState: initial,
+                    previousState: initial
+                ),
+                fsm2: (
+                    value: 25,
+                    currentState: exit,
+                    previousState: exit
+                ),
+                targets: [
+                    target(
+                        executing: fsm2Name,
+                        readState: true,
+                        resetClock: false,
+                        duration: fsm1Gap,
+                        fsm1: (
+                            value: 0,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 25,
+                            currentState: exit,
+                            previousState: exit
+                        ),
+                        constraint: nil
+                    )
+                ]
+            ),
+            kripkeState(
+                executing: fsm1Name,
+                readState: false,
+                fsm1: (
+                    value: 5,
+                    currentState: initial,
+                    previousState: initial
+                ),
+                fsm2: (
+                    value: 25,
+                    currentState: exit,
+                    previousState: exit
+                ),
+                targets: [
+                    target(
+                        executing: fsm2Name,
+                        readState: true,
+                        resetClock: false,
+                        duration: fsm1Gap,
+                        fsm1: (
+                            value: 5,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 25,
+                            currentState: exit,
+                            previousState: exit
                         ),
                         constraint: nil
                     )
@@ -3381,13 +9473,13 @@ struct TimedKripkeStructure: KripkeStructureProtocol {
                 fsm2: (
                     value: 25,
                     currentState: exit,
-                    previousState: initial
+                    previousState: exit
                 ),
                 targets: [
                     target(
                         executing: fsm2Name,
                         readState: true,
-                        resetClock: true,
+                        resetClock: false,
                         duration: fsm1Gap,
                         fsm1: (
                             value: 15,
@@ -3397,7 +9489,339 @@ struct TimedKripkeStructure: KripkeStructureProtocol {
                         fsm2: (
                             value: 25,
                             currentState: exit,
+                            previousState: exit
+                        ),
+                        constraint: nil
+                    )
+                ]
+            ),
+            kripkeState(
+                executing: fsm1Name,
+                readState: false,
+                fsm1: (
+                    value: 15,
+                    currentState: exit,
+                    previousState: initial
+                ),
+                fsm2: (
+                    value: 25,
+                    currentState: exit,
+                    previousState: exit
+                ),
+                targets: [
+                    target(
+                        executing: fsm2Name,
+                        readState: true,
+                        resetClock: false,
+                        duration: fsm1Gap,
+                        fsm1: (
+                            value: 15,
+                            currentState: exit,
                             previousState: initial
+                        ),
+                        fsm2: (
+                            value: 25,
+                            currentState: exit,
+                            previousState: exit
+                        ),
+                        constraint: nil
+                    )
+                ]
+            ),
+            kripkeState(
+                executing: fsm1Name,
+                readState: false,
+                fsm1: (
+                    value: 25,
+                    currentState: exit,
+                    previousState: initial
+                ),
+                fsm2: (
+                    value: 25,
+                    currentState: exit,
+                    previousState: exit
+                ),
+                targets: [
+                    target(
+                        executing: fsm2Name,
+                        readState: true,
+                        resetClock: false,
+                        duration: fsm1Gap,
+                        fsm1: (
+                            value: 25,
+                            currentState: exit,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 25,
+                            currentState: exit,
+                            previousState: exit
+                        ),
+                        constraint: nil
+                    )
+                ]
+            ),
+            // MARK: - (W(fsm2), (*, initial|exit, initial), (15, exit, exit))
+            kripkeState(
+                executing: fsm2Name,
+                readState: false,
+                fsm1: (
+                    value: 0,
+                    currentState: initial,
+                    previousState: initial
+                ),
+                fsm2: (
+                    value: 15,
+                    currentState: exit,
+                    previousState: exit
+                ),
+                targets: [
+                    target(
+                        executing: fsm1Name,
+                        readState: true,
+                        resetClock: false,
+                        duration: fsm2Gap,
+                        fsm1: (
+                            value: 0,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 15,
+                            currentState: exit,
+                            previousState: exit
+                        ),
+                        constraint: nil
+                    )
+                ]
+            ),
+            kripkeState(
+                executing: fsm2Name,
+                readState: false,
+                fsm1: (
+                    value: 5,
+                    currentState: initial,
+                    previousState: initial
+                ),
+                fsm2: (
+                    value: 15,
+                    currentState: exit,
+                    previousState: exit
+                ),
+                targets: [
+                    target(
+                        executing: fsm1Name,
+                        readState: true,
+                        resetClock: false,
+                        duration: fsm2Gap,
+                        fsm1: (
+                            value: 5,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 15,
+                            currentState: exit,
+                            previousState: exit
+                        ),
+                        constraint: nil
+                    )
+                ]
+            ),
+            kripkeState(
+                executing: fsm2Name,
+                readState: false,
+                fsm1: (
+                    value: 15,
+                    currentState: initial,
+                    previousState: initial
+                ),
+                fsm2: (
+                    value: 15,
+                    currentState: exit,
+                    previousState: exit
+                ),
+                targets: [
+                    target(
+                        executing: fsm1Name,
+                        readState: true,
+                        resetClock: false,
+                        duration: fsm2Gap,
+                        fsm1: (
+                            value: 15,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 15,
+                            currentState: exit,
+                            previousState: exit
+                        ),
+                        constraint: nil
+                    )
+                ]
+            ),
+            kripkeState(
+                executing: fsm2Name,
+                readState: false,
+                fsm1: (
+                    value: 15,
+                    currentState: exit,
+                    previousState: initial
+                ),
+                fsm2: (
+                    value: 15,
+                    currentState: exit,
+                    previousState: exit
+                ),
+                targets: [
+                    target(
+                        executing: fsm1Name,
+                        readState: true,
+                        resetClock: true,
+                        duration: fsm2Gap,
+                        fsm1: (
+                            value: 15,
+                            currentState: exit,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 15,
+                            currentState: exit,
+                            previousState: exit
+                        ),
+                        constraint: nil
+                    )
+                ]
+            ),
+            kripkeState(
+                executing: fsm2Name,
+                readState: false,
+                fsm1: (
+                    value: 25,
+                    currentState: exit,
+                    previousState: initial
+                ),
+                fsm2: (
+                    value: 15,
+                    currentState: exit,
+                    previousState: exit
+                ),
+                targets: [
+                    target(
+                        executing: fsm1Name,
+                        readState: true,
+                        resetClock: true,
+                        duration: fsm2Gap,
+                        fsm1: (
+                            value: 25,
+                            currentState: exit,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 15,
+                            currentState: exit,
+                            previousState: exit
+                        ),
+                        constraint: nil
+                    )
+                ]
+            ),
+            // MARK: (W(fsm2), (*, initial|exit, initial), (25, exit, exit))
+            kripkeState(
+                executing: fsm2Name,
+                readState: false,
+                fsm1: (
+                    value: 0,
+                    currentState: initial,
+                    previousState: initial
+                ),
+                fsm2: (
+                    value: 25,
+                    currentState: exit,
+                    previousState: exit
+                ),
+                targets: [
+                    target(
+                        executing: fsm1Name,
+                        readState: true,
+                        resetClock: false,
+                        duration: fsm2Gap,
+                        fsm1: (
+                            value: 0,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 25,
+                            currentState: exit,
+                            previousState: exit
+                        ),
+                        constraint: nil
+                    )
+                ]
+            ),
+            kripkeState(
+                executing: fsm2Name,
+                readState: false,
+                fsm1: (
+                    value: 5,
+                    currentState: initial,
+                    previousState: initial
+                ),
+                fsm2: (
+                    value: 25,
+                    currentState: exit,
+                    previousState: exit
+                ),
+                targets: [
+                    target(
+                        executing: fsm1Name,
+                        readState: true,
+                        resetClock: false,
+                        duration: fsm2Gap,
+                        fsm1: (
+                            value: 5,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 25,
+                            currentState: exit,
+                            previousState: exit
+                        ),
+                        constraint: nil
+                    )
+                ]
+            ),
+            kripkeState(
+                executing: fsm2Name,
+                readState: false,
+                fsm1: (
+                    value: 15,
+                    currentState: initial,
+                    previousState: initial
+                ),
+                fsm2: (
+                    value: 25,
+                    currentState: exit,
+                    previousState: exit
+                ),
+                targets: [
+                    target(
+                        executing: fsm1Name,
+                        readState: true,
+                        resetClock: false,
+                        duration: fsm2Gap,
+                        fsm1: (
+                            value: 15,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        fsm2: (
+                            value: 25,
+                            currentState: exit,
+                            previousState: exit
                         ),
                         constraint: nil
                     )
@@ -3414,14 +9838,14 @@ struct TimedKripkeStructure: KripkeStructureProtocol {
                 fsm2: (
                     value: 25,
                     currentState: exit,
-                    previousState: initial
+                    previousState: exit
                 ),
                 targets: [
                     target(
-                        executing: fsm2Name,
+                        executing: fsm1Name,
                         readState: true,
                         resetClock: true,
-                        duration: fsm1Gap,
+                        duration: fsm2Gap,
                         fsm1: (
                             value: 15,
                             currentState: exit,
@@ -3430,14 +9854,14 @@ struct TimedKripkeStructure: KripkeStructureProtocol {
                         fsm2: (
                             value: 25,
                             currentState: exit,
-                            previousState: initial
+                            previousState: exit
                         ),
                         constraint: nil
                     )
                 ]
             ),
             kripkeState(
-                executing: fsm1Name,
+                executing: fsm2Name,
                 readState: false,
                 fsm1: (
                     value: 25,
@@ -3447,18 +9871,184 @@ struct TimedKripkeStructure: KripkeStructureProtocol {
                 fsm2: (
                     value: 25,
                     currentState: exit,
-                    previousState: initial
+                    previousState: exit
                 ),
                 targets: [
                     target(
-                        executing: fsm2Name,
+                        executing: fsm1Name,
                         readState: true,
                         resetClock: true,
-                        duration: fsm1Gap,
+                        duration: fsm2Gap,
                         fsm1: (
                             value: 25,
                             currentState: exit,
                             previousState: initial
+                        ),
+                        fsm2: (
+                            value: 25,
+                            currentState: exit,
+                            previousState: exit
+                        ),
+                        constraint: nil
+                    )
+                ]
+            ),
+            // MARK: - (W(fsm2), (15, exit, exit), (*, initial|exit, initial))
+            kripkeState(
+                executing: fsm2Name,
+                readState: false,
+                fsm1: (
+                    value: 15,
+                    currentState: exit,
+                    previousState: exit
+                ),
+                fsm2: (
+                    value: 0,
+                    currentState: initial,
+                    previousState: initial
+                ),
+                targets: [
+                    target(
+                        executing: fsm1Name,
+                        readState: true,
+                        resetClock: false,
+                        duration: fsm2Gap,
+                        fsm1: (
+                            value: 15,
+                            currentState: exit,
+                            previousState: exit
+                        ),
+                        fsm2: (
+                            value: 0,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        constraint: nil
+                    )
+                ]
+            ),
+            kripkeState(
+                executing: fsm2Name,
+                readState: false,
+                fsm1: (
+                    value: 15,
+                    currentState: exit,
+                    previousState: exit
+                ),
+                fsm2: (
+                    value: 5,
+                    currentState: initial,
+                    previousState: initial
+                ),
+                targets: [
+                    target(
+                        executing: fsm1Name,
+                        readState: true,
+                        resetClock: false,
+                        duration: fsm2Gap,
+                        fsm1: (
+                            value: 15,
+                            currentState: exit,
+                            previousState: exit
+                        ),
+                        fsm2: (
+                            value: 5,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        constraint: nil
+                    )
+                ]
+            ),
+            kripkeState(
+                executing: fsm2Name,
+                readState: false,
+                fsm1: (
+                    value: 15,
+                    currentState: exit,
+                    previousState: exit
+                ),
+                fsm2: (
+                    value: 15,
+                    currentState: initial,
+                    previousState: initial
+                ),
+                targets: [
+                    target(
+                        executing: fsm1Name,
+                        readState: true,
+                        resetClock: false,
+                        duration: fsm2Gap,
+                        fsm1: (
+                            value: 15,
+                            currentState: exit,
+                            previousState: exit
+                        ),
+                        fsm2: (
+                            value: 15,
+                            currentState: initial,
+                            previousState: initial
+                        ),
+                        constraint: nil
+                    )
+                ]
+            ),
+            kripkeState(
+                executing: fsm2Name,
+                readState: false,
+                fsm1: (
+                    value: 15,
+                    currentState: exit,
+                    previousState: exit
+                ),
+                fsm2: (
+                    value: 15,
+                    currentState: exit,
+                    previousState: initial
+                ),
+                targets: [
+                    target(
+                        executing: fsm1Name,
+                        readState: true,
+                        resetClock: false,
+                        duration: fsm2Gap,
+                        fsm1: (
+                            value: 15,
+                            currentState: exit,
+                            previousState: exit
+                        ),
+                        fsm2: (
+                            value: 15,
+                            currentState: exit,
+                            previousState: initial
+                        ),
+                        constraint: nil
+                    )
+                ]
+            ),
+            kripkeState(
+                executing: fsm2Name,
+                readState: false,
+                fsm1: (
+                    value: 15,
+                    currentState: exit,
+                    previousState: exit
+                ),
+                fsm2: (
+                    value: 25,
+                    currentState: exit,
+                    previousState: initial
+                ),
+                targets: [
+                    target(
+                        executing: fsm1Name,
+                        readState: true,
+                        resetClock: false,
+                        duration: fsm2Gap,
+                        fsm1: (
+                            value: 15,
+                            currentState: exit,
+                            previousState: exit
                         ),
                         fsm2: (
                             value: 25,
@@ -3469,13 +10059,14 @@ struct TimedKripkeStructure: KripkeStructureProtocol {
                     )
                 ]
             ),
+            // MARK: (W(fsm2), (25, exit, exit), (*, initial|exit, initial))
             kripkeState(
-                executing: fsm1Name,
-                readState: true,
+                executing: fsm2Name,
+                readState: false,
                 fsm1: (
-                    value: 5,
-                    currentState: initial,
-                    previousState: initial
+                    value: 25,
+                    currentState: exit,
+                    previousState: exit
                 ),
                 fsm2: (
                     value: 0,
@@ -3485,191 +10076,278 @@ struct TimedKripkeStructure: KripkeStructureProtocol {
                 targets: [
                     target(
                         executing: fsm1Name,
-                        readState: false,
+                        readState: true,
                         resetClock: false,
-                        duration: fsm1.duration,
-                        fsm1: (
-                            value: 0,
-                            currentState: initial,
-                            previousState: initial
-                        ),
-                        fsm2: (
-                            value: 0,
-                            currentState: initial,
-                            previousState: initial
-                        ),
-                        constraint: .lessThanEqual(value: 5000)
-                    ),
-                    target(
-                        executing: fsm1Name,
-                        readState: false,
-                        resetClock: false,
-                        duration: fsm1.duration,
-                        fsm1: (
-                            value: 5,
-                            currentState: initial,
-                            previousState: initial
-                        ),
-                        fsm2: (
-                            value: 0,
-                            currentState: initial,
-                            previousState: initial
-                        ),
-                        constraint: .and(lhs: .greaterThan(value: 5000), rhs: .lessThanEqual(value: 15000))
-                    ),
-                    target(
-                        executing: fsm1Name,
-                        readState: false,
-                        resetClock: false,
-                        duration: fsm1.duration,
-                        fsm1: (
-                            value: 15,
-                            currentState: initial,
-                            previousState: initial
-                        ),
-                        fsm2: (
-                            value: 0,
-                            currentState: initial,
-                            previousState: initial
-                        ),
-                        constraint: .and(lhs: .greaterThan(value: 15000), rhs: .lessThanEqual(value: 20000))
-                    ),
-                    target(
-                        executing: fsm1Name,
-                        readState: false,
-                        resetClock: false,
-                        duration: fsm1.duration,
-                        fsm1: (
-                            value: 15,
-                            currentState: exit,
-                            previousState: initial
-                        ),
-                        fsm2: (
-                            value: 0,
-                            currentState: initial,
-                            previousState: initial
-                        ),
-                        constraint: .and(lhs: .greaterThan(value: 20000), rhs: .lessThanEqual(value: 25000))
-                    ),
-                    target(
-                        executing: fsm1Name,
-                        readState: false,
-                        resetClock: false,
-                        duration: fsm1.duration,
+                        duration: fsm2Gap,
                         fsm1: (
                             value: 25,
                             currentState: exit,
-                            previousState: initial
+                            previousState: exit
                         ),
                         fsm2: (
                             value: 0,
                             currentState: initial,
                             previousState: initial
                         ),
-                        constraint: .greaterThan(value: 25000)
+                        constraint: nil
                     )
                 ]
             ),
             kripkeState(
-                executing: fsm1Name,
-                readState: true,
+                executing: fsm2Name,
+                readState: false,
                 fsm1: (
-                    value: 15,
-                    currentState: initial,
-                    previousState: initial
+                    value: 25,
+                    currentState: exit,
+                    previousState: exit
                 ),
                 fsm2: (
-                    value: 0,
+                    value: 5,
                     currentState: initial,
                     previousState: initial
                 ),
                 targets: [
                     target(
                         executing: fsm1Name,
-                        readState: false,
+                        readState: true,
                         resetClock: false,
-                        duration: fsm1.duration,
+                        duration: fsm2Gap,
                         fsm1: (
-                            value: 0,
-                            currentState: initial,
-                            previousState: initial
+                            value: 25,
+                            currentState: exit,
+                            previousState: exit
                         ),
                         fsm2: (
-                            value: 0,
-                            currentState: initial,
-                            previousState: initial
-                        ),
-                        constraint: .lessThanEqual(value: 5000)
-                    ),
-                    target(
-                        executing: fsm1Name,
-                        readState: false,
-                        resetClock: false,
-                        duration: fsm1.duration,
-                        fsm1: (
                             value: 5,
                             currentState: initial,
                             previousState: initial
                         ),
-                        fsm2: (
-                            value: 0,
-                            currentState: initial,
-                            previousState: initial
-                        ),
-                        constraint: .and(lhs: .greaterThan(value: 5000), rhs: .lessThanEqual(value: 15000))
-                    ),
+                        constraint: nil
+                    )
+                ]
+            ),
+            kripkeState(
+                executing: fsm2Name,
+                readState: false,
+                fsm1: (
+                    value: 25,
+                    currentState: exit,
+                    previousState: exit
+                ),
+                fsm2: (
+                    value: 15,
+                    currentState: initial,
+                    previousState: initial
+                ),
+                targets: [
                     target(
                         executing: fsm1Name,
-                        readState: false,
+                        readState: true,
                         resetClock: false,
-                        duration: fsm1.duration,
+                        duration: fsm2Gap,
                         fsm1: (
+                            value: 25,
+                            currentState: exit,
+                            previousState: exit
+                        ),
+                        fsm2: (
                             value: 15,
                             currentState: initial,
                             previousState: initial
                         ),
-                        fsm2: (
-                            value: 0,
-                            currentState: initial,
-                            previousState: initial
-                        ),
-                        constraint: .and(lhs: .greaterThan(value: 15000), rhs: .lessThanEqual(value: 20000))
-                    ),
+                        constraint: nil
+                    )
+                ]
+            ),
+            kripkeState(
+                executing: fsm2Name,
+                readState: false,
+                fsm1: (
+                    value: 25,
+                    currentState: exit,
+                    previousState: exit
+                ),
+                fsm2: (
+                    value: 15,
+                    currentState: exit,
+                    previousState: initial
+                ),
+                targets: [
                     target(
                         executing: fsm1Name,
-                        readState: false,
+                        readState: true,
                         resetClock: false,
-                        duration: fsm1.duration,
+                        duration: fsm2Gap,
                         fsm1: (
+                            value: 25,
+                            currentState: exit,
+                            previousState: exit
+                        ),
+                        fsm2: (
                             value: 15,
                             currentState: exit,
                             previousState: initial
                         ),
-                        fsm2: (
-                            value: 0,
-                            currentState: initial,
-                            previousState: initial
-                        ),
-                        constraint: .and(lhs: .greaterThan(value: 20000), rhs: .lessThanEqual(value: 25000))
-                    ),
+                        constraint: nil
+                    )
+                ]
+            ),
+            kripkeState(
+                executing: fsm2Name,
+                readState: false,
+                fsm1: (
+                    value: 25,
+                    currentState: exit,
+                    previousState: exit
+                ),
+                fsm2: (
+                    value: 25,
+                    currentState: exit,
+                    previousState: initial
+                ),
+                targets: [
                     target(
                         executing: fsm1Name,
-                        readState: false,
+                        readState: true,
                         resetClock: false,
-                        duration: fsm1.duration,
+                        duration: fsm2Gap,
                         fsm1: (
+                            value: 25,
+                            currentState: exit,
+                            previousState: exit
+                        ),
+                        fsm2: (
                             value: 25,
                             currentState: exit,
                             previousState: initial
                         ),
-                        fsm2: (
-                            value: 0,
-                            currentState: initial,
-                            previousState: initial
-                        ),
-                        constraint: .greaterThan(value: 25000)
+                        constraint: nil
                     )
                 ]
+            ),
+            // MARK: - (W(fsm2), (15|25, exit, exit), (15, exit, exit))
+            kripkeState(
+                executing: fsm2Name,
+                readState: false,
+                fsm1: (
+                    value: 15,
+                    currentState: exit,
+                    previousState: exit
+                ),
+                fsm2: (
+                    value: 15,
+                    currentState: exit,
+                    previousState: exit
+                ),
+                targets: []
+            ),
+            kripkeState(
+                executing: fsm2Name,
+                readState: false,
+                fsm1: (
+                    value: 25,
+                    currentState: exit,
+                    previousState: exit
+                ),
+                fsm2: (
+                    value: 15,
+                    currentState: exit,
+                    previousState: exit
+                ),
+                targets: []
+            ),
+            // MARK: (W(fsm2), (15|25, exit, exit), (25, exit, exit))
+            kripkeState(
+                executing: fsm2Name,
+                readState: false,
+                fsm1: (
+                    value: 15,
+                    currentState: exit,
+                    previousState: exit
+                ),
+                fsm2: (
+                    value: 25,
+                    currentState: exit,
+                    previousState: exit
+                ),
+                targets: []
+            ),
+            kripkeState(
+                executing: fsm2Name,
+                readState: false,
+                fsm1: (
+                    value: 25,
+                    currentState: exit,
+                    previousState: exit
+                ),
+                fsm2: (
+                    value: 25,
+                    currentState: exit,
+                    previousState: exit
+                ),
+                targets: []
+            ),
+            // MARK: - (W(fsm1), (15, exit, exit), (15|25, exit, exit))
+            kripkeState(
+                executing: fsm1Name,
+                readState: false,
+                fsm1: (
+                    value: 15,
+                    currentState: exit,
+                    previousState: exit
+                ),
+                fsm2: (
+                    value: 15,
+                    currentState: exit,
+                    previousState: exit
+                ),
+                targets: []
+            ),
+            kripkeState(
+                executing: fsm1Name,
+                readState: false,
+                fsm1: (
+                    value: 15,
+                    currentState: exit,
+                    previousState: exit
+                ),
+                fsm2: (
+                    value: 25,
+                    currentState: exit,
+                    previousState: exit
+                ),
+                targets: []
+            ),
+            // MARK: (W(fsm1), (25, exit, exit), (15|25, exit, exit))
+            kripkeState(
+                executing: fsm1Name,
+                readState: false,
+                fsm1: (
+                    value: 25,
+                    currentState: exit,
+                    previousState: exit
+                ),
+                fsm2: (
+                    value: 15,
+                    currentState: exit,
+                    previousState: exit
+                ),
+                targets: []
+            ),
+            kripkeState(
+                executing: fsm1Name,
+                readState: false,
+                fsm1: (
+                    value: 25,
+                    currentState: exit,
+                    previousState: exit
+                ),
+                fsm2: (
+                    value: 25,
+                    currentState: exit,
+                    previousState: exit
+                ),
+                targets: []
             ),
         ]
     }

@@ -219,16 +219,16 @@ class ScheduleVerifierTests: XCTestCase {
         }
     }
     
-//    func test_canGenerateCombinedTimedKripkeStructure() {
-//        combinedTimed { (verifier, gateway, timer, viewFactory, cycleDetector) in
-//            verifier.verify(gateway: gateway, timer: timer, viewFactory: viewFactory, cycleDetector: cycleDetector)
-//            XCTAssertEqual(viewFactory.createdViews.count, 1)
-//            guard let view = viewFactory.lastView else {
-//                return
-//            }
-//            view.check(readableName: self.readableName)
-//        }
-//    }
+    func test_canGenerateCombinedTimedKripkeStructure() {
+        combinedTimed { (verifier, gateway, timer, viewFactory, cycleDetector) in
+            verifier.verify(gateway: gateway, timer: timer, viewFactory: viewFactory, cycleDetector: cycleDetector)
+            XCTAssertEqual(viewFactory.createdViews.count, 1)
+            guard let view = viewFactory.lastView else {
+                return
+            }
+            view.check(readableName: self.readableName)
+        }
+    }
     
     func test_canGenerateSeparateTimedKripkeStructures() {
         separateTimed { (verifier, gateway, timer, viewFactory, cycleDetector) in
