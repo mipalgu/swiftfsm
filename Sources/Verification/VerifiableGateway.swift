@@ -80,6 +80,7 @@ extension StackGateway: NewVerifiableGateway {
         } set {
             //stacks = [:]
             for fsm in newValue.fsms {
+                stacks[id(of: fsm.name)] = []
                 fsms[id(of: fsm.name)] = fsm
             }
         }
@@ -87,7 +88,6 @@ extension StackGateway: NewVerifiableGateway {
     
     public func replace(_ fsm: FSMType) {
         fsms[id(of: fsm.name)] = fsm
-        
     }
     
     public func setScenario(_ calls: [CallChain], pool: FSMPool) {
