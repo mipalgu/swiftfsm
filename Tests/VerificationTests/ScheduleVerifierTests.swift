@@ -257,6 +257,17 @@ class ScheduleVerifierTests: XCTestCase {
         }
     }
     
+    func test_canGenerateParameterisedCall() {
+        delegateSync { (verifier, gateway, timer, viewFactory, cycleDetector) in
+            verifier.verify(gateway: gateway, timer: timer, viewFactory: viewFactory, cycleDetector: cycleDetector)
+            guard let view: TestableView = viewFactory.createdViews.first(where: { $0.identifier == "DelegateSyncFiniteStateMachine" }) else {
+                XCTFail("Failed to create Kripke Structure View.")
+                return
+            }
+            view.check(readableName: self.readableName)
+        }
+    }
+    
     func test_measureFourSeparateTime() {
         multipleSeparateSensors(4) { (verifier, gateway, timer, viewFactory, cycleDetector) in
             measure {
@@ -295,6 +306,64 @@ class ScheduleVerifierTests: XCTestCase {
                 verifier.verify(gateway: gateway, timer: timer, viewFactory: viewFactory, cycleDetector: cycleDetector)
             }
         }
+    }
+    
+    private func delegateSync<T>(_ make: (ScheduleVerifier<ScheduleIsolator>, StackGateway, FSMClock, TestableViewFactory, HashTableCycleDetector<KripkeStatePropertyList>) -> T) -> T {
+        let fsm = DelegateFiniteStateMachine()
+        let factory: ([String: Any?]) -> AnyParameterisedFiniteStateMachine = {
+            guard let value = $0["value"] as? Int else {
+                fatalError("Unable to fetch value from parameters")
+            }
+            let fsm = CalleeFiniteStateMachine()
+            fsm.parameters.vars.value = value
+            return AnyParameterisedFiniteStateMachine(fsm, newMachine: { _ in fatalError("Should never be called") })
+        }
+        let callee = AnyParameterisedFiniteStateMachine(CalleeFiniteStateMachine(), newMachine: factory)
+        let startingTime: UInt = 10
+        let duration: UInt = 30
+        let cycleLength = startingTime + duration
+        let states = delegateSyncKripkeStructure(fsmName: fsm.name, startingTime: startingTime, duration: duration, cycleLength: cycleLength)
+        let gateway = StackGateway()
+        let calleeId = gateway.id(of: callee.name)
+        gateway.stacks[calleeId] = []
+        let timer = FSMClock(ringletLengths: [fsm.name: duration, callee.name: duration], scheduleLength: cycleLength)
+        fsm.gateway = gateway
+        fsm.timer = timer
+        let cycleDetector = HashTableCycleDetector<KripkeStatePropertyList>()
+        let viewFactory = TestableViewFactory {
+            TestableView(identifier: $0, expectedIdentifier: fsm.name, expected: states)
+        }
+        let timeslot = Timeslot(
+            fsms: [fsm.name, callee.name],
+            callChain: CallChain(root: fsm.name, calls: []),
+            startingTime: startingTime,
+            duration: duration,
+            cyclesExecuted: 0
+        )
+        let pool = FSMPool(fsms: [.controllableFSM(AnyControllableFiniteStateMachine(fsm)), .parameterisedFSM(callee)])
+        let isolator = ScheduleIsolator(
+            threads: [
+                IsolatedThread(
+                    map: VerificationMap(
+                        steps: [
+                            VerificationMap.Step(
+                                time: timeslot.startingTime,
+                                step: .takeSnapshotAndStartTimeslot(timeslot: timeslot)
+                            ),
+                            VerificationMap.Step(
+                                time: timeslot.startingTime + timeslot.duration,
+                                step: .executeAndSaveSnapshot(timeslot: timeslot)
+                            )
+                        ],
+                        stepLookup: []
+                    ),
+                    pool: pool
+                )
+            ],
+            cycleLength: timeslot.startingTime + timeslot.duration
+        )
+        let verifier = ScheduleVerifier(isolatedThreads: isolator)
+        return make(verifier, gateway, timer, viewFactory, cycleDetector)
     }
     
     private func combinedTimed<T>(_ make: (ScheduleVerifier<ScheduleIsolator>, StackGateway, FSMClock, TestableViewFactory, HashTableCycleDetector<KripkeStatePropertyList>) -> T) -> T {
@@ -830,6 +899,16 @@ class ScheduleVerifierTests: XCTestCase {
     private func sensorsKripkeStructure(fsmName: String, startingTime: UInt, duration: UInt, cycleLength: UInt) -> Set<KripkeState> {
         var structure = SensorKripkeStructure()
         structure.names[0] = fsmName
+        return structure.single(name: fsmName, startingTime: startingTime, duration: duration, cycleLength: cycleLength)
+    }
+    
+    private func delegateSyncKripkeStructure(
+        fsmName: String,
+        startingTime: UInt,
+        duration: UInt,
+        cycleLength: UInt
+    ) -> Set<KripkeState> {
+        var structure = SyncDelegateKripkeStructure()
         return structure.single(name: fsmName, startingTime: startingTime, duration: duration, cycleLength: cycleLength)
     }
     

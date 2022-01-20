@@ -139,27 +139,141 @@ struct SyncDelegateKripkeStructure: KripkeStructureProtocol {
         )
     }
     
-    func target(readState: Bool, resetClock: Bool, duration: UInt, data: (syncCall: Bool, result: Bool??), currentState: String, previousState: String) -> (String, Bool, KripkeStatePropertyList, UInt, Constraint<UInt>?) {
+    func target(readState: Bool, resetClock: Bool, duration: UInt, data: (syncCall: Bool, result: Bool??), currentState: String, previousState: String, constraint: Constraint<UInt>? = nil) -> (String, Bool, KripkeStatePropertyList, UInt, Constraint<UInt>?) {
         self.target(
             executing: names[0],
             readState: readState,
             resetClock: resetClock,
             duration: duration,
             fsms: [(data, currentState, previousState)],
-            constraint: nil
+            constraint: constraint
         )
     }
     
     mutating func single(name fsmName: String, startingTime: UInt, duration: UInt, cycleLength: UInt) -> Set<KripkeState> {
         statesLookup.removeAll(keepingCapacity: true)
         names = [fsmName]
+        let gap = cycleLength - duration - startingTime
+        let syncCall = false
         let fsm = SensorFiniteStateMachine()
         fsm.name = fsmName
         let initial = fsm.initialState.name
         let previous = fsm.initialPreviousState.name
         let exit = fsm.exitState.name
         return [
-            
+            kripkeState(
+                readState: true,
+                value: (syncCall: syncCall, result: nil),
+                currentState: initial,
+                previousState: previous,
+                targets: [
+                    target(
+                        readState: false,
+                        resetClock: false,
+                        duration: duration,
+                        data: (syncCall: syncCall, result: .some(nil)),
+                        currentState: initial,
+                        previousState: initial
+                    )
+                ]
+            ),
+            kripkeState(
+                readState: false,
+                value: (syncCall: syncCall, result: nil),
+                currentState: initial,
+                previousState: initial,
+                targets: [
+                    target(
+                        readState: true,
+                        resetClock: false,
+                        duration: gap,
+                        data: (syncCall: syncCall, result: .some(nil)),
+                        currentState: initial,
+                        previousState: initial,
+                        constraint: .lessThan(value: cycleLength * 2)
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: false,
+                        duration: gap,
+                        data: (syncCall: syncCall, result: .some(false)),
+                        currentState: initial,
+                        previousState: initial,
+                        constraint: .greaterThanEqual(value: cycleLength * 2)
+                    )
+                ]
+            ),
+            kripkeState(
+                readState: true,
+                value: (syncCall: syncCall, result: .some(nil)),
+                currentState: initial,
+                previousState: initial,
+                targets: [
+                    target(
+                        readState: false,
+                        resetClock: false,
+                        duration: duration,
+                        data: (syncCall: syncCall, result: .some(nil)),
+                        currentState: initial,
+                        previousState: initial
+                    )
+                ]
+            ),
+            kripkeState(
+                readState: true,
+                value: (syncCall: syncCall, result: .some(false)),
+                currentState: initial,
+                previousState: initial,
+                targets: [
+                    target(
+                        readState: false,
+                        resetClock: false,
+                        duration: duration,
+                        data: (syncCall: syncCall, result: .some(false)),
+                        currentState: exit,
+                        previousState: initial
+                    )
+                ]
+            ),
+            kripkeState(
+                readState: false,
+                value: (syncCall: syncCall, result: .some(false)),
+                currentState: exit,
+                previousState: initial,
+                targets: [
+                    target(
+                        readState: true,
+                        resetClock: true,
+                        duration: gap,
+                        data: (syncCall: syncCall, result: .some(false)),
+                        currentState: exit,
+                        previousState: initial
+                    )
+                ]
+            ),
+            kripkeState(
+                readState: true,
+                value: (syncCall: syncCall, result: .some(false)),
+                currentState: exit,
+                previousState: initial,
+                targets: [
+                    target(
+                        readState: false,
+                        resetClock: false,
+                        duration: duration,
+                        data: (syncCall: syncCall, result: .some(false)),
+                        currentState: exit,
+                        previousState: exit
+                    )
+                ]
+            ),
+            kripkeState(
+                readState: false,
+                value: (syncCall: syncCall, result: .some(false)),
+                currentState: exit,
+                previousState: exit,
+                targets: []
+            )
         ]
     }
     
