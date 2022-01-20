@@ -173,8 +173,6 @@ final class DelegateFiniteStateMachine: MachineProtocol, CustomStringConvertible
     var calleeName: String = "CalleeFiniteStateMachine"
     
     var syncCall: Bool = true
-    
-    var value: Int = 0
 
     lazy var initialState: MiPalState = {
         InitialState(
@@ -225,7 +223,6 @@ final class DelegateFiniteStateMachine: MachineProtocol, CustomStringConvertible
         }
         fsm.gateway = gateway
         fsm.timer = timer
-        fsm.value = value
         fsm.ringlet = ringlet.clone()
         if fsm.ringlet.previousState.name == initialState.name {
             fsm.ringlet.previousState = fsm.initialState
@@ -237,7 +234,7 @@ final class DelegateFiniteStateMachine: MachineProtocol, CustomStringConvertible
     
     init() {}
     
-    convenience init(value: Int, currentState: String, previousState: String) {
+    convenience init(currentState: String, previousState: String) {
         self.init()
         if currentState == "initial" {
             self.currentState = self.initialState
@@ -249,7 +246,6 @@ final class DelegateFiniteStateMachine: MachineProtocol, CustomStringConvertible
         } else {
             self.previousState = EmptyMiPalState(previousState)
         }
-        self.value = value
         self.ringlet.previousState = self.previousState
         self.ringlet.shouldExecuteOnEntry = self.previousState != self.currentState
     }
