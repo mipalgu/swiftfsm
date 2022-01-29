@@ -95,6 +95,8 @@ public struct FSMPool {
     
     func index(of name: String) -> FSM_ID {
         guard let index = indexes[name] else {
+            print(name)
+            print(indexes)
             fatalError("Attempting to fetch index of fsm that doesn't exist within the pool.")
         }
         return index

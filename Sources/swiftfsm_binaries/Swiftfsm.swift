@@ -120,6 +120,7 @@ public struct Swiftfsm {
             }) else {
                 fatalError("Unable to load dependencies from shallow dependencies")
             }
+            print(fsmType.name)
             gateway.fsms[id] = fsmType
             return (fsmType, dependencies)
         }

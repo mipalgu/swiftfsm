@@ -154,6 +154,9 @@ struct ScheduleVerifier<Isolator: ScheduleIsolatorProtocol> {
                     let fsms = step.step.timeslots
                     let startTimeslot = step.step.startTimeslot
                     let fsm = startTimeslot ? fsms.first?.callChain.fsm(fromPool: job.pool) : nil
+                    if fsm?.currentState.name == "SkipGarbage" {
+                        print("Checking Skip_Garbage")
+                    }
                     let pools: [FSMPool]
                     if step.step.takeSnapshot {
                         pools = generator.takeSnapshot(forFsms: fsms.map { $0.callChain.fsm(fromPool: job.pool) }, in: job.pool)
@@ -196,6 +199,9 @@ struct ScheduleVerifier<Isolator: ScheduleIsolatorProtocol> {
                     }
                 case .execute(let timeslot), .executeAndSaveSnapshot(let timeslot):
                     let fsm = timeslot.callChain.fsm(fromPool: job.pool)
+                    if fsm.currentState.name == "SkipGarbage" {
+                        print("Executing Skip_Garbage: \(fsm.asScheduleableFiniteStateMachine)")
+                    }
                     let currentState = fsm.currentState.name
                     let ringlets = generator.execute(timeslot: timeslot, inPool: job.pool, gateway: gateway, timer: timer)
                     for ringlet in ringlets {
@@ -235,6 +241,22 @@ struct ScheduleVerifier<Isolator: ScheduleIsolatorProtocol> {
                 }
             }
         }
+    }
+    
+}
+
+extension AnyScheduleableFiniteStateMachine: CustomStringConvertible {
+    
+    public var description: String {
+        "\(base)"
+    }
+    
+}
+
+extension AnySnapshotController: CustomStringConvertible {
+    
+    public var description: String {
+        "\(base)"
     }
     
 }
