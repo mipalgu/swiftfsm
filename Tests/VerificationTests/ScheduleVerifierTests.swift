@@ -262,11 +262,101 @@ class ScheduleVerifierTests: XCTestCase {
         print(counts)
         for (index, view) in viewFactory.createdViews.enumerated() {
             let outputView = GraphVizKripkeStructureView<KripkeState>(filename: "\(wbVars[index].0).gv")
+            let nusmvView = NuSMVKripkeStructureView<KripkeState>(identifier: "\(wbVars[index].0)")
             outputView.reset(usingClocks: true)
+            nusmvView.reset(usingClocks: true)
             for state in view.result.sorted(by: { $0.properties.description < $1.properties.description }) {
                 outputView.commit(state: state)
+                nusmvView.commit(state: state)
             }
             outputView.finish()
+            nusmvView.finish()
+        }
+    }
+    
+    func test_canGenerateCombinedSonarMachines() {
+        let wbVars = [
+            ("Sonar23", kwb_Arduino2Pin_v, kwb_Arduino3Pin_v, kwb_Arduino2PinValue_v),
+            ("Sonar45", kwb_Arduino4Pin_v, kwb_Arduino5Pin_v, kwb_Arduino4PinValue_v),
+            ("Sonar67", kwb_Arduino6Pin_v, kwb_Arduino7Pin_v, kwb_Arduino6PinValue_v)
+        ]
+        let gateway = StackGateway()
+        let timeslotLength: UInt = 244
+        let clock = FSMClock(
+            ringletLengths: Dictionary(uniqueKeysWithValues: wbVars.map { ($0.0, timeslotLength) }),
+            scheduleLength: UInt(wbVars.count) * timeslotLength
+        )
+        let machines: [FSMType] = wbVars.map {
+            let caller = gateway.id(of: $0)
+            return make_Sonar(
+                name: $0,
+                gateway: gateway,
+                clock: clock,
+                caller: caller,
+                echoPin: $1,
+                triggerPin: $2,
+                echoPinValue: $3
+            ).0
+        }
+        let pool = FSMPool(fsms: machines)
+        let steps = wbVars.enumerated().flatMap { (index, data) in
+            [
+                VerificationMap.Step(
+                    time: 0,
+                    step: .takeSnapshotAndStartTimeslot(
+                        timeslot: Timeslot(
+                            fsms: [data.0],
+                            callChain: CallChain(root: data.0, calls: []),
+                            startingTime: UInt(index) * timeslotLength,
+                            duration: timeslotLength,
+                            cyclesExecuted: 0
+                        )
+                    )
+                ),
+                VerificationMap.Step(
+                    time: timeslotLength,
+                    step: .executeAndSaveSnapshot(
+                        timeslot: Timeslot(
+                            fsms: [data.0],
+                            callChain: CallChain(root: data.0, calls: []),
+                            startingTime: UInt(index) * timeslotLength,
+                            duration: timeslotLength,
+                            cyclesExecuted: 0
+                        )
+                    )
+                )
+            ]
+        }
+        let threads = [
+            IsolatedThread(map: VerificationMap(steps: steps, stepLookup: []), pool: pool)
+        ]
+        let verifier = ScheduleVerifier(
+            isolatedThreads: ScheduleIsolator(
+                threads: threads,
+                cycleLength: UInt(wbVars.count) * timeslotLength
+            )
+        )
+        let viewFactory = TestableViewFactory { name in
+            guard nil != wbVars.first(where: { $0.0 ==  name}) else {
+                XCTFail("Unexepected view name: \(name)")
+                return TestableView(identifier: name, expectedIdentifier: "", expected: [])
+            }
+            return TestableView(identifier: name, expectedIdentifier: name, expected: [])
+        }
+        verifier.verify(gateway: gateway, timer: clock, viewFactory: viewFactory, cycleDetector: HashTableCycleDetector())
+        let counts = viewFactory.createdViews.map(\.commits.count)
+        print(counts)
+        for (index, view) in viewFactory.createdViews.enumerated() {
+            let outputView = GraphVizKripkeStructureView<KripkeState>(filename: "\(wbVars[index].0).gv")
+            let nusmvView = NuSMVKripkeStructureView<KripkeState>(identifier: "\(wbVars[index].0)")
+            outputView.reset(usingClocks: true)
+            nusmvView.reset(usingClocks: true)
+            for state in view.result.sorted(by: { $0.properties.description < $1.properties.description }) {
+                outputView.commit(state: state)
+                nusmvView.commit(state: state)
+            }
+            outputView.finish()
+            nusmvView.finish()
         }
     }
     
