@@ -62,6 +62,10 @@ let package = Package(
             targets: ["swiftfsm_verify"]
         ),
         .library(
+            name: "Verification",
+            targets: ["Verification"]
+        ),
+        .library(
             name: "CFSMs",
             type: .dynamic,
             targets: ["CFSMs", "CLReflect"]
