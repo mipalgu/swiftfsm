@@ -58,26 +58,26 @@
  */
 
 import swiftfsm
-//
-//extension Bool: ExternalVariables, KripkeVariablesModifier {
-//
-//    public var computedVars: [String: Any] {
-//        return ["value": self]
-//    }
-//
-//    public var manipulators: [String: (Any) -> Any] {
-//        return [:]
-//    }
-//
-//    public var validVars: [String: [Any]] {
-//        return [:]
-//    }
-//
-//    public init(fromDictionary dict: [String: Any?]) {
-//        guard let value = dict["value"] as? Bool else {
-//            fatalError("Unable to convert \(dict) to Bool.")
-//        }
-//        self = value
-//    }
-//
-//}
+
+extension Bool: ExternalVariables, KripkeVariablesModifier {
+
+    public var computedVars: [String: Any] {
+        return ["value": self]
+    }
+
+    public var manipulators: [String: (Any) -> Any] {
+        return [:]
+    }
+
+    public var validVars: [String: [Any]] {
+        return [:]
+    }
+
+    public init(fromDictionary dict: [String: Any?]) {
+        guard let value = dict["value"] as? Bool else {
+            fatalError("Unable to convert \(dict) to Bool.")
+        }
+        self = value
+    }
+
+}

@@ -14,7 +14,6 @@ let foundationDeps: [Target.Dependency] = [.byName(name: "Machines"), .product(n
 let deps = [
     .package(name: "FSM", url: "git@github.com:mipalgu/FSM", .branch("verification")),
     .package(name: "Machines", url: "https://github.com/mipalgu/Machines", .branch("verification")),
-    .package(name: "SwiftfsmWBWrappers", url: "https://github.com/mipalgu/SwiftfsmWBWrappers", .branch("main")),
     .package(name: "swift_helpers", url: "https://github.com/mipalgu/swift_helpers", .branch("main"))
 ] + normalDependencies
 
@@ -92,7 +91,6 @@ let package = Package(
         .target(name: "Verification", dependencies: ["MachineStructure", "Scheduling", "Timers", "Gateways", "FSM", "KripkeStructure", "KripkeStructureViews", .product(name: "Hashing", package: "swift_helpers")]),
         .target(name: "Parsing", dependencies: ["Scheduling", "Timers", "Verification", "MachineCompiling", "FSM"]),
         .target(name: "CFSMWrappers", dependencies: ["Libraries", "Scheduling", "Timers", "FSM", "CLReflect"]),
-        .target(name: "SonarMachine", dependencies: ["SwiftfsmWBWrappers", "FSM"]),
         .target(
             name: "swiftfsm_binaries",
             dependencies: [
@@ -228,8 +226,7 @@ let package = Package(
                 .target(name: "Verification"),
                 .target(name: "CTests"),
                 .target(name: "swiftfsm_binaries"),
-                .product(name: "swift_helpers", package: "swift_helpers"),
-                .target(name: "SonarMachine")
+                .product(name: "swift_helpers", package: "swift_helpers")
             ],
             exclude: ["machines"]
         ),

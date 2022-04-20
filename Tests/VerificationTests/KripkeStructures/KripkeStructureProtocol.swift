@@ -86,6 +86,30 @@ protocol KripkeStructureProtocol {
 
 extension KripkeStructureProtocol {
     
+    mutating func initialKripkeState(
+        targets: [(executing: String, resetClock: Bool, target: KripkeStatePropertyList, duration: UInt, constraint: Constraint<UInt>?)]
+    ) -> KripkeState {
+        let properties: KripkeStatePropertyList = ["pc": KripkeStateProperty("initial")]
+        let edges = targets.map {
+            KripkeEdge(
+                clockName: $0,
+                constraint: $4,
+                resetClock: $1,
+                takeSnapshot: true,
+                time: $3,
+                target: $2
+            )
+        }
+        let state = KripkeState(isInitial: true, properties: properties)
+        if nil == statesLookup[properties] {
+            statesLookup[properties] = state
+        }
+        for edge in edges {
+            state.addEdge(edge)
+        }
+        return state
+    }
+    
     func propertyList(
         executing: String,
         readState: Bool,
@@ -163,7 +187,7 @@ extension KripkeStructureProtocol {
                 target: $2
             )
         }
-        let state = statesLookup[properties] ?? KripkeState(isInitial: executing == names[0] && fsms[0].previousState == fsm.initialPreviousState.name, properties: properties)
+        let state = statesLookup[properties] ?? KripkeState(isInitial: false, properties: properties)
         if nil == statesLookup[properties] {
             statesLookup[properties] = state
         }
