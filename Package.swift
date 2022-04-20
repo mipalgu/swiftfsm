@@ -87,7 +87,7 @@ let package = Package(
         .target(name: "MachineLoading", dependencies: convert(["Libraries", "Gateways", "swiftfsm_helpers", "MachineCompiling", "FSM"]) + foundationDeps),
         .target(name: "MachineCompiling", dependencies: ["FSM"] + foundationDeps),
         .target(name: "Scheduling", dependencies: ["MachineStructure", "MachineLoading", "Timers", "Gateways", "FSM"]),
-        .target(name: "KripkeStructure", dependencies: ["FSM"]),
+        .target(name: "KripkeStructure", dependencies: ["swift_helpers", "FSM"]),
         .target(name: "KripkeStructureViews", dependencies: ["KripkeStructure", "FSM", .product(name: "IO", package: "swift_helpers")]),
         .target(name: "Verification", dependencies: ["MachineStructure", "Scheduling", "Timers", "Gateways", "FSM", "KripkeStructure", "KripkeStructureViews", .product(name: "Hashing", package: "swift_helpers")]),
         .target(name: "Parsing", dependencies: ["Scheduling", "Timers", "Verification", "MachineCompiling", "FSM"]),
