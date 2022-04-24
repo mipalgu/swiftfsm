@@ -143,17 +143,6 @@ struct TimedKripkeStructure: KripkeStructureProtocol {
         let previous = fsm.initialPreviousState.name
         let exit = fsm.exitState.name
         return [
-            initialKripkeState(targets: [
-                target(
-                    executing: fsmName,
-                    readState: true,
-                    resetClock: true,
-                    duration: startingTime,
-                    value: 0,
-                    currentState: initial,
-                    previousState: previous
-                )
-            ]),
             kripkeState(
                 executing: fsmName,
                 readState: true,
@@ -554,25 +543,6 @@ struct TimedKripkeStructure: KripkeStructureProtocol {
         let fsm1Gap = fsm2.startingTime - fsm1.duration - fsm1.startingTime
         let fsm2Gap = fsm1.startingTime
         return [
-            // MARK: - initial
-            initialKripkeState(targets: [
-                target(
-                    executing: fsm1Name,
-                    readState: true,
-                    resetClock: true,
-                    duration: fsm1.startingTime,
-                    fsm1: (
-                        value: 0,
-                        currentState: initial,
-                        previousState: previous
-                    ),
-                    fsm2: (
-                        value: 0,
-                        currentState: initial,
-                        previousState: previous
-                    )
-                )
-            ]),
             // MARK: - (R(fsm1), (0, initial, previous), (0, initial, previous))
             kripkeState(
                 executing: fsm1Name,

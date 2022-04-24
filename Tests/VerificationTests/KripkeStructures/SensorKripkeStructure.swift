@@ -146,24 +146,6 @@ struct SensorKripkeStructure: KripkeStructureProtocol {
         let previous = fsm.initialPreviousState.name
         let exit = fsm.exitState.name
         return [
-            initialKripkeState(targets: [
-                target(
-                    readState: true,
-                    resetClock: true,
-                    duration: startingTime,
-                    sensorValue: false,
-                    currentState: initial,
-                    previousState: previous
-                ),
-                target(
-                    readState: true,
-                    resetClock: true,
-                    duration: startingTime,
-                    sensorValue: true,
-                    currentState: initial,
-                    previousState: previous
-                )
-            ]),
             kripkeState(
                 readState: true,
                 sensorValue: false,
@@ -251,24 +233,6 @@ struct SensorKripkeStructure: KripkeStructureProtocol {
         let fsm1Gap = fsm2.startingTime - fsm1.duration - fsm1.startingTime
         let fsm2Gap = fsm1.startingTime
         return [
-            initialKripkeState(targets: [
-                target(
-                    executing: fsm1Name,
-                    readState: true,
-                    resetClock: true,
-                    duration: fsm1.startingTime,
-                    fsm1: (sensorValue: false, currentState: initial, previousState: previous),
-                    fsm2: (sensorValue: false, currentState: initial, previousState: previous)
-                ),
-                target(
-                    executing: fsm1Name,
-                    readState: true,
-                    resetClock: true,
-                    duration: fsm1.startingTime,
-                    fsm1: (sensorValue: true, currentState: initial, previousState: previous),
-                    fsm2: (sensorValue: false, currentState: initial, previousState: previous)
-                )
-            ]),
             kripkeState(
                 executing: fsm1Name,
                 readState: true,
