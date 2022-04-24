@@ -93,6 +93,35 @@ class ScheduleVerifierTests: XCTestCase {
             return view
         }
         
+        func outputViews(name: String) {
+            let filemanager = FileManager.default
+            let currentDirectory = URL(fileURLWithPath: filemanager.currentDirectoryPath, isDirectory: true)
+            let buildDirectory = currentDirectory.appendingPathComponent("kripke_structures", isDirectory: true)
+            let testDirectory = buildDirectory.appendingPathComponent(name, isDirectory: true)
+            defer {
+                filemanager.changeCurrentDirectoryPath(currentDirectory.path)
+            }
+            _ = try? filemanager.removeItem(atPath: testDirectory.path)
+            guard
+                let _ = try? filemanager.createDirectory(at: testDirectory, withIntermediateDirectories: true),
+                true == filemanager.changeCurrentDirectoryPath(testDirectory.path)
+            else {
+                fatalError("Unable to create views directory")
+            }
+            for view in createdViews {
+                let outputView = GraphVizKripkeStructureView<KripkeState>(filename: view.identifier + ".gv")
+                let nusmvView = NuSMVKripkeStructureView<KripkeState>(identifier: view.identifier)
+                outputView.reset(usingClocks: true)
+                nusmvView.reset(usingClocks: true)
+                for state in view.result.sorted(by: { $0.properties.description < $1.properties.description }) {
+                    outputView.commit(state: state)
+                    nusmvView.commit(state: state)
+                }
+                outputView.finish()
+                nusmvView.finish()
+            }
+        }
+        
     }
     
     final class TestableView: KripkeStructureView {
@@ -187,6 +216,7 @@ class ScheduleVerifierTests: XCTestCase {
     func test_canGenerateSeparateKripkeStructures() {
         separateSensors { (verifier, gateway, timer, viewFactory, cycleDetector) in
             verifier.verify(gateway: gateway, timer: timer, viewFactory: viewFactory, cycleDetector: cycleDetector)
+            defer { viewFactory.outputViews(name: self.readableName) }
             if viewFactory.createdViews.count != 2 {
                 XCTFail("Incorrect number of views created: \(viewFactory.createdViews.count)")
                 return
@@ -203,6 +233,7 @@ class ScheduleVerifierTests: XCTestCase {
     func test_canGenerateCombinedKripkeStructure() {
         combinedSensors { (verifier, gateway, timer, viewFactory, cycleDetector) in
             verifier.verify(gateway: gateway, timer: timer, viewFactory: viewFactory, cycleDetector: cycleDetector)
+            defer { viewFactory.outputViews(name: self.readableName) }
             XCTAssertEqual(viewFactory.createdViews.count, 1)
             guard let view = viewFactory.lastView else {
                 return
@@ -214,6 +245,7 @@ class ScheduleVerifierTests: XCTestCase {
     func test_canGenerateAllStatesOfSensorFSM() {
         singleSensor { (verifier, gateway, timer, viewFactory, cycleDetector) in
             verifier.verify(gateway: gateway, timer: timer, viewFactory: viewFactory, cycleDetector: cycleDetector)
+            defer { viewFactory.outputViews(name: self.readableName) }
             guard let view: TestableView = viewFactory.lastView else {
                 XCTFail("Failed to create Kripke Structure View.")
                 return
@@ -225,6 +257,7 @@ class ScheduleVerifierTests: XCTestCase {
     func test_canGenerateCombinedTimedKripkeStructure() {
         combinedTimed { (verifier, gateway, timer, viewFactory, cycleDetector) in
             verifier.verify(gateway: gateway, timer: timer, viewFactory: viewFactory, cycleDetector: cycleDetector)
+            defer { viewFactory.outputViews(name: self.readableName) }
             XCTAssertEqual(viewFactory.createdViews.count, 1)
             guard let view = viewFactory.lastView else {
                 return
@@ -236,6 +269,7 @@ class ScheduleVerifierTests: XCTestCase {
     func test_canGenerateSeparateTimedKripkeStructures() {
         separateTimed { (verifier, gateway, timer, viewFactory, cycleDetector) in
             verifier.verify(gateway: gateway, timer: timer, viewFactory: viewFactory, cycleDetector: cycleDetector)
+            defer { viewFactory.outputViews(name: self.readableName) }
             if viewFactory.createdViews.count != 2 {
                 XCTFail("Incorrect number of views created: \(viewFactory.createdViews.count)")
                 return
@@ -252,6 +286,7 @@ class ScheduleVerifierTests: XCTestCase {
     func test_canGenerateAllStatesOfTimeFSM() {
         singleTime { (verifier, gateway, timer, viewFactory, cycleDetector) in
             verifier.verify(gateway: gateway, timer: timer, viewFactory: viewFactory, cycleDetector: cycleDetector)
+            defer { viewFactory.outputViews(name: self.readableName) }
             guard let view: TestableView = viewFactory.lastView else {
                 XCTFail("Failed to create Kripke Structure View.")
                 return
@@ -263,6 +298,7 @@ class ScheduleVerifierTests: XCTestCase {
     func test_canGenerateParameterisedCall() {
         delegateSync { (verifier, gateway, timer, viewFactory, cycleDetector) in
             verifier.verify(gateway: gateway, timer: timer, viewFactory: viewFactory, cycleDetector: cycleDetector)
+            defer { viewFactory.outputViews(name: self.readableName) }
             guard let view: TestableView = viewFactory.createdViews.first(where: { $0.identifier == "DelegateSyncFiniteStateMachine" }) else {
                 XCTFail("Failed to create Kripke Structure View.")
                 return
