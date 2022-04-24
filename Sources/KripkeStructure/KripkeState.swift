@@ -90,7 +90,7 @@ public final class KripkeState: KripkeStateType {
      */
     public let properties: KripkeStatePropertyList
 
-    public private(set) var edges: Set<KripkeEdge> = []
+    public internal(set) var edges: Set<KripkeEdge> = []
     
     private var lookup: [EdgeKey: KripkeEdge] = [:]
 

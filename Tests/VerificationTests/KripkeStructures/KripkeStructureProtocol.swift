@@ -56,7 +56,7 @@
  *
  */
 
-import KripkeStructure
+@testable import KripkeStructure
 import swiftfsm
 
 protocol KripkeStructureProtocol {
@@ -167,9 +167,7 @@ extension KripkeStructureProtocol {
         if nil == statesLookup[properties] {
             statesLookup[properties] = state
         }
-        for edge in edges {
-            state.addEdge(edge)
-        }
+        state.edges = Set(edges)
         return state
     }
     
