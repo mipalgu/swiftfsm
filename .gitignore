@@ -4,3 +4,5 @@ build
 .no-foundation
 Package.swift
 kripke_structures
+*.gv
+*.smv
