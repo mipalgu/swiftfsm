@@ -102,12 +102,19 @@ struct SQLitePersistentStore {
     
     private let edges: EdgesTable
     
-    private let encoder = JSONEncoder()
+    private let encoder: JSONEncoder = {
+        let temp = JSONEncoder()
+        if #available(macOS 10.13, *) {
+            temp.outputFormatting = .sortedKeys
+        }
+        return temp
+    }()
     
     private let decoder = JSONDecoder()
     
     init(named name: String) throws {
         let name = name.components(separatedBy: .whitespacesAndNewlines).joined(separator: "-")
+        try FileManager.default.createDirectory(at: URL(fileURLWithPath: "/tmp/swiftfsm", isDirectory: true), withIntermediateDirectories: true)
         let db = try Connection("/tmp/swiftfsm/\(name).sqlite3")
 
         let states = StatesTable(
@@ -131,15 +138,15 @@ struct SQLitePersistentStore {
         try db.run(edges.table.drop(ifExists: true))
         
         try db.run(states.table.create { t in
-            t.column(states.id, primaryKey: true)
+            t.column(states.id, primaryKey: .autoincrement)
             t.column(states.isInitial)
             t.column(states.propertyList, unique: true)
         })
         
         try db.run(states.table.createIndex(states.isInitial))
         
-        try db.run(edges.table.create { (t: TableBuilder) in
-            t.column(edges.id, primaryKey: true)
+        try db.run(edges.table.create { t in
+            t.column(edges.id, primaryKey: .autoincrement)
             t.column(edges.clockName)
             t.column(edges.constraint)
             t.column(edges.resetClock)
@@ -159,51 +166,71 @@ struct SQLitePersistentStore {
         self.edges = edges
     }
     
-    func add(edge: KripkeEdge, to propertyList: KripkeStatePropertyList) throws {
-        guard let (id, state) = try self.state(for: propertyList) else {
-            fatalError("Unable to fetch state for property list: \(propertyList)")
-        }
-        state.addEdge(edge)
-        let newRows: [[Setter]] = try state.edges.map {
-            [
-                edges.clockName <- $0.clockName,
-                edges.constraint <- try $0.constraint.flatMap { try String(data: encoder.encode($0), encoding: .utf8) },
-                edges.resetClock <- $0.resetClock,
-                edges.takeSnapshot <- $0.takeSnapshot,
-                edges.time <- Int64($0.time),
-                edges.target <- id
-            ]
-        }
+    func add(_ propertyList: KripkeStatePropertyList, isInitial: Bool) throws -> (Int64, KripkeState) {
+        let propertyListStr = try stringRepresentation(of: propertyList)
+        var state: (Int64, KripkeState)? = nil
         try db.transaction {
+            if let row = try db.pluck(states.table.select(states.id).where(states.propertyList == propertyListStr)) {
+                let id = try row.get(states.id)
+                state = (id, try self.state(for: id))
+                return
+            }
+            try db.run(
+                states.table.insert([
+                    states.propertyList <- propertyListStr,
+                    states.isInitial <- isInitial
+                ])
+            )
+            guard let row = try db.pluck(states.table.select(states.id).order(states.id.desc)) else {
+                fatalError("Unable to insert KripkeState \(propertyList)")
+            }
+            let id = try row.get(states.id)
+            state = (id, KripkeState(isInitial: isInitial, properties: propertyList))
+        }
+        return state!
+    }
+    
+    func add(edge: KripkeEdge, to id: Int64) throws {
+        try db.transaction {
+            let state = try self.state(for: id)
+            state.addEdge(edge)
+            let newRows: [[Setter]] = try state.edges.map {
+                [
+                    edges.clockName <- $0.clockName,
+                    edges.constraint <- try $0.constraint.flatMap { try String(data: encoder.encode($0), encoding: .utf8) },
+                    edges.resetClock <- $0.resetClock,
+                    edges.takeSnapshot <- $0.takeSnapshot,
+                    edges.time <- Int64($0.time),
+                    edges.target <- id
+                ]
+            }
             try db.run(edges.table.filter(edges.target == id).delete())
             try db.run(edges.table.insertMany(newRows))
         }
     }
     
-    func state(for propertyList: KripkeStatePropertyList) throws -> KripkeState? {
-        try state(for: propertyList)?.1
-    }
-    
-    private func state(for propertyList: KripkeStatePropertyList) throws -> (Int64, KripkeState)? {
-        guard let propertyListStr = try String(data: encoder.encode(propertyList), encoding: .utf8) else {
-            fatalError("Unable to encode propert list \(propertyList)")
+    private func state(for id: Int64) throws -> KripkeState {
+        guard let first = try db.pluck(states.table.select(*).where(states.id == id)) else {
+            fatalError("Attempting to fetch kripke state that doesn't exist: \(id)")
         }
-        let rows = try db.prepare(states.table
-            .select(states.table[*], edges.table[*])
-            .where(states.propertyList == propertyListStr)
+        let rows = try db.prepare(edges.table
+            .select(*)
+            .where(edges.target == id)
         )
-        guard let first = rows.first(where: { _ in true }) else {
-            return nil
+        let id = try first.get(states.id)
+        let isInitial = try first.get(states.isInitial)
+        guard let propertyList = try (try first.get(states.propertyList)).data(using: .utf8).map({
+            try decoder.decode(KripkeStatePropertyList.self, from: $0)
+        }) else {
+            fatalError("Unable to decode property list for kripke state \(id)")
         }
-        let id = try first.get(states.table[states.id])
-        let isInitial = try first.get(states.table[states.isInitial])
         let edgeSet: Set<KripkeEdge> = try Set(rows.map { row in
-            let clockName = try row.get(edges.table[edges.clockName])
-            let constraintStr = try row.get(edges.table[edges.constraint])
+            let clockName = try row.get(edges.clockName)
+            let constraintStr = try row.get(edges.constraint)
             let constraint = try constraintStr?.data(using: .utf8).map { try decoder.decode(Constraint<UInt>.self, from: $0) }
-            let resetClock = try row.get(edges.table[edges.resetClock])
-            let takeSnapshot = try row.get(edges.table[edges.takeSnapshot])
-            let time = try UInt(row.get(edges.table[edges.time]))
+            let resetClock = try row.get(edges.resetClock)
+            let takeSnapshot = try row.get(edges.takeSnapshot)
+            let time = try UInt(row.get(edges.time))
             return KripkeEdge(
                 clockName: clockName,
                 constraint: constraint,
@@ -215,35 +242,14 @@ struct SQLitePersistentStore {
         })
         let state = KripkeState(isInitial: isInitial, properties: propertyList)
         state.edges = edgeSet
-        return (id, state)
+        return state
     }
     
-    func edges(for propertyList: KripkeStatePropertyList) throws -> Set<KripkeEdge> {
+    private func stringRepresentation(of propertyList: KripkeStatePropertyList) throws -> String {
         guard let propertyListStr = try String(data: encoder.encode(propertyList), encoding: .utf8) else {
             fatalError("Unable to encode propert list \(propertyList)")
         }
-        let rows = try db.prepare(states.table
-            .select(edges.table[*])
-            .where(states.table[states.propertyList] == propertyListStr)
-            .where(states.table[states.id] == edges.table[edges.target])
-        )
-        let edgeSet: Set<KripkeEdge> = try Set(rows.map { row in
-            let clockName = try row.get(edges.table[edges.clockName])
-            let constraintStr = try row.get(edges.table[edges.constraint])
-            let constraint = try constraintStr?.data(using: .utf8).map { try decoder.decode(Constraint<UInt>.self, from: $0) }
-            let resetClock = try row.get(edges.table[edges.resetClock])
-            let takeSnapshot = try row.get(edges.table[edges.takeSnapshot])
-            let time = try UInt(row.get(edges.table[edges.time]))
-            return KripkeEdge(
-                clockName: clockName,
-                constraint: constraint,
-                resetClock: resetClock,
-                takeSnapshot: takeSnapshot,
-                time: time,
-                target: propertyList
-            )
-        })
-        return edgeSet
+        return propertyListStr
     }
     
 }
