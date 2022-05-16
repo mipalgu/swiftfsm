@@ -165,6 +165,7 @@ struct ScheduleVerifier<Isolator: ScheduleIsolatorProtocol> {
                     for pool in pools {
                         //print("\nGenerating \(step.step.marker)(\(step.step.timeslots.map(\.callChain.fsm).sorted().joined(separator: ", "))) variations for:\n    \("\(pool)".components(separatedBy: .newlines).joined(separator: "\n\n    "))\n\n")
                         let properties = pool.propertyList(forStep: step.step, executingState: fsm?.currentState.name, collapseIfPossible: collapse)
+                        let (id, state) = try! persistentStore.add(properties, isInitial: previous == nil)
                         if let previous = previous {
                             let edge: KripkeEdge = KripkeEdge(
                                 clockName: fsm?.name,
@@ -182,7 +183,6 @@ struct ScheduleVerifier<Isolator: ScheduleIsolatorProtocol> {
                         guard !cycleDetector.inCycle(data: &cycleData, element: properties) else {
                             continue
                         }
-                        let (id, state) = try! persistentStore.add(properties, isInitial: previous == nil)
                         if step.step.saveSnapshot && job.map.hasFinished(forPool: pool) {
                             view.commit(state: state)
                             continue

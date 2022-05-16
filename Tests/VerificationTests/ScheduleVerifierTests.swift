@@ -212,6 +212,20 @@ class ScheduleVerifierTests: XCTestCase {
     override func tearDownWithError() throws {
         // Put teardown code here. This method is called after the invocation of each test method in the class.
     }
+
+    func test_canEncodeAndDecodeKripkeStatePropertyList() {
+        let fsm = ExternalsFiniteStateMachine()
+        let propertyList = KripkeStatePropertyList(fsm)
+        let encoder = JSONEncoder()
+        let decoder = JSONDecoder()
+        do {
+            let encoded = try encoder.encode(propertyList)
+            let decoded = try decoder.decode(KripkeStatePropertyList.self, from: encoded)
+            XCTAssertEqual(propertyList, decoded)
+        } catch {
+            XCTFail(error.localizedDescription)
+        }
+    }
     
     func test_canGenerateSeparateKripkeStructures() {
         separateSensors { (verifier, gateway, timer, viewFactory, cycleDetector) in

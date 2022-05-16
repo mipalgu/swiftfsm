@@ -91,6 +91,8 @@ struct SQLitePersistentStore {
         let takeSnapshot: Expression<Bool>
         
         let time: Expression<Int64>
+
+        let source: Expression<Int64>
         
         let target: Expression<Int64>
         
@@ -133,6 +135,7 @@ struct SQLitePersistentStore {
             resetClock: Expression<Bool>("resetClock"),
             takeSnapshot: Expression<Bool>("takeSnapshot"),
             time: Expression<Int64>("time"),
+            source: Expression<Int64>("source"),
             target: Expression<Int64>("target")
         )
         try db.run(edges.table.drop(ifExists: true))
@@ -152,7 +155,15 @@ struct SQLitePersistentStore {
             t.column(edges.resetClock)
             t.column(edges.takeSnapshot)
             t.column(edges.time)
+            t.column(edges.source)
             t.column(edges.target)
+            t.foreignKey(
+                edges.source,
+                references: states.table,
+                states.id,
+                update: .cascade,
+                delete: .cascade
+            )
             t.foreignKey(
                 edges.target,
                 references: states.table,
@@ -172,7 +183,7 @@ struct SQLitePersistentStore {
         try db.transaction {
             if let row = try db.pluck(states.table.select(states.id).where(states.propertyList == propertyListStr)) {
                 let id = try row.get(states.id)
-                state = (id, try self.state(for: id))
+                state = (id, try self._state(for: id))
                 return
             }
             try db.run(
@@ -192,30 +203,48 @@ struct SQLitePersistentStore {
     
     func add(edge: KripkeEdge, to id: Int64) throws {
         try db.transaction {
-            let state = try self.state(for: id)
+            let state = try self._state(for: id)
             state.addEdge(edge)
             let newRows: [[Setter]] = try state.edges.map {
-                [
+                let targetId = try self.id(for: $0.target)
+                return [
                     edges.clockName <- $0.clockName,
                     edges.constraint <- try $0.constraint.flatMap { try String(data: encoder.encode($0), encoding: .utf8) },
                     edges.resetClock <- $0.resetClock,
                     edges.takeSnapshot <- $0.takeSnapshot,
                     edges.time <- Int64($0.time),
-                    edges.target <- id
+                    edges.source <- id,
+                    edges.target <- targetId
                 ]
             }
-            try db.run(edges.table.filter(edges.target == id).delete())
+            try db.run(edges.table.filter(edges.source == id).delete())
             try db.run(edges.table.insertMany(newRows))
         }
     }
-    
-    private func state(for id: Int64) throws -> KripkeState {
+
+    public func id(for propertyList: KripkeStatePropertyList) throws -> Int64 {
+        let str = try stringRepresentation(of: propertyList)
+        guard let first = try db.pluck(states.table.select(states.id).where(states.propertyList == str)) else {
+            fatalError("Attempting to fetch id for kripke state that doesn't exist.")
+        }
+        return try first.get(states.id)
+    }
+
+    public func state(for id: Int64) throws -> KripkeState {
+        var state: KripkeState! = nil
+        try self.db.transaction {
+            state = try self._state(for: id)
+        }
+        return state!
+    }
+
+    private func _state(for id: Int64) throws -> KripkeState {
         guard let first = try db.pluck(states.table.select(*).where(states.id == id)) else {
             fatalError("Attempting to fetch kripke state that doesn't exist: \(id)")
         }
         let rows = try db.prepare(edges.table
             .select(*)
-            .where(edges.target == id)
+            .where(edges.source == id)
         )
         let id = try first.get(states.id)
         let isInitial = try first.get(states.isInitial)
@@ -231,13 +260,22 @@ struct SQLitePersistentStore {
             let resetClock = try row.get(edges.resetClock)
             let takeSnapshot = try row.get(edges.takeSnapshot)
             let time = try UInt(row.get(edges.time))
+            let targetId = try row.get(edges.target)
+            guard let target = try db.pluck(states.table.select(*).where(states.id == targetId)) else {
+                fatalError("Attempting to fetch kripke state that doesn't exist: \(id)")
+            }
+            guard let targetPropertyList = try (try target.get(states.propertyList)).data(using: .utf8).map({
+                try decoder.decode(KripkeStatePropertyList.self, from: $0)
+            }) else {
+                fatalError("Unable to decode property list for kripke state \(id)")
+            }
             return KripkeEdge(
                 clockName: clockName,
                 constraint: constraint,
                 resetClock: resetClock,
                 takeSnapshot: takeSnapshot,
                 time: time,
-                target: propertyList
+                target: targetPropertyList
             )
         })
         let state = KripkeState(isInitial: isInitial, properties: propertyList)
