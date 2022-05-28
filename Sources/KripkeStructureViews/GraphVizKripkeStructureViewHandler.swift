@@ -64,16 +64,16 @@ public final class GraphVizKripkeStructureViewHandler: GenericKripkeStructureVie
 
     public init() {}
 
-    public func handleStart(_: KripkeStructurePersistentStore, usingStream stream: inout OutputStream) {
+    public func handleStart(_: KripkeStructure, usingStream stream: inout OutputStream) {
         stream.write("digraph finite_state_machine {\n")
     }
 
-    public func handleEnd(_: KripkeStructurePersistentStore, usingStream stream: inout OutputStream) {
+    public func handleEnd(_: KripkeStructure, usingStream stream: inout OutputStream) {
         stream.write("}")
     }
 
     public func handleState(
-        _: KripkeStructurePersistentStore,
+        _: KripkeStructure,
         state: KripkeState,
         withId id: Int64,
         isInitial: Bool,
@@ -88,7 +88,7 @@ public final class GraphVizKripkeStructureViewHandler: GenericKripkeStructureVie
     }
 
     public func handleInitials(
-        _ store: KripkeStructurePersistentStore,
+        _ store: KripkeStructure,
         initials: AnySequence<KripkeState>,
         usingStream stream: inout OutputStream
     ) {
@@ -99,7 +99,7 @@ public final class GraphVizKripkeStructureViewHandler: GenericKripkeStructureVie
     }
 
     public func handleEffects(
-        _ store: KripkeStructurePersistentStore,
+        _ store: KripkeStructure,
         state: KripkeState,
         withId id: Int64,
         usingClocks: Bool,

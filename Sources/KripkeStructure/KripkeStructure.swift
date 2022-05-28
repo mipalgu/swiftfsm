@@ -1,9 +1,9 @@
 /*
  * KripkeStructure.swift
- * Verification
+ * KripkeStructure
  *
- * Created by Callum McColl on 24/12/21.
- * Copyright © 2021 Callum McColl. All rights reserved.
+ * Created by Callum McColl on 28/5/2022.
+ * Copyright © 2022 Callum McColl. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -56,25 +56,22 @@
  *
  */
 
-public struct KripkeStructure {
-    
-    private var statesLookup: [KripkeStatePropertyList: KripkeState]
-    
-    public var states: Set<KripkeState> {
-        Set(statesLookup.values)
-    }
-    
-    public init(states: Set<KripkeState> = []) {
-        self.statesLookup = Dictionary(uniqueKeysWithValues: states.map { ($0.properties, $0) })
-        self.statesLookup.reserveCapacity(max(self.statesLookup.count, 10000000))
-    }
-    
-    public mutating func state(for properties: KripkeStatePropertyList, isInitial: Bool) -> KripkeState {
-        let state = statesLookup[properties] ?? KripkeState(isInitial: isInitial, properties: properties)
-        if nil == statesLookup[properties] {
-            statesLookup[properties] = state
-        }
-        return state
-    }
-    
+public protocol KripkeStructure {
+
+    var identifier: String { get }
+
+    var acceptingStates: AnySequence<KripkeState> { get }
+
+    var initialStates: AnySequence<KripkeState> { get }
+
+    var states: AnySequence<KripkeState> { get }
+
+    func exists(_ propertyList: KripkeStatePropertyList) throws -> Bool
+
+    func data(for propertyList: KripkeStatePropertyList) throws -> (Int64, KripkeState)
+
+    func id(for propertyList: KripkeStatePropertyList) throws -> Int64
+
+    func state(for id: Int64) throws -> KripkeState
+
 }

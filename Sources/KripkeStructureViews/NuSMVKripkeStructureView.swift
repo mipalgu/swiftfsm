@@ -245,7 +245,7 @@ public final class NuSMVKripkeStructureView: KripkeStructureView {
 
     private let db: DB
 
-    private var store: KripkeStructurePersistentStore! = nil
+    private var store: KripkeStructure! = nil
 
     public init(
         identifier: String,
@@ -261,7 +261,7 @@ public final class NuSMVKripkeStructureView: KripkeStructureView {
         try! self.db.reset()
     }
 
-    public func generate(store: KripkeStructurePersistentStore, usingClocks: Bool) throws {
+    public func generate(store: KripkeStructure, usingClocks: Bool) throws {
         self.reset(usingClocks: usingClocks)
         self.store = store
         for state in store.states {

@@ -60,6 +60,6 @@ import KripkeStructure
 
 public protocol KripkeStructureView: class {
 
-    func generate(store: KripkeStructurePersistentStore, usingClocks: Bool) throws
+    func generate(store: KripkeStructure, usingClocks: Bool) throws
 
 }

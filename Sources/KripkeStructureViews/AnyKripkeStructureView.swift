@@ -64,14 +64,14 @@ public final class AnyKripkeStructureView: KripkeStructureView {
 
     public let base: Any
 
-    private let _generate: (KripkeStructurePersistentStore, Bool) throws -> Void
+    private let _generate: (KripkeStructure, Bool) throws -> Void
 
     public init<View: KripkeStructureView>(_ base: View){
         self.base = base
         self._generate = { try base.generate(store: $0, usingClocks: $1) }
     }
 
-    public func generate(store: KripkeStructurePersistentStore, usingClocks: Bool) throws {
+    public func generate(store: KripkeStructure, usingClocks: Bool) throws {
         try self._generate(store, usingClocks)
     }
 

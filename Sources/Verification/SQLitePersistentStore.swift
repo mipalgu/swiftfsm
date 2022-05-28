@@ -62,7 +62,7 @@ import SQLite
 import Foundation
 import KripkeStructure
 
-struct SQLitePersistentStore: KripkeStructurePersistentStore {
+struct SQLitePersistentStore: MutableKripkeStructure {
 
     struct StatesTable {
         
@@ -116,6 +116,8 @@ struct SQLitePersistentStore: KripkeStructurePersistentStore {
     
     private let decoder = JSONDecoder()
 
+    let identifier: String
+
     var acceptingStates: AnySequence<KripkeState> {
         let results = try! db.prepare(statesTable.table.select(statesTable.id).where(statesTable.isAccepting == true))
         return AnySequence { () -> AnyIterator<KripkeState> in
@@ -146,8 +148,9 @@ struct SQLitePersistentStore: KripkeStructurePersistentStore {
         }
     }
     
-    init(named name: String) throws {
-        let name = name.components(separatedBy: .whitespacesAndNewlines).joined(separator: "-")
+    init(identifier: String) throws {
+        self.identifier = identifier
+        let name = identifier.components(separatedBy: .whitespacesAndNewlines).joined(separator: "-")
         try FileManager.default.createDirectory(at: URL(fileURLWithPath: "/tmp/swiftfsm", isDirectory: true), withIntermediateDirectories: true)
         let db = try Connection("/tmp/swiftfsm/\(name).sqlite3")
 

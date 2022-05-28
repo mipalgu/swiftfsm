@@ -66,7 +66,7 @@ public final class AggregateKripkeStructureView: KripkeStructureView {
         self.views = views
     }
 
-    public func generate(store: KripkeStructurePersistentStore, usingClocks: Bool) throws {
+    public func generate(store: KripkeStructure, usingClocks: Bool) throws {
         for view in views {
             try view.generate(store: store, usingClocks: usingClocks)
         }

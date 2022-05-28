@@ -71,7 +71,7 @@ final class SQLitePersistentStoreTests: XCTestCase {
     override func setUp() {
         self.continueAfterFailure = false
         do {
-            self.store = try SQLitePersistentStore(named: testName)
+            self.store = try SQLitePersistentStore(identifier: testName)
         } catch {
             XCTFail(error.localizedDescription)
         }

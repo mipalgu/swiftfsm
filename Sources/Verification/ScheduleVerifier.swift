@@ -111,20 +111,10 @@ struct ScheduleVerifier<Isolator: ScheduleIsolatorProtocol> {
         self.isolatedThreads = isolatedThreads
     }
     
-    func verify<
-        Gateway: ModifiableFSMGateway,
-        Timer: Clock,
-        ViewFactory: KripkeStructureViewFactory,
-        Detector: CycleDetector
-    >(
-        gateway: Gateway,
-        timer: Timer,
-        viewFactory: ViewFactory,
-        cycleDetector: Detector
-    ) where Gateway: NewVerifiableGateway,
-            Detector.Element == KripkeStatePropertyList
+    func verify<Gateway: ModifiableFSMGateway, Timer: Clock>(gateway: Gateway, timer: Timer) -> [KripkeStructure] where Gateway: NewVerifiableGateway
     {
         let generator = VerificationStepGenerator()
+        var stores: [KripkeStructure] = []
         for (index, thread) in isolatedThreads.threads.enumerated() {
             if thread.map.steps.isEmpty {
                 continue
@@ -132,16 +122,13 @@ struct ScheduleVerifier<Isolator: ScheduleIsolatorProtocol> {
             let allFsmNames: Set<String> = Set(thread.map.steps.flatMap {
                 $0.step.timeslots.flatMap(\.fsms)
             })
-            let viewName = allFsmNames.count == 1 ? allFsmNames.first ?? "\(index)" : "\(index)"
-            let persistentStore = try! SQLitePersistentStore(named: viewName)
-            let view = viewFactory.make(identifier: viewName)
+            let identifier = allFsmNames.count == 1 ? allFsmNames.first ?? "\(index)" : "\(index)"
+            let persistentStore = try! SQLitePersistentStore(identifier: identifier)
+            defer { stores.append(persistentStore) }
             gateway.setScenario([], pool: thread.pool)
             let collapse = nil == thread.map.steps.first { $0.step.fsms.count > 1 }
-            var cycleData = cycleDetector.initialData
             var jobs = [Job(step: 0, map: thread.map, pool: thread.pool, previous: nil)]
-            defer {
-                try! view.generate(store: persistentStore, usingClocks: true)
-            }
+            jobs.reserveCapacity(100000)
             while !jobs.isEmpty {
                 let job = jobs.removeLast()
                 let step = job.map.steps[job.step]
@@ -245,6 +232,7 @@ struct ScheduleVerifier<Isolator: ScheduleIsolatorProtocol> {
                 }
             }
         }
+        return stores
     }
     
 }

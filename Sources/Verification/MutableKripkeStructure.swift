@@ -1,8 +1,8 @@
 /*
- * KripkeStructurePersistentStore.swift
- * KripkeStructure
+ * MutableKripkeStructure.swift
+ * Verification
  *
- * Created by Callum McColl on 28/5/2022.
+ * Created by Callum McColl on 29/5/2022.
  * Copyright © 2022 Callum McColl. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -56,26 +56,14 @@
  *
  */
 
-public protocol KripkeStructurePersistentStore {
+import KripkeStructure
 
-    var acceptingStates: AnySequence<KripkeState> { get }
+public protocol MutableKripkeStructure: KripkeStructure {
 
-    var initialStates: AnySequence<KripkeState> { get }
-
-    var states: AnySequence<KripkeState> { get }
-
-    init(named name: String) throws
+    init(identifier: String) throws
 
     func add(_ propertyList: KripkeStatePropertyList, isInitial: Bool) throws -> (Int64, KripkeState)
 
     func add(edge: KripkeEdge, to id: Int64) throws
-
-    func exists(_ propertyList: KripkeStatePropertyList) throws -> Bool
-
-    func data(for propertyList: KripkeStatePropertyList) throws -> (Int64, KripkeState)
-
-    func id(for propertyList: KripkeStatePropertyList) throws -> Int64
-
-    func state(for id: Int64) throws -> KripkeState
 
 }

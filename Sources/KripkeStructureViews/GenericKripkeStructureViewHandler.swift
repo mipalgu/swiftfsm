@@ -62,7 +62,7 @@ import KripkeStructure
 public protocol GenericKripkeStructureViewHandler {
 
     func handleEffects(
-        _: KripkeStructurePersistentStore,
+        _: KripkeStructure,
         state: KripkeState,
         withId id: Int64,
         usingClocks: Bool,
@@ -70,21 +70,21 @@ public protocol GenericKripkeStructureViewHandler {
     )
 
     func handleInitials(
-        _: KripkeStructurePersistentStore,
+        _: KripkeStructure,
         initials: AnySequence<KripkeState>,
         usingStream stream: inout OutputStream
     )
 
     func handleState(
-        _: KripkeStructurePersistentStore,
+        _: KripkeStructure,
         state: KripkeState,
         withId id: Int64,
         isInitial: Bool,
         usingStream stream: inout OutputStream
     )
 
-    func handleStart(_: KripkeStructurePersistentStore, usingStream stream: inout OutputStream)
+    func handleStart(_: KripkeStructure, usingStream stream: inout OutputStream)
 
-    func handleEnd(_: KripkeStructurePersistentStore, usingStream stream: inout OutputStream)
+    func handleEnd(_: KripkeStructure, usingStream stream: inout OutputStream)
 
 }

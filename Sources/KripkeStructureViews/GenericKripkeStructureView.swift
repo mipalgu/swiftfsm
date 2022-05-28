@@ -90,7 +90,7 @@ public final class GenericKripkeStructureView<Handler: GenericKripkeStructureVie
         self.filename = filename
     }
 
-    public func generate(store: KripkeStructurePersistentStore, usingClocks: Bool) throws {
+    public func generate(store: KripkeStructure, usingClocks: Bool) throws {
         self.reset(store: store, usingClocks: usingClocks)
         for state in store.states {
             self.commit(store: store, state: state, usingClocks: usingClocks)
@@ -98,13 +98,13 @@ public final class GenericKripkeStructureView<Handler: GenericKripkeStructureVie
         self.finish(store: store)
     }
 
-    private func reset(store: KripkeStructurePersistentStore, usingClocks: Bool) {
+    private func reset(store: KripkeStructure, usingClocks: Bool) {
         self.edgeStream = self.inputOutputStreamFactory.make(id: self.edgeFilename)
         self.combinedStream = self.outputStreamFactory.make(id: self.filename)
         self.handler.handleStart(store, usingStream: &self.combinedStream)
     }
 
-    private func commit(store: KripkeStructurePersistentStore, state: KripkeState, usingClocks: Bool) {
+    private func commit(store: KripkeStructure, state: KripkeState, usingClocks: Bool) {
         let id = try! store.id(for: state.properties)
         self.handler.handleState(
             store,
@@ -117,7 +117,7 @@ public final class GenericKripkeStructureView<Handler: GenericKripkeStructureVie
         self.handler.handleEffects(store, state: state, withId: id, usingClocks: usingClocks, usingStream: &edgeOutputStream)
     }
 
-    private func finish(store: KripkeStructurePersistentStore) {
+    private func finish(store: KripkeStructure) {
         self.handler.handleInitials(store, initials: store.initialStates, usingStream: &self.combinedStream)
         self.edgeStream.flush()
         self.edgeStream.rewind()
