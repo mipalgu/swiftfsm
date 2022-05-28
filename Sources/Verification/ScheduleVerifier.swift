@@ -143,7 +143,7 @@ struct ScheduleVerifier<Isolator: ScheduleIsolatorProtocol> {
                 try! view.generate(store: persistentStore, usingClocks: true)
             }
             while !jobs.isEmpty {
-                let job = jobs.removeFirst()
+                let job = jobs.removeLast()
                 let step = job.map.steps[job.step]
                 let previous = job.previous
                 let newStep = job.step >= (job.map.steps.count - 1) ? 0 : job.step + 1
