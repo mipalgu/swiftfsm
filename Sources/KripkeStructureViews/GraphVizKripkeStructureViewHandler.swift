@@ -64,18 +64,18 @@ public final class GraphVizKripkeStructureViewHandler: GenericKripkeStructureVie
 
     public init() {}
 
-    public func handleStart(_: GenericKripkeStructureViewData, usingStream stream: inout OutputStream) {
+    public func handleStart(_: KripkeStructurePersistentStore, usingStream stream: inout OutputStream) {
         stream.write("digraph finite_state_machine {\n")
     }
 
-    public func handleEnd(_: GenericKripkeStructureViewData, usingStream stream: inout OutputStream) {
+    public func handleEnd(_: KripkeStructurePersistentStore, usingStream stream: inout OutputStream) {
         stream.write("}")
     }
 
     public func handleState(
-        _ data: GenericKripkeStructureViewData,
+        _: KripkeStructurePersistentStore,
         state: KripkeState,
-        withId id: Int,
+        withId id: Int64,
         isInitial: Bool,
         usingStream stream: inout OutputStream
     ) {
@@ -83,25 +83,26 @@ public final class GraphVizKripkeStructureViewHandler: GenericKripkeStructureVie
         let label = self.formatProperties(list: state.properties, indent: 1, includeBraces: false) ?? "\(id)"
         if true == isInitial {
             stream.write("node [shape=point] si\(id);")
-            data.addInitial(id, transitioningTo: id)
         }
         stream.write("node [shape=\(shape), label=\"\(label)\"]; s\(id);\n")
     }
 
     public func handleInitials(
-        _ data: GenericKripkeStructureViewData,
-        initials: [(Int, Int)],
+        _ store: KripkeStructurePersistentStore,
+        initials: AnySequence<KripkeState>,
         usingStream stream: inout OutputStream
     ) {
         initials.forEach {
-            stream.write("si\($0) -> s\($1);\n")
+            let id = try! store.id(for: $0.properties)
+            stream.write("si\(id) -> s\(id);\n")
         }
     }
 
     public func handleEffects(
-        _ data: GenericKripkeStructureViewData,
+        _ store: KripkeStructurePersistentStore,
         state: KripkeState,
-        withId id: Int,
+        withId id: Int64,
+        usingClocks: Bool,
         usingStream stream: inout OutputStream
     ) {
         func expression(for constraint: ClockConstraint, clockLabel: String) -> String {
@@ -121,9 +122,9 @@ public final class GraphVizKripkeStructureViewHandler: GenericKripkeStructureVie
             )
         }
         state.edges.forEach {
-            let target = data.fetchId(of: $0.target)
+            let target = try! store.id(for: $0.target)
             let label: String
-            if data.usingClocks {
+            if usingClocks {
                 let time = $0.time == 0 ? nil : $0.time
                 var labels: [String] = []
                 labels.reserveCapacity(3)
