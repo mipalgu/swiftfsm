@@ -1,9 +1,9 @@
 /*
- * KripkeStructureView.swift
- * ModelChecking
+ * KripkeStructurePersistentStore.swift
+ * KripkeStructure
  *
- * Created by Callum McColl on 15/10/18.
- * Copyright © 2018 Callum McColl. All rights reserved.
+ * Created by Callum McColl on 28/5/2022.
+ * Copyright © 2022 Callum McColl. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -56,10 +56,26 @@
  *
  */
 
-import KripkeStructure
+public protocol KripkeStructurePersistentStore {
 
-public protocol KripkeStructureView: class {
+    var acceptingStates: AnySequence<KripkeState> { get }
 
-    func generate(store: KripkeStructurePersistentStore, usingClocks: Bool) throws
+    var initialStates: AnySequence<KripkeState> { get }
+
+    var states: AnySequence<KripkeState> { get }
+
+    init(named name: String) throws
+
+    func add(_ propertyList: KripkeStatePropertyList, isInitial: Bool) throws -> (Int64, KripkeState)
+
+    func add(edge: KripkeEdge, to id: Int64) throws
+
+    func exists(_ propertyList: KripkeStatePropertyList) throws -> Bool
+
+    func data(for propertyList: KripkeStatePropertyList) throws -> (Int64, KripkeState)
+
+    func id(for propertyList: KripkeStatePropertyList) throws -> Int64
+
+    func state(for id: Int64) throws -> KripkeState
 
 }

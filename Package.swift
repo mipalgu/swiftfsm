@@ -14,7 +14,8 @@ let foundationDeps: [Target.Dependency] = [.byName(name: "Machines"), .product(n
 let deps = [
     .package(name: "FSM", url: "git@github.com:mipalgu/FSM", .branch("verification")),
     .package(name: "Machines", url: "https://github.com/mipalgu/Machines", .branch("verification")),
-    .package(name: "swift_helpers", url: "https://github.com/mipalgu/swift_helpers", .branch("main"))
+    .package(name: "swift_helpers", url: "https://github.com/mipalgu/swift_helpers", .branch("main")),
+    .package(name: "SQLite.swift", url: "https://github.com/stephencelis/SQLite.swift.git", from: "0.13.3")
 ] + normalDependencies
 
 let package = Package(
@@ -87,8 +88,8 @@ let package = Package(
         .target(name: "MachineCompiling", dependencies: ["FSM"] + foundationDeps),
         .target(name: "Scheduling", dependencies: ["MachineStructure", "MachineLoading", "Timers", "Gateways", "FSM"]),
         .target(name: "KripkeStructure", dependencies: ["swift_helpers", "FSM"]),
-        .target(name: "KripkeStructureViews", dependencies: ["KripkeStructure", "FSM", .product(name: "IO", package: "swift_helpers")]),
-        .target(name: "Verification", dependencies: ["MachineStructure", "Scheduling", "Timers", "Gateways", "FSM", "KripkeStructure", "KripkeStructureViews", .product(name: "Hashing", package: "swift_helpers")]),
+        .target(name: "KripkeStructureViews", dependencies: ["KripkeStructure", "FSM", .product(name: "IO", package: "swift_helpers"), .product(name: "SQLite", package: "SQLite.swift")]),
+        .target(name: "Verification", dependencies: ["MachineStructure", "Scheduling", "Timers", "Gateways", "FSM", "KripkeStructure", "KripkeStructureViews", .product(name: "Hashing", package: "swift_helpers"), .product(name: "SQLite", package: "SQLite.swift")]),
         .target(name: "Parsing", dependencies: ["Scheduling", "Timers", "Verification", "MachineCompiling", "FSM"]),
         .target(name: "CFSMWrappers", dependencies: ["Libraries", "Scheduling", "Timers", "FSM", "CLReflect"]),
         .target(

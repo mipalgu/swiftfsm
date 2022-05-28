@@ -60,6 +60,6 @@ import KripkeStructure
 
 //swiftlint:disable line_length
 
-public typealias GexfKripkeStructureView<State: KripkeStateType> = GenericKripkeStructureView<GexfKripkeStructureViewHandler<State>, State>
+//public typealias GexfKripkeStructureView = GenericKripkeStructureView<GexfKripkeStructureViewHandler>
 
-public typealias GraphVizKripkeStructureView<State: KripkeStateType> = GenericKripkeStructureView<GraphVizKripkeStructureViewHandler<State>, State>
+public typealias GraphVizKripkeStructureView = GenericKripkeStructureView<GraphVizKripkeStructureViewHandler>

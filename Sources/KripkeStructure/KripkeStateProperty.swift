@@ -62,8 +62,16 @@
 /**
  *  A property within a Kripke State.
  */
-public struct KripkeStateProperty: Equatable {
+public struct KripkeStateProperty: Equatable, Codable {
 
+    public enum CodingKeys: CodingKey {
+        
+        case type
+        
+        case value
+        
+    }
+    
     /**
      *  The type of the property.
      */
@@ -382,6 +390,102 @@ extension KripkeStateProperty: Hashable {
         }
     }
 
+}
+
+extension KripkeStateProperty {
+    
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        let type = try container.decode(KripkeStatePropertyTypes.self, forKey: .type)
+        let value: Any
+        switch type {
+        case .Bool:
+            value = try container.decode(Bool.self, forKey: .value)
+        case .UInt:
+            value = try container.decode(UInt.self, forKey: .value)
+        case .UInt8:
+            value = try container.decode(UInt8.self, forKey: .value)
+        case .UInt16:
+            value = try container.decode(UInt16.self, forKey: .value)
+        case .UInt32:
+            value = try container.decode(UInt32.self, forKey: .value)
+        case .UInt64:
+            value = try container.decode(UInt64.self, forKey: .value)
+        case .Int:
+            value = try container.decode(Int.self, forKey: .value)
+        case .Int8:
+            value = try container.decode(Int8.self, forKey: .value)
+        case .Int16:
+            value = try container.decode(Int16.self, forKey: .value)
+        case .Int32:
+            value = try container.decode(Int32.self, forKey: .value)
+        case .Int64:
+            value = try container.decode(Int64.self, forKey: .value)
+        case .Float80:
+            value = try Float80(container.decode(Double.self, forKey: .value))
+        case .Float:
+            value = try container.decode(Float.self, forKey: .value)
+        case .Double:
+            value = try container.decode(Double.self, forKey: .value)
+        case .String:
+            value = try container.decode(String.self, forKey: .value)
+        case .Collection(let ps):
+            value = try container.decode([KripkeStateProperty].self, forKey: .value)
+        case .Compound(let list):
+            value = try container.decode(KripkeStatePropertyList.self, forKey: .value)
+        case .Optional(let type):
+            value = try container.decode(KripkeStateProperty?.self, forKey: .value) as Any
+        case .EmptyCollection:
+            value = ()
+        }
+        self.init(type: type, value: value)
+    }
+    
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(type, forKey: .type)
+        switch self.type {
+        case .Bool:
+            try container.encode(self.value as! Bool, forKey: .value)
+        case .UInt:
+            try container.encode(self.value as! UInt, forKey: .value)
+        case .UInt8:
+            try container.encode(self.value as! UInt8, forKey: .value)
+        case .UInt16:
+            try container.encode(self.value as! UInt16, forKey: .value)
+        case .UInt32:
+            try container.encode(self.value as! UInt32, forKey: .value)
+        case .UInt64:
+            try container.encode(self.value as! UInt64, forKey: .value)
+        case .Int:
+            try container.encode(self.value as! Int, forKey: .value)
+        case .Int8:
+            try container.encode(self.value as! Int8, forKey: .value)
+        case .Int16:
+            try container.encode(self.value as! Int16, forKey: .value)
+        case .Int32:
+            try container.encode(self.value as! Int32, forKey: .value)
+        case .Int64:
+            try container.encode(self.value as! Int64, forKey: .value)
+        case .Float80:
+            try container.encode(Double(self.value as! Float80), forKey: .value)
+        case .Float:
+            try container.encode(self.value as! Float, forKey: .value)
+        case .Double:
+            try container.encode(self.value as! Double, forKey: .value)
+        case .String:
+            try container.encode(self.value as! String, forKey: .value)
+        case .Collection(let ps):
+            try container.encode(ps, forKey: .value)
+        case .Compound(let list):
+            try container.encode(list, forKey: .value)
+        case .Optional(let type):
+            try container.encode(type, forKey: .value)
+        case .EmptyCollection:
+            try container.encodeNil(forKey: .value)
+        }
+    }
+    
 }
 
 public func == (lhs: KripkeStateProperty, rhs: KripkeStateProperty) -> Bool {

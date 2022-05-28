@@ -58,24 +58,18 @@
 
 import KripkeStructure
 
-public final class AggregateKripkeStructureView<State: KripkeStateType>: KripkeStructureView {
+public final class AggregateKripkeStructureView: KripkeStructureView {
 
-    fileprivate let views: [AnyKripkeStructureView<State>]
+    fileprivate let views: [AnyKripkeStructureView]
 
-    public init(views: [AnyKripkeStructureView<State>]) {
+    public init(views: [AnyKripkeStructureView]) {
         self.views = views
     }
 
-    public func commit(state: State) {
-        self.views.forEach { $0.commit(state: state) }
-    }
-
-    public func finish() {
-        self.views.forEach { $0.finish() }
-    }
-
-    public func reset(usingClocks: Bool) {
-        self.views.forEach { $0.reset(usingClocks: usingClocks) }
+    public func generate(store: KripkeStructurePersistentStore, usingClocks: Bool) throws {
+        for view in views {
+            try view.generate(store: store, usingClocks: usingClocks)
+        }
     }
 
 }

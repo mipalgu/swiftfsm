@@ -314,6 +314,7 @@ public enum Constraint<T: Comparable> {
 
 extension Constraint: Equatable {}
 extension Constraint: Hashable where T: Hashable {}
+extension Constraint: Codable where T: Codable {}
 
 extension Constraint: CustomStringConvertible {
     

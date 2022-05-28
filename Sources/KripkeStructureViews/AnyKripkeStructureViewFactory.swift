@@ -58,20 +58,20 @@
 
 import KripkeStructure
 
-public final class AnyKripkeStructureViewFactory<State: KripkeStateType> {
+public final class AnyKripkeStructureViewFactory {
 
-    fileprivate let _make: (String) -> AnyKripkeStructureView<State>
+    fileprivate let _make: (String) -> AnyKripkeStructureView
 
-    public init<View: KripkeStructureView>(_ make: @escaping (String) -> View) where View.State == State {
+    public init<View: KripkeStructureView>(_ make: @escaping (String) -> View) {
         self._make = { AnyKripkeStructureView(make($0)) }
     }
 
     //swiftlint:disable:next line_length
-    public convenience init<ViewFactory: KripkeStructureViewFactory>(_ factory: ViewFactory) where ViewFactory.View.State == State {
+    public convenience init<ViewFactory: KripkeStructureViewFactory>(_ factory: ViewFactory) {
         self.init(factory.make)
     }
 
-    public func make(identifier: String) -> AnyKripkeStructureView<State> {
+    public func make(identifier: String) -> AnyKripkeStructureView {
         return self._make(identifier)
     }
 

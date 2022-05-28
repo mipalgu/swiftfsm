@@ -64,7 +64,7 @@ import Glibc
 
 import Functional
 
-public struct KripkeStatePropertyList {
+public struct KripkeStatePropertyList: Codable {
 
     public fileprivate(set) var properties: [String: KripkeStateProperty]
 

@@ -61,7 +61,7 @@
 /**
  *  Supported types for `KripkeStructure`s.
  */
-public enum KripkeStatePropertyTypes: Equatable {
+public enum KripkeStatePropertyTypes: Equatable, Codable {
     case Bool
     case Int, Int8, Int16, Int32, Int64
     case UInt, UInt8, UInt16, UInt32, UInt64
