@@ -222,6 +222,21 @@ struct SQLitePersistentStore {
         }
     }
 
+    public func exists(_ propertyList: KripkeStatePropertyList) throws -> Bool {
+        let str = try stringRepresentation(of: propertyList)
+        return try nil != db.pluck(states.table.select(states.id).where(states.propertyList == str))
+    }
+
+    public func data(for propertyList: KripkeStatePropertyList) throws -> (Int64, KripkeState) {
+        var id: Int64! = nil
+        var state: KripkeState! = nil
+        try self.db.transaction {
+            id = try self.id(for: propertyList)
+            state = try self._state(for: id)
+        }
+        return (id!, state!)
+    }
+
     public func id(for propertyList: KripkeStatePropertyList) throws -> Int64 {
         let str = try stringRepresentation(of: propertyList)
         guard let first = try db.pluck(states.table.select(states.id).where(states.propertyList == str)) else {
@@ -261,7 +276,7 @@ struct SQLitePersistentStore {
             let takeSnapshot = try row.get(edges.takeSnapshot)
             let time = try UInt(row.get(edges.time))
             let targetId = try row.get(edges.target)
-            guard let target = try db.pluck(states.table.select(*).where(states.id == targetId)) else {
+            guard let target = try db.pluck(states.table.select(states.propertyList).where(states.id == targetId)) else {
                 fatalError("Attempting to fetch kripke state that doesn't exist: \(id)")
             }
             guard let targetPropertyList = try (try target.get(states.propertyList)).data(using: .utf8).map({
@@ -290,6 +305,18 @@ struct SQLitePersistentStore {
         return propertyListStr
     }
     
+}
+
+extension SQLitePersistentStore: Sequence {
+
+    func makeIterator() -> AnyIterator<KripkeState> {
+        let rows = try! db.prepare(states.table.select(states.id))
+        let states = rows.lazy.map {
+            try! self.state(for: $0.get(self.states.id))
+        }
+        return AnyIterator(states.makeIterator())
+    }
+
 }
 
 #endif

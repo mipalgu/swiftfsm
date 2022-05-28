@@ -141,16 +141,14 @@ struct ScheduleVerifier<Isolator: ScheduleIsolatorProtocol> {
             let collapse = nil == thread.map.steps.first { $0.step.fsms.count > 1 }
             var cycleData = cycleDetector.initialData
             var jobs = [Job(step: 0, map: thread.map, pool: thread.pool, previous: nil)]
+            defer {
+                persistentStore.forEach(view.commit)
+            }
             while !jobs.isEmpty {
                 let job = jobs.removeFirst()
                 let step = job.map.steps[job.step]
                 let previous = job.previous
                 let newStep = job.step >= (job.map.steps.count - 1) ? 0 : job.step + 1
-                defer {
-                    if let previous = previous {
-                        view.commit(state: previous.state)
-                    }
-                }
                 switch step.step {
                 case .takeSnapshot, .takeSnapshotAndStartTimeslot, .startTimeslot, .saveSnapshot:
                     let fsms = step.step.timeslots
@@ -165,7 +163,14 @@ struct ScheduleVerifier<Isolator: ScheduleIsolatorProtocol> {
                     for pool in pools {
                         //print("\nGenerating \(step.step.marker)(\(step.step.timeslots.map(\.callChain.fsm).sorted().joined(separator: ", "))) variations for:\n    \("\(pool)".components(separatedBy: .newlines).joined(separator: "\n\n    "))\n\n")
                         let properties = pool.propertyList(forStep: step.step, executingState: fsm?.currentState.name, collapseIfPossible: collapse)
-                        let (id, state) = try! persistentStore.add(properties, isInitial: previous == nil)
+                        let inCycle = try! persistentStore.exists(properties)
+                        let id: Int64
+                        let state: KripkeState
+                        if !inCycle {
+                            (id, state) = try! persistentStore.add(properties, isInitial: previous == nil)
+                        } else {
+                            (id, state) = try! persistentStore.data(for: properties)
+                        }
                         if let previous = previous {
                             let edge: KripkeEdge = KripkeEdge(
                                 clockName: fsm?.name,
@@ -180,11 +185,10 @@ struct ScheduleVerifier<Isolator: ScheduleIsolatorProtocol> {
                             )
                             try! persistentStore.add(edge: edge, to: previous.id)
                         }
-                        guard !cycleDetector.inCycle(data: &cycleData, element: properties) else {
+                        guard !inCycle else {
                             continue
                         }
                         if step.step.saveSnapshot && job.map.hasFinished(forPool: pool) {
-                            view.commit(state: state)
                             continue
                         }
                         let newResetClocks: Set<String>
@@ -203,7 +207,14 @@ struct ScheduleVerifier<Isolator: ScheduleIsolatorProtocol> {
                     for ringlet in ringlets {
                         //print("\nGenerating \(step.step.marker)(\(step.step.timeslots.map(\.callChain.fsm).sorted().joined(separator: ", "))) variations for:\n    \("\(ringlet.after)".components(separatedBy: .newlines).joined(separator: "\n\n    "))\n\n")
                         let properties = ringlet.after.propertyList(forStep: step.step, executingState: currentState, collapseIfPossible: collapse)
-                        let (id, state) = try! persistentStore.add(properties, isInitial: previous == nil)
+                        let inCycle = try! persistentStore.exists(properties)
+                        let id: Int64
+                        let state: KripkeState
+                        if !inCycle {
+                            (id, state) = try! persistentStore.add(properties, isInitial: previous == nil)
+                        } else {
+                            (id, state) = try! persistentStore.data(for: properties)
+                        }
                         if let previous = previous {
                             let edge = KripkeEdge(
                                 clockName: timeslot.callChain.fsm,
@@ -218,11 +229,10 @@ struct ScheduleVerifier<Isolator: ScheduleIsolatorProtocol> {
                             )
                             try! persistentStore.add(edge: edge, to: previous.id)
                         }
-                        guard !cycleDetector.inCycle(data: &cycleData, element: properties) else {
+                        guard !inCycle else {
                             continue
                         }
                         if step.step.saveSnapshot && job.map.hasFinished(forPool: ringlet.after) {
-                            view.commit(state: state)
                             continue
                         }
                         let resetClocks: Set<String>

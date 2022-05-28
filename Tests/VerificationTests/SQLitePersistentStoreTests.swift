@@ -109,4 +109,41 @@ final class SQLitePersistentStoreTests: XCTestCase {
         }
     }
 
+    func test_canCreateSensorKripkeStructure() {
+        func propertyList(of fsm: SensorFiniteStateMachine, read: Bool) -> KripkeStatePropertyList {
+            let plist = KripkeStatePropertyList(fsm)
+            return KripkeStatePropertyList([
+                "fsms": [
+                    fsm.name: plist
+                ],
+                "pc": fsm.name + "." + fsm.currentState.name + "." + (read ? "R" : "W")
+            ])
+        }
+        func writeRead(for fsm: SensorFiniteStateMachine, source: Int64) throws -> Int64 {
+            let targetPropertyList = propertyList(of: fsm, read: true)
+            let (target, _) = try self.store.add(targetPropertyList, isInitial: false)
+            try self.store.add(edge: KripkeEdge(clockName: fsm.name, constraint: nil, resetClock: fsm.currentState.name != fsm.previousState.name, takeSnapshot: true, time: 40, target: targetPropertyList), to: source)
+            return target
+        }
+        func readWrite(for fsm: SensorFiniteStateMachine, isInitial: Bool) throws -> Int64 {
+            var fsm = fsm
+            let (source, _) = try self.store.add(propertyList(of: fsm, read: true), isInitial: isInitial)
+            fsm.next()
+            let targetPropertyList = propertyList(of: fsm, read: false)
+            let (target, _) = try self.store.add(targetPropertyList, isInitial: false)
+            try self.store.add(edge: KripkeEdge(clockName: fsm.name, constraint: nil, resetClock: false, takeSnapshot: false, time: 30, target: targetPropertyList), to: source)
+            return target
+        }
+        let fsm = SensorFiniteStateMachine()
+        do {
+            var id = try readWrite(for: fsm, isInitial: true)
+            id = try writeRead(for: fsm, source: id)
+            let fsm2 = fsm.clone()
+            fsm2.sensors1.val = true
+            id = try readWrite(for: fsm2, isInitial: false)
+        } catch {
+            XCTFail(error.localizedDescription)
+        }
+    }
+
 }
