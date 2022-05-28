@@ -59,11 +59,11 @@
 import IO
 import KripkeStructure
 
-public protocol GenericKripkeStructureViewHandler: KripkeStateContainer {
+public protocol GenericKripkeStructureViewHandler {
 
     func handleEffects(
         _: GenericKripkeStructureViewData,
-        state: State,
+        state: KripkeState,
         withId id: Int,
         usingStream stream: inout OutputStream
     )
@@ -76,7 +76,7 @@ public protocol GenericKripkeStructureViewHandler: KripkeStateContainer {
 
     func handleState(
         _: GenericKripkeStructureViewData,
-        state: State,
+        state: KripkeState,
         withId id: Int,
         isInitial: Bool,
         usingStream stream: inout OutputStream

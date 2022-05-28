@@ -62,8 +62,8 @@ import SQLite
 import Foundation
 import KripkeStructure
 
-struct SQLitePersistentStore {
-    
+struct SQLitePersistentStore: KripkeStructurePersistentStore {
+
     struct StatesTable {
         
         let table: Table
@@ -71,6 +71,8 @@ struct SQLitePersistentStore {
         let id: Expression<Int64>
         
         let isInitial: Expression<Bool>
+
+        let isAccepting: Expression<Bool>
         
         let propertyList: Expression<String>
         
@@ -100,7 +102,7 @@ struct SQLitePersistentStore {
     
     private let db: Connection
     
-    private let states: StatesTable
+    private let statesTable: StatesTable
     
     private let edges: EdgesTable
     
@@ -113,19 +115,50 @@ struct SQLitePersistentStore {
     }()
     
     private let decoder = JSONDecoder()
+
+    var acceptingStates: AnySequence<KripkeState> {
+        let results = try! db.prepare(statesTable.table.select(statesTable.id).where(statesTable.isAccepting == true))
+        return AnySequence { () -> AnyIterator<KripkeState> in
+            let iterator = results.makeIterator()
+            return AnyIterator {
+                try! iterator.next().map { try self.state(for: $0.get(statesTable.id)) }
+            }
+        }
+    }
+
+    var initialStates: AnySequence<KripkeState> {
+        let results = try! db.prepare(statesTable.table.select(statesTable.id).where(statesTable.isInitial == true))
+        return AnySequence { () -> AnyIterator<KripkeState> in
+            let iterator = results.makeIterator()
+            return AnyIterator {
+                try! iterator.next().map { try self.state(for: $0.get(statesTable.id)) }
+            }
+        }
+    }
+
+    var states: AnySequence<KripkeState> {
+        let results = try! db.prepare(statesTable.table.select(statesTable.id))
+        return AnySequence { () -> AnyIterator<KripkeState> in
+            let iterator = results.makeIterator()
+            return AnyIterator {
+                try! iterator.next().map { try self.state(for: $0.get(statesTable.id)) }
+            }
+        }
+    }
     
     init(named name: String) throws {
         let name = name.components(separatedBy: .whitespacesAndNewlines).joined(separator: "-")
         try FileManager.default.createDirectory(at: URL(fileURLWithPath: "/tmp/swiftfsm", isDirectory: true), withIntermediateDirectories: true)
         let db = try Connection("/tmp/swiftfsm/\(name).sqlite3")
 
-        let states = StatesTable(
+        let statesTable = StatesTable(
             table: Table("States"),
             id: Expression<Int64>("id"),
             isInitial: Expression<Bool>("isInitial"),
+            isAccepting: Expression<Bool>("isAccepting"),
             propertyList: Expression<String>("propertyList")
         )
-        try db.run(states.table.drop(ifExists: true))
+        try db.run(statesTable.table.drop(ifExists: true))
         
         let edges = EdgesTable(
             table: Table("Edges"),
@@ -140,13 +173,15 @@ struct SQLitePersistentStore {
         )
         try db.run(edges.table.drop(ifExists: true))
         
-        try db.run(states.table.create { t in
-            t.column(states.id, primaryKey: .autoincrement)
-            t.column(states.isInitial)
-            t.column(states.propertyList, unique: true)
+        try db.run(statesTable.table.create { t in
+            t.column(statesTable.id, primaryKey: .autoincrement)
+            t.column(statesTable.isInitial)
+            t.column(statesTable.isAccepting)
+            t.column(statesTable.propertyList, unique: true)
         })
         
-        try db.run(states.table.createIndex(states.isInitial))
+        try db.run(statesTable.table.createIndex(statesTable.isInitial))
+        try db.run(statesTable.table.createIndex(statesTable.isAccepting))
         
         try db.run(edges.table.create { t in
             t.column(edges.id, primaryKey: .autoincrement)
@@ -159,21 +194,21 @@ struct SQLitePersistentStore {
             t.column(edges.target)
             t.foreignKey(
                 edges.source,
-                references: states.table,
-                states.id,
+                references: statesTable.table,
+                statesTable.id,
                 update: .cascade,
                 delete: .cascade
             )
             t.foreignKey(
                 edges.target,
-                references: states.table,
-                states.id,
+                references: statesTable.table,
+                statesTable.id,
                 update: .cascade,
                 delete: .cascade
             )
         })
         self.db = db
-        self.states = states
+        self.statesTable = statesTable
         self.edges = edges
     }
     
@@ -181,26 +216,27 @@ struct SQLitePersistentStore {
         let propertyListStr = try stringRepresentation(of: propertyList)
         var state: (Int64, KripkeState)? = nil
         try db.transaction {
-            if let row = try db.pluck(states.table.select(states.id).where(states.propertyList == propertyListStr)) {
-                let id = try row.get(states.id)
+            if let row = try db.pluck(statesTable.table.select(statesTable.id).where(statesTable.propertyList == propertyListStr)) {
+                let id = try row.get(statesTable.id)
                 state = (id, try self._state(for: id))
                 return
             }
             try db.run(
-                states.table.insert([
-                    states.propertyList <- propertyListStr,
-                    states.isInitial <- isInitial
+                statesTable.table.insert([
+                    statesTable.propertyList <- propertyListStr,
+                    statesTable.isInitial <- isInitial,
+                    statesTable.isAccepting <- true
                 ])
             )
-            guard let row = try db.pluck(states.table.select(states.id).order(states.id.desc)) else {
+            guard let row = try db.pluck(statesTable.table.select(statesTable.id).order(statesTable.id.desc)) else {
                 fatalError("Unable to insert KripkeState \(propertyList)")
             }
-            let id = try row.get(states.id)
+            let id = try row.get(statesTable.id)
             state = (id, KripkeState(isInitial: isInitial, properties: propertyList))
         }
         return state!
     }
-    
+
     func add(edge: KripkeEdge, to id: Int64) throws {
         try db.transaction {
             let state = try self._state(for: id)
@@ -219,12 +255,13 @@ struct SQLitePersistentStore {
             }
             try db.run(edges.table.filter(edges.source == id).delete())
             try db.run(edges.table.insertMany(newRows))
+            try db.run(statesTable.table.filter(statesTable.id == id).update(statesTable.isAccepting <- false))
         }
     }
 
     public func exists(_ propertyList: KripkeStatePropertyList) throws -> Bool {
         let str = try stringRepresentation(of: propertyList)
-        return try nil != db.pluck(states.table.select(states.id).where(states.propertyList == str))
+        return try nil != db.pluck(statesTable.table.select(statesTable.id).where(statesTable.propertyList == str))
     }
 
     public func data(for propertyList: KripkeStatePropertyList) throws -> (Int64, KripkeState) {
@@ -239,10 +276,10 @@ struct SQLitePersistentStore {
 
     public func id(for propertyList: KripkeStatePropertyList) throws -> Int64 {
         let str = try stringRepresentation(of: propertyList)
-        guard let first = try db.pluck(states.table.select(states.id).where(states.propertyList == str)) else {
+        guard let first = try db.pluck(statesTable.table.select(statesTable.id).where(statesTable.propertyList == str)) else {
             fatalError("Attempting to fetch id for kripke state that doesn't exist.")
         }
-        return try first.get(states.id)
+        return try first.get(statesTable.id)
     }
 
     public func state(for id: Int64) throws -> KripkeState {
@@ -254,16 +291,16 @@ struct SQLitePersistentStore {
     }
 
     private func _state(for id: Int64) throws -> KripkeState {
-        guard let first = try db.pluck(states.table.select(*).where(states.id == id)) else {
+        guard let first = try db.pluck(statesTable.table.select(*).where(statesTable.id == id)) else {
             fatalError("Attempting to fetch kripke state that doesn't exist: \(id)")
         }
         let rows = try db.prepare(edges.table
             .select(*)
             .where(edges.source == id)
         )
-        let id = try first.get(states.id)
-        let isInitial = try first.get(states.isInitial)
-        guard let propertyList = try (try first.get(states.propertyList)).data(using: .utf8).map({
+        let id = try first.get(statesTable.id)
+        let isInitial = try first.get(statesTable.isInitial)
+        guard let propertyList = try (try first.get(statesTable.propertyList)).data(using: .utf8).map({
             try decoder.decode(KripkeStatePropertyList.self, from: $0)
         }) else {
             fatalError("Unable to decode property list for kripke state \(id)")
@@ -276,10 +313,10 @@ struct SQLitePersistentStore {
             let takeSnapshot = try row.get(edges.takeSnapshot)
             let time = try UInt(row.get(edges.time))
             let targetId = try row.get(edges.target)
-            guard let target = try db.pluck(states.table.select(states.propertyList).where(states.id == targetId)) else {
+            guard let target = try db.pluck(statesTable.table.select(statesTable.propertyList).where(statesTable.id == targetId)) else {
                 fatalError("Attempting to fetch kripke state that doesn't exist: \(id)")
             }
-            guard let targetPropertyList = try (try target.get(states.propertyList)).data(using: .utf8).map({
+            guard let targetPropertyList = try (try target.get(statesTable.propertyList)).data(using: .utf8).map({
                 try decoder.decode(KripkeStatePropertyList.self, from: $0)
             }) else {
                 fatalError("Unable to decode property list for kripke state \(id)")
@@ -310,11 +347,11 @@ struct SQLitePersistentStore {
 extension SQLitePersistentStore: Sequence {
 
     func makeIterator() -> AnyIterator<KripkeState> {
-        let rows = try! db.prepare(states.table.select(states.id))
-        let states = rows.lazy.map {
-            try! self.state(for: $0.get(self.states.id))
+        let rows = try! db.prepare(statesTable.table.select(statesTable.id))
+        let statesTable = rows.lazy.map {
+            try! self.state(for: $0.get(self.statesTable.id))
         }
-        return AnyIterator(states.makeIterator())
+        return AnyIterator(statesTable.makeIterator())
     }
 
 }

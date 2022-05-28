@@ -72,6 +72,84 @@ import MachineStructure
 @testable import Verification
 
 class ScheduleVerifierTests: XCTestCase {
+
+    final class InMemoryStore: KripkeStructurePersistentStore {
+
+        private var latestId: Int64 = 0
+
+        private var ids: [KripkeStatePropertyList: Int64] = [:]
+
+        var allStates: [Int64: (KripkeStatePropertyList, Bool, Set<KripkeEdge>)] = [:]
+
+        var acceptingStates: AnySequence<KripkeState> {
+            AnySequence(states.filter { $0.edges.isEmpty })
+        }
+
+        var initialStates: AnySequence<KripkeState> {
+            AnySequence(states.filter { $0.isInitial })
+        }
+
+        var states: AnySequence<KripkeState> {
+            AnySequence(allStates.keys.map {
+                try! self.state(for: $0)
+            })
+        }
+
+        init(named name: String) throws {}
+
+        init(states: Set<KripkeState>) {
+            for state in states {
+                let (id, _) = try! self.add(state.properties, isInitial: state.isInitial)
+                for edge in state.edges {
+                    try! self.add(edge: edge, to: id)
+                }
+            }
+        }
+
+        func add(_ propertyList: KripkeStatePropertyList, isInitial: Bool) throws -> (Int64, KripkeState) {
+            let id = try id(for: propertyList)
+            if nil == allStates[id] {
+                allStates[id] = (propertyList, isInitial, [])
+            }
+            return try (id, state(for: id))
+        }
+
+        func add(edge: KripkeEdge, to id: Int64) throws {
+            allStates[id]?.2.insert(edge)
+        }
+
+        func exists(_ propertyList: KripkeStatePropertyList) throws -> Bool {
+            return nil != ids[propertyList]
+        }
+
+        func data(for propertyList: KripkeStatePropertyList) throws -> (Int64, KripkeState) {
+            let id = try id(for: propertyList)
+            return try (id, state(for: id))
+        }
+
+        func id(for propertyList: KripkeStatePropertyList) throws -> Int64 {
+            if let id = ids[propertyList] {
+                return id
+            }
+            let id = latestId
+            latestId += 1
+            ids[propertyList] = id
+            return id
+        }
+
+        func state(for id: Int64) throws -> KripkeState {
+            guard let (plist, isInitial, edges) = allStates[id] else {
+                fatalError("State does not exist")
+            }
+            let state = KripkeState(isInitial: isInitial, properties: plist)
+            for edge in edges {
+                state.addEdge(edge)
+            }
+            return state
+        }
+
+
+    }
     
     final class TestableViewFactory: KripkeStructureViewFactory {
         
@@ -109,16 +187,10 @@ class ScheduleVerifierTests: XCTestCase {
                 fatalError("Unable to create views directory")
             }
             for view in createdViews {
-                let outputView = GraphVizKripkeStructureView<KripkeState>(filename: view.identifier + ".gv")
-                let nusmvView = NuSMVKripkeStructureView<KripkeState>(identifier: view.identifier)
-                outputView.reset(usingClocks: true)
-                nusmvView.reset(usingClocks: true)
-                for state in view.result.sorted(by: { $0.properties.description < $1.properties.description }) {
-                    outputView.commit(state: state)
-                    nusmvView.commit(state: state)
-                }
-                outputView.finish()
-                nusmvView.finish()
+                let outputView = GraphVizKripkeStructureView(filename: view.identifier + ".gv")
+                let nusmvView = NuSMVKripkeStructureView(identifier: view.identifier)
+                try! outputView.generate(store: view.store, usingClocks: true)
+                try! nusmvView.generate(store: view.store, usingClocks: true)
             }
         }
         
@@ -133,12 +205,10 @@ class ScheduleVerifierTests: XCTestCase {
         let expectedIdentifier: String
         
         var expected: Set<KripkeState>
-        
-        private(set) var commits: [KripkeState] = []
+
+        private(set) var store: KripkeStructurePersistentStore! = nil
         
         private(set) var result: Set<KripkeState>
-        
-        private(set) var finishCalled: Bool = false
         
         init(identifier: String, expectedIdentifier: String, expected: Set<KripkeState>) {
             self.identifier = identifier
@@ -146,20 +216,10 @@ class ScheduleVerifierTests: XCTestCase {
             self.expected = expected
             self.result = Set<KripkeState>(minimumCapacity: expected.count)
         }
-        
-        func commit(state: KripkeState) {
-            commits.append(state)
-            result.insert(state)
-        }
 
-        func finish() {
-            finishCalled = true
-        }
-
-        func reset(usingClocks: Bool) {
-            commits.removeAll(keepingCapacity: true)
-            result.removeAll(keepingCapacity: true)
-            finishCalled = false
+        func generate(store: KripkeStructurePersistentStore, usingClocks: Bool) throws {
+            self.store = store
+            self.result = Set(store.states)
         }
         
         @discardableResult
@@ -169,9 +229,7 @@ class ScheduleVerifierTests: XCTestCase {
                 explain(name: readableName + "_")
             }
             XCTAssertEqual(identifier, expectedIdentifier)
-            XCTAssertEqual(commits.count, result.count) // Make sure all states are only ever committed once.
-            XCTAssertTrue(finishCalled)
-            return identifier == expectedIdentifier && result == expected && finishCalled
+            return identifier == expectedIdentifier && result == expected
         }
         
         func explain(name: String = "") {
@@ -182,18 +240,11 @@ class ScheduleVerifierTests: XCTestCase {
             print("missing results: \(missingElements)")
             let extraneousElements = result.subtracting(expected)
             print("extraneous results: \(extraneousElements)")
-            let expectedView = GraphVizKripkeStructureView<KripkeState>(filename: "\(name)expected.gv")
-            expectedView.reset(usingClocks: true)
-            let resultView = GraphVizKripkeStructureView<KripkeState>(filename: "\(name)result.gv")
-            resultView.reset(usingClocks: true)
-            for state in expected.sorted(by: { $0.properties.description < $1.properties.description }) {
-                expectedView.commit(state: state)
-            }
-            for state in result.sorted(by: { $0.properties.description < $1.properties.description }) {
-                resultView.commit(state: state)
-            }
-            expectedView.finish()
-            resultView.finish()
+            let expectedView = GraphVizKripkeStructureView(filename: "\(name)expected.gv")
+            let resultView = GraphVizKripkeStructureView(filename: "\(name)result.gv")
+            let expectedStore = InMemoryStore(states: expected)
+            try! expectedView.generate(store: expectedStore, usingClocks: true)
+            try! resultView.generate(store: store, usingClocks: true)
             print("Writing expected to: \(FileManager.default.currentDirectoryPath)/\(name)expected.gv")
             print("Writing result to: \(FileManager.default.currentDirectoryPath)/\(name)result.gv")
         }

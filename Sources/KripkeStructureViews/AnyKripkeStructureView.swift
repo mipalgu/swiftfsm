@@ -59,33 +59,20 @@
 import KripkeStructure
 import Utilities
 
-public final class AnyKripkeStructureView<State: KripkeStateType>: KripkeStructureView {
+public final class AnyKripkeStructureView: KripkeStructureView {
+
 
     public let base: Any
 
-    fileprivate let _commit: (State) -> Void
+    private let _generate: (KripkeStructurePersistentStore, Bool) throws -> Void
 
-    fileprivate let _finish: () -> Void
-
-    fileprivate let _reset: (Bool) -> Void
-
-    public init<View: KripkeStructureView>(_ base: View) where View.State == State {
+    public init<View: KripkeStructureView>(_ base: View){
         self.base = base
-        self._commit = { base.commit(state: $0) }
-        self._finish = { base.finish() }
-        self._reset = { base.reset(usingClocks: $0) }
+        self._generate = { try base.generate(store: $0, usingClocks: $1) }
     }
 
-    public func commit(state: State) {
-        self._commit(state)
-    }
-
-    public func finish() {
-        self._finish()
-    }
-
-    public func reset(usingClocks: Bool) {
-        self._reset(usingClocks)
+    public func generate(store: KripkeStructurePersistentStore, usingClocks: Bool) throws {
+        try self._generate(store, usingClocks)
     }
 
 }

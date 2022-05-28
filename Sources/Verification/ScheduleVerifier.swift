@@ -122,8 +122,7 @@ struct ScheduleVerifier<Isolator: ScheduleIsolatorProtocol> {
         viewFactory: ViewFactory,
         cycleDetector: Detector
     ) where Gateway: NewVerifiableGateway,
-            Detector.Element == KripkeStatePropertyList,
-            ViewFactory.View.State == KripkeState
+            Detector.Element == KripkeStatePropertyList
     {
         let generator = VerificationStepGenerator()
         for (index, thread) in isolatedThreads.threads.enumerated() {
@@ -136,13 +135,12 @@ struct ScheduleVerifier<Isolator: ScheduleIsolatorProtocol> {
             let viewName = allFsmNames.count == 1 ? allFsmNames.first ?? "\(index)" : "\(index)"
             let persistentStore = try! SQLitePersistentStore(named: viewName)
             let view = viewFactory.make(identifier: viewName)
-            defer { view.finish() }
             gateway.setScenario([], pool: thread.pool)
             let collapse = nil == thread.map.steps.first { $0.step.fsms.count > 1 }
             var cycleData = cycleDetector.initialData
             var jobs = [Job(step: 0, map: thread.map, pool: thread.pool, previous: nil)]
             defer {
-                persistentStore.forEach(view.commit)
+                try! view.generate(store: persistentStore, usingClocks: true)
             }
             while !jobs.isEmpty {
                 let job = jobs.removeFirst()

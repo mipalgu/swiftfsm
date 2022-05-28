@@ -62,13 +62,13 @@ import swift_helpers
 
 //swiftlint:disable line_length
 
-public final class GexfKripkeStructureViewHandler<State: KripkeStateType>: GenericKripkeStructureViewHandler {
+public final class GexfKripkeStructureViewHandler: GenericKripkeStructureViewHandler {
 
     public init() {}
 
     public func handleEffects(
         _ data: GenericKripkeStructureViewData,
-        state: State,
+        state: KripkeState,
         withId id: Int,
         usingStream stream: inout OutputStream
     ) {
@@ -114,7 +114,7 @@ public final class GexfKripkeStructureViewHandler<State: KripkeStateType>: Gener
 
     public func handleState(
         _ data: GenericKripkeStructureViewData,
-        state: State,
+        state: KripkeState,
         withId id: Int,
         isInitial: Bool,
         usingStream stream: inout OutputStream

@@ -59,7 +59,7 @@
 import IO
 import KripkeStructure
 
-public final class NuSMVKripkeStructureViewFactory<State: KripkeStateType>: KripkeStructureViewFactory {
+public final class NuSMVKripkeStructureViewFactory: KripkeStructureViewFactory {
 
     fileprivate let extractor: PropertyExtractor<NuSMVPropertyFormatter>
 
@@ -73,7 +73,7 @@ public final class NuSMVKripkeStructureViewFactory<State: KripkeStateType>: Krip
         self.outputStreamFactory = outputStreamFactory
     }
 
-    public func make(identifier: String) -> NuSMVKripkeStructureView<State> {
+    public func make(identifier: String) -> NuSMVKripkeStructureView {
         return NuSMVKripkeStructureView(
             identifier: identifier,
             extractor: extractor,

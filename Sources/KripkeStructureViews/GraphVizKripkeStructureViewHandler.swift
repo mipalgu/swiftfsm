@@ -60,7 +60,7 @@ import IO
 import KripkeStructure
 import swift_helpers
 
-public final class GraphVizKripkeStructureViewHandler<State: KripkeStateType>: GenericKripkeStructureViewHandler {
+public final class GraphVizKripkeStructureViewHandler: GenericKripkeStructureViewHandler {
 
     public init() {}
 
@@ -74,7 +74,7 @@ public final class GraphVizKripkeStructureViewHandler<State: KripkeStateType>: G
 
     public func handleState(
         _ data: GenericKripkeStructureViewData,
-        state: State,
+        state: KripkeState,
         withId id: Int,
         isInitial: Bool,
         usingStream stream: inout OutputStream
@@ -100,7 +100,7 @@ public final class GraphVizKripkeStructureViewHandler<State: KripkeStateType>: G
 
     public func handleEffects(
         _ data: GenericKripkeStructureViewData,
-        state: State,
+        state: KripkeState,
         withId id: Int,
         usingStream stream: inout OutputStream
     ) {
