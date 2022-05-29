@@ -131,7 +131,7 @@ public final class NuSMVKripkeStructureView: KripkeStructureView {
         private let name: Expression<String> = Expression<String>("name")
 
         var properties: AnySequence<(Int64, String)> {
-            return AnySequence { () -> AnyIterator<(Int64, String)> in
+            AnySequence { () -> AnyIterator<(Int64, String)> in
                 let results = try! db.prepare(table.select(id, name).order(name.asc))
                 let iterator = results.makeIterator()
                 return AnyIterator {
@@ -218,7 +218,7 @@ public final class NuSMVKripkeStructureView: KripkeStructureView {
         }
 
         func values(forProperty propertyId: Int64) -> AnySequence<String> {
-            return AnySequence<String> { () -> AnyIterator<String> in
+            AnySequence<String> { () -> AnyIterator<String> in
                 let results = try! db.prepare(table.select(value).where(property == propertyId).order(value.asc))
                 let iterator = results.makeIterator()
                 return AnyIterator {
@@ -262,24 +262,24 @@ public final class NuSMVKripkeStructureView: KripkeStructureView {
     }
 
     public func generate(store: KripkeStructure, usingClocks: Bool) throws {
-        self.reset(usingClocks: usingClocks)
+        try self.reset(usingClocks: usingClocks)
         self.store = store
         for state in try store.states {
-            self.commit(state: state)
+            try self.commit(state: state)
         }
         try self.finish()
     }
 
-    private func reset(usingClocks: Bool) {
+    private func reset(usingClocks: Bool) throws {
         self.clocks = ["c"]
         self.usingClocks = usingClocks
         self.stream = self.outputStreamFactory.make(id: self.identifier + ".smv")
-        try! self.db.reset()
+        try self.db.reset()
         self.firstState = nil
         self.store = nil
     }
 
-    private func commit(state: KripkeState) {
+    private func commit(state: KripkeState) throws {
         if nil == self.firstState {
             self.firstState = state
         }
@@ -289,7 +289,7 @@ public final class NuSMVKripkeStructureView: KripkeStructureView {
         }
         let props = self.extractor.extract(from: state.properties)
         for (key, value) in props {
-            try! self.db.insertIfNotExists(property: key, value: value)
+            try self.db.insertIfNotExists(property: key, value: value)
         }
     }
 

@@ -101,12 +101,12 @@ class ScheduleVerifierTests: XCTestCase {
             self.identifier = identifier
         }
 
-        init(identifier: String, states: Set<KripkeState>) {
+        init(identifier: String, states: Set<KripkeState>) throws {
             self.identifier = identifier
             for state in states {
-                let (id, _) = try! self.add(state.properties, isInitial: state.isInitial)
+                let (id, _) = try self.add(state.properties, isInitial: state.isInitial)
                 for edge in state.edges {
-                    try! self.add(edge: edge, to: id)
+                    try self.add(edge: edge, to: id)
                 }
             }
         }
@@ -176,7 +176,7 @@ class ScheduleVerifierTests: XCTestCase {
             return view
         }
         
-        func outputViews(name: String) {
+        func outputViews(name: String) throws {
             let filemanager = FileManager.default
             let currentDirectory = URL(fileURLWithPath: filemanager.currentDirectoryPath, isDirectory: true)
             let buildDirectory = currentDirectory.appendingPathComponent("kripke_structures", isDirectory: true)
@@ -194,8 +194,8 @@ class ScheduleVerifierTests: XCTestCase {
             for view in createdViews {
                 let outputView = GraphVizKripkeStructureView(filename: view.identifier + ".gv")
                 let nusmvView = NuSMVKripkeStructureView(identifier: view.identifier)
-                try! outputView.generate(store: view.store, usingClocks: true)
-                try! nusmvView.generate(store: view.store, usingClocks: true)
+                try outputView.generate(store: view.store, usingClocks: true)
+                try nusmvView.generate(store: view.store, usingClocks: true)
             }
         }
         
@@ -228,16 +228,16 @@ class ScheduleVerifierTests: XCTestCase {
         }
         
         @discardableResult
-        func check(readableName: String) -> Bool {
+        func check(readableName: String) throws -> Bool {
             XCTAssertEqual(result, expected)
             if expected != result {
-                explain(name: readableName + "_")
+                try explain(name: readableName + "_")
             }
             XCTAssertEqual(identifier, expectedIdentifier)
             return identifier == expectedIdentifier && result == expected
         }
         
-        func explain(name: String = "") {
+        func explain(name: String = "") throws {
             guard expected != result else {
                 return
             }
@@ -247,9 +247,9 @@ class ScheduleVerifierTests: XCTestCase {
             print("extraneous results: \(extraneousElements)")
             let expectedView = GraphVizKripkeStructureView(filename: "\(name)expected.gv")
             let resultView = GraphVizKripkeStructureView(filename: "\(name)result.gv")
-            let expectedStore = InMemoryStore(identifier: expectedIdentifier, states: expected)
-            try! expectedView.generate(store: expectedStore, usingClocks: true)
-            try! resultView.generate(store: store, usingClocks: true)
+            let expectedStore = try InMemoryStore(identifier: expectedIdentifier, states: expected)
+            try expectedView.generate(store: expectedStore, usingClocks: true)
+            try resultView.generate(store: store, usingClocks: true)
             print("Writing expected to: \(FileManager.default.currentDirectoryPath)/\(name)expected.gv")
             print("Writing result to: \(FileManager.default.currentDirectoryPath)/\(name)result.gv")
         }
@@ -289,17 +289,19 @@ class ScheduleVerifierTests: XCTestCase {
                 try verifier.verify(gateway: gateway, timer: timer, factory: kripkeFactory).forEach {
                     try viewFactory.make(identifier: $0.identifier).generate(store: $0, usingClocks: true)
                 }
-                defer { viewFactory.outputViews(name: self.readableName) }
                 if viewFactory.createdViews.count != 2 {
                     XCTFail("Incorrect number of views created: \(viewFactory.createdViews.count)")
+                    try viewFactory.outputViews(name: self.readableName)
                     return
                 }
                 let view1 = viewFactory.createdViews[0]
                 let view2 = viewFactory.createdViews[1]
-                if !view1.check(readableName: self.readableName) {
+                if try !view1.check(readableName: self.readableName) {
+                    try viewFactory.outputViews(name: self.readableName)
                     return
                 }
-                view2.check(readableName: self.readableName)
+                try view2.check(readableName: self.readableName)
+                try viewFactory.outputViews(name: self.readableName)
             } catch {
                 XCTFail(error.localizedDescription)
             }
@@ -312,12 +314,13 @@ class ScheduleVerifierTests: XCTestCase {
                 try verifier.verify(gateway: gateway, timer: timer, factory: kripkeFactory).forEach {
                     try viewFactory.make(identifier: $0.identifier).generate(store: $0, usingClocks: true)
                 }
-                defer { viewFactory.outputViews(name: self.readableName) }
                 XCTAssertEqual(viewFactory.createdViews.count, 1)
                 guard let view = viewFactory.lastView else {
+                    try viewFactory.outputViews(name: self.readableName)
                     return
                 }
-                view.check(readableName: self.readableName)
+                try view.check(readableName: self.readableName)
+                try viewFactory.outputViews(name: self.readableName)
             } catch {
                 XCTFail(error.localizedDescription)
             }
@@ -330,12 +333,13 @@ class ScheduleVerifierTests: XCTestCase {
                 try verifier.verify(gateway: gateway, timer: timer, factory: kripkeFactory).forEach {
                     try viewFactory.make(identifier: $0.identifier).generate(store: $0, usingClocks: true)
                 }
-                defer { viewFactory.outputViews(name: self.readableName) }
                 guard let view: TestableView = viewFactory.lastView else {
                     XCTFail("Failed to create Kripke Structure View.")
+                    try viewFactory.outputViews(name: self.readableName)
                     return
                 }
-                view.check(readableName: self.readableName)
+                try view.check(readableName: self.readableName)
+                try viewFactory.outputViews(name: self.readableName)
             } catch {
                 XCTFail(error.localizedDescription)
             }
@@ -348,12 +352,13 @@ class ScheduleVerifierTests: XCTestCase {
                 try verifier.verify(gateway: gateway, timer: timer, factory: kripkeFactory).forEach {
                     try viewFactory.make(identifier: $0.identifier).generate(store: $0, usingClocks: true)
                 }
-                defer { viewFactory.outputViews(name: self.readableName) }
                 XCTAssertEqual(viewFactory.createdViews.count, 1)
                 guard let view = viewFactory.lastView else {
+                    try viewFactory.outputViews(name: self.readableName)
                     return
                 }
-                view.check(readableName: self.readableName)
+                try view.check(readableName: self.readableName)
+                try viewFactory.outputViews(name: self.readableName)
             } catch {
                 XCTFail(error.localizedDescription)
             }
@@ -366,17 +371,20 @@ class ScheduleVerifierTests: XCTestCase {
                 try verifier.verify(gateway: gateway, timer: timer, factory: kripkeFactory).forEach {
                     try viewFactory.make(identifier: $0.identifier).generate(store: $0, usingClocks: true)
                 }
-                defer { viewFactory.outputViews(name: self.readableName) }
+                try viewFactory.outputViews(name: self.readableName)
                 if viewFactory.createdViews.count != 2 {
                     XCTFail("Incorrect number of views created: \(viewFactory.createdViews.count)")
+                    try viewFactory.outputViews(name: self.readableName)
                     return
                 }
                 let view1 = viewFactory.createdViews[0]
                 let view2 = viewFactory.createdViews[1]
-                if !view1.check(readableName: self.readableName) {
+                if try !view1.check(readableName: self.readableName) {
+                    try viewFactory.outputViews(name: self.readableName)
                     return
                 }
-                view2.check(readableName: self.readableName)
+                try view2.check(readableName: self.readableName)
+                try viewFactory.outputViews(name: self.readableName)
             } catch {
                 XCTFail(error.localizedDescription)
             }
@@ -389,12 +397,14 @@ class ScheduleVerifierTests: XCTestCase {
                 try verifier.verify(gateway: gateway, timer: timer, factory: kripkeFactory).forEach {
                     try viewFactory.make(identifier: $0.identifier).generate(store: $0, usingClocks: true)
                 }
-                defer { viewFactory.outputViews(name: self.readableName) }
+                try viewFactory.outputViews(name: self.readableName)
                 guard let view: TestableView = viewFactory.lastView else {
                     XCTFail("Failed to create Kripke Structure View.")
+                    try viewFactory.outputViews(name: self.readableName)
                     return
                 }
-                view.check(readableName: self.readableName)
+                try view.check(readableName: self.readableName)
+                try viewFactory.outputViews(name: self.readableName)
             } catch {
                 XCTFail(error.localizedDescription)
             }
@@ -407,12 +417,13 @@ class ScheduleVerifierTests: XCTestCase {
                 try verifier.verify(gateway: gateway, timer: timer, factory: kripkeFactory).forEach {
                     try viewFactory.make(identifier: $0.identifier).generate(store: $0, usingClocks: true)
                 }
-                defer { viewFactory.outputViews(name: self.readableName) }
                 guard let view: TestableView = viewFactory.createdViews.first(where: { $0.identifier == "DelegateSyncFiniteStateMachine" }) else {
                     XCTFail("Failed to create Kripke Structure View.")
+                    try viewFactory.outputViews(name: self.readableName)
                     return
                 }
-                view.check(readableName: self.readableName)
+                try view.check(readableName: self.readableName)
+                try viewFactory.outputViews(name: self.readableName)
             } catch {
                 XCTFail(error.localizedDescription)
             }

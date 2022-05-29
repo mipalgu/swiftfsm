@@ -91,9 +91,9 @@ public final class GraphVizKripkeStructureViewHandler: GenericKripkeStructureVie
         _ store: KripkeStructure,
         initials: AnySequence<KripkeState>,
         usingStream stream: inout OutputStream
-    ) {
-        initials.forEach {
-            let id = try! store.id(for: $0.properties)
+    ) throws {
+        try initials.forEach {
+            let id = try store.id(for: $0.properties)
             stream.write("si\(id) -> s\(id);\n")
         }
     }
@@ -104,7 +104,7 @@ public final class GraphVizKripkeStructureViewHandler: GenericKripkeStructureVie
         withId id: Int64,
         usingClocks: Bool,
         usingStream stream: inout OutputStream
-    ) {
+    ) throws {
         func expression(for constraint: ClockConstraint, clockLabel: String) -> String {
             return constraint.expression(
                 referencing: clockLabel,
@@ -121,8 +121,8 @@ public final class GraphVizKripkeStructureViewHandler: GenericKripkeStructureVie
                 group: { "&#40;\($0)&#41;" }
             )
         }
-        state.edges.forEach {
-            let target = try! store.id(for: $0.target)
+        try state.edges.forEach {
+            let target = try store.id(for: $0.target)
             let label: String
             if usingClocks {
                 let time = $0.time == 0 ? nil : $0.time

@@ -67,13 +67,13 @@ public protocol GenericKripkeStructureViewHandler {
         withId id: Int64,
         usingClocks: Bool,
         usingStream stream: inout OutputStream
-    )
+    ) throws
 
     func handleInitials(
         _: KripkeStructure,
         initials: AnySequence<KripkeState>,
         usingStream stream: inout OutputStream
-    )
+    ) throws
 
     func handleState(
         _: KripkeStructure,
@@ -81,10 +81,10 @@ public protocol GenericKripkeStructureViewHandler {
         withId id: Int64,
         isInitial: Bool,
         usingStream stream: inout OutputStream
-    )
+    ) throws
 
-    func handleStart(_: KripkeStructure, usingStream stream: inout OutputStream)
+    func handleStart(_: KripkeStructure, usingStream stream: inout OutputStream) throws
 
-    func handleEnd(_: KripkeStructure, usingStream stream: inout OutputStream)
+    func handleEnd(_: KripkeStructure, usingStream stream: inout OutputStream) throws
 
 }

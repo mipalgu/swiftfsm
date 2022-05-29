@@ -91,22 +91,22 @@ public final class GenericKripkeStructureView<Handler: GenericKripkeStructureVie
     }
 
     public func generate(store: KripkeStructure, usingClocks: Bool) throws {
-        self.reset(store: store, usingClocks: usingClocks)
+        try self.reset(store: store, usingClocks: usingClocks)
         for state in try store.states {
-            self.commit(store: store, state: state, usingClocks: usingClocks)
+            try self.commit(store: store, state: state, usingClocks: usingClocks)
         }
         try self.finish(store: store)
     }
 
-    private func reset(store: KripkeStructure, usingClocks: Bool) {
+    private func reset(store: KripkeStructure, usingClocks: Bool) throws {
         self.edgeStream = self.inputOutputStreamFactory.make(id: self.edgeFilename)
         self.combinedStream = self.outputStreamFactory.make(id: self.filename)
-        self.handler.handleStart(store, usingStream: &self.combinedStream)
+        try self.handler.handleStart(store, usingStream: &self.combinedStream)
     }
 
-    private func commit(store: KripkeStructure, state: KripkeState, usingClocks: Bool) {
-        let id = try! store.id(for: state.properties)
-        self.handler.handleState(
+    private func commit(store: KripkeStructure, state: KripkeState, usingClocks: Bool) throws {
+        let id = try store.id(for: state.properties)
+        try self.handler.handleState(
             store,
             state: state,
             withId: id,
@@ -114,7 +114,7 @@ public final class GenericKripkeStructureView<Handler: GenericKripkeStructureVie
             usingStream: &self.combinedStream
         )
         var edgeOutputStream: OutputStream = self.edgeStream
-        self.handler.handleEffects(store, state: state, withId: id, usingClocks: usingClocks, usingStream: &edgeOutputStream)
+        try self.handler.handleEffects(store, state: state, withId: id, usingClocks: usingClocks, usingStream: &edgeOutputStream)
     }
 
     private func finish(store: KripkeStructure) throws {
@@ -125,7 +125,7 @@ public final class GenericKripkeStructureView<Handler: GenericKripkeStructureVie
             self.combinedStream.write(line)
             self.combinedStream.write("\n")
         }
-        self.handler.handleEnd(store, usingStream: &self.combinedStream)
+        try self.handler.handleEnd(store, usingStream: &self.combinedStream)
         self.combinedStream.flush()
         self.edgeStream.close()
         self.combinedStream.close()
