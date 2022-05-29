@@ -60,14 +60,14 @@ struct Schedule: Hashable {
 
     private struct SequentialSchedule {
 
-        private(set) var timeslots: [Timeslot]
+        private(set) var sections: [SnapshotSection]
 
-        mutating func add(_ timeslot: Timeslot) {
-            self.timeslots.append(timeslot)
+        mutating func add(_ section: SnapshotSection) {
+            sections.append(section)
         }
 
-        func timeslotWillOverlap(_ timeslot: Timeslot) -> Bool {
-            nil != timeslots.first { $0.overlaps(with: timeslot) }
+        func willOverlap(_ section: SnapshotSection) -> Bool {
+            nil != sections.first { $0.overlaps(with: section) }
         }
 
     }
@@ -83,24 +83,28 @@ struct Schedule: Hashable {
             return lastTimeslot.startingTime + lastTimeslot.duration
         }.max() ?? 0
     }
-    
+
+    var allTimeslots: [Timeslot] {
+        threads.flatMap { $0.sections.flatMap(\.timeslots) }
+    }
+
     var threads: [ScheduleThread]
 
     func isValid(forPool fsmPool: FSMPool) -> Bool {
         if nil != threads.first(where: { !$0.isValid }) {
             return false
         }
-        let timeslots = threads.flatMap { $0.sections.flatMap(\.timeslots) }
+        let sections = threads.flatMap(\.sections)
         var schedules: [String: SequentialSchedule] = [:]
-        for timeslot in timeslots {
-            let fsms = timeslot.fsms.map { fsmPool.fsm($0) }
-            let dependencies = fsms.flatMap { Set($0.externalVariables.map(\.name) + $0.sensors.map(\.name) + $0.actuators.map(\.name)) }
+        for section in sections {
+            let fsms = Set(section.timeslots.flatMap { $0.fsms }).map { fsmPool.fsm($0) }
+            let dependencies = Set(fsms.flatMap { $0.externalVariables.map(\.name) + $0.sensors.map(\.name) + $0.actuators.map(\.name) })
             for dependency in dependencies {
-                var schedule = schedules[dependency] ?? SequentialSchedule(timeslots: [])
-                if schedule.timeslotWillOverlap(timeslot) {
+                var schedule = schedules[dependency] ?? SequentialSchedule(sections: [])
+                if schedule.willOverlap(section) {
                     return false
                 }
-                schedule.add(timeslot)
+                schedule.add(section)
                 schedules[dependency] = schedule
             }
         }

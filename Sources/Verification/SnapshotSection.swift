@@ -60,9 +60,43 @@
 // A single section within a schedule marked by when reading from the
 // environment occurs, and ended when writing to the environment occurs.
 struct SnapshotSection: Hashable {
+
+    var startingTime: UInt {
+        timeslots.sorted { $0.startingTime <= $1.startingTime }[0].startingTime
+    }
+
+    var duration: UInt {
+        let timeslots = timeslots.sorted { $0.startingTime <= $1.startingTime }
+        guard let first = timeslots.first, let last = timeslots.last else {
+            fatalError("Unable to calculate duration for an empty SnapshotSection")
+        }
+        return (last.startingTime + last.duration) - first.startingTime
+    }
+
+    var timeRange: ClosedRange<UInt> {
+        startingTime...(startingTime + duration)
+    }
     
     // The time slots that are being executed within this section of the
     // schedule.
     var timeslots: [Timeslot]
+
+    var isValid: Bool {
+        if timeslots.isEmpty {
+            return false
+        }
+        for i in 0..<timeslots.count {
+            for j in (i + 1)..<timeslots.count {
+                if timeslots[i].overlaps(with: timeslots[j]) {
+                    return false
+                }
+            }
+        }
+        return true
+    }
+
+    func overlaps(with other: SnapshotSection) -> Bool {
+        timeRange.overlaps(other.timeRange)
+    }
     
 }
