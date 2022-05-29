@@ -224,7 +224,7 @@ class ScheduleVerifierTests: XCTestCase {
 
         func generate(store: KripkeStructure, usingClocks: Bool) throws {
             self.store = store
-            self.result = Set(store.states)
+            self.result = try Set(store.states)
         }
         
         @discardableResult
@@ -422,7 +422,11 @@ class ScheduleVerifierTests: XCTestCase {
     func test_measureFourSeparateTime() {
         multipleSeparateSensors(4) { (verifier, gateway, timer, _) in
             measure {
-                _ = verifier.verify(gateway: gateway, timer: timer)
+                do {
+                    _ = try verifier.verify(gateway: gateway, timer: timer)
+                } catch {
+                    XCTFail(error.localizedDescription)
+                }
             }
         }
     }
@@ -430,7 +434,11 @@ class ScheduleVerifierTests: XCTestCase {
     func test_measureFourCombinedTime() {
         multipleCombinedSensors(4) { (verifier, gateway, timer, _) in
             measure {
-                _ = verifier.verify(gateway: gateway, timer: timer)
+                do {
+                    _ = try verifier.verify(gateway: gateway, timer: timer)
+                } catch {
+                    XCTFail(error.localizedDescription)
+                }
             }
         }
     }
@@ -438,7 +446,11 @@ class ScheduleVerifierTests: XCTestCase {
     func test_measureCombinedTime() {
         combinedSensors { (verifier, gateway, timer, _) in
             measure {
-                _ = verifier.verify(gateway: gateway, timer: timer)
+                do {
+                    _ = try verifier.verify(gateway: gateway, timer: timer)
+                } catch {
+                    XCTFail(error.localizedDescription)
+                }
             }
         }
     }
@@ -446,7 +458,11 @@ class ScheduleVerifierTests: XCTestCase {
     func test_measureSeparateTime() {
         separateSensors { (verifier, gateway, timer, _) in
             measure {
-                _ = verifier.verify(gateway: gateway, timer: timer)
+                do {
+                    _ = try verifier.verify(gateway: gateway, timer: timer)
+                } catch {
+                    XCTFail(error.localizedDescription)
+                }
             }
         }
     }
@@ -454,7 +470,11 @@ class ScheduleVerifierTests: XCTestCase {
     func test_measureSensorTime() {
         singleSensor { (verifier, gateway, timer, _) in
             measure {
-                _ = verifier.verify(gateway: gateway, timer: timer)
+                do {
+                    _ = try verifier.verify(gateway: gateway, timer: timer)
+                } catch {
+                    XCTFail(error.localizedDescription)
+                }
             }
         }
     }

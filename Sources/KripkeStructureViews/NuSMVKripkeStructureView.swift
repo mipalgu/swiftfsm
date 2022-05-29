@@ -264,10 +264,10 @@ public final class NuSMVKripkeStructureView: KripkeStructureView {
     public func generate(store: KripkeStructure, usingClocks: Bool) throws {
         self.reset(usingClocks: usingClocks)
         self.store = store
-        for state in store.states {
+        for state in try store.states {
             self.commit(state: state)
         }
-        self.finish()
+        try self.finish()
     }
 
     private func reset(usingClocks: Bool) {
@@ -293,7 +293,7 @@ public final class NuSMVKripkeStructureView: KripkeStructureView {
         }
     }
 
-    private func finish() {
+    private func finish() throws {
         defer { self.stream.close() }
         self.stream.flush()
         if self.usingClocks {
@@ -302,8 +302,8 @@ public final class NuSMVKripkeStructureView: KripkeStructureView {
         self.stream.write("MODULE main\n\n")
         var outputStream: TextOutputStream = self.stream
         self.createPropertiesList(usingStream: &outputStream)
-        self.createInitial(usingStream: &outputStream)
-        self.createTransitions(writingTo: &outputStream)
+        try self.createInitial(usingStream: &outputStream)
+        try self.createTransitions(writingTo: &outputStream)
         self.stream.flush()
     }
 
@@ -334,14 +334,14 @@ public final class NuSMVKripkeStructureView: KripkeStructureView {
         }
     }
 
-    fileprivate func createInitial(usingStream stream: inout TextOutputStream) {
-        if nil == self.store.initialStates.first(where: { _ in true }) {
+    fileprivate func createInitial(usingStream stream: inout TextOutputStream) throws {
+        if try nil == self.store.initialStates.first(where: { _ in true }) {
             stream.write("INIT();\n")
             return
         }
         let allClocks = self.usingClocks ? self.clocks.sorted() : []
         stream.write("INIT\n")
-        let initials = self.store.initialStates.lazy.map {
+        let initials = try self.store.initialStates.lazy.map {
             var props = self.extractor.extract(from: $0.properties)
             if self.usingClocks {
                 props["sync"] = "0"
@@ -360,8 +360,8 @@ public final class NuSMVKripkeStructureView: KripkeStructureView {
 
     fileprivate func createTransitions(
         writingTo outputStream: inout TextOutputStream
-    ) {
-        let cases = self.store.states.lazy.compactMap { (state) -> String? in
+    ) throws {
+        let cases = try self.store.states.lazy.compactMap { (state) -> String? in
             guard let content = self.createCase(of: state) else {
                 return nil
             }
@@ -371,7 +371,7 @@ public final class NuSMVKripkeStructureView: KripkeStructureView {
             outputStream.write(str)
             outputStream.write("\n")
         }
-        self.store.acceptingStates.forEach {
+        try self.store.acceptingStates.forEach {
             let props = self.extractor.extract(from: $0.properties)
             let conditions = self.createAcceptingTansition(for: props)
             outputStream.write(conditions + "\n\n")

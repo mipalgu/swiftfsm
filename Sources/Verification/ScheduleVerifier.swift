@@ -111,7 +111,7 @@ struct ScheduleVerifier<Isolator: ScheduleIsolatorProtocol> {
         self.isolatedThreads = isolatedThreads
     }
     
-    func verify<Gateway: ModifiableFSMGateway, Timer: Clock>(gateway: Gateway, timer: Timer) -> [KripkeStructure] where Gateway: NewVerifiableGateway
+    func verify<Gateway: ModifiableFSMGateway, Timer: Clock>(gateway: Gateway, timer: Timer) throws -> [KripkeStructure] where Gateway: NewVerifiableGateway
     {
         let generator = VerificationStepGenerator()
         var stores: [KripkeStructure] = []
@@ -123,7 +123,7 @@ struct ScheduleVerifier<Isolator: ScheduleIsolatorProtocol> {
                 $0.step.timeslots.flatMap(\.fsms)
             })
             let identifier = allFsmNames.count == 1 ? allFsmNames.first ?? "\(index)" : "\(index)"
-            let persistentStore = try! SQLitePersistentStore(identifier: identifier)
+            let persistentStore = try SQLitePersistentStore(identifier: identifier)
             defer { stores.append(persistentStore) }
             gateway.setScenario([], pool: thread.pool)
             let collapse = nil == thread.map.steps.first { $0.step.fsms.count > 1 }
@@ -148,13 +148,13 @@ struct ScheduleVerifier<Isolator: ScheduleIsolatorProtocol> {
                     for pool in pools {
                         //print("\nGenerating \(step.step.marker)(\(step.step.timeslots.map(\.callChain.fsm).sorted().joined(separator: ", "))) variations for:\n    \("\(pool)".components(separatedBy: .newlines).joined(separator: "\n\n    "))\n\n")
                         let properties = pool.propertyList(forStep: step.step, executingState: fsm?.currentState.name, collapseIfPossible: collapse)
-                        let inCycle = try! persistentStore.exists(properties)
+                        let inCycle = try persistentStore.exists(properties)
                         let id: Int64
                         let state: KripkeState
                         if !inCycle {
-                            (id, state) = try! persistentStore.add(properties, isInitial: previous == nil)
+                            (id, state) = try persistentStore.add(properties, isInitial: previous == nil)
                         } else {
-                            (id, state) = try! persistentStore.data(for: properties)
+                            (id, state) = try persistentStore.data(for: properties)
                         }
                         if let previous = previous {
                             let edge: KripkeEdge = KripkeEdge(
@@ -168,7 +168,7 @@ struct ScheduleVerifier<Isolator: ScheduleIsolatorProtocol> {
                                 ),
                                 target: properties
                             )
-                            try! persistentStore.add(edge: edge, to: previous.id)
+                            try persistentStore.add(edge: edge, to: previous.id)
                         }
                         guard !inCycle else {
                             continue
@@ -192,13 +192,13 @@ struct ScheduleVerifier<Isolator: ScheduleIsolatorProtocol> {
                     for ringlet in ringlets {
                         //print("\nGenerating \(step.step.marker)(\(step.step.timeslots.map(\.callChain.fsm).sorted().joined(separator: ", "))) variations for:\n    \("\(ringlet.after)".components(separatedBy: .newlines).joined(separator: "\n\n    "))\n\n")
                         let properties = ringlet.after.propertyList(forStep: step.step, executingState: currentState, collapseIfPossible: collapse)
-                        let inCycle = try! persistentStore.exists(properties)
+                        let inCycle = try persistentStore.exists(properties)
                         let id: Int64
                         let state: KripkeState
                         if !inCycle {
-                            (id, state) = try! persistentStore.add(properties, isInitial: previous == nil)
+                            (id, state) = try persistentStore.add(properties, isInitial: previous == nil)
                         } else {
-                            (id, state) = try! persistentStore.data(for: properties)
+                            (id, state) = try persistentStore.data(for: properties)
                         }
                         if let previous = previous {
                             let edge = KripkeEdge(
@@ -212,7 +212,7 @@ struct ScheduleVerifier<Isolator: ScheduleIsolatorProtocol> {
                                 ),
                                 target: properties
                             )
-                            try! persistentStore.add(edge: edge, to: previous.id)
+                            try persistentStore.add(edge: edge, to: previous.id)
                         }
                         guard !inCycle else {
                             continue

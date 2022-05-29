@@ -119,31 +119,37 @@ struct SQLitePersistentStore: MutableKripkeStructure {
     let identifier: String
 
     var acceptingStates: AnySequence<KripkeState> {
-        let results = try! db.prepare(statesTable.table.select(statesTable.id).where(statesTable.isAccepting == true))
-        return AnySequence { () -> AnyIterator<KripkeState> in
-            let iterator = results.makeIterator()
-            return AnyIterator {
-                try! iterator.next().map { try self.state(for: $0.get(statesTable.id)) }
+        get throws {
+            let results = try db.prepare(statesTable.table.select(statesTable.id).where(statesTable.isAccepting == true))
+            return AnySequence { () -> AnyIterator<KripkeState> in
+                let iterator = results.makeIterator()
+                return AnyIterator {
+                    try! iterator.next().map { try self.state(for: $0.get(statesTable.id)) }
+                }
             }
         }
     }
 
     var initialStates: AnySequence<KripkeState> {
-        let results = try! db.prepare(statesTable.table.select(statesTable.id).where(statesTable.isInitial == true))
-        return AnySequence { () -> AnyIterator<KripkeState> in
-            let iterator = results.makeIterator()
-            return AnyIterator {
-                try! iterator.next().map { try self.state(for: $0.get(statesTable.id)) }
+        get throws {
+            let results = try db.prepare(statesTable.table.select(statesTable.id).where(statesTable.isInitial == true))
+            return AnySequence { () -> AnyIterator<KripkeState> in
+                let iterator = results.makeIterator()
+                return AnyIterator {
+                    try! iterator.next().map { try self.state(for: $0.get(statesTable.id)) }
+                }
             }
         }
     }
 
     var states: AnySequence<KripkeState> {
-        let results = try! db.prepare(statesTable.table.select(statesTable.id))
-        return AnySequence { () -> AnyIterator<KripkeState> in
-            let iterator = results.makeIterator()
-            return AnyIterator {
-                try! iterator.next().map { try self.state(for: $0.get(statesTable.id)) }
+        get throws {
+            let results = try db.prepare(statesTable.table.select(statesTable.id))
+            return AnySequence { () -> AnyIterator<KripkeState> in
+                let iterator = results.makeIterator()
+                return AnyIterator {
+                    try! iterator.next().map { try self.state(for: $0.get(statesTable.id)) }
+                }
             }
         }
     }

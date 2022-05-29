@@ -60,11 +60,11 @@ public protocol KripkeStructure {
 
     var identifier: String { get }
 
-    var acceptingStates: AnySequence<KripkeState> { get }
+    var acceptingStates: AnySequence<KripkeState> { get throws }
 
-    var initialStates: AnySequence<KripkeState> { get }
+    var initialStates: AnySequence<KripkeState> { get throws }
 
-    var states: AnySequence<KripkeState> { get }
+    var states: AnySequence<KripkeState> { get throws }
 
     func exists(_ propertyList: KripkeStatePropertyList) throws -> Bool
 

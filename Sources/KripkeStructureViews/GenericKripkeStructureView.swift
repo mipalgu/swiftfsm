@@ -92,10 +92,10 @@ public final class GenericKripkeStructureView<Handler: GenericKripkeStructureVie
 
     public func generate(store: KripkeStructure, usingClocks: Bool) throws {
         self.reset(store: store, usingClocks: usingClocks)
-        for state in store.states {
+        for state in try store.states {
             self.commit(store: store, state: state, usingClocks: usingClocks)
         }
-        self.finish(store: store)
+        try self.finish(store: store)
     }
 
     private func reset(store: KripkeStructure, usingClocks: Bool) {
@@ -117,8 +117,8 @@ public final class GenericKripkeStructureView<Handler: GenericKripkeStructureVie
         self.handler.handleEffects(store, state: state, withId: id, usingClocks: usingClocks, usingStream: &edgeOutputStream)
     }
 
-    private func finish(store: KripkeStructure) {
-        self.handler.handleInitials(store, initials: store.initialStates, usingStream: &self.combinedStream)
+    private func finish(store: KripkeStructure) throws {
+        try self.handler.handleInitials(store, initials: store.initialStates, usingStream: &self.combinedStream)
         self.edgeStream.flush()
         self.edgeStream.rewind()
         while let line = self.edgeStream.readLine() {
