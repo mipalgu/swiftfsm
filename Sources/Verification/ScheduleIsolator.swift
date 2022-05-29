@@ -127,6 +127,10 @@ struct ScheduleIsolator: ScheduleIsolatorProtocol {
         self.threads = threads
         self.cycleLength = cycleLength
     }
+
+    func thread(forFsm fsm: String) -> IsolatedThread? {
+        threads.first { $0.pool.has(fsm) }
+    }
     
 }
 

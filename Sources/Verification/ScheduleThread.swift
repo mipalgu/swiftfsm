@@ -63,5 +63,20 @@ struct ScheduleThread: Hashable {
     
     /// All `SnapshotSection`s making up the sequential schedule.
     var sections: [SnapshotSection]
+
+    var isValid: Bool {
+        let timeslots = sections.flatMap { $0.timeslots }
+        if timeslots.isEmpty {
+            return false
+        }
+        for i in 0..<timeslots.count {
+            for j in (i + 1)..<timeslots.count {
+                if timeslots[i].overlaps(with: timeslots[j]) {
+                    return false
+                }
+            }
+        }
+        return true
+    }
     
 }

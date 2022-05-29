@@ -57,6 +57,20 @@
  */
 
 struct Schedule: Hashable {
+
+    private struct SequentialSchedule {
+
+        private(set) var timeslots: [Timeslot]
+
+        mutating func add(_ timeslot: Timeslot) {
+            self.timeslots.append(timeslot)
+        }
+
+        func timeslotWillOverlap(_ timeslot: Timeslot) -> Bool {
+            nil != timeslots.first { $0.overlaps(with: timeslot) }
+        }
+
+    }
     
     var cycleLength: UInt {
         threads.map {
@@ -71,5 +85,26 @@ struct Schedule: Hashable {
     }
     
     var threads: [ScheduleThread]
+
+    func isValid(forPool fsmPool: FSMPool) -> Bool {
+        if nil != threads.first(where: { !$0.isValid }) {
+            return false
+        }
+        let timeslots = threads.flatMap { $0.sections.flatMap(\.timeslots) }
+        var schedules: [String: SequentialSchedule] = [:]
+        for timeslot in timeslots {
+            let fsms = timeslot.fsms.map { fsmPool.fsm($0) }
+            let dependencies = fsms.flatMap { Set($0.externalVariables.map(\.name) + $0.sensors.map(\.name) + $0.actuators.map(\.name)) }
+            for dependency in dependencies {
+                var schedule = schedules[dependency] ?? SequentialSchedule(timeslots: [])
+                if schedule.timeslotWillOverlap(timeslot) {
+                    return false
+                }
+                schedule.add(timeslot)
+                schedules[dependency] = schedule
+            }
+        }
+        return true
+    }
     
 }

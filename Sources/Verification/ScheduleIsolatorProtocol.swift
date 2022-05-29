@@ -63,5 +63,7 @@ protocol ScheduleIsolatorProtocol {
     var cycleLength: UInt { get }
     
     init(schedule: Schedule, allFsms: FSMPool)
+
+    func thread(forFsm fsm: String) -> IsolatedThread?
     
 }

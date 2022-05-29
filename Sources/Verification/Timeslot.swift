@@ -84,5 +84,9 @@ struct Timeslot: Hashable {
     func afterExecutingTimeUntil(timeslot: Timeslot, cycleLength: UInt) -> UInt {
         afterExecutingTimeUntil(time: timeslot.startingTime, cycleLength: cycleLength)
     }
+
+    func overlaps(with other: Timeslot) -> Bool {
+        self.timeRange.overlaps(other.timeRange)
+    }
     
 }
