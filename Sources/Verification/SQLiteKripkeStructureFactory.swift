@@ -1,5 +1,5 @@
 /*
- * MutableKripkeStructure.swift
+ * SQLiteKripkeStructureFactory.swift
  * Verification
  *
  * Created by Callum McColl on 29/5/2022.
@@ -56,12 +56,16 @@
  *
  */
 
-import KripkeStructure
+public struct SQLiteKripkeStructureFactory: MutableKripkeStructureFactory {
 
-public protocol MutableKripkeStructure: KripkeStructure {
+    private let path: String
 
-    func add(_ propertyList: KripkeStatePropertyList, isInitial: Bool) throws -> (Int64, KripkeState)
+    public init(savingInDirectory path: String = "/tmp/swiftfsm") {
+        self.path = path
+    }
 
-    func add(edge: KripkeEdge, to id: Int64) throws
+    public func make(identifier: String) throws -> SQLiteKripkeStructure {
+        try SQLiteKripkeStructure(savingInDirectory: path, identifier: identifier)
+    }
 
 }

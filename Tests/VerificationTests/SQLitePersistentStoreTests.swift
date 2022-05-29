@@ -66,12 +66,12 @@ final class SQLitePersistentStoreTests: XCTestCase {
         self.name.dropFirst(2).dropLast().components(separatedBy: .whitespacesAndNewlines).joined(separator: "_")
     }
 
-    var store: SQLitePersistentStore! = nil
+    var store: SQLiteKripkeStructure! = nil
 
     override func setUp() {
         self.continueAfterFailure = false
         do {
-            self.store = try SQLitePersistentStore(identifier: testName)
+            self.store = try SQLiteKripkeStructure(identifier: testName)
         } catch {
             XCTFail(error.localizedDescription)
         }

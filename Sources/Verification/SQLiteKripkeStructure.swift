@@ -62,7 +62,7 @@ import SQLite
 import Foundation
 import KripkeStructure
 
-struct SQLitePersistentStore: MutableKripkeStructure {
+public struct SQLiteKripkeStructure: MutableKripkeStructure {
 
     struct StatesTable {
         
@@ -116,9 +116,9 @@ struct SQLitePersistentStore: MutableKripkeStructure {
     
     private let decoder = JSONDecoder()
 
-    let identifier: String
+    public let identifier: String
 
-    var acceptingStates: AnySequence<KripkeState> {
+    public var acceptingStates: AnySequence<KripkeState> {
         get throws {
             let results = try db.prepare(statesTable.table.select(statesTable.id).where(statesTable.isAccepting == true))
             return AnySequence { () -> AnyIterator<KripkeState> in
@@ -130,7 +130,7 @@ struct SQLitePersistentStore: MutableKripkeStructure {
         }
     }
 
-    var initialStates: AnySequence<KripkeState> {
+    public var initialStates: AnySequence<KripkeState> {
         get throws {
             let results = try db.prepare(statesTable.table.select(statesTable.id).where(statesTable.isInitial == true))
             return AnySequence { () -> AnyIterator<KripkeState> in
@@ -142,7 +142,7 @@ struct SQLitePersistentStore: MutableKripkeStructure {
         }
     }
 
-    var states: AnySequence<KripkeState> {
+    public var states: AnySequence<KripkeState> {
         get throws {
             let results = try db.prepare(statesTable.table.select(statesTable.id))
             return AnySequence { () -> AnyIterator<KripkeState> in
@@ -154,10 +154,10 @@ struct SQLitePersistentStore: MutableKripkeStructure {
         }
     }
     
-    init(identifier: String) throws {
+    internal init(savingInDirectory directory: String = "/tmp/swiftfsm", identifier: String) throws {
         self.identifier = identifier
         let name = identifier.components(separatedBy: .whitespacesAndNewlines).joined(separator: "-")
-        try FileManager.default.createDirectory(at: URL(fileURLWithPath: "/tmp/swiftfsm", isDirectory: true), withIntermediateDirectories: true)
+        try FileManager.default.createDirectory(at: URL(fileURLWithPath: directory, isDirectory: true), withIntermediateDirectories: true)
         let db = try Connection("/tmp/swiftfsm/\(name).sqlite3")
 
         let statesTable = StatesTable(
@@ -221,7 +221,7 @@ struct SQLitePersistentStore: MutableKripkeStructure {
         self.edges = edges
     }
     
-    func add(_ propertyList: KripkeStatePropertyList, isInitial: Bool) throws -> (Int64, KripkeState) {
+    public func add(_ propertyList: KripkeStatePropertyList, isInitial: Bool) throws -> (Int64, KripkeState) {
         let propertyListStr = try stringRepresentation(of: propertyList)
         var state: (Int64, KripkeState)? = nil
         try db.transaction {
@@ -246,7 +246,7 @@ struct SQLitePersistentStore: MutableKripkeStructure {
         return state!
     }
 
-    func add(edge: KripkeEdge, to id: Int64) throws {
+    public func add(edge: KripkeEdge, to id: Int64) throws {
         try db.transaction {
             let state = try self._state(for: id)
             state.addEdge(edge)
@@ -351,18 +351,6 @@ struct SQLitePersistentStore: MutableKripkeStructure {
         return propertyListStr
     }
     
-}
-
-extension SQLitePersistentStore: Sequence {
-
-    func makeIterator() -> AnyIterator<KripkeState> {
-        let rows = try! db.prepare(statesTable.table.select(statesTable.id))
-        let statesTable = rows.lazy.map {
-            try! self.state(for: $0.get(self.statesTable.id))
-        }
-        return AnyIterator(statesTable.makeIterator())
-    }
-
 }
 
 #endif

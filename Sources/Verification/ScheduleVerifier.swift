@@ -110,11 +110,15 @@ struct ScheduleVerifier<Isolator: ScheduleIsolatorProtocol> {
     init(isolatedThreads: Isolator) {
         self.isolatedThreads = isolatedThreads
     }
+
+    func verify<Gateway: ModifiableFSMGateway, Timer: Clock>(gateway: Gateway, timer: Timer) throws -> [SQLiteKripkeStructure] where Gateway: NewVerifiableGateway {
+        try self.verify(gateway: gateway, timer: timer, factory: SQLiteKripkeStructureFactory())
+    }
     
-    func verify<Gateway: ModifiableFSMGateway, Timer: Clock>(gateway: Gateway, timer: Timer) throws -> [KripkeStructure] where Gateway: NewVerifiableGateway
+    func verify<Gateway: ModifiableFSMGateway, Timer: Clock, Factory: MutableKripkeStructureFactory>(gateway: Gateway, timer: Timer, factory: Factory) throws -> [Factory.KripkeStructure] where Gateway: NewVerifiableGateway
     {
         let generator = VerificationStepGenerator()
-        var stores: [KripkeStructure] = []
+        var stores: [Factory.KripkeStructure] = []
         for (index, thread) in isolatedThreads.threads.enumerated() {
             if thread.map.steps.isEmpty {
                 continue
@@ -123,7 +127,7 @@ struct ScheduleVerifier<Isolator: ScheduleIsolatorProtocol> {
                 $0.step.timeslots.flatMap(\.fsms)
             })
             let identifier = allFsmNames.count == 1 ? allFsmNames.first ?? "\(index)" : "\(index)"
-            let persistentStore = try SQLitePersistentStore(identifier: identifier)
+            let persistentStore = try factory.make(identifier: identifier)
             defer { stores.append(persistentStore) }
             gateway.setScenario([], pool: thread.pool)
             let collapse = nil == thread.map.steps.first { $0.step.fsms.count > 1 }

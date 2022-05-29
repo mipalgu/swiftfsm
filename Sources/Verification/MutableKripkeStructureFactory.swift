@@ -1,5 +1,5 @@
 /*
- * MutableKripkeStructure.swift
+ * MutableKripkeStructureFactory.swift
  * Verification
  *
  * Created by Callum McColl on 29/5/2022.
@@ -58,10 +58,10 @@
 
 import KripkeStructure
 
-public protocol MutableKripkeStructure: KripkeStructure {
+public protocol MutableKripkeStructureFactory {
 
-    func add(_ propertyList: KripkeStatePropertyList, isInitial: Bool) throws -> (Int64, KripkeState)
+    associatedtype KripkeStructure: MutableKripkeStructure
 
-    func add(edge: KripkeEdge, to id: Int64) throws
+    func make(identifier: String) throws -> KripkeStructure
 
 }
