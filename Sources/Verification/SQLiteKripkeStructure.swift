@@ -157,8 +157,10 @@ public struct SQLiteKripkeStructure: MutableKripkeStructure {
     internal init(savingInDirectory directory: String = "/tmp/swiftfsm", identifier: String) throws {
         self.identifier = identifier
         let name = identifier.components(separatedBy: .whitespacesAndNewlines).joined(separator: "-")
-        try FileManager.default.createDirectory(at: URL(fileURLWithPath: directory, isDirectory: true), withIntermediateDirectories: true)
-        let db = try Connection("/tmp/swiftfsm/\(name).sqlite3")
+        let url = URL(fileURLWithPath: directory, isDirectory: true)
+        try FileManager.default.createDirectory(at: url, withIntermediateDirectories: true)
+        let fileURL = url.appendingPathComponent("\(name).sqlite3", isDirectory: false)
+        let db = try Connection(fileURL.absoluteString)
 
         let statesTable = StatesTable(
             table: Table("States"),
