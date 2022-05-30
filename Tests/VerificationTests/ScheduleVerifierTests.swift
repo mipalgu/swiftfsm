@@ -104,19 +104,19 @@ class ScheduleVerifierTests: XCTestCase {
         init(identifier: String, states: Set<KripkeState>) throws {
             self.identifier = identifier
             for state in states {
-                let (id, _) = try self.add(state.properties, isInitial: state.isInitial)
+                let id = try self.add(state.properties, isInitial: state.isInitial)
                 for edge in state.edges {
                     try self.add(edge: edge, to: id)
                 }
             }
         }
 
-        func add(_ propertyList: KripkeStatePropertyList, isInitial: Bool) throws -> (Int64, KripkeState) {
+        func add(_ propertyList: KripkeStatePropertyList, isInitial: Bool) throws -> Int64 {
             let id = try id(for: propertyList)
             if nil == allStates[id] {
                 allStates[id] = (propertyList, isInitial, [])
             }
-            return try (id, state(for: id))
+            return id
         }
 
         func add(edge: KripkeEdge, to id: Int64) throws {
