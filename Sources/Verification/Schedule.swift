@@ -57,20 +57,6 @@
  */
 
 struct Schedule: Hashable {
-
-    private struct SequentialSchedule {
-
-        private(set) var sections: [SnapshotSection]
-
-        mutating func add(_ section: SnapshotSection) {
-            sections.append(section)
-        }
-
-        func willOverlap(_ section: SnapshotSection) -> Bool {
-            nil != sections.first { $0.overlaps(with: section) }
-        }
-
-    }
     
     var cycleLength: UInt {
         threads.map {
@@ -95,12 +81,12 @@ struct Schedule: Hashable {
             return false
         }
         let sections = threads.flatMap(\.sections)
-        var schedules: [String: SequentialSchedule] = [:]
+        var schedules: [String: ScheduleThread] = [:]
         for section in sections {
             let fsms = Set(section.timeslots.flatMap { $0.fsms }).map { fsmPool.fsm($0) }
             let dependencies = Set(fsms.flatMap { $0.externalVariables.map(\.name) + $0.sensors.map(\.name) + $0.actuators.map(\.name) })
             for dependency in dependencies {
-                var schedule = schedules[dependency] ?? SequentialSchedule(sections: [])
+                var schedule = schedules[dependency] ?? ScheduleThread(sections: [])
                 if schedule.willOverlap(section) {
                     return false
                 }

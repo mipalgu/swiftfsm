@@ -518,6 +518,7 @@ class ScheduleVerifierTests: XCTestCase {
         let timeslot = Timeslot(
             fsms: [fsm.name, callee.name],
             callChain: CallChain(root: fsm.name, calls: []),
+            externalDependencies: [],
             startingTime: startingTime,
             duration: duration,
             cyclesExecuted: 0
@@ -542,6 +543,7 @@ class ScheduleVerifierTests: XCTestCase {
                     pool: pool
                 )
             ],
+            parameterisedThreads: [:],
             cycleLength: timeslot.startingTime + timeslot.duration
         )
         let verifier = ScheduleVerifier(isolatedThreads: isolator)
@@ -576,6 +578,7 @@ class ScheduleVerifierTests: XCTestCase {
         let fsm1Timeslot = Timeslot(
             fsms: [fsm1.name],
             callChain: CallChain(root: fsm1.name, calls: []),
+            externalDependencies: [],
             startingTime: fsm1StartingTime,
             duration: fsm1Duration,
             cyclesExecuted: 0
@@ -583,6 +586,7 @@ class ScheduleVerifierTests: XCTestCase {
         let fsm2Timeslot = Timeslot(
             fsms: [fsm2.name],
             callChain: CallChain(root: fsm2.name, calls: []),
+            externalDependencies: [],
             startingTime: fsm2StartingTime,
             duration: fsm2Duration,
             cyclesExecuted: 0
@@ -620,6 +624,7 @@ class ScheduleVerifierTests: XCTestCase {
                     pool: pool
                 )
             ],
+            parameterisedThreads: [:],
             cycleLength: cycleLength
         )
         let verifier = ScheduleVerifier(isolatedThreads: isolator)
@@ -659,6 +664,7 @@ class ScheduleVerifierTests: XCTestCase {
         let fsm1Timeslot = Timeslot(
             fsms: [fsm1.name],
             callChain: CallChain(root: fsm1.name, calls: []),
+            externalDependencies: [],
             startingTime: fsm1StartingTime,
             duration: fsm1Duration,
             cyclesExecuted: 0
@@ -666,6 +672,7 @@ class ScheduleVerifierTests: XCTestCase {
         let fsm2Timeslot = Timeslot(
             fsms: [fsm2.name],
             callChain: CallChain(root: fsm2.name, calls: []),
+            externalDependencies: [],
             startingTime: fsm2StartingTime,
             duration: fsm2Duration,
             cyclesExecuted: 0
@@ -707,6 +714,7 @@ class ScheduleVerifierTests: XCTestCase {
                     pool: fsm2Pool
                 )
             ],
+            parameterisedThreads: [:],
             cycleLength: cycleLength
         )
         let verifier = ScheduleVerifier(isolatedThreads: isolator)
@@ -746,6 +754,7 @@ class ScheduleVerifierTests: XCTestCase {
         let fsm1Timeslot = Timeslot(
             fsms: [fsm1.name],
             callChain: CallChain(root: fsm1.name, calls: []),
+            externalDependencies: [],
             startingTime: fsm1StartingTime,
             duration: fsm1Duration,
             cyclesExecuted: 0
@@ -753,6 +762,7 @@ class ScheduleVerifierTests: XCTestCase {
         let fsm2Timeslot = Timeslot(
             fsms: [fsm2.name],
             callChain: CallChain(root: fsm2.name, calls: []),
+            externalDependencies: [],
             startingTime: fsm2StartingTime,
             duration: fsm2Duration,
             cyclesExecuted: 0
@@ -794,6 +804,7 @@ class ScheduleVerifierTests: XCTestCase {
                     pool: fsm2Pool
                 )
             ],
+            parameterisedThreads: [:],
             cycleLength: cycleLength
         )
         let verifier = ScheduleVerifier(isolatedThreads: isolator)
@@ -827,6 +838,7 @@ class ScheduleVerifierTests: XCTestCase {
             let timeslot = Timeslot(
                 fsms: [$0.name],
                 callChain: CallChain(root: $0.name, calls: []),
+                externalDependencies: [],
                 startingTime: $1,
                 duration: $2,
                 cyclesExecuted: 0
@@ -856,7 +868,7 @@ class ScheduleVerifierTests: XCTestCase {
                     pool: FSMPool(fsms: [.controllableFSM(AnyControllableFiniteStateMachine($1))])
                 )
             }
-            let isolator = ScheduleIsolator(threads: threads, cycleLength: cycleLength)
+            let isolator = ScheduleIsolator(threads: threads, parameterisedThreads: [:], cycleLength: cycleLength)
             let verifier = ScheduleVerifier(isolatedThreads: isolator)
             return make(verifier, gateway, timer, kripkeFactory, viewFactory)
         }
@@ -889,6 +901,7 @@ class ScheduleVerifierTests: XCTestCase {
                         pool: pool
                     )
                 ],
+                parameterisedThreads: [:],
                 cycleLength: cycleLength
             )
             let verifier = ScheduleVerifier(isolatedThreads: isolator)
@@ -924,6 +937,7 @@ class ScheduleVerifierTests: XCTestCase {
         let fsm1Timeslot = Timeslot(
             fsms: [fsm1.name],
             callChain: CallChain(root: fsm1.name, calls: []),
+            externalDependencies: [],
             startingTime: fsm1StartingTime,
             duration: fsm1Duration,
             cyclesExecuted: 0
@@ -931,6 +945,7 @@ class ScheduleVerifierTests: XCTestCase {
         let fsm2Timeslot = Timeslot(
             fsms: [fsm2.name],
             callChain: CallChain(root: fsm2.name, calls: []),
+            externalDependencies: [],
             startingTime: fsm2StartingTime,
             duration: fsm2Duration,
             cyclesExecuted: 0
@@ -968,6 +983,7 @@ class ScheduleVerifierTests: XCTestCase {
                     pool: pool
                 )
             ],
+            parameterisedThreads: [:],
             cycleLength: cycleLength
         )
         let verifier = ScheduleVerifier(isolatedThreads: isolator)
@@ -992,6 +1008,7 @@ class ScheduleVerifierTests: XCTestCase {
         let timeslot = Timeslot(
             fsms: [fsm.name],
             callChain: CallChain(root: fsm.name, calls: []),
+            externalDependencies: [],
             startingTime: startingTime,
             duration: duration,
             cyclesExecuted: 0
@@ -1016,6 +1033,7 @@ class ScheduleVerifierTests: XCTestCase {
                     pool: pool
                 )
             ],
+            parameterisedThreads: [:],
             cycleLength: timeslot.startingTime + timeslot.duration
         )
         let verifier = ScheduleVerifier(isolatedThreads: isolator)
@@ -1039,6 +1057,7 @@ class ScheduleVerifierTests: XCTestCase {
         let timeslot = Timeslot(
             fsms: [fsm.name],
             callChain: CallChain(root: fsm.name, calls: []),
+            externalDependencies: [],
             startingTime: startingTime,
             duration: duration,
             cyclesExecuted: 0
@@ -1063,6 +1082,7 @@ class ScheduleVerifierTests: XCTestCase {
                     pool: pool
                 )
             ],
+            parameterisedThreads: [:],
             cycleLength: timeslot.startingTime + timeslot.duration
         )
         let verifier = ScheduleVerifier(isolatedThreads: isolator)

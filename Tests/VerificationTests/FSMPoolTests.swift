@@ -80,6 +80,7 @@ class FSMPoolTests: XCTestCase {
         let timeslot = Timeslot(
             fsms: [fsm.name],
             callChain: CallChain(root: fsm.name, calls: []),
+            externalDependencies: [],
             startingTime: 0,
             duration: 30,
             cyclesExecuted: 0
