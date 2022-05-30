@@ -87,7 +87,7 @@ struct ScheduleThread: Hashable {
 
     var verificationMap: VerificationMap {
         let steps = sections.sorted { $0.startingTime < $1.startingTime }.flatMap { (section) -> [VerificationMap.Step] in
-            if section.timeslots.count == 1 {
+            if section.timeslots.count == 1 && section.timeRange == section.timeslots[0].timeRange {
                 return [
                     VerificationMap.Step(time: section.startingTime, step: .takeSnapshotAndStartTimeslot(timeslot: section.timeslots[0])),
                     VerificationMap.Step(time: section.startingTime + section.duration, step: .executeAndSaveSnapshot(timeslot: section.timeslots[0]))
