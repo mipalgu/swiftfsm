@@ -71,6 +71,82 @@ public enum KripkeStatePropertyTypes: Equatable, Codable {
     case EmptyCollection
     case Collection([KripkeStateProperty])
     case Compound(KripkeStatePropertyList)
+
+    var isEmpty: Bool {
+        switch self {
+        case .EmptyCollection:
+            return true
+        case .Optional(let opt):
+            return opt == nil
+        case .Collection(let props):
+            return props.isEmpty || !props.contains(where: { !$0.type.isEmpty })
+        case .Compound(let props):
+            return props.properties.isEmpty || !props.properties.values.contains { !$0.type.isEmpty }
+        default:
+            return false
+        }
+    }
+
+    var defaultType: KripkeStatePropertyTypes {
+        switch self {
+        case .Bool,
+            .Int, .Int8, .Int16, .Int32, .Int64,
+            .UInt, .UInt8, .UInt16, .UInt32, .UInt64,
+            .Float, .Float80, .Double,
+            .String,
+            .EmptyCollection:
+            return self
+        case .Optional:
+            return .Optional(nil)
+        case .Collection:
+            return .Collection([])
+        case .Compound:
+            return .Compound(KripkeStatePropertyList())
+        }
+    }
+
+    var defaultValue: Any {
+        switch self {
+        case .Bool:
+            return false
+        case .Int:
+            return 0
+        case .Int8:
+            return Swift.Int8(0)
+        case .Int16:
+            return Swift.Int16(0)
+        case .Int32:
+            return Swift.Int32(0)
+        case .Int64:
+            return Swift.Int64(0)
+        case .UInt:
+            return Swift.UInt(0)
+        case .UInt8:
+            return Swift.UInt8(0)
+        case .UInt16:
+            return Swift.UInt16(0)
+        case .UInt32:
+            return Swift.UInt32(0)
+        case .UInt64:
+            return Swift.UInt64(0)
+        case .Float:
+            return Swift.Float(0)
+        case .Float80:
+            return Swift.Float80(0)
+        case .Double:
+            return 0.0
+        case .String:
+            return ""
+        case .EmptyCollection:
+            return Array<Any>()
+        case .Optional:
+            return Swift.Optional<Any>.none as Any
+        case .Collection(let props):
+            return props.map(\.type.defaultValue)
+        case .Compound:
+            return Dictionary<String, Any>()
+        }
+    }
 }
 
 /**

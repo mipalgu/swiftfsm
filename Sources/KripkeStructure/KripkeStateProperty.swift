@@ -81,6 +81,10 @@ public struct KripkeStateProperty: Equatable, Codable {
      *  The value of the property.
      */
     public let value: Any
+
+    var defaultProperty: KripkeStateProperty {
+        KripkeStateProperty(type: type.defaultType, value: type.defaultValue)
+    }
     
     public init(_ value: Bool) {
         self.init(type: .Bool, value: value)
