@@ -77,7 +77,7 @@ class TimeAwareRingletTests: XCTestCase {
     
     func test_computesAllPossibleRinglets() throws {
         let fsm = TimeConditionalFiniteStateMachine()
-        let timeslot = Timeslot(fsms: [fsm.name], callChain: CallChain(root: fsm.name, calls: []), startingTime: 0, duration: 30, cyclesExecuted: 0)
+        let timeslot = Timeslot(fsms: [fsm.name], callChain: CallChain(root: fsm.name, calls: []), externalDependencies: [], startingTime: 0, duration: 30, cyclesExecuted: 0)
         let id = fsm.gateway.id(of: fsm.name)
         let id2 = fsm.gateway.id(of: "calling")
         let newMachine: ([String: Any?]) -> AnyParameterisedFiniteStateMachine = {
@@ -143,7 +143,7 @@ class TimeAwareRingletTests: XCTestCase {
     
     func test_computesAllPossibleRingletsForMiddleStartingTime() throws {
         let fsm = TimeConditionalFiniteStateMachine()
-        let timeslot = Timeslot(fsms: [fsm.name], callChain: CallChain(root: fsm.name, calls: []), startingTime: 0, duration: 30, cyclesExecuted: 0)
+        let timeslot = Timeslot(fsms: [fsm.name], callChain: CallChain(root: fsm.name, calls: []), externalDependencies: [], startingTime: 0, duration: 30, cyclesExecuted: 0)
         let id = fsm.gateway.id(of: fsm.name)
         let id2 = fsm.gateway.id(of: "calling")
         let newMachine: ([String: Any?]) -> AnyParameterisedFiniteStateMachine = {
@@ -206,7 +206,7 @@ class TimeAwareRingletTests: XCTestCase {
     
     func test_computesAllPossibleRingletsForBoundaryStartingTime() throws {
         let fsm = TimeConditionalFiniteStateMachine()
-        let timeslot = Timeslot(fsms: [fsm.name], callChain: CallChain(root: fsm.name, calls: []), startingTime: 0, duration: 30, cyclesExecuted: 0)
+        let timeslot = Timeslot(fsms: [fsm.name], callChain: CallChain(root: fsm.name, calls: []), externalDependencies: [], startingTime: 0, duration: 30, cyclesExecuted: 0)
         let id = fsm.gateway.id(of: fsm.name)
         let id2 = fsm.gateway.id(of: "calling")
         let newMachine: ([String: Any?]) -> AnyParameterisedFiniteStateMachine = {
@@ -271,7 +271,7 @@ class TimeAwareRingletTests: XCTestCase {
     
     func test_computesAllPossibleRingletsForMaxStartingTime() throws {
         let fsm = TimeConditionalFiniteStateMachine()
-        let timeslot = Timeslot(fsms: [fsm.name], callChain: CallChain(root: fsm.name, calls: []), startingTime: 0, duration: 30, cyclesExecuted: 0)
+        let timeslot = Timeslot(fsms: [fsm.name], callChain: CallChain(root: fsm.name, calls: []), externalDependencies: [], startingTime: 0, duration: 30, cyclesExecuted: 0)
         let id = fsm.gateway.id(of: fsm.name)
         let id2 = fsm.gateway.id(of: "calling")
         let newMachine: ([String: Any?]) -> AnyParameterisedFiniteStateMachine = {
@@ -338,6 +338,7 @@ class TimeAwareRingletTests: XCTestCase {
             let timeslot = Timeslot(
                 fsms: [fsm.name],
                 callChain: CallChain(root: fsm.name, calls: []),
+                externalDependencies: [],
                 startingTime: 10,
                 duration: 20,
                 cyclesExecuted: 0
@@ -363,6 +364,7 @@ class TimeAwareRingletTests: XCTestCase {
                 let timeslot = Timeslot(
                     fsms: [fsm.name],
                     callChain: CallChain(root: fsm.name, calls: []),
+                    externalDependencies: [],
                     startingTime: 10,
                     duration: 20,
                     cyclesExecuted: 0
@@ -431,7 +433,7 @@ class TimeAwareRingletTests: XCTestCase {
     
     func test_doesNotHaveSideEffectsOnExternalVariables() throws {
         let fsm = AnyControllableFiniteStateMachine(ExternalsFiniteStateMachine())
-        let timeslot = Timeslot(fsms: [fsm.name], callChain: CallChain(root: fsm.name, calls: []), startingTime: 0, duration: 30, cyclesExecuted: 0)
+        let timeslot = Timeslot(fsms: [fsm.name], callChain: CallChain(root: fsm.name, calls: []), externalDependencies: [], startingTime: 0, duration: 30, cyclesExecuted: 0)
         let base = { fsm.base as! ExternalsFiniteStateMachine }
         let initialExternalValues = (base().actuators + base().externalVariables + base().sensors).map { $0.val as! Bool }
         _ = TimeAwareRinglets(fsm: .controllableFSM(fsm), timeslot: timeslot, gateway: base().gateway, timer: base().timer, startingTime: 0)

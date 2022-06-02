@@ -82,6 +82,7 @@ class SnapshotSectionVariationsTests: XCTestCase {
             Timeslot(
                 fsms: [fsm.name],
                 callChain: CallChain(root: fsm.name, calls: []),
+                externalDependencies: [],
                 startingTime: 0,
                 duration: 20,
                 cyclesExecuted: 0
@@ -113,6 +114,7 @@ class SnapshotSectionVariationsTests: XCTestCase {
             Timeslot(
                 fsms: [fsm.name],
                 callChain: CallChain(root: fsm.name, calls: []),
+                externalDependencies: [],
                 startingTime: 0,
                 duration: 20,
                 cyclesExecuted: 0
@@ -145,6 +147,7 @@ class SnapshotSectionVariationsTests: XCTestCase {
             Timeslot(
                 fsms: [fsm.name],
                 callChain: CallChain(root: fsm.name, calls: []),
+                externalDependencies: [],
                 startingTime: 0,
                 duration: 20,
                 cyclesExecuted: 0
@@ -197,6 +200,7 @@ class SnapshotSectionVariationsTests: XCTestCase {
             Timeslot(
                 fsms: [fsm1.name],
                 callChain: CallChain(root: fsm1.name, calls: []),
+                externalDependencies: [],
                 startingTime: 0,
                 duration: 20,
                 cyclesExecuted: 0
@@ -204,6 +208,7 @@ class SnapshotSectionVariationsTests: XCTestCase {
             Timeslot(
                 fsms: [fsm2.name],
                 callChain: CallChain(root: fsm2.name, calls: []),
+                externalDependencies: [],
                 startingTime: 30,
                 duration: 30,
                 cyclesExecuted: 0
@@ -257,6 +262,7 @@ class SnapshotSectionVariationsTests: XCTestCase {
             Timeslot(
                 fsms: [fsm1.name],
                 callChain: CallChain(root: fsm1.name, calls: []),
+                externalDependencies: [],
                 startingTime: 0,
                 duration: 20,
                 cyclesExecuted: 0
@@ -264,6 +270,7 @@ class SnapshotSectionVariationsTests: XCTestCase {
             Timeslot(
                 fsms: [fsm2.name],
                 callChain: CallChain(root: fsm2.name, calls: []),
+                externalDependencies: [],
                 startingTime: 30,
                 duration: 30,
                 cyclesExecuted: 0

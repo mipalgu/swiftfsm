@@ -66,11 +66,11 @@ final class MirrorKripkePropertiesRecorder {
 
     init() {}
 
-    func takeRecord(of object: Any) -> KripkeStatePropertyList {
+    func takeRecord(of object: Any) -> KripkeStatePropertyList? {
         return self._takeRecord(of: object, withMemoryCache: [])
     }
 
-    func getKripkeStatePropertyType(_ val: Any) -> (KripkeStatePropertyTypes, Any) {
+    func getKripkeStatePropertyType(_ val: Any) -> (KripkeStatePropertyTypes, Any)? {
         return self.getKripkeStatePropertyType(val, validValues: [val], withMemoryCache: [])
     }
 
@@ -179,12 +179,14 @@ final class MirrorKripkePropertiesRecorder {
         value: Any,
         validValues: [Any]?,
         withMemoryCache memoryCache: [AnyObject]
-    ) -> KripkeStateProperty {
-        let t = self.getKripkeStatePropertyType(
+    ) -> KripkeStateProperty? {
+        guard let t = self.getKripkeStatePropertyType(
             value,
             validValues: validValues ?? [value],
             withMemoryCache: memoryCache
-        )
+        ) else {
+            return nil
+        }
         return KripkeStateProperty(
             type: t.0,
             value: t.1
@@ -199,7 +201,7 @@ final class MirrorKripkePropertiesRecorder {
         _ val: Any,
         validValues values: [Any],
         withMemoryCache memoryCache: [AnyObject]
-    ) -> (KripkeStatePropertyTypes, Any) {
+    ) -> (KripkeStatePropertyTypes, Any)? {
         let mirror = Mirror(reflecting: val)
         // Check for collections.
         if mirror.displayStyle == Mirror.DisplayStyle.dictionary {
@@ -211,7 +213,10 @@ final class MirrorKripkePropertiesRecorder {
                     fatalError("Unable to convert dictionary elements to tuple.")
                 }
                 let keyStr = "\(key)"
-                dict[keyStr] = KripkeStateProperty(type: self.getKripkeStatePropertyType(value, validValues: [value], withMemoryCache: memoryCache).0, value: value)
+                guard let type = self.getKripkeStatePropertyType(value, validValues: [value], withMemoryCache: memoryCache)?.0 else {
+                    return
+                }
+                dict[keyStr] = KripkeStateProperty(type: type, value: value)
                 elements.append((key, value))
             }
             return (.Compound(KripkeStatePropertyList(dict)), elements)
@@ -219,26 +224,37 @@ final class MirrorKripkePropertiesRecorder {
         if  mirror.displayStyle == Mirror.DisplayStyle.collection ||
             mirror.displayStyle == Mirror.DisplayStyle.set
         {
-            var arr: [Any] = []
-            mirror.children.forEach {
-                arr.append(self.getKripkeStatePropertyType($0, validValues: values, withMemoryCache: memoryCache).1)
+            let elements = mirror.children.map {
+                self.getKripkeStatePropertyType($0, validValues: values, withMemoryCache: memoryCache)
             }
+            guard let first = elements.first(where: { $0 != nil && !$0!.0.isEmpty }) else {
+                return nil
+            }
+            let defaultProp = KripkeStateProperty(type: first!.0, value: first!.1).defaultProperty
             return (
                 .Collection(mirror.children.map {
-                    self.convertValue(value: $0, validValues: values, withMemoryCache: memoryCache)
+                    self.convertValue(value: $0, validValues: values, withMemoryCache: memoryCache) ?? defaultProp
                 }),
-                arr
+                elements.map { $0?.1 ?? first!.0.defaultValue }
             )
         }
         // Check for optionals.
         if mirror.displayStyle == Mirror.DisplayStyle.optional {
             guard let (_, value) = mirror.children.first else {
-                return (.Optional(nil), Optional<Any>.none as Any)
+                return nil
             }
-            return (
-                .Optional(self.convertValue(value: value, validValues: values, withMemoryCache: memoryCache)),
-                Any?.some(self.getKripkeStatePropertyType(value, validValues: values, withMemoryCache: memoryCache).1) as Any
-            )
+            if
+                let type = self.convertValue(value: value, validValues: values, withMemoryCache: memoryCache),
+                !type.type.isEmpty,
+                let value = self.getKripkeStatePropertyType(value, validValues: values, withMemoryCache: memoryCache)?.1
+            {
+                return (
+                    .Optional(type),
+                    Any?.some(value) as Any
+                )
+            } else {
+                return nil
+            }
         }
         switch val {
         case is Bool:
@@ -325,10 +341,13 @@ final class MirrorKripkePropertiesRecorder {
                 }
                 memoryCache.append(temp)
             }
-            if values.count == 1 {
-                return (.Compound(self._takeRecord(of: values[0], withMemoryCache: memoryCache)), values[0])
+            let value: Any = values.count == 1 ? values[0] : val
+            let plist = self._takeRecord(of: value, withMemoryCache: memoryCache)
+            if plist.isEmpty || !plist.contains(where: { !$0.value.type.isEmpty }) {
+                return nil
+            } else {
+                return (.Compound(plist), value)
             }
-            return (.Compound(self._takeRecord(of: val, withMemoryCache: memoryCache)), val)
         }
     }
 

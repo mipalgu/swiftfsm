@@ -69,7 +69,32 @@ struct Schedule: Hashable {
             return lastTimeslot.startingTime + lastTimeslot.duration
         }.max() ?? 0
     }
-    
+
+    var allTimeslots: [Timeslot] {
+        threads.flatMap { $0.sections.flatMap(\.timeslots) }
+    }
+
     var threads: [ScheduleThread]
+
+    func isValid(forPool fsmPool: FSMPool) -> Bool {
+        if nil != threads.first(where: { !$0.isValid }) {
+            return false
+        }
+        let sections = threads.flatMap(\.sections)
+        var schedules: [String: ScheduleThread] = [:]
+        for section in sections {
+            let fsms = Set(section.timeslots.flatMap { $0.fsms }).map { fsmPool.fsm($0) }
+            let dependencies = Set(fsms.flatMap { $0.externalVariables.map(\.name) + $0.sensors.map(\.name) + $0.actuators.map(\.name) })
+            for dependency in dependencies {
+                var schedule = schedules[dependency] ?? ScheduleThread(sections: [])
+                if schedule.willOverlap(section) {
+                    return false
+                }
+                schedule.add(section)
+                schedules[dependency] = schedule
+            }
+        }
+        return true
+    }
     
 }

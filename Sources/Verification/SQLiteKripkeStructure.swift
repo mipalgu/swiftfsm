@@ -223,29 +223,23 @@ public struct SQLiteKripkeStructure: MutableKripkeStructure {
         self.edges = edges
     }
     
-    public func add(_ propertyList: KripkeStatePropertyList, isInitial: Bool) throws -> (Int64, KripkeState) {
+    public func add(_ propertyList: KripkeStatePropertyList, isInitial: Bool) throws -> Int64 {
         let propertyListStr = try stringRepresentation(of: propertyList)
-        var state: (Int64, KripkeState)? = nil
+        var id: Int64! = nil
         try db.transaction {
             if let row = try db.pluck(statesTable.table.select(statesTable.id).where(statesTable.propertyList == propertyListStr)) {
-                let id = try row.get(statesTable.id)
-                state = (id, try self._state(for: id))
+                id = try row.get(statesTable.id)
                 return
             }
-            try db.run(
+            id = try db.run(
                 statesTable.table.insert([
                     statesTable.propertyList <- propertyListStr,
                     statesTable.isInitial <- isInitial,
                     statesTable.isAccepting <- true
                 ])
             )
-            guard let row = try db.pluck(statesTable.table.select(statesTable.id).order(statesTable.id.desc)) else {
-                fatalError("Unable to insert KripkeState \(propertyList)")
-            }
-            let id = try row.get(statesTable.id)
-            state = (id, KripkeState(isInitial: isInitial, properties: propertyList))
         }
-        return state!
+        return id
     }
 
     public func add(edge: KripkeEdge, to id: Int64) throws {

@@ -81,6 +81,10 @@ public struct KripkeStateProperty: Equatable, Codable {
      *  The value of the property.
      */
     public let value: Any
+
+    var defaultProperty: KripkeStateProperty {
+        KripkeStateProperty(type: type.defaultType, value: type.defaultValue)
+    }
     
     public init(_ value: Bool) {
         self.init(type: .Bool, value: value)
@@ -396,6 +400,24 @@ extension KripkeStateProperty {
     
     public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
+        if let type = try? container.decode(String.self, forKey: .type) {
+            switch type {
+            case "Collection":
+                let props = try container.decode([KripkeStateProperty].self, forKey: .value)
+                self.init(type: .Collection(props), value: props.map(\.value))
+                return
+            case "Compound":
+                let plist = try container.decode(KripkeStatePropertyList.self, forKey: .value)
+                self.init(type: .Compound(plist), value: plist.properties.mapValues(\.value))
+                return
+            case "Optional":
+                let prop = try container.decode(KripkeStateProperty?.self, forKey: .value)
+                self.init(type: .Optional(prop), value: prop?.value as Any)
+                return
+            default:
+                throw DecodingError.dataCorruptedError(forKey: CodingKeys.type, in: container, debugDescription: "Type is not an expected value: \(type)")
+            }
+        }
         let type = try container.decode(KripkeStatePropertyTypes.self, forKey: .type)
         let value: Any
         switch type {
@@ -443,6 +465,16 @@ extension KripkeStateProperty {
     
     public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
+        switch type {
+        case .Collection:
+            try container.encode("Collection", forKey: .type)
+        case .Compound:
+            try container.encode("Compound", forKey: .type)
+        case .Optional:
+            try container.encode("Optional", forKey: .type)
+        default:
+            try container.encode(type, forKey: .type)
+        }
         try container.encode(type, forKey: .type)
         switch self.type {
         case .Bool:

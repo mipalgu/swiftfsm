@@ -56,11 +56,15 @@
  *
  */
 
+import swiftfsm
+
 struct Timeslot: Hashable {
     
     var fsms: Set<String>
     
     var callChain: CallChain
+
+    var externalDependencies: [ShallowDependency]
     
     var startingTime: UInt
     
@@ -84,5 +88,43 @@ struct Timeslot: Hashable {
     func afterExecutingTimeUntil(timeslot: Timeslot, cycleLength: UInt) -> UInt {
         afterExecutingTimeUntil(time: timeslot.startingTime, cycleLength: cycleLength)
     }
+
+    func overlaps(with other: Timeslot) -> Bool {
+        self.timeRange.overlaps(other.timeRange)
+    }
     
+}
+
+extension ShallowDependency: Equatable {
+
+    public static func == (lhs: ShallowDependency, rhs: ShallowDependency) -> Bool {
+        switch (lhs, rhs) {
+        case
+            (.callableMachine(let lname), .callableMachine(let rname)),
+            (.invokableMachine(let lname), .invokableMachine(let rname)),
+            (.submachine(let lname), .submachine(let rname)):
+            return lname == rname
+        default:
+            return false
+        }
+    }
+
+}
+
+extension ShallowDependency: Hashable {
+
+    public func hash(into hasher: inout Hasher) {
+        switch self {
+        case .callableMachine(let name):
+            hasher.combine(0)
+            hasher.combine(name)
+        case .invokableMachine(let name):
+            hasher.combine(1)
+            hasher.combine(name)
+        case .submachine(let name):
+            hasher.combine(2)
+            hasher.combine(name)
+        }
+    }
+
 }

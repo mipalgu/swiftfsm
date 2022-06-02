@@ -79,5 +79,9 @@ struct ScheduleIsolatorMock: ScheduleIsolatorProtocol {
         Self.calls = []
         Self.make = { _,_ in ([], 0)}
     }
+
+    func thread(forFsm fsm: String) -> IsolatedThread? {
+        threads.first { $0.pool.has(fsm) }
+    }
     
 }

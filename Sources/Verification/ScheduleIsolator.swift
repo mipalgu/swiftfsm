@@ -61,71 +61,80 @@ import swiftfsm
 /// Is responsible for splitting a schedule into discrete verifiable
 /// subcomponents based on the communication lines between fsms.
 struct ScheduleIsolator: ScheduleIsolatorProtocol {
+
+    private var parameterisedThreads: [String: IsolatedThread]
     
     var threads: [IsolatedThread]
     
     var cycleLength: UInt
     
     init(schedule: Schedule, allFsms: FSMPool) {
-        typealias FSM_Name = String
-        typealias External_Name = String
-        let fsms: [FSM_Name: FSMType] = Dictionary(uniqueKeysWithValues: allFsms.fsms.map { ($0.name, $0) })
-        var fsmBins: [Int: Set<FSM_Name>] = [:]
-        var bins: [Int: Set<External_Name>] = [:]
-        var binIds: [External_Name: Int] = [:]
-        var latestId = 0
-        for fsm in allFsms.fsms {
-            for external in fsm.sensors + fsm.externalVariables + fsm.actuators {
-                let id = binIds[external.name] ?? latestId
-                if nil == binIds[external.name] {
-                    binIds[external.name] = id
-                    latestId += 1
+        if !schedule.isValid(forPool: allFsms) {
+            fatalError("Cannot partition an invalid schedule.")
+        }
+        var schedules = schedule.threads.flatMap {
+            $0.sections.flatMap { (section) -> [ScheduleThread] in
+                section.timeslots.map {
+                    ScheduleThread(
+                        sections: [
+                            SnapshotSection(
+                                startingTime: section.startingTime,
+                                duration: section.duration,
+                                timeslots: [$0]
+                            )
+                        ]
+                    )
                 }
-                bins.insert(external.name, into: id)
-                fsmBins.insert(fsm.name, into: id)
             }
         }
-        binsLoop: for i in 0..<latestId {
-            guard let bin = bins[i] else {
+        var i = 0
+        outerLoop: while i < (schedules.count - 1) {
+            for j in (i + 1)..<schedules.count {
+                if schedules[i].sharesDependencies(with: schedules[j]) {
+                    if schedules[i].willOverlapUnlessSame(schedules[j]) {
+                        fatalError("Detected overlapping schedules that should be combined")
+                    }
+                    schedules[i].merge(schedules[j])
+                    schedules.remove(at: j)
+                    continue outerLoop
+                }
+            }
+            i += 1
+        }
+        var parameterisedThreads: [String: IsolatedThread] = [:]
+        for i in (schedules.count - 1)...0 {
+            let fsms = Set(schedules[i].sections.flatMap(\.timeslots).flatMap(\.fsms))
+            if fsms.contains(where: { allFsms.fsm($0).parameters == nil }) {
                 continue
             }
-            for j in (i + 1)...latestId {
-                guard let otherBin = bins[j], otherBin.intersection(bin).isEmpty else {
-                    continue
-                }
-                bins[j] = otherBin.union(bin)
-                bins[i] = nil
-                fsmBins[j] = (fsmBins[j] ?? Set()).union(fsmBins[i] ?? Set())
-                fsmBins[i] = nil
-                continue binsLoop
+            let parameterised = fsms.filter { allFsms.fsm($0).parameters != nil }
+            let map = schedules[i].verificationMap
+            parameterised.forEach {
+                parameterisedThreads[$0] = IsolatedThread(
+                    map: map,
+                    pool: FSMPool(fsms: parameterised.map { allFsms.fsm($0).clone() })
+                )
             }
+            schedules.remove(at: i)
         }
-        let groups = Array(fsmBins.values)
-        let maps: [(VerificationMap, FSMPool)] = groups.map { group in
-            var map = VerificationMap()
-            for thread in schedule.threads {
-                for section in thread.sections {
-                    guard let first = section.timeslots.first, let last = section.timeslots.last else {
-                        continue
-                    }
-                    let validTimeslots = section.timeslots.filter {
-                        nil != $0.fsms.first { group.contains($0) }
-                    }
-                    guard !validTimeslots.isEmpty else {
-                        continue
-                    }
-                    map.insert(section: validTimeslots, read: first.startingTime, write: last.startingTime + last.duration)
-                }
-            }
-            let pool = FSMPool(fsms: allFsms.fsms.filter { group.contains($0.name) })
-            return (map, pool)
+        let isolatedThreads: [IsolatedThread] = schedules.map {
+            let fsms = Set($0.sections.flatMap(\.timeslots).flatMap(\.fsms))
+            return IsolatedThread(
+                map: $0.verificationMap,
+                pool: FSMPool(fsms: fsms.map { allFsms.fsm($0).clone() })
+            )
         }
-        self.init(threads: maps.map { IsolatedThread(map: $0, pool: $1) }, cycleLength: schedule.cycleLength)
+        self.init(threads: isolatedThreads, parameterisedThreads: parameterisedThreads, cycleLength: schedule.cycleLength)
     }
     
-    init(threads: [IsolatedThread], cycleLength: UInt) {
+    init(threads: [IsolatedThread], parameterisedThreads: [String: IsolatedThread], cycleLength: UInt) {
         self.threads = threads
+        self.parameterisedThreads = parameterisedThreads
         self.cycleLength = cycleLength
+    }
+
+    func thread(forFsm fsm: String) -> IsolatedThread? {
+        threads.first { $0.pool.has(fsm) }
     }
     
 }

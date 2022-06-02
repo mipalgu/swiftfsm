@@ -68,8 +68,6 @@ struct ScheduleVerifier<Isolator: ScheduleIsolatorProtocol> {
         
         var id: Int64
         
-        var state: KripkeState
-        
         var time: UInt
         
         var resetClocks: Set<String>
@@ -154,11 +152,10 @@ struct ScheduleVerifier<Isolator: ScheduleIsolatorProtocol> {
                         let properties = pool.propertyList(forStep: step.step, executingState: fsm?.currentState.name, collapseIfPossible: collapse)
                         let inCycle = try persistentStore.exists(properties)
                         let id: Int64
-                        let state: KripkeState
                         if !inCycle {
-                            (id, state) = try persistentStore.add(properties, isInitial: previous == nil)
+                            id = try persistentStore.add(properties, isInitial: previous == nil)
                         } else {
-                            (id, state) = try persistentStore.data(for: properties)
+                            id = try persistentStore.id(for: properties)
                         }
                         if let previous = previous {
                             let edge: KripkeEdge = KripkeEdge(
@@ -186,7 +183,7 @@ struct ScheduleVerifier<Isolator: ScheduleIsolatorProtocol> {
                         } else {
                             newResetClocks = previous?.resetClocks ?? []
                         }
-                        let newPrevious = Previous(id: id, state: state, time: step.time, resetClocks: newResetClocks)
+                        let newPrevious = Previous(id: id, time: step.time, resetClocks: newResetClocks)
                         jobs.append(Job(step: newStep, map: job.map, pool: pool.cloned, previous: newPrevious))
                     }
                 case .execute(let timeslot), .executeAndSaveSnapshot(let timeslot):
@@ -198,11 +195,10 @@ struct ScheduleVerifier<Isolator: ScheduleIsolatorProtocol> {
                         let properties = ringlet.after.propertyList(forStep: step.step, executingState: currentState, collapseIfPossible: collapse)
                         let inCycle = try persistentStore.exists(properties)
                         let id: Int64
-                        let state: KripkeState
                         if !inCycle {
-                            (id, state) = try persistentStore.add(properties, isInitial: previous == nil)
+                            id = try persistentStore.add(properties, isInitial: previous == nil)
                         } else {
-                            (id, state) = try persistentStore.data(for: properties)
+                            id = try persistentStore.id(for: properties)
                         }
                         if let previous = previous {
                             let edge = KripkeEdge(
@@ -230,7 +226,7 @@ struct ScheduleVerifier<Isolator: ScheduleIsolatorProtocol> {
                         } else {
                             resetClocks = previous?.resetClocks ?? []
                         }
-                        let newPrevious = Previous(id: id, state: state, time: step.time, resetClocks: resetClocks)
+                        let newPrevious = Previous(id: id, time: step.time, resetClocks: resetClocks)
                         jobs.append(Job(step: newStep, map: job.map, pool: ringlet.after, previous: newPrevious))
                     }
                 }

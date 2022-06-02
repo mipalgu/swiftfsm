@@ -77,7 +77,11 @@ public struct KripkeStatePropertyList: Codable {
     }
     
     public init<T>(_ object: T) {
-        self = MirrorKripkePropertiesRecorder().takeRecord(of: object)
+        if let plist = MirrorKripkePropertiesRecorder().takeRecord(of: object) {
+            self = plist
+        } else {
+            self.init()
+        }
     }
 
     public init(_ properties: [String: KripkeStateProperty] = [:]) {
