@@ -193,6 +193,8 @@ public struct SQLiteKripkeStructure: MutableKripkeStructure {
         
         try db.run(statesTable.table.createIndex(statesTable.isInitial))
         try db.run(statesTable.table.createIndex(statesTable.isAccepting))
+
+        try db.run(statesTable.table.delete())
         
         try db.run(edges.table.create { t in
             t.column(edges.id, primaryKey: .autoincrement)
@@ -218,6 +220,7 @@ public struct SQLiteKripkeStructure: MutableKripkeStructure {
                 delete: .cascade
             )
         })
+        try db.run(edges.table.delete())
         self.db = db
         self.statesTable = statesTable
         self.edges = edges
