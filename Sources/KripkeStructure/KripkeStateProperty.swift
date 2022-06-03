@@ -451,12 +451,8 @@ extension KripkeStateProperty {
             value = try container.decode(Double.self, forKey: .value)
         case .String:
             value = try container.decode(String.self, forKey: .value)
-        case .Collection(let ps):
-            value = try container.decode([KripkeStateProperty].self, forKey: .value)
-        case .Compound(let list):
-            value = try container.decode(KripkeStatePropertyList.self, forKey: .value)
-        case .Optional(let type):
-            value = try container.decode(KripkeStateProperty?.self, forKey: .value) as Any
+        case .Collection, .Compound, .Optional:
+            throw DecodingError.dataCorruptedError(forKey: .type, in: container, debugDescription: "Unexpected type to be String")
         case .EmptyCollection:
             value = ()
         }
@@ -475,7 +471,6 @@ extension KripkeStateProperty {
         default:
             try container.encode(type, forKey: .type)
         }
-        try container.encode(type, forKey: .type)
         switch self.type {
         case .Bool:
             try container.encode(self.value as! Bool, forKey: .value)
