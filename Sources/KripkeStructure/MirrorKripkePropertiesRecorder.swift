@@ -213,6 +213,7 @@ final class MirrorKripkePropertiesRecorder {
                 }
                 let keyStr = "\(key)"
                 guard let type = self.getKripkeStatePropertyType(value, validValues: [value], withMemoryCache: memoryCache)?.0 else {
+                    dict[keyStr] = KripkeStateProperty(type: .Compound(KripkeStatePropertyList()), value: [String: Any]())
                     return
                 }
                 dict[keyStr] = KripkeStateProperty(type: type, value: value)
@@ -223,24 +224,32 @@ final class MirrorKripkePropertiesRecorder {
         if  mirror.displayStyle == Mirror.DisplayStyle.collection ||
             mirror.displayStyle == Mirror.DisplayStyle.set
         {
+            if mirror.children.isEmpty {
+                return (.EmptyCollection, mirror.children.map(\.value))
+            }
             let elements = mirror.children.map {
                 self.getKripkeStatePropertyType($0, validValues: values, withMemoryCache: memoryCache)
             }
-            guard let first = elements.first(where: { $0 != nil && !$0!.0.isEmpty }) else {
-                return nil
+            let first: (KripkeStatePropertyTypes, Any)
+            if let temp = elements.first(where: { $0 != nil && !$0!.0.isEmpty }), let temp2 = temp {
+                first = temp2
+            } else if let temp = elements.first(where: { $0 != nil }), let temp2 = temp {
+                first = temp2
+            } else {
+                first = (.Compound(KripkeStatePropertyList()), [String: Any]())
             }
-            let defaultProp = KripkeStateProperty(type: first!.0, value: first!.1).defaultProperty
+            let defaultProp = KripkeStateProperty(type: first.0, value: first.1).defaultProperty
             return (
                 .Collection(mirror.children.map {
                     self.convertValue(value: $0, validValues: values, withMemoryCache: memoryCache) ?? defaultProp
                 }),
-                elements.map { $0?.1 ?? first!.0.defaultValue }
+                elements.map { $0?.1 ?? first.0.defaultValue }
             )
         }
         // Check for optionals.
         if mirror.displayStyle == Mirror.DisplayStyle.optional {
             guard let (_, value) = mirror.children.first else {
-                return nil
+                return (.Optional(nil), Optional<Any>.none as Any)
             }
             if
                 let type = self.convertValue(value: value, validValues: values, withMemoryCache: memoryCache),
