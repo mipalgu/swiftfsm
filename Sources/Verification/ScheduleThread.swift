@@ -103,7 +103,7 @@ struct ScheduleThread: Hashable {
             let endStep = VerificationMap.Step(time: section.startingTime, step: .saveSnapshot(fsms: Set(section.timeslots)))
             return [startStep] + fsmSteps + [endStep]
         }
-        return VerificationMap(steps: steps, stepLookup: [])
+        return VerificationMap(steps: steps)
     }
 
     mutating func add(_ section: SnapshotSection) {

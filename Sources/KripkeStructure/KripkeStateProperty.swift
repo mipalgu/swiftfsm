@@ -400,65 +400,72 @@ extension KripkeStateProperty {
     
     public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
-        if let type = try? container.decode(String.self, forKey: .type) {
-            switch type {
-            case "Collection":
-                let props = try container.decode([KripkeStateProperty].self, forKey: .value)
-                self.init(type: .Collection(props), value: props.map(\.value))
-                return
-            case "Compound":
-                let plist = try container.decode(KripkeStatePropertyList.self, forKey: .value)
-                self.init(type: .Compound(plist), value: plist.properties.mapValues(\.value))
-                return
-            case "Optional":
-                let prop = try container.decode(KripkeStateProperty?.self, forKey: .value)
-                self.init(type: .Optional(prop), value: prop?.value as Any)
-                return
-            default:
-                throw DecodingError.dataCorruptedError(forKey: CodingKeys.type, in: container, debugDescription: "Type is not an expected value: \(type)")
-            }
-        }
-        let type = try container.decode(KripkeStatePropertyTypes.self, forKey: .type)
+        let typeStr = try container.decode(String.self, forKey: .type)
+        let type: KripkeStatePropertyTypes
         let value: Any
-        switch type {
-        case .Bool:
+        switch typeStr {
+        case "Bool":
+            type = .Bool
             value = try container.decode(Bool.self, forKey: .value)
-        case .UInt:
-            value = try container.decode(UInt.self, forKey: .value)
-        case .UInt8:
-            value = try container.decode(UInt8.self, forKey: .value)
-        case .UInt16:
-            value = try container.decode(UInt16.self, forKey: .value)
-        case .UInt32:
-            value = try container.decode(UInt32.self, forKey: .value)
-        case .UInt64:
-            value = try container.decode(UInt64.self, forKey: .value)
-        case .Int:
+        case "Int":
+            type = .Int
             value = try container.decode(Int.self, forKey: .value)
-        case .Int8:
+        case "Int8":
+            type = .Int8
             value = try container.decode(Int8.self, forKey: .value)
-        case .Int16:
+        case "Int16":
+            type = .Int16
             value = try container.decode(Int16.self, forKey: .value)
-        case .Int32:
+        case "Int32":
+            type = .Int32
             value = try container.decode(Int32.self, forKey: .value)
-        case .Int64:
+        case "Int64":
+            type = .Int64
             value = try container.decode(Int64.self, forKey: .value)
-        case .Float80:
+        case "UInt":
+            type = .UInt
+            value = try container.decode(UInt.self, forKey: .value)
+        case "UInt8":
+            type = .UInt8
+            value = try container.decode(UInt8.self, forKey: .value)
+        case "UInt16":
+            type = .UInt16
+            value = try container.decode(UInt16.self, forKey: .value)
+        case "UInt32":
+            type = .UInt32
+            value = try container.decode(UInt32.self, forKey: .value)
+        case "UInt64":
+            type = .UInt64
+            value = try container.decode(UInt64.self, forKey: .value)
+        case "Float80":
+            type = .Float80
             value = try Float80(container.decode(Double.self, forKey: .value))
-        case .Float:
+        case "Float":
+            type = .Float
             value = try container.decode(Float.self, forKey: .value)
-        case .Double:
+        case "Double":
+            type = .Double
             value = try container.decode(Double.self, forKey: .value)
-        case .String:
+        case "String":
+            type = .String
             value = try container.decode(String.self, forKey: .value)
-        case .Collection(let ps):
-            value = try container.decode([KripkeStateProperty].self, forKey: .value)
-        case .Compound(let list):
-            value = try container.decode(KripkeStatePropertyList.self, forKey: .value)
-        case .Optional(let type):
-            value = try container.decode(KripkeStateProperty?.self, forKey: .value) as Any
-        case .EmptyCollection:
+        case "Collection":
+            let props = try container.decode([KripkeStateProperty].self, forKey: .value)
+            type = .Collection(props)
+            value = props.map(\.value)
+        case "Compound":
+            let plist = try container.decode(KripkeStatePropertyList.self, forKey: .value)
+            type = .Compound(plist)
+            value = plist.properties.mapValues(\.value)
+        case "Optional":
+            let prop = try container.decode(KripkeStateProperty?.self, forKey: .value)
+            type = .Optional(prop)
+            value = prop?.value as Any
+        case "EmptyCollection":
+            type = .EmptyCollection
             value = ()
+        default:
+            throw DecodingError.dataCorruptedError(forKey: CodingKeys.type, in: container, debugDescription: "Type is not an expected value: \(typeStr)")
         }
         self.init(type: type, value: value)
     }
@@ -473,9 +480,8 @@ extension KripkeStateProperty {
         case .Optional:
             try container.encode("Optional", forKey: .type)
         default:
-            try container.encode(type, forKey: .type)
+            try container.encode(type.typeString, forKey: .type)
         }
-        try container.encode(type, forKey: .type)
         switch self.type {
         case .Bool:
             try container.encode(self.value as! Bool, forKey: .value)

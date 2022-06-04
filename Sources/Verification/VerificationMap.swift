@@ -68,73 +68,20 @@ struct VerificationMap {
         
     }
     
-    private var stepLookup: [(ClosedRange<UInt>, Step)]
-    
     private(set) var steps: SortedCollection<Step>
     
-    init() {
-        self.init(steps: [], stepLookup: [])
-    }
-    
-    init(steps: [Step], stepLookup: [(ClosedRange<UInt>, Step)]) {
-        let collection = SortedCollection<Step>.init(unsortedSequence: steps) {
-            if $0.time < $1.time {
+    init(steps: [Step]) {
+        self.steps = SortedCollection(unsortedSequence: steps) {
+            if $0.time == $1.time {
+                return .orderedSame
+            } else if $0.time < $1.time {
                 return .orderedAscending
-            }
-            if $0.time > $1.time {
+            } else {
                 return .orderedDescending
             }
-            return .orderedSame
-        }
-        self.stepLookup = stepLookup
-        self.steps = collection
-    }
-    
-    mutating func insert(section: [Timeslot], read: UInt, write: UInt) {
-        guard let first = section.first else {
-            return
-        }
-        guard nil == stepLookup.first(where: { ($0.0.lowerBound >= read && $0.0.lowerBound <= write) || ($0.0.upperBound >= read && $0.0.upperBound <= write) }) else {
-            fatalError("Attempting to insert a verification step that conflicts with a previous verification step.")
-        }
-        if section.count == 1, write == first.startingTime + first.duration {
-            let firstStep = Step(time: read, step: .takeSnapshotAndStartTimeslot(timeslot: first))
-            stepLookup.append((read...write, firstStep))
-            steps.insert(firstStep)
-            steps.insert(Step(time: write, step: .executeAndSaveSnapshot(timeslot: first)))
-            return
-        } else {
-            let firstStep = Step(time: read, step: .takeSnapshot(fsms: Set(section)))
-            stepLookup.append((read...write, firstStep))
-            steps.insert(firstStep)
-            for timeslot in section {
-                let startStep = Step(
-                    time: timeslot.startingTime,
-                    step: .startTimeslot(timeslot: timeslot)
-                )
-                steps.insert(startStep)
-                let executeStep = Step(
-                    time: timeslot.startingTime + timeslot.duration,
-                    step: .execute(timeslot: timeslot)
-                )
-                steps.insert(executeStep)
-            }
-            let step = Step(time: write, step: .saveSnapshot(fsms: Set(section)))
-            steps.insert(step)
         }
     }
-    
-    mutating func insert(step: VerificationStep, atTime time: ClosedRange<UInt>) {
-        let lowerBound = time.lowerBound
-        let upperBound = time.upperBound
-        guard nil == stepLookup.first(where: { ($0.0.lowerBound >= lowerBound && $0.0.lowerBound <= upperBound) || ($0.0.upperBound >= lowerBound && $0.0.upperBound <= upperBound) }) else {
-            fatalError("Attempting to insert a verification step that conflicts with a previous verification step.")
-        }
-        let step = Step(time: upperBound, step: step)
-        stepLookup.append((lowerBound...upperBound, step))
-        steps.insert(step)
-    }
-    
+
     func hasFinished(forPool pool: FSMPool) -> Bool {
         let fsms: Set<String> = Set(steps.lazy.flatMap(\.step.fsms))
         return nil == fsms.first { !pool.fsm($0).hasFinished }

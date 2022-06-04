@@ -72,6 +72,30 @@ public enum KripkeStatePropertyTypes: Equatable, Codable {
     case Collection([KripkeStateProperty])
     case Compound(KripkeStatePropertyList)
 
+    var typeString: String {
+        switch self {
+        case .Bool: return "Bool"
+        case .Int: return "Int"
+        case .Int8: return "Int8"
+        case .Int16: return "Int16"
+        case .Int32: return "Int32"
+        case .Int64: return "Int64"
+        case .UInt: return "UInt"
+        case .UInt8: return "UInt8"
+        case .UInt16: return "UInt16"
+        case .UInt32: return "UInt32"
+        case .UInt64: return "UInt64"
+        case .Float: return "Float"
+        case .Float80: return "Float80"
+        case .Double: return "Double"
+        case .String: return "String"
+        case .Optional: return "Optional"
+        case .EmptyCollection: return "EmptyCollection"
+        case .Collection: return "Collection"
+        case .Compound: return "Compound"
+        }
+    }
+
     var isEmpty: Bool {
         switch self {
         case .EmptyCollection:

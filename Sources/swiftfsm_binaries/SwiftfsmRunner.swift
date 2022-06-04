@@ -63,7 +63,7 @@ import Glibc
 #endif
 
 import IO
-import CFSMWrappers
+//import CFSMWrappers
 import Gateways
 import KripkeStructure
 import KripkeStructureViews
@@ -98,7 +98,7 @@ struct SwiftfsmRunner {
             return
         }
         let machines = self.machines.map { Machine(debug: args.scheduleArgs.debug, name: $0.fsm.name, fsm: $0.fsm, dependencies: $0.dependencies, clock: clock) }
-        let clfsmMachineLoader = CLFSMMachineLoader()
+        //let clfsmMachineLoader = CLFSMMachineLoader()
 //        switch self.args.scheduleArgs.scheduler {
 //        case .roundRobin:
 //            let scheduler = RoundRobinSchedulerFactory(gateway: self.gateway, scheduleHandler: clfsmMachineLoader, unloader: clfsmMachineLoader).make()

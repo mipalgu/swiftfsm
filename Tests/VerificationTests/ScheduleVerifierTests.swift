@@ -523,7 +523,7 @@ class ScheduleVerifierTests: XCTestCase {
             duration: duration,
             cyclesExecuted: 0
         )
-        let pool = FSMPool(fsms: [.controllableFSM(AnyControllableFiniteStateMachine(fsm)), .parameterisedFSM(callee)])
+        let pool = FSMPool(fsms: [.controllableFSM(AnyControllableFiniteStateMachine(fsm)), .parameterisedFSM(callee)], parameterisedFSMs: [])
         let isolator = ScheduleIsolator(
             threads: [
                 IsolatedThread(
@@ -537,8 +537,7 @@ class ScheduleVerifierTests: XCTestCase {
                                 time: timeslot.startingTime + timeslot.duration,
                                 step: .executeAndSaveSnapshot(timeslot: timeslot)
                             )
-                        ],
-                        stepLookup: []
+                        ]
                     ),
                     pool: pool
                 )
@@ -595,7 +594,8 @@ class ScheduleVerifierTests: XCTestCase {
             fsms: [
                 .controllableFSM(AnyControllableFiniteStateMachine(fsm1)),
                 .controllableFSM(AnyControllableFiniteStateMachine(fsm2))
-            ]
+            ],
+            parameterisedFSMs: []
         )
         let isolator = ScheduleIsolator(
             threads: [
@@ -618,8 +618,7 @@ class ScheduleVerifierTests: XCTestCase {
                                 time: fsm2Timeslot.startingTime + fsm2Timeslot.duration,
                                 step: .executeAndSaveSnapshot(timeslot: fsm2Timeslot)
                             )
-                        ],
-                        stepLookup: []
+                        ]
                     ),
                     pool: pool
                 )
@@ -677,8 +676,8 @@ class ScheduleVerifierTests: XCTestCase {
             duration: fsm2Duration,
             cyclesExecuted: 0
         )
-        let fsm1Pool = FSMPool(fsms: [.controllableFSM(AnyControllableFiniteStateMachine(fsm1))])
-        let fsm2Pool = FSMPool(fsms: [.controllableFSM(AnyControllableFiniteStateMachine(fsm2))])
+        let fsm1Pool = FSMPool(fsms: [.controllableFSM(AnyControllableFiniteStateMachine(fsm1))], parameterisedFSMs: [])
+        let fsm2Pool = FSMPool(fsms: [.controllableFSM(AnyControllableFiniteStateMachine(fsm2))], parameterisedFSMs: [])
         let isolator = ScheduleIsolator(
             threads: [
                 IsolatedThread(
@@ -692,8 +691,7 @@ class ScheduleVerifierTests: XCTestCase {
                                 time: fsm1Timeslot.startingTime + fsm1Timeslot.duration,
                                 step: .executeAndSaveSnapshot(timeslot: fsm1Timeslot)
                             )
-                        ],
-                        stepLookup: []
+                        ]
                     ),
                     pool: fsm1Pool
                 ),
@@ -708,8 +706,7 @@ class ScheduleVerifierTests: XCTestCase {
                                 time: fsm2Timeslot.startingTime + fsm2Timeslot.duration,
                                 step: .executeAndSaveSnapshot(timeslot: fsm2Timeslot)
                             )
-                        ],
-                        stepLookup: []
+                        ]
                     ),
                     pool: fsm2Pool
                 )
@@ -767,8 +764,8 @@ class ScheduleVerifierTests: XCTestCase {
             duration: fsm2Duration,
             cyclesExecuted: 0
         )
-        let fsm1Pool = FSMPool(fsms: [.controllableFSM(AnyControllableFiniteStateMachine(fsm1))])
-        let fsm2Pool = FSMPool(fsms: [.controllableFSM(AnyControllableFiniteStateMachine(fsm2))])
+        let fsm1Pool = FSMPool(fsms: [.controllableFSM(AnyControllableFiniteStateMachine(fsm1))], parameterisedFSMs: [])
+        let fsm2Pool = FSMPool(fsms: [.controllableFSM(AnyControllableFiniteStateMachine(fsm2))], parameterisedFSMs: [])
         let isolator = ScheduleIsolator(
             threads: [
                 IsolatedThread(
@@ -782,8 +779,7 @@ class ScheduleVerifierTests: XCTestCase {
                                 time: fsm1Timeslot.startingTime + fsm1Timeslot.duration,
                                 step: .executeAndSaveSnapshot(timeslot: fsm1Timeslot)
                             )
-                        ],
-                        stepLookup: []
+                        ]
                     ),
                     pool: fsm1Pool
                 ),
@@ -798,8 +794,7 @@ class ScheduleVerifierTests: XCTestCase {
                                 time: fsm2Timeslot.startingTime + fsm2Timeslot.duration,
                                 step: .executeAndSaveSnapshot(timeslot: fsm2Timeslot)
                             )
-                        ],
-                        stepLookup: []
+                        ]
                     ),
                     pool: fsm2Pool
                 )
@@ -862,10 +857,9 @@ class ScheduleVerifierTests: XCTestCase {
                                 time: $0.startingTime + $0.duration,
                                 step: .executeAndSaveSnapshot(timeslot: $0)
                             )
-                        ],
-                        stepLookup: []
+                        ]
                     ),
-                    pool: FSMPool(fsms: [.controllableFSM(AnyControllableFiniteStateMachine($1))])
+                    pool: FSMPool(fsms: [.controllableFSM(AnyControllableFiniteStateMachine($1))], parameterisedFSMs: [])
                 )
             }
             let isolator = ScheduleIsolator(threads: threads, parameterisedThreads: [:], cycleLength: cycleLength)
@@ -876,9 +870,12 @@ class ScheduleVerifierTests: XCTestCase {
     
     private func multipleCombinedSensors<T>(_ number: Int, _ make: (ScheduleVerifier<ScheduleIsolator>, StackGateway, FSMClock, SQLiteKripkeStructureFactory, TestableViewFactory) -> T) -> T {
         multipleSensors(number) { (timeslots, cycleLength, gateway, timer, kripkeFactory, viewFactory) in
-            let pool = FSMPool(fsms: timeslots.map {
+            let pool = FSMPool(
+                fsms: timeslots.map {
                     .controllableFSM(AnyControllableFiniteStateMachine($1))
-            })
+                },
+                parameterisedFSMs: []
+            )
             let steps = timeslots.flatMap {
                 [
                     VerificationMap.Step(
@@ -895,8 +892,7 @@ class ScheduleVerifierTests: XCTestCase {
                 threads: [
                     IsolatedThread(
                         map: VerificationMap(
-                            steps: steps,
-                            stepLookup: []
+                            steps: steps
                         ),
                         pool: pool
                     )
@@ -954,7 +950,8 @@ class ScheduleVerifierTests: XCTestCase {
             fsms: [
                 .controllableFSM(AnyControllableFiniteStateMachine(fsm1)),
                 .controllableFSM(AnyControllableFiniteStateMachine(fsm2))
-            ]
+            ],
+            parameterisedFSMs: []
         )
         let isolator = ScheduleIsolator(
             threads: [
@@ -977,8 +974,7 @@ class ScheduleVerifierTests: XCTestCase {
                                 time: fsm2Timeslot.startingTime + fsm2Timeslot.duration,
                                 step: .executeAndSaveSnapshot(timeslot: fsm2Timeslot)
                             )
-                        ],
-                        stepLookup: []
+                        ]
                     ),
                     pool: pool
                 )
@@ -1013,7 +1009,7 @@ class ScheduleVerifierTests: XCTestCase {
             duration: duration,
             cyclesExecuted: 0
         )
-        let pool = FSMPool(fsms: [.controllableFSM(AnyControllableFiniteStateMachine(fsm))])
+        let pool = FSMPool(fsms: [.controllableFSM(AnyControllableFiniteStateMachine(fsm))], parameterisedFSMs: [])
         let isolator = ScheduleIsolator(
             threads: [
                 IsolatedThread(
@@ -1027,8 +1023,7 @@ class ScheduleVerifierTests: XCTestCase {
                                 time: timeslot.startingTime + timeslot.duration,
                                 step: .executeAndSaveSnapshot(timeslot: timeslot)
                             )
-                        ],
-                        stepLookup: []
+                        ]
                     ),
                     pool: pool
                 )
@@ -1062,7 +1057,7 @@ class ScheduleVerifierTests: XCTestCase {
             duration: duration,
             cyclesExecuted: 0
         )
-        let pool = FSMPool(fsms: [.controllableFSM(AnyControllableFiniteStateMachine(fsm))])
+        let pool = FSMPool(fsms: [.controllableFSM(AnyControllableFiniteStateMachine(fsm))], parameterisedFSMs: [])
         let isolator = ScheduleIsolator(
             threads: [
                 IsolatedThread(
@@ -1076,8 +1071,7 @@ class ScheduleVerifierTests: XCTestCase {
                                 time: timeslot.startingTime + timeslot.duration,
                                 step: .executeAndSaveSnapshot(timeslot: timeslot)
                             )
-                        ],
-                        stepLookup: []
+                        ]
                     ),
                     pool: pool
                 )

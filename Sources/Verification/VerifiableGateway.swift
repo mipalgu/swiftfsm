@@ -76,7 +76,7 @@ extension StackGateway: NewVerifiableGateway {
     
     public var pool: FSMPool {
         get {
-            FSMPool(fsms: Array(fsms.values))
+            FSMPool(fsms: Array(fsms.values), parameterisedFSMs: [])
         } set {
             //stacks = [:]
             for fsm in newValue.fsms {

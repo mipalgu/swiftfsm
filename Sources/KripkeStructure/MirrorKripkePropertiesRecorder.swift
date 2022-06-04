@@ -56,7 +56,6 @@
  *
  */
 
-import KripkeStructure
 import swiftfsm
 
 //swiftlint:disable force_cast
