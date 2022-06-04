@@ -64,7 +64,7 @@ import swift_helpers
 
 public struct FSMPool {
 
-    struct ParameterisedStatus {
+    struct ParameterisedStatus: KripkeVariablesModifier {
 
         enum Status: String, Hashable, Codable {
 
@@ -75,17 +75,28 @@ public struct FSMPool {
 
         struct CallData {
 
-            var parameters: Any
+            var parameters: [String: Any?]
 
             var result: Any?
 
             var cloned: CallData {
                 CallData(
-                    parameters: (parameters as? Cloneable)?.clone() ?? parameters,
+                    parameters: parameters.mapValues { ($0 as? Cloneable)?.clone() ?? $0 },
                     result: (result as? Cloneable)?.clone() ?? result
                 )
             }
 
+        }
+
+        var computedVars: [String : Any] {
+            [
+                "parameters": call?.parameters ?? Optional<[String: Any?]>.none as Any,
+                "result": call?.result ?? Optional<Any?>.none as Any
+            ]
+        }
+
+        var validVars: [String : [Any]] {
+            ["call": []]
         }
 
         var status: Status
@@ -174,7 +185,7 @@ public struct FSMPool {
         )
     }
 
-    mutating func handleCall(to fsm: String, parameters: Any) {
+    mutating func handleCall(to fsm: String, parameters: [String: Any?]) {
         var status = self.parameterisedFSMs[fsm] ?? ParameterisedStatus(
             status: .inactive,
             call: nil

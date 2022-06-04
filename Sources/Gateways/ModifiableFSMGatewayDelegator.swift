@@ -104,6 +104,10 @@ extension ModifiableFSMGateway where Self: ModifiableFSMGatewayDelegator {
         return self.gateway.id(of: name)
     }
 
+    public func parameterisedFSM(fromID id: FSM_ID) -> AnyParameterisedFiniteStateMachine {
+        return self.gateway.parameterisedFSM(fromID: id)
+    }
+
     public func fsm(fromID id: FSM_ID) -> AnyControllableFiniteStateMachine {
         return self.gateway.fsm(fromID: id)
     }

@@ -192,7 +192,15 @@ struct ScheduleVerifier<Isolator: ScheduleIsolatorProtocol> {
                     let ringlets = generator.execute(timeslot: timeslot, inPool: job.pool, gateway: gateway, timer: timer)
                     for ringlet in ringlets {
                         //print("\nGenerating \(step.step.marker)(\(step.step.timeslots.map(\.callChain.fsm).sorted().joined(separator: ", "))) variations for:\n    \("\(ringlet.after)".components(separatedBy: .newlines).joined(separator: "\n\n    "))\n\n")
-                        let properties = ringlet.after.propertyList(forStep: step.step, executingState: currentState, collapseIfPossible: collapse)
+                        var newMap = job.map
+                        var newPool = ringlet.after
+                        for call in ringlet.calls {
+                            let calleeName = gateway.parameterisedFSM(fromID: call.callee).name
+                            if job.map.delegates.contains(calleeName) {
+                                newPool.handleCall(to: calleeName, parameters: call.parameters)
+                            }
+                        }
+                        let properties = newPool.propertyList(forStep: step.step, executingState: currentState, collapseIfPossible: collapse)
                         let inCycle = try persistentStore.exists(properties)
                         let id: Int64
                         if !inCycle {
@@ -227,7 +235,7 @@ struct ScheduleVerifier<Isolator: ScheduleIsolatorProtocol> {
                             resetClocks = previous?.resetClocks ?? []
                         }
                         let newPrevious = Previous(id: id, time: step.time, resetClocks: resetClocks)
-                        jobs.append(Job(step: newStep, map: job.map, pool: ringlet.after, previous: newPrevious))
+                        jobs.append(Job(step: newStep, map: newMap, pool: ringlet.after, previous: newPrevious))
                     }
                 }
             }

@@ -62,6 +62,16 @@ public protocol ModifiableFSMGatewayDefaults {}
 
 extension ModifiableFSMGateway where Self: ModifiableFSMGatewayDefaults {
 
+    public func parameterisedFSM(fromID id: FSM_ID) -> AnyParameterisedFiniteStateMachine {
+        guard let fsm = self.fsms[id] else {
+            fatalError("FSM with id '\(id)' does not exist.")
+        }
+        guard let parameterisedFSM = fsm.asParameterisedFiniteStateMachine else {
+            fatalError("Unable to fetch FSM with id '\(id)' as it is not a parameterised FSM.")
+        }
+        return parameterisedFSM
+    }
+
     public func fsm(fromID id: FSM_ID) -> AnyControllableFiniteStateMachine {
         guard let fsm = self.fsms[id] else {
             fatalError("FSM with id '\(id)' does not exist.")

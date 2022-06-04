@@ -118,6 +118,13 @@ public final class RestrictiveFSMGateway<Gateway: FSMGateway, _Formatter: Format
         return self.gateway.invoke(id, withParameters: parameters, caller: caller)
     }
 
+    public func parameterisedFSM(fromID id: FSM_ID) -> AnyParameterisedFiniteStateMachine {
+        guard true == self.whitelist.contains(id) else {
+            fatalError("Unable to fetch fsm with id \(id)")
+        }
+        return self.gateway.parameterisedFSM(fromID: id)
+    }
+
     public func fsm(fromID id: FSM_ID) -> AnyControllableFiniteStateMachine {
         guard true == self.whitelist.contains(id) else {
             fatalError("Unable to fetch fsm with id \(id)")
