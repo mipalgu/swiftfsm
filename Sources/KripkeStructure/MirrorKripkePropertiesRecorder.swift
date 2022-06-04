@@ -333,12 +333,11 @@ final class MirrorKripkePropertiesRecorder {
             return (.String, val)
         default:
             var memoryCache = memoryCache
-            if let temp = val as? AnyObject {
-                if nil != memoryCache.first(where: { $0 === temp }) {
-                    return (.Compound(KripkeStatePropertyList()), val)
-                }
-                memoryCache.append(temp)
+            let temp = val as AnyObject
+            if nil != memoryCache.first(where: { $0 === temp }) {
+                return (.Compound(KripkeStatePropertyList()), val)
             }
+            memoryCache.append(temp)
             let value: Any = values.count == 1 ? values[0] : val
             let plist = self._takeRecord(of: value, withMemoryCache: memoryCache)
             if plist.isEmpty || !plist.contains(where: { !$0.value.type.isEmpty }) {
