@@ -77,7 +77,7 @@ class SnapshotSectionVariationsTests: XCTestCase {
     func test_cyclesExecutedIncreasesWhenNoTransitionsFire() throws {
         let fsm = AnyControllableFiniteStateMachine(ToggleFiniteStateMachine())
         let base = { fsm.base as! ToggleFiniteStateMachine }
-        let pool = FSMPool(fsms: [.controllableFSM(fsm)])
+        let pool = FSMPool(fsms: [.controllableFSM(fsm)], parameterisedFSMs: [])
         let timeslots = [
             Timeslot(
                 fsms: [fsm.name],
@@ -109,7 +109,7 @@ class SnapshotSectionVariationsTests: XCTestCase {
     func test_cyclesExecutedDoesNotIncreaseWhenTransitionsFire() throws {
         let fsm = AnyControllableFiniteStateMachine(TransitioningFiniteStateMachine())
         let base = { fsm.base as! TransitioningFiniteStateMachine }
-        let pool = FSMPool(fsms: [.controllableFSM(fsm)])
+        let pool = FSMPool(fsms: [.controllableFSM(fsm)], parameterisedFSMs: [])
         let timeslots = [
             Timeslot(
                 fsms: [fsm.name],
@@ -142,7 +142,7 @@ class SnapshotSectionVariationsTests: XCTestCase {
     func test_canGenerateRingletsForOneMachine() throws {
         let fsm = AnyControllableFiniteStateMachine(ExternalsFiniteStateMachine())
         let base = { fsm.base as! ExternalsFiniteStateMachine }
-        let pool = FSMPool(fsms: [.controllableFSM(fsm)])
+        let pool = FSMPool(fsms: [.controllableFSM(fsm)], parameterisedFSMs: [])
         let timeslots = [
             Timeslot(
                 fsms: [fsm.name],
@@ -195,7 +195,7 @@ class SnapshotSectionVariationsTests: XCTestCase {
         base1().timer = timer
         base2().timer = timer
         base2().gateway = base1().gateway
-        let pool = FSMPool(fsms: [.controllableFSM(fsm1), .controllableFSM(fsm2)])
+        let pool = FSMPool(fsms: [.controllableFSM(fsm1), .controllableFSM(fsm2)], parameterisedFSMs: [])
         let timeslots = [
             Timeslot(
                 fsms: [fsm1.name],
@@ -257,7 +257,7 @@ class SnapshotSectionVariationsTests: XCTestCase {
         base1().timer = timer
         base2().timer = timer
         base2().gateway = base1().gateway
-        let pool = FSMPool(fsms: [.controllableFSM(fsm1), .controllableFSM(fsm2)])
+        let pool = FSMPool(fsms: [.controllableFSM(fsm1), .controllableFSM(fsm2)], parameterisedFSMs: [])
         let timeslots = [
             Timeslot(
                 fsms: [fsm1.name],

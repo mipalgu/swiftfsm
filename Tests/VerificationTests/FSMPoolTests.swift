@@ -76,7 +76,7 @@ class FSMPoolTests: XCTestCase {
     func test_canConvertToPropertyList() throws {
         let fsm = AnyControllableFiniteStateMachine(ToggleFiniteStateMachine())
         let base = { fsm.base as! ToggleFiniteStateMachine }
-        let pool = FSMPool(fsms: [.controllableFSM(fsm)])
+        let pool = FSMPool(fsms: [.controllableFSM(fsm)], parameterisedFSMs: [])
         let timeslot = Timeslot(
             fsms: [fsm.name],
             callChain: CallChain(root: fsm.name, calls: []),

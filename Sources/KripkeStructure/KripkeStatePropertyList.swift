@@ -96,6 +96,14 @@ public struct KripkeStatePropertyList: Codable {
         }
     }
 
+    public init(from decoder: Decoder) throws {
+        self.properties = try [String: KripkeStateProperty](from: decoder)
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        try self.properties.encode(to: encoder)
+    }
+
 }
 
 extension KripkeStatePropertyList: ExpressibleByDictionaryLiteral {

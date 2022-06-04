@@ -59,24 +59,69 @@
 import swiftfsm
 import KripkeStructure
 import FSM
+import Gateways
+import swift_helpers
 
 public struct FSMPool {
+
+    struct ParameterisedStatus {
+
+        enum Status: String, Hashable, Codable {
+
+            case inactive
+            case executing
+
+        }
+
+        struct CallData {
+
+            var parameters: Any
+
+            var result: Any?
+
+            var cloned: CallData {
+                CallData(
+                    parameters: (parameters as? Cloneable)?.clone() ?? parameters,
+                    result: (result as? Cloneable)?.clone() ?? result
+                )
+            }
+
+        }
+
+        var status: Status
+
+        var call: CallData?
+
+        var cloned: ParameterisedStatus {
+            ParameterisedStatus(status: status, call: call?.cloned)
+        }
+
+    }
+
+    private(set) var parameterisedFSMs: [String: ParameterisedStatus]
     
     private(set) var fsms: [FSMType]
     
     private var indexes: [String: FSM_ID]
     
     var cloned: FSMPool {
-        FSMPool(fsms: fsms.map { $0.clone() }, indexes: indexes)
+        FSMPool(fsms: fsms.map { $0.clone() }, indexes: indexes, parameterisedFSMs: parameterisedFSMs.mapValues(\.cloned))
     }
     
-    private init(fsms: [FSMType], indexes: [String: FSM_ID]) {
+    private init(fsms: [FSMType], indexes: [String: FSM_ID], parameterisedFSMs: [String: ParameterisedStatus]) {
         self.fsms = fsms
         self.indexes = indexes
+        self.parameterisedFSMs = parameterisedFSMs
     }
     
-    init(fsms: [FSMType]) {
-        self.init(fsms: fsms, indexes: Dictionary(uniqueKeysWithValues: fsms.enumerated().map { ($1.name, $0) }))
+    init(fsms: [FSMType], parameterisedFSMs: Set<String>) {
+        self.init(
+            fsms: fsms,
+            indexes: Dictionary(uniqueKeysWithValues: fsms.enumerated().map { ($1.name, $0) }),
+            parameterisedFSMs: Dictionary(uniqueKeysWithValues: parameterisedFSMs.map {
+                ($0, ParameterisedStatus(status: .inactive, call: nil))
+            })
+        )
     }
     
     mutating func insert(_ fsm: FSMType) {
@@ -111,9 +156,13 @@ public struct FSMPool {
     }
     
     func propertyList(forStep step: VerificationStep, executingState state: String?, collapseIfPossible collapse: Bool = false) -> KripkeStatePropertyList {
-        let fsmValues = Dictionary(uniqueKeysWithValues: fsms.map {
+        var fsmValues = Dictionary(uniqueKeysWithValues: fsms.map {
             ($0.name, $0.asScheduleableFiniteStateMachine.base)
         })
+        fsmValues.reserveCapacity(fsmValues.count + parameterisedFSMs.count)
+        for (key, val) in parameterisedFSMs {
+            fsmValues[key] = val
+        }
         let fsmProperties = KripkeStatePropertyList(fsmValues.mapValues {
             KripkeStateProperty(type: .Compound(KripkeStatePropertyList($0)), value: $0)
         })
@@ -123,6 +172,24 @@ public struct FSMPool {
                 "pc": step.property(state: state, collapseIfPossible: collapse)
             ]
         )
+    }
+
+    mutating func handleCall(to fsm: String, parameters: Any) {
+        var status = self.parameterisedFSMs[fsm] ?? ParameterisedStatus(
+            status: .inactive,
+            call: nil
+        )
+        guard status.status == .inactive else {
+            fatalError("Detected call to fsm that is already executing.")
+        }
+        status.status = .executing
+        status.call = ParameterisedStatus.CallData(parameters: parameters, result: nil)
+        self.parameterisedFSMs[fsm] = status
+    }
+
+    mutating func setInactive(_ fsm: String) {
+        self.parameterisedFSMs[fsm]?.status = .inactive
+        self.parameterisedFSMs[fsm]?.call = nil
     }
     
 }

@@ -98,9 +98,9 @@ class TimeAwareRingletTests: XCTestCase {
         let time: UInt = 2000000
         let pool: (Bool, Bool?) -> FSMPool = {
             if let parameter = $1 {
-                return FSMPool(fsms: [.controllableFSM(AnyControllableFiniteStateMachine(TimeConditionalFiniteStateMachine(value: $0))), .parameterisedFSM(AnyParameterisedFiniteStateMachine(CallingFiniteStateMachine(parameterValue: parameter), newMachine: newMachine))])
+                return FSMPool(fsms: [.controllableFSM(AnyControllableFiniteStateMachine(TimeConditionalFiniteStateMachine(value: $0))), .parameterisedFSM(AnyParameterisedFiniteStateMachine(CallingFiniteStateMachine(parameterValue: parameter), newMachine: newMachine))], parameterisedFSMs: [])
             } else {
-                return FSMPool(fsms: [.controllableFSM(AnyControllableFiniteStateMachine(TimeConditionalFiniteStateMachine(value: $0))), .parameterisedFSM(AnyParameterisedFiniteStateMachine(CallingFiniteStateMachine(), newMachine: newMachine))])
+                return FSMPool(fsms: [.controllableFSM(AnyControllableFiniteStateMachine(TimeConditionalFiniteStateMachine(value: $0))), .parameterisedFSM(AnyParameterisedFiniteStateMachine(CallingFiniteStateMachine(), newMachine: newMachine))], parameterisedFSMs: [])
             }
         }
         let expectedData: [(Bool, [Bool], Constraint<UInt>)] = [
@@ -161,9 +161,9 @@ class TimeAwareRingletTests: XCTestCase {
         let falseProperties = KripkeStatePropertyList(["value": KripkeStateProperty(type: .Bool, value: Bool(false))])
         let pool: (Bool, Bool?) -> FSMPool = {
             if let parameter = $1 {
-                return FSMPool(fsms: [.controllableFSM(AnyControllableFiniteStateMachine(TimeConditionalFiniteStateMachine(value: $0))), .parameterisedFSM(AnyParameterisedFiniteStateMachine(CallingFiniteStateMachine(parameterValue: parameter), newMachine: newMachine))])
+                return FSMPool(fsms: [.controllableFSM(AnyControllableFiniteStateMachine(TimeConditionalFiniteStateMachine(value: $0))), .parameterisedFSM(AnyParameterisedFiniteStateMachine(CallingFiniteStateMachine(parameterValue: parameter), newMachine: newMachine))], parameterisedFSMs: [])
             } else {
-                return FSMPool(fsms: [.controllableFSM(AnyControllableFiniteStateMachine(TimeConditionalFiniteStateMachine(value: $0))), .parameterisedFSM(AnyParameterisedFiniteStateMachine(CallingFiniteStateMachine(), newMachine: newMachine))])
+                return FSMPool(fsms: [.controllableFSM(AnyControllableFiniteStateMachine(TimeConditionalFiniteStateMachine(value: $0))), .parameterisedFSM(AnyParameterisedFiniteStateMachine(CallingFiniteStateMachine(), newMachine: newMachine))], parameterisedFSMs: [])
             }
         }
         let parameterisedFSM: FSMType = .parameterisedFSM(AnyParameterisedFiniteStateMachine(fsm, newMachine: newMachine))
@@ -225,9 +225,9 @@ class TimeAwareRingletTests: XCTestCase {
         let trueProperties = KripkeStatePropertyList(["value": KripkeStateProperty(type: .Bool, value: Bool(true))])
         let pool: (Bool, Bool?) -> FSMPool = {
             if let parameter = $1 {
-                return FSMPool(fsms: [.controllableFSM(AnyControllableFiniteStateMachine(TimeConditionalFiniteStateMachine(value: $0))), .parameterisedFSM(AnyParameterisedFiniteStateMachine(CallingFiniteStateMachine(parameterValue: parameter), newMachine: newMachine))])
+                return FSMPool(fsms: [.controllableFSM(AnyControllableFiniteStateMachine(TimeConditionalFiniteStateMachine(value: $0))), .parameterisedFSM(AnyParameterisedFiniteStateMachine(CallingFiniteStateMachine(parameterValue: parameter), newMachine: newMachine))], parameterisedFSMs: [])
             } else {
-                return FSMPool(fsms: [.controllableFSM(AnyControllableFiniteStateMachine(TimeConditionalFiniteStateMachine(value: $0))), .parameterisedFSM(AnyParameterisedFiniteStateMachine(CallingFiniteStateMachine(), newMachine: newMachine))])
+                return FSMPool(fsms: [.controllableFSM(AnyControllableFiniteStateMachine(TimeConditionalFiniteStateMachine(value: $0))), .parameterisedFSM(AnyParameterisedFiniteStateMachine(CallingFiniteStateMachine(), newMachine: newMachine))], parameterisedFSMs: [])
             }
         }
         let parameterisedFSM: FSMType = .parameterisedFSM(AnyParameterisedFiniteStateMachine(fsm, newMachine: newMachine))
@@ -289,9 +289,9 @@ class TimeAwareRingletTests: XCTestCase {
         let falseProperties = KripkeStatePropertyList(["value": KripkeStateProperty(type: .Bool, value: Bool(false))])
         let pool: (Bool, Bool?) -> FSMPool = {
             if let parameter = $1 {
-                return FSMPool(fsms: [.controllableFSM(AnyControllableFiniteStateMachine(TimeConditionalFiniteStateMachine(value: $0))), .parameterisedFSM(AnyParameterisedFiniteStateMachine(CallingFiniteStateMachine(parameterValue: parameter), newMachine: newMachine))])
+                return FSMPool(fsms: [.controllableFSM(AnyControllableFiniteStateMachine(TimeConditionalFiniteStateMachine(value: $0))), .parameterisedFSM(AnyParameterisedFiniteStateMachine(CallingFiniteStateMachine(parameterValue: parameter), newMachine: newMachine))], parameterisedFSMs: [])
             } else {
-                return FSMPool(fsms: [.controllableFSM(AnyControllableFiniteStateMachine(TimeConditionalFiniteStateMachine(value: $0))), .parameterisedFSM(AnyParameterisedFiniteStateMachine(CallingFiniteStateMachine(), newMachine: newMachine))])
+                return FSMPool(fsms: [.controllableFSM(AnyControllableFiniteStateMachine(TimeConditionalFiniteStateMachine(value: $0))), .parameterisedFSM(AnyParameterisedFiniteStateMachine(CallingFiniteStateMachine(), newMachine: newMachine))], parameterisedFSMs: [])
             }
         }
         let parameterisedFSM: FSMType = .parameterisedFSM(AnyParameterisedFiniteStateMachine(fsm, newMachine: newMachine))
@@ -374,7 +374,7 @@ class TimeAwareRingletTests: XCTestCase {
                 fsm.gateway = gateway
                 fsm.timer = timer
                 let controllableFSM = FSMType.controllableFSM(AnyControllableFiniteStateMachine(fsm))
-                let pool = FSMPool(fsms: [controllableFSM])
+                let pool = FSMPool(fsms: [controllableFSM], parameterisedFSMs: [])
                 timer.forceRunningTime(time)
                 var clone = controllableFSM.clone()
                 var pool2 = pool.cloned

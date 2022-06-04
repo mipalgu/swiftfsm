@@ -112,7 +112,7 @@ struct ScheduleIsolator: ScheduleIsolatorProtocol {
             parameterised.forEach {
                 parameterisedThreads[$0] = IsolatedThread(
                     map: map,
-                    pool: FSMPool(fsms: parameterised.map { allFsms.fsm($0).clone() })
+                    pool: FSMPool(fsms: parameterised.map { allFsms.fsm($0).clone() }, parameterisedFSMs: [])
                 )
             }
             schedules.remove(at: i)
@@ -121,7 +121,7 @@ struct ScheduleIsolator: ScheduleIsolatorProtocol {
             let fsms = Set($0.sections.flatMap(\.timeslots).flatMap(\.fsms))
             return IsolatedThread(
                 map: $0.verificationMap,
-                pool: FSMPool(fsms: fsms.map { allFsms.fsm($0).clone() })
+                pool: FSMPool(fsms: fsms.map { allFsms.fsm($0).clone() }, parameterisedFSMs: [])
             )
         }
         self.init(threads: isolatedThreads, parameterisedThreads: parameterisedThreads, cycleLength: schedule.cycleLength)
