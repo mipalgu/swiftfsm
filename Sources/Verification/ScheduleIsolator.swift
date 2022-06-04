@@ -108,7 +108,7 @@ struct ScheduleIsolator: ScheduleIsolatorProtocol {
                 continue
             }
             let parameterised = fsms.filter { allFsms.fsm($0).parameters != nil }
-            let map = schedules[i].verificationMap
+            let map = schedules[i].verificationMap(delegates: [])
             parameterised.forEach {
                 parameterisedThreads[$0] = IsolatedThread(
                     map: map,
@@ -120,7 +120,7 @@ struct ScheduleIsolator: ScheduleIsolatorProtocol {
         let isolatedThreads: [IsolatedThread] = schedules.map {
             let fsms = Set($0.sections.flatMap(\.timeslots).flatMap(\.fsms))
             return IsolatedThread(
-                map: $0.verificationMap,
+                map: $0.verificationMap(delegates: []),
                 pool: FSMPool(fsms: fsms.map { allFsms.fsm($0).clone() }, parameterisedFSMs: [])
             )
         }

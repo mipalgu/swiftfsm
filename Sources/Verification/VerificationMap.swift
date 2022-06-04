@@ -69,8 +69,10 @@ struct VerificationMap {
     }
     
     private(set) var steps: SortedCollection<Step>
+
+    var delegates: Set<String>
     
-    init(steps: [Step]) {
+    init(steps: [Step], delegates: Set<String>) {
         self.steps = SortedCollection(unsortedSequence: steps) {
             if $0.time == $1.time {
                 return .orderedSame
@@ -80,6 +82,7 @@ struct VerificationMap {
                 return .orderedDescending
             }
         }
+        self.delegates = delegates
     }
 
     func hasFinished(forPool pool: FSMPool) -> Bool {

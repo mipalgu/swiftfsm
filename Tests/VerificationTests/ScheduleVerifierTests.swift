@@ -538,7 +538,8 @@ class ScheduleVerifierTests: XCTestCase {
                                 time: timeslot.startingTime + timeslot.duration,
                                 step: .executeAndSaveSnapshot(timeslot: timeslot)
                             )
-                        ]
+                        ],
+                        delegates: [callee.name]
                     ),
                     pool: pool
                 )
@@ -555,7 +556,8 @@ class ScheduleVerifierTests: XCTestCase {
                                 time: timeslot.startingTime + timeslot.duration,
                                 step: .executeAndSaveSnapshot(timeslot: timeslot)
                             )
-                        ]
+                        ],
+                        delegates: []
                     ),
                     pool: calleePool
                 )
@@ -635,7 +637,8 @@ class ScheduleVerifierTests: XCTestCase {
                                 time: fsm2Timeslot.startingTime + fsm2Timeslot.duration,
                                 step: .executeAndSaveSnapshot(timeslot: fsm2Timeslot)
                             )
-                        ]
+                        ],
+                        delegates: []
                     ),
                     pool: pool
                 )
@@ -708,7 +711,8 @@ class ScheduleVerifierTests: XCTestCase {
                                 time: fsm1Timeslot.startingTime + fsm1Timeslot.duration,
                                 step: .executeAndSaveSnapshot(timeslot: fsm1Timeslot)
                             )
-                        ]
+                        ],
+                        delegates: []
                     ),
                     pool: fsm1Pool
                 ),
@@ -723,7 +727,8 @@ class ScheduleVerifierTests: XCTestCase {
                                 time: fsm2Timeslot.startingTime + fsm2Timeslot.duration,
                                 step: .executeAndSaveSnapshot(timeslot: fsm2Timeslot)
                             )
-                        ]
+                        ],
+                        delegates: []
                     ),
                     pool: fsm2Pool
                 )
@@ -796,7 +801,8 @@ class ScheduleVerifierTests: XCTestCase {
                                 time: fsm1Timeslot.startingTime + fsm1Timeslot.duration,
                                 step: .executeAndSaveSnapshot(timeslot: fsm1Timeslot)
                             )
-                        ]
+                        ],
+                        delegates: []
                     ),
                     pool: fsm1Pool
                 ),
@@ -811,7 +817,8 @@ class ScheduleVerifierTests: XCTestCase {
                                 time: fsm2Timeslot.startingTime + fsm2Timeslot.duration,
                                 step: .executeAndSaveSnapshot(timeslot: fsm2Timeslot)
                             )
-                        ]
+                        ],
+                        delegates: []
                     ),
                     pool: fsm2Pool
                 )
@@ -874,7 +881,8 @@ class ScheduleVerifierTests: XCTestCase {
                                 time: $0.startingTime + $0.duration,
                                 step: .executeAndSaveSnapshot(timeslot: $0)
                             )
-                        ]
+                        ],
+                        delegates: []
                     ),
                     pool: FSMPool(fsms: [.controllableFSM(AnyControllableFiniteStateMachine($1))], parameterisedFSMs: [])
                 )
@@ -909,7 +917,8 @@ class ScheduleVerifierTests: XCTestCase {
                 threads: [
                     IsolatedThread(
                         map: VerificationMap(
-                            steps: steps
+                            steps: steps,
+                            delegates: []
                         ),
                         pool: pool
                     )
@@ -991,7 +1000,8 @@ class ScheduleVerifierTests: XCTestCase {
                                 time: fsm2Timeslot.startingTime + fsm2Timeslot.duration,
                                 step: .executeAndSaveSnapshot(timeslot: fsm2Timeslot)
                             )
-                        ]
+                        ],
+                        delegates: []
                     ),
                     pool: pool
                 )
@@ -1040,7 +1050,8 @@ class ScheduleVerifierTests: XCTestCase {
                                 time: timeslot.startingTime + timeslot.duration,
                                 step: .executeAndSaveSnapshot(timeslot: timeslot)
                             )
-                        ]
+                        ],
+                        delegates: []
                     ),
                     pool: pool
                 )
@@ -1088,7 +1099,8 @@ class ScheduleVerifierTests: XCTestCase {
                                 time: timeslot.startingTime + timeslot.duration,
                                 step: .executeAndSaveSnapshot(timeslot: timeslot)
                             )
-                        ]
+                        ],
+                        delegates: []
                     ),
                     pool: pool
                 )

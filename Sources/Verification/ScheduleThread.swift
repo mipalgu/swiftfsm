@@ -85,27 +85,6 @@ struct ScheduleThread: Hashable {
         return true
     }
 
-    var verificationMap: VerificationMap {
-        let steps = sections.sorted { $0.startingTime < $1.startingTime }.flatMap { (section) -> [VerificationMap.Step] in
-            if section.timeslots.count == 1 && section.timeRange == section.timeslots[0].timeRange {
-                return [
-                    VerificationMap.Step(time: section.startingTime, step: .takeSnapshotAndStartTimeslot(timeslot: section.timeslots[0])),
-                    VerificationMap.Step(time: section.startingTime + section.duration, step: .executeAndSaveSnapshot(timeslot: section.timeslots[0]))
-                ]
-            }
-            let startStep = VerificationMap.Step(time: section.startingTime, step: .takeSnapshot(fsms: Set(section.timeslots)))
-            let fsmSteps = section.timeslots.flatMap {
-                [
-                    VerificationMap.Step(time: $0.startingTime, step: .startTimeslot(timeslot: $0)),
-                    VerificationMap.Step(time: $0.duration, step: .execute(timeslot: $0))
-                ]
-            }
-            let endStep = VerificationMap.Step(time: section.startingTime, step: .saveSnapshot(fsms: Set(section.timeslots)))
-            return [startStep] + fsmSteps + [endStep]
-        }
-        return VerificationMap(steps: steps)
-    }
-
     mutating func add(_ section: SnapshotSection) {
         sections.append(section)
     }
@@ -141,6 +120,27 @@ struct ScheduleThread: Hashable {
             }
         }
         return false
+    }
+
+    func verificationMap(delegates: Set<String>) -> VerificationMap {
+        let steps = sections.sorted { $0.startingTime < $1.startingTime }.flatMap { (section) -> [VerificationMap.Step] in
+            if section.timeslots.count == 1 && section.timeRange == section.timeslots[0].timeRange {
+                return [
+                    VerificationMap.Step(time: section.startingTime, step: .takeSnapshotAndStartTimeslot(timeslot: section.timeslots[0])),
+                    VerificationMap.Step(time: section.startingTime + section.duration, step: .executeAndSaveSnapshot(timeslot: section.timeslots[0]))
+                ]
+            }
+            let startStep = VerificationMap.Step(time: section.startingTime, step: .takeSnapshot(fsms: Set(section.timeslots)))
+            let fsmSteps = section.timeslots.flatMap {
+                [
+                    VerificationMap.Step(time: $0.startingTime, step: .startTimeslot(timeslot: $0)),
+                    VerificationMap.Step(time: $0.duration, step: .execute(timeslot: $0))
+                ]
+            }
+            let endStep = VerificationMap.Step(time: section.startingTime, step: .saveSnapshot(fsms: Set(section.timeslots)))
+            return [startStep] + fsmSteps + [endStep]
+        }
+        return VerificationMap(steps: steps, delegates: delegates)
     }
     
 }
