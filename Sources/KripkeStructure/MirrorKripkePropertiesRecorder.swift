@@ -244,7 +244,6 @@ final class MirrorKripkePropertiesRecorder {
             }
             if
                 let type = self.convertValue(value: value, validValues: values, withMemoryCache: memoryCache),
-                !type.type.isEmpty,
                 let value = self.getKripkeStatePropertyType(value, validValues: values, withMemoryCache: memoryCache)?.1
             {
                 return (
@@ -252,7 +251,7 @@ final class MirrorKripkePropertiesRecorder {
                     Any?.some(value) as Any
                 )
             } else {
-                return nil
+                return (.Optional(nil), Any?.none as Any)
             }
         }
         switch val {
@@ -343,6 +342,10 @@ final class MirrorKripkePropertiesRecorder {
             let value: Any = values.count == 1 ? values[0] : val
             let plist = self._takeRecord(of: value, withMemoryCache: memoryCache)
             if plist.isEmpty || !plist.contains(where: { !$0.value.type.isEmpty }) {
+                // Check for enums.
+                if mirror.displayStyle == .enum {
+                    return (.String, "\(val)")
+                }
                 return nil
             } else {
                 return (.Compound(plist), value)

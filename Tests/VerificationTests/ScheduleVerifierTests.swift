@@ -523,7 +523,8 @@ class ScheduleVerifierTests: XCTestCase {
             duration: duration,
             cyclesExecuted: 0
         )
-        let pool = FSMPool(fsms: [.controllableFSM(AnyControllableFiniteStateMachine(fsm)), .parameterisedFSM(callee)], parameterisedFSMs: [])
+        let pool = FSMPool(fsms: [.controllableFSM(AnyControllableFiniteStateMachine(fsm)), .parameterisedFSM(callee)], parameterisedFSMs: [callee.name])
+        let calleePool = FSMPool(fsms: [.parameterisedFSM(callee)], parameterisedFSMs: [])
         let isolator = ScheduleIsolator(
             threads: [
                 IsolatedThread(
@@ -542,7 +543,23 @@ class ScheduleVerifierTests: XCTestCase {
                     pool: pool
                 )
             ],
-            parameterisedThreads: [:],
+            parameterisedThreads: [
+                callee.name: IsolatedThread(
+                    map: VerificationMap(
+                        steps: [
+                            VerificationMap.Step(
+                                time: timeslot.startingTime,
+                                step: .takeSnapshotAndStartTimeslot(timeslot: timeslot)
+                            ),
+                            VerificationMap.Step(
+                                time: timeslot.startingTime + timeslot.duration,
+                                step: .executeAndSaveSnapshot(timeslot: timeslot)
+                            )
+                        ]
+                    ),
+                    pool: calleePool
+                )
+            ],
             cycleLength: timeslot.startingTime + timeslot.duration
         )
         let verifier = ScheduleVerifier(isolatedThreads: isolator)

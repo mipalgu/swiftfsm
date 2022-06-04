@@ -66,7 +66,7 @@ public struct FSMPool {
 
     struct ParameterisedStatus {
 
-        enum Status: Hashable, Codable {
+        enum Status: String, Hashable, Codable {
 
             case inactive
             case executing
@@ -161,7 +161,7 @@ public struct FSMPool {
         })
         fsmValues.reserveCapacity(fsmValues.count + parameterisedFSMs.count)
         for (key, val) in parameterisedFSMs {
-            fsmValues[key] = fsmValues[key] ?? val
+            fsmValues[key] = val
         }
         let fsmProperties = KripkeStatePropertyList(fsmValues.mapValues {
             KripkeStateProperty(type: .Compound(KripkeStatePropertyList($0)), value: $0)
