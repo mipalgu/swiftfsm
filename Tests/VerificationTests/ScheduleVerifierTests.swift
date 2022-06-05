@@ -81,6 +81,8 @@ class ScheduleVerifierTests: XCTestCase {
 
         private var ids: [KripkeStatePropertyList: Int64] = [:]
 
+        private var jobs: Set<KripkeStatePropertyList> = []
+
         var allStates: [Int64: (KripkeStatePropertyList, Bool, Set<KripkeEdge>)] = [:]
 
         var acceptingStates: AnySequence<KripkeState> {
@@ -140,6 +142,13 @@ class ScheduleVerifierTests: XCTestCase {
             latestId += 1
             ids[propertyList] = id
             return id
+        }
+
+        func inCycle(_ job: Job) throws -> Bool {
+            let plist = KripkeStatePropertyList(job)
+            let cycle = jobs.contains(plist)
+            jobs.insert(plist)
+            return cycle
         }
 
         func state(for id: Int64) throws -> KripkeState {

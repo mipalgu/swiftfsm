@@ -1,8 +1,8 @@
 /*
- * MutableKripkeStructure.swift
+ * Job.swift
  * Verification
  *
- * Created by Callum McColl on 29/5/2022.
+ * Created by Callum McColl on 6/6/2022.
  * Copyright © 2022 Callum McColl. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -56,14 +56,37 @@
  *
  */
 
-import KripkeStructure
+public struct Job {
 
-public protocol MutableKripkeStructure: KripkeStructure {
+    struct Previous {
 
-    func add(_ propertyList: KripkeStatePropertyList, isInitial: Bool) throws -> Int64
+        var id: Int64
 
-    func add(edge: KripkeEdge, to id: Int64) throws
+        var time: UInt
 
-    func inCycle(_ job: Job) throws -> Bool
+        var resetClocks: Set<String>
+
+        func afterExecutingTimeUntil(time: UInt, cycleLength: UInt) -> UInt {
+            let currentTime = self.time
+            if time >= currentTime {
+                return time - currentTime
+            } else {
+                return (cycleLength - currentTime) + time
+            }
+        }
+
+    }
+
+    var initial: Bool {
+        previous == nil
+    }
+
+    var step: Int
+
+    var map: VerificationMap
+
+    var pool: FSMPool
+
+    var previous: Previous?
 
 }

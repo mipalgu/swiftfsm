@@ -99,12 +99,22 @@ public struct SQLiteKripkeStructure: MutableKripkeStructure {
         let target: Expression<Int64>
         
     }
+
+    struct JobsTable {
+
+        let table: Table
+
+        let job: Expression<String>
+
+    }
     
     private let db: Connection
     
     private let statesTable: StatesTable
     
     private let edges: EdgesTable
+
+    private let jobs: JobsTable
     
     private let encoder: JSONEncoder = {
         let temp = JSONEncoder()
@@ -183,6 +193,9 @@ public struct SQLiteKripkeStructure: MutableKripkeStructure {
             target: Expression<Int64>("target")
         )
         try db.run(edges.table.drop(ifExists: true))
+
+        let jobs = JobsTable(table: Table("jobs"), job: Expression<String>("job"))
+        try db.run(jobs.table.drop(ifExists: true))
         
         try db.run(statesTable.table.create { t in
             t.column(statesTable.id, primaryKey: .autoincrement)
@@ -218,9 +231,13 @@ public struct SQLiteKripkeStructure: MutableKripkeStructure {
                 delete: .cascade
             )
         })
+        try db.run(jobs.table.create { t in
+            t.column(jobs.job, primaryKey: true)
+        })
         self.db = db
         self.statesTable = statesTable
         self.edges = edges
+        self.jobs = jobs
     }
     
     public func add(_ propertyList: KripkeStatePropertyList, isInitial: Bool) throws -> Int64 {
@@ -285,6 +302,21 @@ public struct SQLiteKripkeStructure: MutableKripkeStructure {
             fatalError("Attempting to fetch id for kripke state that doesn't exist.")
         }
         return try first.get(statesTable.id)
+    }
+
+    public func inCycle(_ job: Job) throws -> Bool {
+        let str = try stringRepresentation(of: KripkeStatePropertyList(job))
+        var cycle = false
+        try db.transaction {
+            guard try nil == db.pluck(jobs.table.select(jobs.job).where(jobs.job == str)) else {
+                cycle = true
+                return
+            }
+            try db.run(
+                jobs.table.insert([jobs.job <- str])
+            )
+        }
+        return cycle
     }
 
     public func state(for id: Int64) throws -> KripkeState {
