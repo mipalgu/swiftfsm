@@ -85,6 +85,54 @@ struct VerificationMap {
         self.delegates = delegates
     }
 
+    mutating func handleSyncCall(from caller: String, to callee: String, data: Call) {
+        var newSteps = steps
+        for step in steps {
+            switch step.step {
+            case .takeSnapshot(let timeslots), .saveSnapshot(let timeslots):
+                let newTimeslots: Set<Timeslot> = Set(timeslots.map {
+                    guard $0.callChain.fsm == caller else {
+                        return $0
+                    }
+                    var new = $0
+                    new.callChain.add(data)
+                    return new
+                })
+                newSteps.removeAll(step)
+                let newStep: VerificationStep
+                if step.step.takeSnapshot {
+                    newStep = .takeSnapshot(fsms: newTimeslots)
+                } else {
+                    newStep = .saveSnapshot(fsms: newTimeslots)
+                }
+                newSteps.insert(Step(time: step.time, step: newStep))
+            case .execute(let timeslot),
+                .executeAndSaveSnapshot(let timeslot),
+                .startTimeslot(let timeslot),
+                .takeSnapshotAndStartTimeslot(let timeslot):
+                guard timeslot.callChain.fsm == caller else {
+                    continue
+                }
+                var new = timeslot
+                new.callChain.add(data)
+                newSteps.removeAll(step)
+                let newStep: VerificationStep
+                switch step.step {
+                case .execute:
+                    newStep = .execute(timeslot: new)
+                case .executeAndSaveSnapshot:
+                    newStep = .executeAndSaveSnapshot(timeslot: new)
+                case .startTimeslot:
+                    newStep = .startTimeslot(timeslot: new)
+                default:
+                    newStep = .takeSnapshotAndStartTimeslot(timeslot: new)
+                }
+                newSteps.insert(Step(time: step.time, step: newStep))
+            }
+        }
+        self.steps = newSteps
+    }
+
     func hasFinished(forPool pool: FSMPool) -> Bool {
         let fsms: Set<String> = Set(steps.lazy.flatMap(\.step.fsms))
         return nil == fsms.first { !pool.fsm($0).hasFinished }
