@@ -58,7 +58,7 @@
 
 import KripkeStructure
 
-public final class InMemoryStore: MutableKripkeStructure {
+public final class InMemoryKripkeStructure: MutableKripkeStructure {
 
     public let identifier: String
 
@@ -84,7 +84,7 @@ public final class InMemoryStore: MutableKripkeStructure {
         })
     }
 
-    init(identifier: String) throws {
+    init(identifier: String) {
         self.identifier = identifier
     }
 

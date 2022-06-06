@@ -164,7 +164,7 @@ class ScheduleVerifierTests: XCTestCase {
             print("extraneous results: \(extraneousElements)")
             let expectedView = GraphVizKripkeStructureView(filename: "\(name)expected.gv")
             let resultView = GraphVizKripkeStructureView(filename: "\(name)result.gv")
-            let expectedStore = try InMemoryStore(identifier: expectedIdentifier, states: expected)
+            let expectedStore = try InMemoryKripkeStructure(identifier: expectedIdentifier, states: expected)
             try expectedView.generate(store: expectedStore, usingClocks: true)
             try resultView.generate(store: store, usingClocks: true)
             print("Writing expected to: \(FileManager.default.currentDirectoryPath)/\(name)expected.gv")
