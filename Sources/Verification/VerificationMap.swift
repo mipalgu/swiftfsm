@@ -85,19 +85,57 @@ struct VerificationMap {
         self.delegates = delegates
     }
 
-    mutating func handleSyncCall(from caller: String, to callee: String, data: Call) {
+    mutating func handleFinishedCall(to callee: String, data: Call) {
+        replaceSteps {
+            guard $0.callChain.fsm == callee else {
+                return $0
+            }
+            var new = $0
+            new.callChain.pop()
+            return new
+        }
+    }
+
+    mutating func handleCall(from caller: String, to callee: String, data: Call) {
+        switch data.method {
+        case .synchronous:
+            handleSyncCall(from: caller, to: callee, data: data)
+        case .asynchronous:
+            handleASyncCall(to: callee, data: data)
+        }
+    }
+
+    private mutating func handleSyncCall(from caller: String, to callee: String, data: Call) {
+        replaceSteps {
+            guard $0.callChain.fsm == caller else {
+                return $0
+            }
+            var new = $0
+            new.callChain.add(data)
+            return new
+        }
+    }
+
+    private mutating func handleASyncCall(to callee: String, data: Call) {
+        replaceSteps {
+            guard $0.callChain.root == callee else {
+                return $0
+            }
+            guard $0.callChain.fsm == callee else {
+                fatalError("Attempting to call callee that is currently already executing.")
+            }
+            var new = $0
+            new.callChain.add(data)
+            return new
+        }
+    }
+
+    private mutating func replaceSteps(_ transform: (Timeslot) throws -> Timeslot) rethrows {
         var newSteps = steps
         for step in steps {
             switch step.step {
             case .takeSnapshot(let timeslots), .saveSnapshot(let timeslots):
-                let newTimeslots: Set<Timeslot> = Set(timeslots.map {
-                    guard $0.callChain.fsm == caller else {
-                        return $0
-                    }
-                    var new = $0
-                    new.callChain.add(data)
-                    return new
-                })
+                let newTimeslots: Set<Timeslot> = try Set(timeslots.map(transform))
                 newSteps.removeAll(step)
                 let newStep: VerificationStep
                 if step.step.takeSnapshot {
@@ -110,11 +148,7 @@ struct VerificationMap {
                 .executeAndSaveSnapshot(let timeslot),
                 .startTimeslot(let timeslot),
                 .takeSnapshotAndStartTimeslot(let timeslot):
-                guard timeslot.callChain.fsm == caller else {
-                    continue
-                }
-                var new = timeslot
-                new.callChain.add(data)
+                let new = try transform(timeslot)
                 newSteps.removeAll(step)
                 let newStep: VerificationStep
                 switch step.step {

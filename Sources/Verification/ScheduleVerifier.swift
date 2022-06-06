@@ -199,7 +199,7 @@ struct ScheduleVerifier<Isolator: ScheduleIsolatorProtocol> {
                             let calleeName = gateway.parameterisedFSM(fromID: call.callee).name
                             if job.map.delegates.contains(calleeName) {
                                 newPool.handleCall(to: calleeName, parameters: call.parameters)
-                                newMap.handleSyncCall(from: callerName, to: calleeName, data: call)
+                                newMap.handleCall(from: callerName, to: calleeName, data: call)
                             }
                         }
                         let properties = newPool.propertyList(forStep: step.step, executingState: currentState, collapseIfPossible: collapse)

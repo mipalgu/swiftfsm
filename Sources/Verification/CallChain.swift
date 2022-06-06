@@ -91,6 +91,8 @@ public struct CallChain: Hashable {
     private var indexes: [CallID: Int] = [:]
     
     private(set) var calls: [Call]
+
+    private var lastId: CallID!
     
     var fsm: String {
         calls.last?.fsm ?? root
@@ -116,6 +118,12 @@ public struct CallChain: Hashable {
         }
         indexes[id] = calls.count
         calls.append(call)
+        lastId = id
+    }
+
+    mutating func pop() {
+        indexes[lastId] = nil
+        calls.removeLast()
     }
     
     func fsm(fromPool pool: FSMPool) -> FSMType {
