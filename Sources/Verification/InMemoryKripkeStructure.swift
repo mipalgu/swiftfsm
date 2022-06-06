@@ -129,13 +129,6 @@ public final class InMemoryKripkeStructure: MutableKripkeStructure {
         return id
     }
 
-    public func inCycle(_ job: Job) throws -> Bool {
-        let plist = KripkeStatePropertyList(job)
-        let cycle = jobs.contains(plist)
-        jobs.insert(plist)
-        return cycle
-    }
-
     public func state(for id: Int64) throws -> KripkeState {
         guard let (plist, isInitial, edges) = allStates[id] else {
             fatalError("State does not exist")

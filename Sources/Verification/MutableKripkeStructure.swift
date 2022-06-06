@@ -64,6 +64,4 @@ public protocol MutableKripkeStructure: KripkeStructure {
 
     func add(edge: KripkeEdge, to id: Int64) throws
 
-    func inCycle(_ job: Job) throws -> Bool
-
 }

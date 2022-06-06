@@ -64,6 +64,41 @@ import KripkeStructureViews
 
 struct ScheduleVerifier<Isolator: ScheduleIsolatorProtocol> {
     
+    private struct Previous {
+        
+        var id: Int64
+        
+        var time: UInt
+        
+        var resetClocks: Set<String>
+        
+        func afterExecutingTimeUntil(time: UInt, cycleLength: UInt) -> UInt {
+            let currentTime = self.time
+            if time >= currentTime {
+                return time - currentTime
+            } else {
+                return (cycleLength - currentTime) + time
+            }
+        }
+        
+    }
+    
+    private struct Job {
+        
+        var initial: Bool {
+            previous == nil
+        }
+        
+        var step: Int
+        
+        var map: VerificationMap
+        
+        var pool: FSMPool
+        
+        var previous: Previous?
+        
+    }
+    
     var isolatedThreads: Isolator
     
     init(schedule: Schedule, allFsms: FSMPool) where Isolator == ScheduleIsolator {
@@ -148,13 +183,8 @@ struct ScheduleVerifier<Isolator: ScheduleIsolatorProtocol> {
                         } else {
                             newResetClocks = previous?.resetClocks ?? []
                         }
-                        let newPrevious = Job.Previous(id: id, time: step.time, resetClocks: newResetClocks)
-                        let newJob = Job(step: newStep, map: job.map, pool: pool.cloned, previous: newPrevious)
-                        if try persistentStore.inCycle(newJob) {
-                            continue
-                        } else {
-                            jobs.append(newJob)
-                        }
+                        let newPrevious = Previous(id: id, time: step.time, resetClocks: newResetClocks)
+                        jobs.append(Job(step: newStep, map: job.map, pool: pool.cloned, previous: newPrevious))
                     }
                 case .execute(let timeslot), .executeAndSaveSnapshot(let timeslot):
                     let fsm = timeslot.callChain.fsm(fromPool: job.pool)
@@ -206,13 +236,8 @@ struct ScheduleVerifier<Isolator: ScheduleIsolatorProtocol> {
                         } else {
                             resetClocks = previous?.resetClocks ?? []
                         }
-                        let newPrevious = Job.Previous(id: id, time: step.time, resetClocks: resetClocks)
-                        let newJob = Job(step: newStep, map: newMap, pool: ringlet.after, previous: newPrevious)
-                        if try persistentStore.inCycle(newJob) {
-                            continue
-                        } else {
-                            jobs.append(newJob)
-                        }
+                        let newPrevious = Previous(id: id, time: step.time, resetClocks: resetClocks)
+                        jobs.append(Job(step: newStep, map: newMap, pool: ringlet.after, previous: newPrevious))
                     }
                 }
             }
