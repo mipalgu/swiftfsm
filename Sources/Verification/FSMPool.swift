@@ -198,6 +198,14 @@ public struct FSMPool {
         self.parameterisedFSMs[fsm] = status
     }
 
+    mutating func handleFinishedCall(for fsm: String, result: Any?) {
+        guard var status = self.parameterisedFSMs[fsm], status.status == .executing, status.call != nil else {
+            fatalError("Detected finishing call to fsm that has not been executing.")
+        }
+        status.status = .inactive
+        status.call?.result = result
+    }
+
     mutating func setInactive(_ fsm: String) {
         self.parameterisedFSMs[fsm]?.status = .inactive
         self.parameterisedFSMs[fsm]?.call = nil

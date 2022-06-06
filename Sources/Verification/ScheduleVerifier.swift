@@ -136,9 +136,107 @@ struct ScheduleVerifier<Isolator: ScheduleIsolatorProtocol> {
                 let step = job.map.steps[job.step]
                 let previous = job.previous
                 let newStep = job.step >= (job.map.steps.count - 1) ? 0 : job.step + 1
+                // Handle parameterised machine delegates
+                if step.step.startTimeslot,
+                    let timeslot = step.step.timeslots.first,
+                    let call = timeslot.callChain.calls.last,
+                    job.map.delegates.contains(timeslot.callChain.fsm)
+                {
+                    let writeStep = job.map.steps[newStep]
+                    let newStep = newStep >= (job.map.steps.count - 1) ? 0 : newStep + 1
+                    let fsm = timeslot.callChain.fsm
+                    let results = delegate(call: call)
+                    let properties = job.pool.propertyList(forStep: .startTimeslot(timeslot: timeslot), executingState: nil, collapseIfPossible: collapse)
+                    let inCycle = try persistentStore.exists(properties)
+                    let id: Int64
+                    if inCycle {
+                        id = try persistentStore.id(for: properties)
+                    } else {
+                        id = try persistentStore.add(properties, isInitial: previous == nil)
+                    }
+                    if let previous = previous {
+                        let edge: KripkeEdge = KripkeEdge(
+                            clockName: fsm,
+                            constraint: nil,
+                            resetClock: previous.resetClocks.contains(fsm),
+                            takeSnapshot: true,
+                            time: previous.afterExecutingTimeUntil(
+                                time: step.time,
+                                cycleLength: isolatedThreads.cycleLength
+                            ),
+                            target: properties
+                        )
+                        try persistentStore.add(edge: edge, to: previous.id)
+                    }
+                    guard !inCycle else {
+                        continue
+                    }
+                    let newResetClocks = previous?.resetClocks.subtracting([fsm]) ?? []
+                    guard !results.results.isEmpty else {
+                        let target = job.pool.propertyList(forStep: .execute(timeslot: timeslot), executingState: nil, collapseIfPossible: true)
+                        let targetId: Int64 = try persistentStore.add(target, isInitial: false)
+                        let edge = KripkeEdge(
+                            clockName: fsm,
+                            constraint: nil,
+                            resetClock: false,
+                            takeSnapshot: false,
+                            time: timeslot.duration,
+                            target: target
+                        )
+                        try persistentStore.add(edge: edge, to: targetId)
+                        let newPrevious = Previous(id: targetId, time: writeStep.time, resetClocks: newResetClocks)
+                        jobs.append(Job(step: newStep, map: job.map, pool: job.pool.cloned, previous: newPrevious))
+                        continue
+                    }
+                    for (range, result) in results.results {
+                        var resultPool = job.pool.cloned
+                        resultPool.handleFinishedCall(for: fsm, result: result)
+                        let target = resultPool.propertyList(forStep: .execute(timeslot: timeslot), executingState: nil, collapseIfPossible: true)
+                        let targetId: Int64 = try persistentStore.add(target, isInitial: false)
+                        let edge: KripkeEdge
+                        switch range {
+                        case .greaterThan(let time):
+                            edge = KripkeEdge(
+                                clockName: fsm,
+                                constraint: .greaterThan(value: time),
+                                resetClock: false,
+                                takeSnapshot: false,
+                                time: timeslot.duration,
+                                target: target
+                            )
+                        case .range(let range):
+                            edge = KripkeEdge(
+                                clockName: fsm,
+                                constraint: .and(lhs: .greaterThanEqual(value: range.lowerBound), rhs: .lessThanEqual(value: range.upperBound)),
+                                resetClock: false,
+                                takeSnapshot: false,
+                                time: timeslot.duration,
+                                target: target
+                            )
+                        }
+                        try persistentStore.add(edge: edge, to: targetId)
+                        let newPrevious = Previous(id: targetId, time: writeStep.time, resetClocks: newResetClocks)
+                        jobs.append(Job(step: newStep, map: job.map, pool: resultPool.cloned, previous: newPrevious))
+                    }
+                    let target = job.pool.propertyList(forStep: .execute(timeslot: timeslot), executingState: nil, collapseIfPossible: true)
+                    let targetId: Int64 = try persistentStore.add(target, isInitial: false)
+                    let extraEdge = KripkeEdge(
+                        clockName: fsm,
+                        constraint: .lessThan(value: results.bound),
+                        resetClock: false,
+                        takeSnapshot: false,
+                        time: timeslot.duration,
+                        target: target
+                    )
+                    try persistentStore.add(edge: extraEdge, to: targetId)
+                    let newPrevious = Previous(id: targetId, time: writeStep.time, resetClocks: newResetClocks)
+                    jobs.append(Job(step: newStep, map: job.map, pool: job.pool.cloned, previous: newPrevious))
+                    continue
+                }
+                // Handle inline jobs.
                 switch step.step {
                 case .takeSnapshot, .takeSnapshotAndStartTimeslot, .startTimeslot, .saveSnapshot:
-                    let fsms = step.step.timeslots
+                    let fsms = step.step.timeslots.filter { !job.map.delegates.contains($0.callChain.fsm) }
                     let startTimeslot = step.step.startTimeslot
                     let fsm = startTimeslot ? fsms.first?.callChain.fsm(fromPool: job.pool) : nil
                     let pools: [FSMPool]
@@ -194,9 +292,11 @@ struct ScheduleVerifier<Isolator: ScheduleIsolatorProtocol> {
                         //print("\nGenerating \(step.step.marker)(\(step.step.timeslots.map(\.callChain.fsm).sorted().joined(separator: ", "))) variations for:\n    \("\(ringlet.after)".components(separatedBy: .newlines).joined(separator: "\n\n    "))\n\n")
                         var newMap = job.map
                         var newPool = ringlet.after
+                        var callees: Set<String> = []
                         for call in ringlet.calls {
                             let callerName = gateway.fsm(fromID: call.caller).name
                             let calleeName = gateway.parameterisedFSM(fromID: call.callee).name
+                            callees.insert(calleeName)
                             if job.map.delegates.contains(calleeName) {
                                 newPool.handleCall(to: calleeName, parameters: call.parameters)
                                 newMap.handleCall(from: callerName, to: calleeName, data: call)
@@ -232,9 +332,9 @@ struct ScheduleVerifier<Isolator: ScheduleIsolatorProtocol> {
                         }
                         let resetClocks: Set<String>
                         if ringlet.transitioned {
-                            resetClocks = (previous?.resetClocks ?? []).union([timeslot.callChain.fsm])
+                            resetClocks = (previous?.resetClocks ?? []).union([timeslot.callChain.fsm]).union(callees)
                         } else {
-                            resetClocks = previous?.resetClocks ?? []
+                            resetClocks = (previous?.resetClocks ?? []).union(callees)
                         }
                         let newPrevious = Previous(id: id, time: step.time, resetClocks: resetClocks)
                         jobs.append(Job(step: newStep, map: newMap, pool: ringlet.after, previous: newPrevious))
@@ -244,5 +344,22 @@ struct ScheduleVerifier<Isolator: ScheduleIsolatorProtocol> {
         }
         return stores
     }
+
+    struct CallResults {
+
+        var bound: UInt
+
+        var results: [(ClockRange, Any?)]
+
+    }
+
+    enum ClockRange {
+
+        case greaterThan(UInt)
+        case range(ClosedRange<UInt>)
+
+    }
+
+    private func delegate(call _: Call) -> CallResults { CallResults(bound: 0, results: []) }
     
 }

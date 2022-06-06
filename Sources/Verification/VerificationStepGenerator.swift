@@ -63,6 +63,9 @@ import Timers
 struct VerificationStepGenerator {
     
     func takeSnapshot(forFsms fsms: [FSMType], in pool: FSMPool) -> [FSMPool] {
+        if fsms.isEmpty {
+            return [pool.cloned]
+        }
         let pool = pool.cloned
         let combinations = Combinations(fsms: fsms.map(\.asScheduleableFiniteStateMachine))
         return combinations.flatMap { combination in
