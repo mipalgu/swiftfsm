@@ -100,6 +100,10 @@ public struct KripkeStatePropertyList: Codable {
         self.properties = try [String: KripkeStateProperty](from: decoder)
     }
 
+    public func contains<T: AnyObject>(object: T) -> Bool {
+        self.properties.contains(where: { $1.contains(object: object) })
+    }
+
     public func encode(to encoder: Encoder) throws {
         try self.properties.encode(to: encoder)
     }

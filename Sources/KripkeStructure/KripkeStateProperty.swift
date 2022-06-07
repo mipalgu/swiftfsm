@@ -222,6 +222,13 @@ public struct KripkeStateProperty: Equatable, Codable {
         self.value = value
     }
 
+    public func contains<T: AnyObject>(object: T) -> Bool {
+        if let other = value as? T, other === object {
+            return true
+        }
+        return type.contains(object: object)
+    }
+
     /**
      *  Is `other` equal to `self`?
      */

@@ -172,8 +172,26 @@ public struct FSMPool {
     func fsm(_ name: String) -> FSMType {
         return fsm(atIndex: index(of: name))
     }
+
+    func promiseResults(_ promises: [String: PromiseData]) -> [(Any?, PromiseData)] {
+        promises.compactMap { (callee, promise) in
+            guard let status = parameterisedFSMs[callee], status.status == .inactive, status.call != nil else {
+                return nil
+            }
+            return ((promise.result as? Cloneable)?.clone() ?? promise.result, promise)
+        }
+    }
     
-    func propertyList(forStep step: VerificationStep, executingState state: String?, collapseIfPossible collapse: Bool = false) -> KripkeStatePropertyList {
+    func propertyList(forStep step: VerificationStep, executingState state: String?, promises: [String: PromiseData], collapseIfPossible collapse: Bool = false) -> KripkeStatePropertyList {
+        var setPromises: [(Any?, PromiseData)] = []
+        setPromises.reserveCapacity(promises.count)
+        for (callee, promise) in promises {
+            guard let status = parameterisedFSMs[callee], status.status == .inactive, let call = status.call else {
+                continue
+            }
+            setPromises.append(((promise.result as? Cloneable)?.clone() ?? promise.result, promise))
+            promise.result = call.result
+        }
         var fsmValues = Dictionary(uniqueKeysWithValues: fsms.map {
             ($0.name, $0.asScheduleableFiniteStateMachine.base)
         })
@@ -184,6 +202,9 @@ public struct FSMPool {
         let fsmProperties = KripkeStatePropertyList(fsmValues.mapValues {
             KripkeStateProperty(type: .Compound(KripkeStatePropertyList($0)), value: $0)
         })
+        for (result, promise) in setPromises {
+            promise.result = result
+        }
         return KripkeStatePropertyList(
             [
                 "fsms": KripkeStateProperty(type: .Compound(fsmProperties), value: fsmValues),

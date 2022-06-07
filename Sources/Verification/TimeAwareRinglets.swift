@@ -66,7 +66,7 @@ struct TimeAwareRinglets {
     
     var ringlets: [ConditionalRinglet]
     
-    init<Gateway: ModifiableFSMGateway, Timer: Clock>(fsm: FSMType, timeslot: Timeslot, gateway: Gateway, timer: Timer, startingTime: UInt) where Gateway: NewVerifiableGateway {
+    init<Gateway: ModifiableFSMGateway, Timer: Clock>(fsm: FSMType, timeslot: Timeslot, promises: [(Any?, PromiseData)], gateway: Gateway, timer: Timer, startingTime: UInt) where Gateway: NewVerifiableGateway {
         var lastTime: UInt
         var smallerTimes: SortedCollection<UInt> = []
         var times: SortedCollection<UInt> = []
@@ -94,7 +94,7 @@ struct TimeAwareRinglets {
             clone.asScheduleableFiniteStateMachine.externalValues = initialExternalValues
             timer.forceRunningTime(time.timeValue)
             gateway.pool = pool.cloned
-            let ringlet = Ringlet(fsm: clone, timeslot: timeslot, gateway: gateway, timer: timer)
+            let ringlet = Ringlet(fsm: clone, timeslot: timeslot, promises: promises, gateway: gateway, timer: timer)
             for newTime in ringlet.afterCalls {
                 if newTime <= lastTime, !smallerTimes.contains(newTime) {
                     smallerTimes.insert(newTime)

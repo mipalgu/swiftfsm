@@ -81,6 +81,7 @@ struct VerificationStepGenerator {
     
     func execute<Gateway: ModifiableFSMGateway, Timer: Clock>(
         timeslot: Timeslot,
+        promises: [(Any?, PromiseData)],
         inPool pool: FSMPool,
         gateway: Gateway,
         timer: Timer
@@ -89,6 +90,7 @@ struct VerificationStepGenerator {
         return TimeAwareRinglets(
             fsm: timeslot.callChain.fsm(fromPool: pool),
             timeslot: timeslot,
+            promises: promises,
             gateway: gateway,
             timer: timer,
             startingTime: 0

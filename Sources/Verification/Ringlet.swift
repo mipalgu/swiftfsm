@@ -143,7 +143,13 @@ struct Ringlet {
     /// - Parameter gateway The `ModifiableFSMGateway` responsible for handling
     /// parameterised machine invocations. A delegate is created and used to
     /// detect when the fsm makes any calls to other machines.
-    init<Gateway: ModifiableFSMGateway, Timer: Clock>(fsm: FSMType, timeslot: Timeslot, gateway: Gateway, timer: Timer) where Gateway: NewVerifiableGateway {
+    init<Gateway: ModifiableFSMGateway, Timer: Clock>(fsm: FSMType, timeslot: Timeslot, promises: [(Any?, PromiseData)], gateway: Gateway, timer: Timer) where Gateway: NewVerifiableGateway {
+        var setPromises: [(Any?, PromiseData)] = []
+        setPromises.reserveCapacity(promises.count)
+        for (result, promise) in promises {
+            setPromises.append(((promise.result as? Cloneable)?.clone , promise))
+            promise.result = (result as? Cloneable)?.clone() ?? result
+        }
         let allExternalVariables = (fsm.sensors + fsm.externalVariables + fsm.actuators)
         let externalsPreSnapshot = KripkeStatePropertyList(Dictionary(uniqueKeysWithValues: allExternalVariables.map { ($0.name, KripkeStateProperty($0.val)) }))
         let preSnapshot = KripkeStatePropertyList(fsm.asScheduleableFiniteStateMachine.base)
@@ -159,6 +165,9 @@ struct Ringlet {
         let externalsPostSnapshot = KripkeStatePropertyList(Dictionary(uniqueKeysWithValues: allExternalVariables.map { ($0.name, KripkeStateProperty($0.val)) }))
         let postSnapshot = KripkeStatePropertyList(clone.asScheduleableFiniteStateMachine.base)
         let calls = delegate.invocations + delegate.calls
+        for (result, promise) in setPromises {
+            promise.result = result
+        }
         self.init(
             fsmBefore: fsm,
             fsmAfter: clone,

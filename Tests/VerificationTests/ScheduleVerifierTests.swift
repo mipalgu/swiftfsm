@@ -433,7 +433,7 @@ class ScheduleVerifierTests: XCTestCase {
             TestableView(identifier: $0, expectedIdentifier: fsm.name, expected: states)
         }
         let timeslot = Timeslot(
-            fsms: [fsm.name, callee.name],
+            fsms: [fsm.name],
             callChain: CallChain(root: fsm.name, calls: []),
             externalDependencies: [],
             startingTime: startingTime,

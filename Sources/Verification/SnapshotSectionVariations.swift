@@ -101,7 +101,7 @@ struct SnapshotSectionVariations: SnapshotSectionVariationsProtocol {
                 let fsm = section.timeslots[index].callChain.fsm(fromPool: pool)
                 gateway.pool = pool
                 let timeslot = section.timeslots[index]
-                let ringlets = TimeAwareRinglets(fsm: fsm, timeslot: timeslot, gateway: gateway, timer: timer, startingTime: timeslot.cyclesExecuted * cycleLength + timeslot.startingTime).ringlets
+                let ringlets = TimeAwareRinglets(fsm: fsm, timeslot: timeslot, promises: [], gateway: gateway, timer: timer, startingTime: timeslot.cyclesExecuted * cycleLength + timeslot.startingTime).ringlets
                 return ringlets.flatMap { (ringlet) -> [[SnapshotSectionPath.State]] in
                     let newRinglet = CallAwareRinglet(
                         callChain: CallChain(

@@ -79,6 +79,7 @@ class RingletTests: XCTestCase {
         let ringlet = Ringlet(
             fsm: .controllableFSM(AnyControllableFiniteStateMachine(fsm)),
             timeslot: timeslot,
+            promises: [],
             gateway: fsm.gateway,
             timer: fsm.timer
         )
@@ -90,6 +91,7 @@ class RingletTests: XCTestCase {
         let ringlet2 = Ringlet(
             fsm: .controllableFSM(AnyControllableFiniteStateMachine(fsm)),
             timeslot: timeslot,
+            promises: [],
             gateway: fsm.gateway,
             timer: fsm.timer
         )
@@ -116,6 +118,7 @@ class RingletTests: XCTestCase {
         let ringlet = Ringlet(
             fsm: .parameterisedFSM(AnyParameterisedFiniteStateMachine(fsm, newMachine: newMachine)),
             timeslot: timeslot,
+            promises: [],
             gateway: fsm.gateway,
             timer: fsm.timer
         )
@@ -133,7 +136,7 @@ class RingletTests: XCTestCase {
         let fsm = AfterFiniteStateMachine()
         let timeslot = Timeslot(fsms: [fsm.name], callChain: CallChain(root: fsm.name, calls: []), externalDependencies: [], startingTime: 0, duration: 30, cyclesExecuted: 0)
         fsm.timer.update(fromFSM: AnyScheduleableFiniteStateMachine(fsm))
-        let ringlet = Ringlet(fsm: .controllableFSM(AnyControllableFiniteStateMachine(fsm)), timeslot: timeslot, gateway: fsm.gateway, timer: fsm.timer)
+        let ringlet = Ringlet(fsm: .controllableFSM(AnyControllableFiniteStateMachine(fsm)), timeslot: timeslot, promises: [], gateway: fsm.gateway, timer: fsm.timer)
         XCTAssertEqual(ringlet.afterCalls.count, 1)
         if ringlet.afterCalls.count != 1 {
             return
@@ -144,7 +147,7 @@ class RingletTests: XCTestCase {
     func test_includesExternalVariables() throws {
         let fsm = ExternalsFiniteStateMachine()
         let timeslot = Timeslot(fsms: [fsm.name], callChain: CallChain(root: fsm.name, calls: []), externalDependencies: [], startingTime: 0, duration: 30, cyclesExecuted: 0)
-        let ringlet = Ringlet(fsm: .controllableFSM(AnyControllableFiniteStateMachine(fsm)), timeslot: timeslot, gateway: fsm.gateway, timer: fsm.timer)
+        let ringlet = Ringlet(fsm: .controllableFSM(AnyControllableFiniteStateMachine(fsm)), timeslot: timeslot, promises: [], gateway: fsm.gateway, timer: fsm.timer)
         print(ringlet.externalsPreSnapshot)
         XCTAssertNotNil(ringlet.externalsPreSnapshot["InMemoryContainer-sensors1"])
         XCTAssertNotNil(ringlet.externalsPreSnapshot["InMemoryContainer-sensors2"])

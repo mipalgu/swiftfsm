@@ -92,7 +92,7 @@ class TimeAwareRingletTests: XCTestCase {
         fsm.gateway.fsms[id] = parameterisedFSM
         fsm.gateway.fsms[id2] = .parameterisedFSM(AnyParameterisedFiniteStateMachine(CallingFiniteStateMachine(), newMachine: newMachine))
         fsm.gateway.stacks[id] = []
-        let ringlets = TimeAwareRinglets(fsm: parameterisedFSM, timeslot: timeslot, gateway: fsm.gateway, timer: fsm.timer, startingTime: 0)
+        let ringlets = TimeAwareRinglets(fsm: parameterisedFSM, timeslot: timeslot, promises: [], gateway: fsm.gateway, timer: fsm.timer, startingTime: 0)
         let falseProperties = KripkeStatePropertyList(["value": KripkeStateProperty(type: .Bool, value: Bool(false))])
         let trueProperties = KripkeStatePropertyList(["value": KripkeStateProperty(type: .Bool, value: Bool(true))])
         let time: UInt = 2000000
@@ -157,7 +157,7 @@ class TimeAwareRingletTests: XCTestCase {
         fsm.gateway.fsms[id2] = .parameterisedFSM(AnyParameterisedFiniteStateMachine(CallingFiniteStateMachine(), newMachine: newMachine))
         fsm.gateway.stacks[id] = []
         let time: UInt = 3500000
-        let ringlets = TimeAwareRinglets(fsm: .parameterisedFSM(AnyParameterisedFiniteStateMachine(fsm, newMachine: newMachine)), timeslot: timeslot, gateway: fsm.gateway, timer: fsm.timer, startingTime: time)
+        let ringlets = TimeAwareRinglets(fsm: .parameterisedFSM(AnyParameterisedFiniteStateMachine(fsm, newMachine: newMachine)), timeslot: timeslot, promises: [], gateway: fsm.gateway, timer: fsm.timer, startingTime: time)
         let falseProperties = KripkeStatePropertyList(["value": KripkeStateProperty(type: .Bool, value: Bool(false))])
         let pool: (Bool, Bool?) -> FSMPool = {
             if let parameter = $1 {
@@ -220,7 +220,7 @@ class TimeAwareRingletTests: XCTestCase {
         fsm.gateway.fsms[id2] = .parameterisedFSM(AnyParameterisedFiniteStateMachine(CallingFiniteStateMachine(), newMachine: newMachine))
         fsm.gateway.stacks[id] = []
         let time: UInt = 2000000
-        let ringlets = TimeAwareRinglets(fsm: .parameterisedFSM(AnyParameterisedFiniteStateMachine(fsm, newMachine: newMachine)), timeslot: timeslot, gateway: fsm.gateway, timer: fsm.timer, startingTime: time)
+        let ringlets = TimeAwareRinglets(fsm: .parameterisedFSM(AnyParameterisedFiniteStateMachine(fsm, newMachine: newMachine)), timeslot: timeslot, promises: [], gateway: fsm.gateway, timer: fsm.timer, startingTime: time)
         let falseProperties = KripkeStatePropertyList(["value": KripkeStateProperty(type: .Bool, value: Bool(false))])
         let trueProperties = KripkeStatePropertyList(["value": KripkeStateProperty(type: .Bool, value: Bool(true))])
         let pool: (Bool, Bool?) -> FSMPool = {
@@ -285,7 +285,7 @@ class TimeAwareRingletTests: XCTestCase {
         fsm.gateway.fsms[id2] = .parameterisedFSM(AnyParameterisedFiniteStateMachine(CallingFiniteStateMachine(), newMachine: newMachine))
         fsm.gateway.stacks[id] = []
         let maxTime: UInt = 4000000
-        let ringlets = TimeAwareRinglets(fsm: .parameterisedFSM(AnyParameterisedFiniteStateMachine(fsm, newMachine: newMachine)), timeslot: timeslot, gateway: fsm.gateway, timer: fsm.timer, startingTime: maxTime + 5000)
+        let ringlets = TimeAwareRinglets(fsm: .parameterisedFSM(AnyParameterisedFiniteStateMachine(fsm, newMachine: newMachine)), timeslot: timeslot, promises: [], gateway: fsm.gateway, timer: fsm.timer, startingTime: maxTime + 5000)
         let falseProperties = KripkeStatePropertyList(["value": KripkeStateProperty(type: .Bool, value: Bool(false))])
         let pool: (Bool, Bool?) -> FSMPool = {
             if let parameter = $1 {
@@ -351,6 +351,7 @@ class TimeAwareRingletTests: XCTestCase {
             let results = TimeAwareRinglets(
                 fsm: controllableFSM,
                 timeslot: timeslot,
+                promises: [],
                 gateway: gateway,
                 timer: timer,
                 startingTime: startingTime
@@ -436,7 +437,7 @@ class TimeAwareRingletTests: XCTestCase {
         let timeslot = Timeslot(fsms: [fsm.name], callChain: CallChain(root: fsm.name, calls: []), externalDependencies: [], startingTime: 0, duration: 30, cyclesExecuted: 0)
         let base = { fsm.base as! ExternalsFiniteStateMachine }
         let initialExternalValues = (base().actuators + base().externalVariables + base().sensors).map { $0.val as! Bool }
-        _ = TimeAwareRinglets(fsm: .controllableFSM(fsm), timeslot: timeslot, gateway: base().gateway, timer: base().timer, startingTime: 0)
+        _ = TimeAwareRinglets(fsm: .controllableFSM(fsm), timeslot: timeslot, promises: [], gateway: base().gateway, timer: base().timer, startingTime: 0)
         let resultingExternalValues = (base().actuators + base().externalVariables + base().sensors).map { $0.val as! Bool }
         XCTAssertEqual(initialExternalValues, resultingExternalValues)
     }

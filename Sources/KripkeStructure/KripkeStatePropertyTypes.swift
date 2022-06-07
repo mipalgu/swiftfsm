@@ -171,6 +171,23 @@ public enum KripkeStatePropertyTypes: Equatable, Codable {
             return Dictionary<String, Any>()
         }
     }
+
+    public func contains<T: AnyObject>(object: T) -> Bool {
+        switch self {
+        case .Compound(let plist):
+            return plist.contains(object: object)
+        case .Collection(let props):
+            return props.contains(where: { $0.contains(object: object) })
+        case .Optional(let prop):
+            guard let prop = prop else {
+                return false
+            }
+            return prop.contains(object: object)
+        default:
+            return false
+        }
+    }
+
 }
 
 extension KripkeStatePropertyTypes: Hashable {

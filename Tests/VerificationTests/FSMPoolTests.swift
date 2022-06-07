@@ -85,7 +85,7 @@ class FSMPoolTests: XCTestCase {
             duration: 30,
             cyclesExecuted: 0
         )
-        let result = pool.propertyList(forStep: .takeSnapshotAndStartTimeslot(timeslot: timeslot), executingState: fsm.currentState.name, collapseIfPossible: true)
+        let result = pool.propertyList(forStep: .takeSnapshotAndStartTimeslot(timeslot: timeslot), executingState: fsm.currentState.name, promises: [:], collapseIfPossible: true)
         let expected = KripkeStatePropertyList(
             [
                 "fsms": KripkeStateProperty(
