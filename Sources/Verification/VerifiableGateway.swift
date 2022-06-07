@@ -101,16 +101,16 @@ extension StackGateway: NewVerifiableGateway {
             else {
                 continue
             }
-            guard let fsm = pool.fsm(last.fsm).asParameterisedFiniteStateMachine else {
-                fatalError("Unable to convert fsm \(last.fsm) to parameterised machine.")
+            guard let fsm = pool.fsm(last.callee.name).asParameterisedFiniteStateMachine else {
+                fatalError("Unable to convert fsm \(last.callee.name) to parameterised machine.")
             }
             let promiseData = PromiseData(fsm: fsm, hasFinished: fsm.hasFinished && fsm.resultContainer.result != nil)
             let stackId: FSM_ID
             switch last.method {
             case .asynchronous:
-                stackId = last.callee
+                stackId = last.callee.id
             case .synchronous:
-                stackId = last.caller
+                stackId = last.caller.id
             }
             if nil != self.stacks[stackId] {
                 fatalError("Detected calling the same fsm more than once.")

@@ -61,6 +61,7 @@ import Gateways
 import Timers
 import KripkeStructure
 import KripkeStructureViews
+import swift_helpers
 
 final class ScheduleVerifier<Isolator: ScheduleIsolatorProtocol> {
     
@@ -141,7 +142,7 @@ final class ScheduleVerifier<Isolator: ScheduleIsolatorProtocol> {
     {
         let persistentStore = try (stores[identifier] as? Factory.KripkeStructure) ?? factory.make(identifier: identifier)
         defer { self.stores[identifier] = persistentStore }
-        var callResults = CallResults(bound: 0, results: [])
+        var callResults = CallResults()
         if thread.map.steps.isEmpty {
             if let resultsFsm = resultsFsm {
                 fatalError("Thread is empty for calling \(resultsFsm)")
@@ -167,7 +168,7 @@ final class ScheduleVerifier<Isolator: ScheduleIsolatorProtocol> {
                 let writeStep = job.map.steps[newStep]
                 let newStep = newStep >= (job.map.steps.count - 1) ? 0 : newStep + 1
                 let fsm = timeslot.callChain.fsm
-                let results = try delegate(call: call, callee: "", gateway: gateway, timer: timer, factory: factory)
+                let results = try delegate(call: call, callee: call.callee.name, gateway: gateway, timer: timer, factory: factory)
                 let properties = job.pool.propertyList(forStep: .startTimeslot(timeslot: timeslot), executingState: nil, collapseIfPossible: collapse)
                 let inCycle = try persistentStore.exists(properties)
                 let id: Int64
@@ -209,7 +210,7 @@ final class ScheduleVerifier<Isolator: ScheduleIsolatorProtocol> {
                         time: timeslot.duration,
                         target: target
                     )
-                    try persistentStore.add(edge: edge, to: targetId)
+                    try persistentStore.add(edge: edge, to: id)
                     let newPrevious = Previous(id: targetId, time: writeStep.time, resetClocks: newResetClocks)
                     jobs.append(Job(step: newStep, map: job.map, pool: job.pool.cloned, cycleCount: newCycleCount, previous: newPrevious))
                     continue
@@ -221,10 +222,10 @@ final class ScheduleVerifier<Isolator: ScheduleIsolatorProtocol> {
                     let targetId: Int64 = try persistentStore.add(target, isInitial: false)
                     let edge: KripkeEdge
                     switch range {
-                    case .greaterThan(let time):
+                    case .greaterThanEqual(let time):
                         edge = KripkeEdge(
                             clockName: fsm,
-                            constraint: .greaterThan(value: time),
+                            constraint: .greaterThanEqual(value: time),
                             resetClock: false,
                             takeSnapshot: false,
                             time: timeslot.duration,
@@ -233,14 +234,14 @@ final class ScheduleVerifier<Isolator: ScheduleIsolatorProtocol> {
                     case .range(let range):
                         edge = KripkeEdge(
                             clockName: fsm,
-                            constraint: .and(lhs: .greaterThanEqual(value: range.lowerBound), rhs: .lessThanEqual(value: range.upperBound)),
+                            constraint: .and(lhs: .greaterThanEqual(value: range.lowerBound), rhs: .lessThan(value: range.upperBound)),
                             resetClock: false,
                             takeSnapshot: false,
                             time: timeslot.duration,
                             target: target
                         )
                     }
-                    try persistentStore.add(edge: edge, to: targetId)
+                    try persistentStore.add(edge: edge, to: id)
                     let newPrevious = Previous(id: targetId, time: writeStep.time, resetClocks: newResetClocks)
                     jobs.append(Job(step: newStep, map: job.map, pool: resultPool.cloned, cycleCount: newCycleCount, previous: newPrevious))
                 }
@@ -254,7 +255,7 @@ final class ScheduleVerifier<Isolator: ScheduleIsolatorProtocol> {
                     time: timeslot.duration,
                     target: target
                 )
-                try persistentStore.add(edge: extraEdge, to: targetId)
+                try persistentStore.add(edge: extraEdge, to: id)
                 let newPrevious = Previous(id: targetId, time: writeStep.time, resetClocks: newResetClocks)
                 jobs.append(Job(step: newStep, map: job.map, pool: job.pool.cloned, cycleCount: newCycleCount, previous: newPrevious))
                 continue
@@ -330,12 +331,10 @@ final class ScheduleVerifier<Isolator: ScheduleIsolatorProtocol> {
                     var newPool = ringlet.after
                     var callees: Set<String> = []
                     for call in ringlet.calls {
-                        let callerName = gateway.fsm(fromID: call.caller).name
-                        let calleeName = gateway.parameterisedFSM(fromID: call.callee).name
-                        callees.insert(calleeName)
-                        if job.map.delegates.contains(calleeName) {
-                            newPool.handleCall(to: calleeName, parameters: call.parameters)
-                            newMap.handleCall(from: callerName, to: calleeName, data: call)
+                        callees.insert(call.callee.name)
+                        if job.map.delegates.contains(call.callee.name) {
+                            newPool.handleCall(to: call.callee.name, parameters: call.parameters)
+                            newMap.handleCall(call)
                         }
                     }
                     let properties = newPool.propertyList(forStep: step.step, executingState: currentState, collapseIfPossible: collapse)
@@ -392,20 +391,60 @@ final class ScheduleVerifier<Isolator: ScheduleIsolatorProtocol> {
 
     struct CallResults {
 
-        var bound: UInt
+        var bound: UInt = 0
 
-        var results: [(ClockRange, Any?)]
+        private var times: SortedCollection = SortedCollection<(UInt, Any?, KripkeStateProperty)> {
+            if $0.0 < $1.0 {
+                return .orderedAscending
+            } else if $0.0 > $1.0 {
+                return .orderedDescending
+            } else {
+                return .orderedSame
+            }
+        }
+
+        var results: [(ClockRange, Any?)] {
+            if times.isEmpty {
+                return []
+            }
+            let grouped = times.grouped {
+                $0.0 == $1.0
+            }
+            guard let last = grouped.last?.map({ (ClockRange.greaterThanEqual($0.0), $0.1) }) else {
+                return []
+            }
+            if grouped.count == 1 {
+                return last
+            }
+            let zipped = zip(grouped, grouped.dropFirst())
+            let ranges = zipped.flatMap { (lhs, rhs) -> [(ClockRange, Any?)] in
+                guard let lhsTime = lhs.first?.0, let rhsTime = rhs.first?.0 else {
+                    fatalError("Grouped elements results in empty array")
+                }
+                return lhs.map { (ClockRange.range(lhsTime..<rhsTime), $0.1) }
+            }
+            return ranges + last
+        }
+
+        init() {}
 
         mutating func insert(result: Any?, forTime time: UInt) {
-
+            let plist = KripkeStateProperty(result)
+            let element = (time, result, plist)
+            let range = times.range(of: element)
+            guard !times[range].contains(where: { $0.2 == plist }) else {
+                return
+            }
+            times.insert(element)
+            bound = times.last?.0 ?? 0
         }
 
     }
 
     enum ClockRange {
 
-        case greaterThan(UInt)
-        case range(ClosedRange<UInt>)
+        case greaterThanEqual(UInt)
+        case range(Range<UInt>)
 
     }
 

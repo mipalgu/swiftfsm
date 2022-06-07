@@ -85,9 +85,9 @@ struct VerificationMap {
         self.delegates = delegates
     }
 
-    mutating func handleFinishedCall(to callee: String, data: Call) {
+    mutating func handleFinishedCall(_ call: Call) {
         replaceSteps {
-            guard $0.callChain.fsm == callee else {
+            guard $0.callChain.fsm == call.callee.name else {
                 return $0
             }
             var new = $0
@@ -96,36 +96,36 @@ struct VerificationMap {
         }
     }
 
-    mutating func handleCall(from caller: String, to callee: String, data: Call) {
-        switch data.method {
+    mutating func handleCall(_ call: Call) {
+        switch call.method {
         case .synchronous:
-            handleSyncCall(from: caller, to: callee, data: data)
+            handleSyncCall(call)
         case .asynchronous:
-            handleASyncCall(to: callee, data: data)
+            handleASyncCall(call)
         }
     }
 
-    private mutating func handleSyncCall(from caller: String, to callee: String, data: Call) {
+    private mutating func handleSyncCall(_ call: Call) {
         replaceSteps {
-            guard $0.callChain.fsm == caller else {
+            guard $0.callChain.fsm == call.caller.name else {
                 return $0
             }
             var new = $0
-            new.callChain.add(data)
+            new.callChain.add(call)
             return new
         }
     }
 
-    private mutating func handleASyncCall(to callee: String, data: Call) {
+    private mutating func handleASyncCall(_ call: Call) {
         replaceSteps {
-            guard $0.callChain.root == callee else {
+            guard $0.callChain.root == call.callee.name else {
                 return $0
             }
-            guard $0.callChain.fsm == callee else {
+            guard $0.callChain.fsm == call.callee.name else {
                 fatalError("Attempting to call callee that is currently already executing.")
             }
             var new = $0
-            new.callChain.add(data)
+            new.callChain.add(call)
             return new
         }
     }

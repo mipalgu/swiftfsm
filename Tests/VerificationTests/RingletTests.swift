@@ -123,8 +123,8 @@ class RingletTests: XCTestCase {
         if ringlet.calls.count != 1 {
             return
         }
-        XCTAssertEqual(ringlet.calls[0].caller, id)
-        XCTAssertEqual(ringlet.calls[0].callee, id)
+        XCTAssertEqual(ringlet.calls[0].caller.id, id)
+        XCTAssertEqual(ringlet.calls[0].callee.id, id)
         XCTAssertEqual(ringlet.calls[0].parameters.count, 1)
         XCTAssertEqual(ringlet.calls[0].parameters["value"] as? Bool, true)
     }

@@ -122,11 +122,10 @@ class TimeAwareRingletTests: XCTestCase {
                 postSnapshot: $0.0 ? trueProperties : falseProperties,
                 calls: $0.1.map {
                     Call(
-                        caller: id,
-                        callee: id2,
+                        caller: (id, fsm.name),
+                        callee: (id2, newMachine(["value": $0]).name),
                         parameters: ["value": $0],
-                        method: .synchronous,
-                        fsm: newMachine(["value": $0]).name
+                        method: .synchronous
                     )
                 },
                 condition: $0.2
@@ -185,11 +184,10 @@ class TimeAwareRingletTests: XCTestCase {
                 postSnapshot: falseProperties,
                 calls: $0.1.map {
                     Call(
-                        caller: id,
-                        callee: id2,
+                        caller: (id, fsm.name),
+                        callee: (id2, newMachine(["value": $0]).name),
                         parameters: ["value": $0],
-                        method: .synchronous,
-                        fsm: newMachine(["value": $0]).name
+                        method: .synchronous
                     )
                 },
                 condition: $0.2
@@ -250,11 +248,10 @@ class TimeAwareRingletTests: XCTestCase {
                 postSnapshot: $0.0 ? trueProperties : falseProperties,
                 calls: $0.1.map {
                     Call(
-                        caller: id,
-                        callee: id2,
+                        caller: (id, fsm.name),
+                        callee: (id2, newMachine(["value": $0]).name),
                         parameters: ["value": $0],
-                        method: .synchronous,
-                        fsm: newMachine(["value": $0]).name
+                        method: .synchronous
                     )
                 },
                 condition: $0.2
@@ -312,11 +309,10 @@ class TimeAwareRingletTests: XCTestCase {
                 postSnapshot: falseProperties,
                 calls: $0.1.map {
                     Call(
-                        caller: id,
-                        callee: id2,
+                        caller: (id, fsm.name),
+                        callee: (id2, newMachine(["value": $0]).name),
                         parameters: ["value": $0],
-                        method: .synchronous,
-                        fsm: newMachine(["value": $0]).name
+                        method: .synchronous
                     )
                 },
                 condition: $0.2

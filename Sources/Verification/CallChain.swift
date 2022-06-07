@@ -95,7 +95,7 @@ public struct CallChain: Hashable {
     private var lastId: CallID!
     
     var fsm: String {
-        calls.last?.fsm ?? root
+        calls.last?.callee.name ?? root
     }
     
     private init(root: String, indexes: [CallID: Int], calls: [Call]) {
@@ -106,13 +106,13 @@ public struct CallChain: Hashable {
     
     init(root: String, calls: [Call]) {
         let indexes = Dictionary(uniqueKeysWithValues: calls.enumerated().map {
-            (CallID(callee: $1.callee, parameters: $1.parameters), $0)
+            (CallID(callee: $1.callee.id, parameters: $1.parameters), $0)
         })
         self.init(root: root, indexes: indexes, calls: calls)
     }
     
     mutating func add(_ call: Call) {
-        let id = CallID(callee: call.callee, parameters: call.parameters)
+        let id = CallID(callee: call.callee.id, parameters: call.parameters)
         if let index = indexes[id] {
             fatalError("Cyclic call detected: \(calls[index..<calls.count])")
         }
@@ -130,7 +130,7 @@ public struct CallChain: Hashable {
         guard let last = calls.last else {
             return pool.fsm(root)
         }
-        return pool.fsm(last.fsm)
+        return pool.fsm(last.callee.name)
     }
     
 }

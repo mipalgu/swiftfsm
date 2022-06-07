@@ -69,23 +69,21 @@ struct Call {
         case asynchronous
         
     }
+
+    var caller: (id: FSM_ID, name: String)
     
-    var caller: FSM_ID
-    
-    var callee: FSM_ID
+    var callee: (id: FSM_ID, name: String)
     
     var parameters: [String: Any?]
     
     var method: Method
-    
-    var fsm: String
     
 }
 
 extension Call: Equatable {
     
     static func ==(lhs: Call, rhs: Call) -> Bool {
-        guard lhs.caller == rhs.caller, lhs.callee == rhs.callee, lhs.parameters.keys == rhs.parameters.keys, lhs.method == rhs.method, lhs.fsm == rhs.fsm else {
+        guard lhs.caller.0 == rhs.caller.0, lhs.caller.1 == rhs.caller.1, lhs.callee.0 == rhs.callee.0, lhs.callee.1 == rhs.callee.1, lhs.parameters.keys == rhs.parameters.keys, lhs.method == rhs.method else {
             return false
         }
         for key in lhs.parameters.keys {
@@ -101,11 +99,12 @@ extension Call: Equatable {
 extension Call: Hashable {
     
     func hash(into hasher: inout Hasher) {
-        hasher.combine(self.caller)
-        hasher.combine(self.callee)
+        hasher.combine(self.caller.0)
+        hasher.combine(self.caller.1)
+        hasher.combine(self.callee.0)
+        hasher.combine(self.callee.1)
         hasher.combine(KripkeStatePropertyList(self.parameters.sorted { $0.key < $1.key }))
         hasher.combine(self.method)
-        hasher.combine(self.fsm)
     }
     
 }

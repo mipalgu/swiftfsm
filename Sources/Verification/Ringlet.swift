@@ -74,13 +74,19 @@ struct Ringlet {
         var invocations: [Call] = []
         
         var calls: [Call] = []
+
+        let callerName: String
+
+        init(callerName: String) {
+            self.callerName = callerName
+        }
         
         func hasCalled(inGateway _: ModifiableFSMGateway, fsm: AnyParameterisedFiniteStateMachine, withId callee: FSM_ID, withParameters parameters: [String: Any?], caller: FSM_ID, storingResultsIn _: PromiseData) {
-            self.calls.append(Call(caller: caller, callee: callee, parameters: parameters, method: .synchronous, fsm: fsm.name))
+            self.calls.append(Call(caller: (caller, callerName), callee: (callee, fsm.name), parameters: parameters, method: .synchronous))
         }
 
         func hasInvoked(inGateway _: ModifiableFSMGateway, fsm: AnyParameterisedFiniteStateMachine, withId callee: FSM_ID, withParameters parameters: [String: Any?], caller: FSM_ID, storingResultsIn _: PromiseData) {
-            self.invocations.append(Call(caller: caller, callee: callee, parameters: parameters, method: .asynchronous, fsm: fsm.name))
+            self.invocations.append(Call(caller: (caller, callerName), callee: (callee, fsm.name), parameters: parameters, method: .asynchronous))
         }
         
     }
@@ -141,7 +147,7 @@ struct Ringlet {
         let allExternalVariables = (fsm.sensors + fsm.externalVariables + fsm.actuators)
         let externalsPreSnapshot = KripkeStatePropertyList(Dictionary(uniqueKeysWithValues: allExternalVariables.map { ($0.name, KripkeStateProperty($0.val)) }))
         let preSnapshot = KripkeStatePropertyList(fsm.asScheduleableFiniteStateMachine.base)
-        let delegate = GatewayDelegate()
+        let delegate = GatewayDelegate(callerName: fsm.name)
         gateway.delegate = delegate
         let before = gateway.pool
         let currentState = fsm.currentState.name
