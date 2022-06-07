@@ -99,6 +99,8 @@ final class ScheduleVerifier<Isolator: ScheduleIsolatorProtocol> {
         var cycleCount: UInt
 
         var promises: [String: PromiseData]
+
+        var previousNodes: Set<Int64>
         
         var previous: Previous?
         
@@ -151,7 +153,7 @@ final class ScheduleVerifier<Isolator: ScheduleIsolatorProtocol> {
         let generator = VerificationStepGenerator()
         gateway.setScenario([], pool: thread.pool)
         let collapse = nil == thread.map.steps.first { $0.step.fsms.count > 1 }
-        var jobs = [Job(step: 0, map: thread.map, pool: thread.pool, cycleCount: 0, promises: [:], previous: nil)]
+        var jobs = [Job(step: 0, map: thread.map, pool: thread.pool, cycleCount: 0, promises: [:], previousNodes: [], previous: nil)]
         jobs.reserveCapacity(100000)
         while !jobs.isEmpty {
             let job = jobs.removeLast()
@@ -191,9 +193,9 @@ final class ScheduleVerifier<Isolator: ScheduleIsolatorProtocol> {
                     try persistentStore.add(edge: edge, to: previous.id)
                 }
                 guard !inCycle else {
-//                    if let resultsFsm = resultsFsm {
-//                        fatalError("Detected cycle in delegate parameterised machine call that should always return a value for call to \(resultsFsm).")
-//                    }
+                    if let resultsFsm = resultsFsm, job.previousNodes.contains(id) {
+                        fatalError("Detected cycle in delegate parameterised machine call that should always return a value for call to \(resultsFsm).")
+                    }
                     continue
                 }
                 let newResetClocks = previous?.resetClocks.subtracting([fsm]) ?? []
@@ -211,7 +213,7 @@ final class ScheduleVerifier<Isolator: ScheduleIsolatorProtocol> {
                     )
                     try persistentStore.add(edge: edge, to: id)
                     let newPrevious = Previous(id: targetId, time: writeStep.time, resetClocks: newResetClocks)
-                    jobs.append(Job(step: newStep, map: job.map, pool: job.pool.cloned, cycleCount: newCycleCount, promises: job.promises, previous: newPrevious))
+                    jobs.append(Job(step: newStep, map: job.map, pool: job.pool.cloned, cycleCount: newCycleCount, promises: job.promises, previousNodes: job.previousNodes.union([id, targetId]), previous: newPrevious))
                     continue
                 }
                 for (range, result) in results.results {
@@ -245,7 +247,7 @@ final class ScheduleVerifier<Isolator: ScheduleIsolatorProtocol> {
                     try persistentStore.add(edge: edge, to: id)
                     let newPrevious = Previous(id: targetId, time: writeStep.time, resetClocks: newResetClocks)
                     let newPromises = job.promises.filter { !target.contains(object: $1) }
-                    jobs.append(Job(step: newStep, map: newMap, pool: resultPool.cloned, cycleCount: newCycleCount, promises: newPromises, previous: newPrevious))
+                    jobs.append(Job(step: newStep, map: newMap, pool: resultPool.cloned, cycleCount: newCycleCount, promises: newPromises, previousNodes: job.previousNodes.union([id, targetId]), previous: newPrevious))
                 }
                 let target = job.pool.propertyList(forStep: .execute(timeslot: timeslot), executingState: nil, promises: job.promises, collapseIfPossible: true)
                 let targetId: Int64 = try persistentStore.add(target, isInitial: false)
@@ -260,7 +262,7 @@ final class ScheduleVerifier<Isolator: ScheduleIsolatorProtocol> {
                 try persistentStore.add(edge: extraEdge, to: id)
                 let newPrevious = Previous(id: targetId, time: writeStep.time, resetClocks: newResetClocks)
                 let newPromises = job.promises.filter { !target.contains(object: $1) }
-                jobs.append(Job(step: newStep, map: job.map, pool: job.pool.cloned, cycleCount: newCycleCount, promises: newPromises, previous: newPrevious))
+                jobs.append(Job(step: newStep, map: job.map, pool: job.pool.cloned, cycleCount: newCycleCount, promises: newPromises, previousNodes: job.previousNodes.union([id, targetId]), previous: newPrevious))
                 continue
             }
             // Handle inline jobs.
@@ -309,7 +311,7 @@ final class ScheduleVerifier<Isolator: ScheduleIsolatorProtocol> {
                         continue
                     }
                     guard !inCycle else {
-                        if let resultsFsm = resultsFsm {
+                        if let resultsFsm = resultsFsm, job.previousNodes.contains(id) {
                             fatalError("Detected cycle in delegate parameterised machine call that should always return a value for call to \(resultsFsm).")
                         }
                         continue
@@ -323,7 +325,7 @@ final class ScheduleVerifier<Isolator: ScheduleIsolatorProtocol> {
                     let newCycleCount = newStep <= job.step ? job.cycleCount + 1 : job.cycleCount
                     let newPrevious = Previous(id: id, time: step.time, resetClocks: newResetClocks)
                     let newPromises = job.promises.filter { !properties.contains(object: $1) }
-                    jobs.append(Job(step: newStep, map: job.map, pool: pool.cloned, cycleCount: newCycleCount, promises: newPromises, previous: newPrevious))
+                    jobs.append(Job(step: newStep, map: job.map, pool: pool.cloned, cycleCount: newCycleCount, promises: newPromises, previousNodes: job.previousNodes.union([id]), previous: newPrevious))
                 }
             case .execute(let timeslot), .executeAndSaveSnapshot(let timeslot):
                 let fsm = timeslot.callChain.fsm(fromPool: job.pool)
@@ -374,7 +376,7 @@ final class ScheduleVerifier<Isolator: ScheduleIsolatorProtocol> {
                         continue
                     }
                     guard !inCycle else {
-                        if let resultsFsm = resultsFsm {
+                        if let resultsFsm = resultsFsm, job.previousNodes.contains(id) {
                             fatalError("Detected cycle in delegate parameterised machine call that should always return a value for call to \(resultsFsm).")
                         }
                         continue
@@ -388,7 +390,7 @@ final class ScheduleVerifier<Isolator: ScheduleIsolatorProtocol> {
                     let newCycleCount = newStep <= job.step ? job.cycleCount + 1 : job.cycleCount
                     let newPrevious = Previous(id: id, time: step.time, resetClocks: resetClocks)
                     let newPromises = job.promises.filter { !properties.contains(object: $1) }
-                    jobs.append(Job(step: newStep, map: newMap, pool: newPool, cycleCount: newCycleCount, promises: newPromises, previous: newPrevious))
+                    jobs.append(Job(step: newStep, map: newMap, pool: newPool, cycleCount: newCycleCount, promises: newPromises, previousNodes: job.previousNodes.union([id]), previous: newPrevious))
                 }
             }
         }
