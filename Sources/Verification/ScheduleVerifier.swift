@@ -62,7 +62,7 @@ import Timers
 import KripkeStructure
 import KripkeStructureViews
 
-struct ScheduleVerifier<Isolator: ScheduleIsolatorProtocol> {
+final class ScheduleVerifier<Isolator: ScheduleIsolatorProtocol> {
     
     private struct Previous {
         
@@ -94,14 +94,22 @@ struct ScheduleVerifier<Isolator: ScheduleIsolatorProtocol> {
         var map: VerificationMap
         
         var pool: FSMPool
+
+        var cycleCount: UInt
         
         var previous: Previous?
         
     }
     
-    var isolatedThreads: Isolator
+    let isolatedThreads: Isolator
+
+    private var threadCache: [String: IsolatedThread] = [:]
+
+    private var resultsCache: [KripkeStatePropertyList: CallResults] = [:]
+
+    private var stores: [String: Any] = [:]
     
-    init(schedule: Schedule, allFsms: FSMPool) where Isolator == ScheduleIsolator {
+    convenience init(schedule: Schedule, allFsms: FSMPool) where Isolator == ScheduleIsolator {
         self.init(isolatedThreads: ScheduleIsolator(schedule: schedule, allFsms: allFsms))
     }
     
@@ -115,28 +123,35 @@ struct ScheduleVerifier<Isolator: ScheduleIsolatorProtocol> {
     
     func verify<Gateway: ModifiableFSMGateway, Timer: Clock, Factory: MutableKripkeStructureFactory>(gateway: Gateway, timer: Timer, factory: Factory) throws -> [Factory.KripkeStructure] where Gateway: NewVerifiableGateway
     {
-        var stores: [Factory.KripkeStructure] = []
+        stores = [:]
+        threadCache = [:]
+        resultsCache = [:]
         for (index, thread) in isolatedThreads.threads.enumerated() {
             let allFsmNames: Set<String> = Set(thread.map.steps.flatMap {
                 $0.step.timeslots.flatMap(\.fsms)
             })
             let identifier = allFsmNames.count == 1 ? allFsmNames.first ?? "\(index)" : "\(index)"
-            let structure = try verify(thread: thread, identifier: identifier, gateway: gateway, timer: timer, factory: factory)
-            stores.append(structure)
+            try verify(thread: thread, identifier: identifier, gateway: gateway, timer: timer, factory: factory, recordingResultsFor: nil)
         }
-        return stores
+        return stores.values.map { $0 as! Factory.KripkeStructure }
     }
 
-    func verify<Gateway: ModifiableFSMGateway, Timer: Clock, Factory: MutableKripkeStructureFactory>(thread: IsolatedThread, identifier: String, gateway: Gateway, timer: Timer, factory: Factory) throws -> Factory.KripkeStructure where Gateway: NewVerifiableGateway
+    @discardableResult
+    func verify<Gateway: ModifiableFSMGateway, Timer: Clock, Factory: MutableKripkeStructureFactory>(thread: IsolatedThread, identifier: String, gateway: Gateway, timer: Timer, factory: Factory, recordingResultsFor resultsFsm: String?) throws -> CallResults where Gateway: NewVerifiableGateway
     {
-        let persistentStore = try factory.make(identifier: identifier)
+        let persistentStore = try (stores[identifier] as? Factory.KripkeStructure) ?? factory.make(identifier: identifier)
+        defer { self.stores[identifier] = persistentStore }
+        var callResults = CallResults(bound: 0, results: [])
         if thread.map.steps.isEmpty {
-            return persistentStore
+            if let resultsFsm = resultsFsm {
+                fatalError("Thread is empty for calling \(resultsFsm)")
+            }
+            return callResults
         }
         let generator = VerificationStepGenerator()
         gateway.setScenario([], pool: thread.pool)
         let collapse = nil == thread.map.steps.first { $0.step.fsms.count > 1 }
-        var jobs = [Job(step: 0, map: thread.map, pool: thread.pool, previous: nil)]
+        var jobs = [Job(step: 0, map: thread.map, pool: thread.pool, cycleCount: 0, previous: nil)]
         jobs.reserveCapacity(100000)
         while !jobs.isEmpty {
             let job = jobs.removeLast()
@@ -152,7 +167,7 @@ struct ScheduleVerifier<Isolator: ScheduleIsolatorProtocol> {
                 let writeStep = job.map.steps[newStep]
                 let newStep = newStep >= (job.map.steps.count - 1) ? 0 : newStep + 1
                 let fsm = timeslot.callChain.fsm
-                let results = delegate(call: call)
+                let results = try delegate(call: call, callee: "", gateway: gateway, timer: timer, factory: factory)
                 let properties = job.pool.propertyList(forStep: .startTimeslot(timeslot: timeslot), executingState: nil, collapseIfPossible: collapse)
                 let inCycle = try persistentStore.exists(properties)
                 let id: Int64
@@ -176,9 +191,13 @@ struct ScheduleVerifier<Isolator: ScheduleIsolatorProtocol> {
                     try persistentStore.add(edge: edge, to: previous.id)
                 }
                 guard !inCycle else {
+                    if let resultsFsm = resultsFsm {
+                        fatalError("Detected cycle in delegate parameterised machine call that should always return a value for call to \(resultsFsm).")
+                    }
                     continue
                 }
                 let newResetClocks = previous?.resetClocks.subtracting([fsm]) ?? []
+                let newCycleCount = newStep <= job.step ? job.cycleCount + 1 : job.cycleCount
                 guard !results.results.isEmpty else {
                     let target = job.pool.propertyList(forStep: .execute(timeslot: timeslot), executingState: nil, collapseIfPossible: true)
                     let targetId: Int64 = try persistentStore.add(target, isInitial: false)
@@ -192,7 +211,7 @@ struct ScheduleVerifier<Isolator: ScheduleIsolatorProtocol> {
                     )
                     try persistentStore.add(edge: edge, to: targetId)
                     let newPrevious = Previous(id: targetId, time: writeStep.time, resetClocks: newResetClocks)
-                    jobs.append(Job(step: newStep, map: job.map, pool: job.pool.cloned, previous: newPrevious))
+                    jobs.append(Job(step: newStep, map: job.map, pool: job.pool.cloned, cycleCount: newCycleCount, previous: newPrevious))
                     continue
                 }
                 for (range, result) in results.results {
@@ -223,7 +242,7 @@ struct ScheduleVerifier<Isolator: ScheduleIsolatorProtocol> {
                     }
                     try persistentStore.add(edge: edge, to: targetId)
                     let newPrevious = Previous(id: targetId, time: writeStep.time, resetClocks: newResetClocks)
-                    jobs.append(Job(step: newStep, map: job.map, pool: resultPool.cloned, previous: newPrevious))
+                    jobs.append(Job(step: newStep, map: job.map, pool: resultPool.cloned, cycleCount: newCycleCount, previous: newPrevious))
                 }
                 let target = job.pool.propertyList(forStep: .execute(timeslot: timeslot), executingState: nil, collapseIfPossible: true)
                 let targetId: Int64 = try persistentStore.add(target, isInitial: false)
@@ -237,7 +256,7 @@ struct ScheduleVerifier<Isolator: ScheduleIsolatorProtocol> {
                 )
                 try persistentStore.add(edge: extraEdge, to: targetId)
                 let newPrevious = Previous(id: targetId, time: writeStep.time, resetClocks: newResetClocks)
-                jobs.append(Job(step: newStep, map: job.map, pool: job.pool.cloned, previous: newPrevious))
+                jobs.append(Job(step: newStep, map: job.map, pool: job.pool.cloned, cycleCount: newCycleCount, previous: newPrevious))
                 continue
             }
             // Handle inline jobs.
@@ -277,9 +296,18 @@ struct ScheduleVerifier<Isolator: ScheduleIsolatorProtocol> {
                         try persistentStore.add(edge: edge, to: previous.id)
                     }
                     guard !inCycle else {
+                        if let resultsFsm = resultsFsm {
+                            fatalError("Detected cycle in delegate parameterised machine call that should always return a value for call to \(resultsFsm).")
+                        }
                         continue
                     }
                     if step.step.saveSnapshot && job.map.hasFinished(forPool: pool) {
+                        if let resultsFsm = resultsFsm {
+                            guard let parameterisedFSM = pool.fsm(resultsFsm).asParameterisedFiniteStateMachine else {
+                                fatalError("Attempting to record results for a non-parameterised fsm")
+                            }
+                            callResults.insert(result: parameterisedFSM.resultContainer.result, forTime: job.cycleCount * isolatedThreads.cycleLength + step.time)
+                        }
                         continue
                     }
                     let newResetClocks: Set<String>
@@ -288,8 +316,9 @@ struct ScheduleVerifier<Isolator: ScheduleIsolatorProtocol> {
                     } else {
                         newResetClocks = previous?.resetClocks ?? []
                     }
+                    let newCycleCount = newStep <= job.step ? job.cycleCount + 1 : job.cycleCount
                     let newPrevious = Previous(id: id, time: step.time, resetClocks: newResetClocks)
-                    jobs.append(Job(step: newStep, map: job.map, pool: pool.cloned, previous: newPrevious))
+                    jobs.append(Job(step: newStep, map: job.map, pool: pool.cloned, cycleCount: newCycleCount, previous: newPrevious))
                 }
             case .execute(let timeslot), .executeAndSaveSnapshot(let timeslot):
                 let fsm = timeslot.callChain.fsm(fromPool: job.pool)
@@ -332,9 +361,18 @@ struct ScheduleVerifier<Isolator: ScheduleIsolatorProtocol> {
                         try persistentStore.add(edge: edge, to: previous.id)
                     }
                     guard !inCycle else {
+                        if let resultsFsm = resultsFsm {
+                            fatalError("Detected cycle in delegate parameterised machine call that should always return a value for call to \(resultsFsm).")
+                        }
                         continue
                     }
                     if step.step.saveSnapshot && job.map.hasFinished(forPool: ringlet.after) {
+                        if let resultsFsm = resultsFsm {
+                            guard let parameterisedFSM = ringlet.after.fsm(resultsFsm).asParameterisedFiniteStateMachine else {
+                                fatalError("Attempting to record results for a non-parameterised fsm")
+                            }
+                            callResults.insert(result: parameterisedFSM.resultContainer.result, forTime: job.cycleCount * isolatedThreads.cycleLength + step.time)
+                        }
                         continue
                     }
                     let resetClocks: Set<String>
@@ -343,12 +381,13 @@ struct ScheduleVerifier<Isolator: ScheduleIsolatorProtocol> {
                     } else {
                         resetClocks = (previous?.resetClocks ?? []).union(callees)
                     }
+                    let newCycleCount = newStep <= job.step ? job.cycleCount + 1 : job.cycleCount
                     let newPrevious = Previous(id: id, time: step.time, resetClocks: resetClocks)
-                    jobs.append(Job(step: newStep, map: newMap, pool: ringlet.after, previous: newPrevious))
+                    jobs.append(Job(step: newStep, map: newMap, pool: ringlet.after, cycleCount: newCycleCount, previous: newPrevious))
                 }
             }
         }
-        return persistentStore
+        return callResults
     }
 
     struct CallResults {
@@ -356,6 +395,10 @@ struct ScheduleVerifier<Isolator: ScheduleIsolatorProtocol> {
         var bound: UInt
 
         var results: [(ClockRange, Any?)]
+
+        mutating func insert(result: Any?, forTime time: UInt) {
+
+        }
 
     }
 
@@ -366,6 +409,16 @@ struct ScheduleVerifier<Isolator: ScheduleIsolatorProtocol> {
 
     }
 
-    private func delegate(call _: Call) -> CallResults { CallResults(bound: 0, results: []) }
+    private func delegate<Gateway: ModifiableFSMGateway, Timer: Clock, Factory: MutableKripkeStructureFactory>(call: Call, callee: String, gateway: Gateway, timer: Timer, factory: Factory) throws -> CallResults where Gateway: NewVerifiableGateway
+    {
+        let key = KripkeStatePropertyList(call)
+        if let results = resultsCache[key] {
+            return results
+        }
+        guard let thread = threadCache[callee] ?? isolatedThreads.thread(forFsm: callee) else {
+            fatalError("No thread provided for calling \(callee)")
+        }
+        return try verify(thread: thread, identifier: callee, gateway: gateway, timer: timer, factory: factory, recordingResultsFor: callee)
+    }
     
 }
