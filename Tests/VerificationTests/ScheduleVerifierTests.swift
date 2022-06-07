@@ -440,6 +440,14 @@ class ScheduleVerifierTests: XCTestCase {
             duration: duration,
             cyclesExecuted: 0
         )
+        let calleeTimeslot = Timeslot(
+            fsms: [callee.name],
+            callChain: CallChain(root: callee.name, calls: []),
+            externalDependencies: [],
+            startingTime: startingTime,
+            duration: duration,
+            cyclesExecuted: 0
+        )
         let pool = FSMPool(fsms: [.controllableFSM(AnyControllableFiniteStateMachine(fsm)), .parameterisedFSM(callee)], parameterisedFSMs: [callee.name])
         let calleePool = FSMPool(fsms: [.parameterisedFSM(callee)], parameterisedFSMs: [])
         let isolator = ScheduleIsolator(
@@ -466,12 +474,12 @@ class ScheduleVerifierTests: XCTestCase {
                     map: VerificationMap(
                         steps: [
                             VerificationMap.Step(
-                                time: timeslot.startingTime,
-                                step: .takeSnapshotAndStartTimeslot(timeslot: timeslot)
+                                time: calleeTimeslot.startingTime,
+                                step: .takeSnapshotAndStartTimeslot(timeslot: calleeTimeslot)
                             ),
                             VerificationMap.Step(
-                                time: timeslot.startingTime + timeslot.duration,
-                                step: .executeAndSaveSnapshot(timeslot: timeslot)
+                                time: calleeTimeslot.startingTime + calleeTimeslot.duration,
+                                step: .executeAndSaveSnapshot(timeslot: calleeTimeslot)
                             )
                         ],
                         delegates: []

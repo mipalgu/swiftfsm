@@ -354,6 +354,7 @@ extension KripkeStateProperty: CustomStringConvertible {
 extension KripkeStateProperty: Hashable {
 
     public func hash(into hasher: inout Hasher) {
+        hasher.combine(type)
         switch self.type {
         case .Bool:
             hasher.combine((self.value as! Bool))
@@ -385,12 +386,10 @@ extension KripkeStateProperty: Hashable {
             hasher.combine((self.value as! Double))
         case .String:
             hasher.combine((self.value as! String))
-        case .Collection(let ps):
-            hasher.combine(ps)
-        case .Compound(let list):
-            hasher.combine(list)
-        default:
-            hasher.combine("\(self.value)")
+        case .EmptyCollection:
+            hasher.combine([Int]())
+        case .Collection, .Compound, .Optional:
+            break // hashing the type is enough to cover these cases
         }
     }
 

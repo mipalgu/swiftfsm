@@ -148,6 +148,13 @@ public struct FSMPool {
     func has(_ name: String) -> Bool {
         return indexes[name] != nil
     }
+
+    func hasThatIsntDelegate(_ name: String) -> Bool {
+        if parameterisedFSMs[name] != nil {
+            return false
+        }
+        return has(name)
+    }
     
     func index(of name: String) -> FSM_ID {
         guard let index = indexes[name] else {
@@ -204,6 +211,7 @@ public struct FSMPool {
         }
         status.status = .inactive
         status.call?.result = result
+        self.parameterisedFSMs[fsm] = status
     }
 
     mutating func setInactive(_ fsm: String) {

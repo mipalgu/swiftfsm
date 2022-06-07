@@ -134,7 +134,7 @@ struct ScheduleIsolator: ScheduleIsolatorProtocol {
     }
 
     func thread(forFsm fsm: String) -> IsolatedThread? {
-        threads.first { $0.pool.has(fsm) }
+        parameterisedThreads[fsm]
     }
     
 }

@@ -173,6 +173,24 @@ public enum KripkeStatePropertyTypes: Equatable, Codable {
     }
 }
 
+extension KripkeStatePropertyTypes: Hashable {
+
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(typeString)
+        switch self {
+        case .Collection(let props):
+            hasher.combine(props)
+        case .Compound(let plist):
+            hasher.combine(plist)
+        case .Optional(let prop):
+            hasher.combine(prop)
+        default:
+            break
+        }
+    }
+
+}
+
 /**
  *  Are two types equal?
  */

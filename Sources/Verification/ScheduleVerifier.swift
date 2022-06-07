@@ -104,9 +104,7 @@ final class ScheduleVerifier<Isolator: ScheduleIsolatorProtocol> {
     
     let isolatedThreads: Isolator
 
-    private var threadCache: [String: IsolatedThread] = [:]
-
-    private var resultsCache: [KripkeStatePropertyList: CallResults] = [:]
+    private var resultsCache: [CallKey: CallResults] = [:]
 
     private var stores: [String: Any] = [:]
     
@@ -125,7 +123,6 @@ final class ScheduleVerifier<Isolator: ScheduleIsolatorProtocol> {
     func verify<Gateway: ModifiableFSMGateway, Timer: Clock, Factory: MutableKripkeStructureFactory>(gateway: Gateway, timer: Timer, factory: Factory) throws -> [Factory.KripkeStructure] where Gateway: NewVerifiableGateway
     {
         stores = [:]
-        threadCache = [:]
         resultsCache = [:]
         for (index, thread) in isolatedThreads.threads.enumerated() {
             let allFsmNames: Set<String> = Set(thread.map.steps.flatMap {
@@ -192,9 +189,9 @@ final class ScheduleVerifier<Isolator: ScheduleIsolatorProtocol> {
                     try persistentStore.add(edge: edge, to: previous.id)
                 }
                 guard !inCycle else {
-                    if let resultsFsm = resultsFsm {
-                        fatalError("Detected cycle in delegate parameterised machine call that should always return a value for call to \(resultsFsm).")
-                    }
+//                    if let resultsFsm = resultsFsm {
+//                        fatalError("Detected cycle in delegate parameterised machine call that should always return a value for call to \(resultsFsm).")
+//                    }
                     continue
                 }
                 let newResetClocks = previous?.resetClocks.subtracting([fsm]) ?? []
@@ -218,6 +215,8 @@ final class ScheduleVerifier<Isolator: ScheduleIsolatorProtocol> {
                 for (range, result) in results.results {
                     var resultPool = job.pool.cloned
                     resultPool.handleFinishedCall(for: fsm, result: result)
+                    var newMap = job.map
+                    newMap.handleFinishedCall(call)
                     let target = resultPool.propertyList(forStep: .execute(timeslot: timeslot), executingState: nil, collapseIfPossible: true)
                     let targetId: Int64 = try persistentStore.add(target, isInitial: false)
                     let edge: KripkeEdge
@@ -243,7 +242,7 @@ final class ScheduleVerifier<Isolator: ScheduleIsolatorProtocol> {
                     }
                     try persistentStore.add(edge: edge, to: id)
                     let newPrevious = Previous(id: targetId, time: writeStep.time, resetClocks: newResetClocks)
-                    jobs.append(Job(step: newStep, map: job.map, pool: resultPool.cloned, cycleCount: newCycleCount, previous: newPrevious))
+                    jobs.append(Job(step: newStep, map: newMap, pool: resultPool.cloned, cycleCount: newCycleCount, previous: newPrevious))
                 }
                 let target = job.pool.propertyList(forStep: .execute(timeslot: timeslot), executingState: nil, collapseIfPossible: true)
                 let targetId: Int64 = try persistentStore.add(target, isInitial: false)
@@ -296,18 +295,18 @@ final class ScheduleVerifier<Isolator: ScheduleIsolatorProtocol> {
                         )
                         try persistentStore.add(edge: edge, to: previous.id)
                     }
-                    guard !inCycle else {
-                        if let resultsFsm = resultsFsm {
-                            fatalError("Detected cycle in delegate parameterised machine call that should always return a value for call to \(resultsFsm).")
-                        }
-                        continue
-                    }
                     if step.step.saveSnapshot && job.map.hasFinished(forPool: pool) {
                         if let resultsFsm = resultsFsm {
                             guard let parameterisedFSM = pool.fsm(resultsFsm).asParameterisedFiniteStateMachine else {
                                 fatalError("Attempting to record results for a non-parameterised fsm")
                             }
                             callResults.insert(result: parameterisedFSM.resultContainer.result, forTime: job.cycleCount * isolatedThreads.cycleLength + step.time)
+                        }
+                        continue
+                    }
+                    guard !inCycle else {
+                        if let resultsFsm = resultsFsm {
+                            fatalError("Detected cycle in delegate parameterised machine call that should always return a value for call to \(resultsFsm).")
                         }
                         continue
                     }
@@ -359,18 +358,18 @@ final class ScheduleVerifier<Isolator: ScheduleIsolatorProtocol> {
                         )
                         try persistentStore.add(edge: edge, to: previous.id)
                     }
-                    guard !inCycle else {
-                        if let resultsFsm = resultsFsm {
-                            fatalError("Detected cycle in delegate parameterised machine call that should always return a value for call to \(resultsFsm).")
-                        }
-                        continue
-                    }
                     if step.step.saveSnapshot && job.map.hasFinished(forPool: ringlet.after) {
                         if let resultsFsm = resultsFsm {
                             guard let parameterisedFSM = ringlet.after.fsm(resultsFsm).asParameterisedFiniteStateMachine else {
                                 fatalError("Attempting to record results for a non-parameterised fsm")
                             }
                             callResults.insert(result: parameterisedFSM.resultContainer.result, forTime: job.cycleCount * isolatedThreads.cycleLength + step.time)
+                        }
+                        continue
+                    }
+                    guard !inCycle else {
+                        if let resultsFsm = resultsFsm {
+                            fatalError("Detected cycle in delegate parameterised machine call that should always return a value for call to \(resultsFsm).")
                         }
                         continue
                     }
@@ -382,7 +381,7 @@ final class ScheduleVerifier<Isolator: ScheduleIsolatorProtocol> {
                     }
                     let newCycleCount = newStep <= job.step ? job.cycleCount + 1 : job.cycleCount
                     let newPrevious = Previous(id: id, time: step.time, resetClocks: resetClocks)
-                    jobs.append(Job(step: newStep, map: newMap, pool: ringlet.after, cycleCount: newCycleCount, previous: newPrevious))
+                    jobs.append(Job(step: newStep, map: newMap, pool: newPool, cycleCount: newCycleCount, previous: newPrevious))
                 }
             }
         }
@@ -448,16 +447,34 @@ final class ScheduleVerifier<Isolator: ScheduleIsolatorProtocol> {
 
     }
 
+    struct CallKey: Hashable {
+
+        var callee: String
+
+        var parameters: [String: Any?]
+
+        static func ==(lhs: CallKey, rhs: CallKey) -> Bool {
+            KripkeStatePropertyList(lhs) == KripkeStatePropertyList(rhs)
+        }
+
+        func hash(into hasher: inout Hasher) {
+            hasher.combine(KripkeStatePropertyList(self))
+        }
+
+    }
+
     private func delegate<Gateway: ModifiableFSMGateway, Timer: Clock, Factory: MutableKripkeStructureFactory>(call: Call, callee: String, gateway: Gateway, timer: Timer, factory: Factory) throws -> CallResults where Gateway: NewVerifiableGateway
     {
-        let key = KripkeStatePropertyList(call)
+        let key = CallKey(callee: call.callee.name, parameters: call.parameters)
         if let results = resultsCache[key] {
             return results
         }
-        guard let thread = threadCache[callee] ?? isolatedThreads.thread(forFsm: callee) else {
+        guard let thread = isolatedThreads.thread(forFsm: callee) else {
             fatalError("No thread provided for calling \(callee)")
         }
-        return try verify(thread: thread, identifier: callee, gateway: gateway, timer: timer, factory: factory, recordingResultsFor: callee)
+        let results = try verify(thread: thread, identifier: callee, gateway: gateway, timer: timer, factory: factory, recordingResultsFor: callee)
+        resultsCache[key] = results
+        return results
     }
     
 }
