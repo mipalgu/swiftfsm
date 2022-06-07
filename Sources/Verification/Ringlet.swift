@@ -81,12 +81,12 @@ struct Ringlet {
             self.callerName = callerName
         }
         
-        func hasCalled(inGateway _: ModifiableFSMGateway, fsm: AnyParameterisedFiniteStateMachine, withId callee: FSM_ID, withParameters parameters: [String: Any?], caller: FSM_ID, storingResultsIn _: PromiseData) {
-            self.calls.append(Call(caller: (caller, callerName), callee: (callee, fsm.name), parameters: parameters, method: .synchronous))
+        func hasCalled(inGateway _: ModifiableFSMGateway, fsm: AnyParameterisedFiniteStateMachine, withId callee: FSM_ID, withParameters parameters: [String: Any?], caller: FSM_ID, storingResultsIn promiseData: PromiseData) {
+            self.calls.append(Call(caller: (caller, callerName), callee: (callee, fsm.name), parameters: parameters, method: .synchronous, promiseData: promiseData))
         }
 
-        func hasInvoked(inGateway _: ModifiableFSMGateway, fsm: AnyParameterisedFiniteStateMachine, withId callee: FSM_ID, withParameters parameters: [String: Any?], caller: FSM_ID, storingResultsIn _: PromiseData) {
-            self.invocations.append(Call(caller: (caller, callerName), callee: (callee, fsm.name), parameters: parameters, method: .asynchronous))
+        func hasInvoked(inGateway _: ModifiableFSMGateway, fsm: AnyParameterisedFiniteStateMachine, withId callee: FSM_ID, withParameters parameters: [String: Any?], caller: FSM_ID, storingResultsIn promiseData: PromiseData) {
+            self.invocations.append(Call(caller: (caller, callerName), callee: (callee, fsm.name), parameters: parameters, method: .asynchronous, promiseData: promiseData))
         }
         
     }

@@ -125,7 +125,8 @@ class TimeAwareRingletTests: XCTestCase {
                         caller: (id, fsm.name),
                         callee: (id2, newMachine(["value": $0]).name),
                         parameters: ["value": $0],
-                        method: .synchronous
+                        method: .synchronous,
+                        promiseData: PromiseData(fsm: fsm.gateway.fsms[id2]!.asParameterisedFiniteStateMachine!)
                     )
                 },
                 condition: $0.2
@@ -187,7 +188,8 @@ class TimeAwareRingletTests: XCTestCase {
                         caller: (id, fsm.name),
                         callee: (id2, newMachine(["value": $0]).name),
                         parameters: ["value": $0],
-                        method: .synchronous
+                        method: .synchronous,
+                        promiseData: PromiseData(fsm: fsm.gateway.fsms[id2]!.asParameterisedFiniteStateMachine!)
                     )
                 },
                 condition: $0.2
@@ -251,7 +253,8 @@ class TimeAwareRingletTests: XCTestCase {
                         caller: (id, fsm.name),
                         callee: (id2, newMachine(["value": $0]).name),
                         parameters: ["value": $0],
-                        method: .synchronous
+                        method: .synchronous,
+                        promiseData: PromiseData(fsm: fsm.gateway.fsms[id2]!.asParameterisedFiniteStateMachine!)
                     )
                 },
                 condition: $0.2
@@ -312,7 +315,8 @@ class TimeAwareRingletTests: XCTestCase {
                         caller: (id, fsm.name),
                         callee: (id2, newMachine(["value": $0]).name),
                         parameters: ["value": $0],
-                        method: .synchronous
+                        method: .synchronous,
+                        promiseData: PromiseData(fsm: fsm.gateway.fsms[id2]!.asParameterisedFiniteStateMachine!)
                     )
                 },
                 condition: $0.2

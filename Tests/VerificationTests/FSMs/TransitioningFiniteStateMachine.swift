@@ -66,6 +66,7 @@ import swiftfsm
 internal final class TransitioningFiniteStateMachine: FiniteStateMachineType,
     Cloneable,
     ConvertibleToScheduleableFiniteStateMachine,
+    KripkeVariablesModifier,
     StateExecuter,
     Exitable,
     Finishable,
@@ -74,6 +75,40 @@ internal final class TransitioningFiniteStateMachine: FiniteStateMachineType,
     Snapshotable,
     SnapshotControllerContainer
 {
+
+    var validVars: [String: [Any]] {
+        [
+            "currentState": [],
+            "exitState": [],
+            "externalVariables": [],
+            "sensors": [],
+            "actuators": [],
+            "snapshotSensors": [],
+            "snapshotActuators": [],
+            "fsmVars": [],
+            "initialPreviousState": [],
+            "initialState": [],
+            "name": [],
+            "calleeName": [],
+            "previousState": [],
+            "submachineFunctions": [],
+            "submachines": [],
+            "suspendedState": [],
+            "suspendState": [],
+            "gateway": [],
+            "timer": [],
+            "$__lazy_storage_$_currentState": [],
+            "$__lazy_storage_$_initialState": []
+        ]
+    }
+
+    var computedVars: [String: Any] {
+        return [
+            "currentState": currentState.name,
+            "isSuspended": isSuspended,
+            "hasFinished": hasFinished
+        ]
+    }
     
     let gateway = StackGateway()
     

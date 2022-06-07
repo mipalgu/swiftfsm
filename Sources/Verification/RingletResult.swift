@@ -75,5 +75,11 @@ struct RingletResult: Hashable {
         self.postSnapshot = postSnapshot
         self.calls = calls
     }
+
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(externalsPostSnapshot)
+        hasher.combine(postSnapshot)
+        hasher.combine(calls)
+    }
     
 }

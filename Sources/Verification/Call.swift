@@ -61,6 +61,20 @@ import KripkeStructure
 import Gateways
 
 struct Call {
+
+    fileprivate struct Parameters: Hashable {
+
+        var parameters: [String: Any?]
+
+        static func ==(lhs: Parameters, rhs: Parameters) -> Bool {
+            return KripkeStatePropertyList(lhs) == KripkeStatePropertyList(rhs)
+        }
+
+        func hash(into hasher: inout Hasher) {
+            hasher.combine(KripkeStatePropertyList(self))
+        }
+
+    }
     
     enum Method: String, Codable, CaseIterable, Hashable {
         
@@ -77,6 +91,8 @@ struct Call {
     var parameters: [String: Any?]
     
     var method: Method
+
+    var promiseData: PromiseData
     
 }
 
@@ -103,7 +119,7 @@ extension Call: Hashable {
         hasher.combine(self.caller.1)
         hasher.combine(self.callee.0)
         hasher.combine(self.callee.1)
-        hasher.combine(KripkeStatePropertyList(self.parameters.sorted { $0.key < $1.key }))
+        hasher.combine(Parameters(parameters: parameters))
         hasher.combine(self.method)
     }
     
