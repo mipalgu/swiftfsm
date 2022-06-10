@@ -12,7 +12,7 @@ func convert(_ arr: [String]) -> [Target.Dependency] {
 
 let foundationDeps: [Target.Dependency] = [.byName(name: "Machines"), .product(name: "IO", package: "swift_helpers")]
 let deps = [
-    .package(name: "FSM", url: "git@github.com:mipalgu/FSM", .branch("verification")),
+    .package(name: "FSM", url: "git@github.com:mipalgu/FSM", .branch("parameters")),
     .package(name: "Machines", url: "https://github.com/mipalgu/Machines", .branch("verification")),
     .package(name: "swift_helpers", url: "https://github.com/mipalgu/swift_helpers", .branch("main")),
     .package(name: "SQLite.swift", url: "https://github.com/stephencelis/SQLite.swift.git", from: "0.13.3")
