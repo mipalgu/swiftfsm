@@ -96,6 +96,15 @@ public enum KripkeStatePropertyTypes: Equatable, Codable {
         }
     }
 
+    var isEmptyCompound: Bool {
+        switch self {
+        case .Compound(let props):
+            return !props.properties.contains { !$1.isEmptyCompound }
+        default:
+            return false
+        }
+    }
+
     var isEmpty: Bool {
         switch self {
         case .EmptyCollection:

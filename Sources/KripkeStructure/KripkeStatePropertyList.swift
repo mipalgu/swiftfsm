@@ -88,6 +88,10 @@ public struct KripkeStatePropertyList: Codable {
         self.properties = properties
     }
 
+    public init(properties: [String: KripkeStateProperty]) {
+        self.properties = properties
+    }
+
     public subscript(key: String) -> KripkeStateProperty? {
         get {
             return self.properties[key]

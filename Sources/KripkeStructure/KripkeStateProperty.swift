@@ -82,6 +82,10 @@ public struct KripkeStateProperty: Equatable, Codable {
      */
     public let value: Any
 
+    public var isEmptyCompound: Bool {
+        type.isEmptyCompound
+    }
+
     var defaultProperty: KripkeStateProperty {
         KripkeStateProperty(type: type.defaultType, value: type.defaultValue)
     }
