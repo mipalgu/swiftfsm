@@ -109,7 +109,7 @@ public struct FSMPool {
 
     }
 
-    private(set) var parameterisedFSMs: [String: ParameterisedStatus]
+    var parameterisedFSMs: [String: ParameterisedStatus]
     
     private(set) var fsms: [FSMType]
     

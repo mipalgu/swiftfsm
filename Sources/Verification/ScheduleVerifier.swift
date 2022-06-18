@@ -335,6 +335,7 @@ final class ScheduleVerifier<Isolator: ScheduleIsolatorProtocol> {
                     //print("\nGenerating \(step.step.marker)(\(step.step.timeslots.map(\.callChain.fsm).sorted().joined(separator: ", "))) variations for:\n    \("\(ringlet.after)".components(separatedBy: .newlines).joined(separator: "\n\n    "))\n\n")
                     var newMap = job.map
                     var newPool = ringlet.after
+                    newPool.parameterisedFSMs.merge(job.pool.parameterisedFSMs) { (lhs, _) in lhs }
                     var callees: Set<String> = []
                     var newPromises: [String: PromiseData] = [:]
                     for call in ringlet.calls {
