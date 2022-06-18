@@ -192,22 +192,38 @@ public struct FSMPool {
             setPromises.append(((promise.result as? Cloneable)?.clone() ?? promise.result, promise))
             promise.result = call.result
         }
-        var fsmValues = Dictionary(uniqueKeysWithValues: fsms.map {
-            ($0.name, $0.asScheduleableFiniteStateMachine.base)
+        var fsmValues: [String: KripkeStateProperty] = Dictionary(uniqueKeysWithValues: fsms.compactMap {
+            guard !parameterisedFSMs.keys.contains($0.name) else {
+                return nil
+            }
+            return ($0.name, KripkeStateProperty(type: .Compound(KripkeStatePropertyList($0.asScheduleableFiniteStateMachine.base)), value: $0.asScheduleableFiniteStateMachine.base))
         })
         fsmValues.reserveCapacity(fsmValues.count + parameterisedFSMs.count)
         for (key, val) in parameterisedFSMs {
-            fsmValues[key] = val
+            guard val.status == .executing, let call = val.call else {
+                fsmValues[key] = KripkeStateProperty(type: .Optional(nil), value: Optional<[String: Any]>.none as Any)
+                continue
+            }
+            fsmValues[key] = KripkeStateProperty(
+                type: .Optional(KripkeStateProperty(
+                    type: .Compound(KripkeStatePropertyList([
+                        "parameters": .init(
+                            type: .Compound(KripkeStatePropertyList(call.parameters.mapValues { KripkeStateProperty($0 as Any) })),
+                            value: call.parameters
+                        ),
+                        "result": KripkeStateProperty(call.result)
+                    ])),
+                    value: call
+                )),
+                value: Optional<ParameterisedStatus.CallData>.some(call) as Any
+            )
         }
-        let fsmProperties = KripkeStatePropertyList(fsmValues.mapValues {
-            KripkeStateProperty(type: .Compound(KripkeStatePropertyList($0)), value: $0)
-        })
         for (result, promise) in setPromises {
             promise.result = result
         }
         return KripkeStatePropertyList(
             [
-                "fsms": KripkeStateProperty(type: .Compound(fsmProperties), value: fsmValues),
+                "fsms": KripkeStateProperty(type: .Compound(KripkeStatePropertyList(properties: fsmValues)), value: fsmValues.mapValues(\.value)),
                 "pc": step.property(state: state, collapseIfPossible: collapse)
             ]
         )
