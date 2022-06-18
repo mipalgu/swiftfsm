@@ -143,31 +143,25 @@ struct Ringlet {
     /// - Parameter gateway The `ModifiableFSMGateway` responsible for handling
     /// parameterised machine invocations. A delegate is created and used to
     /// detect when the fsm makes any calls to other machines.
-    init<Gateway: ModifiableFSMGateway, Timer: Clock>(fsm: FSMType, timeslot: Timeslot, promises: [(Any?, PromiseData)], gateway: Gateway, timer: Timer) where Gateway: NewVerifiableGateway {
-        var setPromises: [(Any?, PromiseData)] = []
-        setPromises.reserveCapacity(promises.count)
-        for (result, promise) in promises {
-            setPromises.append(((promise.result as? Cloneable)?.clone , promise))
-            promise.result = (result as? Cloneable)?.clone() ?? result
-        }
+    init<Gateway: ModifiableFSMGateway, Timer: Clock>(fsm: FSMType, timeslot: Timeslot, gateway: Gateway, timer: Timer) where Gateway: NewVerifiableGateway {
         let allExternalVariables = (fsm.sensors + fsm.externalVariables + fsm.actuators)
         let externalsPreSnapshot = KripkeStatePropertyList(Dictionary(uniqueKeysWithValues: allExternalVariables.map { ($0.name, KripkeStateProperty($0.val)) }))
+        let preBase = fsm.asScheduleableFiniteStateMachine.base
         let preSnapshot = KripkeStatePropertyList(fsm.asScheduleableFiniteStateMachine.base)
         let delegate = GatewayDelegate(callerName: fsm.name)
         gateway.delegate = delegate
         let before = gateway.pool
         let currentState = fsm.currentState.name
         var clone = fsm.clone()
+        let cloneBase = clone.asScheduleableFiniteStateMachine.base
         gateway.replace(clone)
         clone.next()
+        let base = clone.asScheduleableFiniteStateMachine.base
         let after = gateway.pool
         let transitioned = currentState != clone.currentState.name
         let externalsPostSnapshot = KripkeStatePropertyList(Dictionary(uniqueKeysWithValues: allExternalVariables.map { ($0.name, KripkeStateProperty($0.val)) }))
         let postSnapshot = KripkeStatePropertyList(clone.asScheduleableFiniteStateMachine.base)
         let calls = delegate.invocations + delegate.calls
-        for (result, promise) in setPromises {
-            promise.result = result
-        }
         self.init(
             fsmBefore: fsm,
             fsmAfter: clone,

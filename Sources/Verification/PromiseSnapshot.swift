@@ -1,9 +1,9 @@
 /*
- * PromiseData.swift 
- * Scheduling 
+ * PromiseSnapshot.swift
+ * Verificaiton
  *
- * Created by Callum McColl on 25/08/2018.
- * Copyright © 2018 Callum McColl. All rights reserved.
+ * Created by Callum McColl on 19/6/2022.
+ * Copyright © 2022 Callum McColl. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -56,54 +56,33 @@
  *
  */
 
-import swiftfsm
+import Gateways
 
-public final class PromiseData {
+struct PromiseSnapshot {
 
-    public var fsm: AnyParameterisedFiniteStateMachine
+    let hasFinished: Bool
 
-    public var hasFinished: Bool {
-        get {
-            return self._hasFinished
-        } set {
-            if true == newValue {
-                self.result = self.fsm.resultContainer.result
-            }
-            self._hasFinished = newValue
-        }
+    let result: Any?
+
+    let promiseData: PromiseData
+
+    init(hasFinished: Bool, result: Any?, promiseData: PromiseData) {
+        self.hasFinished = hasFinished
+        self.result = result
+        self.promiseData = promiseData
     }
 
-    public var _hasFinished: Bool
-
-    public var result: Any? = nil
-
-    public init(fsm: AnyParameterisedFiniteStateMachine, hasFinished: Bool = true) {
-        self.fsm = fsm
-        self._hasFinished = hasFinished
-    }
-
-    public func makePromise<T>() -> Promise<T> {
-        let promise = Promise<T>(
-            hasFinished: { self.hasFinished },
-            result: {
-                if let result = self.result {
-                    return result as! T
-                }
-                guard let result = self.fsm.resultContainer.result else {
-                    swiftfsmError("Parameterised machine \(self.fsm.name) is finished with nil result")
-                }
-                self.result = result
-                return result as! T
-            }
+    init(promiseData: PromiseData) {
+        self.init(
+            hasFinished: promiseData._hasFinished,
+            result: promiseData.result,
+            promiseData: promiseData
         )
-        promise.base = self
-        return promise
     }
 
-    public func clone() -> PromiseData {
-        let promiseData = PromiseData(fsm: self.fsm.clone(), hasFinished: self._hasFinished)
+    func apply() {
         promiseData.result = result
-        return promiseData
+        promiseData._hasFinished = hasFinished
     }
 
 }

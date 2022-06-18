@@ -150,6 +150,14 @@ final class DelegateFiniteStateMachine: MachineProtocol, CustomStringConvertible
         override func onEntry() {
             promise = callee(5)
         }
+
+        override func main() {
+            print("Promise(hasFinished: \(promise.hasFinished), result: \((promise.hasFinished ? promise.result : nil) as Any))")
+        }
+
+        override func onExit() {
+            print("Transitioning...Promise(hasFinished: \(promise.hasFinished), result: \((promise.hasFinished ? promise.result : nil) as Any))")
+        }
         
         override func clone() -> InitialState {
             let state = InitialState(

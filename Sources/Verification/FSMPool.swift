@@ -173,25 +173,29 @@ public struct FSMPool {
         return fsm(atIndex: index(of: name))
     }
 
-    func promiseResults(_ promises: [String: PromiseData]) -> [(Any?, PromiseData)] {
-        promises.compactMap { (callee, promise) in
-            guard let status = parameterisedFSMs[callee], status.status == .inactive, status.call != nil else {
-                return nil
-            }
-            return ((promise.result as? Cloneable)?.clone() ?? promise.result, promise)
-        }
-    }
-    
-    func propertyList(forStep step: VerificationStep, executingState state: String?, promises: [String: PromiseData], collapseIfPossible collapse: Bool = false) -> KripkeStatePropertyList {
-        var setPromises: [(Any?, PromiseData)] = []
+    func setPromises(_ promises: [String: PromiseData]) -> [PromiseSnapshot] {
+        var setPromises: [PromiseSnapshot] = []
         setPromises.reserveCapacity(promises.count)
         for (callee, promise) in promises {
             guard let status = parameterisedFSMs[callee], status.status == .inactive, let call = status.call else {
                 continue
             }
-            setPromises.append(((promise.result as? Cloneable)?.clone() ?? promise.result, promise))
+            let snapshot = PromiseSnapshot(promiseData: promise)
+            setPromises.append(snapshot)
+            promise._hasFinished = true
             promise.result = call.result
         }
+        return setPromises
+    }
+
+    func undoSetPromises(_ promises: [PromiseSnapshot]) {
+        for promise in promises {
+            promise.apply()
+        }
+    }
+    
+    func propertyList(forStep step: VerificationStep, executingState state: String?, promises: [String: PromiseData], collapseIfPossible collapse: Bool = false) -> KripkeStatePropertyList {
+        let setPromises = setPromises(promises)
         var fsmValues: [String: KripkeStateProperty] = Dictionary(uniqueKeysWithValues: fsms.compactMap {
             guard !parameterisedFSMs.keys.contains($0.name) else {
                 return nil
@@ -218,9 +222,7 @@ public struct FSMPool {
                 value: Optional<ParameterisedStatus.CallData>.some(call) as Any
             )
         }
-        for (result, promise) in setPromises {
-            promise.result = result
-        }
+        undoSetPromises(setPromises)
         return KripkeStatePropertyList(
             [
                 "fsms": KripkeStateProperty(type: .Compound(KripkeStatePropertyList(properties: fsmValues)), value: fsmValues.mapValues(\.value)),

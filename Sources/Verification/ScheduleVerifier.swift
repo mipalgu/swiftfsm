@@ -330,21 +330,25 @@ final class ScheduleVerifier<Isolator: ScheduleIsolatorProtocol> {
             case .execute(let timeslot), .executeAndSaveSnapshot(let timeslot):
                 let fsm = timeslot.callChain.fsm(fromPool: job.pool)
                 let currentState = fsm.currentState.name
-                let setPromises = job.pool.promiseResults(job.promises)
-                let ringlets = generator.execute(timeslot: timeslot, promises: setPromises, inPool: job.pool, gateway: gateway, timer: timer)
+                let ringlets = generator.execute(timeslot: timeslot, promises: job.promises, inPool: job.pool, gateway: gateway, timer: timer)
                 for ringlet in ringlets {
                     //print("\nGenerating \(step.step.marker)(\(step.step.timeslots.map(\.callChain.fsm).sorted().joined(separator: ", "))) variations for:\n    \("\(ringlet.after)".components(separatedBy: .newlines).joined(separator: "\n\n    "))\n\n")
                     var newMap = job.map
                     var newPool = ringlet.after
                     var callees: Set<String> = []
+                    var newPromises: [String: PromiseData] = [:]
                     for call in ringlet.calls {
                         callees.insert(call.callee.name)
+                        newPromises[call.callee.name] = call.promiseData
                         if job.map.delegates.contains(call.callee.name) {
                             newPool.handleCall(to: call.callee.name, parameters: call.parameters)
                             newMap.handleCall(call)
                         }
                     }
-                    let properties = newPool.propertyList(forStep: step.step, executingState: currentState, promises: job.promises, collapseIfPossible: collapse)
+                    let mergedPromises = job.promises.merging(newPromises) { (_, _) in
+                        fatalError("Detected calling same machine more than once.")
+                    }
+                    let properties = newPool.propertyList(forStep: step.step, executingState: currentState, promises: mergedPromises, collapseIfPossible: collapse)
                     let inCycle = try persistentStore.exists(properties)
                     let id: Int64
                     if !inCycle {
@@ -389,8 +393,8 @@ final class ScheduleVerifier<Isolator: ScheduleIsolatorProtocol> {
                     }
                     let newCycleCount = newStep <= job.step ? job.cycleCount + 1 : job.cycleCount
                     let newPrevious = Previous(id: id, time: step.time, resetClocks: resetClocks)
-                    let newPromises = job.promises.filter { !properties.contains(object: $1) }
-                    jobs.append(Job(step: newStep, map: newMap, pool: newPool, cycleCount: newCycleCount, promises: newPromises, previousNodes: job.previousNodes.union([id]), previous: newPrevious))
+                    let filteredPromises = mergedPromises.filter { !properties.contains(object: $1) }
+                    jobs.append(Job(step: newStep, map: newMap, pool: newPool, cycleCount: newCycleCount, promises: filteredPromises, previousNodes: job.previousNodes.union([id]), previous: newPrevious))
                 }
             }
         }
