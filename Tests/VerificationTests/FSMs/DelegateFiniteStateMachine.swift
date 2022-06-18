@@ -103,8 +103,15 @@ final class DelegateFiniteStateMachine: MachineProtocol, CustomStringConvertible
         return [
             "currentState": currentState.name,
             "isSuspended": isSuspended,
-            "hasFinished": hasFinished
+            "hasFinished": hasFinished,
+            "states": States(initialState: initialState)
         ]
+    }
+
+    struct States {
+
+        var initialState: MiPalState
+
     }
     
     final class InitialState: MiPalState {
@@ -113,6 +120,8 @@ final class DelegateFiniteStateMachine: MachineProtocol, CustomStringConvertible
             var dict = super.validVars
             dict["actualTransitions"] = []
             dict["callee"] = []
+            dict["snapshotSensors"] = []
+            dict["snapshotActuators"] = []
             return dict
         }
         
