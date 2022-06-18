@@ -334,7 +334,7 @@ class ScheduleVerifierTests: XCTestCase {
                 try verifier.verify(gateway: gateway, timer: timer, factory: kripkeFactory).forEach {
                     try viewFactory.make(identifier: $0.identifier).generate(store: $0, usingClocks: true)
                 }
-                guard let view: TestableView = viewFactory.createdViews.first(where: { $0.identifier == "DelegateSyncFiniteStateMachine" }) else {
+                guard let view: TestableView = viewFactory.createdViews.first(where: { $0.identifier == "DelegateFiniteStateMachine" }) else {
                     XCTFail("Failed to create Kripke Structure View.")
                     try viewFactory.outputViews(name: self.readableName)
                     return
