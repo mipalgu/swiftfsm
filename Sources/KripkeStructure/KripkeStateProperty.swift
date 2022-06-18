@@ -351,8 +351,13 @@ extension KripkeStateProperty: CustomStringConvertible {
             return ps.map { $0.description }.description
         case .Compound(let list):
             return list.description
-        default:
-            return "Some"
+        case .Optional(let prop):
+            guard let prop = prop else {
+                return "nil"
+            }
+            return prop.description
+        case .EmptyCollection:
+            return "[]"
         }
     }
 
