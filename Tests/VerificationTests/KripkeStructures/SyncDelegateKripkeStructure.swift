@@ -72,17 +72,22 @@ struct SyncDelegateKripkeStructure: KripkeStructureProtocol {
     
     typealias FSM = DelegateFiniteStateMachine
     
-    typealias Data = (Bool, (String, (Int, Bool?)?))
+    typealias Data = (Bool, (String, Bool, (Int, Bool?)?))
 
-    func propertyList(executing: String, readState: Bool, fsms: [(value: (Bool, (String, (Int, Bool?)?)), currentState: String, previousState: String)]) -> KripkeStatePropertyList {
+    func propertyList(executing: String, readState: Bool, fsms: [(value: (Bool, (String, Bool, (Int, Bool?)?)), currentState: String, previousState: String)]) -> KripkeStatePropertyList {
         let configurations: [(String, Data, String, String)] = fsms.enumerated().map {
             (names[$0], $1.0, $1.1, $1.2)
         }
+        var other: String!
         var currentState: String!
         var previousState: String!
         let fsmProperties = configurations.flatMap { (data) -> [((String, KripkeStateProperty), (String, Any))] in
             let fsm = fsm(named: data.0, data: data.1)
+            let callData: (callee: String, executing: Bool, callData: (parameter: Int, result: Bool?)?) = data.1.1
             if data.0 == executing {
+                if callData.executing && ((readState && data.2 == fsm.initialState.name) || (!readState && data.3 == fsm.initialState.name)) {
+                    other = callData.callee
+                }
                 currentState = data.2
                 previousState = data.3
             }
@@ -102,7 +107,6 @@ struct SyncDelegateKripkeStructure: KripkeStructureProtocol {
                 type: .Compound(KripkeStatePropertyList(["shouldExecuteOnEntry": .init(type: .Bool, value: fsm.ringlet.shouldExecuteOnEntry)])),
                 value: fsm.ringlet
             )
-            let callData: (callee: String, (parameter: Int, result: Bool?)?) = data.1.1
             let props = KripkeStateProperty(
                 type: .Compound(KripkeStatePropertyList([
                     "syncCall": .init(type: .Bool, value: fsm.syncCall),
@@ -115,13 +119,13 @@ struct SyncDelegateKripkeStructure: KripkeStructureProtocol {
                             fsm.initialState.name: .init(
                                 type: .Compound(KripkeStatePropertyList([
                                     "promise": .init(
-                                        type: .Optional((fsm.initialState as! DelegateFiniteStateMachine.InitialState).promise.map {
-                                            KripkeStateProperty(
+                                        type: .Optional((fsm.initialState as! DelegateFiniteStateMachine.InitialState).promise.flatMap {
+                                            return KripkeStateProperty(
                                                 type: .Compound(KripkeStatePropertyList([
-                                                    "hasFinished": .init(type: .Bool, value: callData.1?.result != nil),
+                                                    "hasFinished": .init(type: .Bool, value: callData.2?.result != nil),
                                                     "result": .init(
-                                                        type: .Optional(callData.1?.result.map { KripkeStateProperty(type: .Bool, value: $0) }),
-                                                        value: callData.1?.result as Any
+                                                        type: .Optional(callData.2?.result.map { KripkeStateProperty(type: .Bool, value: $0) }),
+                                                        value: callData.2?.result as Any
                                                     )
                                                 ])),
                                                 value: $0
@@ -139,7 +143,7 @@ struct SyncDelegateKripkeStructure: KripkeStructureProtocol {
                 value: fsm
             )
             let fsmData = ((fsm.name, props), (fsm.name, fsm))
-            let calleeFSM = callData.1.map { (parameter: Int, result: Bool?) -> CalleeFiniteStateMachine in
+            let calleeFSM = callData.2.map { (parameter: Int, result: Bool?) -> CalleeFiniteStateMachine in
                 let fsm = CalleeFiniteStateMachine()
                 fsm.name = callData.callee
                 fsm.parameters.vars.value = parameter
@@ -147,8 +151,8 @@ struct SyncDelegateKripkeStructure: KripkeStructureProtocol {
                 return fsm
             }
             let calleeProps = KripkeStateProperty(
-                type: .Optional(callData.1.flatMap { (parameter, result) in
-                    if fsm.currentState != fsm.initialState {
+                type: .Optional(callData.2.flatMap { (parameter, result) in
+                    if fsm.currentState != fsm.initialState || (callData.executing && callData.callData != nil && !readState) || !callData.executing {
                         return nil
                     }
                     return KripkeStateProperty(
@@ -167,11 +171,15 @@ struct SyncDelegateKripkeStructure: KripkeStructureProtocol {
                         value: ["parameters": parameter, result: result as Any]
                     )
                 }),
-                value: callData.1.map { ["parameters": $0, "result": $1 as Any] } as Any
+                value: callData.2.map { ["parameters": $0, "result": $1 as Any] } as Any
             )
             let calleeResult = ((callData.callee, calleeProps), (callData.callee, calleeFSM as Any))
             return [fsmData, calleeResult]
         }
+        let prefix = other == nil ? executing : other!
+        let middle = other == nil ? "." + (readState ? currentState : previousState) : ""
+        let postfix = other == nil ? (readState ? "R" : "W") : (readState ? "S" : "E")
+        let pc = prefix + middle + "." + postfix
         return KripkeStatePropertyList([
             "fsms": .init(
                 type: .Compound(KripkeStatePropertyList(Dictionary(uniqueKeysWithValues: fsmProperties.map(\.0)))),
@@ -179,19 +187,19 @@ struct SyncDelegateKripkeStructure: KripkeStructureProtocol {
             ),
             "pc": KripkeStateProperty(
                 type: .String,
-                value: executing + "." + (readState ? currentState! : previousState!) + "." + (readState ? "R" : "W")
+                value: pc
             )
         ])
     }
     
-    func fsm(named name: String, data: (Bool, (String, (Int, Bool?)?))) -> DelegateFiniteStateMachine {
+    func fsm(named name: String, data: (Bool, (String, Bool, (Int, Bool?)?))) -> DelegateFiniteStateMachine {
         let fsm = DelegateFiniteStateMachine()
         fsm.syncCall = data.0
         fsm.name = name
         let id = fsm.gateway.id(of: fsm.calleeName)
         let callee = AnyParameterisedFiniteStateMachine(CalleeFiniteStateMachine()) { _ in fatalError("Creating Machine") }
         fsm.gateway.fsms[id] = .parameterisedFSM(callee)
-        if let result = data.1.1 {
+        if let result = data.1.2 {
             let promiseData = PromiseData(fsm: callee, hasFinished: result.1 != nil)
             promiseData.result = result.1
             fsm.gateway.stacks[id] = [promiseData]
@@ -207,7 +215,7 @@ struct SyncDelegateKripkeStructure: KripkeStructureProtocol {
         EmptyMiPalState(name)
     }
     
-             mutating func kripkeState(readState: Bool, value: (syncCall: Bool, callData: (callee: String, (parameter: Int, result: Bool?)?)), currentState: String, previousState: String, targets: [(String, Bool, KripkeStatePropertyList, UInt, Constraint<UInt>?)]) -> KripkeState {
+    mutating func kripkeState(readState: Bool, value: (syncCall: Bool, callData: (callee: String, executing: Bool, callData: (parameter: Int, result: Bool?)?)), currentState: String, previousState: String, targets: [(String, Bool, KripkeStatePropertyList, UInt, Constraint<UInt>?)]) -> KripkeState {
         kripkeState(
             executing: names[0],
             readState: readState,
@@ -219,8 +227,8 @@ struct SyncDelegateKripkeStructure: KripkeStructureProtocol {
     mutating func kripkeState(
         executing: String,
         readState: Bool,
-        fsm1: (value: (Bool, (String, (Int, Bool?)?)), currentState: String, previousState: String),
-        fsm2: (value: (Bool, (String, (Int, Bool?)?)), currentState: String, previousState: String),
+        fsm1: (value: (Bool, (String, Bool, (Int, Bool?)?)), currentState: String, previousState: String),
+        fsm2: (value: (Bool, (String, Bool, (Int, Bool?)?)), currentState: String, previousState: String),
         targets: [(String, Bool, KripkeStatePropertyList, UInt, Constraint<UInt>?)]
     ) -> KripkeState {
         kripkeState(
@@ -236,8 +244,8 @@ struct SyncDelegateKripkeStructure: KripkeStructureProtocol {
         readState: Bool,
         resetClock: Bool,
         duration: UInt,
-        fsm1: (value: (Bool, (String, (Int, Bool?)?)), currentState: String, previousState: String),
-        fsm2: (value: (Bool, (String, (Int, Bool?)?)), currentState: String, previousState: String)
+        fsm1: (value: (Bool, (String, Bool, (Int, Bool?)?)), currentState: String, previousState: String),
+        fsm2: (value: (Bool, (String, Bool, (Int, Bool?)?)), currentState: String, previousState: String)
     ) -> (String, Bool, KripkeStatePropertyList, UInt, Constraint<UInt>?) {
         self.target(
             executing: executing,
@@ -249,7 +257,7 @@ struct SyncDelegateKripkeStructure: KripkeStructureProtocol {
         )
     }
     
-               func target(readState: Bool, resetClock: Bool, duration: UInt, data: (syncCall: Bool, callData: (callee: String, (parameter: Int, result: Bool?)?)), currentState: String, previousState: String, constraint: Constraint<UInt>? = nil) -> (String, Bool, KripkeStatePropertyList, UInt, Constraint<UInt>?) {
+    func target(readState: Bool, resetClock: Bool, duration: UInt, data: (syncCall: Bool, callData: (callee: String, executing: Bool, callData: (parameter: Int, result: Bool?)?)), currentState: String, previousState: String, constraint: Constraint<UInt>? = nil) -> (String, Bool, KripkeStatePropertyList, UInt, Constraint<UInt>?) {
         self.target(
             executing: names[0],
             readState: readState,
@@ -276,7 +284,7 @@ struct SyncDelegateKripkeStructure: KripkeStructureProtocol {
                 readState: true,
                 value: (
                     syncCall: syncCall,
-                    callData: (callee: callee, nil)
+                    callData: (callee: callee, executing: false, nil)
                 ),
                 currentState: initial,
                 previousState: previous,
@@ -289,6 +297,7 @@ struct SyncDelegateKripkeStructure: KripkeStructureProtocol {
                             syncCall: syncCall,
                             callData: (
                                 callee: callee,
+                                executing: false,
                                 (parameter: 5, result: nil)
                             )
                         ),
@@ -303,6 +312,7 @@ struct SyncDelegateKripkeStructure: KripkeStructureProtocol {
                     syncCall: syncCall,
                     callData: (
                         callee: callee,
+                        executing: false,
                         (parameter: 5, result: nil)
                     )
                 ),
@@ -317,6 +327,7 @@ struct SyncDelegateKripkeStructure: KripkeStructureProtocol {
                             syncCall: syncCall,
                             callData: (
                                 callee: callee,
+                                executing: true,
                                 (parameter: 5, result: nil)
                             )
                         ),
@@ -329,7 +340,7 @@ struct SyncDelegateKripkeStructure: KripkeStructureProtocol {
                 readState: true,
                 value: (
                     syncCall: syncCall,
-                    callData: (callee: callee, (parameter: 5, result: nil))
+                    callData: (callee: callee, executing: true, (parameter: 5, result: nil))
                 ),
                 currentState: initial,
                 previousState: initial,
@@ -342,6 +353,7 @@ struct SyncDelegateKripkeStructure: KripkeStructureProtocol {
                             syncCall: syncCall,
                             callData: (
                                 callee: callee,
+                                executing: true,
                                 (parameter: 5, result: nil)
                             )
                         ),
@@ -357,10 +369,11 @@ struct SyncDelegateKripkeStructure: KripkeStructureProtocol {
                             syncCall: syncCall,
                             callData: (
                                 callee: callee,
+                                executing: true,
                                 (parameter: 5, result: false)
                             )
                         ),
-                        currentState: exit,
+                        currentState: initial,
                         previousState: initial,
                         constraint: .greaterThanEqual(value: cycleLength * 2)
                     )
@@ -372,6 +385,93 @@ struct SyncDelegateKripkeStructure: KripkeStructureProtocol {
                     syncCall: syncCall,
                     callData: (
                         callee: callee,
+                        executing: true,
+                        (parameter: 5, result: nil)
+                    )
+                ),
+                currentState: initial,
+                previousState: initial,
+                targets: [
+                    target(
+                        readState: true,
+                        resetClock: false,
+                        duration: gap,
+                        data: (
+                            syncCall: syncCall,
+                            callData: (
+                                callee: callee,
+                                executing: true,
+                                (parameter: 5, result: nil)
+                            )
+                        ),
+                        currentState: initial,
+                        previousState: initial
+                    )
+                ]
+            ),
+            kripkeState(
+                readState: false,
+                value: (
+                    syncCall: syncCall,
+                    callData: (
+                        callee: callee,
+                        executing: true,
+                        (parameter: 5, result: false)
+                    )
+                ),
+                currentState: initial,
+                previousState: initial,
+                targets: [
+                    target(
+                        readState: true,
+                        resetClock: false,
+                        duration: gap,
+                        data: (
+                            syncCall: syncCall,
+                            callData: (
+                                callee: callee,
+                                executing: false,
+                                (parameter: 5, result: false)
+                            )
+                        ),
+                        currentState: initial,
+                        previousState: initial
+                    )
+                ]
+            ),
+            kripkeState(
+                readState: true,
+                value: (
+                    syncCall: syncCall,
+                    callData: (callee: callee, executing: false, (parameter: 5, result: false))
+                ),
+                currentState: initial,
+                previousState: initial,
+                targets: [
+                    target(
+                        readState: false,
+                        resetClock: false,
+                        duration: duration,
+                        data: (
+                            syncCall: syncCall,
+                            callData: (
+                                callee: callee,
+                                executing: false,
+                                (parameter: 5, result: false)
+                            )
+                        ),
+                        currentState: exit,
+                        previousState: initial
+                    )
+                ]
+            ),
+            kripkeState(
+                readState: false,
+                value: (
+                    syncCall: syncCall,
+                    callData: (
+                        callee: callee,
+                        executing: false,
                         (parameter: 5, result: false)
                     )
                 ),
@@ -380,12 +480,13 @@ struct SyncDelegateKripkeStructure: KripkeStructureProtocol {
                 targets: [
                     target(
                         readState: true,
-                        resetClock: true,
+                        resetClock: false,
                         duration: gap,
                         data: (
                             syncCall: syncCall,
                             callData: (
                                 callee: callee,
+                                executing: false,
                                 (parameter: 5, result: false)
                             )
                         ),
@@ -398,7 +499,7 @@ struct SyncDelegateKripkeStructure: KripkeStructureProtocol {
                 readState: true,
                 value: (
                     syncCall: syncCall,
-                    callData: (callee: callee, (parameter: 5, result: false))
+                    callData: (callee: callee, executing: false, (parameter: 5, result: false))
                 ),
                 currentState: exit,
                 previousState: initial,
@@ -411,6 +512,7 @@ struct SyncDelegateKripkeStructure: KripkeStructureProtocol {
                             syncCall: syncCall,
                             callData: (
                                 callee: callee,
+                                executing: false,
                                 (parameter: 5, result: false)
                             )
                         ),
@@ -425,13 +527,14 @@ struct SyncDelegateKripkeStructure: KripkeStructureProtocol {
                     syncCall: syncCall,
                     callData: (
                         callee: callee,
+                        executing: false,
                         (parameter: 5, result: false)
                     )
                 ),
                 currentState: exit,
                 previousState: exit,
                 targets: []
-            )
+            ),
         ]
     }
     
