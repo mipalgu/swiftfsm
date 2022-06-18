@@ -73,6 +73,10 @@ struct SyncDelegateKripkeStructure: KripkeStructureProtocol {
     typealias FSM = DelegateFiniteStateMachine
     
     typealias Data = (Bool, Bool??)
+
+    func propertyList(executing: String, readState: Bool, fsms: [(value: (Bool, Bool??), currentState: String, previousState: String)]) -> KripkeStatePropertyList {
+        KripkeStatePropertyList()
+    }
     
     func fsm(named name: String, data: (Bool, Bool??)) -> DelegateFiniteStateMachine {
         let fsm = DelegateFiniteStateMachine()

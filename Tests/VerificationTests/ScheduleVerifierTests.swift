@@ -359,17 +359,17 @@ class ScheduleVerifierTests: XCTestCase {
         }
     }
     
-    func test_measureFourCombinedTime() {
-        multipleCombinedSensors(4) { (verifier, gateway, timer, kripkeFactory, _) in
-            measure {
-                do {
-                    _ = try verifier.verify(gateway: gateway, timer: timer, factory: kripkeFactory)
-                } catch {
-                    XCTFail(error.localizedDescription)
-                }
-            }
-        }
-    }
+//    func test_measureFourCombinedTime() {
+//        multipleCombinedSensors(4) { (verifier, gateway, timer, kripkeFactory, _) in
+//            measure {
+//                do {
+//                    _ = try verifier.verify(gateway: gateway, timer: timer, factory: kripkeFactory)
+//                } catch {
+//                    XCTFail(error.localizedDescription)
+//                }
+//            }
+//        }
+//    }
     
     func test_measureCombinedTime() {
         combinedSensors { (verifier, gateway, timer, kripkeFactory, _) in

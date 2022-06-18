@@ -73,6 +73,12 @@ protocol KripkeStructureProtocol {
     func fsm(named: String, data: Data) -> FSM
     
     func emptyState(named: String) -> FSM._StateType
+
+    func propertyList(
+        executing: String,
+        readState: Bool,
+        fsms: [(value: Data, currentState: String, previousState: String)]
+    ) -> KripkeStatePropertyList
     
     mutating func single(name: String, startingTime: UInt, duration: UInt, cycleLength: UInt) -> Set<KripkeState>
     
@@ -86,47 +92,47 @@ protocol KripkeStructureProtocol {
 
 extension KripkeStructureProtocol {
     
-    func propertyList(
-        executing: String,
-        readState: Bool,
-        fsms: [(value: Data, currentState: String, previousState: String)]
-    ) -> KripkeStatePropertyList {
-        let configurations: [(String, Data, String, String)] = fsms.enumerated().map {
-            (names[$0], $1.0, $1.1, $1.2)
-        }
-        var currentState: String!
-        var previousState: String!
-        let fsms = configurations.map { (data) -> (String, KripkeStatePropertyList, FSM) in
-            var fsm = fsm(named: data.0, data: data.1)
-            if data.0 == executing {
-                currentState = data.2
-                previousState = data.3
-            }
-            if data.2 == fsm.initialState.name {
-                fsm.currentState = fsm.initialState
-            } else {
-                fsm.currentState = emptyState(named: data.2)
-            }
-            if data.3 == fsm.initialState.name {
-                fsm.previousState = fsm.initialState
-            } else {
-                fsm.previousState = emptyState(named: data.3)
-            }
-            fsm.ringlet.previousState = fsm.previousState
-            fsm.ringlet.shouldExecuteOnEntry = fsm.previousState != fsm.currentState
-            let fsmProperties = KripkeStatePropertyList(fsm)
-            return (fsm.name, fsmProperties, fsm)
-        }
-        return [
-            "fsms": KripkeStateProperty(
-                type: .Compound(KripkeStatePropertyList(Dictionary<String, KripkeStateProperty>(uniqueKeysWithValues: fsms.map {
-                    ($0, KripkeStateProperty(type: .Compound($1), value: $2))
-                }))),
-                value: Dictionary<String, FSM>(uniqueKeysWithValues: fsms.map { ($0.0, $0.2) })
-            ),
-            "pc": KripkeStateProperty(type: .String, value: executing + "." + (readState ? currentState! : previousState!) + "." + (readState ? "R" : "W"))
-        ]
-    }
+//    func propertyList(
+//        executing: String,
+//        readState: Bool,
+//        fsms: [(value: Data, currentState: String, previousState: String)]
+//    ) -> KripkeStatePropertyList {
+//        let configurations: [(String, Data, String, String)] = fsms.enumerated().map {
+//            (names[$0], $1.0, $1.1, $1.2)
+//        }
+//        var currentState: String!
+//        var previousState: String!
+//        let fsms = configurations.map { (data) -> (String, KripkeStatePropertyList, FSM) in
+//            var fsm = fsm(named: data.0, data: data.1)
+//            if data.0 == executing {
+//                currentState = data.2
+//                previousState = data.3
+//            }
+//            if data.2 == fsm.initialState.name {
+//                fsm.currentState = fsm.initialState
+//            } else {
+//                fsm.currentState = emptyState(named: data.2)
+//            }
+//            if data.3 == fsm.initialState.name {
+//                fsm.previousState = fsm.initialState
+//            } else {
+//                fsm.previousState = emptyState(named: data.3)
+//            }
+//            fsm.ringlet.previousState = fsm.previousState
+//            fsm.ringlet.shouldExecuteOnEntry = fsm.previousState != fsm.currentState
+//            let fsmProperties = KripkeStatePropertyList(fsm)
+//            return (fsm.name, fsmProperties, fsm)
+//        }
+//        return [
+//            "fsms": KripkeStateProperty(
+//                type: .Compound(KripkeStatePropertyList(Dictionary<String, KripkeStateProperty>(uniqueKeysWithValues: fsms.map {
+//                    ($0, KripkeStateProperty(type: .Compound($1), value: $2))
+//                }))),
+//                value: Dictionary<String, FSM>(uniqueKeysWithValues: fsms.map { ($0.0, $0.2) })
+//            ),
+//            "pc": KripkeStateProperty(type: .String, value: executing + "." + (readState ? currentState! : previousState!) + "." + (readState ? "R" : "W"))
+//        ]
+//    }
     
     func target(
         executing: String,

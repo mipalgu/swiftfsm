@@ -79,6 +79,58 @@ struct TimedKripkeStructure: KripkeStructureProtocol {
     func emptyState(named name: String) -> MiPalState {
         EmptyMiPalState(name)
     }
+
+    func propertyList(executing: String, readState: Bool, fsms: [(value: Int, currentState: String, previousState: String)]) -> KripkeStatePropertyList {
+        let configurations: [(String, Data, String, String)] = fsms.enumerated().map {
+            (names[$0], $1.0, $1.1, $1.2)
+        }
+        var currentState: String!
+        var previousState: String!
+        let fsmProperties = configurations.map { (data) -> ((String, KripkeStateProperty), (String, FSM)) in
+            let fsm = fsm(named: data.0, data: data.1)
+            if data.0 == executing {
+                currentState = data.2
+                previousState = data.3
+            }
+            if data.2 == fsm.initialState.name {
+                fsm.currentState = fsm.initialState
+            } else {
+                fsm.currentState = emptyState(named: data.2)
+            }
+            if data.3 == fsm.initialState.name {
+                fsm.previousState = fsm.initialState
+            } else {
+                fsm.previousState = emptyState(named: data.3)
+            }
+            fsm.ringlet.previousState = fsm.previousState
+            fsm.ringlet.shouldExecuteOnEntry = fsm.previousState != fsm.currentState
+            let ringlet = KripkeStateProperty(
+                type: .Compound(KripkeStatePropertyList(["shouldExecuteOnEntry": .init(type: .Bool, value: fsm.ringlet.shouldExecuteOnEntry)])),
+                value: ["shouldExecuteOnEntry": fsm.ringlet.shouldExecuteOnEntry]
+            )
+            let props = KripkeStateProperty(
+                type: .Compound(KripkeStatePropertyList([
+                    "currentState": .init(type: .String, value: fsm.currentState.name),
+                    "hasFinished": .init(type: .Bool, value: fsm.hasFinished),
+                    "isSuspended": .init(type: .Bool, value: fsm.isSuspended),
+                    "ringlet": ringlet,
+                    "value": .init(type: .Int, value: fsm.value)
+                ])),
+                value: fsm
+            )
+            return ((fsm.name, props), (fsm.name, fsm))
+        }
+        return KripkeStatePropertyList([
+            "fsms": .init(
+                type: .Compound(KripkeStatePropertyList(Dictionary(uniqueKeysWithValues: fsmProperties.map(\.0)))),
+                value: Dictionary(uniqueKeysWithValues: fsmProperties.map(\.1))
+            ),
+            "pc": KripkeStateProperty(
+                type: .String,
+                value: executing + "." + (readState ? currentState! : previousState!) + "." + (readState ? "R" : "W")
+            )
+        ])
+    }
     
     mutating func kripkeState(executing: String, readState: Bool, value: Int, currentState: String, previousState: String, targets: [(String, Bool, KripkeStatePropertyList, UInt, Constraint<UInt>?)]) -> KripkeState {
         kripkeState(

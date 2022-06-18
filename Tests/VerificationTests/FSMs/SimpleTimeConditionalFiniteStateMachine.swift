@@ -100,7 +100,6 @@ final class SimpleTimeConditionalFiniteStateMachine: MachineProtocol, CustomStri
     
     var computedVars: [String: Any] {
         return [
-            "sensors": Dictionary(uniqueKeysWithValues: sensors.map { ($0.name, $0.val) }),
             "currentState": currentState.name,
             "isSuspended": isSuspended,
             "hasFinished": hasFinished
