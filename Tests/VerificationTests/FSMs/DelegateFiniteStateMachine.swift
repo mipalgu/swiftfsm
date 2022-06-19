@@ -104,13 +104,13 @@ final class DelegateFiniteStateMachine: MachineProtocol, CustomStringConvertible
             "currentState": currentState.name,
             "isSuspended": isSuspended,
             "hasFinished": hasFinished,
-            "states": States(initialState: initialState)
+            "states": States(initial: initialState)
         ]
     }
 
     struct States {
 
-        var initialState: MiPalState
+        var initial: MiPalState
 
     }
     

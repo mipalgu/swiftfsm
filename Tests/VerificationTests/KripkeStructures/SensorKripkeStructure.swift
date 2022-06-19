@@ -140,7 +140,7 @@ struct SensorKripkeStructure: KripkeStructureProtocol {
         EmptyMiPalState(name)
     }
     
-    mutating func kripkeState(readState: Bool, sensorValue: Bool, currentState: String, previousState: String, targets: [(String, Bool, KripkeStatePropertyList, UInt, Constraint<UInt>?)]) -> KripkeState {
+    mutating func kripkeState(readState: Bool, sensorValue: Bool, currentState: String, previousState: String, targets: [Target]) -> KripkeState {
         kripkeState(
             executing: names[0],
             readState: readState,
@@ -154,7 +154,7 @@ struct SensorKripkeStructure: KripkeStructureProtocol {
         readState: Bool,
         fsm1: (sensorValue: Bool, currentState: String, previousState: String),
         fsm2: (sensorValue: Bool, currentState: String, previousState: String),
-        targets: [(String, Bool, KripkeStatePropertyList, UInt, Constraint<UInt>?)]
+        targets: [Target]
     ) -> KripkeState {
         kripkeState(
             executing: executing,
@@ -168,25 +168,28 @@ struct SensorKripkeStructure: KripkeStructureProtocol {
         executing: String,
         readState: Bool,
         resetClock: Bool,
+        clock: String? = nil,
         duration: UInt,
         fsm1: (sensorValue: Bool, currentState: String, previousState: String),
         fsm2: (sensorValue: Bool, currentState: String, previousState: String)
-    ) -> (String, Bool, KripkeStatePropertyList, UInt, Constraint<UInt>?) {
+    ) -> Target {
         self.target(
             executing: executing,
             readState: readState,
             resetClock: resetClock,
+            clock: clock,
             duration: duration,
             fsms: [fsm1, fsm2].map { ($0, $1, $2) },
             constraint: nil
         )
     }
     
-    func target(readState: Bool, resetClock: Bool, duration: UInt, sensorValue: Bool, currentState: String, previousState: String) -> (String, Bool, KripkeStatePropertyList, UInt, Constraint<UInt>?) {
+    func target(readState: Bool, resetClock: Bool, clock: String? = nil, duration: UInt, sensorValue: Bool, currentState: String, previousState: String) -> Target {
         self.target(
             executing: names[0],
             readState: readState,
             resetClock: resetClock,
+            clock: clock,
             duration: duration,
             fsms: [(sensorValue, currentState, previousState)],
             constraint: nil

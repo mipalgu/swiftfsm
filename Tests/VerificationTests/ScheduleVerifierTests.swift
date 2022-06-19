@@ -162,6 +162,10 @@ class ScheduleVerifierTests: XCTestCase {
             print("missing results: \(missingElements)")
             let extraneousElements = result.subtracting(expected)
             print("extraneous results: \(extraneousElements)")
+            let missingProps = Set(expected.map(\.properties)).subtracting(Set(result.map(\.properties)))
+            print("missing props: \(missingProps.map { "\($0)" }.joined(separator: "\n"))")
+            let extraneousProps = Set(result.map(\.properties)).subtracting(Set(expected.map(\.properties)))
+            print("extraneous props: \(extraneousProps.map { "\($0)" }.joined(separator: "\n"))")
             let expectedView = GraphVizKripkeStructureView(filename: "\(name)expected.gv")
             let resultView = GraphVizKripkeStructureView(filename: "\(name)result.gv")
             let expectedStore = try InMemoryKripkeStructure(identifier: expectedIdentifier, states: expected)
@@ -429,8 +433,18 @@ class ScheduleVerifierTests: XCTestCase {
         fsm.gateway = gateway
         fsm.timer = timer
         let kripkeFactory = SQLiteKripkeStructureFactory(savingInDirectory: "/tmp/swiftfsm/\(readableName)")
+        let store = try! kripkeFactory.make(identifier: "expected")
+        for state in states {
+            _ = try! store.add(state.properties, isInitial: state.isInitial)
+        }
+        for state in states {
+            let id = try! store.id(for: state.properties)
+            for edge in state.edges {
+                try! store.add(edge: edge, to: id)
+            }
+        }
         let viewFactory = TestableViewFactory {
-            TestableView(identifier: $0, expectedIdentifier: fsm.name, expected: states)
+            TestableView(identifier: $0, expectedIdentifier: fsm.name, expected: Set(states))
         }
         let timeslot = Timeslot(
             fsms: [fsm.name],
@@ -1057,7 +1071,7 @@ class ScheduleVerifierTests: XCTestCase {
         startingTime: UInt,
         duration: UInt,
         cycleLength: UInt
-    ) -> Set<KripkeState> {
+    ) -> [KripkeState] {
         var structure = SyncDelegateKripkeStructure()
         return structure.single(name: fsmName, startingTime: startingTime, duration: duration, cycleLength: cycleLength)
     }

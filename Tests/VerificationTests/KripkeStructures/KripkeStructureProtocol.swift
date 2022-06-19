@@ -80,13 +80,13 @@ protocol KripkeStructureProtocol {
         fsms: [(value: Data, currentState: String, previousState: String)]
     ) -> KripkeStatePropertyList
     
-    mutating func single(name: String, startingTime: UInt, duration: UInt, cycleLength: UInt) -> Set<KripkeState>
-    
-    mutating func two(
-        fsm1: (name: String, startingTime: UInt, duration: UInt),
-        fsm2: (name: String, startingTime: UInt, duration: UInt),
-        cycleLength: UInt
-    ) -> Set<KripkeState>
+//    mutating func single(name: String, startingTime: UInt, duration: UInt, cycleLength: UInt) -> Set<KripkeState>
+//    
+//    mutating func two(
+//        fsm1: (name: String, startingTime: UInt, duration: UInt),
+//        fsm2: (name: String, startingTime: UInt, duration: UInt),
+//        cycleLength: UInt
+//    ) -> Set<KripkeState>
     
 }
 
@@ -138,16 +138,18 @@ extension KripkeStructureProtocol {
         executing: String,
         readState: Bool,
         resetClock: Bool,
+        clock: String? = nil,
         duration: UInt,
         fsms: [(value: Data, currentState: String, previousState: String)],
         constraint: Constraint<UInt>? = nil
-    ) -> (String, Bool, KripkeStatePropertyList, UInt, Constraint<UInt>?) {
-        return (
-            executing,
-            resetClock,
-            propertyList(executing: executing, readState: readState, fsms: fsms),
-            duration,
-            constraint
+    ) -> Target {
+        return Target(
+            executing: executing,
+            resetClock: resetClock,
+            clock: clock ?? executing,
+            propertyList: propertyList(executing: executing, readState: readState, fsms: fsms),
+            duration: duration,
+            constraint: constraint
         )
     }
     
@@ -155,18 +157,18 @@ extension KripkeStructureProtocol {
         executing: String,
         readState: Bool,
         fsms: [(value: Data, currentState: String, previousState: String)],
-        targets: [(executing: String, resetClock: Bool, target: KripkeStatePropertyList, duration: UInt, constraint: Constraint<UInt>?)]
+        targets: [Target]
     ) -> KripkeState {
         let fsm = defaultFSM
         let properties = propertyList(executing: executing, readState: readState, fsms: fsms)
         let edges = targets.map {
             KripkeEdge(
-                clockName: $0,
-                constraint: $4,
-                resetClock: $1,
+                clockName: $0.clock,
+                constraint: $0.constraint,
+                resetClock: $0.resetClock,
                 takeSnapshot: !readState,
-                time: $3,
-                target: $2
+                time: $0.duration,
+                target: $0.propertyList
             )
         }
         let state = statesLookup[properties] ?? KripkeState(isInitial: executing == names[0] && fsms[0].previousState == fsm.initialPreviousState.name, properties: properties)

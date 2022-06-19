@@ -132,7 +132,7 @@ struct TimedKripkeStructure: KripkeStructureProtocol {
         ])
     }
     
-    mutating func kripkeState(executing: String, readState: Bool, value: Int, currentState: String, previousState: String, targets: [(String, Bool, KripkeStatePropertyList, UInt, Constraint<UInt>?)]) -> KripkeState {
+    mutating func kripkeState(executing: String, readState: Bool, value: Int, currentState: String, previousState: String, targets: [Target]) -> KripkeState {
         kripkeState(
             executing: executing,
             readState: readState,
@@ -146,7 +146,7 @@ struct TimedKripkeStructure: KripkeStructureProtocol {
         readState: Bool,
         fsm1: (value: Int, currentState: String, previousState: String),
         fsm2: (value: Int, currentState: String, previousState: String),
-        targets: [(String, Bool, KripkeStatePropertyList, UInt, Constraint<UInt>?)]
+        targets: [Target]
     ) -> KripkeState {
         kripkeState(
             executing: executing,
@@ -160,26 +160,29 @@ struct TimedKripkeStructure: KripkeStructureProtocol {
         executing: String,
         readState: Bool,
         resetClock: Bool,
+        clock: String? = nil,
         duration: UInt,
         fsm1: (value: Int, currentState: String, previousState: String),
         fsm2: (value: Int, currentState: String, previousState: String),
         constraint: Constraint<UInt>? = nil
-    ) -> (String, Bool, KripkeStatePropertyList, UInt, Constraint<UInt>?) {
+    ) -> Target {
         self.target(
             executing: executing,
             readState: readState,
             resetClock: resetClock,
+            clock: clock,
             duration: duration,
             fsms: [fsm1, fsm2].map { ($0, $1, $2) },
             constraint: constraint
         )
     }
     
-    func target(executing: String, readState: Bool, resetClock: Bool, duration: UInt, value: Int, currentState: String, previousState: String, constraint: Constraint<UInt>? = nil) -> (String, Bool, KripkeStatePropertyList, UInt, Constraint<UInt>?) {
+    func target(executing: String, readState: Bool, resetClock: Bool, clock: String? = nil, duration: UInt, value: Int, currentState: String, previousState: String, constraint: Constraint<UInt>? = nil) -> Target {
         self.target(
             executing: executing,
             readState: readState,
             resetClock: resetClock,
+            clock: clock,
             duration: duration,
             fsms: [(value, currentState, previousState)],
             constraint: constraint
