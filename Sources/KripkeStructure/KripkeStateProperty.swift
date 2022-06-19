@@ -268,6 +268,13 @@ public struct KripkeStateProperty: Equatable, Codable {
             default:
                 return false
             }
+        case .Optional(let lprop):
+            switch other.type {
+            case .Optional(let rprop):
+                return lprop == rprop
+            default:
+                return false
+            }
         default:
             // Compare the values
             return self.equalValues(other: other)
