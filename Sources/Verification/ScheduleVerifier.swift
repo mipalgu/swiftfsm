@@ -483,9 +483,10 @@ final class ScheduleVerifier<Isolator: ScheduleIsolatorProtocol> {
         if let results = resultsCache[key] {
             return results
         }
-        guard let thread = isolatedThreads.thread(forFsm: callee) else {
+        guard var thread = isolatedThreads.thread(forFsm: callee) else {
             fatalError("No thread provided for calling \(callee)")
         }
+        thread.setParameters(of: callee, to: call.parameters)
         let results = try verify(thread: thread, identifier: callee, gateway: gateway, timer: timer, factory: factory, recordingResultsFor: callee)
         resultsCache[key] = results
         return results
