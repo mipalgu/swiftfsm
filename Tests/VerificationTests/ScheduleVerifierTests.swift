@@ -332,8 +332,27 @@ class ScheduleVerifierTests: XCTestCase {
         }
     }
     
-    func test_canGenerateParameterisedCall() {
+    func test_canGenerateSyncParameterisedCall() {
         delegateSync { (verifier, gateway, timer, kripkeFactory, viewFactory) in
+            do {
+                try verifier.verify(gateway: gateway, timer: timer, factory: kripkeFactory).forEach {
+                    try viewFactory.make(identifier: $0.identifier).generate(store: $0, usingClocks: true)
+                }
+                guard let view: TestableView = viewFactory.createdViews.first(where: { $0.identifier == "DelegateFiniteStateMachine" }) else {
+                    XCTFail("Failed to create Kripke Structure View.")
+                    try viewFactory.outputViews(name: self.readableName)
+                    return
+                }
+                try view.check(readableName: self.readableName)
+                try viewFactory.outputViews(name: self.readableName)
+            } catch {
+                XCTFail(error.localizedDescription)
+            }
+        }
+    }
+
+    func test_canGenerateASyncParameterisedCall() {
+        delegateASync { (verifier, gateway, timer, kripkeFactory, viewFactory) in
             do {
                 try verifier.verify(gateway: gateway, timer: timer, factory: kripkeFactory).forEach {
                     try viewFactory.make(identifier: $0.identifier).generate(store: $0, usingClocks: true)
@@ -502,6 +521,103 @@ class ScheduleVerifierTests: XCTestCase {
                 )
             ],
             cycleLength: timeslot.startingTime + timeslot.duration
+        )
+        let verifier = ScheduleVerifier(isolatedThreads: isolator)
+        return make(verifier, gateway, timer, kripkeFactory, viewFactory)
+    }
+
+    private func delegateASync<T>(_ make: (ScheduleVerifier<ScheduleIsolator>, StackGateway, FSMClock, SQLiteKripkeStructureFactory, TestableViewFactory) -> T) -> T {
+        let fsm = DelegateFiniteStateMachine()
+        fsm.syncCall = false
+        let factory: ([String: Any?]) -> AnyParameterisedFiniteStateMachine = {
+            guard let value = $0["value"] as? Int else {
+                fatalError("Unable to fetch value from parameters")
+            }
+            let fsm = CalleeFiniteStateMachine()
+            fsm.parameters.vars.value = value
+            return AnyParameterisedFiniteStateMachine(fsm, newMachine: { _ in fatalError("Should never be called") })
+        }
+        let callee = AnyParameterisedFiniteStateMachine(CalleeFiniteStateMachine(), newMachine: factory)
+        let startingTime: UInt = 10
+        let duration: UInt = 30
+        let cycleLength = startingTime * 2 + duration * 2
+        let states = delegateASyncKripkeStructure(fsmName: fsm.name, startingTime: startingTime, duration: duration, cycleLength: cycleLength)
+        let gateway = StackGateway()
+        let calleeId = gateway.id(of: callee.name)
+        gateway.stacks[calleeId] = []
+        let timer = FSMClock(ringletLengths: [fsm.name: duration, callee.name: duration], scheduleLength: cycleLength)
+        fsm.gateway = gateway
+        fsm.timer = timer
+        let kripkeFactory = SQLiteKripkeStructureFactory(savingInDirectory: "/tmp/swiftfsm/\(readableName)")
+        let store = try! kripkeFactory.make(identifier: "expected")
+        for state in states {
+            _ = try! store.add(state.properties, isInitial: state.isInitial)
+        }
+        for state in states {
+            let id = try! store.id(for: state.properties)
+            for edge in state.edges {
+                try! store.add(edge: edge, to: id)
+            }
+        }
+        let viewFactory = TestableViewFactory {
+            TestableView(identifier: $0, expectedIdentifier: fsm.name, expected: Set(states))
+        }
+        let timeslot = Timeslot(
+            fsms: [fsm.name],
+            callChain: CallChain(root: fsm.name, calls: []),
+            externalDependencies: [],
+            startingTime: startingTime,
+            duration: duration,
+            cyclesExecuted: 0
+        )
+        let calleeTimeslot = Timeslot(
+            fsms: [callee.name],
+            callChain: CallChain(root: callee.name, calls: []),
+            externalDependencies: [],
+            startingTime: startingTime + duration + startingTime,
+            duration: duration,
+            cyclesExecuted: 0
+        )
+        let pool = FSMPool(fsms: [.controllableFSM(AnyControllableFiniteStateMachine(fsm)), .parameterisedFSM(callee)], parameterisedFSMs: [callee.name])
+        let calleePool = FSMPool(fsms: [.parameterisedFSM(callee)], parameterisedFSMs: [])
+        let isolator = ScheduleIsolator(
+            threads: [
+                IsolatedThread(
+                    map: VerificationMap(
+                        steps: [
+                            VerificationMap.Step(
+                                time: timeslot.startingTime,
+                                step: .takeSnapshotAndStartTimeslot(timeslot: timeslot)
+                            ),
+                            VerificationMap.Step(
+                                time: timeslot.startingTime + timeslot.duration,
+                                step: .executeAndSaveSnapshot(timeslot: timeslot)
+                            )
+                        ],
+                        delegates: [callee.name]
+                    ),
+                    pool: pool
+                )
+            ],
+            parameterisedThreads: [
+                callee.name: IsolatedThread(
+                    map: VerificationMap(
+                        steps: [
+                            VerificationMap.Step(
+                                time: calleeTimeslot.startingTime,
+                                step: .takeSnapshotAndStartTimeslot(timeslot: calleeTimeslot)
+                            ),
+                            VerificationMap.Step(
+                                time: calleeTimeslot.startingTime + calleeTimeslot.duration,
+                                step: .executeAndSaveSnapshot(timeslot: calleeTimeslot)
+                            )
+                        ],
+                        delegates: []
+                    ),
+                    pool: calleePool
+                )
+            ],
+            cycleLength: cycleLength
         )
         let verifier = ScheduleVerifier(isolatedThreads: isolator)
         return make(verifier, gateway, timer, kripkeFactory, viewFactory)
@@ -1073,6 +1189,16 @@ class ScheduleVerifierTests: XCTestCase {
         cycleLength: UInt
     ) -> [KripkeState] {
         var structure = SyncDelegateKripkeStructure()
+        return structure.single(name: fsmName, startingTime: startingTime, duration: duration, cycleLength: cycleLength)
+    }
+
+    private func delegateASyncKripkeStructure(
+        fsmName: String,
+        startingTime: UInt,
+        duration: UInt,
+        cycleLength: UInt
+    ) -> [KripkeState] {
+        var structure = ASyncDelegateKripkeStructure()
         return structure.single(name: fsmName, startingTime: startingTime, duration: duration, cycleLength: cycleLength)
     }
     
