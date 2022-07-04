@@ -224,7 +224,7 @@ public struct FSMPool {
         }
         undoSetPromises(setPromises)
         let clocks: KripkeStateProperty? = resetClocks.map { resetClocks in
-            let values = Dictionary(uniqueKeysWithValues: fsmValues.keys.map {
+            let values = Dictionary(uniqueKeysWithValues: Set(fsmValues.keys).union(Set(parameterisedFSMs.keys)).map {
                 ($0, resetClocks.contains($0))
             })
             let props = values.mapValues {
