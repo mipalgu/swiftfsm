@@ -90,9 +90,10 @@ final class LightFiniteStateMachine: MachineProtocol, CustomStringConvertible {
             "timer": [],
             "status": [],
             "light": [],
+            "onState": [],
             "$__lazy_storage_$_currentState": [],
             "$__lazy_storage_$_initialState": [],
-            "$__lazy_storage_$_offState": []
+            "$__lazy_storage_$_onState": []
         ]
     }
 
@@ -140,21 +141,21 @@ final class LightFiniteStateMachine: MachineProtocol, CustomStringConvertible {
 
     lazy var initialState: MiPalState = {
         CallbackMiPalState(
-            "On",
-            transitions: [Transition(offState) { [self] _ in !status.val.doorOpen && !status.val.timeLeft }],
-            snapshotSensors: [status.name, light.name],
-            snapshotActuators: [status.name, light.name],
-            onEntry: { [self] in light.val = true }
-        )
-    }()
-
-    lazy var offState: MiPalState = {
-        CallbackMiPalState(
             "Off",
-            transitions: [Transition(initialState) { [self] _ in status.val.doorOpen || status.val.timeLeft }],
+            transitions: [Transition(onState) { [self] _ in status.val.doorOpen || status.val.timeLeft }],
             snapshotSensors: [status.name, light.name],
             snapshotActuators: [status.name, light.name],
             onEntry: { [self] in light.val = false }
+        )
+    }()
+
+    lazy var onState: MiPalState = {
+        CallbackMiPalState(
+            "On",
+            transitions: [Transition(initialState) { [self] _ in !status.val.doorOpen && !status.val.timeLeft }],
+            snapshotSensors: [status.name, light.name],
+            snapshotActuators: [status.name, light.name],
+            onEntry: { [self] in light.val = true }
         )
     }()
 
@@ -179,13 +180,13 @@ final class LightFiniteStateMachine: MachineProtocol, CustomStringConvertible {
         fsm.name = name
         if currentState.name == initialState.name {
             fsm.currentState = fsm.initialState
-        } else if currentState.name == offState.name {
-            fsm.currentState = fsm.offState
+        } else if currentState.name == onState.name {
+            fsm.currentState = fsm.onState
         }
         if previousState.name == initialState.name {
             fsm.previousState = fsm.initialState
-        } else if previousState.name == offState.name {
-            fsm.previousState = fsm.offState
+        } else if previousState.name == onState.name {
+            fsm.previousState = fsm.onState
         }
         fsm.status.val = status.val
         fsm.light.val = light.val
@@ -205,22 +206,22 @@ final class LightFiniteStateMachine: MachineProtocol, CustomStringConvertible {
         self.status.val = status
         self.light.val = light
         if currentState == "On" {
-            self.currentState = self.initialState
+            self.currentState = self.onState
         } else {
             self.currentState = EmptyMiPalState(currentState)
         }
         if currentState == "Off" {
-            self.currentState = self.offState
+            self.currentState = self.initialState
         } else {
             self.currentState = EmptyMiPalState(currentState)
         }
         if previousState == "On" {
-            self.previousState = self.initialState
+            self.previousState = self.onState
         } else {
             self.previousState = EmptyMiPalState(previousState)
         }
         if previousState == "Off" {
-            self.previousState = self.offState
+            self.previousState = self.initialState
         } else {
             self.previousState = EmptyMiPalState(previousState)
         }
