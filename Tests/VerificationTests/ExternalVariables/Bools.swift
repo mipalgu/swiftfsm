@@ -1,9 +1,9 @@
 /*
- * FSMPoolTests.swift
- * VerificationTests
+ * Bools.swift
+ * ExternalVariables
  *
- * Created by Callum McColl on 24/11/21.
- * Copyright © 2021 Callum McColl. All rights reserved.
+ * Created by Callum McColl on 29/6/2022.
+ * Copyright © 2022 Callum McColl. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -56,60 +56,31 @@
  *
  */
 
-import XCTest
+import FSM
 
-import KripkeStructure
-import swiftfsm
+struct Bools: ExternalVariables {
 
-@testable import Verification
+    var bool1: Bool
 
-class FSMPoolTests: XCTestCase {
+    var bool2: Bool
 
-    override func setUpWithError() throws {
-        // Put setup code here. This method is called before the invocation of each test method in the class.
+    var bool3: Bool
+
+    init(bool1: Bool = false, bool2: Bool = false, bool3: Bool = false) {
+        self.bool1 = bool1
+        self.bool2 = bool2
+        self.bool3 = bool3
     }
 
-    override func tearDownWithError() throws {
-        // Put teardown code here. This method is called after the invocation of each test method in the class.
+    init(fromDictionary dictionary: [String : Any?]) {
+        guard
+            let bool1 = dictionary["bool1"] as? Bool,
+            let bool2 = dictionary["bool2"] as? Bool,
+            let bool3 = dictionary["bool3"] as? Bool
+        else {
+            fatalError("Unable to create bools from dictionary.")
+        }
+        self.init(bool1: bool1, bool2: bool2, bool3: bool3)
     }
 
-    func test_canConvertToPropertyList() throws {
-        let fsm = AnyControllableFiniteStateMachine(ToggleFiniteStateMachine())
-        let base = { fsm.base as! ToggleFiniteStateMachine }
-        let pool = FSMPool(fsms: [.controllableFSM(fsm)], parameterisedFSMs: [])
-        let timeslot = Timeslot(
-            fsms: [fsm.name],
-            callChain: CallChain(root: fsm.name, calls: []),
-            externalDependencies: [],
-            startingTime: 0,
-            duration: 30,
-            cyclesExecuted: 0
-        )
-        let result = pool.propertyList(forStep: .takeSnapshotAndStartTimeslot(timeslot: timeslot), executingState: fsm.currentState.name, promises: [:], resetClocks: nil, collapseIfPossible: true)
-        let expected = KripkeStatePropertyList(
-            [
-                "fsms": KripkeStateProperty(
-                    type: .Compound(KripkeStatePropertyList(
-                        [
-                            fsm.name: KripkeStateProperty(
-                                type: .Compound(KripkeStatePropertyList(
-                                    [
-                                        "currentState": KripkeStateProperty(type: .String, value: "current"),
-                                        "isSuspended": KripkeStateProperty(type: .Bool, value: true),
-                                        "hasFinished": KripkeStateProperty(type: .Bool, value: true),
-                                        "value": KripkeStateProperty(type: .Bool, value: false)
-                                    ]
-                                )),
-                                value: base()
-                            )
-                        ]
-                    )),
-                    value: [fsm.name: base()]
-                ),
-                "pc": KripkeStateProperty(type: .String, value: fsm.name + "." + fsm.currentState.name + ".R")
-            ]
-        )
-        XCTAssertEqual(result, expected)
-    }
-    
 }

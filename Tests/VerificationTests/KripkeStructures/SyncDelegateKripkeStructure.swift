@@ -113,6 +113,7 @@ struct SyncDelegateKripkeStructure: KripkeStructureProtocol {
         let configurations: [(String, Data, String, String)] = fsms.enumerated().map {
             (names[$0], $1.0, $1.1, $1.2)
         }
+        let resetClocks = resetClocksProperty(executing: executing, readState: readState, fsms: fsms)
         var other: String!
         var currentState: String!
         var previousState: String!
@@ -223,7 +224,8 @@ struct SyncDelegateKripkeStructure: KripkeStructureProtocol {
             "pc": KripkeStateProperty(
                 type: .String,
                 value: pc
-            )
+            ),
+            "resetClocks": resetClocks
         ])
     }
     

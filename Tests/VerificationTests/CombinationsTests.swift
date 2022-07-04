@@ -241,6 +241,81 @@ class CombinationsTests: XCTestCase {
             XCTAssertEqual(rn, en, "index: \(index)")
         }
     }
+
+    func test_boolsStructWithBoolInFSMWithOtherFSM() throws {
+        let fsm = CombinationsFiniteStateMachine()
+        let fsm2 = SimpleTimeConditionalFiniteStateMachine()
+        let combinations = Combinations(fsms: [
+            AnyScheduleableFiniteStateMachine(fsm),
+            AnyScheduleableFiniteStateMachine(fsm2)
+        ])
+        let expected: [(Bool, Bool, Bool, Bool)] = [
+            (false, false, false, false),
+            (false, false, false, true),
+            (false, false, true, false),
+            (false, false, true, true),
+            (false, true, false, false),
+            (false, true, false, true),
+            (false, true, true, false),
+            (false, true, true, true),
+            (true, false, false, false),
+            (true, false, false, true),
+            (true, false, true, false),
+            (true, false, true, true),
+            (true, true, false, false),
+            (true, true, false, true),
+            (true, true, true, false),
+            (true, true, true, true)
+        ]
+        let result: [(Bool, Bool, Bool, Bool)] = combinations.map {
+            let bools = $0[0][0] as! Bools
+            let bool = $0[0][1] as! Bool
+            XCTAssertTrue($0[1].isEmpty)
+            return (bools.bool1, bools.bool2, bools.bool3, bool)
+        }
+        XCTAssertEqual(result.count, expected.count)
+        for (index, ((rb1, rb2, rb3, rb4), (eb1, eb2, eb3, eb4))) in zip(result, expected).enumerated() {
+            XCTAssertEqual(rb1, eb1, "b1 index: \(index)")
+            XCTAssertEqual(rb2, eb2, "b2 index: \(index)")
+            XCTAssertEqual(rb3, eb3, "b3 index: \(index)")
+            XCTAssertEqual(rb4, eb4, "b4 index: \(index)")
+        }
+    }
+
+    func test_boolsStructWithBoolInFSM() throws {
+        let fsm = CombinationsFiniteStateMachine()
+        let combinations = Combinations(fsms: [fsm].map(AnyScheduleableFiniteStateMachine.init))
+        let expected: [(Bool, Bool, Bool, Bool)] = [
+            (false, false, false, false),
+            (false, false, false, true),
+            (false, false, true, false),
+            (false, false, true, true),
+            (false, true, false, false),
+            (false, true, false, true),
+            (false, true, true, false),
+            (false, true, true, true),
+            (true, false, false, false),
+            (true, false, false, true),
+            (true, false, true, false),
+            (true, false, true, true),
+            (true, true, false, false),
+            (true, true, false, true),
+            (true, true, true, false),
+            (true, true, true, true)
+        ]
+        let result: [(Bool, Bool, Bool, Bool)] = combinations.map {
+            let bools = $0[0][0] as! Bools
+            let bool = $0[0][1] as! Bool
+            return (bools.bool1, bools.bool2, bools.bool3, bool)
+        }
+        XCTAssertEqual(result.count, expected.count)
+        for (index, ((rb1, rb2, rb3, rb4), (eb1, eb2, eb3, eb4))) in zip(result, expected).enumerated() {
+            XCTAssertEqual(rb1, eb1, "b1 index: \(index)")
+            XCTAssertEqual(rb2, eb2, "b2 index: \(index)")
+            XCTAssertEqual(rb3, eb3, "b3 index: \(index)")
+            XCTAssertEqual(rb4, eb4, "b4 index: \(index)")
+        }
+    }
     
     func test_boolsStruct() throws {
         let combinations = Combinations(reflecting: Bools())
@@ -423,74 +498,4 @@ class CombinationsTests: XCTestCase {
         }
     }
 
-}
-
-fileprivate struct TestStruct: ConvertibleFromDictionary {
-    
-    var bool: Bool
-    
-    var num: UInt8
-    
-    init(bool: Bool = false, num: UInt8 = 0) {
-        self.bool = bool
-        self.num = num
-    }
-    
-    init(fromDictionary dictionary: [String : Any?]) {
-        guard let bool = dictionary["bool"] as? Bool, let num = dictionary["num"] as? UInt8 else {
-            fatalError("Unable to convert dictionary to TestStruct.")
-        }
-        self.init(bool: bool, num: num)
-    }
-    
-}
-
-fileprivate struct Bools: ConvertibleFromDictionary {
-    
-    var bool1: Bool
-    
-    var bool2: Bool
-    
-    var bool3: Bool
-    
-    init(bool1: Bool = false, bool2: Bool = false, bool3: Bool = false) {
-        self.bool1 = bool1
-        self.bool2 = bool2
-        self.bool3 = bool3
-    }
-    
-    init(fromDictionary dictionary: [String : Any?]) {
-        guard
-            let bool1 = dictionary["bool1"] as? Bool,
-            let bool2 = dictionary["bool2"] as? Bool,
-            let bool3 = dictionary["bool3"] as? Bool
-        else {
-            fatalError("Unable to create bools from dictionary.")
-        }
-        self.init(bool1: bool1, bool2: bool2, bool3: bool3)
-    }
-    
-}
-
-fileprivate struct InnerStruct: ConvertibleFromDictionary {
-    
-    var strct1: Bools
-    
-    var strct2: Bools
-    
-    init(strct1: Bools = Bools(), strct2: Bools = Bools()) {
-        self.strct1 = strct1
-        self.strct2 = strct2
-    }
-    
-    init(fromDictionary dictionary: [String : Any?]) {
-        guard
-            let d1 = dictionary["strct1"] as? [String: Any?],
-            let d2 = dictionary["strct2"] as? [String: Any?]
-        else {
-            fatalError("Unable to create InnerStruct from dictionary.")
-        }
-        self.init(strct1: Bools(fromDictionary: d1), strct2: Bools(fromDictionary: d2))
-    }
-    
 }

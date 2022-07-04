@@ -133,6 +133,25 @@ extension KripkeStructureProtocol {
 //            "pc": KripkeStateProperty(type: .String, value: executing + "." + (readState ? currentState! : previousState!) + "." + (readState ? "R" : "W"))
 //        ]
 //    }
+
+    func resetClocksProperty(executing: String, readState: Bool, fsms: [(value: Data, currentState: String, previousState: String)]) -> KripkeStateProperty {
+        let resetClocks = Set<String>(fsms.enumerated().compactMap { (index, data) in
+            if data.currentState == data.previousState {
+                return nil
+            }
+            return names[index]
+        })
+        let fsms = Set(fsms.indices.map { names[$0] })
+        return resetClocksProperty(resetClocks, fsms: fsms)
+    }
+
+    func resetClocksProperty(_ resetClocks: Set<String>, fsms: Set<String>) -> KripkeStateProperty {
+        let values = Dictionary(uniqueKeysWithValues: fsms.map {
+            ($0, resetClocks.contains($0))
+        })
+        let props = values.mapValues { KripkeStateProperty(type: .Bool, value: $0) }
+        return KripkeStateProperty(type: .Compound(KripkeStatePropertyList(properties: props)), value: values)
+    }
     
     func target(
         executing: String,

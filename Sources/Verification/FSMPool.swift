@@ -194,7 +194,7 @@ public struct FSMPool {
         }
     }
     
-    func propertyList(forStep step: VerificationStep, executingState state: String?, promises: [String: PromiseData], collapseIfPossible collapse: Bool = false) -> KripkeStatePropertyList {
+    func propertyList(forStep step: VerificationStep, executingState state: String?, promises: [String: PromiseData], resetClocks: Set<String>?, collapseIfPossible collapse: Bool = false) -> KripkeStatePropertyList {
         let setPromises = setPromises(promises)
         var fsmValues: [String: KripkeStateProperty] = Dictionary(uniqueKeysWithValues: fsms.compactMap {
             guard !parameterisedFSMs.keys.contains($0.name) else {
@@ -223,12 +223,21 @@ public struct FSMPool {
             )
         }
         undoSetPromises(setPromises)
-        return KripkeStatePropertyList(
-            [
-                "fsms": KripkeStateProperty(type: .Compound(KripkeStatePropertyList(properties: fsmValues)), value: fsmValues.mapValues(\.value)),
-                "pc": step.property(state: state, collapseIfPossible: collapse)
-            ]
-        )
+        let clocks: KripkeStateProperty? = resetClocks.map { resetClocks in
+            let values = Dictionary(uniqueKeysWithValues: fsmValues.keys.map {
+                ($0, resetClocks.contains($0))
+            })
+            let props = values.mapValues {
+                KripkeStateProperty(type: .Bool, value: $0)
+            }
+            return KripkeStateProperty(type: .Compound(KripkeStatePropertyList(properties: props)), value: values)
+        }
+        var dict = [
+            "fsms": KripkeStateProperty(type: .Compound(KripkeStatePropertyList(properties: fsmValues)), value: fsmValues.mapValues(\.value)),
+            "pc": step.property(state: state, collapseIfPossible: collapse)
+        ]
+        dict["resetClocks"] = clocks
+        return KripkeStatePropertyList(properties: dict)
     }
 
     mutating func handleCall(to fsm: String, parameters: [String: Any?]) {

@@ -1,9 +1,9 @@
 /*
- * FSMPoolTests.swift
- * VerificationTests
+ * CombinationFinitestateMachine.swift
+ * FSMs
  *
- * Created by Callum McColl on 24/11/21.
- * Copyright © 2021 Callum McColl. All rights reserved.
+ * Created by Callum McColl on 29/6/2022.
+ * Copyright © 2022 Callum McColl. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -56,60 +56,94 @@
  *
  */
 
-import XCTest
-
+import FSM
 import KripkeStructure
+import Gateways
+import Timers
+import Verification
 import swiftfsm
 
-@testable import Verification
+internal final class CombinationsFiniteStateMachine: FiniteStateMachineType,
+    Cloneable,
+    ConvertibleToScheduleableFiniteStateMachine,
+    StateExecuter,
+    Exitable,
+    Finishable,
+    Resumeable,
+    Restartable,
+    Snapshotable,
+    SnapshotControllerContainer,
+    KripkeVariablesModifier
+{
 
-class FSMPoolTests: XCTestCase {
-
-    override func setUpWithError() throws {
-        // Put setup code here. This method is called before the invocation of each test method in the class.
+    var validVars: [String: [Any]] {
+        [
+            "gateway": [],
+            "timer": [],
+            "actuators": [],
+            "sensors": [],
+            "externalVariables": [],
+            "initialState": [],
+            "currentState": []
+        ]
     }
 
-    override func tearDownWithError() throws {
-        // Put teardown code here. This method is called after the invocation of each test method in the class.
+    var computedVars: [String: Any] {
+        return [
+            "actuators": Dictionary(uniqueKeysWithValues: actuators.map { ($0.name, $0.val) }),
+            "sensors": Dictionary(uniqueKeysWithValues: sensors.map { ($0.name, $0.val) }),
+            "externalVariables": Dictionary(uniqueKeysWithValues: externalVariables.map { ($0.name, $0.val) }),
+            "initialState": initialState.name,
+            "currentState": currentState.name
+        ]
     }
 
-    func test_canConvertToPropertyList() throws {
-        let fsm = AnyControllableFiniteStateMachine(ToggleFiniteStateMachine())
-        let base = { fsm.base as! ToggleFiniteStateMachine }
-        let pool = FSMPool(fsms: [.controllableFSM(fsm)], parameterisedFSMs: [])
-        let timeslot = Timeslot(
-            fsms: [fsm.name],
-            callChain: CallChain(root: fsm.name, calls: []),
-            externalDependencies: [],
-            startingTime: 0,
-            duration: 30,
-            cyclesExecuted: 0
-        )
-        let result = pool.propertyList(forStep: .takeSnapshotAndStartTimeslot(timeslot: timeslot), executingState: fsm.currentState.name, promises: [:], resetClocks: nil, collapseIfPossible: true)
-        let expected = KripkeStatePropertyList(
-            [
-                "fsms": KripkeStateProperty(
-                    type: .Compound(KripkeStatePropertyList(
-                        [
-                            fsm.name: KripkeStateProperty(
-                                type: .Compound(KripkeStatePropertyList(
-                                    [
-                                        "currentState": KripkeStateProperty(type: .String, value: "current"),
-                                        "isSuspended": KripkeStateProperty(type: .Bool, value: true),
-                                        "hasFinished": KripkeStateProperty(type: .Bool, value: true),
-                                        "value": KripkeStateProperty(type: .Bool, value: false)
-                                    ]
-                                )),
-                                value: base()
-                            )
-                        ]
-                    )),
-                    value: [fsm.name: base()]
-                ),
-                "pc": KripkeStateProperty(type: .String, value: fsm.name + "." + fsm.currentState.name + ".R")
-            ]
-        )
-        XCTAssertEqual(result, expected)
+    var gateway = StackGateway()
+
+    var timer = FSMClock(ringletLengths: ["toggle": 10], scheduleLength: 10)
+
+    var sensors: [AnySnapshotController] = [
+        AnySnapshotController(InMemoryContainer<Bools>(name: "externals1", initialValue: Bools())),
+        AnySnapshotController(InMemoryContainer<Bool>(name: "externals2", initialValue: false))
+    ]
+
+    var actuators: [AnySnapshotController] = []
+
+    var externalVariables: [AnySnapshotController] = []
+
+    //swiftlint:disable:next type_name
+    typealias _StateType = MiPalState
+
+    var name: String = "toggle"
+
+    var initialState: MiPalState = EmptyMiPalState("initial")
+
+    var currentState: MiPalState = EmptyMiPalState("current")
+
+    let hasFinished: Bool = true
+
+    let isSuspended: Bool = true
+
+    let submachines: [AnyScheduleableFiniteStateMachine] = []
+
+    func clone() -> CombinationsFiniteStateMachine {
+        return self
     }
-    
+
+    func exit() {}
+
+    func next() {
+        (externalVariables + actuators).forEach {
+            $0.val = !($0.val as! Bool)
+        }
+    }
+
+    func restart() {}
+
+    func resume() {}
+
+    func saveSnapshot() {}
+
+    func suspend() {}
+
 }

@@ -84,6 +84,7 @@ struct TimedKripkeStructure: KripkeStructureProtocol {
         let configurations: [(String, Data, String, String)] = fsms.enumerated().map {
             (names[$0], $1.0, $1.1, $1.2)
         }
+        let resetClocks = resetClocksProperty(executing: executing, readState: readState, fsms: fsms)
         var currentState: String!
         var previousState: String!
         let fsmProperties = configurations.map { (data) -> ((String, KripkeStateProperty), (String, FSM)) in
@@ -128,7 +129,8 @@ struct TimedKripkeStructure: KripkeStructureProtocol {
             "pc": KripkeStateProperty(
                 type: .String,
                 value: executing + "." + (readState ? currentState! : previousState!) + "." + (readState ? "R" : "W")
-            )
+            ),
+            "resetClocks": resetClocks
         ])
     }
     
@@ -7144,7 +7146,7 @@ struct TimedKripkeStructure: KripkeStructureProtocol {
                     target(
                         executing: fsm2Name,
                         readState: true,
-                        resetClock: false,
+                        resetClock: true,
                         duration: fsm1Gap,
                         fsm1: (
                             value: 0,
@@ -7177,7 +7179,7 @@ struct TimedKripkeStructure: KripkeStructureProtocol {
                     target(
                         executing: fsm2Name,
                         readState: true,
-                        resetClock: false,
+                        resetClock: true,
                         duration: fsm1Gap,
                         fsm1: (
                             value: 5,
@@ -7210,7 +7212,7 @@ struct TimedKripkeStructure: KripkeStructureProtocol {
                     target(
                         executing: fsm2Name,
                         readState: true,
-                        resetClock: false,
+                        resetClock: true,
                         duration: fsm1Gap,
                         fsm1: (
                             value: 15,
@@ -7243,7 +7245,7 @@ struct TimedKripkeStructure: KripkeStructureProtocol {
                     target(
                         executing: fsm2Name,
                         readState: true,
-                        resetClock: false,
+                        resetClock: true,
                         duration: fsm1Gap,
                         fsm1: (
                             value: 15,
@@ -7276,7 +7278,7 @@ struct TimedKripkeStructure: KripkeStructureProtocol {
                     target(
                         executing: fsm2Name,
                         readState: true,
-                        resetClock: false,
+                        resetClock: true,
                         duration: fsm1Gap,
                         fsm1: (
                             value: 25,

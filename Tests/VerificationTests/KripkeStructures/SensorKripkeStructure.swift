@@ -79,6 +79,7 @@ struct SensorKripkeStructure: KripkeStructureProtocol {
         }
         var currentState: String!
         var previousState: String!
+        let resetClocks = resetClocksProperty(executing: executing, readState: readState, fsms: fsms)
         let fsmProperties = configurations.map { (data) -> ((String, KripkeStateProperty), (String, FSM)) in
             let fsm = fsm(named: data.0, data: data.1)
             if data.0 == executing {
@@ -125,7 +126,8 @@ struct SensorKripkeStructure: KripkeStructureProtocol {
             "pc": KripkeStateProperty(
                 type: .String,
                 value: executing + "." + (readState ? currentState! : previousState!) + "." + (readState ? "R" : "W")
-            )
+            ),
+            "resetClocks": resetClocks
         ])
     }
     
@@ -317,7 +319,7 @@ struct SensorKripkeStructure: KripkeStructureProtocol {
                     target(
                         executing: fsm2Name,
                         readState: true,
-                        resetClock: false,
+                        resetClock: true,
                         duration: fsm1Gap,
                         fsm1: (sensorValue: false, currentState: initial, previousState: initial),
                         fsm2: (sensorValue: false, currentState: initial, previousState: previous)
@@ -325,7 +327,7 @@ struct SensorKripkeStructure: KripkeStructureProtocol {
                     target(
                         executing: fsm2Name,
                         readState: true,
-                        resetClock: false,
+                        resetClock: true,
                         duration: fsm1Gap,
                         fsm1: (sensorValue: false, currentState: initial, previousState: initial),
                         fsm2: (sensorValue: true, currentState: initial, previousState: previous)
@@ -1139,7 +1141,7 @@ struct SensorKripkeStructure: KripkeStructureProtocol {
                     target(
                         executing: fsm2Name,
                         readState: true,
-                        resetClock: false,
+                        resetClock: true,
                         duration: fsm1Gap,
                         fsm1: (sensorValue: true, currentState: exit, previousState: initial),
                         fsm2: (sensorValue: false, currentState: initial, previousState: previous)
@@ -1147,7 +1149,7 @@ struct SensorKripkeStructure: KripkeStructureProtocol {
                     target(
                         executing: fsm2Name,
                         readState: true,
-                        resetClock: false,
+                        resetClock: true,
                         duration: fsm1Gap,
                         fsm1: (sensorValue: true, currentState: exit, previousState: initial),
                         fsm2: (sensorValue: true, currentState: initial, previousState: previous)
