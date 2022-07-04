@@ -64,4 +64,6 @@ public protocol MutableKripkeStructure: KripkeStructure {
 
     func add(edge: KripkeEdge, to id: Int64) throws
 
+    func markAsInitial(id: Int64) throws
+
 }

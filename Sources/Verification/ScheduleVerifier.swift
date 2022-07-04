@@ -175,6 +175,9 @@ final class ScheduleVerifier<Isolator: ScheduleIsolatorProtocol> {
                 let id: Int64
                 if inCycle {
                     id = try persistentStore.id(for: properties)
+                    if job.initial {
+                        try persistentStore.markAsInitial(id: id)
+                    }
                 } else {
                     id = try persistentStore.add(properties, isInitial: previous == nil)
                 }
@@ -286,6 +289,9 @@ final class ScheduleVerifier<Isolator: ScheduleIsolatorProtocol> {
                         id = try persistentStore.add(properties, isInitial: previous == nil)
                     } else {
                         id = try persistentStore.id(for: properties)
+                        if job.initial {
+                            try persistentStore.markAsInitial(id: id)
+                        }
                     }
                     if let previous = previous {
                         let edge: KripkeEdge = KripkeEdge(
@@ -362,6 +368,9 @@ final class ScheduleVerifier<Isolator: ScheduleIsolatorProtocol> {
                         id = try persistentStore.add(properties, isInitial: previous == nil)
                     } else {
                         id = try persistentStore.id(for: properties)
+                        if job.initial {
+                            try persistentStore.markAsInitial(id: id)
+                        }
                     }
                     if let previous = previous {
                         let edge = KripkeEdge(

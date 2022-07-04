@@ -264,6 +264,10 @@ public struct SQLiteKripkeStructure: MutableKripkeStructure {
         }
     }
 
+    public func markAsInitial(id: Int64) throws {
+        try db.run(statesTable.table.filter(statesTable.id == id).update(statesTable.isInitial <- true))
+    }
+
     public func exists(_ propertyList: KripkeStatePropertyList) throws -> Bool {
         let str = try stringRepresentation(of: propertyList)
         return try nil != db.pluck(statesTable.table.select(statesTable.id).where(statesTable.propertyList == str))

@@ -110,6 +110,10 @@ public final class InMemoryKripkeStructure: MutableKripkeStructure {
         allStates[id]?.2.insert(edge)
     }
 
+    public func markAsInitial(id: Int64) throws {
+        self.allStates[id]?.1 = true
+    }
+
     public func exists(_ propertyList: KripkeStatePropertyList) throws -> Bool {
         return nil != ids[propertyList]
     }
