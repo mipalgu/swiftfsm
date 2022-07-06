@@ -81,8 +81,8 @@ extension _KripkeStateType where Self: CustomStringConvertible, Self: Hashable {
         str += self.properties.description
         str += "\n},\n"
         str += "effects: [\n"
-        str += (self.edges.first?.description ?? "") + self.edges.dropFirst().reduce("") {
-            $0 + ",\n    " + $1.description
+        str += (self.edges.first.map { String(describing: $0) } ?? "") + self.edges.dropFirst().reduce("") {
+            $0 + ",\n    " + String(describing: $1)
         }
         str += "\n}"
         return str

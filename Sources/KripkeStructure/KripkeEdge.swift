@@ -100,16 +100,5 @@ public struct KripkeEdge {
     
 }
 
-extension KripkeEdge: CustomStringConvertible {
-    
-    public var description: String {
-        guard let constraint = constraint else {
-            return "(time: \(time), target: \(target))"
-        }
-        return "(constraint: \(constraint), time: \(time), target: \(target))"
-    }
-    
-}
-
 extension KripkeEdge: Equatable {}
 extension KripkeEdge: Hashable {}

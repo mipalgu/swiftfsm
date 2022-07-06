@@ -103,7 +103,7 @@ final class LightFiniteStateMachine: MachineProtocol, CustomStringConvertible {
 
     var computedVars: [String: Any] {
         return [
-            "sensors": Dictionary(uniqueKeysWithValues: sensors.map { ($0.name, $0.val) }),
+            "externalVariables": Dictionary(uniqueKeysWithValues: externalVariables.map { ($0.name, $0.val) }),
             "currentState": currentState.name,
             "isSuspended": isSuspended,
             "hasFinished": hasFinished
@@ -126,13 +126,11 @@ final class LightFiniteStateMachine: MachineProtocol, CustomStringConvertible {
         get {
             [AnySnapshotController(status), AnySnapshotController(light)]
         } set {
-            for sensor in externalVariables {
-                if let val = newValue.first(where: { $0.name == status.name })?.val {
-                    status.val = val as! MicrowaveStatus
-                }
-                if let val = newValue.first(where: { $0.name == light.name })?.val {
-                    light.val = val as! Bool
-                }
+            if let val = newValue.first(where: { $0.name == status.name })?.val {
+                status.val = val as! MicrowaveStatus
+            }
+            if let val = newValue.first(where: { $0.name == light.name })?.val {
+                light.val = val as! Bool
             }
         }
     }
@@ -152,7 +150,7 @@ final class LightFiniteStateMachine: MachineProtocol, CustomStringConvertible {
     lazy var onState: MiPalState = {
         CallbackMiPalState(
             "On",
-            transitions: [Transition(initialState) { [self] _ in !status.val.doorOpen && !status.val.timeLeft }],
+            transitions: [],
             snapshotSensors: [status.name, light.name],
             snapshotActuators: [status.name, light.name],
             onEntry: { [self] in light.val = true }
@@ -193,13 +191,15 @@ final class LightFiniteStateMachine: MachineProtocol, CustomStringConvertible {
         fsm.ringlet = ringlet.clone()
         if fsm.ringlet.previousState.name == initialState.name {
             fsm.ringlet.previousState = fsm.initialState
-        } else if fsm.ringlet.previousState.name == exitState.name {
-            fsm.ringlet.previousState = fsm.exitState
+        } else if fsm.ringlet.previousState.name == onState.name {
+            fsm.ringlet.previousState = fsm.onState
         }
         return fsm
     }
 
-    init() {}
+    init() {
+        self.onState.addTransition(Transition(initialState) { [self] _ in !status.val.doorOpen && !status.val.timeLeft })
+    }
 
     convenience init(status: MicrowaveStatus, light: Bool, currentState: String, previousState: String) {
         self.init()

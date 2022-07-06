@@ -88,11 +88,15 @@ struct LightKripkeStructure: KripkeStructureProtocol {
             }
             if data.2 == fsm.initialState.name {
                 fsm.currentState = fsm.initialState
+            } else if data.2 == fsm.onState.name {
+                fsm.currentState = fsm.onState
             } else {
                 fsm.currentState = emptyState(named: data.2)
             }
             if data.3 == fsm.initialState.name {
                 fsm.previousState = fsm.initialState
+            } else if data.3 == fsm.onState.name {
+                fsm.previousState = fsm.onState
             } else {
                 fsm.previousState = emptyState(named: data.3)
             }
@@ -693,7 +697,7 @@ struct LightKripkeStructure: KripkeStructureProtocol {
                 targets: [
                     target(
                         readState: true,
-                        resetClock: false,
+                        resetClock: true,
                         duration: gap,
                         status: .init(buttonPushed: false, doorOpen: false, timeLeft: false),
                         light: false,
@@ -702,7 +706,7 @@ struct LightKripkeStructure: KripkeStructureProtocol {
                     ),
                     target(
                         readState: true,
-                        resetClock: false,
+                        resetClock: true,
                         duration: gap,
                         status: .init(buttonPushed: true, doorOpen: false, timeLeft: false),
                         light: false,
@@ -711,7 +715,7 @@ struct LightKripkeStructure: KripkeStructureProtocol {
                     ),
                     target(
                         readState: true,
-                        resetClock: false,
+                        resetClock: true,
                         duration: gap,
                         status: .init(buttonPushed: false, doorOpen: true, timeLeft: false),
                         light: false,
@@ -720,7 +724,7 @@ struct LightKripkeStructure: KripkeStructureProtocol {
                     ),
                     target(
                         readState: true,
-                        resetClock: false,
+                        resetClock: true,
                         duration: gap,
                         status: .init(buttonPushed: false, doorOpen: false, timeLeft: true),
                         light: false,
@@ -729,7 +733,7 @@ struct LightKripkeStructure: KripkeStructureProtocol {
                     ),
                     target(
                         readState: true,
-                        resetClock: false,
+                        resetClock: true,
                         duration: gap,
                         status: .init(buttonPushed: false, doorOpen: false, timeLeft: false),
                         light: true,
@@ -738,7 +742,7 @@ struct LightKripkeStructure: KripkeStructureProtocol {
                     ),
                     target(
                         readState: true,
-                        resetClock: false,
+                        resetClock: true,
                         duration: gap,
                         status: .init(buttonPushed: false, doorOpen: true, timeLeft: true),
                         light: false,
@@ -747,7 +751,7 @@ struct LightKripkeStructure: KripkeStructureProtocol {
                     ),
                     target(
                         readState: true,
-                        resetClock: false,
+                        resetClock: true,
                         duration: gap,
                         status: .init(buttonPushed: false, doorOpen: true, timeLeft: false),
                         light: true,
@@ -756,7 +760,7 @@ struct LightKripkeStructure: KripkeStructureProtocol {
                     ),
                     target(
                         readState: true,
-                        resetClock: false,
+                        resetClock: true,
                         duration: gap,
                         status: .init(buttonPushed: false, doorOpen: false, timeLeft: true),
                         light: true,
@@ -765,7 +769,7 @@ struct LightKripkeStructure: KripkeStructureProtocol {
                     ),
                     target(
                         readState: true,
-                        resetClock: false,
+                        resetClock: true,
                         duration: gap,
                         status: .init(buttonPushed: true, doorOpen: true, timeLeft: false),
                         light: false,
@@ -774,7 +778,7 @@ struct LightKripkeStructure: KripkeStructureProtocol {
                     ),
                     target(
                         readState: true,
-                        resetClock: false,
+                        resetClock: true,
                         duration: gap,
                         status: .init(buttonPushed: true, doorOpen: false, timeLeft: true),
                         light: false,
@@ -783,7 +787,7 @@ struct LightKripkeStructure: KripkeStructureProtocol {
                     ),
                     target(
                         readState: true,
-                        resetClock: false,
+                        resetClock: true,
                         duration: gap,
                         status: .init(buttonPushed: true, doorOpen: false, timeLeft: false),
                         light: true,
@@ -792,7 +796,7 @@ struct LightKripkeStructure: KripkeStructureProtocol {
                     ),
                     target(
                         readState: true,
-                        resetClock: false,
+                        resetClock: true,
                         duration: gap,
                         status: .init(buttonPushed: true, doorOpen: true, timeLeft: true),
                         light: false,
@@ -801,7 +805,7 @@ struct LightKripkeStructure: KripkeStructureProtocol {
                     ),
                     target(
                         readState: true,
-                        resetClock: false,
+                        resetClock: true,
                         duration: gap,
                         status: .init(buttonPushed: true, doorOpen: true, timeLeft: false),
                         light: true,
@@ -810,7 +814,7 @@ struct LightKripkeStructure: KripkeStructureProtocol {
                     ),
                     target(
                         readState: true,
-                        resetClock: false,
+                        resetClock: true,
                         duration: gap,
                         status: .init(buttonPushed: true, doorOpen: false, timeLeft: true),
                         light: true,
@@ -819,7 +823,7 @@ struct LightKripkeStructure: KripkeStructureProtocol {
                     ),
                     target(
                         readState: true,
-                        resetClock: false,
+                        resetClock: true,
                         duration: gap,
                         status: .init(buttonPushed: false, doorOpen: true, timeLeft: true),
                         light: true,
@@ -828,7 +832,7 @@ struct LightKripkeStructure: KripkeStructureProtocol {
                     ),
                     target(
                         readState: true,
-                        resetClock: false,
+                        resetClock: true,
                         duration: gap,
                         status: .init(buttonPushed: true, doorOpen: true, timeLeft: true),
                         light: true,
@@ -846,7 +850,7 @@ struct LightKripkeStructure: KripkeStructureProtocol {
                 targets: [
                     target(
                         readState: true,
-                        resetClock: false,
+                        resetClock: true,
                         duration: gap,
                         status: .init(buttonPushed: false, doorOpen: false, timeLeft: false),
                         light: false,
@@ -855,7 +859,7 @@ struct LightKripkeStructure: KripkeStructureProtocol {
                     ),
                     target(
                         readState: true,
-                        resetClock: false,
+                        resetClock: true,
                         duration: gap,
                         status: .init(buttonPushed: true, doorOpen: false, timeLeft: false),
                         light: false,
@@ -864,7 +868,7 @@ struct LightKripkeStructure: KripkeStructureProtocol {
                     ),
                     target(
                         readState: true,
-                        resetClock: false,
+                        resetClock: true,
                         duration: gap,
                         status: .init(buttonPushed: false, doorOpen: true, timeLeft: false),
                         light: false,
@@ -873,7 +877,7 @@ struct LightKripkeStructure: KripkeStructureProtocol {
                     ),
                     target(
                         readState: true,
-                        resetClock: false,
+                        resetClock: true,
                         duration: gap,
                         status: .init(buttonPushed: false, doorOpen: false, timeLeft: true),
                         light: false,
@@ -882,7 +886,7 @@ struct LightKripkeStructure: KripkeStructureProtocol {
                     ),
                     target(
                         readState: true,
-                        resetClock: false,
+                        resetClock: true,
                         duration: gap,
                         status: .init(buttonPushed: false, doorOpen: false, timeLeft: false),
                         light: true,
@@ -891,7 +895,7 @@ struct LightKripkeStructure: KripkeStructureProtocol {
                     ),
                     target(
                         readState: true,
-                        resetClock: false,
+                        resetClock: true,
                         duration: gap,
                         status: .init(buttonPushed: false, doorOpen: true, timeLeft: true),
                         light: false,
@@ -900,7 +904,7 @@ struct LightKripkeStructure: KripkeStructureProtocol {
                     ),
                     target(
                         readState: true,
-                        resetClock: false,
+                        resetClock: true,
                         duration: gap,
                         status: .init(buttonPushed: false, doorOpen: true, timeLeft: false),
                         light: true,
@@ -909,7 +913,7 @@ struct LightKripkeStructure: KripkeStructureProtocol {
                     ),
                     target(
                         readState: true,
-                        resetClock: false,
+                        resetClock: true,
                         duration: gap,
                         status: .init(buttonPushed: false, doorOpen: false, timeLeft: true),
                         light: true,
@@ -918,7 +922,7 @@ struct LightKripkeStructure: KripkeStructureProtocol {
                     ),
                     target(
                         readState: true,
-                        resetClock: false,
+                        resetClock: true,
                         duration: gap,
                         status: .init(buttonPushed: true, doorOpen: true, timeLeft: false),
                         light: false,
@@ -927,7 +931,7 @@ struct LightKripkeStructure: KripkeStructureProtocol {
                     ),
                     target(
                         readState: true,
-                        resetClock: false,
+                        resetClock: true,
                         duration: gap,
                         status: .init(buttonPushed: true, doorOpen: false, timeLeft: true),
                         light: false,
@@ -936,7 +940,7 @@ struct LightKripkeStructure: KripkeStructureProtocol {
                     ),
                     target(
                         readState: true,
-                        resetClock: false,
+                        resetClock: true,
                         duration: gap,
                         status: .init(buttonPushed: true, doorOpen: false, timeLeft: false),
                         light: true,
@@ -945,7 +949,7 @@ struct LightKripkeStructure: KripkeStructureProtocol {
                     ),
                     target(
                         readState: true,
-                        resetClock: false,
+                        resetClock: true,
                         duration: gap,
                         status: .init(buttonPushed: true, doorOpen: true, timeLeft: true),
                         light: false,
@@ -954,7 +958,7 @@ struct LightKripkeStructure: KripkeStructureProtocol {
                     ),
                     target(
                         readState: true,
-                        resetClock: false,
+                        resetClock: true,
                         duration: gap,
                         status: .init(buttonPushed: true, doorOpen: true, timeLeft: false),
                         light: true,
@@ -963,7 +967,7 @@ struct LightKripkeStructure: KripkeStructureProtocol {
                     ),
                     target(
                         readState: true,
-                        resetClock: false,
+                        resetClock: true,
                         duration: gap,
                         status: .init(buttonPushed: true, doorOpen: false, timeLeft: true),
                         light: true,
@@ -972,7 +976,7 @@ struct LightKripkeStructure: KripkeStructureProtocol {
                     ),
                     target(
                         readState: true,
-                        resetClock: false,
+                        resetClock: true,
                         duration: gap,
                         status: .init(buttonPushed: false, doorOpen: true, timeLeft: true),
                         light: true,
@@ -981,7 +985,7 @@ struct LightKripkeStructure: KripkeStructureProtocol {
                     ),
                     target(
                         readState: true,
-                        resetClock: false,
+                        resetClock: true,
                         duration: gap,
                         status: .init(buttonPushed: true, doorOpen: true, timeLeft: true),
                         light: true,
@@ -999,7 +1003,7 @@ struct LightKripkeStructure: KripkeStructureProtocol {
                 targets: [
                     target(
                         readState: true,
-                        resetClock: false,
+                        resetClock: true,
                         duration: gap,
                         status: .init(buttonPushed: false, doorOpen: false, timeLeft: false),
                         light: false,
@@ -1008,7 +1012,7 @@ struct LightKripkeStructure: KripkeStructureProtocol {
                     ),
                     target(
                         readState: true,
-                        resetClock: false,
+                        resetClock: true,
                         duration: gap,
                         status: .init(buttonPushed: true, doorOpen: false, timeLeft: false),
                         light: false,
@@ -1017,7 +1021,7 @@ struct LightKripkeStructure: KripkeStructureProtocol {
                     ),
                     target(
                         readState: true,
-                        resetClock: false,
+                        resetClock: true,
                         duration: gap,
                         status: .init(buttonPushed: false, doorOpen: true, timeLeft: false),
                         light: false,
@@ -1026,7 +1030,7 @@ struct LightKripkeStructure: KripkeStructureProtocol {
                     ),
                     target(
                         readState: true,
-                        resetClock: false,
+                        resetClock: true,
                         duration: gap,
                         status: .init(buttonPushed: false, doorOpen: false, timeLeft: true),
                         light: false,
@@ -1035,7 +1039,7 @@ struct LightKripkeStructure: KripkeStructureProtocol {
                     ),
                     target(
                         readState: true,
-                        resetClock: false,
+                        resetClock: true,
                         duration: gap,
                         status: .init(buttonPushed: false, doorOpen: false, timeLeft: false),
                         light: true,
@@ -1044,7 +1048,7 @@ struct LightKripkeStructure: KripkeStructureProtocol {
                     ),
                     target(
                         readState: true,
-                        resetClock: false,
+                        resetClock: true,
                         duration: gap,
                         status: .init(buttonPushed: false, doorOpen: true, timeLeft: true),
                         light: false,
@@ -1053,7 +1057,7 @@ struct LightKripkeStructure: KripkeStructureProtocol {
                     ),
                     target(
                         readState: true,
-                        resetClock: false,
+                        resetClock: true,
                         duration: gap,
                         status: .init(buttonPushed: false, doorOpen: true, timeLeft: false),
                         light: true,
@@ -1062,7 +1066,7 @@ struct LightKripkeStructure: KripkeStructureProtocol {
                     ),
                     target(
                         readState: true,
-                        resetClock: false,
+                        resetClock: true,
                         duration: gap,
                         status: .init(buttonPushed: false, doorOpen: false, timeLeft: true),
                         light: true,
@@ -1071,7 +1075,7 @@ struct LightKripkeStructure: KripkeStructureProtocol {
                     ),
                     target(
                         readState: true,
-                        resetClock: false,
+                        resetClock: true,
                         duration: gap,
                         status: .init(buttonPushed: true, doorOpen: true, timeLeft: false),
                         light: false,
@@ -1080,7 +1084,7 @@ struct LightKripkeStructure: KripkeStructureProtocol {
                     ),
                     target(
                         readState: true,
-                        resetClock: false,
+                        resetClock: true,
                         duration: gap,
                         status: .init(buttonPushed: true, doorOpen: false, timeLeft: true),
                         light: false,
@@ -1089,7 +1093,7 @@ struct LightKripkeStructure: KripkeStructureProtocol {
                     ),
                     target(
                         readState: true,
-                        resetClock: false,
+                        resetClock: true,
                         duration: gap,
                         status: .init(buttonPushed: true, doorOpen: false, timeLeft: false),
                         light: true,
@@ -1098,7 +1102,7 @@ struct LightKripkeStructure: KripkeStructureProtocol {
                     ),
                     target(
                         readState: true,
-                        resetClock: false,
+                        resetClock: true,
                         duration: gap,
                         status: .init(buttonPushed: true, doorOpen: true, timeLeft: true),
                         light: false,
@@ -1107,7 +1111,7 @@ struct LightKripkeStructure: KripkeStructureProtocol {
                     ),
                     target(
                         readState: true,
-                        resetClock: false,
+                        resetClock: true,
                         duration: gap,
                         status: .init(buttonPushed: true, doorOpen: true, timeLeft: false),
                         light: true,
@@ -1116,7 +1120,7 @@ struct LightKripkeStructure: KripkeStructureProtocol {
                     ),
                     target(
                         readState: true,
-                        resetClock: false,
+                        resetClock: true,
                         duration: gap,
                         status: .init(buttonPushed: true, doorOpen: false, timeLeft: true),
                         light: true,
@@ -1125,7 +1129,7 @@ struct LightKripkeStructure: KripkeStructureProtocol {
                     ),
                     target(
                         readState: true,
-                        resetClock: false,
+                        resetClock: true,
                         duration: gap,
                         status: .init(buttonPushed: false, doorOpen: true, timeLeft: true),
                         light: true,
@@ -1134,7 +1138,7 @@ struct LightKripkeStructure: KripkeStructureProtocol {
                     ),
                     target(
                         readState: true,
-                        resetClock: false,
+                        resetClock: true,
                         duration: gap,
                         status: .init(buttonPushed: true, doorOpen: true, timeLeft: true),
                         light: true,
@@ -1152,7 +1156,7 @@ struct LightKripkeStructure: KripkeStructureProtocol {
                 targets: [
                     target(
                         readState: true,
-                        resetClock: false,
+                        resetClock: true,
                         duration: gap,
                         status: .init(buttonPushed: false, doorOpen: false, timeLeft: false),
                         light: false,
@@ -1161,7 +1165,7 @@ struct LightKripkeStructure: KripkeStructureProtocol {
                     ),
                     target(
                         readState: true,
-                        resetClock: false,
+                        resetClock: true,
                         duration: gap,
                         status: .init(buttonPushed: true, doorOpen: false, timeLeft: false),
                         light: false,
@@ -1170,7 +1174,7 @@ struct LightKripkeStructure: KripkeStructureProtocol {
                     ),
                     target(
                         readState: true,
-                        resetClock: false,
+                        resetClock: true,
                         duration: gap,
                         status: .init(buttonPushed: false, doorOpen: true, timeLeft: false),
                         light: false,
@@ -1179,7 +1183,7 @@ struct LightKripkeStructure: KripkeStructureProtocol {
                     ),
                     target(
                         readState: true,
-                        resetClock: false,
+                        resetClock: true,
                         duration: gap,
                         status: .init(buttonPushed: false, doorOpen: false, timeLeft: true),
                         light: false,
@@ -1188,7 +1192,7 @@ struct LightKripkeStructure: KripkeStructureProtocol {
                     ),
                     target(
                         readState: true,
-                        resetClock: false,
+                        resetClock: true,
                         duration: gap,
                         status: .init(buttonPushed: false, doorOpen: false, timeLeft: false),
                         light: true,
@@ -1197,7 +1201,7 @@ struct LightKripkeStructure: KripkeStructureProtocol {
                     ),
                     target(
                         readState: true,
-                        resetClock: false,
+                        resetClock: true,
                         duration: gap,
                         status: .init(buttonPushed: false, doorOpen: true, timeLeft: true),
                         light: false,
@@ -1206,7 +1210,7 @@ struct LightKripkeStructure: KripkeStructureProtocol {
                     ),
                     target(
                         readState: true,
-                        resetClock: false,
+                        resetClock: true,
                         duration: gap,
                         status: .init(buttonPushed: false, doorOpen: true, timeLeft: false),
                         light: true,
@@ -1215,7 +1219,7 @@ struct LightKripkeStructure: KripkeStructureProtocol {
                     ),
                     target(
                         readState: true,
-                        resetClock: false,
+                        resetClock: true,
                         duration: gap,
                         status: .init(buttonPushed: false, doorOpen: false, timeLeft: true),
                         light: true,
@@ -1224,7 +1228,7 @@ struct LightKripkeStructure: KripkeStructureProtocol {
                     ),
                     target(
                         readState: true,
-                        resetClock: false,
+                        resetClock: true,
                         duration: gap,
                         status: .init(buttonPushed: true, doorOpen: true, timeLeft: false),
                         light: false,
@@ -1233,7 +1237,7 @@ struct LightKripkeStructure: KripkeStructureProtocol {
                     ),
                     target(
                         readState: true,
-                        resetClock: false,
+                        resetClock: true,
                         duration: gap,
                         status: .init(buttonPushed: true, doorOpen: false, timeLeft: true),
                         light: false,
@@ -1242,7 +1246,7 @@ struct LightKripkeStructure: KripkeStructureProtocol {
                     ),
                     target(
                         readState: true,
-                        resetClock: false,
+                        resetClock: true,
                         duration: gap,
                         status: .init(buttonPushed: true, doorOpen: false, timeLeft: false),
                         light: true,
@@ -1251,7 +1255,7 @@ struct LightKripkeStructure: KripkeStructureProtocol {
                     ),
                     target(
                         readState: true,
-                        resetClock: false,
+                        resetClock: true,
                         duration: gap,
                         status: .init(buttonPushed: true, doorOpen: true, timeLeft: true),
                         light: false,
@@ -1260,7 +1264,7 @@ struct LightKripkeStructure: KripkeStructureProtocol {
                     ),
                     target(
                         readState: true,
-                        resetClock: false,
+                        resetClock: true,
                         duration: gap,
                         status: .init(buttonPushed: true, doorOpen: true, timeLeft: false),
                         light: true,
@@ -1269,7 +1273,7 @@ struct LightKripkeStructure: KripkeStructureProtocol {
                     ),
                     target(
                         readState: true,
-                        resetClock: false,
+                        resetClock: true,
                         duration: gap,
                         status: .init(buttonPushed: true, doorOpen: false, timeLeft: true),
                         light: true,
@@ -1278,7 +1282,7 @@ struct LightKripkeStructure: KripkeStructureProtocol {
                     ),
                     target(
                         readState: true,
-                        resetClock: false,
+                        resetClock: true,
                         duration: gap,
                         status: .init(buttonPushed: false, doorOpen: true, timeLeft: true),
                         light: true,
@@ -1287,7 +1291,7 @@ struct LightKripkeStructure: KripkeStructureProtocol {
                     ),
                     target(
                         readState: true,
-                        resetClock: false,
+                        resetClock: true,
                         duration: gap,
                         status: .init(buttonPushed: true, doorOpen: true, timeLeft: true),
                         light: true,
@@ -1305,7 +1309,7 @@ struct LightKripkeStructure: KripkeStructureProtocol {
                 targets: [
                     target(
                         readState: true,
-                        resetClock: false,
+                        resetClock: true,
                         duration: gap,
                         status: .init(buttonPushed: false, doorOpen: false, timeLeft: false),
                         light: false,
@@ -1314,7 +1318,7 @@ struct LightKripkeStructure: KripkeStructureProtocol {
                     ),
                     target(
                         readState: true,
-                        resetClock: false,
+                        resetClock: true,
                         duration: gap,
                         status: .init(buttonPushed: true, doorOpen: false, timeLeft: false),
                         light: false,
@@ -1323,7 +1327,7 @@ struct LightKripkeStructure: KripkeStructureProtocol {
                     ),
                     target(
                         readState: true,
-                        resetClock: false,
+                        resetClock: true,
                         duration: gap,
                         status: .init(buttonPushed: false, doorOpen: true, timeLeft: false),
                         light: false,
@@ -1332,7 +1336,7 @@ struct LightKripkeStructure: KripkeStructureProtocol {
                     ),
                     target(
                         readState: true,
-                        resetClock: false,
+                        resetClock: true,
                         duration: gap,
                         status: .init(buttonPushed: false, doorOpen: false, timeLeft: true),
                         light: false,
@@ -1341,7 +1345,7 @@ struct LightKripkeStructure: KripkeStructureProtocol {
                     ),
                     target(
                         readState: true,
-                        resetClock: false,
+                        resetClock: true,
                         duration: gap,
                         status: .init(buttonPushed: false, doorOpen: false, timeLeft: false),
                         light: true,
@@ -1350,7 +1354,7 @@ struct LightKripkeStructure: KripkeStructureProtocol {
                     ),
                     target(
                         readState: true,
-                        resetClock: false,
+                        resetClock: true,
                         duration: gap,
                         status: .init(buttonPushed: false, doorOpen: true, timeLeft: true),
                         light: false,
@@ -1359,7 +1363,7 @@ struct LightKripkeStructure: KripkeStructureProtocol {
                     ),
                     target(
                         readState: true,
-                        resetClock: false,
+                        resetClock: true,
                         duration: gap,
                         status: .init(buttonPushed: false, doorOpen: true, timeLeft: false),
                         light: true,
@@ -1368,7 +1372,7 @@ struct LightKripkeStructure: KripkeStructureProtocol {
                     ),
                     target(
                         readState: true,
-                        resetClock: false,
+                        resetClock: true,
                         duration: gap,
                         status: .init(buttonPushed: false, doorOpen: false, timeLeft: true),
                         light: true,
@@ -1377,7 +1381,7 @@ struct LightKripkeStructure: KripkeStructureProtocol {
                     ),
                     target(
                         readState: true,
-                        resetClock: false,
+                        resetClock: true,
                         duration: gap,
                         status: .init(buttonPushed: true, doorOpen: true, timeLeft: false),
                         light: false,
@@ -1386,7 +1390,7 @@ struct LightKripkeStructure: KripkeStructureProtocol {
                     ),
                     target(
                         readState: true,
-                        resetClock: false,
+                        resetClock: true,
                         duration: gap,
                         status: .init(buttonPushed: true, doorOpen: false, timeLeft: true),
                         light: false,
@@ -1395,7 +1399,7 @@ struct LightKripkeStructure: KripkeStructureProtocol {
                     ),
                     target(
                         readState: true,
-                        resetClock: false,
+                        resetClock: true,
                         duration: gap,
                         status: .init(buttonPushed: true, doorOpen: false, timeLeft: false),
                         light: true,
@@ -1404,7 +1408,7 @@ struct LightKripkeStructure: KripkeStructureProtocol {
                     ),
                     target(
                         readState: true,
-                        resetClock: false,
+                        resetClock: true,
                         duration: gap,
                         status: .init(buttonPushed: true, doorOpen: true, timeLeft: true),
                         light: false,
@@ -1413,7 +1417,7 @@ struct LightKripkeStructure: KripkeStructureProtocol {
                     ),
                     target(
                         readState: true,
-                        resetClock: false,
+                        resetClock: true,
                         duration: gap,
                         status: .init(buttonPushed: true, doorOpen: true, timeLeft: false),
                         light: true,
@@ -1422,7 +1426,7 @@ struct LightKripkeStructure: KripkeStructureProtocol {
                     ),
                     target(
                         readState: true,
-                        resetClock: false,
+                        resetClock: true,
                         duration: gap,
                         status: .init(buttonPushed: true, doorOpen: false, timeLeft: true),
                         light: true,
@@ -1431,7 +1435,7 @@ struct LightKripkeStructure: KripkeStructureProtocol {
                     ),
                     target(
                         readState: true,
-                        resetClock: false,
+                        resetClock: true,
                         duration: gap,
                         status: .init(buttonPushed: false, doorOpen: true, timeLeft: true),
                         light: true,
@@ -1440,7 +1444,7 @@ struct LightKripkeStructure: KripkeStructureProtocol {
                     ),
                     target(
                         readState: true,
-                        resetClock: false,
+                        resetClock: true,
                         duration: gap,
                         status: .init(buttonPushed: true, doorOpen: true, timeLeft: true),
                         light: true,
@@ -1458,7 +1462,7 @@ struct LightKripkeStructure: KripkeStructureProtocol {
                 targets: [
                     target(
                         readState: true,
-                        resetClock: false,
+                        resetClock: true,
                         duration: gap,
                         status: .init(buttonPushed: false, doorOpen: false, timeLeft: false),
                         light: false,
@@ -1467,7 +1471,7 @@ struct LightKripkeStructure: KripkeStructureProtocol {
                     ),
                     target(
                         readState: true,
-                        resetClock: false,
+                        resetClock: true,
                         duration: gap,
                         status: .init(buttonPushed: true, doorOpen: false, timeLeft: false),
                         light: false,
@@ -1476,7 +1480,7 @@ struct LightKripkeStructure: KripkeStructureProtocol {
                     ),
                     target(
                         readState: true,
-                        resetClock: false,
+                        resetClock: true,
                         duration: gap,
                         status: .init(buttonPushed: false, doorOpen: true, timeLeft: false),
                         light: false,
@@ -1485,7 +1489,7 @@ struct LightKripkeStructure: KripkeStructureProtocol {
                     ),
                     target(
                         readState: true,
-                        resetClock: false,
+                        resetClock: true,
                         duration: gap,
                         status: .init(buttonPushed: false, doorOpen: false, timeLeft: true),
                         light: false,
@@ -1494,7 +1498,7 @@ struct LightKripkeStructure: KripkeStructureProtocol {
                     ),
                     target(
                         readState: true,
-                        resetClock: false,
+                        resetClock: true,
                         duration: gap,
                         status: .init(buttonPushed: false, doorOpen: false, timeLeft: false),
                         light: true,
@@ -1503,7 +1507,7 @@ struct LightKripkeStructure: KripkeStructureProtocol {
                     ),
                     target(
                         readState: true,
-                        resetClock: false,
+                        resetClock: true,
                         duration: gap,
                         status: .init(buttonPushed: false, doorOpen: true, timeLeft: true),
                         light: false,
@@ -1512,7 +1516,7 @@ struct LightKripkeStructure: KripkeStructureProtocol {
                     ),
                     target(
                         readState: true,
-                        resetClock: false,
+                        resetClock: true,
                         duration: gap,
                         status: .init(buttonPushed: false, doorOpen: true, timeLeft: false),
                         light: true,
@@ -1521,7 +1525,7 @@ struct LightKripkeStructure: KripkeStructureProtocol {
                     ),
                     target(
                         readState: true,
-                        resetClock: false,
+                        resetClock: true,
                         duration: gap,
                         status: .init(buttonPushed: false, doorOpen: false, timeLeft: true),
                         light: true,
@@ -1530,7 +1534,7 @@ struct LightKripkeStructure: KripkeStructureProtocol {
                     ),
                     target(
                         readState: true,
-                        resetClock: false,
+                        resetClock: true,
                         duration: gap,
                         status: .init(buttonPushed: true, doorOpen: true, timeLeft: false),
                         light: false,
@@ -1539,7 +1543,7 @@ struct LightKripkeStructure: KripkeStructureProtocol {
                     ),
                     target(
                         readState: true,
-                        resetClock: false,
+                        resetClock: true,
                         duration: gap,
                         status: .init(buttonPushed: true, doorOpen: false, timeLeft: true),
                         light: false,
@@ -1548,7 +1552,7 @@ struct LightKripkeStructure: KripkeStructureProtocol {
                     ),
                     target(
                         readState: true,
-                        resetClock: false,
+                        resetClock: true,
                         duration: gap,
                         status: .init(buttonPushed: true, doorOpen: false, timeLeft: false),
                         light: true,
@@ -1557,7 +1561,7 @@ struct LightKripkeStructure: KripkeStructureProtocol {
                     ),
                     target(
                         readState: true,
-                        resetClock: false,
+                        resetClock: true,
                         duration: gap,
                         status: .init(buttonPushed: true, doorOpen: true, timeLeft: true),
                         light: false,
@@ -1566,7 +1570,7 @@ struct LightKripkeStructure: KripkeStructureProtocol {
                     ),
                     target(
                         readState: true,
-                        resetClock: false,
+                        resetClock: true,
                         duration: gap,
                         status: .init(buttonPushed: true, doorOpen: true, timeLeft: false),
                         light: true,
@@ -1575,7 +1579,7 @@ struct LightKripkeStructure: KripkeStructureProtocol {
                     ),
                     target(
                         readState: true,
-                        resetClock: false,
+                        resetClock: true,
                         duration: gap,
                         status: .init(buttonPushed: true, doorOpen: false, timeLeft: true),
                         light: true,
@@ -1584,7 +1588,7 @@ struct LightKripkeStructure: KripkeStructureProtocol {
                     ),
                     target(
                         readState: true,
-                        resetClock: false,
+                        resetClock: true,
                         duration: gap,
                         status: .init(buttonPushed: false, doorOpen: true, timeLeft: true),
                         light: true,
@@ -1593,7 +1597,7 @@ struct LightKripkeStructure: KripkeStructureProtocol {
                     ),
                     target(
                         readState: true,
-                        resetClock: false,
+                        resetClock: true,
                         duration: gap,
                         status: .init(buttonPushed: true, doorOpen: true, timeLeft: true),
                         light: true,
@@ -1650,7 +1654,7 @@ struct LightKripkeStructure: KripkeStructureProtocol {
                 currentState: off,
                 previousState: off,
                 targets: [
-                    target(readState: false, resetClock: false, duration: duration, status: .init(buttonPushed: false, doorOpen: false, timeLeft: false), light: false, currentState: off, previousState: off)
+                    target(readState: false, resetClock: false, duration: duration, status: .init(buttonPushed: false, doorOpen: false, timeLeft: false), light: true, currentState: off, previousState: off)
                 ]
             ),
             kripkeState(
@@ -1670,7 +1674,7 @@ struct LightKripkeStructure: KripkeStructureProtocol {
                 currentState: off,
                 previousState: off,
                 targets: [
-                    target(readState: false, resetClock: false, duration: duration, status: .init(buttonPushed: false, doorOpen: true, timeLeft: false), light: false, currentState: on, previousState: off)
+                    target(readState: false, resetClock: false, duration: duration, status: .init(buttonPushed: false, doorOpen: true, timeLeft: false), light: true, currentState: on, previousState: off)
                 ]
             ),
             kripkeState(
@@ -1680,7 +1684,7 @@ struct LightKripkeStructure: KripkeStructureProtocol {
                 currentState: off,
                 previousState: off,
                 targets: [
-                    target(readState: false, resetClock: false, duration: duration, status: .init(buttonPushed: false, doorOpen: false, timeLeft: true), light: false, currentState: on, previousState: off)
+                    target(readState: false, resetClock: false, duration: duration, status: .init(buttonPushed: false, doorOpen: false, timeLeft: true), light: true, currentState: on, previousState: off)
                 ]
             ),
             kripkeState(
@@ -1710,7 +1714,7 @@ struct LightKripkeStructure: KripkeStructureProtocol {
                 currentState: off,
                 previousState: off,
                 targets: [
-                    target(readState: false, resetClock: false, duration: duration, status: .init(buttonPushed: true, doorOpen: false, timeLeft: false), light: false, currentState: off, previousState: off)
+                    target(readState: false, resetClock: false, duration: duration, status: .init(buttonPushed: true, doorOpen: false, timeLeft: false), light: true, currentState: off, previousState: off)
                 ]
             ),
             kripkeState(
@@ -1730,7 +1734,7 @@ struct LightKripkeStructure: KripkeStructureProtocol {
                 currentState: off,
                 previousState: off,
                 targets: [
-                    target(readState: false, resetClock: false, duration: duration, status: .init(buttonPushed: true, doorOpen: true, timeLeft: false), light: false, currentState: on, previousState: off)
+                    target(readState: false, resetClock: false, duration: duration, status: .init(buttonPushed: true, doorOpen: true, timeLeft: false), light: true, currentState: on, previousState: off)
                 ]
             ),
             kripkeState(
@@ -1740,7 +1744,7 @@ struct LightKripkeStructure: KripkeStructureProtocol {
                 currentState: off,
                 previousState: off,
                 targets: [
-                    target(readState: false, resetClock: false, duration: duration, status: .init(buttonPushed: true, doorOpen: false, timeLeft: true), light: false, currentState: on, previousState: off)
+                    target(readState: false, resetClock: false, duration: duration, status: .init(buttonPushed: true, doorOpen: false, timeLeft: true), light: true, currentState: on, previousState: off)
                 ]
             ),
             kripkeState(
@@ -1750,7 +1754,7 @@ struct LightKripkeStructure: KripkeStructureProtocol {
                 currentState: off,
                 previousState: off,
                 targets: [
-                    target(readState: false, resetClock: false, duration: duration, status: .init(buttonPushed: false, doorOpen: true, timeLeft: true), light: false, currentState: on, previousState: off)
+                    target(readState: false, resetClock: false, duration: duration, status: .init(buttonPushed: false, doorOpen: true, timeLeft: true), light: true, currentState: on, previousState: off)
                 ]
             ),
             kripkeState(
@@ -1760,7 +1764,1232 @@ struct LightKripkeStructure: KripkeStructureProtocol {
                 currentState: off,
                 previousState: off,
                 targets: [
-                    target(readState: false, resetClock: false, duration: duration, status: .init(buttonPushed: true, doorOpen: true, timeLeft: true), light: false, currentState: on, previousState: off)
+                    target(readState: false, resetClock: false, duration: duration, status: .init(buttonPushed: true, doorOpen: true, timeLeft: true), light: true, currentState: on, previousState: off)
+                ]
+            ),
+// - MARK: Off Off W
+            kripkeState(
+                readState: false,
+                status: .init(buttonPushed: false, doorOpen: false, timeLeft: false),
+                light: true,
+                currentState: off,
+                previousState: off,
+                targets: [
+                    target(
+                        readState: true,
+                        resetClock: false,
+                        duration: gap,
+                        status: .init(buttonPushed: false, doorOpen: false, timeLeft: false),
+                        light: false,
+                        currentState: off,
+                        previousState: off
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: false,
+                        duration: gap,
+                        status: .init(buttonPushed: true, doorOpen: false, timeLeft: false),
+                        light: false,
+                        currentState: off,
+                        previousState: off
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: false,
+                        duration: gap,
+                        status: .init(buttonPushed: false, doorOpen: true, timeLeft: false),
+                        light: false,
+                        currentState: off,
+                        previousState: off
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: false,
+                        duration: gap,
+                        status: .init(buttonPushed: false, doorOpen: false, timeLeft: true),
+                        light: false,
+                        currentState: off,
+                        previousState: off
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: false,
+                        duration: gap,
+                        status: .init(buttonPushed: false, doorOpen: false, timeLeft: false),
+                        light: true,
+                        currentState: off,
+                        previousState: off
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: false,
+                        duration: gap,
+                        status: .init(buttonPushed: false, doorOpen: true, timeLeft: true),
+                        light: false,
+                        currentState: off,
+                        previousState: off
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: false,
+                        duration: gap,
+                        status: .init(buttonPushed: false, doorOpen: true, timeLeft: false),
+                        light: true,
+                        currentState: off,
+                        previousState: off
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: false,
+                        duration: gap,
+                        status: .init(buttonPushed: false, doorOpen: false, timeLeft: true),
+                        light: true,
+                        currentState: off,
+                        previousState: off
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: false,
+                        duration: gap,
+                        status: .init(buttonPushed: true, doorOpen: true, timeLeft: false),
+                        light: false,
+                        currentState: off,
+                        previousState: off
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: false,
+                        duration: gap,
+                        status: .init(buttonPushed: true, doorOpen: false, timeLeft: true),
+                        light: false,
+                        currentState: off,
+                        previousState: off
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: false,
+                        duration: gap,
+                        status: .init(buttonPushed: true, doorOpen: false, timeLeft: false),
+                        light: true,
+                        currentState: off,
+                        previousState: off
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: false,
+                        duration: gap,
+                        status: .init(buttonPushed: true, doorOpen: true, timeLeft: true),
+                        light: false,
+                        currentState: off,
+                        previousState: off
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: false,
+                        duration: gap,
+                        status: .init(buttonPushed: true, doorOpen: true, timeLeft: false),
+                        light: true,
+                        currentState: off,
+                        previousState: off
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: false,
+                        duration: gap,
+                        status: .init(buttonPushed: true, doorOpen: false, timeLeft: true),
+                        light: true,
+                        currentState: off,
+                        previousState: off
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: false,
+                        duration: gap,
+                        status: .init(buttonPushed: false, doorOpen: true, timeLeft: true),
+                        light: true,
+                        currentState: off,
+                        previousState: off
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: false,
+                        duration: gap,
+                        status: .init(buttonPushed: true, doorOpen: true, timeLeft: true),
+                        light: true,
+                        currentState: off,
+                        previousState: off
+                    )
+                ]
+            ),
+            kripkeState(
+                readState: false,
+                status: .init(buttonPushed: true, doorOpen: false, timeLeft: false),
+                light: true,
+                currentState: off,
+                previousState: off,
+                targets: [
+                    target(
+                        readState: true,
+                        resetClock: false,
+                        duration: gap,
+                        status: .init(buttonPushed: false, doorOpen: false, timeLeft: false),
+                        light: false,
+                        currentState: off,
+                        previousState: off
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: false,
+                        duration: gap,
+                        status: .init(buttonPushed: true, doorOpen: false, timeLeft: false),
+                        light: false,
+                        currentState: off,
+                        previousState: off
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: false,
+                        duration: gap,
+                        status: .init(buttonPushed: false, doorOpen: true, timeLeft: false),
+                        light: false,
+                        currentState: off,
+                        previousState: off
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: false,
+                        duration: gap,
+                        status: .init(buttonPushed: false, doorOpen: false, timeLeft: true),
+                        light: false,
+                        currentState: off,
+                        previousState: off
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: false,
+                        duration: gap,
+                        status: .init(buttonPushed: false, doorOpen: false, timeLeft: false),
+                        light: true,
+                        currentState: off,
+                        previousState: off
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: false,
+                        duration: gap,
+                        status: .init(buttonPushed: false, doorOpen: true, timeLeft: true),
+                        light: false,
+                        currentState: off,
+                        previousState: off
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: false,
+                        duration: gap,
+                        status: .init(buttonPushed: false, doorOpen: true, timeLeft: false),
+                        light: true,
+                        currentState: off,
+                        previousState: off
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: false,
+                        duration: gap,
+                        status: .init(buttonPushed: false, doorOpen: false, timeLeft: true),
+                        light: true,
+                        currentState: off,
+                        previousState: off
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: false,
+                        duration: gap,
+                        status: .init(buttonPushed: true, doorOpen: true, timeLeft: false),
+                        light: false,
+                        currentState: off,
+                        previousState: off
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: false,
+                        duration: gap,
+                        status: .init(buttonPushed: true, doorOpen: false, timeLeft: true),
+                        light: false,
+                        currentState: off,
+                        previousState: off
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: false,
+                        duration: gap,
+                        status: .init(buttonPushed: true, doorOpen: false, timeLeft: false),
+                        light: true,
+                        currentState: off,
+                        previousState: off
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: false,
+                        duration: gap,
+                        status: .init(buttonPushed: true, doorOpen: true, timeLeft: true),
+                        light: false,
+                        currentState: off,
+                        previousState: off
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: false,
+                        duration: gap,
+                        status: .init(buttonPushed: true, doorOpen: true, timeLeft: false),
+                        light: true,
+                        currentState: off,
+                        previousState: off
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: false,
+                        duration: gap,
+                        status: .init(buttonPushed: true, doorOpen: false, timeLeft: true),
+                        light: true,
+                        currentState: off,
+                        previousState: off
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: false,
+                        duration: gap,
+                        status: .init(buttonPushed: false, doorOpen: true, timeLeft: true),
+                        light: true,
+                        currentState: off,
+                        previousState: off
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: false,
+                        duration: gap,
+                        status: .init(buttonPushed: true, doorOpen: true, timeLeft: true),
+                        light: true,
+                        currentState: off,
+                        previousState: off
+                    )
+                ]
+            ),
+            kripkeState(
+                readState: false,
+                status: .init(buttonPushed: false, doorOpen: true, timeLeft: false),
+                light: true,
+                currentState: on,
+                previousState: off,
+                targets: [
+                    target(
+                        readState: true,
+                        resetClock: true,
+                        duration: gap,
+                        status: .init(buttonPushed: false, doorOpen: false, timeLeft: false),
+                        light: false,
+                        currentState: on,
+                        previousState: off
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: true,
+                        duration: gap,
+                        status: .init(buttonPushed: true, doorOpen: false, timeLeft: false),
+                        light: false,
+                        currentState: on,
+                        previousState: off
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: true,
+                        duration: gap,
+                        status: .init(buttonPushed: false, doorOpen: true, timeLeft: false),
+                        light: false,
+                        currentState: on,
+                        previousState: off
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: true,
+                        duration: gap,
+                        status: .init(buttonPushed: false, doorOpen: false, timeLeft: true),
+                        light: false,
+                        currentState: on,
+                        previousState: off
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: true,
+                        duration: gap,
+                        status: .init(buttonPushed: false, doorOpen: false, timeLeft: false),
+                        light: true,
+                        currentState: on,
+                        previousState: off
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: true,
+                        duration: gap,
+                        status: .init(buttonPushed: false, doorOpen: true, timeLeft: true),
+                        light: false,
+                        currentState: on,
+                        previousState: off
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: true,
+                        duration: gap,
+                        status: .init(buttonPushed: false, doorOpen: true, timeLeft: false),
+                        light: true,
+                        currentState: on,
+                        previousState: off
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: true,
+                        duration: gap,
+                        status: .init(buttonPushed: false, doorOpen: false, timeLeft: true),
+                        light: true,
+                        currentState: on,
+                        previousState: off
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: true,
+                        duration: gap,
+                        status: .init(buttonPushed: true, doorOpen: true, timeLeft: false),
+                        light: false,
+                        currentState: on,
+                        previousState: off
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: true,
+                        duration: gap,
+                        status: .init(buttonPushed: true, doorOpen: false, timeLeft: true),
+                        light: false,
+                        currentState: on,
+                        previousState: off
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: true,
+                        duration: gap,
+                        status: .init(buttonPushed: true, doorOpen: false, timeLeft: false),
+                        light: true,
+                        currentState: on,
+                        previousState: off
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: true,
+                        duration: gap,
+                        status: .init(buttonPushed: true, doorOpen: true, timeLeft: true),
+                        light: false,
+                        currentState: on,
+                        previousState: off
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: true,
+                        duration: gap,
+                        status: .init(buttonPushed: true, doorOpen: true, timeLeft: false),
+                        light: true,
+                        currentState: on,
+                        previousState: off
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: true,
+                        duration: gap,
+                        status: .init(buttonPushed: true, doorOpen: false, timeLeft: true),
+                        light: true,
+                        currentState: on,
+                        previousState: off
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: true,
+                        duration: gap,
+                        status: .init(buttonPushed: false, doorOpen: true, timeLeft: true),
+                        light: true,
+                        currentState: on,
+                        previousState: off
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: true,
+                        duration: gap,
+                        status: .init(buttonPushed: true, doorOpen: true, timeLeft: true),
+                        light: true,
+                        currentState: on,
+                        previousState: off
+                    )
+                ]
+            ),
+            kripkeState(
+                readState: false,
+                status: .init(buttonPushed: false, doorOpen: false, timeLeft: true),
+                light: true,
+                currentState: on,
+                previousState: off,
+                targets: [
+                    target(
+                        readState: true,
+                        resetClock: true,
+                        duration: gap,
+                        status: .init(buttonPushed: false, doorOpen: false, timeLeft: false),
+                        light: false,
+                        currentState: on,
+                        previousState: off
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: true,
+                        duration: gap,
+                        status: .init(buttonPushed: true, doorOpen: false, timeLeft: false),
+                        light: false,
+                        currentState: on,
+                        previousState: off
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: true,
+                        duration: gap,
+                        status: .init(buttonPushed: false, doorOpen: true, timeLeft: false),
+                        light: false,
+                        currentState: on,
+                        previousState: off
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: true,
+                        duration: gap,
+                        status: .init(buttonPushed: false, doorOpen: false, timeLeft: true),
+                        light: false,
+                        currentState: on,
+                        previousState: off
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: true,
+                        duration: gap,
+                        status: .init(buttonPushed: false, doorOpen: false, timeLeft: false),
+                        light: true,
+                        currentState: on,
+                        previousState: off
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: true,
+                        duration: gap,
+                        status: .init(buttonPushed: false, doorOpen: true, timeLeft: true),
+                        light: false,
+                        currentState: on,
+                        previousState: off
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: true,
+                        duration: gap,
+                        status: .init(buttonPushed: false, doorOpen: true, timeLeft: false),
+                        light: true,
+                        currentState: on,
+                        previousState: off
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: true,
+                        duration: gap,
+                        status: .init(buttonPushed: false, doorOpen: false, timeLeft: true),
+                        light: true,
+                        currentState: on,
+                        previousState: off
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: true,
+                        duration: gap,
+                        status: .init(buttonPushed: true, doorOpen: true, timeLeft: false),
+                        light: false,
+                        currentState: on,
+                        previousState: off
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: true,
+                        duration: gap,
+                        status: .init(buttonPushed: true, doorOpen: false, timeLeft: true),
+                        light: false,
+                        currentState: on,
+                        previousState: off
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: true,
+                        duration: gap,
+                        status: .init(buttonPushed: true, doorOpen: false, timeLeft: false),
+                        light: true,
+                        currentState: on,
+                        previousState: off
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: true,
+                        duration: gap,
+                        status: .init(buttonPushed: true, doorOpen: true, timeLeft: true),
+                        light: false,
+                        currentState: on,
+                        previousState: off
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: true,
+                        duration: gap,
+                        status: .init(buttonPushed: true, doorOpen: true, timeLeft: false),
+                        light: true,
+                        currentState: on,
+                        previousState: off
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: true,
+                        duration: gap,
+                        status: .init(buttonPushed: true, doorOpen: false, timeLeft: true),
+                        light: true,
+                        currentState: on,
+                        previousState: off
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: true,
+                        duration: gap,
+                        status: .init(buttonPushed: false, doorOpen: true, timeLeft: true),
+                        light: true,
+                        currentState: on,
+                        previousState: off
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: true,
+                        duration: gap,
+                        status: .init(buttonPushed: true, doorOpen: true, timeLeft: true),
+                        light: true,
+                        currentState: on,
+                        previousState: off
+                    )
+                ]
+            ),
+            kripkeState(
+                readState: false,
+                status: .init(buttonPushed: false, doorOpen: true, timeLeft: true),
+                light: true,
+                currentState: on,
+                previousState: off,
+                targets: [
+                    target(
+                        readState: true,
+                        resetClock: true,
+                        duration: gap,
+                        status: .init(buttonPushed: false, doorOpen: false, timeLeft: false),
+                        light: false,
+                        currentState: on,
+                        previousState: off
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: true,
+                        duration: gap,
+                        status: .init(buttonPushed: true, doorOpen: false, timeLeft: false),
+                        light: false,
+                        currentState: on,
+                        previousState: off
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: true,
+                        duration: gap,
+                        status: .init(buttonPushed: false, doorOpen: true, timeLeft: false),
+                        light: false,
+                        currentState: on,
+                        previousState: off
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: true,
+                        duration: gap,
+                        status: .init(buttonPushed: false, doorOpen: false, timeLeft: true),
+                        light: false,
+                        currentState: on,
+                        previousState: off
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: true,
+                        duration: gap,
+                        status: .init(buttonPushed: false, doorOpen: false, timeLeft: false),
+                        light: true,
+                        currentState: on,
+                        previousState: off
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: true,
+                        duration: gap,
+                        status: .init(buttonPushed: false, doorOpen: true, timeLeft: true),
+                        light: false,
+                        currentState: on,
+                        previousState: off
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: true,
+                        duration: gap,
+                        status: .init(buttonPushed: false, doorOpen: true, timeLeft: false),
+                        light: true,
+                        currentState: on,
+                        previousState: off
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: true,
+                        duration: gap,
+                        status: .init(buttonPushed: false, doorOpen: false, timeLeft: true),
+                        light: true,
+                        currentState: on,
+                        previousState: off
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: true,
+                        duration: gap,
+                        status: .init(buttonPushed: true, doorOpen: true, timeLeft: false),
+                        light: false,
+                        currentState: on,
+                        previousState: off
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: true,
+                        duration: gap,
+                        status: .init(buttonPushed: true, doorOpen: false, timeLeft: true),
+                        light: false,
+                        currentState: on,
+                        previousState: off
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: true,
+                        duration: gap,
+                        status: .init(buttonPushed: true, doorOpen: false, timeLeft: false),
+                        light: true,
+                        currentState: on,
+                        previousState: off
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: true,
+                        duration: gap,
+                        status: .init(buttonPushed: true, doorOpen: true, timeLeft: true),
+                        light: false,
+                        currentState: on,
+                        previousState: off
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: true,
+                        duration: gap,
+                        status: .init(buttonPushed: true, doorOpen: true, timeLeft: false),
+                        light: true,
+                        currentState: on,
+                        previousState: off
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: true,
+                        duration: gap,
+                        status: .init(buttonPushed: true, doorOpen: false, timeLeft: true),
+                        light: true,
+                        currentState: on,
+                        previousState: off
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: true,
+                        duration: gap,
+                        status: .init(buttonPushed: false, doorOpen: true, timeLeft: true),
+                        light: true,
+                        currentState: on,
+                        previousState: off
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: true,
+                        duration: gap,
+                        status: .init(buttonPushed: true, doorOpen: true, timeLeft: true),
+                        light: true,
+                        currentState: on,
+                        previousState: off
+                    )
+                ]
+            ),
+            kripkeState(
+                readState: false,
+                status: .init(buttonPushed: true, doorOpen: true, timeLeft: false),
+                light: true,
+                currentState: on,
+                previousState: off,
+                targets: [
+                    target(
+                        readState: true,
+                        resetClock: true,
+                        duration: gap,
+                        status: .init(buttonPushed: false, doorOpen: false, timeLeft: false),
+                        light: false,
+                        currentState: on,
+                        previousState: off
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: true,
+                        duration: gap,
+                        status: .init(buttonPushed: true, doorOpen: false, timeLeft: false),
+                        light: false,
+                        currentState: on,
+                        previousState: off
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: true,
+                        duration: gap,
+                        status: .init(buttonPushed: false, doorOpen: true, timeLeft: false),
+                        light: false,
+                        currentState: on,
+                        previousState: off
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: true,
+                        duration: gap,
+                        status: .init(buttonPushed: false, doorOpen: false, timeLeft: true),
+                        light: false,
+                        currentState: on,
+                        previousState: off
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: true,
+                        duration: gap,
+                        status: .init(buttonPushed: false, doorOpen: false, timeLeft: false),
+                        light: true,
+                        currentState: on,
+                        previousState: off
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: true,
+                        duration: gap,
+                        status: .init(buttonPushed: false, doorOpen: true, timeLeft: true),
+                        light: false,
+                        currentState: on,
+                        previousState: off
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: true,
+                        duration: gap,
+                        status: .init(buttonPushed: false, doorOpen: true, timeLeft: false),
+                        light: true,
+                        currentState: on,
+                        previousState: off
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: true,
+                        duration: gap,
+                        status: .init(buttonPushed: false, doorOpen: false, timeLeft: true),
+                        light: true,
+                        currentState: on,
+                        previousState: off
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: true,
+                        duration: gap,
+                        status: .init(buttonPushed: true, doorOpen: true, timeLeft: false),
+                        light: false,
+                        currentState: on,
+                        previousState: off
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: true,
+                        duration: gap,
+                        status: .init(buttonPushed: true, doorOpen: false, timeLeft: true),
+                        light: false,
+                        currentState: on,
+                        previousState: off
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: true,
+                        duration: gap,
+                        status: .init(buttonPushed: true, doorOpen: false, timeLeft: false),
+                        light: true,
+                        currentState: on,
+                        previousState: off
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: true,
+                        duration: gap,
+                        status: .init(buttonPushed: true, doorOpen: true, timeLeft: true),
+                        light: false,
+                        currentState: on,
+                        previousState: off
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: true,
+                        duration: gap,
+                        status: .init(buttonPushed: true, doorOpen: true, timeLeft: false),
+                        light: true,
+                        currentState: on,
+                        previousState: off
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: true,
+                        duration: gap,
+                        status: .init(buttonPushed: true, doorOpen: false, timeLeft: true),
+                        light: true,
+                        currentState: on,
+                        previousState: off
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: true,
+                        duration: gap,
+                        status: .init(buttonPushed: false, doorOpen: true, timeLeft: true),
+                        light: true,
+                        currentState: on,
+                        previousState: off
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: true,
+                        duration: gap,
+                        status: .init(buttonPushed: true, doorOpen: true, timeLeft: true),
+                        light: true,
+                        currentState: on,
+                        previousState: off
+                    )
+                ]
+            ),
+            kripkeState(
+                readState: false,
+                status: .init(buttonPushed: true, doorOpen: false, timeLeft: true),
+                light: true,
+                currentState: on,
+                previousState: off,
+                targets: [
+                    target(
+                        readState: true,
+                        resetClock: true,
+                        duration: gap,
+                        status: .init(buttonPushed: false, doorOpen: false, timeLeft: false),
+                        light: false,
+                        currentState: on,
+                        previousState: off
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: true,
+                        duration: gap,
+                        status: .init(buttonPushed: true, doorOpen: false, timeLeft: false),
+                        light: false,
+                        currentState: on,
+                        previousState: off
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: true,
+                        duration: gap,
+                        status: .init(buttonPushed: false, doorOpen: true, timeLeft: false),
+                        light: false,
+                        currentState: on,
+                        previousState: off
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: true,
+                        duration: gap,
+                        status: .init(buttonPushed: false, doorOpen: false, timeLeft: true),
+                        light: false,
+                        currentState: on,
+                        previousState: off
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: true,
+                        duration: gap,
+                        status: .init(buttonPushed: false, doorOpen: false, timeLeft: false),
+                        light: true,
+                        currentState: on,
+                        previousState: off
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: true,
+                        duration: gap,
+                        status: .init(buttonPushed: false, doorOpen: true, timeLeft: true),
+                        light: false,
+                        currentState: on,
+                        previousState: off
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: true,
+                        duration: gap,
+                        status: .init(buttonPushed: false, doorOpen: true, timeLeft: false),
+                        light: true,
+                        currentState: on,
+                        previousState: off
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: true,
+                        duration: gap,
+                        status: .init(buttonPushed: false, doorOpen: false, timeLeft: true),
+                        light: true,
+                        currentState: on,
+                        previousState: off
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: true,
+                        duration: gap,
+                        status: .init(buttonPushed: true, doorOpen: true, timeLeft: false),
+                        light: false,
+                        currentState: on,
+                        previousState: off
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: true,
+                        duration: gap,
+                        status: .init(buttonPushed: true, doorOpen: false, timeLeft: true),
+                        light: false,
+                        currentState: on,
+                        previousState: off
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: true,
+                        duration: gap,
+                        status: .init(buttonPushed: true, doorOpen: false, timeLeft: false),
+                        light: true,
+                        currentState: on,
+                        previousState: off
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: true,
+                        duration: gap,
+                        status: .init(buttonPushed: true, doorOpen: true, timeLeft: true),
+                        light: false,
+                        currentState: on,
+                        previousState: off
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: true,
+                        duration: gap,
+                        status: .init(buttonPushed: true, doorOpen: true, timeLeft: false),
+                        light: true,
+                        currentState: on,
+                        previousState: off
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: true,
+                        duration: gap,
+                        status: .init(buttonPushed: true, doorOpen: false, timeLeft: true),
+                        light: true,
+                        currentState: on,
+                        previousState: off
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: true,
+                        duration: gap,
+                        status: .init(buttonPushed: false, doorOpen: true, timeLeft: true),
+                        light: true,
+                        currentState: on,
+                        previousState: off
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: true,
+                        duration: gap,
+                        status: .init(buttonPushed: true, doorOpen: true, timeLeft: true),
+                        light: true,
+                        currentState: on,
+                        previousState: off
+                    )
+                ]
+            ),
+            kripkeState(
+                readState: false,
+                status: .init(buttonPushed: true, doorOpen: true, timeLeft: true),
+                light: true,
+                currentState: on,
+                previousState: off,
+                targets: [
+                    target(
+                        readState: true,
+                        resetClock: true,
+                        duration: gap,
+                        status: .init(buttonPushed: false, doorOpen: false, timeLeft: false),
+                        light: false,
+                        currentState: on,
+                        previousState: off
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: true,
+                        duration: gap,
+                        status: .init(buttonPushed: true, doorOpen: false, timeLeft: false),
+                        light: false,
+                        currentState: on,
+                        previousState: off
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: true,
+                        duration: gap,
+                        status: .init(buttonPushed: false, doorOpen: true, timeLeft: false),
+                        light: false,
+                        currentState: on,
+                        previousState: off
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: true,
+                        duration: gap,
+                        status: .init(buttonPushed: false, doorOpen: false, timeLeft: true),
+                        light: false,
+                        currentState: on,
+                        previousState: off
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: true,
+                        duration: gap,
+                        status: .init(buttonPushed: false, doorOpen: false, timeLeft: false),
+                        light: true,
+                        currentState: on,
+                        previousState: off
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: true,
+                        duration: gap,
+                        status: .init(buttonPushed: false, doorOpen: true, timeLeft: true),
+                        light: false,
+                        currentState: on,
+                        previousState: off
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: true,
+                        duration: gap,
+                        status: .init(buttonPushed: false, doorOpen: true, timeLeft: false),
+                        light: true,
+                        currentState: on,
+                        previousState: off
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: true,
+                        duration: gap,
+                        status: .init(buttonPushed: false, doorOpen: false, timeLeft: true),
+                        light: true,
+                        currentState: on,
+                        previousState: off
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: true,
+                        duration: gap,
+                        status: .init(buttonPushed: true, doorOpen: true, timeLeft: false),
+                        light: false,
+                        currentState: on,
+                        previousState: off
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: true,
+                        duration: gap,
+                        status: .init(buttonPushed: true, doorOpen: false, timeLeft: true),
+                        light: false,
+                        currentState: on,
+                        previousState: off
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: true,
+                        duration: gap,
+                        status: .init(buttonPushed: true, doorOpen: false, timeLeft: false),
+                        light: true,
+                        currentState: on,
+                        previousState: off
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: true,
+                        duration: gap,
+                        status: .init(buttonPushed: true, doorOpen: true, timeLeft: true),
+                        light: false,
+                        currentState: on,
+                        previousState: off
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: true,
+                        duration: gap,
+                        status: .init(buttonPushed: true, doorOpen: true, timeLeft: false),
+                        light: true,
+                        currentState: on,
+                        previousState: off
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: true,
+                        duration: gap,
+                        status: .init(buttonPushed: true, doorOpen: false, timeLeft: true),
+                        light: true,
+                        currentState: on,
+                        previousState: off
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: true,
+                        duration: gap,
+                        status: .init(buttonPushed: false, doorOpen: true, timeLeft: true),
+                        light: true,
+                        currentState: on,
+                        previousState: off
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: true,
+                        duration: gap,
+                        status: .init(buttonPushed: true, doorOpen: true, timeLeft: true),
+                        light: true,
+                        currentState: on,
+                        previousState: off
+                    )
                 ]
             ),
 // - MARK: Off On R
@@ -1921,7 +3150,7 @@ struct LightKripkeStructure: KripkeStructureProtocol {
                 currentState: on,
                 previousState: off,
                 targets: [
-                    target(readState: false, resetClock: false, duration: duration, status: .init(buttonPushed: true, doorOpen: true, timeLeft: true), light: false, currentState: on, previousState: on)
+                    target(readState: false, resetClock: false, duration: duration, status: .init(buttonPushed: true, doorOpen: true, timeLeft: true), light: true, currentState: on, previousState: on)
                 ]
             ),
 // MARK: On W
@@ -3157,7 +4386,7 @@ struct LightKripkeStructure: KripkeStructureProtocol {
                 currentState: on,
                 previousState: on,
                 targets: [
-                    target(readState: false, resetClock: false, duration: duration, status: .init(buttonPushed: false, doorOpen: false, timeLeft: false), light: true, currentState: off, previousState: on)
+                    target(readState: false, resetClock: false, duration: duration, status: .init(buttonPushed: false, doorOpen: false, timeLeft: false), light: false, currentState: off, previousState: on)
                 ]
             ),
             kripkeState(
@@ -3167,7 +4396,7 @@ struct LightKripkeStructure: KripkeStructureProtocol {
                 currentState: on,
                 previousState: on,
                 targets: [
-                    target(readState: false, resetClock: false, duration: duration, status: .init(buttonPushed: true, doorOpen: false, timeLeft: false), light: true, currentState: off, previousState: on)
+                    target(readState: false, resetClock: false, duration: duration, status: .init(buttonPushed: true, doorOpen: false, timeLeft: false), light: false, currentState: off, previousState: on)
                 ]
             ),
             kripkeState(
@@ -3177,7 +4406,7 @@ struct LightKripkeStructure: KripkeStructureProtocol {
                 currentState: on,
                 previousState: on,
                 targets: [
-                    target(readState: false, resetClock: false, duration: duration, status: .init(buttonPushed: false, doorOpen: true, timeLeft: false), light: true, currentState: on, previousState: on)
+                    target(readState: false, resetClock: false, duration: duration, status: .init(buttonPushed: false, doorOpen: true, timeLeft: false), light: false, currentState: on, previousState: on)
                 ]
             ),
             kripkeState(
@@ -3187,7 +4416,7 @@ struct LightKripkeStructure: KripkeStructureProtocol {
                 currentState: on,
                 previousState: on,
                 targets: [
-                    target(readState: false, resetClock: false, duration: duration, status: .init(buttonPushed: false, doorOpen: false, timeLeft: true), light: true, currentState: on, previousState: on)
+                    target(readState: false, resetClock: false, duration: duration, status: .init(buttonPushed: false, doorOpen: false, timeLeft: true), light: false, currentState: on, previousState: on)
                 ]
             ),
             kripkeState(
@@ -3207,7 +4436,7 @@ struct LightKripkeStructure: KripkeStructureProtocol {
                 currentState: on,
                 previousState: on,
                 targets: [
-                    target(readState: false, resetClock: false, duration: duration, status: .init(buttonPushed: false, doorOpen: true, timeLeft: true), light: true, currentState: on, previousState: on)
+                    target(readState: false, resetClock: false, duration: duration, status: .init(buttonPushed: false, doorOpen: true, timeLeft: true), light: false, currentState: on, previousState: on)
                 ]
             ),
             kripkeState(
@@ -3237,7 +4466,7 @@ struct LightKripkeStructure: KripkeStructureProtocol {
                 currentState: on,
                 previousState: on,
                 targets: [
-                    target(readState: false, resetClock: false, duration: duration, status: .init(buttonPushed: true, doorOpen: true, timeLeft: false), light: true, currentState: on, previousState: on)
+                    target(readState: false, resetClock: false, duration: duration, status: .init(buttonPushed: true, doorOpen: true, timeLeft: false), light: false, currentState: on, previousState: on)
                 ]
             ),
             kripkeState(
@@ -3247,7 +4476,7 @@ struct LightKripkeStructure: KripkeStructureProtocol {
                 currentState: on,
                 previousState: on,
                 targets: [
-                    target(readState: false, resetClock: false, duration: duration, status: .init(buttonPushed: true, doorOpen: false, timeLeft: true), light: true, currentState: on, previousState: on)
+                    target(readState: false, resetClock: false, duration: duration, status: .init(buttonPushed: true, doorOpen: false, timeLeft: true), light: false, currentState: on, previousState: on)
                 ]
             ),
             kripkeState(
@@ -3267,7 +4496,7 @@ struct LightKripkeStructure: KripkeStructureProtocol {
                 currentState: on,
                 previousState: on,
                 targets: [
-                    target(readState: false, resetClock: false, duration: duration, status: .init(buttonPushed: true, doorOpen: true, timeLeft: true), light: true, currentState: on, previousState: on)
+                    target(readState: false, resetClock: false, duration: duration, status: .init(buttonPushed: true, doorOpen: true, timeLeft: true), light: false, currentState: on, previousState: on)
                 ]
             ),
             kripkeState(
@@ -3307,9 +4536,1234 @@ struct LightKripkeStructure: KripkeStructureProtocol {
                 currentState: on,
                 previousState: on,
                 targets: [
-                    target(readState: false, resetClock: false, duration: duration, status: .init(buttonPushed: true, doorOpen: true, timeLeft: true), light: false, currentState: on, previousState: on)
+                    target(readState: false, resetClock: false, duration: duration, status: .init(buttonPushed: true, doorOpen: true, timeLeft: true), light: true, currentState: on, previousState: on)
                 ]
-            )
+            ),
+// - MARK: On On W
+            kripkeState(
+                readState: false,
+                status: .init(buttonPushed: false, doorOpen: false, timeLeft: false),
+                light: false,
+                currentState: off,
+                previousState: on,
+                targets: [
+                    target(
+                        readState: true,
+                        resetClock: true,
+                        duration: gap,
+                        status: .init(buttonPushed: false, doorOpen: false, timeLeft: false),
+                        light: false,
+                        currentState: off,
+                        previousState: on
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: true,
+                        duration: gap,
+                        status: .init(buttonPushed: true, doorOpen: false, timeLeft: false),
+                        light: false,
+                        currentState: off,
+                        previousState: on
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: true,
+                        duration: gap,
+                        status: .init(buttonPushed: false, doorOpen: true, timeLeft: false),
+                        light: false,
+                        currentState: off,
+                        previousState: on
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: true,
+                        duration: gap,
+                        status: .init(buttonPushed: false, doorOpen: false, timeLeft: true),
+                        light: false,
+                        currentState: off,
+                        previousState: on
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: true,
+                        duration: gap,
+                        status: .init(buttonPushed: false, doorOpen: false, timeLeft: false),
+                        light: true,
+                        currentState: off,
+                        previousState: on
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: true,
+                        duration: gap,
+                        status: .init(buttonPushed: false, doorOpen: true, timeLeft: true),
+                        light: false,
+                        currentState: off,
+                        previousState: on
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: true,
+                        duration: gap,
+                        status: .init(buttonPushed: false, doorOpen: true, timeLeft: false),
+                        light: true,
+                        currentState: off,
+                        previousState: on
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: true,
+                        duration: gap,
+                        status: .init(buttonPushed: false, doorOpen: false, timeLeft: true),
+                        light: true,
+                        currentState: off,
+                        previousState: on
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: true,
+                        duration: gap,
+                        status: .init(buttonPushed: true, doorOpen: true, timeLeft: false),
+                        light: false,
+                        currentState: off,
+                        previousState: on
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: true,
+                        duration: gap,
+                        status: .init(buttonPushed: true, doorOpen: false, timeLeft: true),
+                        light: false,
+                        currentState: off,
+                        previousState: on
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: true,
+                        duration: gap,
+                        status: .init(buttonPushed: true, doorOpen: false, timeLeft: false),
+                        light: true,
+                        currentState: off,
+                        previousState: on
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: true,
+                        duration: gap,
+                        status: .init(buttonPushed: true, doorOpen: true, timeLeft: true),
+                        light: false,
+                        currentState: off,
+                        previousState: on
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: true,
+                        duration: gap,
+                        status: .init(buttonPushed: true, doorOpen: true, timeLeft: false),
+                        light: true,
+                        currentState: off,
+                        previousState: on
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: true,
+                        duration: gap,
+                        status: .init(buttonPushed: true, doorOpen: false, timeLeft: true),
+                        light: true,
+                        currentState: off,
+                        previousState: on
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: true,
+                        duration: gap,
+                        status: .init(buttonPushed: false, doorOpen: true, timeLeft: true),
+                        light: true,
+                        currentState: off,
+                        previousState: on
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: true,
+                        duration: gap,
+                        status: .init(buttonPushed: true, doorOpen: true, timeLeft: true),
+                        light: true,
+                        currentState: off,
+                        previousState: on
+                    )
+                ]
+            ),
+            kripkeState(
+                readState: false,
+                status: .init(buttonPushed: true, doorOpen: false, timeLeft: false),
+                light: false,
+                currentState: off,
+                previousState: on,
+                targets: [
+                    target(
+                        readState: true,
+                        resetClock: true,
+                        duration: gap,
+                        status: .init(buttonPushed: false, doorOpen: false, timeLeft: false),
+                        light: false,
+                        currentState: off,
+                        previousState: on
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: true,
+                        duration: gap,
+                        status: .init(buttonPushed: true, doorOpen: false, timeLeft: false),
+                        light: false,
+                        currentState: off,
+                        previousState: on
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: true,
+                        duration: gap,
+                        status: .init(buttonPushed: false, doorOpen: true, timeLeft: false),
+                        light: false,
+                        currentState: off,
+                        previousState: on
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: true,
+                        duration: gap,
+                        status: .init(buttonPushed: false, doorOpen: false, timeLeft: true),
+                        light: false,
+                        currentState: off,
+                        previousState: on
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: true,
+                        duration: gap,
+                        status: .init(buttonPushed: false, doorOpen: false, timeLeft: false),
+                        light: true,
+                        currentState: off,
+                        previousState: on
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: true,
+                        duration: gap,
+                        status: .init(buttonPushed: false, doorOpen: true, timeLeft: true),
+                        light: false,
+                        currentState: off,
+                        previousState: on
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: true,
+                        duration: gap,
+                        status: .init(buttonPushed: false, doorOpen: true, timeLeft: false),
+                        light: true,
+                        currentState: off,
+                        previousState: on
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: true,
+                        duration: gap,
+                        status: .init(buttonPushed: false, doorOpen: false, timeLeft: true),
+                        light: true,
+                        currentState: off,
+                        previousState: on
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: true,
+                        duration: gap,
+                        status: .init(buttonPushed: true, doorOpen: true, timeLeft: false),
+                        light: false,
+                        currentState: off,
+                        previousState: on
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: true,
+                        duration: gap,
+                        status: .init(buttonPushed: true, doorOpen: false, timeLeft: true),
+                        light: false,
+                        currentState: off,
+                        previousState: on
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: true,
+                        duration: gap,
+                        status: .init(buttonPushed: true, doorOpen: false, timeLeft: false),
+                        light: true,
+                        currentState: off,
+                        previousState: on
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: true,
+                        duration: gap,
+                        status: .init(buttonPushed: true, doorOpen: true, timeLeft: true),
+                        light: false,
+                        currentState: off,
+                        previousState: on
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: true,
+                        duration: gap,
+                        status: .init(buttonPushed: true, doorOpen: true, timeLeft: false),
+                        light: true,
+                        currentState: off,
+                        previousState: on
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: true,
+                        duration: gap,
+                        status: .init(buttonPushed: true, doorOpen: false, timeLeft: true),
+                        light: true,
+                        currentState: off,
+                        previousState: on
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: true,
+                        duration: gap,
+                        status: .init(buttonPushed: false, doorOpen: true, timeLeft: true),
+                        light: true,
+                        currentState: off,
+                        previousState: on
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: true,
+                        duration: gap,
+                        status: .init(buttonPushed: true, doorOpen: true, timeLeft: true),
+                        light: true,
+                        currentState: off,
+                        previousState: on
+                    )
+                ]
+            ),
+            kripkeState(
+                readState: false,
+                status: .init(buttonPushed: false, doorOpen: true, timeLeft: false),
+                light: false,
+                currentState: on,
+                previousState: on,
+                targets: [
+                    target(
+                        readState: true,
+                        resetClock: false,
+                        duration: gap,
+                        status: .init(buttonPushed: false, doorOpen: false, timeLeft: false),
+                        light: false,
+                        currentState: on,
+                        previousState: on
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: false,
+                        duration: gap,
+                        status: .init(buttonPushed: true, doorOpen: false, timeLeft: false),
+                        light: false,
+                        currentState: on,
+                        previousState: on
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: false,
+                        duration: gap,
+                        status: .init(buttonPushed: false, doorOpen: true, timeLeft: false),
+                        light: false,
+                        currentState: on,
+                        previousState: on
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: false,
+                        duration: gap,
+                        status: .init(buttonPushed: false, doorOpen: false, timeLeft: true),
+                        light: false,
+                        currentState: on,
+                        previousState: on
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: false,
+                        duration: gap,
+                        status: .init(buttonPushed: false, doorOpen: false, timeLeft: false),
+                        light: true,
+                        currentState: on,
+                        previousState: on
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: false,
+                        duration: gap,
+                        status: .init(buttonPushed: false, doorOpen: true, timeLeft: true),
+                        light: false,
+                        currentState: on,
+                        previousState: on
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: false,
+                        duration: gap,
+                        status: .init(buttonPushed: false, doorOpen: true, timeLeft: false),
+                        light: true,
+                        currentState: on,
+                        previousState: on
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: false,
+                        duration: gap,
+                        status: .init(buttonPushed: false, doorOpen: false, timeLeft: true),
+                        light: true,
+                        currentState: on,
+                        previousState: on
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: false,
+                        duration: gap,
+                        status: .init(buttonPushed: true, doorOpen: true, timeLeft: false),
+                        light: false,
+                        currentState: on,
+                        previousState: on
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: false,
+                        duration: gap,
+                        status: .init(buttonPushed: true, doorOpen: false, timeLeft: true),
+                        light: false,
+                        currentState: on,
+                        previousState: on
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: false,
+                        duration: gap,
+                        status: .init(buttonPushed: true, doorOpen: false, timeLeft: false),
+                        light: true,
+                        currentState: on,
+                        previousState: on
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: false,
+                        duration: gap,
+                        status: .init(buttonPushed: true, doorOpen: true, timeLeft: true),
+                        light: false,
+                        currentState: on,
+                        previousState: on
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: false,
+                        duration: gap,
+                        status: .init(buttonPushed: true, doorOpen: true, timeLeft: false),
+                        light: true,
+                        currentState: on,
+                        previousState: on
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: false,
+                        duration: gap,
+                        status: .init(buttonPushed: true, doorOpen: false, timeLeft: true),
+                        light: true,
+                        currentState: on,
+                        previousState: on
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: false,
+                        duration: gap,
+                        status: .init(buttonPushed: false, doorOpen: true, timeLeft: true),
+                        light: true,
+                        currentState: on,
+                        previousState: on
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: false,
+                        duration: gap,
+                        status: .init(buttonPushed: true, doorOpen: true, timeLeft: true),
+                        light: true,
+                        currentState: on,
+                        previousState: on
+                    )
+                ]
+            ),
+            kripkeState(
+                readState: false,
+                status: .init(buttonPushed: false, doorOpen: false, timeLeft: true),
+                light: false,
+                currentState: on,
+                previousState: on,
+                targets: [
+                    target(
+                        readState: true,
+                        resetClock: false,
+                        duration: gap,
+                        status: .init(buttonPushed: false, doorOpen: false, timeLeft: false),
+                        light: false,
+                        currentState: on,
+                        previousState: on
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: false,
+                        duration: gap,
+                        status: .init(buttonPushed: true, doorOpen: false, timeLeft: false),
+                        light: false,
+                        currentState: on,
+                        previousState: on
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: false,
+                        duration: gap,
+                        status: .init(buttonPushed: false, doorOpen: true, timeLeft: false),
+                        light: false,
+                        currentState: on,
+                        previousState: on
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: false,
+                        duration: gap,
+                        status: .init(buttonPushed: false, doorOpen: false, timeLeft: true),
+                        light: false,
+                        currentState: on,
+                        previousState: on
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: false,
+                        duration: gap,
+                        status: .init(buttonPushed: false, doorOpen: false, timeLeft: false),
+                        light: true,
+                        currentState: on,
+                        previousState: on
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: false,
+                        duration: gap,
+                        status: .init(buttonPushed: false, doorOpen: true, timeLeft: true),
+                        light: false,
+                        currentState: on,
+                        previousState: on
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: false,
+                        duration: gap,
+                        status: .init(buttonPushed: false, doorOpen: true, timeLeft: false),
+                        light: true,
+                        currentState: on,
+                        previousState: on
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: false,
+                        duration: gap,
+                        status: .init(buttonPushed: false, doorOpen: false, timeLeft: true),
+                        light: true,
+                        currentState: on,
+                        previousState: on
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: false,
+                        duration: gap,
+                        status: .init(buttonPushed: true, doorOpen: true, timeLeft: false),
+                        light: false,
+                        currentState: on,
+                        previousState: on
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: false,
+                        duration: gap,
+                        status: .init(buttonPushed: true, doorOpen: false, timeLeft: true),
+                        light: false,
+                        currentState: on,
+                        previousState: on
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: false,
+                        duration: gap,
+                        status: .init(buttonPushed: true, doorOpen: false, timeLeft: false),
+                        light: true,
+                        currentState: on,
+                        previousState: on
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: false,
+                        duration: gap,
+                        status: .init(buttonPushed: true, doorOpen: true, timeLeft: true),
+                        light: false,
+                        currentState: on,
+                        previousState: on
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: false,
+                        duration: gap,
+                        status: .init(buttonPushed: true, doorOpen: true, timeLeft: false),
+                        light: true,
+                        currentState: on,
+                        previousState: on
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: false,
+                        duration: gap,
+                        status: .init(buttonPushed: true, doorOpen: false, timeLeft: true),
+                        light: true,
+                        currentState: on,
+                        previousState: on
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: false,
+                        duration: gap,
+                        status: .init(buttonPushed: false, doorOpen: true, timeLeft: true),
+                        light: true,
+                        currentState: on,
+                        previousState: on
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: false,
+                        duration: gap,
+                        status: .init(buttonPushed: true, doorOpen: true, timeLeft: true),
+                        light: true,
+                        currentState: on,
+                        previousState: on
+                    )
+                ]
+            ),
+            kripkeState(
+                readState: false,
+                status: .init(buttonPushed: false, doorOpen: true, timeLeft: true),
+                light: false,
+                currentState: on,
+                previousState: on,
+                targets: [
+                    target(
+                        readState: true,
+                        resetClock: false,
+                        duration: gap,
+                        status: .init(buttonPushed: false, doorOpen: false, timeLeft: false),
+                        light: false,
+                        currentState: on,
+                        previousState: on
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: false,
+                        duration: gap,
+                        status: .init(buttonPushed: true, doorOpen: false, timeLeft: false),
+                        light: false,
+                        currentState: on,
+                        previousState: on
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: false,
+                        duration: gap,
+                        status: .init(buttonPushed: false, doorOpen: true, timeLeft: false),
+                        light: false,
+                        currentState: on,
+                        previousState: on
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: false,
+                        duration: gap,
+                        status: .init(buttonPushed: false, doorOpen: false, timeLeft: true),
+                        light: false,
+                        currentState: on,
+                        previousState: on
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: false,
+                        duration: gap,
+                        status: .init(buttonPushed: false, doorOpen: false, timeLeft: false),
+                        light: true,
+                        currentState: on,
+                        previousState: on
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: false,
+                        duration: gap,
+                        status: .init(buttonPushed: false, doorOpen: true, timeLeft: true),
+                        light: false,
+                        currentState: on,
+                        previousState: on
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: false,
+                        duration: gap,
+                        status: .init(buttonPushed: false, doorOpen: true, timeLeft: false),
+                        light: true,
+                        currentState: on,
+                        previousState: on
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: false,
+                        duration: gap,
+                        status: .init(buttonPushed: false, doorOpen: false, timeLeft: true),
+                        light: true,
+                        currentState: on,
+                        previousState: on
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: false,
+                        duration: gap,
+                        status: .init(buttonPushed: true, doorOpen: true, timeLeft: false),
+                        light: false,
+                        currentState: on,
+                        previousState: on
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: false,
+                        duration: gap,
+                        status: .init(buttonPushed: true, doorOpen: false, timeLeft: true),
+                        light: false,
+                        currentState: on,
+                        previousState: on
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: false,
+                        duration: gap,
+                        status: .init(buttonPushed: true, doorOpen: false, timeLeft: false),
+                        light: true,
+                        currentState: on,
+                        previousState: on
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: false,
+                        duration: gap,
+                        status: .init(buttonPushed: true, doorOpen: true, timeLeft: true),
+                        light: false,
+                        currentState: on,
+                        previousState: on
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: false,
+                        duration: gap,
+                        status: .init(buttonPushed: true, doorOpen: true, timeLeft: false),
+                        light: true,
+                        currentState: on,
+                        previousState: on
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: false,
+                        duration: gap,
+                        status: .init(buttonPushed: true, doorOpen: false, timeLeft: true),
+                        light: true,
+                        currentState: on,
+                        previousState: on
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: false,
+                        duration: gap,
+                        status: .init(buttonPushed: false, doorOpen: true, timeLeft: true),
+                        light: true,
+                        currentState: on,
+                        previousState: on
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: false,
+                        duration: gap,
+                        status: .init(buttonPushed: true, doorOpen: true, timeLeft: true),
+                        light: true,
+                        currentState: on,
+                        previousState: on
+                    )
+                ]
+            ),
+            kripkeState(
+                readState: false,
+                status: .init(buttonPushed: true, doorOpen: true, timeLeft: false),
+                light: false,
+                currentState: on,
+                previousState: on,
+                targets: [
+                    target(
+                        readState: true,
+                        resetClock: false,
+                        duration: gap,
+                        status: .init(buttonPushed: false, doorOpen: false, timeLeft: false),
+                        light: false,
+                        currentState: on,
+                        previousState: on
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: false,
+                        duration: gap,
+                        status: .init(buttonPushed: true, doorOpen: false, timeLeft: false),
+                        light: false,
+                        currentState: on,
+                        previousState: on
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: false,
+                        duration: gap,
+                        status: .init(buttonPushed: false, doorOpen: true, timeLeft: false),
+                        light: false,
+                        currentState: on,
+                        previousState: on
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: false,
+                        duration: gap,
+                        status: .init(buttonPushed: false, doorOpen: false, timeLeft: true),
+                        light: false,
+                        currentState: on,
+                        previousState: on
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: false,
+                        duration: gap,
+                        status: .init(buttonPushed: false, doorOpen: false, timeLeft: false),
+                        light: true,
+                        currentState: on,
+                        previousState: on
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: false,
+                        duration: gap,
+                        status: .init(buttonPushed: false, doorOpen: true, timeLeft: true),
+                        light: false,
+                        currentState: on,
+                        previousState: on
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: false,
+                        duration: gap,
+                        status: .init(buttonPushed: false, doorOpen: true, timeLeft: false),
+                        light: true,
+                        currentState: on,
+                        previousState: on
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: false,
+                        duration: gap,
+                        status: .init(buttonPushed: false, doorOpen: false, timeLeft: true),
+                        light: true,
+                        currentState: on,
+                        previousState: on
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: false,
+                        duration: gap,
+                        status: .init(buttonPushed: true, doorOpen: true, timeLeft: false),
+                        light: false,
+                        currentState: on,
+                        previousState: on
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: false,
+                        duration: gap,
+                        status: .init(buttonPushed: true, doorOpen: false, timeLeft: true),
+                        light: false,
+                        currentState: on,
+                        previousState: on
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: false,
+                        duration: gap,
+                        status: .init(buttonPushed: true, doorOpen: false, timeLeft: false),
+                        light: true,
+                        currentState: on,
+                        previousState: on
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: false,
+                        duration: gap,
+                        status: .init(buttonPushed: true, doorOpen: true, timeLeft: true),
+                        light: false,
+                        currentState: on,
+                        previousState: on
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: false,
+                        duration: gap,
+                        status: .init(buttonPushed: true, doorOpen: true, timeLeft: false),
+                        light: true,
+                        currentState: on,
+                        previousState: on
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: false,
+                        duration: gap,
+                        status: .init(buttonPushed: true, doorOpen: false, timeLeft: true),
+                        light: true,
+                        currentState: on,
+                        previousState: on
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: false,
+                        duration: gap,
+                        status: .init(buttonPushed: false, doorOpen: true, timeLeft: true),
+                        light: true,
+                        currentState: on,
+                        previousState: on
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: false,
+                        duration: gap,
+                        status: .init(buttonPushed: true, doorOpen: true, timeLeft: true),
+                        light: true,
+                        currentState: on,
+                        previousState: on
+                    )
+                ]
+            ),
+            kripkeState(
+                readState: false,
+                status: .init(buttonPushed: true, doorOpen: false, timeLeft: true),
+                light: false,
+                currentState: on,
+                previousState: on,
+                targets: [
+                    target(
+                        readState: true,
+                        resetClock: false,
+                        duration: gap,
+                        status: .init(buttonPushed: false, doorOpen: false, timeLeft: false),
+                        light: false,
+                        currentState: on,
+                        previousState: on
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: false,
+                        duration: gap,
+                        status: .init(buttonPushed: true, doorOpen: false, timeLeft: false),
+                        light: false,
+                        currentState: on,
+                        previousState: on
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: false,
+                        duration: gap,
+                        status: .init(buttonPushed: false, doorOpen: true, timeLeft: false),
+                        light: false,
+                        currentState: on,
+                        previousState: on
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: false,
+                        duration: gap,
+                        status: .init(buttonPushed: false, doorOpen: false, timeLeft: true),
+                        light: false,
+                        currentState: on,
+                        previousState: on
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: false,
+                        duration: gap,
+                        status: .init(buttonPushed: false, doorOpen: false, timeLeft: false),
+                        light: true,
+                        currentState: on,
+                        previousState: on
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: false,
+                        duration: gap,
+                        status: .init(buttonPushed: false, doorOpen: true, timeLeft: true),
+                        light: false,
+                        currentState: on,
+                        previousState: on
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: false,
+                        duration: gap,
+                        status: .init(buttonPushed: false, doorOpen: true, timeLeft: false),
+                        light: true,
+                        currentState: on,
+                        previousState: on
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: false,
+                        duration: gap,
+                        status: .init(buttonPushed: false, doorOpen: false, timeLeft: true),
+                        light: true,
+                        currentState: on,
+                        previousState: on
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: false,
+                        duration: gap,
+                        status: .init(buttonPushed: true, doorOpen: true, timeLeft: false),
+                        light: false,
+                        currentState: on,
+                        previousState: on
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: false,
+                        duration: gap,
+                        status: .init(buttonPushed: true, doorOpen: false, timeLeft: true),
+                        light: false,
+                        currentState: on,
+                        previousState: on
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: false,
+                        duration: gap,
+                        status: .init(buttonPushed: true, doorOpen: false, timeLeft: false),
+                        light: true,
+                        currentState: on,
+                        previousState: on
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: false,
+                        duration: gap,
+                        status: .init(buttonPushed: true, doorOpen: true, timeLeft: true),
+                        light: false,
+                        currentState: on,
+                        previousState: on
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: false,
+                        duration: gap,
+                        status: .init(buttonPushed: true, doorOpen: true, timeLeft: false),
+                        light: true,
+                        currentState: on,
+                        previousState: on
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: false,
+                        duration: gap,
+                        status: .init(buttonPushed: true, doorOpen: false, timeLeft: true),
+                        light: true,
+                        currentState: on,
+                        previousState: on
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: false,
+                        duration: gap,
+                        status: .init(buttonPushed: false, doorOpen: true, timeLeft: true),
+                        light: true,
+                        currentState: on,
+                        previousState: on
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: false,
+                        duration: gap,
+                        status: .init(buttonPushed: true, doorOpen: true, timeLeft: true),
+                        light: true,
+                        currentState: on,
+                        previousState: on
+                    )
+                ]
+            ),
+            kripkeState(
+                readState: false,
+                status: .init(buttonPushed: true, doorOpen: true, timeLeft: true),
+                light: false,
+                currentState: on,
+                previousState: on,
+                targets: [
+                    target(
+                        readState: true,
+                        resetClock: false,
+                        duration: gap,
+                        status: .init(buttonPushed: false, doorOpen: false, timeLeft: false),
+                        light: false,
+                        currentState: on,
+                        previousState: on
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: false,
+                        duration: gap,
+                        status: .init(buttonPushed: true, doorOpen: false, timeLeft: false),
+                        light: false,
+                        currentState: on,
+                        previousState: on
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: false,
+                        duration: gap,
+                        status: .init(buttonPushed: false, doorOpen: true, timeLeft: false),
+                        light: false,
+                        currentState: on,
+                        previousState: on
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: false,
+                        duration: gap,
+                        status: .init(buttonPushed: false, doorOpen: false, timeLeft: true),
+                        light: false,
+                        currentState: on,
+                        previousState: on
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: false,
+                        duration: gap,
+                        status: .init(buttonPushed: false, doorOpen: false, timeLeft: false),
+                        light: true,
+                        currentState: on,
+                        previousState: on
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: false,
+                        duration: gap,
+                        status: .init(buttonPushed: false, doorOpen: true, timeLeft: true),
+                        light: false,
+                        currentState: on,
+                        previousState: on
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: false,
+                        duration: gap,
+                        status: .init(buttonPushed: false, doorOpen: true, timeLeft: false),
+                        light: true,
+                        currentState: on,
+                        previousState: on
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: false,
+                        duration: gap,
+                        status: .init(buttonPushed: false, doorOpen: false, timeLeft: true),
+                        light: true,
+                        currentState: on,
+                        previousState: on
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: false,
+                        duration: gap,
+                        status: .init(buttonPushed: true, doorOpen: true, timeLeft: false),
+                        light: false,
+                        currentState: on,
+                        previousState: on
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: false,
+                        duration: gap,
+                        status: .init(buttonPushed: true, doorOpen: false, timeLeft: true),
+                        light: false,
+                        currentState: on,
+                        previousState: on
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: false,
+                        duration: gap,
+                        status: .init(buttonPushed: true, doorOpen: false, timeLeft: false),
+                        light: true,
+                        currentState: on,
+                        previousState: on
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: false,
+                        duration: gap,
+                        status: .init(buttonPushed: true, doorOpen: true, timeLeft: true),
+                        light: false,
+                        currentState: on,
+                        previousState: on
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: false,
+                        duration: gap,
+                        status: .init(buttonPushed: true, doorOpen: true, timeLeft: false),
+                        light: true,
+                        currentState: on,
+                        previousState: on
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: false,
+                        duration: gap,
+                        status: .init(buttonPushed: true, doorOpen: false, timeLeft: true),
+                        light: true,
+                        currentState: on,
+                        previousState: on
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: false,
+                        duration: gap,
+                        status: .init(buttonPushed: false, doorOpen: true, timeLeft: true),
+                        light: true,
+                        currentState: on,
+                        previousState: on
+                    ),
+                    target(
+                        readState: true,
+                        resetClock: false,
+                        duration: gap,
+                        status: .init(buttonPushed: true, doorOpen: true, timeLeft: true),
+                        light: true,
+                        currentState: on,
+                        previousState: on
+                    )
+                ]
+            ),
         ]
     }
 

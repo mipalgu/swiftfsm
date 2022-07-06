@@ -166,6 +166,30 @@ class ScheduleVerifierTests: XCTestCase {
             print("missing props: \(missingProps.map { "\($0)" }.joined(separator: "\n"))")
             let extraneousProps = Set(result.map(\.properties)).subtracting(Set(expected.map(\.properties)))
             print("extraneous props: \(extraneousProps.map { "\($0)" }.joined(separator: "\n"))")
+            let missingTransitions: String = expected.compactMap { state in
+                guard let commonState = result.first(where: { $0.properties == state.properties }) else {
+                    return nil
+                }
+                let edges = state.edges.filter { edge in !commonState.edges.contains(where: { $0 == edge })  }
+                if edges.isEmpty {
+                    return nil
+                }
+                let edgesStr: String = edges.map { "\($0)" }.sorted().joined(separator: "\n    ")
+                return "from \(state.properties):\n    \(edgesStr)"
+            }.sorted().joined(separator: "\n\n")
+            print("missing edges: \(missingTransitions)")
+            let extraneousTransitions: String = result.compactMap { state in
+                guard let commonState = expected.first(where: { $0.properties == state.properties }) else {
+                    return nil
+                }
+                let edges = state.edges.filter { edge in !commonState.edges.contains(where: { $0 == edge }) }
+                if edges.isEmpty {
+                    return nil
+                }
+                let edgesStr: String = edges.map { "\($0)" }.sorted().joined(separator: "\n    ")
+                return "from \(state.properties):\n    \(edgesStr)"
+            }.sorted().joined(separator: "\n\n")
+            print("extraneous edges: \(extraneousTransitions)")
             let expectedView = GraphVizKripkeStructureView(filename: "\(name)expected.gv")
             let resultView = GraphVizKripkeStructureView(filename: "\(name)result.gv")
             let expectedStore = try InMemoryKripkeStructure(identifier: expectedIdentifier, states: expected)
@@ -201,6 +225,29 @@ class ScheduleVerifierTests: XCTestCase {
             XCTAssertEqual(propertyList, decoded)
         } catch {
             XCTFail(error.localizedDescription)
+        }
+    }
+
+    func test_canGenerateLightKripkeStructures() {
+        singleLight { (verifier, gateway, timer, kripkeFactory, viewFactory) in
+            do {
+                try verifier.verify(gateway: gateway, timer: timer, factory: kripkeFactory).forEach {
+                    try viewFactory.make(identifier: $0.identifier).generate(store: $0, usingClocks: true)
+                }
+                if viewFactory.createdViews.count != 1 {
+                    XCTFail("Incorrect number of views created: \(viewFactory.createdViews.count)")
+                    try viewFactory.outputViews(name: self.readableName)
+                    return
+                }
+                let view = viewFactory.createdViews[0]
+                if try !view.check(readableName: self.readableName) {
+                    try viewFactory.outputViews(name: self.readableName)
+                    return
+                }
+                try viewFactory.outputViews(name: self.readableName)
+            } catch {
+                XCTFail(error.localizedDescription)
+            }
         }
     }
     
@@ -993,6 +1040,56 @@ class ScheduleVerifierTests: XCTestCase {
             return make(verifier, gateway, timer, kripkeFactory, viewFactory)
         }
     }
+
+    private func singleLight<T>(_ make: (ScheduleVerifier<ScheduleIsolator>, StackGateway, FSMClock, SQLiteKripkeStructureFactory, TestableViewFactory) -> T) -> T {
+        let fsm = LightFiniteStateMachine()
+        fsm.name += "0"
+        let startingTime: UInt = 10
+        let duration: UInt = 30
+        let cycleLength = startingTime + duration
+        let states = lightKripkeStructure(fsmName: fsm.name, startingTime: startingTime, duration: duration, cycleLength: cycleLength)
+        let gateway = StackGateway()
+        let timer = FSMClock(ringletLengths: [fsm.name: duration], scheduleLength: cycleLength)
+        fsm.gateway = gateway
+        fsm.timer = timer
+        let kripkeFactory = SQLiteKripkeStructureFactory(savingInDirectory: "/tmp/swiftfsm/\(readableName)")
+        let viewFactory = TestableViewFactory {
+            TestableView(identifier: $0, expectedIdentifier: fsm.name, expected: states)
+        }
+        let timeslot = Timeslot(
+            fsms: [fsm.name],
+            callChain: CallChain(root: fsm.name, calls: []),
+            externalDependencies: [],
+            startingTime: startingTime,
+            duration: duration,
+            cyclesExecuted: 0
+        )
+        let pool = FSMPool(fsms: [.controllableFSM(AnyControllableFiniteStateMachine(fsm))], parameterisedFSMs: [])
+        let isolator = ScheduleIsolator(
+            threads: [
+                IsolatedThread(
+                    map: VerificationMap(
+                        steps: [
+                            VerificationMap.Step(
+                                time: timeslot.startingTime,
+                                step: .takeSnapshotAndStartTimeslot(timeslot: timeslot)
+                            ),
+                            VerificationMap.Step(
+                                time: timeslot.startingTime + timeslot.duration,
+                                step: .executeAndSaveSnapshot(timeslot: timeslot)
+                            )
+                        ],
+                        delegates: []
+                    ),
+                    pool: pool
+                )
+            ],
+            parameterisedThreads: [:],
+            cycleLength: timeslot.startingTime + timeslot.duration
+        )
+        let verifier = ScheduleVerifier(isolatedThreads: isolator)
+        return make(verifier, gateway, timer, kripkeFactory, viewFactory)
+    }
     
     private func combinedSensors<T>(_ make: (ScheduleVerifier<ScheduleIsolator>, StackGateway, FSMClock, SQLiteKripkeStructureFactory, TestableViewFactory) -> T) -> T {
         let fsm1 = SensorFiniteStateMachine()
@@ -1182,6 +1279,12 @@ class ScheduleVerifierTests: XCTestCase {
     ) -> Set<KripkeState> {
         var structure = SensorKripkeStructure()
         return structure.two(fsm1: fsm1, fsm2: fsm2, cycleLength: cycleLength)
+    }
+
+    private func lightKripkeStructure(fsmName: String, startingTime: UInt, duration: UInt, cycleLength: UInt) -> Set<KripkeState> {
+        var structure = LightKripkeStructure()
+        structure.names[0] = fsmName
+        return structure.single(name: fsmName, startingTime: startingTime, duration: duration, cycleLength: cycleLength)
     }
     
     private func sensorsKripkeStructure(fsmName: String, startingTime: UInt, duration: UInt, cycleLength: UInt) -> Set<KripkeState> {

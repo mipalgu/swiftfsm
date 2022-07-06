@@ -281,6 +281,7 @@ final class ScheduleVerifier<Isolator: ScheduleIsolatorProtocol> {
                     pools = [job.pool]
                 }
                 for pool in pools {
+                    let bases = pool.fsms.map(\.asScheduleableFiniteStateMachine.base)
                     //print("\nGenerating \(step.step.marker)(\(step.step.timeslots.map(\.callChain.fsm).sorted().joined(separator: ", "))) variations for:\n    \("\(pool)".components(separatedBy: .newlines).joined(separator: "\n\n    "))\n\n")
                     let properties = pool.propertyList(forStep: step.step, executingState: fsm?.currentState.name, promises: job.promises, resetClocks: job.resetClocks, collapseIfPossible: collapse)
                     let inCycle = try persistentStore.exists(properties)
