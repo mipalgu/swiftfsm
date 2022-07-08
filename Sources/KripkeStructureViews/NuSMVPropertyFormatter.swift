@@ -85,8 +85,12 @@ public final class NuSMVPropertyFormatter: PropertyFormatter {
         switch property.type {
         case .String:
             return "\"" + self.formatString(val) + "\""
-        case .Double, .Float, .Float80:
+        case .Double, .Float:
             return "F" + String(val.map({ $0 == "." ? "_" : $0 }))
+        #if (arch(i386) || arch(x86_64)) && !os(Windows) && !os(Android)
+        case .Float80:
+            return "F" + String(val.map({ $0 == "." ? "_" : $0 }))
+        #endif
         default:
             return self.formatString(val)
         }

@@ -120,10 +120,12 @@ public final class KripkeStatePropertyListConverterTests: VerificationTestCase {
                 type: .Float,
                 value: Float(1.0)
             ),
+#if (arch(i386) || arch(x86_64)) && !os(Windows) && !os(Android)
             "f80": KripkeStateProperty(
                 type: .Float80,
                 value: Float80(1.0)
             ),
+#endif
             "d": KripkeStateProperty(
                 type: .Double,
                 value: Double(1.0)
@@ -147,7 +149,10 @@ public final class KripkeStatePropertyListConverterTests: VerificationTestCase {
             "ui32": UInt32(1),
             "ui64": UInt64(1),
             "f": Float(1.0),
+            
+#if (arch(i386) || arch(x86_64)) && !os(Windows) && !os(Android)
             "f80": Float80(1.0),
+#endif
             "d": Double(1.0),
             "s": "s"
         ]
@@ -163,8 +168,10 @@ public final class KripkeStatePropertyListConverterTests: VerificationTestCase {
         XCTAssertEqual(expected["ui16"] as? UInt16, result["ui16"] as? UInt16)
         XCTAssertEqual(expected["ui32"] as? UInt32, result["ui32"] as? UInt32)
         XCTAssertEqual(expected["ui64"] as? UInt64, result["ui64"] as? UInt64)
-        XCTAssertEqual(expected["f"] as? Float, result["f"] as? Float)
+        XCTAssertEqual(expected["f"] as? Float, result["f"] as? Float)        
+#if (arch(i386) || arch(x86_64)) && !os(Windows) && !os(Android)
         XCTAssertEqual(expected["f80"] as? Float80, result["f80"] as? Float80)
+#endif
         XCTAssertEqual(expected["d"] as? Double, result["d"] as? Double)
         XCTAssertEqual(expected["s"] as? String, result["s"] as? String)
     }

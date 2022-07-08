@@ -138,9 +138,12 @@ public struct KripkeStateProperty: Equatable, Codable {
         self.init(type: .Float, value: value)
     }
     
+    
+#if (arch(i386) || arch(x86_64)) && !os(Windows) && !os(Android)
     public init(_ value: Float80) {
         self.init(type: .Float80, value: value)
     }
+#endif
     
     public init(_ value: Double) {
         self.init(type: .Double, value: value)
@@ -189,8 +192,10 @@ public struct KripkeStateProperty: Equatable, Codable {
             self.init(u64)
         case let f as Float:
             self.init(f)
+#if (arch(i386) || arch(x86_64)) && !os(Windows) && !os(Android)
         case let f80 as Float80:
             self.init(f80)
+#endif
         case let d as Double:
             self.init(d)
         case let s as String:
@@ -309,8 +314,10 @@ public struct KripkeStateProperty: Equatable, Codable {
             return self.value as? Int32 == other.value as? Int32
         case is Int64:
             return self.value as? Int64 == other.value as? Int64
+#if (arch(i386) || arch(x86_64)) && !os(Windows) && !os(Android)
         case is Float80:
             return self.value as? Float80 == other.value as? Float80
+#endif
         case is Float:
             return self.value as? Float == other.value as? Float
         case is Double:
@@ -350,8 +357,10 @@ extension KripkeStateProperty: CustomStringConvertible {
             return (self.value as! Int32).description
         case .Int64:
             return (self.value as! Int64).description
+#if (arch(i386) || arch(x86_64)) && !os(Windows) && !os(Android)
         case .Float80:
             return (self.value as! Float80).description
+#endif
         case .Float:
             return (self.value as! Float).description
         case .Double:
@@ -401,8 +410,10 @@ extension KripkeStateProperty: Hashable {
             hasher.combine((self.value as! Int32))
         case .Int64:
             hasher.combine((self.value as! Int64))
+#if (arch(i386) || arch(x86_64)) && !os(Windows) && !os(Android)
         case .Float80:
             hasher.combine((self.value as! Float80))
+#endif
         case .Float:
             hasher.combine((self.value as! Float))
         case .Double:
@@ -459,9 +470,12 @@ extension KripkeStateProperty {
         case "UInt64":
             type = .UInt64
             value = try container.decode(UInt64.self, forKey: .value)
+            
+#if (arch(i386) || arch(x86_64)) && !os(Windows) && !os(Android)
         case "Float80":
             type = .Float80
             value = try Float80(container.decode(Double.self, forKey: .value))
+#endif
         case "Float":
             type = .Float
             value = try container.decode(Float.self, forKey: .value)
@@ -527,8 +541,11 @@ extension KripkeStateProperty {
             try container.encode(self.value as! Int32, forKey: .value)
         case .Int64:
             try container.encode(self.value as! Int64, forKey: .value)
+            
+#if (arch(i386) || arch(x86_64)) && !os(Windows) && !os(Android)
         case .Float80:
             try container.encode(Double(self.value as! Float80), forKey: .value)
+#endif
         case .Float:
             try container.encode(self.value as! Float, forKey: .value)
         case .Double:

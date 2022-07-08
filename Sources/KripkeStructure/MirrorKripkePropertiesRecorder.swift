@@ -319,6 +319,7 @@ final class MirrorKripkePropertiesRecorder {
                 .Float,
                 values.lazy.map { abs(val - $0) }.lazy.sorted { $0 < $1 }.first!
             )
+#if (arch(i386) || arch(x86_64)) && !os(Windows) && !os(Android)
         case is Float80:
             let values: [Float80] = values as! [Float80]
             var val: Float80 = ((val as! Float80) + values[0])
@@ -327,6 +328,7 @@ final class MirrorKripkePropertiesRecorder {
                 .Float80,
                 values.lazy.map { abs(val - $0) }.lazy.sorted { $0 < $1 }.first!
             )
+#endif
         case is Double:
             let values: [Double] = values as! [Double]
             var val: Double = ((val as! Double) + values[0])

@@ -65,7 +65,10 @@ public enum KripkeStatePropertyTypes: Equatable, Codable {
     case Bool
     case Int, Int8, Int16, Int32, Int64
     case UInt, UInt8, UInt16, UInt32, UInt64
-    case Float, Float80, Double
+    case Float, Double
+#if (arch(i386) || arch(x86_64)) && !os(Windows) && !os(Android)
+    case Float80
+#endif
     case String
     indirect case Optional(KripkeStateProperty?)
     case EmptyCollection
@@ -86,7 +89,9 @@ public enum KripkeStatePropertyTypes: Equatable, Codable {
         case .UInt32: return "UInt32"
         case .UInt64: return "UInt64"
         case .Float: return "Float"
+        #if (arch(i386) || arch(x86_64)) && !os(Windows) && !os(Android)
         case .Float80: return "Float80"
+        #endif
         case .Double: return "Double"
         case .String: return "String"
         case .Optional: return "Optional"
@@ -125,10 +130,14 @@ public enum KripkeStatePropertyTypes: Equatable, Codable {
         case .Bool,
             .Int, .Int8, .Int16, .Int32, .Int64,
             .UInt, .UInt8, .UInt16, .UInt32, .UInt64,
-            .Float, .Float80, .Double,
+            .Float, .Double,
             .String,
             .EmptyCollection:
             return self
+        #if (arch(i386) || arch(x86_64)) && !os(Windows) && !os(Android)
+        case .Float80:
+            return self
+        #endif
         case .Optional:
             return .Optional(nil)
         case .Collection:
@@ -164,8 +173,10 @@ public enum KripkeStatePropertyTypes: Equatable, Codable {
             return Swift.UInt64(0)
         case .Float:
             return Swift.Float(0)
+#if (arch(i386) || arch(x86_64)) && !os(Windows) && !os(Android)
         case .Float80:
             return Swift.Float80(0)
+#endif
         case .Double:
             return 0.0
         case .String:
@@ -247,8 +258,10 @@ public func == (lhs: KripkeStatePropertyTypes, rhs: KripkeStatePropertyTypes) ->
         return true
     case (.Float, .Float):
         return true
+#if (arch(i386) || arch(x86_64)) && !os(Windows) && !os(Android)
     case (.Float80, .Float80):
         return true
+#endif
     case (.Double, .Double):
         return true
     case (.String, .String):
