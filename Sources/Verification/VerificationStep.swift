@@ -59,6 +59,10 @@
 import KripkeStructure
 
 enum VerificationStep: Hashable {
+
+    case startDelegates(fsms: Set<Timeslot>)
+
+    case endDelegates(fsms: Set<Timeslot>)
     
     case takeSnapshot(fsms: Set<Timeslot>)
     
@@ -103,9 +107,9 @@ enum VerificationStep: Hashable {
         switch self {
         case .takeSnapshot, .takeSnapshotAndStartTimeslot:
             return "R"
-        case .startTimeslot:
+        case .startTimeslot, .startDelegates:
             return "S"
-        case .execute:
+        case .execute, .endDelegates:
             return "E"
         case .executeAndSaveSnapshot, .saveSnapshot:
             return "W"
@@ -114,7 +118,7 @@ enum VerificationStep: Hashable {
     
     var timeslots: Set<Timeslot> {
         switch self {
-        case .takeSnapshot(let fsms), .saveSnapshot(let fsms):
+        case .takeSnapshot(let fsms), .saveSnapshot(let fsms), .startDelegates(let fsms), .endDelegates(let fsms):
             return fsms
         case .takeSnapshotAndStartTimeslot(let timeslot), .startTimeslot(let timeslot), .execute(let timeslot), .executeAndSaveSnapshot(let timeslot):
             return [timeslot]

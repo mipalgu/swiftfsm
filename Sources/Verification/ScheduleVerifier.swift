@@ -160,33 +160,70 @@ final class ScheduleVerifier<Isolator: ScheduleIsolatorProtocol> {
             let step = job.map.steps[job.step]
             let previous = job.previous
             let newStep = job.step >= (job.map.steps.count - 1) ? 0 : job.step + 1
-            // Handle parameterised machine delegates
-            if step.step.startTimeslot,
-                let timeslot = step.step.timeslots.first,
-                let call = timeslot.callChain.calls.last,
-                job.map.delegates.contains(timeslot.callChain.fsm)
-            {
-                let writeStep = job.map.steps[newStep]
-                let newStep = newStep >= (job.map.steps.count - 1) ? 0 : newStep + 1
-                let fsm = timeslot.callChain.fsm
-                let results = try delegate(call: call, callee: call.callee.name, gateway: gateway, timer: timer, factory: factory)
-                let properties = job.pool.propertyList(forStep: .startTimeslot(timeslot: timeslot), executingState: nil, promises: job.promises, resetClocks: job.resetClocks, collapseIfPossible: collapse)
+            // Handle Delegate steps.
+            delegateSwitch: switch step.step {
+            case .startDelegates, .takeSnapshotAndStartTimeslot, .startTimeslot:
+                switch step.step {
+                case .takeSnapshotAndStartTimeslot(let timeslot), .startTimeslot(let timeslot):
+                    if timeslot.callChain.calls.isEmpty {
+                        break delegateSwitch
+                    }
+                default:
+                    break
+                }
+                print("start")
+                let timeslots = step.step.timeslots
+                let executing = timeslots.filter { job.pool.parameterisedFSMs[$0.callChain.fsm]?.status == .executing && (job.resetClocks?.contains($0.callChain.fsm) ?? false) }
+                var previous = previous
+                var resetClocks = job.resetClocks
+                if executing.count != 1 && executing.count != timeslots.count {
+                    for timeslot in executing.sorted(by: { $0.callChain.fsm < $1.callChain.fsm }) {
+                        let properties = job.pool.propertyList(forStep: .startDelegates(fsms: [timeslot]), executingState: nil, promises: job.promises, resetClocks: resetClocks)
+                        let inCycle = try persistentStore.exists(properties)
+                        let id: Int64
+                        if !inCycle {
+                            id = try persistentStore.add(properties, isInitial: job.initial)
+                        } else {
+                            id = try persistentStore.id(for: properties)
+                            if job.initial {
+                                try persistentStore.markAsInitial(id: id)
+                            }
+                        }
+                        if let previous = previous {
+                            let edge: KripkeEdge = KripkeEdge(
+                                clockName: timeslot.callChain.fsm,
+                                constraint: nil,
+                                resetClock: true,
+                                takeSnapshot: true,
+                                time: previous.afterExecutingTimeUntil(
+                                    time: step.time,
+                                    cycleLength: isolatedThreads.cycleLength
+                                ),
+                                target: properties
+                            )
+                            try persistentStore.add(edge: edge, to: previous.id)
+                        }
+                        previous = Previous(id: id, time: step.time)
+                        resetClocks?.subtract([timeslot.callChain.fsm])
+                    }
+                }
+                let properties = job.pool.propertyList(forStep: step.step, executingState: nil, promises: job.promises, resetClocks: resetClocks)
                 let inCycle = try persistentStore.exists(properties)
                 let id: Int64
-                if inCycle {
+                if !inCycle {
+                    id = try persistentStore.add(properties, isInitial: previous == nil)
+                } else {
                     id = try persistentStore.id(for: properties)
                     if job.initial {
                         try persistentStore.markAsInitial(id: id)
                     }
-                } else {
-                    id = try persistentStore.add(properties, isInitial: previous == nil)
                 }
                 if let previous = previous {
                     let edge: KripkeEdge = KripkeEdge(
-                        clockName: fsm,
+                        clockName: nil,
                         constraint: nil,
-                        resetClock: job.resetClocks?.contains(fsm) ?? false,
-                        takeSnapshot: true,
+                        resetClock: false,
+                        takeSnapshot: false,
                         time: previous.afterExecutingTimeUntil(
                             time: step.time,
                             cycleLength: isolatedThreads.cycleLength
@@ -201,74 +238,54 @@ final class ScheduleVerifier<Isolator: ScheduleIsolatorProtocol> {
                     }
                     continue
                 }
-                let newResetClocks = job.resetClocks.map { $0.subtracting([fsm]) }
                 let newCycleCount = newStep <= job.step ? job.cycleCount + 1 : job.cycleCount
-                guard !results.results.isEmpty else {
-                    let target = job.pool.propertyList(forStep: .execute(timeslot: timeslot), executingState: nil, promises: job.promises, resetClocks: newResetClocks, collapseIfPossible: true)
-                    let targetId: Int64 = try persistentStore.add(target, isInitial: false)
-                    let edge = KripkeEdge(
-                        clockName: fsm,
-                        constraint: nil,
-                        resetClock: false,
-                        takeSnapshot: false,
-                        time: timeslot.duration,
-                        target: target
-                    )
-                    try persistentStore.add(edge: edge, to: id)
-                    let newPrevious = Previous(id: targetId, time: writeStep.time)
-                    jobs.append(Job(step: newStep, map: job.map, pool: job.pool.cloned, cycleCount: newCycleCount, promises: job.promises, previousNodes: job.previousNodes.union([id, targetId]), previous: newPrevious, resetClocks: newResetClocks))
-                    continue
-                }
-                for (range, result) in results.results {
-                    var resultPool = job.pool.cloned
-                    resultPool.handleFinishedCall(for: fsm, result: result)
-                    var newMap = job.map
-                    newMap.handleFinishedCall(call)
-                    let target = resultPool.propertyList(forStep: .execute(timeslot: timeslot), executingState: nil, promises: job.promises, resetClocks: newResetClocks, collapseIfPossible: true)
-                    let targetId: Int64 = try persistentStore.add(target, isInitial: false)
-                    let edge: KripkeEdge
-                    switch range {
-                    case .greaterThanEqual(let time):
-                        edge = KripkeEdge(
-                            clockName: fsm,
-                            constraint: .greaterThanEqual(value: time),
-                            resetClock: false,
-                            takeSnapshot: false,
-                            time: timeslot.duration,
-                            target: target
-                        )
-                    case .range(let range):
-                        edge = KripkeEdge(
-                            clockName: fsm,
-                            constraint: .and(lhs: .greaterThanEqual(value: range.lowerBound), rhs: .lessThan(value: range.upperBound)),
-                            resetClock: false,
-                            takeSnapshot: false,
-                            time: timeslot.duration,
-                            target: target
-                        )
+                let newPrevious = Previous(id: id, time: step.time)
+                jobs.append(Job(step: newStep, map: job.map, pool: job.pool, cycleCount: newCycleCount, promises: job.promises, previousNodes: job.previousNodes.union([id]), previous: newPrevious, resetClocks: job.resetClocks))
+            case .endDelegates, .execute, .executeAndSaveSnapshot:
+                switch step.step {
+                case .execute(let timeslot), .executeAndSaveSnapshot(let timeslot):
+                    if timeslot.callChain.calls.isEmpty {
+                        break delegateSwitch
                     }
-                    try persistentStore.add(edge: edge, to: id)
-                    let newPrevious = Previous(id: targetId, time: writeStep.time)
-                    let newPromises = job.promises.filter { !target.contains(object: $1) }
-                    jobs.append(Job(step: newStep, map: newMap, pool: resultPool.cloned, cycleCount: newCycleCount, promises: newPromises, previousNodes: job.previousNodes.union([id, targetId]), previous: newPrevious, resetClocks: newResetClocks))
+                default:
+                    break
                 }
-                let target = job.pool.propertyList(forStep: .execute(timeslot: timeslot), executingState: nil, promises: job.promises, resetClocks: newResetClocks, collapseIfPossible: true)
-                let targetId: Int64 = try persistentStore.add(target, isInitial: false)
-                let extraEdge = KripkeEdge(
-                    clockName: fsm,
-                    constraint: .lessThan(value: results.bound),
-                    resetClock: false,
-                    takeSnapshot: false,
-                    time: timeslot.duration,
-                    target: target
-                )
-                try persistentStore.add(edge: extraEdge, to: id)
-                let newPrevious = Previous(id: targetId, time: writeStep.time)
-                let newPromises = job.promises.filter { !target.contains(object: $1) }
-                jobs.append(Job(step: newStep, map: job.map, pool: job.pool.cloned, cycleCount: newCycleCount, promises: newPromises, previousNodes: job.previousNodes.union([id, targetId]), previous: newPrevious, resetClocks: newResetClocks))
-                continue
+                let timeslots = step.step.timeslots
+                let executing = timeslots.filter { job.pool.parameterisedFSMs[$0.callChain.fsm]?.status == .executing }
+                let pathways = try processDelegate(gateway: gateway, timer: timer, factory: factory, time: step.time, map: job.map, pool: job.pool, promises: job.promises, resetClocks: job.resetClocks, previous: job.previous, timeslots: executing, addingTo: persistentStore)
+                for (pool, map, previous) in pathways.isEmpty ? [(job.pool, job.map, [job.previous].map { $0 })] : pathways {
+                    let properties = pool.propertyList(forStep: step.step, executingState: nil, promises: job.promises, resetClocks: job.resetClocks)
+                    let inCycle = try persistentStore.exists(properties)
+                    let id: Int64
+                    if !inCycle {
+                        id = try persistentStore.add(properties, isInitial: false)
+                    } else {
+                        id = try persistentStore.id(for: properties)
+                    }
+                    for previous in previous {
+                        if let previous = previous {
+                            let edge: KripkeEdge = KripkeEdge(
+                                clockName: nil,
+                                constraint: nil,
+                                resetClock: false,
+                                takeSnapshot: false,
+                                time: previous.afterExecutingTimeUntil(
+                                    time: step.time,
+                                    cycleLength: isolatedThreads.cycleLength
+                                ),
+                                target: properties
+                            )
+                            try persistentStore.add(edge: edge, to: previous.id)
+                        }
+                    }
+                    let newCycleCount = newStep <= job.step ? job.cycleCount + 1 : job.cycleCount
+                    let newPrevious = Previous(id: id, time: step.time)
+                    jobs.append(Job(step: newStep, map: map, pool: pool, cycleCount: newCycleCount, promises: job.promises, previousNodes: job.previousNodes, previous: newPrevious, resetClocks: job.resetClocks))
+                }
+            default:
+                break
             }
-            // Handle inline jobs.
+            // Handle inline steps.
             switch step.step {
             case .takeSnapshot, .takeSnapshotAndStartTimeslot, .startTimeslot, .saveSnapshot:
                 let fsms = step.step.timeslots.filter { !job.map.delegates.contains($0.callChain.fsm) }
@@ -281,7 +298,6 @@ final class ScheduleVerifier<Isolator: ScheduleIsolatorProtocol> {
                     pools = [job.pool]
                 }
                 for pool in pools {
-                    let bases = pool.fsms.map(\.asScheduleableFiniteStateMachine.base)
                     //print("\nGenerating \(step.step.marker)(\(step.step.timeslots.map(\.callChain.fsm).sorted().joined(separator: ", "))) variations for:\n    \("\(pool)".components(separatedBy: .newlines).joined(separator: "\n\n    "))\n\n")
                     let properties = pool.propertyList(forStep: step.step, executingState: fsm?.currentState.name, promises: job.promises, resetClocks: job.resetClocks, collapseIfPossible: collapse)
                     let inCycle = try persistentStore.exists(properties)
@@ -407,9 +423,119 @@ final class ScheduleVerifier<Isolator: ScheduleIsolatorProtocol> {
                     let filteredPromises = mergedPromises.filter { !properties.contains(object: $1) }
                     jobs.append(Job(step: newStep, map: newMap, pool: newPool, cycleCount: newCycleCount, promises: filteredPromises, previousNodes: job.previousNodes.union([id]), previous: newPrevious, resetClocks: resetClocks))
                 }
+            case .startDelegates, .endDelegates:
+                fatalError("Attempting to handle delegate step in inline step section.")
             }
         }
         return callResults
+    }
+
+    private func processDelegate<
+        Gateway: ModifiableFSMGateway,
+        Timer: Clock,
+        Factory: MutableKripkeStructureFactory,
+        C: Collection,
+        Structure: MutableKripkeStructure
+    >(
+        gateway: Gateway,
+        timer: Timer,
+        factory: Factory,
+        time: UInt,
+        map: VerificationMap,
+        pool: FSMPool,
+        promises: [String: PromiseData],
+        resetClocks: Set<String>?,
+        previous: Previous?,
+        timeslots: C,
+        addingTo structure: Structure
+    ) throws -> [(FSMPool, VerificationMap, [Previous?])] where
+        Gateway: NewVerifiableGateway,
+        C.Element == Timeslot,
+        C.SubSequence: Collection,
+        C.SubSequence.Element == Timeslot,
+        C.SubSequence.SubSequence == C.SubSequence
+    {
+        guard let timeslot = timeslots.first, let call = timeslot.callChain.calls.last else {
+            return [(pool, map, previous.map { [$0] } ?? [])]
+        }
+        let results = try self.delegate(call: call, callee: call.callee.name, gateway: gateway, timer: timer, factory: factory)
+        var out: [(FSMPool, VerificationMap, [Previous?])] = []
+        for result in results.results {
+            var resultPool = pool.cloned
+            resultPool.handleFinishedCall(for: timeslot.callChain.fsm, result: result)
+            var newMap = map
+            newMap.handleFinishedCall(call)
+            let properties = pool.propertyList(forStep: .endDelegates(fsms: [timeslot]), executingState: nil, promises: promises, resetClocks: resetClocks)
+            let inCycle = try structure.exists(properties)
+            let id: Int64
+            if !inCycle {
+                id = try structure.add(properties, isInitial: previous == nil)
+            } else {
+                id = try structure.id(for: properties)
+                if previous == nil {
+                    try structure.markAsInitial(id: id)
+                }
+            }
+            let range = result.0
+            if let previous = previous {
+                let edge: KripkeEdge
+                switch range {
+                case .greaterThanEqual(let greaterThanTime):
+                    edge = KripkeEdge(
+                        clockName: timeslot.callChain.fsm,
+                        constraint: .greaterThanEqual(value: greaterThanTime),
+                        resetClock: false,
+                        takeSnapshot: false,
+                        time: previous.afterExecutingTimeUntil(
+                            time: time,
+                            cycleLength: isolatedThreads.cycleLength
+                        ),
+                        target: properties
+                    )
+                case .range(let range):
+                    edge = KripkeEdge(
+                        clockName: timeslot.callChain.fsm,
+                        constraint: .and(lhs: .greaterThanEqual(value: range.lowerBound), rhs: .lessThan(value: range.upperBound)),
+                        resetClock: false,
+                        takeSnapshot: false,
+                        time: previous.afterExecutingTimeUntil(
+                            time: time,
+                            cycleLength: isolatedThreads.cycleLength
+                        ),
+                        target: properties
+                    )
+                }
+                try structure.add(edge: edge, to: previous.id)
+            }
+            out.append(contentsOf: try processDelegate(gateway: gateway, timer: timer, factory: factory, time: time, map: newMap, pool: resultPool, promises: promises, resetClocks: resetClocks, previous: Previous(id: id, time: time), timeslots: timeslots.dropFirst(), addingTo: structure))
+        }
+        let properties = pool.propertyList(forStep: .endDelegates(fsms: [timeslot]), executingState: nil, promises: promises, resetClocks: resetClocks, collapseIfPossible: true)
+        let inCycle = try structure.exists(properties)
+        let id: Int64
+        if !inCycle {
+            id = try structure.add(properties, isInitial: previous == nil)
+        } else {
+            id = try structure.id(for: properties)
+            if previous == nil {
+                try structure.markAsInitial(id: id)
+            }
+        }
+        if let previous = previous {
+            let extraEdge = KripkeEdge(
+                clockName: timeslot.callChain.fsm,
+                constraint: results.results.isEmpty ? nil : .lessThan(value: results.bound),
+                resetClock: false,
+                takeSnapshot: false,
+                time: previous.afterExecutingTimeUntil(
+                    time: time,
+                    cycleLength: isolatedThreads.cycleLength
+                ),
+                target: properties
+            )
+            try structure.add(edge: extraEdge, to: previous.id)
+        }
+        out.append(contentsOf: try processDelegate(gateway: gateway, timer: timer, factory: factory, time: time, map: map, pool: pool, promises: promises, resetClocks: resetClocks, previous: Previous(id: id, time: time), timeslots: timeslots.dropFirst(), addingTo: structure))
+        return out
     }
 
     struct CallResults {

@@ -162,6 +162,8 @@ struct VerificationMap {
                     newStep = .takeSnapshotAndStartTimeslot(timeslot: new)
                 }
                 newSteps.insert(Step(time: step.time, step: newStep))
+            case .startDelegates, .endDelegates:
+                fatalError("Attempting to replace a delegate verification step.")
             }
         }
         self.steps = newSteps
