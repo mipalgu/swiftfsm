@@ -178,7 +178,7 @@ final class ScheduleVerifier<Isolator: ScheduleIsolatorProtocol> {
                 var resetClocks = job.resetClocks
                 if executing.count != 1 && executing.count != timeslots.count {
                     for timeslot in executing.sorted(by: { $0.callChain.fsm < $1.callChain.fsm }) {
-                        let properties = job.pool.propertyList(forStep: .startDelegates(fsms: [timeslot]), executingState: nil, promises: job.promises, resetClocks: resetClocks)
+                        let properties = job.pool.propertyList(forStep: .startDelegates(fsms: [timeslot]), executingState: nil, promises: job.promises, resetClocks: resetClocks, collapseIfPossible: true)
                         let inCycle = try persistentStore.exists(properties)
                         let id: Int64
                         if !inCycle {
@@ -207,7 +207,7 @@ final class ScheduleVerifier<Isolator: ScheduleIsolatorProtocol> {
                         resetClocks?.subtract([timeslot.callChain.fsm])
                     }
                 }
-                let properties = job.pool.propertyList(forStep: step.step, executingState: nil, promises: job.promises, resetClocks: resetClocks)
+                let properties = job.pool.propertyList(forStep: step.step, executingState: nil, promises: job.promises, resetClocks: resetClocks, collapseIfPossible: true)
                 let inCycle = try persistentStore.exists(properties)
                 let id: Int64
                 if !inCycle {
@@ -254,7 +254,7 @@ final class ScheduleVerifier<Isolator: ScheduleIsolatorProtocol> {
                 let executing = timeslots.filter { job.pool.parameterisedFSMs[$0.callChain.fsm]?.status == .executing }
                 let pathways = try processDelegate(gateway: gateway, timer: timer, factory: factory, time: step.time, map: job.map, pool: job.pool, promises: job.promises, resetClocks: job.resetClocks, previous: job.previous, timeslots: executing, addingTo: persistentStore)
                 for (pool, map, previous) in pathways.isEmpty ? [(job.pool, job.map, [job.previous].map { $0 })] : pathways {
-                    let properties = pool.propertyList(forStep: step.step, executingState: nil, promises: job.promises, resetClocks: job.resetClocks)
+                    let properties = pool.propertyList(forStep: step.step, executingState: nil, promises: job.promises, resetClocks: job.resetClocks, collapseIfPossible: true)
                     let inCycle = try persistentStore.exists(properties)
                     let id: Int64
                     if !inCycle {
@@ -462,10 +462,10 @@ final class ScheduleVerifier<Isolator: ScheduleIsolatorProtocol> {
         var out: [(FSMPool, VerificationMap, [Previous?])] = []
         for result in results.results {
             var resultPool = pool.cloned
-            resultPool.handleFinishedCall(for: timeslot.callChain.fsm, result: result)
+            resultPool.handleFinishedCall(for: timeslot.callChain.fsm, result: result.1)
             var newMap = map
             newMap.handleFinishedCall(call)
-            let properties = pool.propertyList(forStep: .endDelegates(fsms: [timeslot]), executingState: nil, promises: promises, resetClocks: resetClocks)
+            let properties = resultPool.propertyList(forStep: .endDelegates(fsms: [timeslot]), executingState: nil, promises: promises, resetClocks: resetClocks, collapseIfPossible: true)
             let inCycle = try structure.exists(properties)
             let id: Int64
             if !inCycle {

@@ -121,7 +121,7 @@ struct VerificationMap {
             guard $0.callChain.root == call.callee.name else {
                 return $0
             }
-            guard $0.callChain.fsm == call.callee.name else {
+            guard $0.callChain.calls.isEmpty else {
                 fatalError("Attempting to call callee that is currently already executing.")
             }
             var new = $0
