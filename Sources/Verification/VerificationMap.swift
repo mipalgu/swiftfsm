@@ -175,8 +175,15 @@ struct VerificationMap {
     }
 
     func hasFinished(forPool pool: FSMPool) -> Bool {
-        let fsms: Set<String> = Set(steps.lazy.flatMap(\.step.fsms))
-        return nil == fsms.first { !pool.fsm($0).hasFinished }
+        let fsms: Set<String> = Set(steps.lazy.flatMap { (step: Step) -> Set<String> in
+            switch step.step {
+            case .startDelegates, .endDelegates:
+                return []
+            default:
+                return step.step.fsms
+            }
+        })
+        return !pool.parameterisedFSMs.values.contains { $0.status == .executing } && !fsms.contains { !pool.fsm($0).hasFinished }
     }
     
 }
