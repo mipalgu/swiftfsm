@@ -642,11 +642,11 @@ class ScheduleVerifierTests: XCTestCase {
                             ),
                             VerificationMap.Step(
                                 time: calleeTimeslot.startingTime,
-                                step: .startTimeslot(timeslot: calleeTimeslot)
+                                step: .startDelegates(fsms: [calleeTimeslot])
                             ),
                             VerificationMap.Step(
                                 time: calleeTimeslot.startingTime + calleeTimeslot.duration,
-                                step: .execute(timeslot: calleeTimeslot)
+                                step: .endDelegates(fsms: [calleeTimeslot])
                             )
                         ],
                         delegates: [callee.name]
