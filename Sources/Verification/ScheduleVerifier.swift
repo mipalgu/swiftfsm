@@ -511,6 +511,9 @@ final class ScheduleVerifier<Isolator: ScheduleIsolatorProtocol> {
                 }
                 try structure.add(edge: edge, to: previous.id)
             }
+            if inCycle {
+                continue
+            }
             out.append(contentsOf: try processDelegate(gateway: gateway, timer: timer, factory: factory, time: time, map: newMap, pool: resultPool, promises: promises, resetClocks: resetClocks, previous: Previous(id: id, time: time), timeslots: timeslots.dropFirst(), addingTo: structure))
         }
         let properties = pool.propertyList(forStep: .endDelegates(fsms: [timeslot]), executingState: nil, promises: promises, resetClocks: resetClocks, collapseIfPossible: true)
@@ -537,6 +540,9 @@ final class ScheduleVerifier<Isolator: ScheduleIsolatorProtocol> {
                 target: properties
             )
             try structure.add(edge: extraEdge, to: previous.id)
+        }
+        if inCycle {
+            return out
         }
         out.append(contentsOf: try processDelegate(gateway: gateway, timer: timer, factory: factory, time: time, map: map, pool: pool, promises: promises, resetClocks: resetClocks, previous: Previous(id: id, time: time), timeslots: timeslots.dropFirst(), addingTo: structure))
         return out
