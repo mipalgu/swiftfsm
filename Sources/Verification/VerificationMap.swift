@@ -134,14 +134,21 @@ struct VerificationMap {
         var newSteps = steps
         for step in steps {
             switch step.step {
-            case .takeSnapshot(let timeslots), .saveSnapshot(let timeslots):
+            case .takeSnapshot(let timeslots), .saveSnapshot(let timeslots), .startDelegates(let timeslots), .endDelegates(let timeslots):
                 let newTimeslots: Set<Timeslot> = try Set(timeslots.map(transform))
                 newSteps.removeAll(step)
                 let newStep: VerificationStep
-                if step.step.takeSnapshot {
+                switch step.step {
+                case .takeSnapshot:
                     newStep = .takeSnapshot(fsms: newTimeslots)
-                } else {
+                case .saveSnapshot:
                     newStep = .saveSnapshot(fsms: newTimeslots)
+                case .startDelegates:
+                    newStep = .startDelegates(fsms: newTimeslots)
+                case .endDelegates:
+                    newStep = .endDelegates(fsms: newTimeslots)
+                default:
+                    fatalError("Attempting to assign new timeslots to a step that is not supported")
                 }
                 newSteps.insert(Step(time: step.time, step: newStep))
             case .execute(let timeslot),
@@ -162,8 +169,6 @@ struct VerificationMap {
                     newStep = .takeSnapshotAndStartTimeslot(timeslot: new)
                 }
                 newSteps.insert(Step(time: step.time, step: newStep))
-            case .startDelegates, .endDelegates:
-                fatalError("Attempting to replace a delegate verification step.")
             }
         }
         self.steps = newSteps
