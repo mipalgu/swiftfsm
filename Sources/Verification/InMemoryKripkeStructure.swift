@@ -57,7 +57,6 @@
  */
 
 import KripkeStructure
-import Dispatch
 
 public final class InMemoryKripkeStructure: MutableKripkeStructure {
 
@@ -72,23 +71,17 @@ public final class InMemoryKripkeStructure: MutableKripkeStructure {
     var allStates: [Int64: (KripkeStatePropertyList, Bool, Set<KripkeEdge>)] = [:]
 
     public var acceptingStates: AnySequence<KripkeState> {
-        DispatchQueue.global(qos: .userInteractive).sync {
-            AnySequence(states.filter { $0.edges.isEmpty })
-        }
+        AnySequence(states.filter { $0.edges.isEmpty })
     }
 
     public var initialStates: AnySequence<KripkeState> {
-        DispatchQueue.global(qos: .userInteractive).sync {
-            AnySequence(states.filter { $0.isInitial })
-        }
+        AnySequence(states.filter { $0.isInitial })
     }
 
     public var states: AnySequence<KripkeState> {
-        DispatchQueue.global(qos: .userInteractive).sync {
-            AnySequence(allStates.keys.map {
-                try! self.state(for: $0)
-            })
-        }
+        AnySequence(allStates.keys.map {
+            try! self.state(for: $0)
+        })
     }
 
     init(identifier: String) {
@@ -98,40 +91,31 @@ public final class InMemoryKripkeStructure: MutableKripkeStructure {
     init(identifier: String, states: Set<KripkeState>) throws {
         self.identifier = identifier
         for state in states {
-            let (id, _) = try self.add(state.properties, isInitial: state.isInitial)
+            let id = try self.add(state.properties, isInitial: state.isInitial)
             for edge in state.edges {
                 try self.add(edge: edge, to: id)
             }
         }
     }
 
-    public func add(_ propertyList: KripkeStatePropertyList, isInitial: Bool) throws -> (Int64, Bool) {
-        try DispatchQueue.global(qos: .userInteractive).sync {
-            let id = try id(for: propertyList)
-            let inCycle = nil != allStates[id]
-            if !inCycle {
-                allStates[id] = (propertyList, isInitial, [])
-            }
-            return (id, inCycle)
+    public func add(_ propertyList: KripkeStatePropertyList, isInitial: Bool) throws -> Int64 {
+        let id = try id(for: propertyList)
+        if nil == allStates[id] {
+            allStates[id] = (propertyList, isInitial, [])
         }
+        return id
     }
 
     public func add(edge: KripkeEdge, to id: Int64) throws {
-        _ = DispatchQueue.global(qos: .userInteractive).sync {
-            allStates[id]?.2.insert(edge)
-        }
+        allStates[id]?.2.insert(edge)
     }
 
     public func markAsInitial(id: Int64) throws {
-        DispatchQueue.global(qos: .userInteractive).sync {
-            self.allStates[id]?.1 = true
-        }
+        self.allStates[id]?.1 = true
     }
 
     public func exists(_ propertyList: KripkeStatePropertyList) throws -> Bool {
-        DispatchQueue.global(qos: .userInteractive).sync {
-            return nil != ids[propertyList]
-        }
+        return nil != ids[propertyList]
     }
 
     public func data(for propertyList: KripkeStatePropertyList) throws -> (Int64, KripkeState) {
@@ -140,28 +124,24 @@ public final class InMemoryKripkeStructure: MutableKripkeStructure {
     }
 
     public func id(for propertyList: KripkeStatePropertyList) throws -> Int64 {
-        DispatchQueue.global(qos: .userInteractive).sync {
-            if let id = ids[propertyList] {
-                return id
-            }
-            let id = latestId
-            latestId += 1
-            ids[propertyList] = id
+        if let id = ids[propertyList] {
             return id
         }
+        let id = latestId
+        latestId += 1
+        ids[propertyList] = id
+        return id
     }
 
     public func state(for id: Int64) throws -> KripkeState {
-        DispatchQueue.global(qos: .userInteractive).sync {
-            guard let (plist, isInitial, edges) = allStates[id] else {
-                fatalError("State does not exist")
-            }
-            let state = KripkeState(isInitial: isInitial, properties: plist)
-            for edge in edges {
-                state.addEdge(edge)
-            }
-            return state
+        guard let (plist, isInitial, edges) = allStates[id] else {
+            fatalError("State does not exist")
         }
+        let state = KripkeState(isInitial: isInitial, properties: plist)
+        for edge in edges {
+            state.addEdge(edge)
+        }
+        return state
     }
 
 

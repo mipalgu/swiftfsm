@@ -60,7 +60,7 @@ import KripkeStructure
 
 public protocol MutableKripkeStructure: KripkeStructure {
 
-    func add(_ propertyList: KripkeStatePropertyList, isInitial: Bool) throws -> (Int64, Bool)
+    func add(_ propertyList: KripkeStatePropertyList, isInitial: Bool) throws -> Int64
 
     func add(edge: KripkeEdge, to id: Int64) throws
 

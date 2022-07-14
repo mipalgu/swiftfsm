@@ -1,4 +1,4 @@
-// swift-tools-version:5.5
+// swift-tools-version:5.2
 
 import PackageDescription
 
@@ -20,7 +20,6 @@ let deps = [
 
 let package = Package(
     name: "swiftfsm",
-    platforms: [.macOS(.v11)],
     products: [
         .executable(
             name: "swiftfsm_binary",
