@@ -80,7 +80,7 @@ final class SQLitePersistentStoreTests: XCTestCase {
     func test_canAddPropertyList() {
         let propertyList = KripkeStatePropertyList(SensorFiniteStateMachine())
         do {
-            let id = try store.add(propertyList, isInitial: true)
+            let (id, _) = try store.add(propertyList, isInitial: true)
             let state = try store.state(for: id)
             XCTAssertEqual(state.properties, propertyList)
         } catch {
@@ -95,8 +95,10 @@ final class SQLitePersistentStoreTests: XCTestCase {
         let propertyList2 = KripkeStatePropertyList(fsm)
         let edge = KripkeEdge(clockName: fsm.name, constraint: .greaterThanEqual(value: 0), resetClock: true, takeSnapshot: true, time: 5, target: propertyList2)
         do {
-            let id1 = try store.add(propertyList1, isInitial: true)
-            let id2 = try store.add(propertyList2, isInitial: false)
+            let (id1, inCycle1) = try store.add(propertyList1, isInitial: true)
+            let (id2, inCycle2) = try store.add(propertyList2, isInitial: false)
+            XCTAssertFalse(inCycle1)
+            XCTAssertFalse(inCycle2)
             try store.add(edge: edge, to: id1)
             let state1 = try store.state(for: id1)
             XCTAssertEqual(state1.properties, propertyList1)
@@ -121,16 +123,16 @@ final class SQLitePersistentStoreTests: XCTestCase {
         }
         func writeRead(for fsm: SensorFiniteStateMachine, source: Int64) throws -> Int64 {
             let targetPropertyList = propertyList(of: fsm, read: true)
-            let target = try self.store.add(targetPropertyList, isInitial: false)
+            let (target, _) = try self.store.add(targetPropertyList, isInitial: false)
             try self.store.add(edge: KripkeEdge(clockName: fsm.name, constraint: nil, resetClock: fsm.currentState.name != fsm.previousState.name, takeSnapshot: true, time: 40, target: targetPropertyList), to: source)
             return target
         }
         func readWrite(for fsm: SensorFiniteStateMachine, isInitial: Bool) throws -> Int64 {
             var fsm = fsm
-            let source = try self.store.add(propertyList(of: fsm, read: true), isInitial: isInitial)
+            let (source, _) = try self.store.add(propertyList(of: fsm, read: true), isInitial: isInitial)
             fsm.next()
             let targetPropertyList = propertyList(of: fsm, read: false)
-            let target = try self.store.add(targetPropertyList, isInitial: false)
+            let (target, _) = try self.store.add(targetPropertyList, isInitial: false)
             try self.store.add(edge: KripkeEdge(clockName: fsm.name, constraint: nil, resetClock: false, takeSnapshot: false, time: 30, target: targetPropertyList), to: source)
             return target
         }

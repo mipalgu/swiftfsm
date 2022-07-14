@@ -62,7 +62,7 @@ import SQLite
 import Foundation
 import KripkeStructure
 
-public struct SQLiteKripkeStructure: MutableKripkeStructure {
+public struct SQLiteKripkeStructure: Sendable, MutableKripkeStructure {
 
     struct StatesTable {
         
@@ -223,12 +223,17 @@ public struct SQLiteKripkeStructure: MutableKripkeStructure {
         self.edges = edges
     }
     
-    public func add(_ propertyList: KripkeStatePropertyList, isInitial: Bool) throws -> Int64 {
+    public func add(_ propertyList: KripkeStatePropertyList, isInitial: Bool) throws -> (Int64, Bool) {
         let propertyListStr = try stringRepresentation(of: propertyList)
         var id: Int64! = nil
+        var inCycle = false
         try db.transaction {
             if let row = try db.pluck(statesTable.table.select(statesTable.id).where(statesTable.propertyList == propertyListStr)) {
                 id = try row.get(statesTable.id)
+                inCycle = true
+                if isInitial {
+                    try self.markAsInitial(id: id)
+                }
                 return
             }
             id = try db.run(
@@ -239,7 +244,7 @@ public struct SQLiteKripkeStructure: MutableKripkeStructure {
                 ])
             )
         }
-        return id
+        return (id, inCycle)
     }
 
     public func add(edge: KripkeEdge, to id: Int64) throws {

@@ -228,10 +228,10 @@ class ScheduleVerifierTests: XCTestCase {
         }
     }
 
-    func test_canGenerateLightKripkeStructures() {
-        singleLight { (verifier, gateway, timer, kripkeFactory, viewFactory) in
+    func test_canGenerateLightKripkeStructures() async {
+        await singleLight { (verifier, gateway, timer, kripkeFactory, viewFactory) in
             do {
-                try verifier.verify(gateway: gateway, timer: timer, factory: kripkeFactory).forEach {
+                try await verifier.verify(gateway: gateway, timer: timer, factory: kripkeFactory).forEach {
                     try viewFactory.make(identifier: $0.identifier).generate(store: $0, usingClocks: true)
                 }
                 if viewFactory.createdViews.count != 1 {
@@ -251,10 +251,10 @@ class ScheduleVerifierTests: XCTestCase {
         }
     }
     
-    func test_canGenerateSeparateKripkeStructures() {
-        separateSensors { (verifier, gateway, timer, kripkeFactory, viewFactory) in
+    func test_canGenerateSeparateKripkeStructures() async {
+        await separateSensors { (verifier, gateway, timer, kripkeFactory, viewFactory) in
             do {
-                try verifier.verify(gateway: gateway, timer: timer, factory: kripkeFactory).forEach {
+                try await verifier.verify(gateway: gateway, timer: timer, factory: kripkeFactory).forEach {
                     try viewFactory.make(identifier: $0.identifier).generate(store: $0, usingClocks: true)
                 }
                 if viewFactory.createdViews.count != 2 {
@@ -276,10 +276,10 @@ class ScheduleVerifierTests: XCTestCase {
         }
     }
     
-    func test_canGenerateCombinedKripkeStructure() {
-        combinedSensors { (verifier, gateway, timer, kripkeFactory, viewFactory) in
+    func test_canGenerateCombinedKripkeStructure() async {
+        await combinedSensors { (verifier, gateway, timer, kripkeFactory, viewFactory) in
             do {
-                try verifier.verify(gateway: gateway, timer: timer, factory: kripkeFactory).forEach {
+                try await verifier.verify(gateway: gateway, timer: timer, factory: kripkeFactory).forEach {
                     try viewFactory.make(identifier: $0.identifier).generate(store: $0, usingClocks: true)
                 }
                 XCTAssertEqual(viewFactory.createdViews.count, 1)
@@ -295,10 +295,10 @@ class ScheduleVerifierTests: XCTestCase {
         }
     }
     
-    func test_canGenerateAllStatesOfSensorFSM() {
-        singleSensor { (verifier, gateway, timer, kripkeFactory, viewFactory) in
+    func test_canGenerateAllStatesOfSensorFSM() async {
+        await singleSensor { (verifier, gateway, timer, kripkeFactory, viewFactory) in
             do {
-                try verifier.verify(gateway: gateway, timer: timer, factory: kripkeFactory).forEach {
+                try await verifier.verify(gateway: gateway, timer: timer, factory: kripkeFactory).forEach {
                     try viewFactory.make(identifier: $0.identifier).generate(store: $0, usingClocks: true)
                 }
                 guard let view: TestableView = viewFactory.lastView else {
@@ -314,10 +314,10 @@ class ScheduleVerifierTests: XCTestCase {
         }
     }
     
-    func test_canGenerateCombinedTimedKripkeStructure() {
-        combinedTimed { (verifier, gateway, timer, kripkeFactory, viewFactory) in
+    func test_canGenerateCombinedTimedKripkeStructure() async {
+        await combinedTimed { (verifier, gateway, timer, kripkeFactory, viewFactory) in
             do {
-                try verifier.verify(gateway: gateway, timer: timer, factory: kripkeFactory).forEach {
+                try await verifier.verify(gateway: gateway, timer: timer, factory: kripkeFactory).forEach {
                     try viewFactory.make(identifier: $0.identifier).generate(store: $0, usingClocks: true)
                 }
                 XCTAssertEqual(viewFactory.createdViews.count, 1)
@@ -333,10 +333,10 @@ class ScheduleVerifierTests: XCTestCase {
         }
     }
     
-    func test_canGenerateSeparateTimedKripkeStructures() {
-        separateTimed { (verifier, gateway, timer, kripkeFactory, viewFactory) in
+    func test_canGenerateSeparateTimedKripkeStructures() async {
+        await separateTimed { (verifier, gateway, timer, kripkeFactory, viewFactory) in
             do {
-                try verifier.verify(gateway: gateway, timer: timer, factory: kripkeFactory).forEach {
+                try await verifier.verify(gateway: gateway, timer: timer, factory: kripkeFactory).forEach {
                     try viewFactory.make(identifier: $0.identifier).generate(store: $0, usingClocks: true)
                 }
                 try viewFactory.outputViews(name: self.readableName)
@@ -359,10 +359,10 @@ class ScheduleVerifierTests: XCTestCase {
         }
     }
     
-    func test_canGenerateAllStatesOfTimeFSM() {
-        singleTime { (verifier, gateway, timer, kripkeFactory, viewFactory) in
+    func test_canGenerateAllStatesOfTimeFSM() async {
+        await singleTime { (verifier, gateway, timer, kripkeFactory, viewFactory) in
             do {
-                try verifier.verify(gateway: gateway, timer: timer, factory: kripkeFactory).forEach {
+                try await verifier.verify(gateway: gateway, timer: timer, factory: kripkeFactory).forEach {
                     try viewFactory.make(identifier: $0.identifier).generate(store: $0, usingClocks: true)
                 }
                 try viewFactory.outputViews(name: self.readableName)
@@ -379,10 +379,10 @@ class ScheduleVerifierTests: XCTestCase {
         }
     }
     
-    func test_canGenerateSyncParameterisedCall() {
-        delegateSync { (verifier, gateway, timer, kripkeFactory, viewFactory) in
+    func test_canGenerateSyncParameterisedCall() async {
+        await delegateSync { (verifier, gateway, timer, kripkeFactory, viewFactory) in
             do {
-                try verifier.verify(gateway: gateway, timer: timer, factory: kripkeFactory).forEach {
+                try await verifier.verify(gateway: gateway, timer: timer, factory: kripkeFactory).forEach {
                     try viewFactory.make(identifier: $0.identifier).generate(store: $0, usingClocks: true)
                 }
                 guard let view: TestableView = viewFactory.createdViews.first(where: { $0.identifier == "DelegateFiniteStateMachine" }) else {
@@ -398,10 +398,10 @@ class ScheduleVerifierTests: XCTestCase {
         }
     }
 
-    func test_canGenerateASyncParameterisedCall() {
-        delegateASync { (verifier, gateway, timer, kripkeFactory, viewFactory) in
+    func test_canGenerateASyncParameterisedCall() async {
+        await delegateASync { (verifier, gateway, timer, kripkeFactory, viewFactory) in
             do {
-                try verifier.verify(gateway: gateway, timer: timer, factory: kripkeFactory).forEach {
+                try await verifier.verify(gateway: gateway, timer: timer, factory: kripkeFactory).forEach {
                     try viewFactory.make(identifier: $0.identifier).generate(store: $0, usingClocks: true)
                 }
                 guard let view: TestableView = viewFactory.createdViews.first(where: { $0.identifier == "0" }) else {
@@ -417,67 +417,72 @@ class ScheduleVerifierTests: XCTestCase {
         }
     }
     
-    func test_measureFourSeparateTime() {
-        multipleSeparateSensors(4) { (verifier, gateway, timer, kripkeFactory, _) in
-            measure {
-                do {
-                    _ = try verifier.verify(gateway: gateway, timer: timer, factory: kripkeFactory)
-                } catch {
-                    XCTFail(error.localizedDescription)
-                }
-            }
-        }
-    }
+//    func test_measureFourSeparateTime() async {
+//        await multipleSeparateSensors(4) { (verifier, gateway, timer, kripkeFactory, _) in
+//            var group: TaskGroup<[SQLiteKripkeStructure]> = await withTaskGroup(of: [SQLiteKripkeStructure].self) { _ in }
+//            measureMet
+//            measure {
+//                group.addTask {
+//                    do {
+//                        return try await verifier.verify(gateway: gateway, timer: timer, factory: kripkeFactory)
+//                    } catch let e {
+//                        XCTFail(e.localizedDescription)
+//                    }
+//                }
+//                XCTAssertNotNil(group.next())
+//            }
+//        }
+//    }
     
-    func test_measureFourCombinedTime() {
-        multipleCombinedSensors(4) { (verifier, gateway, timer, kripkeFactory, _) in
-            measure {
-                do {
-                    _ = try verifier.verify(gateway: gateway, timer: timer, factory: kripkeFactory)
-                } catch {
-                    XCTFail(error.localizedDescription)
-                }
-            }
-        }
-    }
+//    func test_measureFourCombinedTime() async {
+//        multipleCombinedSensors(4) { (verifier, gateway, timer, kripkeFactory, _) in
+//            measure {
+//                do {
+//                    _ = try await verifier.verify(gateway: gateway, timer: timer, factory: kripkeFactory)
+//                } catch {
+//                    XCTFail(error.localizedDescription)
+//                }
+//            }
+//        }
+//    }
     
-    func test_measureCombinedTime() {
-        combinedSensors { (verifier, gateway, timer, kripkeFactory, _) in
-            measure {
-                do {
-                    _ = try verifier.verify(gateway: gateway, timer: timer, factory: kripkeFactory)
-                } catch {
-                    XCTFail(error.localizedDescription)
-                }
-            }
-        }
-    }
+//    func test_measureCombinedTime() async {
+//        combinedSensors { (verifier, gateway, timer, kripkeFactory, _) in
+//            measure {
+//                do {
+//                    _ = try await verifier.verify(gateway: gateway, timer: timer, factory: kripkeFactory)
+//                } catch {
+//                    XCTFail(error.localizedDescription)
+//                }
+//            }
+//        }
+//    }
     
-    func test_measureSeparateTime() {
-        separateSensors { (verifier, gateway, timer, kripkeFactory, _) in
-            measure {
-                do {
-                    _ = try verifier.verify(gateway: gateway, timer: timer, factory: kripkeFactory)
-                } catch {
-                    XCTFail(error.localizedDescription)
-                }
-            }
-        }
-    }
+//    func test_measureSeparateTime() async {
+//        separateSensors { (verifier, gateway, timer, kripkeFactory, _) in
+//            measure {
+//                do {
+//                    _ = try await verifier.verify(gateway: gateway, timer: timer, factory: kripkeFactory)
+//                } catch {
+//                    XCTFail(error.localizedDescription)
+//                }
+//            }
+//        }
+//    }
     
-    func test_measureSensorTime() {
-        singleSensor { (verifier, gateway, timer, kripkeFactory, _) in
-            measure {
-                do {
-                    _ = try verifier.verify(gateway: gateway, timer: timer, factory: kripkeFactory)
-                } catch {
-                    XCTFail(error.localizedDescription)
-                }
-            }
-        }
-    }
+//    func test_measureSensorTime() async {
+//        singleSensor { (verifier, gateway, timer, kripkeFactory, _) in
+//            measure {
+//                do {
+//                    _ = try await verifier.verify(gateway: gateway, timer: timer, factory: kripkeFactory)
+//                } catch {
+//                    XCTFail(error.localizedDescription)
+//                }
+//            }
+//        }
+//    }
     
-    private func delegateSync<T>(_ make: (ScheduleVerifier<ScheduleIsolator>, StackGateway, FSMClock, SQLiteKripkeStructureFactory, TestableViewFactory) -> T) -> T {
+    private func delegateSync<T>(_ make: (ScheduleVerifier<ScheduleIsolator>, StackGateway, FSMClock, SQLiteKripkeStructureFactory, TestableViewFactory) async -> T) async -> T {
         let fsm = DelegateFiniteStateMachine()
         let factory: ([String: Any?]) -> AnyParameterisedFiniteStateMachine = {
             guard let value = $0["value"] as? Int else {
@@ -570,10 +575,10 @@ class ScheduleVerifierTests: XCTestCase {
             cycleLength: timeslot.startingTime + timeslot.duration
         )
         let verifier = ScheduleVerifier(isolatedThreads: isolator)
-        return make(verifier, gateway, timer, kripkeFactory, viewFactory)
+        return await make(verifier, gateway, timer, kripkeFactory, viewFactory)
     }
 
-    private func delegateASync<T>(_ make: (ScheduleVerifier<ScheduleIsolator>, StackGateway, FSMClock, SQLiteKripkeStructureFactory, TestableViewFactory) -> T) -> T {
+    private func delegateASync<T>(_ make: (ScheduleVerifier<ScheduleIsolator>, StackGateway, FSMClock, SQLiteKripkeStructureFactory, TestableViewFactory) async -> T) async -> T {
         let fsm = DelegateFiniteStateMachine()
         fsm.syncCall = false
         let factory: ([String: Any?]) -> AnyParameterisedFiniteStateMachine = {
@@ -675,10 +680,10 @@ class ScheduleVerifierTests: XCTestCase {
             cycleLength: cycleLength
         )
         let verifier = ScheduleVerifier(isolatedThreads: isolator)
-        return make(verifier, gateway, timer, kripkeFactory, viewFactory)
+        return await make(verifier, gateway, timer, kripkeFactory, viewFactory)
     }
     
-    private func combinedTimed<T>(_ make: (ScheduleVerifier<ScheduleIsolator>, StackGateway, FSMClock, SQLiteKripkeStructureFactory, TestableViewFactory) -> T) -> T {
+    private func combinedTimed<T>(_ make: (ScheduleVerifier<ScheduleIsolator>, StackGateway, FSMClock, SQLiteKripkeStructureFactory, TestableViewFactory) async -> T) async -> T {
         let fsm1 = SimpleTimeConditionalFiniteStateMachine()
         fsm1.name = fsm1.name + "1"
         let fsm1StartingTime: UInt = 10
@@ -757,10 +762,10 @@ class ScheduleVerifierTests: XCTestCase {
             cycleLength: cycleLength
         )
         let verifier = ScheduleVerifier(isolatedThreads: isolator)
-        return make(verifier, gateway, timer, kripkeFactory, viewFactory)
+        return await make(verifier, gateway, timer, kripkeFactory, viewFactory)
     }
     
-    private func separateTimed<T>(_ make: (ScheduleVerifier<ScheduleIsolator>, StackGateway, FSMClock, SQLiteKripkeStructureFactory, TestableViewFactory) -> T) -> T {
+    private func separateTimed<T>(_ make: (ScheduleVerifier<ScheduleIsolator>, StackGateway, FSMClock, SQLiteKripkeStructureFactory, TestableViewFactory) async -> T) async -> T {
         let fsm1 = SimpleTimeConditionalFiniteStateMachine()
         fsm1.name = fsm1.name + "1"
         let fsm1StartingTime: UInt = 10
@@ -847,10 +852,10 @@ class ScheduleVerifierTests: XCTestCase {
             cycleLength: cycleLength
         )
         let verifier = ScheduleVerifier(isolatedThreads: isolator)
-        return make(verifier, gateway, timer, kripkeFactory, viewFactory)
+        return await make(verifier, gateway, timer, kripkeFactory, viewFactory)
     }
     
-    private func separateSensors<T>(_ make: (ScheduleVerifier<ScheduleIsolator>, StackGateway, FSMClock, SQLiteKripkeStructureFactory, TestableViewFactory) -> T) -> T {
+    private func separateSensors<T>(_ make: (ScheduleVerifier<ScheduleIsolator>, StackGateway, FSMClock, SQLiteKripkeStructureFactory, TestableViewFactory) async -> T) async -> T {
         let fsm1 = SensorFiniteStateMachine()
         fsm1.name = fsm1.name + "0"
         let fsm1StartingTime: UInt = 10
@@ -937,10 +942,10 @@ class ScheduleVerifierTests: XCTestCase {
             cycleLength: cycleLength
         )
         let verifier = ScheduleVerifier(isolatedThreads: isolator)
-        return make(verifier, gateway, timer, kripkeFactory, viewFactory)
+        return await make(verifier, gateway, timer, kripkeFactory, viewFactory)
     }
     
-    private func multipleSensors<T>(_ number: Int, use: ([(Timeslot, SensorFiniteStateMachine)], UInt, StackGateway, FSMClock, SQLiteKripkeStructureFactory, TestableViewFactory) -> T) -> T {
+    private func multipleSensors<T>(_ number: Int, use: ([(Timeslot, SensorFiniteStateMachine)], UInt, StackGateway, FSMClock, SQLiteKripkeStructureFactory, TestableViewFactory) async -> T) async -> T {
         let fsms = (0..<number).map { (i: Int) -> (SensorFiniteStateMachine, UInt, UInt) in
             let fsm = SensorFiniteStateMachine()
             fsm.name += "\(i)"
@@ -974,11 +979,11 @@ class ScheduleVerifierTests: XCTestCase {
             )
             return (timeslot, $0)
         }
-        return use(timeslots, cycleLength, gateway, timer, kripkeFactory, viewFactory)
+        return await use(timeslots, cycleLength, gateway, timer, kripkeFactory, viewFactory)
     }
     
-    private func multipleSeparateSensors<T>(_ number: Int, _ make: (ScheduleVerifier<ScheduleIsolator>, StackGateway, FSMClock, SQLiteKripkeStructureFactory, TestableViewFactory) -> T) -> T {
-        multipleSensors(number) { (timeslots, cycleLength, gateway, timer, kripkeFactory, viewFactory) in
+    private func multipleSeparateSensors<T>(_ number: Int, _ make: (ScheduleVerifier<ScheduleIsolator>, StackGateway, FSMClock, SQLiteKripkeStructureFactory, TestableViewFactory) async -> T) async -> T {
+        await multipleSensors(number) { (timeslots, cycleLength, gateway, timer, kripkeFactory, viewFactory) in
             let threads = timeslots.map {
                 IsolatedThread(
                     map: VerificationMap(
@@ -999,12 +1004,12 @@ class ScheduleVerifierTests: XCTestCase {
             }
             let isolator = ScheduleIsolator(threads: threads, parameterisedThreads: [:], cycleLength: cycleLength)
             let verifier = ScheduleVerifier(isolatedThreads: isolator)
-            return make(verifier, gateway, timer, kripkeFactory, viewFactory)
+            return await make(verifier, gateway, timer, kripkeFactory, viewFactory)
         }
     }
     
-    private func multipleCombinedSensors<T>(_ number: Int, _ make: (ScheduleVerifier<ScheduleIsolator>, StackGateway, FSMClock, SQLiteKripkeStructureFactory, TestableViewFactory) -> T) -> T {
-        multipleSensors(number) { (timeslots, cycleLength, gateway, timer, kripkeFactory, viewFactory) in
+    private func multipleCombinedSensors<T>(_ number: Int, _ make: (ScheduleVerifier<ScheduleIsolator>, StackGateway, FSMClock, SQLiteKripkeStructureFactory, TestableViewFactory) async -> T) async -> T {
+        await multipleSensors(number) { (timeslots, cycleLength, gateway, timer, kripkeFactory, viewFactory) in
             let pool = FSMPool(
                 fsms: timeslots.map {
                     .controllableFSM(AnyControllableFiniteStateMachine($1))
@@ -1037,11 +1042,11 @@ class ScheduleVerifierTests: XCTestCase {
                 cycleLength: cycleLength
             )
             let verifier = ScheduleVerifier(isolatedThreads: isolator)
-            return make(verifier, gateway, timer, kripkeFactory, viewFactory)
+            return await make(verifier, gateway, timer, kripkeFactory, viewFactory)
         }
     }
 
-    private func singleLight<T>(_ make: (ScheduleVerifier<ScheduleIsolator>, StackGateway, FSMClock, SQLiteKripkeStructureFactory, TestableViewFactory) -> T) -> T {
+    private func singleLight<T>(_ make: (ScheduleVerifier<ScheduleIsolator>, StackGateway, FSMClock, SQLiteKripkeStructureFactory, TestableViewFactory) async -> T) async -> T {
         let fsm = LightFiniteStateMachine()
         fsm.name += "0"
         let startingTime: UInt = 10
@@ -1088,10 +1093,10 @@ class ScheduleVerifierTests: XCTestCase {
             cycleLength: timeslot.startingTime + timeslot.duration
         )
         let verifier = ScheduleVerifier(isolatedThreads: isolator)
-        return make(verifier, gateway, timer, kripkeFactory, viewFactory)
+        return await make(verifier, gateway, timer, kripkeFactory, viewFactory)
     }
     
-    private func combinedSensors<T>(_ make: (ScheduleVerifier<ScheduleIsolator>, StackGateway, FSMClock, SQLiteKripkeStructureFactory, TestableViewFactory) -> T) -> T {
+    private func combinedSensors<T>(_ make: (ScheduleVerifier<ScheduleIsolator>, StackGateway, FSMClock, SQLiteKripkeStructureFactory, TestableViewFactory) async -> T) async -> T {
         let fsm1 = SensorFiniteStateMachine()
         fsm1.name = fsm1.name + "0"
         let fsm1StartingTime: UInt = 10
@@ -1170,10 +1175,10 @@ class ScheduleVerifierTests: XCTestCase {
             cycleLength: cycleLength
         )
         let verifier = ScheduleVerifier(isolatedThreads: isolator)
-        return make(verifier, gateway, timer, kripkeFactory, viewFactory)
+        return await make(verifier, gateway, timer, kripkeFactory, viewFactory)
     }
     
-    private func singleSensor<T>(_ make: (ScheduleVerifier<ScheduleIsolator>, StackGateway, FSMClock, SQLiteKripkeStructureFactory, TestableViewFactory) -> T) -> T {
+    private func singleSensor<T>(_ make: (ScheduleVerifier<ScheduleIsolator>, StackGateway, FSMClock, SQLiteKripkeStructureFactory, TestableViewFactory) async -> T) async -> T {
         let fsm = SensorFiniteStateMachine()
         fsm.name += "0"
         let startingTime: UInt = 10
@@ -1220,10 +1225,10 @@ class ScheduleVerifierTests: XCTestCase {
             cycleLength: timeslot.startingTime + timeslot.duration
         )
         let verifier = ScheduleVerifier(isolatedThreads: isolator)
-        return make(verifier, gateway, timer, kripkeFactory, viewFactory)
+        return await make(verifier, gateway, timer, kripkeFactory, viewFactory)
     }
     
-    private func singleTime<T>(_ make: (ScheduleVerifier<ScheduleIsolator>, StackGateway, FSMClock, SQLiteKripkeStructureFactory, TestableViewFactory) -> T) -> T {
+    private func singleTime<T>(_ make: (ScheduleVerifier<ScheduleIsolator>, StackGateway, FSMClock, SQLiteKripkeStructureFactory, TestableViewFactory) async -> T) async -> T {
         let fsm = SimpleTimeConditionalFiniteStateMachine()
         let startingTime: UInt = 10
         let duration: UInt = 30
@@ -1269,7 +1274,7 @@ class ScheduleVerifierTests: XCTestCase {
             cycleLength: timeslot.startingTime + timeslot.duration
         )
         let verifier = ScheduleVerifier(isolatedThreads: isolator)
-        return make(verifier, gateway, timer, kripkeFactory, viewFactory)
+        return await make(verifier, gateway, timer, kripkeFactory, viewFactory)
     }
     
     private func twoSensorKripkeStructure(

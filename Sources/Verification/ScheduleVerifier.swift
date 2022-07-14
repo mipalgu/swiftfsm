@@ -81,8 +81,34 @@ final class ScheduleVerifier<Isolator: ScheduleIsolatorProtocol> {
         }
         
     }
+
+    private actor JobCollection {
+
+        private var jobs: [Job]
+
+        var isEmpty: Bool {
+            jobs.isEmpty
+        }
+
+        init(jobs: [Job]) {
+            self.jobs = jobs
+        }
+
+        func add(_ job: Job) {
+            self.jobs.append(job)
+        }
+
+        func next() -> Job {
+            self.jobs.removeLast()
+        }
+
+        func reserveCapacity(_ capacity: Int) {
+            self.jobs.reserveCapacity(capacity)
+        }
+
+    }
     
-    private struct Job {
+    private struct Job: Sendable {
         
         var initial: Bool {
             previous == nil
@@ -120,11 +146,11 @@ final class ScheduleVerifier<Isolator: ScheduleIsolatorProtocol> {
         self.isolatedThreads = isolatedThreads
     }
 
-    func verify<Gateway: ModifiableFSMGateway, Timer: Clock>(gateway: Gateway, timer: Timer) throws -> [SQLiteKripkeStructure] where Gateway: NewVerifiableGateway {
-        try self.verify(gateway: gateway, timer: timer, factory: SQLiteKripkeStructureFactory())
+    func verify<Gateway: ModifiableFSMGateway, Timer: Clock>(gateway: Gateway, timer: Timer) async throws -> [SQLiteKripkeStructure] where Gateway: NewVerifiableGateway {
+        try await self.verify(gateway: gateway, timer: timer, factory: SQLiteKripkeStructureFactory())
     }
     
-    func verify<Gateway: ModifiableFSMGateway, Timer: Clock, Factory: MutableKripkeStructureFactory>(gateway: Gateway, timer: Timer, factory: Factory) throws -> [Factory.KripkeStructure] where Gateway: NewVerifiableGateway
+    func verify<Gateway: ModifiableFSMGateway, Timer: Clock, Factory: MutableKripkeStructureFactory>(gateway: Gateway, timer: Timer, factory: Factory) async throws -> [Factory.KripkeStructure] where Gateway: NewVerifiableGateway
     {
         stores = [:]
         resultsCache = [:]
@@ -133,13 +159,13 @@ final class ScheduleVerifier<Isolator: ScheduleIsolatorProtocol> {
                 $0.step.timeslots.flatMap(\.fsms)
             })
             let identifier = allFsmNames.count == 1 ? allFsmNames.first ?? "\(index)" : "\(index)"
-            try verify(thread: thread, identifier: identifier, gateway: gateway, timer: timer, factory: factory, recordingResultsFor: nil)
+            try await verify(thread: thread, identifier: identifier, gateway: gateway, timer: timer, factory: factory, recordingResultsFor: nil)
         }
         return stores.values.map { $0 as! Factory.KripkeStructure }
     }
 
     @discardableResult
-    func verify<Gateway: ModifiableFSMGateway, Timer: Clock, Factory: MutableKripkeStructureFactory>(thread: IsolatedThread, identifier: String, gateway: Gateway, timer: Timer, factory: Factory, recordingResultsFor resultsFsm: String?) throws -> CallResults where Gateway: NewVerifiableGateway
+    func verify<Gateway: ModifiableFSMGateway, Timer: Clock, Factory: MutableKripkeStructureFactory>(thread: IsolatedThread, identifier: String, gateway: Gateway, timer: Timer, factory: Factory, recordingResultsFor resultsFsm: String?) async throws -> CallResults where Gateway: NewVerifiableGateway
     {
         let persistentStore = try (stores[identifier] as? Factory.KripkeStructure) ?? factory.make(identifier: identifier)
         defer { self.stores[identifier] = persistentStore }
@@ -153,10 +179,10 @@ final class ScheduleVerifier<Isolator: ScheduleIsolatorProtocol> {
         let generator = VerificationStepGenerator()
         gateway.setScenario([], pool: thread.pool)
         let collapse = nil == thread.map.steps.first { $0.step.fsms.count > 1 }
-        var jobs = [Job(step: 0, map: thread.map, pool: thread.pool, cycleCount: 0, promises: [:], previousNodes: [], previous: nil, resetClocks: Set(thread.pool.fsms.map(\.name).filter { thread.pool.parameterisedFSMs[$0] == nil }))]
-        jobs.reserveCapacity(100000)
-        while !jobs.isEmpty {
-            let job = jobs.removeLast()
+        var jobs = JobCollection(jobs: [Job(step: 0, map: thread.map, pool: thread.pool, cycleCount: 0, promises: [:], previousNodes: [], previous: nil, resetClocks: Set(thread.pool.fsms.map(\.name).filter { thread.pool.parameterisedFSMs[$0] == nil }))])
+        await jobs.reserveCapacity(100000)
+        while await !jobs.isEmpty {
+            let job = await jobs.next()
             let step = job.map.steps[job.step]
             let previous = job.previous
             let newStep = job.step >= (job.map.steps.count - 1) ? 0 : job.step + 1
@@ -182,17 +208,8 @@ final class ScheduleVerifier<Isolator: ScheduleIsolatorProtocol> {
                     let shouldReset = resetClocks?.contains(timeslot.callChain.fsm)
                     resetClocks?.subtract([timeslot.callChain.fsm])
                     let properties = job.pool.propertyList(forStep: .startDelegates(fsms: [timeslot]), executingState: nil, promises: job.promises, resetClocks: resetClocks, collapseIfPossible: true)
-                    let inCycle = try persistentStore.exists(properties)
+                    let (id, inCycle) = try persistentStore.add(properties, isInitial: job.initial)
                     allInCycle = allInCycle && inCycle
-                    let id: Int64
-                    if !inCycle {
-                        id = try persistentStore.add(properties, isInitial: job.initial)
-                    } else {
-                        id = try persistentStore.id(for: properties)
-                        if job.initial {
-                            try persistentStore.markAsInitial(id: id)
-                        }
-                    }
                     subCycle = subCycle || previousNodes.contains(id)
                     previousNodes.formUnion([id])
                     if let previous = previous {
@@ -218,7 +235,7 @@ final class ScheduleVerifier<Isolator: ScheduleIsolatorProtocol> {
                     continue
                 }
                 let newCycleCount = newStep <= job.step ? job.cycleCount + 1 : job.cycleCount
-                jobs.append(Job(step: newStep, map: job.map, pool: job.pool, cycleCount: newCycleCount, promises: job.promises, previousNodes: previousNodes, previous: previous, resetClocks: resetClocks))
+                await jobs.add(Job(step: newStep, map: job.map, pool: job.pool, cycleCount: newCycleCount, promises: job.promises, previousNodes: previousNodes, previous: previous, resetClocks: resetClocks))
                 continue
             case .endDelegates, .execute, .executeAndSaveSnapshot:
                 switch step.step {
@@ -232,18 +249,12 @@ final class ScheduleVerifier<Isolator: ScheduleIsolatorProtocol> {
                 let timeslots = step.step.timeslots
                 let executing = timeslots.filter { job.pool.parameterisedFSMs[$0.callChain.fsm]?.status == .executing }
                 let remainingTimeslots = timeslots.subtracting(executing)
-                let pathways = try processDelegate(gateway: gateway, timer: timer, factory: factory, time: step.time, map: job.map, pool: job.pool, promises: job.promises, resetClocks: job.resetClocks, previous: job.previous, timeslots: executing, addingTo: persistentStore)
+                let pathways = try await processDelegate(gateway: gateway, timer: timer, factory: factory, time: step.time, map: job.map, pool: job.pool, promises: job.promises, resetClocks: job.resetClocks, previous: job.previous, timeslots: executing, addingTo: persistentStore)
                 var newPrevious: [Previous] = []
                 if !remainingTimeslots.isEmpty {
                     for (pool, map, previous) in pathways.isEmpty ? [(job.pool, job.map, [job.previous].map { $0 })] : pathways {
                         let properties = pool.propertyList(forStep: .endDelegates(fsms: remainingTimeslots), executingState: nil, promises: job.promises, resetClocks: job.resetClocks, collapseIfPossible: true)
-                        let inCycle = try persistentStore.exists(properties)
-                        let id: Int64
-                        if !inCycle {
-                            id = try persistentStore.add(properties, isInitial: false)
-                        } else {
-                            id = try persistentStore.id(for: properties)
-                        }
+                        let (id, inCycle) = try persistentStore.add(properties, isInitial: false)
                         var previousNodes = job.previousNodes
                         for previous in previous {
                             if let previous = previous {
@@ -271,14 +282,14 @@ final class ScheduleVerifier<Isolator: ScheduleIsolatorProtocol> {
                         }
                         let newCycleCount = newStep <= job.step ? job.cycleCount + 1 : job.cycleCount
                         let newPrevious = Previous(id: id, time: step.time)
-                        jobs.append(Job(step: newStep, map: map, pool: pool, cycleCount: newCycleCount, promises: job.promises, previousNodes: previousNodes.union([id]), previous: newPrevious, resetClocks: job.resetClocks))
+                        await jobs.add(Job(step: newStep, map: map, pool: pool, cycleCount: newCycleCount, promises: job.promises, previousNodes: previousNodes.union([id]), previous: newPrevious, resetClocks: job.resetClocks))
                     }
                 } else {
                     for (pool, map, previous) in pathways {
                         for previous in previous {
                             if let previous = previous {
                                 let newCycleCount = newStep <= job.step ? job.cycleCount + 1 : job.cycleCount
-                                jobs.append(Job(step: newStep, map: map, pool: pool, cycleCount: newCycleCount, promises: job.promises, previousNodes: job.previousNodes.union([previous.id]), previous: previous, resetClocks: job.resetClocks))
+                                await jobs.add(Job(step: newStep, map: map, pool: pool, cycleCount: newCycleCount, promises: job.promises, previousNodes: job.previousNodes.union([previous.id]), previous: previous, resetClocks: job.resetClocks))
                             }
                         }
                     }
@@ -304,16 +315,7 @@ final class ScheduleVerifier<Isolator: ScheduleIsolatorProtocol> {
                 for pool in pools {
                     //print("\nGenerating \(step.step.marker)(\(step.step.timeslots.map(\.callChain.fsm).sorted().joined(separator: ", "))) variations for:\n    \("\(pool)".components(separatedBy: .newlines).joined(separator: "\n\n    "))\n\n")
                     let properties = pool.propertyList(forStep: step.step, executingState: fsm?.currentState.name, promises: job.promises, resetClocks: job.resetClocks, collapseIfPossible: collapse)
-                    let inCycle = try persistentStore.exists(properties)
-                    let id: Int64
-                    if !inCycle {
-                        id = try persistentStore.add(properties, isInitial: previous == nil)
-                    } else {
-                        id = try persistentStore.id(for: properties)
-                        if job.initial {
-                            try persistentStore.markAsInitial(id: id)
-                        }
-                    }
+                    let (id, inCycle) = try persistentStore.add(properties, isInitial: previous == nil)
                     if let previous = previous {
                         let edge: KripkeEdge = KripkeEdge(
                             clockName: fsm?.name,
@@ -352,7 +354,7 @@ final class ScheduleVerifier<Isolator: ScheduleIsolatorProtocol> {
                     let newCycleCount = newStep <= job.step ? job.cycleCount + 1 : job.cycleCount
                     let newPrevious = Previous(id: id, time: step.time)
                     let newPromises = job.promises.filter { !properties.contains(object: $1) }
-                    jobs.append(Job(step: newStep, map: job.map, pool: pool.cloned, cycleCount: newCycleCount, promises: newPromises, previousNodes: job.previousNodes.union([id]), previous: newPrevious, resetClocks: newResetClocks))
+                    await jobs.add(Job(step: newStep, map: job.map, pool: pool.cloned, cycleCount: newCycleCount, promises: newPromises, previousNodes: job.previousNodes.union([id]), previous: newPrevious, resetClocks: newResetClocks))
                 }
             case .execute(let timeslot), .executeAndSaveSnapshot(let timeslot):
                 let fsm = timeslot.callChain.fsm(fromPool: job.pool)
@@ -383,16 +385,7 @@ final class ScheduleVerifier<Isolator: ScheduleIsolatorProtocol> {
                         resetClocks = job.resetClocks.map { $0.union(callees) }
                     }
                     let properties = newPool.propertyList(forStep: step.step, executingState: currentState, promises: mergedPromises, resetClocks: resetClocks, collapseIfPossible: collapse)
-                    let inCycle = try persistentStore.exists(properties)
-                    let id: Int64
-                    if !inCycle {
-                        id = try persistentStore.add(properties, isInitial: previous == nil)
-                    } else {
-                        id = try persistentStore.id(for: properties)
-                        if job.initial {
-                            try persistentStore.markAsInitial(id: id)
-                        }
-                    }
+                    let (id, inCycle) = try persistentStore.add(properties, isInitial: previous == nil)
                     if let previous = previous {
                         let edge = KripkeEdge(
                             clockName: timeslot.callChain.fsm,
@@ -425,7 +418,7 @@ final class ScheduleVerifier<Isolator: ScheduleIsolatorProtocol> {
                     let newCycleCount = newStep <= job.step ? job.cycleCount + 1 : job.cycleCount
                     let newPrevious = Previous(id: id, time: step.time)
                     let filteredPromises = mergedPromises.filter { !properties.contains(object: $1) }
-                    jobs.append(Job(step: newStep, map: newMap, pool: newPool, cycleCount: newCycleCount, promises: filteredPromises, previousNodes: job.previousNodes.union([id]), previous: newPrevious, resetClocks: resetClocks))
+                    await jobs.add(Job(step: newStep, map: newMap, pool: newPool, cycleCount: newCycleCount, promises: filteredPromises, previousNodes: job.previousNodes.union([id]), previous: newPrevious, resetClocks: resetClocks))
                 }
             case .startDelegates, .endDelegates:
                 fatalError("Attempting to handle delegate step in inline step section.")
@@ -452,7 +445,7 @@ final class ScheduleVerifier<Isolator: ScheduleIsolatorProtocol> {
         previous: Previous?,
         timeslots: C,
         addingTo structure: Structure
-    ) throws -> [(FSMPool, VerificationMap, [Previous?])] where
+    ) async throws -> [(FSMPool, VerificationMap, [Previous?])] where
         Gateway: NewVerifiableGateway,
         C.Element == Timeslot,
         C.SubSequence: Collection,
@@ -462,7 +455,7 @@ final class ScheduleVerifier<Isolator: ScheduleIsolatorProtocol> {
         guard let timeslot = timeslots.first, let call = timeslot.callChain.calls.last else {
             return [(pool, map, previous.map { [$0] } ?? [])]
         }
-        let results = try self.delegate(call: call, callee: call.callee.name, gateway: gateway, timer: timer, factory: factory)
+        let results = try await self.delegate(call: call, callee: call.callee.name, gateway: gateway, timer: timer, factory: factory)
         var out: [(FSMPool, VerificationMap, [Previous?])] = []
         for result in results.results {
             var resultPool = pool.cloned
@@ -470,16 +463,7 @@ final class ScheduleVerifier<Isolator: ScheduleIsolatorProtocol> {
             var newMap = map
             newMap.handleFinishedCall(call)
             let properties = resultPool.propertyList(forStep: .endDelegates(fsms: [timeslot]), executingState: nil, promises: promises, resetClocks: resetClocks, collapseIfPossible: true)
-            let inCycle = try structure.exists(properties)
-            let id: Int64
-            if !inCycle {
-                id = try structure.add(properties, isInitial: previous == nil)
-            } else {
-                id = try structure.id(for: properties)
-                if previous == nil {
-                    try structure.markAsInitial(id: id)
-                }
-            }
+            let (id, inCycle) = try structure.add(properties, isInitial: previous == nil)
             let range = result.0
             if let previous = previous {
                 let edge: KripkeEdge
@@ -514,19 +498,10 @@ final class ScheduleVerifier<Isolator: ScheduleIsolatorProtocol> {
             if inCycle {
                 continue
             }
-            out.append(contentsOf: try processDelegate(gateway: gateway, timer: timer, factory: factory, time: time, map: newMap, pool: resultPool, promises: promises, resetClocks: resetClocks, previous: Previous(id: id, time: time), timeslots: timeslots.dropFirst(), addingTo: structure))
+            out.append(contentsOf: try await processDelegate(gateway: gateway, timer: timer, factory: factory, time: time, map: newMap, pool: resultPool, promises: promises, resetClocks: resetClocks, previous: Previous(id: id, time: time), timeslots: timeslots.dropFirst(), addingTo: structure))
         }
         let properties = pool.propertyList(forStep: .endDelegates(fsms: [timeslot]), executingState: nil, promises: promises, resetClocks: resetClocks, collapseIfPossible: true)
-        let inCycle = try structure.exists(properties)
-        let id: Int64
-        if !inCycle {
-            id = try structure.add(properties, isInitial: previous == nil)
-        } else {
-            id = try structure.id(for: properties)
-            if previous == nil {
-                try structure.markAsInitial(id: id)
-            }
-        }
+        let (id, inCycle) = try structure.add(properties, isInitial: previous == nil)
         if let previous = previous {
             let extraEdge = KripkeEdge(
                 clockName: timeslot.callChain.fsm,
@@ -544,7 +519,7 @@ final class ScheduleVerifier<Isolator: ScheduleIsolatorProtocol> {
         if inCycle {
             return out
         }
-        out.append(contentsOf: try processDelegate(gateway: gateway, timer: timer, factory: factory, time: time, map: map, pool: pool, promises: promises, resetClocks: resetClocks, previous: Previous(id: id, time: time), timeslots: timeslots.dropFirst(), addingTo: structure))
+        out.append(contentsOf: try await processDelegate(gateway: gateway, timer: timer, factory: factory, time: time, map: map, pool: pool, promises: promises, resetClocks: resetClocks, previous: Previous(id: id, time: time), timeslots: timeslots.dropFirst(), addingTo: structure))
         return out
     }
 
@@ -623,7 +598,7 @@ final class ScheduleVerifier<Isolator: ScheduleIsolatorProtocol> {
 
     }
 
-    private func delegate<Gateway: ModifiableFSMGateway, Timer: Clock, Factory: MutableKripkeStructureFactory>(call: Call, callee: String, gateway: Gateway, timer: Timer, factory: Factory) throws -> CallResults where Gateway: NewVerifiableGateway
+    private func delegate<Gateway: ModifiableFSMGateway, Timer: Clock, Factory: MutableKripkeStructureFactory>(call: Call, callee: String, gateway: Gateway, timer: Timer, factory: Factory) async throws -> CallResults where Gateway: NewVerifiableGateway
     {
         let key = CallKey(callee: call.callee.name, parameters: call.parameters)
         if let results = resultsCache[key] {
@@ -633,7 +608,7 @@ final class ScheduleVerifier<Isolator: ScheduleIsolatorProtocol> {
             fatalError("No thread provided for calling \(callee)")
         }
         thread.setParameters(of: callee, to: call.parameters)
-        let results = try verify(thread: thread, identifier: callee, gateway: gateway, timer: timer, factory: factory, recordingResultsFor: callee)
+        let results = try await verify(thread: thread, identifier: callee, gateway: gateway, timer: timer, factory: factory, recordingResultsFor: callee)
         resultsCache[key] = results
         return results
     }
