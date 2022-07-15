@@ -214,10 +214,16 @@ final class ScheduleVerifier<Isolator: ScheduleIsolatorProtocol> {
                 }
                 guard !allInCycle else {
                     if let resultsFsm = resultsFsm {
-                        if subCycle, (cyclic ?? false) {
+                        defer { cyclic = true }
+                        if subCycle {
                             fatalError("Detected cycle in delegate parameterised machine call that should always return a value for call to \(resultsFsm).")
                         }
-                        cyclic = true
+                        guard let cyclic = cyclic else {
+                            continue
+                        }
+                        guard cyclic else {
+                            fatalError("Detected cycle in delegate parameterised machine call that should always return a value for call to \(resultsFsm).")
+                        }
                     }
                     continue
                 }
@@ -269,10 +275,13 @@ final class ScheduleVerifier<Isolator: ScheduleIsolatorProtocol> {
                         }
                         guard !inCycle else {
                             if let resultsFsm = resultsFsm {
-                                if job.previousNodes.contains(id), (cyclic ?? false) {
+                                defer { cyclic = true }
+                                guard let cyclic = cyclic else {
+                                    continue
+                                }
+                                guard cyclic, !job.previousNodes.contains(id) else {
                                     fatalError("Detected cycle in delegate parameterised machine call that should always return a value for call to \(resultsFsm).")
                                 }
-                                cyclic = true
                             }
                             continue
                         }
@@ -335,20 +344,29 @@ final class ScheduleVerifier<Isolator: ScheduleIsolatorProtocol> {
                     }
                     if step.step.saveSnapshot && job.map.hasFinished(forPool: pool) {
                         if let resultsFsm = resultsFsm {
-                            guard let parameterisedFSM = pool.fsm(resultsFsm).asParameterisedFiniteStateMachine, (cyclic.map({ !$0 }) ?? true) else {
+                            defer { cyclic = false }
+                            guard let parameterisedFSM = pool.fsm(resultsFsm).asParameterisedFiniteStateMachine else {
                                 fatalError("Attempting to record results for a non-parameterised fsm")
                             }
                             callResults.insert(result: parameterisedFSM.resultContainer.result, forTime: job.cycleCount * isolatedThreads.cycleLength + step.time)
-                            cyclic = false
+                            guard let cyclic = cyclic else {
+                                continue
+                            }
+                            guard !cyclic else {
+                                fatalError("Attempting to record results for a cyclic fsm.")
+                            }
                         }
                         continue
                     }
                     guard !inCycle else {
                         if let resultsFsm = resultsFsm {
-                            if job.previousNodes.contains(id), (cyclic ?? false) {
+                            defer { cyclic = true }
+                            guard let cyclic = cyclic else {
+                                continue
+                            }
+                            guard cyclic, !job.previousNodes.contains(id) else {
                                 fatalError("Detected cycle in delegate parameterised machine call that should always return a value for call to \(resultsFsm).")
                             }
-                            cyclic = true
                         }
                         continue
                     }
@@ -418,20 +436,29 @@ final class ScheduleVerifier<Isolator: ScheduleIsolatorProtocol> {
                     }
                     if step.step.saveSnapshot && job.map.hasFinished(forPool: ringlet.after) {
                         if let resultsFsm = resultsFsm {
-                            guard let parameterisedFSM = ringlet.after.fsm(resultsFsm).asParameterisedFiniteStateMachine, (cyclic.map({ !$0 }) ?? true) else {
+                            defer { cyclic = false }
+                            guard let parameterisedFSM = ringlet.after.fsm(resultsFsm).asParameterisedFiniteStateMachine else {
                                 fatalError("Attempting to record results for a non-parameterised fsm")
                             }
                             callResults.insert(result: parameterisedFSM.resultContainer.result, forTime: job.cycleCount * isolatedThreads.cycleLength + step.time)
-                            cyclic = false
+                            guard let cyclic = cyclic else {
+                                continue
+                            }
+                            guard !cyclic else {
+                                fatalError("Attempting to record results for a cyclic fsm")
+                            }
                         }
                         continue
                     }
                     guard !inCycle else {
                         if let resultsFsm = resultsFsm {
-                            if job.previousNodes.contains(id), (cyclic ?? false) {
+                            defer { cyclic = true }
+                            guard let cyclic = cyclic else {
+                                continue
+                            }
+                            guard cyclic, !job.previousNodes.contains(id) else {
                                 fatalError("Detected cycle in delegate parameterised machine call that should always return a value for call to \(resultsFsm).")
                             }
-                            cyclic = true
                         }
                         continue
                     }
