@@ -132,7 +132,7 @@ final class ScheduleVerifier<Isolator: ScheduleIsolatorProtocol> {
             let allFsmNames: Set<String> = Set(thread.map.steps.flatMap {
                 $0.step.timeslots.flatMap(\.fsms)
             })
-            let filtered = allFsmNames.filter { thread.pool.parameterisedFSMs.keys.contains($0) }
+            let filtered = allFsmNames.filter { !thread.pool.parameterisedFSMs.keys.contains($0) }
             let identifier = filtered.count == 1 ? filtered.first ?? "\(index)" : "\(index)"
             try verify(thread: thread, identifier: identifier, gateway: gateway, timer: timer, factory: factory, recordingResultsFor: nil)
         }
