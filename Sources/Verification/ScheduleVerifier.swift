@@ -152,6 +152,7 @@ final class ScheduleVerifier<Isolator: ScheduleIsolatorProtocol> {
         }
         let generator = VerificationStepGenerator()
         gateway.setScenario([], pool: thread.pool)
+        var cyclic: Bool? = nil
         let collapse = nil == thread.map.steps.first { $0.step.fsms.count > 1 }
         var jobs = [Job(step: 0, map: thread.map, pool: thread.pool, cycleCount: 0, promises: [:], previousNodes: [], previous: nil, resetClocks: Set(thread.pool.fsms.map(\.name).filter { thread.pool.parameterisedFSMs[$0] == nil }))]
         jobs.reserveCapacity(100000)
@@ -212,8 +213,11 @@ final class ScheduleVerifier<Isolator: ScheduleIsolatorProtocol> {
                     previous = Previous(id: id, time: step.time)
                 }
                 guard !allInCycle else {
-                    if let resultsFsm = resultsFsm, subCycle {
-                        fatalError("Detected cycle in delegate parameterised machine call that should always return a value for call to \(resultsFsm).")
+                    if let resultsFsm = resultsFsm {
+                        if subCycle, cyclic ?? false {
+                            fatalError("Detected cycle in delegate parameterised machine call that should always return a value for call to \(resultsFsm).")
+                        }
+                        cyclic = true
                     }
                     continue
                 }
@@ -264,8 +268,11 @@ final class ScheduleVerifier<Isolator: ScheduleIsolatorProtocol> {
                             }
                         }
                         guard !inCycle else {
-                            if let resultsFsm = resultsFsm, job.previousNodes.contains(id) {
-                                fatalError("Detected cycle in delegate parameterised machine call that should always return a value for call to \(resultsFsm).")
+                            if let resultsFsm = resultsFsm {
+                                if job.previousNodes.contains(id), cyclic ?? false {
+                                    fatalError("Detected cycle in delegate parameterised machine call that should always return a value for call to \(resultsFsm).")
+                                }
+                                cyclic = true
                             }
                             continue
                         }
@@ -283,8 +290,6 @@ final class ScheduleVerifier<Isolator: ScheduleIsolatorProtocol> {
                         }
                     }
                 }
-
-
                 continue
             default:
                 break
@@ -330,16 +335,20 @@ final class ScheduleVerifier<Isolator: ScheduleIsolatorProtocol> {
                     }
                     if step.step.saveSnapshot && job.map.hasFinished(forPool: pool) {
                         if let resultsFsm = resultsFsm {
-                            guard let parameterisedFSM = pool.fsm(resultsFsm).asParameterisedFiniteStateMachine else {
+                            guard let parameterisedFSM = pool.fsm(resultsFsm).asParameterisedFiniteStateMachine, cyclic.map({ !$0 }) ?? true else {
                                 fatalError("Attempting to record results for a non-parameterised fsm")
                             }
                             callResults.insert(result: parameterisedFSM.resultContainer.result, forTime: job.cycleCount * isolatedThreads.cycleLength + step.time)
+                            cyclic = false
                         }
                         continue
                     }
                     guard !inCycle else {
-                        if let resultsFsm = resultsFsm, job.previousNodes.contains(id) {
-                            fatalError("Detected cycle in delegate parameterised machine call that should always return a value for call to \(resultsFsm).")
+                        if let resultsFsm = resultsFsm {
+                            if job.previousNodes.contains(id), cyclic ?? false {
+                                fatalError("Detected cycle in delegate parameterised machine call that should always return a value for call to \(resultsFsm).")
+                            }
+                            cyclic = true
                         }
                         continue
                     }
@@ -409,16 +418,20 @@ final class ScheduleVerifier<Isolator: ScheduleIsolatorProtocol> {
                     }
                     if step.step.saveSnapshot && job.map.hasFinished(forPool: ringlet.after) {
                         if let resultsFsm = resultsFsm {
-                            guard let parameterisedFSM = ringlet.after.fsm(resultsFsm).asParameterisedFiniteStateMachine else {
+                            guard let parameterisedFSM = ringlet.after.fsm(resultsFsm).asParameterisedFiniteStateMachine, cyclic.map({ !$0 }) ?? true else {
                                 fatalError("Attempting to record results for a non-parameterised fsm")
                             }
                             callResults.insert(result: parameterisedFSM.resultContainer.result, forTime: job.cycleCount * isolatedThreads.cycleLength + step.time)
+                            cyclic = false
                         }
                         continue
                     }
                     guard !inCycle else {
-                        if let resultsFsm = resultsFsm, job.previousNodes.contains(id) {
-                            fatalError("Detected cycle in delegate parameterised machine call that should always return a value for call to \(resultsFsm).")
+                        if let resultsFsm = resultsFsm {
+                            if job.previousNodes.contains(id), cyclic ?? false {
+                                fatalError("Detected cycle in delegate parameterised machine call that should always return a value for call to \(resultsFsm).")
+                            }
+                            cyclic = true
                         }
                         continue
                     }
