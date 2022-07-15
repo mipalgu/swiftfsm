@@ -173,7 +173,6 @@ final class ScheduleVerifier<Isolator: ScheduleIsolatorProtocol> {
                 default:
                     break
                 }
-                print("start")
                 let timeslots = step.step.timeslots
                 var previous = previous
                 var resetClocks = job.resetClocks
