@@ -282,6 +282,9 @@ final class ScheduleVerifier<Isolator: ScheduleIsolatorProtocol> {
                                     }
                                     continue
                                 }
+                                if !job.previousNodes.contains(id) {
+                                    continue
+                                }
                                 guard c else {
                                     fatalError("Detected cycle in delegate parameterised machine call that should always return a value for call to \(resultsFsm).")
                                 }
@@ -368,6 +371,9 @@ final class ScheduleVerifier<Isolator: ScheduleIsolatorProtocol> {
                                 if job.previousNodes.contains(id) {
                                     cyclic = true
                                 }
+                                continue
+                            }
+                            if !job.previousNodes.contains(id) {
                                 continue
                             }
                             guard c else {
@@ -463,6 +469,9 @@ final class ScheduleVerifier<Isolator: ScheduleIsolatorProtocol> {
                                 if job.previousNodes.contains(id) {
                                     cyclic = true
                                 }
+                                continue
+                            }
+                            if !job.previousNodes.contains(id) {
                                 continue
                             }
                             guard c else {
