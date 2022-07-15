@@ -277,7 +277,9 @@ final class ScheduleVerifier<Isolator: ScheduleIsolatorProtocol> {
                         guard !inCycle else {
                             if let resultsFsm = resultsFsm {
                                 guard let c = cyclic else {
-                                    cyclic = job.previousNodes.contains(id)
+                                    if job.previousNodes.contains(id) {
+                                        cyclic = true
+                                    }
                                     continue
                                 }
                                 guard c else {
@@ -363,7 +365,9 @@ final class ScheduleVerifier<Isolator: ScheduleIsolatorProtocol> {
                     guard !inCycle else {
                         if let resultsFsm = resultsFsm {
                             guard let c = cyclic else {
-                                cyclic = job.previousNodes.contains(id)
+                                if job.previousNodes.contains(id) {
+                                    cyclic = true
+                                }
                                 continue
                             }
                             guard c else {
@@ -456,7 +460,9 @@ final class ScheduleVerifier<Isolator: ScheduleIsolatorProtocol> {
                     guard !inCycle else {
                         if let resultsFsm = resultsFsm {
                             guard let c = cyclic else {
-                                cyclic = job.previousNodes.contains(id)
+                                if job.previousNodes.contains(id) {
+                                    cyclic = true
+                                }
                                 continue
                             }
                             guard c else {
