@@ -277,13 +277,12 @@ final class ScheduleVerifier<Isolator: ScheduleIsolatorProtocol> {
                         guard !inCycle else {
                             if let resultsFsm = resultsFsm {
                                 guard let c = cyclic else {
-                                    cyclic = true
+                                    cyclic = job.previousNodes.contains(id)
                                     continue
                                 }
-                                guard c, !job.previousNodes.contains(id) else {
+                                guard c else {
                                     fatalError("Detected cycle in delegate parameterised machine call that should always return a value for call to \(resultsFsm).")
                                 }
-                                cyclic = true
                             }
                             continue
                         }
@@ -364,13 +363,12 @@ final class ScheduleVerifier<Isolator: ScheduleIsolatorProtocol> {
                     guard !inCycle else {
                         if let resultsFsm = resultsFsm {
                             guard let c = cyclic else {
-                                cyclic = true
+                                cyclic = job.previousNodes.contains(id)
                                 continue
                             }
-                            guard c, !job.previousNodes.contains(id) else {
+                            guard c else {
                                 fatalError("Detected cycle in delegate parameterised machine call that should always return a value for call to \(resultsFsm).")
                             }
-                            cyclic = true
                         }
                         continue
                     }
@@ -458,13 +456,12 @@ final class ScheduleVerifier<Isolator: ScheduleIsolatorProtocol> {
                     guard !inCycle else {
                         if let resultsFsm = resultsFsm {
                             guard let c = cyclic else {
-                                cyclic = true
+                                cyclic = job.previousNodes.contains(id)
                                 continue
                             }
-                            guard c, !job.previousNodes.contains(id) else {
+                            guard c else {
                                 fatalError("Detected cycle in delegate parameterised machine call that should always return a value for call to \(resultsFsm).")
                             }
-                            cyclic = true
                         }
                         continue
                     }
