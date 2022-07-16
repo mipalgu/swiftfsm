@@ -131,14 +131,11 @@ struct VerificationMap {
     }
 
     private mutating func replaceSteps(_ transform: (Timeslot) throws -> Timeslot) rethrows {
-        var newSteps = steps
-        for step in steps {
+        var newSteps = Array(steps)
+        for (index, step) in steps.enumerated() {
             switch step.step {
             case .takeSnapshot(let timeslots), .saveSnapshot(let timeslots), .startDelegates(let timeslots), .endDelegates(let timeslots):
                 let newTimeslots: Set<Timeslot> = try Set(timeslots.map(transform))
-                let range = newSteps.range(of: step)
-                let indexes = range.filter { newSteps[$0] == step }
-                indexes.sorted(by: >).forEach { newSteps.remove(at: $0) }
                 let newStep: VerificationStep
                 switch step.step {
                 case .takeSnapshot:
@@ -152,15 +149,12 @@ struct VerificationMap {
                 default:
                     fatalError("Attempting to assign new timeslots to a step that is not supported")
                 }
-                newSteps.insert(Step(time: step.time, step: newStep))
+                newSteps[index] = Step(time: step.time, step: newStep)
             case .execute(let timeslot),
                 .executeAndSaveSnapshot(let timeslot),
                 .startTimeslot(let timeslot),
                 .takeSnapshotAndStartTimeslot(let timeslot):
                 let new = try transform(timeslot)
-                let range = newSteps.range(of: step)
-                let indexes = range.filter { newSteps[$0] == step }
-                indexes.sorted(by: >).forEach { newSteps.remove(at: $0) }
                 let newStep: VerificationStep
                 switch step.step {
                 case .execute:
@@ -172,10 +166,10 @@ struct VerificationMap {
                 default:
                     newStep = .takeSnapshotAndStartTimeslot(timeslot: new)
                 }
-                newSteps.insert(Step(time: step.time, step: newStep))
+                newSteps[index] = Step(time: step.time, step: newStep)
             }
         }
-        self.steps = newSteps
+        self.steps = SortedCollection(sortedArray: newSteps, comparator: self.steps.comparator)
     }
 
     func hasFinished(forPool pool: FSMPool) -> Bool {
