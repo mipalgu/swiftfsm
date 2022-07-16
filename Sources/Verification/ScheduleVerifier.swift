@@ -154,7 +154,7 @@ final class ScheduleVerifier<Isolator: ScheduleIsolatorProtocol> {
         let generator = VerificationStepGenerator()
         gateway.setScenario([], pool: thread.pool)
         var cyclic: Bool? = nil
-        let collapse = thread.pool.fsms.map(\.name).filter { thread.pool.parameterisedFSMs[$0] == nil }.count <= 1
+        let collapse = !thread.map.steps.contains { $0.step.fsms.count > 1 }
         var jobs = [Job(step: 0, map: thread.map, pool: thread.pool, cycleCount: 0, promises: [:], previousNodes: [], previous: nil, resetClocks: Set(thread.pool.fsms.map(\.name).filter { thread.pool.parameterisedFSMs[$0] == nil }))]
         jobs.reserveCapacity(100000)
         while !jobs.isEmpty {
