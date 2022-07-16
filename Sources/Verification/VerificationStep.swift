@@ -136,15 +136,20 @@ enum VerificationStep: Hashable {
         } else {
             let marker = self.marker
             let names = fsms.sorted()
-            let value: [String: Any] = [
+            var value: [String: Any] = [
                 "step": marker,
                 "fsms": names
             ]
+            var plist: [String: KripkeStateProperty] = [
+                "step": KripkeStateProperty(marker),
+                "fsms": KripkeStateProperty(type: .Collection(names.map { KripkeStateProperty($0) }), value: names)
+            ]
+            if let state = state {
+                value["state"] = state
+                plist["state"] = KripkeStateProperty(type: .String, value: state)
+            }
             return KripkeStateProperty(
-                type: .Compound([
-                    "step": KripkeStateProperty(marker),
-                    "fsms": KripkeStateProperty(type: .Collection(names.map { KripkeStateProperty($0) }), value: names)
-                ]),
+                type: .Compound(KripkeStatePropertyList(properties: plist)),
                 value: value
             )
         }
