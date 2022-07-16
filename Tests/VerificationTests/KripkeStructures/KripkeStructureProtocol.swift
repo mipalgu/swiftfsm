@@ -139,7 +139,11 @@ extension KripkeStructureProtocol {
             if data.currentState == data.previousState {
                 return nil
             }
-            return names[index]
+            let name = names[index]
+            if readState && executing == name {
+                return nil
+            }
+            return name
         })
         let fsms = Set(fsms.indices.map { names[$0] })
         return resetClocksProperty(resetClocks, fsms: fsms)
