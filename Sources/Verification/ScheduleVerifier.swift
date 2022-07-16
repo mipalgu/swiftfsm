@@ -321,9 +321,18 @@ final class ScheduleVerifier<Isolator: ScheduleIsolatorProtocol> {
                 } else {
                     pools = [job.pool]
                 }
+                let newResetClocks: Set<String>?
+                let shouldReset: Bool
+                if startTimeslot, let timeslot = fsms.first {
+                    shouldReset = job.resetClocks?.contains(timeslot.callChain.fsm) ?? false
+                    newResetClocks = job.resetClocks?.subtracting([timeslot.callChain.fsm])
+                } else {
+                    newResetClocks = job.resetClocks
+                    shouldReset = false
+                }
                 for pool in pools {
                     //print("\nGenerating \(step.step.marker)(\(step.step.timeslots.map(\.callChain.fsm).sorted().joined(separator: ", "))) variations for:\n    \("\(pool)".components(separatedBy: .newlines).joined(separator: "\n\n    "))\n\n")
-                    let properties = pool.propertyList(forStep: step.step, executingState: fsm?.currentState.name, promises: job.promises, resetClocks: job.resetClocks, collapseIfPossible: collapse)
+                    let properties = pool.propertyList(forStep: step.step, executingState: fsm?.currentState.name, promises: job.promises, resetClocks: newResetClocks, collapseIfPossible: collapse)
                     let inCycle = try persistentStore.exists(properties)
                     let id: Int64
                     if !inCycle {
@@ -338,7 +347,7 @@ final class ScheduleVerifier<Isolator: ScheduleIsolatorProtocol> {
                         let edge: KripkeEdge = KripkeEdge(
                             clockName: fsm?.name,
                             constraint: nil,
-                            resetClock: startTimeslot && (fsm.map { job.resetClocks?.contains($0.name) ?? false } ?? false),
+                            resetClock: shouldReset,
                             takeSnapshot: startTimeslot,
                             time: previous.afterExecutingTimeUntil(
                                 time: step.time,
@@ -381,12 +390,6 @@ final class ScheduleVerifier<Isolator: ScheduleIsolatorProtocol> {
                             }
                         }
                         continue
-                    }
-                    let newResetClocks: Set<String>?
-                    if startTimeslot, let fsm = fsm {
-                        newResetClocks = job.resetClocks.map { $0.subtracting([fsm.name]) }
-                    } else {
-                        newResetClocks = job.resetClocks
                     }
                     let newCycleCount = newStep <= job.step ? job.cycleCount + 1 : job.cycleCount
                     let newPrevious = Previous(id: id, time: step.time)
