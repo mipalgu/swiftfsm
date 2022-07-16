@@ -60,7 +60,7 @@ import swift_helpers
 
 struct VerificationMap {
     
-    struct Step {
+    struct Step: Hashable {
         
         var time: UInt
         
@@ -136,7 +136,9 @@ struct VerificationMap {
             switch step.step {
             case .takeSnapshot(let timeslots), .saveSnapshot(let timeslots), .startDelegates(let timeslots), .endDelegates(let timeslots):
                 let newTimeslots: Set<Timeslot> = try Set(timeslots.map(transform))
-                newSteps.removeAll(step)
+                let range = newSteps.range(of: step)
+                let indexes = range.filter { newSteps[$0] == step }
+                indexes.sorted(by: >).forEach { newSteps.remove(at: $0) }
                 let newStep: VerificationStep
                 switch step.step {
                 case .takeSnapshot:
@@ -156,7 +158,9 @@ struct VerificationMap {
                 .startTimeslot(let timeslot),
                 .takeSnapshotAndStartTimeslot(let timeslot):
                 let new = try transform(timeslot)
-                newSteps.removeAll(step)
+                let range = newSteps.range(of: step)
+                let indexes = range.filter { newSteps[$0] == step }
+                indexes.sorted(by: >).forEach { newSteps.remove(at: $0) }
                 let newStep: VerificationStep
                 switch step.step {
                 case .execute:
