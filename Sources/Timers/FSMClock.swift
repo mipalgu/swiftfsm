@@ -62,7 +62,7 @@ import swiftfsm_helpers
 
 public final class FSMClock: Clock {
 
-    fileprivate var data: [String: (previousState: AnyState, startTime: UInt)] = [:]
+    fileprivate var data: [String: (previousState: String, startTime: UInt)] = [:]
 
     /**
      *  An array of clock values in microseconds that were queried during the
@@ -76,8 +76,6 @@ public final class FSMClock: Clock {
     public var lastClockValues: [UInt] = []
 
     fileprivate var currentFSM: String! = nil
-
-    fileprivate var previousState: AnyState? = nil
 
     fileprivate var startTime: UInt! = nil
     
@@ -121,14 +119,14 @@ public final class FSMClock: Clock {
         self.lastClockValues = []
         self.currentFSM = fsm.name
         guard var data = self.data[fsm.name] else {
-            self.data[fsm.name] = (fsm.currentState, UInt(microseconds()))
+            self.data[fsm.name] = (fsm.currentState.name, UInt(microseconds()))
             return
         }
-        if data.previousState == fsm.currentState {
+        if data.previousState == fsm.currentState.name {
             return
         }
         data.startTime = UInt(microseconds())
-        data.previousState = fsm.currentState
+        data.previousState = fsm.currentState.name
         self.data[fsm.name] = data
     }
 
