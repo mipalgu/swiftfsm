@@ -61,12 +61,11 @@ import Utilities
 
 public final class AnyKripkeStructureView: KripkeStructureView {
 
-
     public let base: Any
 
     private let _generate: (KripkeStructure, Bool) throws -> Void
 
-    public init<View: KripkeStructureView>(_ base: View){
+    public init<View: KripkeStructureView>(_ base: View) {
         self.base = base
         self._generate = { try base.generate(store: $0, usingClocks: $1) }
     }

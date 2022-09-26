@@ -58,7 +58,7 @@
 
 import KripkeStructure
 
-public final class AnyKripkeStructureViewFactory {
+public final class AnyKripkeStructureViewFactory: KripkeStructureViewFactory {
 
     fileprivate let _make: (String) -> AnyKripkeStructureView
 
