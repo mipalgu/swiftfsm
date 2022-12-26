@@ -11,8 +11,6 @@ public protocol FSMModel<StateType>: ContextUser {
         where TransitionType.Source == StateType,
             TransitionType.Target == (Self) -> StateInformation
 
-    var context: Context { get set }
-
     var initialState: StateID { get }
 
 }
@@ -39,10 +37,6 @@ public extension FSMModel {
     }
 
     func id(of state: String) -> StateID {
-        StateRegistrar.id(of: state)
-    }
-
-    static func id(of state: String) -> StateID {
         StateRegistrar.id(of: state)
     }
 

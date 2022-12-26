@@ -15,8 +15,8 @@ struct FSMMock: FSMModel {
     })
     var pong = EmptyMockState(name: "Pong")
 
-    var context = EmptyDataStructure()
-
-    var initialState = id(of: "Ping")
+    var initialState: StateID {
+        id(of: \.$ping)
+    }
 
 }
