@@ -1,13 +1,9 @@
 import FSM
 
-struct FSMMock: FiniteStateMachineProtocol {
+struct FSMMock: FSMModel {
 
     typealias Context = EmptyDataStructure
     typealias StateType = AnyMockState<EmptyConvertibleDataStructure<EmptyDataStructure>>
-
-    var context = EmptyDataStructure()
-
-    let name = "FSM"
 
     @State(transitions: {
         Transition<EmptyMockState>(to: \FSMMock.$pong)
@@ -19,20 +15,8 @@ struct FSMMock: FiniteStateMachineProtocol {
     })
     var pong = EmptyMockState(name: "Pong")
 
-    var currentState = id(of: "Ping")
+    var context = EmptyDataStructure()
 
     var initialState = id(of: "Ping")
-
-    private(set) var isFinished: Bool = false
-
-    var isSuspended: Bool = false
-
-    mutating func restart() {}
-
-    mutating func resume() {}
-
-    mutating func suspend() {}
-
-    mutating func next() {}
 
 }

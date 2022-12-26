@@ -1,4 +1,4 @@
-public protocol FiniteStateMachineProtocol<StateType>: ContextUser, FiniteStateMachineOperations {
+public protocol FSMModel<StateType>: ContextUser {
 
     associatedtype Context = EmptyDataStructure
 
@@ -13,17 +13,11 @@ public protocol FiniteStateMachineProtocol<StateType>: ContextUser, FiniteStateM
 
     var context: Context { get set }
 
-    var currentState: StateID { get set }
-
     var initialState: StateID { get }
-
-    var name: String { get }
-
-    mutating func next()
 
 }
 
-public extension FiniteStateMachineProtocol {
+public extension FSMModel {
 
     typealias State<ConcreteState: StateProtocol> = StateProperty<ConcreteState, Self>
         where ConcreteState: Nameable,
