@@ -1,18 +1,23 @@
 @propertyWrapper
-public struct StateProperty<ConcreteState: StateProtocol> {
+public struct StateProperty<StateType: StateProtocol, Root> {
 
-    public var projectedValue: Self { self }
+    public let projectedValue: StateInformation
 
-    public var wrappedValue: ConcreteState
+    public var wrappedValue: StateType
 
-    public var transitions: [AnyTransition<ConcreteState, Int>]
+    public var transitions: [AnyTransition<StateType, (Root) -> StateInformation>]
 
-    public init(
-        name: String,
-        @TransitionBuilder transitions: () -> [AnyTransition<ConcreteState, Int>]
-    ) {
-        self.wrappedValue = ConcreteState(name: name)
-        self.transitions = transitions()
+    public init<ConcreteState: StateProtocol>(
+        wrappedValue: ConcreteState,
+        @TransitionBuilder transitions: () -> [AnyTransition<ConcreteState, (Root) -> StateInformation>] = { [] }
+    ) where ConcreteState.TypeErasedVersion == StateType, ConcreteState: Nameable {
+        self.projectedValue = StateInformation(name: wrappedValue.name)
+        self.wrappedValue = wrappedValue.erased
+        self.transitions = transitions().map { transition in
+            AnyTransition(to: transition.target) {
+                transition.canTransition(from: $0 as! ConcreteState)
+            }
+        }
     }
 
 }

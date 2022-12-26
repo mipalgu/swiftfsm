@@ -1,7 +1,7 @@
 public protocol StateProtocol: ContextUser {
 
-    associatedtype TypeErasedVersion
+    associatedtype TypeErasedVersion: TypeErasedState
 
-    init(name: String)
+    var erased: TypeErasedVersion { get }
 
 }
