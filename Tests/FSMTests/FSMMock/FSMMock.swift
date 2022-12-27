@@ -6,7 +6,7 @@ struct FSMMock: FSMModel {
     typealias StateType = AnyMockState<EmptyConvertibleDataStructure<EmptyDataStructure>>
 
     @State(transitions: {
-        Transition<EmptyMockState>(to: \FSMMock.$pong)
+        Transition<EmptyMockState>(to: \.$pong)
     })
     var ping = EmptyMockState(name: "Ping")
 
@@ -15,8 +15,6 @@ struct FSMMock: FSMModel {
     })
     var pong = EmptyMockState(name: "Pong")
 
-    var initialState: StateID {
-        id(of: \.$ping)
-    }
+    let initialState = \Self.$ping
 
 }

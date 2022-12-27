@@ -11,7 +11,7 @@ public protocol FSMModel<StateType>: ContextUser {
         where TransitionType.Source == StateType,
             TransitionType.Target == (Self) -> StateInformation
 
-    var initialState: StateID { get }
+    var initialState: KeyPath<Self, StateInformation> { get }
 
 }
 
