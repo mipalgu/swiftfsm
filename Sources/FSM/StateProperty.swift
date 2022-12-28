@@ -15,6 +15,7 @@ public struct StateProperty<StateType: StateProtocol, Root> {
         self.wrappedValue = wrappedValue.erased
         self.transitions = transitions().map { transition in
             AnyTransition(to: transition.target) {
+                // swiftlint:disable:next force_cast
                 transition.canTransition(from: $0 as! ConcreteState)
             }
         }
