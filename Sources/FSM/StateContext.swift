@@ -1,7 +1,7 @@
 @dynamicMemberLookup
 public struct StateContext<
     StateContext: DataStructure, FSMContext: DataStructure, Environment: DataStructure
->: Hashable, Codable, Sendable {
+> {
 
     private var state: StateContext
 
