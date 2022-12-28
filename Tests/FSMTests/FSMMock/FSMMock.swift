@@ -3,7 +3,7 @@ import FSM
 struct FSMMock: FSMModel {
 
     typealias Context = EmptyDataStructure
-    typealias StateType = AnyMockState<EmptyConvertibleDataStructure<EmptyDataStructure>>
+    typealias StateType = AnyMockState<EmptyConvertibleDataStructure<EmptyDataStructure>, Context, Environment>
 
     @State(transitions: {
         Transition<EmptyMockState>(to: \.$pong)

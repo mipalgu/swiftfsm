@@ -1,35 +1,36 @@
 import FSM
 
-protocol MockState: StateProtocol, NameInitialisable where TypeErasedVersion == AnyMockState<Context> {
+protocol MockState: StateProtocol, NameInitialisable
+    where TypeErasedVersion == AnyMockState<Context, OwnerContext, OwnerEnvironment> {
 
     associatedtype Context = EmptyConvertibleDataStructure<FSMMock.Context>
 
-    func onEntry(context: inout Context)
+    func onEntry(context: inout StateContext<Context, OwnerContext, OwnerEnvironment>)
 
-    func main(context: inout Context)
+    func main(context: inout StateContext<Context, OwnerContext, OwnerEnvironment>)
 
-    func onExit(context: inout Context)
+    func onExit(context: inout StateContext<Context, OwnerContext, OwnerEnvironment>)
 
-    func onSuspend(context: inout Context)
+    func onSuspend(context: inout StateContext<Context, OwnerContext, OwnerEnvironment>)
 
-    func onResume(context: inout Context)
+    func onResume(context: inout StateContext<Context, OwnerContext, OwnerEnvironment>)
 
 }
 
 extension MockState {
 
-    var erased: AnyMockState<Context> {
+    var erased: AnyMockState<Context, OwnerContext, OwnerEnvironment> {
         AnyMockState(self)
     }
 
-    func onEntry(context _: inout Context) {}
+    func onEntry(context _: inout StateContext<Context, OwnerContext, OwnerEnvironment>) {}
 
-    func main(context _: inout Context) {}
+    func main(context _: inout StateContext<Context, OwnerContext, OwnerEnvironment>) {}
 
-    func onExit(context _: inout Context) {}
+    func onExit(context _: inout StateContext<Context, OwnerContext, OwnerEnvironment>) {}
 
-    func onSuspend(context _: inout Context) {}
+    func onSuspend(context _: inout StateContext<Context, OwnerContext, OwnerEnvironment>) {}
 
-    func onResume(context _: inout Context) {}
+    func onResume(context _: inout StateContext<Context, OwnerContext, OwnerEnvironment>) {}
 
 }
