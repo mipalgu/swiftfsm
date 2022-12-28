@@ -9,20 +9,37 @@ public struct StateContext<
 
     public var environment: Environment
 
+    private var status: FSMStatus
+
+    public var isFinished: Bool {
+        status == .finished
+    }
+
+    public var isSuspended: Bool {
+        status == .suspended
+    }
+
     public init(fsmContext: FSMContext<FSMsContext, Environment>) {
         // swiftlint:disable force_cast
         self.init(
             state: fsmContext.state as! StateContext,
             fsm: fsmContext.fsm,
-            environment: fsmContext.environment
+            environment: fsmContext.environment,
+            status: fsmContext.status
         )
         // swiftlint:enable force_cast
     }
 
-    public init(state: StateContext, fsm: FSMsContext, environment: Environment) {
+    public init(
+        state: StateContext,
+        fsm: FSMsContext,
+        environment: Environment,
+        status: FSMStatus = .executing
+    ) {
         self.state = state
         self.fsm = fsm
         self.environment = environment
+        self.status = status
     }
 
     public subscript<T>(dynamicMember keyPath: KeyPath<StateContext, T>) -> T {
@@ -57,6 +74,18 @@ public struct StateContext<
         state = fsmContext.state as! StateContext
         fsm = fsmContext.fsm
         environment = fsmContext.environment
+    }
+
+    public mutating func restart() {
+        status = .restarting
+    }
+
+    public mutating func resume() {
+        status = .resuming
+    }
+
+    public mutating func suspend() {
+        status = .suspending
     }
 
 }
