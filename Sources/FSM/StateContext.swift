@@ -1,5 +1,5 @@
 @dynamicMemberLookup
-public struct ContextView<
+public struct StateContext<
     StateContext: DataStructure, FSMContext: DataStructure, Environment: DataStructure
 >: Hashable, Codable, Sendable {
 
