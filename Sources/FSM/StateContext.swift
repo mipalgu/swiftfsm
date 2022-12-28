@@ -53,11 +53,10 @@ public struct StateContext<
     }
 
     public mutating func update(from fsmContext: FSMContext<FSMsContext, Environment>) {
-        // swiftlint:disable force_cast
+        // swiftlint:disable:next force_cast
         state = fsmContext.state as! StateContext
         fsm = fsmContext.fsm
         environment = fsmContext.environment
-        // swiftlint:enable force_cast
     }
 
 }
