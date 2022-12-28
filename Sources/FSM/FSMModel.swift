@@ -1,4 +1,4 @@
-public protocol FSMModel<StateType>: ContextUser {
+public protocol FSMModel<StateType>: ContextUser, EnvironmentUser {
 
     associatedtype Context = EmptyDataStructure
 
