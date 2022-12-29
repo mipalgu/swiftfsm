@@ -5,8 +5,10 @@ extension StateProperty {
     init<FSMsContext: DataStructure, Environment: DataStructure>(
         name: String,
         @TransitionBuilder transitions:
-            () -> [AnyTransition<EmptyMockState<FSMsContext, Environment>, (Root) -> StateInformation>]
-                = { [] }
+            () -> [AnyTransition<
+                StateContext<EmptyDataStructure, FSMsContext, Environment>,
+                (Root) -> StateInformation
+            >] = { [] }
     ) where StateType == AnyMockState<FSMsContext, Environment> {
         self.init(wrappedValue: EmptyMockState(), name: name, transitions: transitions)
     }
@@ -21,7 +23,7 @@ extension StateProperty {
         onResume: @escaping (inout StateContext<StatesContext, FSMsContext, Environment>) -> Void = { _ in },
         @TransitionBuilder transitions:
             () -> [AnyTransition<
-                    CallbackMockState<StatesContext, FSMsContext, Environment>,
+                    StateContext<StatesContext, FSMsContext, Environment>,
                     (Root) -> StateInformation
                 >] = { [] }
     ) where StateType == AnyMockState<FSMsContext, Environment> {
@@ -47,7 +49,7 @@ extension StateProperty {
         onResume: @escaping (inout StateContext<EmptyDataStructure, FSMsContext, Environment>) -> Void = { _ in },
         @TransitionBuilder transitions:
             () -> [AnyTransition<
-                    CallbackMockState<EmptyDataStructure, FSMsContext, Environment>,
+                    StateContext<EmptyDataStructure, FSMsContext, Environment>,
                     (Root) -> StateInformation
                 >] = { [] }
     ) where StateType == AnyMockState<FSMsContext, Environment> {

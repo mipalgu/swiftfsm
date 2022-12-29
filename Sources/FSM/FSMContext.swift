@@ -1,5 +1,5 @@
 @dynamicMemberLookup
-public struct FSMContext<FSMsContext: DataStructure, Environment: DataStructure>: FSMContextProtocol {
+public struct FSMContext<FSMsContext: DataStructure, Environment: DataStructure>: FiniteStateMachineOperations {
 
     var state: Sendable
 

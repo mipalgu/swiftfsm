@@ -1,6 +1,7 @@
 public protocol TypeErasedState {
 
-    associatedtype Context: FSMContextProtocol
+    associatedtype FSMsContext: DataStructure
+    associatedtype Environment: DataStructure
 
     var base: Any { get }
 

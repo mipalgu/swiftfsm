@@ -27,7 +27,7 @@ struct FSMMock: MockFSM {
             context.count += 1
         },
         transitions: {
-            Transition(to: "Ping", context: CustomData.self)
+            Transition(to: "Ping", context: CustomData.self) { $0.count > 5 }
         }
     )
     var pang
