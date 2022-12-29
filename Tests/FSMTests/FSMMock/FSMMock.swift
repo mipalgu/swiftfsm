@@ -1,9 +1,6 @@
 import FSM
 
-struct FSMMock: FSMModel {
-
-    typealias Context = EmptyDataStructure
-    typealias StateType = AnyMockState<Context, Environment>
+struct FSMMock: MockFSM {
 
     @State(name: "Ping", transitions: {
         Transition(to: \.$pong)
