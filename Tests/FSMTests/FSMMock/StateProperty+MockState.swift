@@ -13,6 +13,7 @@ extension StateProperty {
 
     init<StatesContext: DataStructure, FSMsContext: DataStructure, Environment: DataStructure>(
         name: String,
+        context _: StatesContext.Type,
         onEntry: @escaping (inout StateContext<StatesContext, FSMsContext, Environment>) -> Void = { _ in },
         main: @escaping (inout StateContext<StatesContext, FSMsContext, Environment>) -> Void = { _ in },
         onExit: @escaping (inout StateContext<StatesContext, FSMsContext, Environment>) -> Void = { _ in },
@@ -21,6 +22,32 @@ extension StateProperty {
         @TransitionBuilder transitions:
             () -> [AnyTransition<
                     CallbackMockState<StatesContext, FSMsContext, Environment>,
+                    (Root) -> StateInformation
+                >] = { [] }
+    ) where StateType == AnyMockState<FSMsContext, Environment> {
+        self.init(
+            wrappedValue: CallbackMockState(
+                onEntry: onEntry,
+                main: main,
+                onExit: onExit,
+                onSuspend: onSuspend,
+                onResume: onResume
+            ),
+            name: name,
+            transitions: transitions
+        )
+    }
+
+    init<FSMsContext: DataStructure, Environment: DataStructure>(
+        name: String,
+        onEntry: @escaping (inout StateContext<EmptyDataStructure, FSMsContext, Environment>) -> Void = { _ in },
+        main: @escaping (inout StateContext<EmptyDataStructure, FSMsContext, Environment>) -> Void = { _ in },
+        onExit: @escaping (inout StateContext<EmptyDataStructure, FSMsContext, Environment>) -> Void = { _ in },
+        onSuspend: @escaping (inout StateContext<EmptyDataStructure, FSMsContext, Environment>) -> Void = { _ in },
+        onResume: @escaping (inout StateContext<EmptyDataStructure, FSMsContext, Environment>) -> Void = { _ in },
+        @TransitionBuilder transitions:
+            () -> [AnyTransition<
+                    CallbackMockState<EmptyDataStructure, FSMsContext, Environment>,
                     (Root) -> StateInformation
                 >] = { [] }
     ) where StateType == AnyMockState<FSMsContext, Environment> {
