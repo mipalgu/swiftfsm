@@ -2,7 +2,7 @@ import FSM
 
 protocol MockState: StateProtocol where TypeErasedVersion == AnyMockState<OwnerContext, Environment> {
 
-    associatedtype Context = EmptyConvertibleDataStructure<FSMMock.Context>
+    associatedtype Context = EmptyDataStructure
 
     func onEntry(context: inout StateContext<Context, OwnerContext, Environment>)
 
