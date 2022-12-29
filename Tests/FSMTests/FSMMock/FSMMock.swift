@@ -2,32 +2,49 @@ import FSM
 
 struct FSMMock: MockFSM {
 
-    struct CustomData: DataStructure {
+    struct Context: DataStructure {
 
-        var count: Int = 0
+        var fsmCount: Int = 0
 
     }
 
-    @State(name: "Ping", transitions: {
-        Transition(to: \.$pong)
-    })
+    struct PangData: DataStructure {
+
+        var stateCount: Int = 0
+
+    }
+
+    @State(
+        name: "Ping",
+        onEntry: { print("Ping: \($0.fsmCount)") },
+        onExit: { $0.fsmCount += 1 },
+        transitions: {
+            Transition(to: \.$pong)
+        }
+    )
     var ping
 
-    @State(name: "Pong", transitions: {
-        Transition(to: \.$pang)
-    })
+    @State(
+        name: "Pong",
+        onEntry: { print("Pong: \($0.fsmCount)") },
+        onExit: { $0.fsmCount += 1 },
+        transitions: {
+            Transition(to: \.$pang)
+        }
+    )
     var pong
 
     @State(
         name: "Pang",
-        context: CustomData.self,
-        onEntry: { $0.count = 0 },
-        internal: { context in
-            print("Pang: \(context.count)")
-            context.count += 1
+        context: PangData.self,
+        onEntry: { $0.stateCount = 0 },
+        internal: {
+            print("Pang: (\($0.fsmCount), \($0.stateCount))")
+            $0.stateCount += 1
+            $0.fsmCount += 1
         },
         transitions: {
-            Transition(to: "Ping", context: CustomData.self) { $0.count > 5 }
+            Transition(to: "Ping", context: PangData.self) { $0.stateCount > 5 }
         }
     )
     var pang
