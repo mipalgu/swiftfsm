@@ -18,16 +18,16 @@ final class TransitionBuilderTests: XCTestCase {
 
     func testOneTransitions() {
         @TransitionBuilder
-        var trueTransitions: [AnyTransition<EmptyMockState, Int>] {
-            CallbackTransition<EmptyMockState, Int>(target: 0) { state in
+        var trueTransitions: [AnyTransition<NamedMockState, Int>] {
+            CallbackTransition<NamedMockState, Int>(target: 0) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "0")
                 return true
             }
         }
         @TransitionBuilder
-        var falseTransitions: [AnyTransition<EmptyMockState, Int>] {
-            CallbackTransition<EmptyMockState, Int>(target: 0) { state in
+        var falseTransitions: [AnyTransition<NamedMockState, Int>] {
+            CallbackTransition<NamedMockState, Int>(target: 0) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "0")
                 return false
@@ -40,26 +40,26 @@ final class TransitionBuilderTests: XCTestCase {
 
     func testTwoTransitions() {
         @TransitionBuilder
-        var trueTransitions: [AnyTransition<EmptyMockState, Int>] {
-            CallbackTransition<EmptyMockState, Int>(target: 0) { state in
+        var trueTransitions: [AnyTransition<NamedMockState, Int>] {
+            CallbackTransition<NamedMockState, Int>(target: 0) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "0")
                 return true
             }
-            CallbackTransition<EmptyMockState, Int>(target: 1) { state in
+            CallbackTransition<NamedMockState, Int>(target: 1) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "1")
                 return true
             }
         }
         @TransitionBuilder
-        var falseTransitions: [AnyTransition<EmptyMockState, Int>] {
-            CallbackTransition<EmptyMockState, Int>(target: 0) { state in
+        var falseTransitions: [AnyTransition<NamedMockState, Int>] {
+            CallbackTransition<NamedMockState, Int>(target: 0) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "0")
                 return false
             }
-            CallbackTransition<EmptyMockState, Int>(target: 1) { state in
+            CallbackTransition<NamedMockState, Int>(target: 1) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "1")
                 return false
@@ -72,36 +72,36 @@ final class TransitionBuilderTests: XCTestCase {
 
     func testThreeTransitions() {
         @TransitionBuilder
-        var trueTransitions: [AnyTransition<EmptyMockState, Int>] {
-            CallbackTransition<EmptyMockState, Int>(target: 0) { state in
+        var trueTransitions: [AnyTransition<NamedMockState, Int>] {
+            CallbackTransition<NamedMockState, Int>(target: 0) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "0")
                 return true
             }
-            CallbackTransition<EmptyMockState, Int>(target: 1) { state in
+            CallbackTransition<NamedMockState, Int>(target: 1) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "1")
                 return true
             }
-            CallbackTransition<EmptyMockState, Int>(target: 2) { state in
+            CallbackTransition<NamedMockState, Int>(target: 2) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "2")
                 return true
             }
         }
         @TransitionBuilder
-        var falseTransitions: [AnyTransition<EmptyMockState, Int>] {
-            CallbackTransition<EmptyMockState, Int>(target: 0) { state in
+        var falseTransitions: [AnyTransition<NamedMockState, Int>] {
+            CallbackTransition<NamedMockState, Int>(target: 0) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "0")
                 return false
             }
-            CallbackTransition<EmptyMockState, Int>(target: 1) { state in
+            CallbackTransition<NamedMockState, Int>(target: 1) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "1")
                 return false
             }
-            CallbackTransition<EmptyMockState, Int>(target: 2) { state in
+            CallbackTransition<NamedMockState, Int>(target: 2) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "2")
                 return false
@@ -114,46 +114,46 @@ final class TransitionBuilderTests: XCTestCase {
 
     func testFourTransitions() {
         @TransitionBuilder
-        var trueTransitions: [AnyTransition<EmptyMockState, Int>] {
-            CallbackTransition<EmptyMockState, Int>(target: 0) { state in
+        var trueTransitions: [AnyTransition<NamedMockState, Int>] {
+            CallbackTransition<NamedMockState, Int>(target: 0) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "0")
                 return true
             }
-            CallbackTransition<EmptyMockState, Int>(target: 1) { state in
+            CallbackTransition<NamedMockState, Int>(target: 1) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "1")
                 return true
             }
-            CallbackTransition<EmptyMockState, Int>(target: 2) { state in
+            CallbackTransition<NamedMockState, Int>(target: 2) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "2")
                 return true
             }
-            CallbackTransition<EmptyMockState, Int>(target: 3) { state in
+            CallbackTransition<NamedMockState, Int>(target: 3) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "3")
                 return true
             }
         }
         @TransitionBuilder
-        var falseTransitions: [AnyTransition<EmptyMockState, Int>] {
-            CallbackTransition<EmptyMockState, Int>(target: 0) { state in
+        var falseTransitions: [AnyTransition<NamedMockState, Int>] {
+            CallbackTransition<NamedMockState, Int>(target: 0) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "0")
                 return false
             }
-            CallbackTransition<EmptyMockState, Int>(target: 1) { state in
+            CallbackTransition<NamedMockState, Int>(target: 1) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "1")
                 return false
             }
-            CallbackTransition<EmptyMockState, Int>(target: 2) { state in
+            CallbackTransition<NamedMockState, Int>(target: 2) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "2")
                 return false
             }
-            CallbackTransition<EmptyMockState, Int>(target: 3) { state in
+            CallbackTransition<NamedMockState, Int>(target: 3) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "3")
                 return false
@@ -166,56 +166,56 @@ final class TransitionBuilderTests: XCTestCase {
 
     func testFiveTransitions() {
         @TransitionBuilder
-        var trueTransitions: [AnyTransition<EmptyMockState, Int>] {
-            CallbackTransition<EmptyMockState, Int>(target: 0) { state in
+        var trueTransitions: [AnyTransition<NamedMockState, Int>] {
+            CallbackTransition<NamedMockState, Int>(target: 0) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "0")
                 return true
             }
-            CallbackTransition<EmptyMockState, Int>(target: 1) { state in
+            CallbackTransition<NamedMockState, Int>(target: 1) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "1")
                 return true
             }
-            CallbackTransition<EmptyMockState, Int>(target: 2) { state in
+            CallbackTransition<NamedMockState, Int>(target: 2) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "2")
                 return true
             }
-            CallbackTransition<EmptyMockState, Int>(target: 3) { state in
+            CallbackTransition<NamedMockState, Int>(target: 3) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "3")
                 return true
             }
-            CallbackTransition<EmptyMockState, Int>(target: 4) { state in
+            CallbackTransition<NamedMockState, Int>(target: 4) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "4")
                 return true
             }
         }
         @TransitionBuilder
-        var falseTransitions: [AnyTransition<EmptyMockState, Int>] {
-            CallbackTransition<EmptyMockState, Int>(target: 0) { state in
+        var falseTransitions: [AnyTransition<NamedMockState, Int>] {
+            CallbackTransition<NamedMockState, Int>(target: 0) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "0")
                 return false
             }
-            CallbackTransition<EmptyMockState, Int>(target: 1) { state in
+            CallbackTransition<NamedMockState, Int>(target: 1) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "1")
                 return false
             }
-            CallbackTransition<EmptyMockState, Int>(target: 2) { state in
+            CallbackTransition<NamedMockState, Int>(target: 2) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "2")
                 return false
             }
-            CallbackTransition<EmptyMockState, Int>(target: 3) { state in
+            CallbackTransition<NamedMockState, Int>(target: 3) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "3")
                 return false
             }
-            CallbackTransition<EmptyMockState, Int>(target: 4) { state in
+            CallbackTransition<NamedMockState, Int>(target: 4) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "4")
                 return false
@@ -228,66 +228,66 @@ final class TransitionBuilderTests: XCTestCase {
 
     func testSixTransitions() {
         @TransitionBuilder
-        var trueTransitions: [AnyTransition<EmptyMockState, Int>] {
-            CallbackTransition<EmptyMockState, Int>(target: 0) { state in
+        var trueTransitions: [AnyTransition<NamedMockState, Int>] {
+            CallbackTransition<NamedMockState, Int>(target: 0) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "0")
                 return true
             }
-            CallbackTransition<EmptyMockState, Int>(target: 1) { state in
+            CallbackTransition<NamedMockState, Int>(target: 1) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "1")
                 return true
             }
-            CallbackTransition<EmptyMockState, Int>(target: 2) { state in
+            CallbackTransition<NamedMockState, Int>(target: 2) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "2")
                 return true
             }
-            CallbackTransition<EmptyMockState, Int>(target: 3) { state in
+            CallbackTransition<NamedMockState, Int>(target: 3) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "3")
                 return true
             }
-            CallbackTransition<EmptyMockState, Int>(target: 4) { state in
+            CallbackTransition<NamedMockState, Int>(target: 4) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "4")
                 return true
             }
-            CallbackTransition<EmptyMockState, Int>(target: 5) { state in
+            CallbackTransition<NamedMockState, Int>(target: 5) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "5")
                 return true
             }
         }
         @TransitionBuilder
-        var falseTransitions: [AnyTransition<EmptyMockState, Int>] {
-            CallbackTransition<EmptyMockState, Int>(target: 0) { state in
+        var falseTransitions: [AnyTransition<NamedMockState, Int>] {
+            CallbackTransition<NamedMockState, Int>(target: 0) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "0")
                 return false
             }
-            CallbackTransition<EmptyMockState, Int>(target: 1) { state in
+            CallbackTransition<NamedMockState, Int>(target: 1) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "1")
                 return false
             }
-            CallbackTransition<EmptyMockState, Int>(target: 2) { state in
+            CallbackTransition<NamedMockState, Int>(target: 2) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "2")
                 return false
             }
-            CallbackTransition<EmptyMockState, Int>(target: 3) { state in
+            CallbackTransition<NamedMockState, Int>(target: 3) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "3")
                 return false
             }
-            CallbackTransition<EmptyMockState, Int>(target: 4) { state in
+            CallbackTransition<NamedMockState, Int>(target: 4) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "4")
                 return false
             }
-            CallbackTransition<EmptyMockState, Int>(target: 5) { state in
+            CallbackTransition<NamedMockState, Int>(target: 5) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "5")
                 return false
@@ -300,76 +300,76 @@ final class TransitionBuilderTests: XCTestCase {
 
     func testSevenTransitions() {
         @TransitionBuilder
-        var trueTransitions: [AnyTransition<EmptyMockState, Int>] {
-            CallbackTransition<EmptyMockState, Int>(target: 0) { state in
+        var trueTransitions: [AnyTransition<NamedMockState, Int>] {
+            CallbackTransition<NamedMockState, Int>(target: 0) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "0")
                 return true
             }
-            CallbackTransition<EmptyMockState, Int>(target: 1) { state in
+            CallbackTransition<NamedMockState, Int>(target: 1) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "1")
                 return true
             }
-            CallbackTransition<EmptyMockState, Int>(target: 2) { state in
+            CallbackTransition<NamedMockState, Int>(target: 2) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "2")
                 return true
             }
-            CallbackTransition<EmptyMockState, Int>(target: 3) { state in
+            CallbackTransition<NamedMockState, Int>(target: 3) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "3")
                 return true
             }
-            CallbackTransition<EmptyMockState, Int>(target: 4) { state in
+            CallbackTransition<NamedMockState, Int>(target: 4) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "4")
                 return true
             }
-            CallbackTransition<EmptyMockState, Int>(target: 5) { state in
+            CallbackTransition<NamedMockState, Int>(target: 5) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "5")
                 return true
             }
-            CallbackTransition<EmptyMockState, Int>(target: 6) { state in
+            CallbackTransition<NamedMockState, Int>(target: 6) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "6")
                 return true
             }
         }
         @TransitionBuilder
-        var falseTransitions: [AnyTransition<EmptyMockState, Int>] {
-            CallbackTransition<EmptyMockState, Int>(target: 0) { state in
+        var falseTransitions: [AnyTransition<NamedMockState, Int>] {
+            CallbackTransition<NamedMockState, Int>(target: 0) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "0")
                 return false
             }
-            CallbackTransition<EmptyMockState, Int>(target: 1) { state in
+            CallbackTransition<NamedMockState, Int>(target: 1) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "1")
                 return false
             }
-            CallbackTransition<EmptyMockState, Int>(target: 2) { state in
+            CallbackTransition<NamedMockState, Int>(target: 2) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "2")
                 return false
             }
-            CallbackTransition<EmptyMockState, Int>(target: 3) { state in
+            CallbackTransition<NamedMockState, Int>(target: 3) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "3")
                 return false
             }
-            CallbackTransition<EmptyMockState, Int>(target: 4) { state in
+            CallbackTransition<NamedMockState, Int>(target: 4) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "4")
                 return false
             }
-            CallbackTransition<EmptyMockState, Int>(target: 5) { state in
+            CallbackTransition<NamedMockState, Int>(target: 5) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "5")
                 return false
             }
-            CallbackTransition<EmptyMockState, Int>(target: 6) { state in
+            CallbackTransition<NamedMockState, Int>(target: 6) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "6")
                 return false
@@ -382,86 +382,86 @@ final class TransitionBuilderTests: XCTestCase {
 
     func testEightTransitions() {
         @TransitionBuilder
-        var trueTransitions: [AnyTransition<EmptyMockState, Int>] {
-            CallbackTransition<EmptyMockState, Int>(target: 0) { state in
+        var trueTransitions: [AnyTransition<NamedMockState, Int>] {
+            CallbackTransition<NamedMockState, Int>(target: 0) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "0")
                 return true
             }
-            CallbackTransition<EmptyMockState, Int>(target: 1) { state in
+            CallbackTransition<NamedMockState, Int>(target: 1) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "1")
                 return true
             }
-            CallbackTransition<EmptyMockState, Int>(target: 2) { state in
+            CallbackTransition<NamedMockState, Int>(target: 2) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "2")
                 return true
             }
-            CallbackTransition<EmptyMockState, Int>(target: 3) { state in
+            CallbackTransition<NamedMockState, Int>(target: 3) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "3")
                 return true
             }
-            CallbackTransition<EmptyMockState, Int>(target: 4) { state in
+            CallbackTransition<NamedMockState, Int>(target: 4) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "4")
                 return true
             }
-            CallbackTransition<EmptyMockState, Int>(target: 5) { state in
+            CallbackTransition<NamedMockState, Int>(target: 5) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "5")
                 return true
             }
-            CallbackTransition<EmptyMockState, Int>(target: 6) { state in
+            CallbackTransition<NamedMockState, Int>(target: 6) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "6")
                 return true
             }
-            CallbackTransition<EmptyMockState, Int>(target: 7) { state in
+            CallbackTransition<NamedMockState, Int>(target: 7) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "7")
                 return true
             }
         }
         @TransitionBuilder
-        var falseTransitions: [AnyTransition<EmptyMockState, Int>] {
-            CallbackTransition<EmptyMockState, Int>(target: 0) { state in
+        var falseTransitions: [AnyTransition<NamedMockState, Int>] {
+            CallbackTransition<NamedMockState, Int>(target: 0) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "0")
                 return false
             }
-            CallbackTransition<EmptyMockState, Int>(target: 1) { state in
+            CallbackTransition<NamedMockState, Int>(target: 1) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "1")
                 return false
             }
-            CallbackTransition<EmptyMockState, Int>(target: 2) { state in
+            CallbackTransition<NamedMockState, Int>(target: 2) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "2")
                 return false
             }
-            CallbackTransition<EmptyMockState, Int>(target: 3) { state in
+            CallbackTransition<NamedMockState, Int>(target: 3) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "3")
                 return false
             }
-            CallbackTransition<EmptyMockState, Int>(target: 4) { state in
+            CallbackTransition<NamedMockState, Int>(target: 4) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "4")
                 return false
             }
-            CallbackTransition<EmptyMockState, Int>(target: 5) { state in
+            CallbackTransition<NamedMockState, Int>(target: 5) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "5")
                 return false
             }
-            CallbackTransition<EmptyMockState, Int>(target: 6) { state in
+            CallbackTransition<NamedMockState, Int>(target: 6) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "6")
                 return false
             }
-            CallbackTransition<EmptyMockState, Int>(target: 7) { state in
+            CallbackTransition<NamedMockState, Int>(target: 7) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "7")
                 return false
@@ -474,96 +474,96 @@ final class TransitionBuilderTests: XCTestCase {
 
     func testNineTransitions() {
         @TransitionBuilder
-        var trueTransitions: [AnyTransition<EmptyMockState, Int>] {
-            CallbackTransition<EmptyMockState, Int>(target: 0) { state in
+        var trueTransitions: [AnyTransition<NamedMockState, Int>] {
+            CallbackTransition<NamedMockState, Int>(target: 0) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "0")
                 return true
             }
-            CallbackTransition<EmptyMockState, Int>(target: 1) { state in
+            CallbackTransition<NamedMockState, Int>(target: 1) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "1")
                 return true
             }
-            CallbackTransition<EmptyMockState, Int>(target: 2) { state in
+            CallbackTransition<NamedMockState, Int>(target: 2) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "2")
                 return true
             }
-            CallbackTransition<EmptyMockState, Int>(target: 3) { state in
+            CallbackTransition<NamedMockState, Int>(target: 3) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "3")
                 return true
             }
-            CallbackTransition<EmptyMockState, Int>(target: 4) { state in
+            CallbackTransition<NamedMockState, Int>(target: 4) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "4")
                 return true
             }
-            CallbackTransition<EmptyMockState, Int>(target: 5) { state in
+            CallbackTransition<NamedMockState, Int>(target: 5) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "5")
                 return true
             }
-            CallbackTransition<EmptyMockState, Int>(target: 6) { state in
+            CallbackTransition<NamedMockState, Int>(target: 6) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "6")
                 return true
             }
-            CallbackTransition<EmptyMockState, Int>(target: 7) { state in
+            CallbackTransition<NamedMockState, Int>(target: 7) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "7")
                 return true
             }
-            CallbackTransition<EmptyMockState, Int>(target: 8) { state in
+            CallbackTransition<NamedMockState, Int>(target: 8) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "8")
                 return true
             }
         }
         @TransitionBuilder
-        var falseTransitions: [AnyTransition<EmptyMockState, Int>] {
-            CallbackTransition<EmptyMockState, Int>(target: 0) { state in
+        var falseTransitions: [AnyTransition<NamedMockState, Int>] {
+            CallbackTransition<NamedMockState, Int>(target: 0) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "0")
                 return false
             }
-            CallbackTransition<EmptyMockState, Int>(target: 1) { state in
+            CallbackTransition<NamedMockState, Int>(target: 1) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "1")
                 return false
             }
-            CallbackTransition<EmptyMockState, Int>(target: 2) { state in
+            CallbackTransition<NamedMockState, Int>(target: 2) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "2")
                 return false
             }
-            CallbackTransition<EmptyMockState, Int>(target: 3) { state in
+            CallbackTransition<NamedMockState, Int>(target: 3) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "3")
                 return false
             }
-            CallbackTransition<EmptyMockState, Int>(target: 4) { state in
+            CallbackTransition<NamedMockState, Int>(target: 4) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "4")
                 return false
             }
-            CallbackTransition<EmptyMockState, Int>(target: 5) { state in
+            CallbackTransition<NamedMockState, Int>(target: 5) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "5")
                 return false
             }
-            CallbackTransition<EmptyMockState, Int>(target: 6) { state in
+            CallbackTransition<NamedMockState, Int>(target: 6) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "6")
                 return false
             }
-            CallbackTransition<EmptyMockState, Int>(target: 7) { state in
+            CallbackTransition<NamedMockState, Int>(target: 7) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "7")
                 return false
             }
-            CallbackTransition<EmptyMockState, Int>(target: 8) { state in
+            CallbackTransition<NamedMockState, Int>(target: 8) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "8")
                 return false
@@ -576,106 +576,106 @@ final class TransitionBuilderTests: XCTestCase {
 
     func testTenTransitions() {
         @TransitionBuilder
-        var trueTransitions: [AnyTransition<EmptyMockState, Int>] {
-            CallbackTransition<EmptyMockState, Int>(target: 0) { state in
+        var trueTransitions: [AnyTransition<NamedMockState, Int>] {
+            CallbackTransition<NamedMockState, Int>(target: 0) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "0")
                 return true
             }
-            CallbackTransition<EmptyMockState, Int>(target: 1) { state in
+            CallbackTransition<NamedMockState, Int>(target: 1) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "1")
                 return true
             }
-            CallbackTransition<EmptyMockState, Int>(target: 2) { state in
+            CallbackTransition<NamedMockState, Int>(target: 2) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "2")
                 return true
             }
-            CallbackTransition<EmptyMockState, Int>(target: 3) { state in
+            CallbackTransition<NamedMockState, Int>(target: 3) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "3")
                 return true
             }
-            CallbackTransition<EmptyMockState, Int>(target: 4) { state in
+            CallbackTransition<NamedMockState, Int>(target: 4) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "4")
                 return true
             }
-            CallbackTransition<EmptyMockState, Int>(target: 5) { state in
+            CallbackTransition<NamedMockState, Int>(target: 5) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "5")
                 return true
             }
-            CallbackTransition<EmptyMockState, Int>(target: 6) { state in
+            CallbackTransition<NamedMockState, Int>(target: 6) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "6")
                 return true
             }
-            CallbackTransition<EmptyMockState, Int>(target: 7) { state in
+            CallbackTransition<NamedMockState, Int>(target: 7) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "7")
                 return true
             }
-            CallbackTransition<EmptyMockState, Int>(target: 8) { state in
+            CallbackTransition<NamedMockState, Int>(target: 8) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "8")
                 return true
             }
-            CallbackTransition<EmptyMockState, Int>(target: 9) { state in
+            CallbackTransition<NamedMockState, Int>(target: 9) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "9")
                 return true
             }
         }
         @TransitionBuilder
-        var falseTransitions: [AnyTransition<EmptyMockState, Int>] {
-            CallbackTransition<EmptyMockState, Int>(target: 0) { state in
+        var falseTransitions: [AnyTransition<NamedMockState, Int>] {
+            CallbackTransition<NamedMockState, Int>(target: 0) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "0")
                 return false
             }
-            CallbackTransition<EmptyMockState, Int>(target: 1) { state in
+            CallbackTransition<NamedMockState, Int>(target: 1) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "1")
                 return false
             }
-            CallbackTransition<EmptyMockState, Int>(target: 2) { state in
+            CallbackTransition<NamedMockState, Int>(target: 2) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "2")
                 return false
             }
-            CallbackTransition<EmptyMockState, Int>(target: 3) { state in
+            CallbackTransition<NamedMockState, Int>(target: 3) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "3")
                 return false
             }
-            CallbackTransition<EmptyMockState, Int>(target: 4) { state in
+            CallbackTransition<NamedMockState, Int>(target: 4) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "4")
                 return false
             }
-            CallbackTransition<EmptyMockState, Int>(target: 5) { state in
+            CallbackTransition<NamedMockState, Int>(target: 5) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "5")
                 return false
             }
-            CallbackTransition<EmptyMockState, Int>(target: 6) { state in
+            CallbackTransition<NamedMockState, Int>(target: 6) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "6")
                 return false
             }
-            CallbackTransition<EmptyMockState, Int>(target: 7) { state in
+            CallbackTransition<NamedMockState, Int>(target: 7) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "7")
                 return false
             }
-            CallbackTransition<EmptyMockState, Int>(target: 8) { state in
+            CallbackTransition<NamedMockState, Int>(target: 8) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "8")
                 return false
             }
-            CallbackTransition<EmptyMockState, Int>(target: 9) { state in
+            CallbackTransition<NamedMockState, Int>(target: 9) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "9")
                 return false
@@ -688,116 +688,116 @@ final class TransitionBuilderTests: XCTestCase {
 
     func testElevenTransitions() {
         @TransitionBuilder
-        var trueTransitions: [AnyTransition<EmptyMockState, Int>] {
-            CallbackTransition<EmptyMockState, Int>(target: 0) { state in
+        var trueTransitions: [AnyTransition<NamedMockState, Int>] {
+            CallbackTransition<NamedMockState, Int>(target: 0) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "0")
                 return true
             }
-            CallbackTransition<EmptyMockState, Int>(target: 1) { state in
+            CallbackTransition<NamedMockState, Int>(target: 1) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "1")
                 return true
             }
-            CallbackTransition<EmptyMockState, Int>(target: 2) { state in
+            CallbackTransition<NamedMockState, Int>(target: 2) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "2")
                 return true
             }
-            CallbackTransition<EmptyMockState, Int>(target: 3) { state in
+            CallbackTransition<NamedMockState, Int>(target: 3) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "3")
                 return true
             }
-            CallbackTransition<EmptyMockState, Int>(target: 4) { state in
+            CallbackTransition<NamedMockState, Int>(target: 4) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "4")
                 return true
             }
-            CallbackTransition<EmptyMockState, Int>(target: 5) { state in
+            CallbackTransition<NamedMockState, Int>(target: 5) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "5")
                 return true
             }
-            CallbackTransition<EmptyMockState, Int>(target: 6) { state in
+            CallbackTransition<NamedMockState, Int>(target: 6) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "6")
                 return true
             }
-            CallbackTransition<EmptyMockState, Int>(target: 7) { state in
+            CallbackTransition<NamedMockState, Int>(target: 7) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "7")
                 return true
             }
-            CallbackTransition<EmptyMockState, Int>(target: 8) { state in
+            CallbackTransition<NamedMockState, Int>(target: 8) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "8")
                 return true
             }
-            CallbackTransition<EmptyMockState, Int>(target: 9) { state in
+            CallbackTransition<NamedMockState, Int>(target: 9) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "9")
                 return true
             }
-            CallbackTransition<EmptyMockState, Int>(target: 10) { state in
+            CallbackTransition<NamedMockState, Int>(target: 10) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "10")
                 return true
             }
         }
         @TransitionBuilder
-        var falseTransitions: [AnyTransition<EmptyMockState, Int>] {
-            CallbackTransition<EmptyMockState, Int>(target: 0) { state in
+        var falseTransitions: [AnyTransition<NamedMockState, Int>] {
+            CallbackTransition<NamedMockState, Int>(target: 0) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "0")
                 return false
             }
-            CallbackTransition<EmptyMockState, Int>(target: 1) { state in
+            CallbackTransition<NamedMockState, Int>(target: 1) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "1")
                 return false
             }
-            CallbackTransition<EmptyMockState, Int>(target: 2) { state in
+            CallbackTransition<NamedMockState, Int>(target: 2) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "2")
                 return false
             }
-            CallbackTransition<EmptyMockState, Int>(target: 3) { state in
+            CallbackTransition<NamedMockState, Int>(target: 3) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "3")
                 return false
             }
-            CallbackTransition<EmptyMockState, Int>(target: 4) { state in
+            CallbackTransition<NamedMockState, Int>(target: 4) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "4")
                 return false
             }
-            CallbackTransition<EmptyMockState, Int>(target: 5) { state in
+            CallbackTransition<NamedMockState, Int>(target: 5) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "5")
                 return false
             }
-            CallbackTransition<EmptyMockState, Int>(target: 6) { state in
+            CallbackTransition<NamedMockState, Int>(target: 6) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "6")
                 return false
             }
-            CallbackTransition<EmptyMockState, Int>(target: 7) { state in
+            CallbackTransition<NamedMockState, Int>(target: 7) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "7")
                 return false
             }
-            CallbackTransition<EmptyMockState, Int>(target: 8) { state in
+            CallbackTransition<NamedMockState, Int>(target: 8) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "8")
                 return false
             }
-            CallbackTransition<EmptyMockState, Int>(target: 9) { state in
+            CallbackTransition<NamedMockState, Int>(target: 9) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "9")
                 return false
             }
-            CallbackTransition<EmptyMockState, Int>(target: 10) { state in
+            CallbackTransition<NamedMockState, Int>(target: 10) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "10")
                 return false
@@ -810,126 +810,126 @@ final class TransitionBuilderTests: XCTestCase {
 
     func testTwelveTransitions() {
         @TransitionBuilder
-        var trueTransitions: [AnyTransition<EmptyMockState, Int>] {
-            CallbackTransition<EmptyMockState, Int>(target: 0) { state in
+        var trueTransitions: [AnyTransition<NamedMockState, Int>] {
+            CallbackTransition<NamedMockState, Int>(target: 0) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "0")
                 return true
             }
-            CallbackTransition<EmptyMockState, Int>(target: 1) { state in
+            CallbackTransition<NamedMockState, Int>(target: 1) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "1")
                 return true
             }
-            CallbackTransition<EmptyMockState, Int>(target: 2) { state in
+            CallbackTransition<NamedMockState, Int>(target: 2) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "2")
                 return true
             }
-            CallbackTransition<EmptyMockState, Int>(target: 3) { state in
+            CallbackTransition<NamedMockState, Int>(target: 3) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "3")
                 return true
             }
-            CallbackTransition<EmptyMockState, Int>(target: 4) { state in
+            CallbackTransition<NamedMockState, Int>(target: 4) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "4")
                 return true
             }
-            CallbackTransition<EmptyMockState, Int>(target: 5) { state in
+            CallbackTransition<NamedMockState, Int>(target: 5) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "5")
                 return true
             }
-            CallbackTransition<EmptyMockState, Int>(target: 6) { state in
+            CallbackTransition<NamedMockState, Int>(target: 6) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "6")
                 return true
             }
-            CallbackTransition<EmptyMockState, Int>(target: 7) { state in
+            CallbackTransition<NamedMockState, Int>(target: 7) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "7")
                 return true
             }
-            CallbackTransition<EmptyMockState, Int>(target: 8) { state in
+            CallbackTransition<NamedMockState, Int>(target: 8) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "8")
                 return true
             }
-            CallbackTransition<EmptyMockState, Int>(target: 9) { state in
+            CallbackTransition<NamedMockState, Int>(target: 9) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "9")
                 return true
             }
-            CallbackTransition<EmptyMockState, Int>(target: 10) { state in
+            CallbackTransition<NamedMockState, Int>(target: 10) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "10")
                 return true
             }
-            CallbackTransition<EmptyMockState, Int>(target: 11) { state in
+            CallbackTransition<NamedMockState, Int>(target: 11) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "11")
                 return true
             }
         }
         @TransitionBuilder
-        var falseTransitions: [AnyTransition<EmptyMockState, Int>] {
-            CallbackTransition<EmptyMockState, Int>(target: 0) { state in
+        var falseTransitions: [AnyTransition<NamedMockState, Int>] {
+            CallbackTransition<NamedMockState, Int>(target: 0) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "0")
                 return false
             }
-            CallbackTransition<EmptyMockState, Int>(target: 1) { state in
+            CallbackTransition<NamedMockState, Int>(target: 1) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "1")
                 return false
             }
-            CallbackTransition<EmptyMockState, Int>(target: 2) { state in
+            CallbackTransition<NamedMockState, Int>(target: 2) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "2")
                 return false
             }
-            CallbackTransition<EmptyMockState, Int>(target: 3) { state in
+            CallbackTransition<NamedMockState, Int>(target: 3) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "3")
                 return false
             }
-            CallbackTransition<EmptyMockState, Int>(target: 4) { state in
+            CallbackTransition<NamedMockState, Int>(target: 4) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "4")
                 return false
             }
-            CallbackTransition<EmptyMockState, Int>(target: 5) { state in
+            CallbackTransition<NamedMockState, Int>(target: 5) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "5")
                 return false
             }
-            CallbackTransition<EmptyMockState, Int>(target: 6) { state in
+            CallbackTransition<NamedMockState, Int>(target: 6) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "6")
                 return false
             }
-            CallbackTransition<EmptyMockState, Int>(target: 7) { state in
+            CallbackTransition<NamedMockState, Int>(target: 7) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "7")
                 return false
             }
-            CallbackTransition<EmptyMockState, Int>(target: 8) { state in
+            CallbackTransition<NamedMockState, Int>(target: 8) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "8")
                 return false
             }
-            CallbackTransition<EmptyMockState, Int>(target: 9) { state in
+            CallbackTransition<NamedMockState, Int>(target: 9) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "9")
                 return false
             }
-            CallbackTransition<EmptyMockState, Int>(target: 10) { state in
+            CallbackTransition<NamedMockState, Int>(target: 10) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "10")
                 return false
             }
-            CallbackTransition<EmptyMockState, Int>(target: 11) { state in
+            CallbackTransition<NamedMockState, Int>(target: 11) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "11")
                 return false
@@ -941,7 +941,7 @@ final class TransitionBuilderTests: XCTestCase {
     }
 
     private func checkTransitions(
-        transitions: [AnyTransition<EmptyMockState, Int>],
+        transitions: [AnyTransition<NamedMockState, Int>],
         calls: Calls,
         expectedValue: Bool,
         expectedCount: Int
@@ -949,7 +949,7 @@ final class TransitionBuilderTests: XCTestCase {
         XCTAssertEqual(transitions.count, expectedCount)
         var previousCalls = calls.calls
         for index in 0..<transitions.count {
-            let state = EmptyMockState(name: "\(index)")
+            let state = NamedMockState(name: "\(index)")
             XCTAssertEqual(transitions[index].target, index)
             XCTAssertEqual(transitions[index].canTransition(from: state), expectedValue)
             previousCalls += [state.name]

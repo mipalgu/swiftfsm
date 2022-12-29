@@ -8,12 +8,12 @@ struct FSMMock: FSMModel {
     @State(name: "Ping", transitions: {
         Transition<EmptyMockState>(to: \.$pong)
     })
-    var ping = EmptyMockState(name: "Ping")
+    var ping = EmptyMockState()
 
     @State(name: "Pong", transitions: {
         Transition<EmptyMockState>(to: "Ping")
     })
-    var pong = EmptyMockState(name: "Pong")
+    var pong = EmptyMockState()
 
     let initialState = \Self.$ping
 

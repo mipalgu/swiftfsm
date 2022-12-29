@@ -6,8 +6,7 @@
 //         name: String,
 //         @TransitionBuilder transitions: () -> [AnyTransition<EmptyMockState, (Root) -> StateInformation>] = { [] }
 //     ) where StateType == AnyMockState<FSMsContext, Environment> {
-//         let empty = EmptyMockState(name: name)
-//         self.init(wrappedValue: empty, name: name, transitions: transitions)
+//         self.init(wrappedValue: EmptyMockState(), name: name, transitions: transitions)
 //     }
 
 // }

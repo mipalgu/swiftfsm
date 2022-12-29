@@ -1,7 +1,9 @@
 import FSM
 
-struct EmptyMockState: MockState {
+struct NamedMockState: MockState {
 
     typealias Context = EmptyConvertibleDataStructure<FSMMock.Context>
+
+    let name: String
 
 }
