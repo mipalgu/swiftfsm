@@ -20,14 +20,12 @@ public struct StateContext<
     }
 
     public init(fsmContext: FSMContext<FSMsContext, Environment>) {
-        // swiftlint:disable force_cast
         self.init(
-            state: fsmContext.state as! StateContext,
+            state: unsafeBitCast(fsmContext.state, to: StateContext.self),
             fsm: fsmContext.fsm,
             environment: fsmContext.environment,
             status: fsmContext.status
         )
-        // swiftlint:enable force_cast
     }
 
     public init(
@@ -70,8 +68,7 @@ public struct StateContext<
     }
 
     public mutating func update(from fsmContext: FSMContext<FSMsContext, Environment>) {
-        // swiftlint:disable:next force_cast
-        state = fsmContext.state as! StateContext
+        state = unsafeBitCast(fsmContext.state, to: StateContext.self)
         fsm = fsmContext.fsm
         environment = fsmContext.environment
     }
