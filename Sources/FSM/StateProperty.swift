@@ -9,9 +9,10 @@ public struct StateProperty<StateType: TypeErasedState, Root> {
 
     public init<ConcreteState: StateProtocol>(
         wrappedValue: ConcreteState,
+        name: String,
         @TransitionBuilder transitions: () -> [AnyTransition<ConcreteState, (Root) -> StateInformation>] = { [] }
-    ) where ConcreteState.TypeErasedVersion == StateType, ConcreteState: Nameable {
-        self.projectedValue = StateInformation(name: wrappedValue.name)
+    ) where ConcreteState.TypeErasedVersion == StateType {
+        self.projectedValue = StateInformation(name: name)
         self.wrappedValue = wrappedValue.erased
         self.transitions = transitions().map { transition in
             AnyTransition(to: transition.target) {

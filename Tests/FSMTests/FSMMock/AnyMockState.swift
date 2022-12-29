@@ -3,12 +3,11 @@ import FSM
 struct AnyMockState<
     FSMsContext: DataStructure,
     Environment: DataStructure
->: TypeErasedState, Nameable {
+>: TypeErasedState {
 
     typealias Context = FSMContext<FSMsContext, Environment>
     typealias TypeErasedVersion = Self
 
-    private let _name: () -> String
     private let _onEntry: (inout FSMContext<FSMsContext, Environment>) -> Void
     private let _main: (inout FSMContext<FSMsContext, Environment>) -> Void
     private let _onExit: (inout FSMContext<FSMsContext, Environment>) -> Void
@@ -17,15 +16,12 @@ struct AnyMockState<
 
     var base: Any
 
-    var name: String { _name() }
-
     var erased: Self { self }
 
     init<Base: MockState>(_ base: Base)
         where Base.OwnerContext == FSMsContext,
             Base.OwnerEnvironment == Environment {
         self.base = base
-        self._name = { base.name }
         self._onEntry = {
             var context = StateContext<Base.Context, FSMsContext, Environment>(fsmContext: $0)
             base.onEntry(context: &context)

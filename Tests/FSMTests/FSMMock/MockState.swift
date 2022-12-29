@@ -1,7 +1,6 @@
 import FSM
 
-protocol MockState: StateProtocol, NameInitialisable
-    where TypeErasedVersion == AnyMockState<OwnerContext, OwnerEnvironment> {
+protocol MockState: StateProtocol where TypeErasedVersion == AnyMockState<OwnerContext, OwnerEnvironment> {
 
     associatedtype Context = EmptyConvertibleDataStructure<FSMMock.Context>
 

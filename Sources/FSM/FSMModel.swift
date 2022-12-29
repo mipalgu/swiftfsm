@@ -21,8 +21,7 @@ public extension FSMModel {
 
     typealias Transition<ConcreteState: StateProtocol>
         = AnyTransition<ConcreteState, (Self) -> StateInformation>
-            where ConcreteState: Nameable,
-                ConcreteState.Context: Convertible,
+            where ConcreteState.Context: Convertible,
                 ConcreteState.Context.Source == Context,
                 ConcreteState.TypeErasedVersion == StateType
 
