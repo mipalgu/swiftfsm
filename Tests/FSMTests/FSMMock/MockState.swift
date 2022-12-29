@@ -1,7 +1,7 @@
 import FSM
 
 protocol MockState: StateProtocol, NameInitialisable
-    where TypeErasedVersion == AnyMockState<Context, OwnerContext, OwnerEnvironment> {
+    where TypeErasedVersion == AnyMockState<OwnerContext, OwnerEnvironment> {
 
     associatedtype Context = EmptyConvertibleDataStructure<FSMMock.Context>
 
@@ -19,7 +19,7 @@ protocol MockState: StateProtocol, NameInitialisable
 
 extension MockState {
 
-    var erased: AnyMockState<Context, OwnerContext, OwnerEnvironment> {
+    var erased: AnyMockState<OwnerContext, OwnerEnvironment> {
         AnyMockState(self)
     }
 

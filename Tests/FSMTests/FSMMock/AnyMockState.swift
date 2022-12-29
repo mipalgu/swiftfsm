@@ -1,20 +1,19 @@
 import FSM
 
 struct AnyMockState<
-    StatesContext: DataStructure,
     FSMsContext: DataStructure,
     Environment: DataStructure
->: StateProtocol, TypeErasedState, Nameable {
+>: TypeErasedState, Nameable {
 
-    typealias Context = StatesContext
+    typealias Context = FSMContext<FSMsContext, Environment>
     typealias TypeErasedVersion = Self
 
     private let _name: () -> String
-    private let _onEntry: (inout StateContext<StatesContext, FSMsContext, Environment>) -> Void
-    private let _main: (inout StateContext<StatesContext, FSMsContext, Environment>) -> Void
-    private let _onExit: (inout StateContext<StatesContext, FSMsContext, Environment>) -> Void
-    private let _onResume: (inout StateContext<StatesContext, FSMsContext, Environment>) -> Void
-    private let _onSuspend: (inout StateContext<StatesContext, FSMsContext, Environment>) -> Void
+    private let _onEntry: (inout FSMContext<FSMsContext, Environment>) -> Void
+    private let _main: (inout FSMContext<FSMsContext, Environment>) -> Void
+    private let _onExit: (inout FSMContext<FSMsContext, Environment>) -> Void
+    private let _onResume: (inout FSMContext<FSMsContext, Environment>) -> Void
+    private let _onSuspend: (inout FSMContext<FSMsContext, Environment>) -> Void
 
     var base: Any
 
@@ -22,33 +21,55 @@ struct AnyMockState<
 
     var erased: Self { self }
 
-    init<Base: MockState>(_ base: Base) where Base.Context == StatesContext, Base.OwnerContext == FSMsContext, Base.OwnerEnvironment == Environment {
+    init<Base: MockState>(_ base: Base)
+        where Base.OwnerContext == FSMsContext,
+            Base.OwnerEnvironment == Environment {
         self.base = base
         self._name = { base.name }
-        self._onEntry = { base.onEntry(context: &$0) }
-        self._main = { base.main(context: &$0) }
-        self._onExit = { base.onExit(context: &$0) }
-        self._onResume = { base.onResume(context: &$0) }
-        self._onSuspend = { base.onSuspend(context: &$0) }
+        self._onEntry = {
+            var context = StateContext<Base.Context, FSMsContext, Environment>(fsmContext: $0)
+            base.onEntry(context: &context)
+            $0.update(from: context)
+        }
+        self._main = {
+            var context = StateContext<Base.Context, FSMsContext, Environment>(fsmContext: $0)
+            base.main(context: &context)
+            $0.update(from: context)
+        }
+        self._onExit = {
+            var context = StateContext<Base.Context, FSMsContext, Environment>(fsmContext: $0)
+            base.onExit(context: &context)
+            $0.update(from: context)
+        }
+        self._onResume = {
+            var context = StateContext<Base.Context, FSMsContext, Environment>(fsmContext: $0)
+            base.onResume(context: &context)
+            $0.update(from: context)
+        }
+        self._onSuspend = {
+            var context = StateContext<Base.Context, FSMsContext, Environment>(fsmContext: $0)
+            base.onSuspend(context: &context)
+            $0.update(from: context)
+        }
     }
 
-    func onEntry(context: inout StateContext<StatesContext, FSMsContext, Environment>) {
+    func onEntry(context: inout FSMContext<FSMsContext, Environment>) {
         _onEntry(&context)
     }
 
-    func main(context: inout StateContext<StatesContext, FSMsContext, Environment>) {
+    func main(context: inout FSMContext<FSMsContext, Environment>) {
         _main(&context)
     }
 
-    func onExit(context: inout StateContext<StatesContext, FSMsContext, Environment>) {
+    func onExit(context: inout FSMContext<FSMsContext, Environment>) {
         _onExit(&context)
     }
 
-    func onResume(context: inout StateContext<StatesContext, FSMsContext, Environment>) {
+    func onResume(context: inout FSMContext<FSMsContext, Environment>) {
         _onResume(&context)
     }
 
-    func onSuspend(context: inout StateContext<StatesContext, FSMsContext, Environment>) {
+    func onSuspend(context: inout FSMContext<FSMsContext, Environment>) {
         _onSuspend(&context)
     }
 

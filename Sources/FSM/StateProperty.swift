@@ -1,5 +1,5 @@
 @propertyWrapper
-public struct StateProperty<StateType: StateProtocol, Root> {
+public struct StateProperty<StateType: TypeErasedState, Root> {
 
     public let projectedValue: StateInformation
 

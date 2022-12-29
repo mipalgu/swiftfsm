@@ -1,9 +1,9 @@
 @dynamicMemberLookup
-public struct FSMContext<Context: DataStructure, Environment: DataStructure>: FiniteStateMachineOperations {
+public struct FSMContext<FSMsContext: DataStructure, Environment: DataStructure>: FSMContextProtocol {
 
-    public var state: Sendable
+    var state: Sendable
 
-    public var fsm: Context
+    public var fsm: FSMsContext
 
     public var environment: Environment
 
@@ -18,7 +18,7 @@ public struct FSMContext<Context: DataStructure, Environment: DataStructure>: Fi
     }
 
     public init<StatesContext: DataStructure>(
-        stateContext: StateContext<StatesContext, Context, Environment>
+        stateContext: StateContext<StatesContext, FSMsContext, Environment>
     ) {
         self.init(
             state: stateContext.state as Sendable,
@@ -27,18 +27,18 @@ public struct FSMContext<Context: DataStructure, Environment: DataStructure>: Fi
         )
     }
 
-    public init(state: Sendable, fsm: Context, environment: Environment, status: FSMStatus = .executing) {
+    public init(state: Sendable, fsm: FSMsContext, environment: Environment, status: FSMStatus = .executing) {
         self.state = state
         self.fsm = fsm
         self.environment = environment
         self.status = status
     }
 
-    public subscript<T>(dynamicMember keyPath: KeyPath<Context, T>) -> T {
+    public subscript<T>(dynamicMember keyPath: KeyPath<FSMsContext, T>) -> T {
         fsm[keyPath: keyPath]
     }
 
-    public subscript<T>(dynamicMember keyPath: WritableKeyPath<Context, T>) -> T {
+    public subscript<T>(dynamicMember keyPath: WritableKeyPath<FSMsContext, T>) -> T {
         get { fsm[keyPath: keyPath] }
         set { fsm[keyPath: keyPath] = newValue }
     }
@@ -52,14 +52,6 @@ public struct FSMContext<Context: DataStructure, Environment: DataStructure>: Fi
         set { environment[keyPath: keyPath] = newValue }
     }
 
-    public mutating func update<StatesContext: DataStructure>(
-        from stateContext: StateContext<StatesContext, Context, Environment>
-    ) {
-        self.state = stateContext.state as Sendable
-        self.fsm = stateContext.fsm
-        self.environment = stateContext.environment
-    }
-
     public mutating func restart() {
         status = .restarting
     }
@@ -70,6 +62,14 @@ public struct FSMContext<Context: DataStructure, Environment: DataStructure>: Fi
 
     public mutating func suspend() {
         status = .suspending
+    }
+
+    public mutating func update<StatesContext: DataStructure>(
+        from stateContext: StateContext<StatesContext, FSMsContext, Environment>
+    ) {
+        self.state = stateContext.state as Sendable
+        self.fsm = stateContext.fsm
+        self.environment = stateContext.environment
     }
 
 }

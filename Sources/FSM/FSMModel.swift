@@ -1,10 +1,10 @@
 public protocol FSMModel<StateType>: ContextUser, EnvironmentUser {
 
-    associatedtype Context = EmptyDataStructure
+    associatedtype Context: DataStructure = EmptyDataStructure
 
-    associatedtype StateType: StateProtocol
-        where StateType.Context: Convertible,
-            StateType.Context.Source == Context
+    associatedtype StateType: TypeErasedState
+        where StateType.Context.FSMsContext == Context,
+            StateType.Context.Environment == Environment
 
     associatedtype TransitionType: TransitionProtocol
         = AnyTransition<StateType, (Self) -> StateInformation>
@@ -17,11 +17,7 @@ public protocol FSMModel<StateType>: ContextUser, EnvironmentUser {
 
 public extension FSMModel {
 
-    typealias State<ConcreteState: StateProtocol> = StateProperty<ConcreteState, Self>
-        where ConcreteState: Nameable,
-            ConcreteState.Context: Convertible,
-            ConcreteState.Context.Source == Context,
-            ConcreteState.TypeErasedVersion == StateType
+    typealias State = StateProperty<StateType, Self>
 
     typealias Transition<ConcreteState: StateProtocol>
         = AnyTransition<ConcreteState, (Self) -> StateInformation>
