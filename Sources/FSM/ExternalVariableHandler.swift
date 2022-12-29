@@ -1,1 +1,1 @@
-public protocol ExternalVariableHandler: SensorHandler, ActuatorHandler {}
+public protocol ExternalVariableHandler: SensorHandler, ActuatorHandler where Value: ExternalVariable {}

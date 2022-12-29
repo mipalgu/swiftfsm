@@ -1,4 +1,4 @@
-public protocol ActuatorHandler: EnvironmentHandler {
+public protocol ActuatorHandler: EnvironmentHandler where Value: Actuator {
 
     var value: Value { get set }
 

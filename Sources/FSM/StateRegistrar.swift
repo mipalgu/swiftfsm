@@ -1,4 +1,4 @@
-final class StateRegistrar {
+public final class StateRegistrar {
 
     private static var latestID: Int = 0
 
@@ -8,7 +8,7 @@ final class StateRegistrar {
 
     private init() {}
 
-    static func id(of state: String) -> Int {
+    public static func id(of state: String) -> Int {
         if let id = names[state] {
             return id
         }
@@ -19,7 +19,7 @@ final class StateRegistrar {
         return id
     }
 
-    static func name(of state: Int) -> String? {
+    public static func name(of state: Int) -> String? {
         states[state]
     }
 
