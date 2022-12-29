@@ -19,9 +19,9 @@ public extension FSMModel {
 
     typealias State = StateProperty<StateType, Self>
 
-    typealias Transition<ConcreteState: StateProtocol>
-        = AnyTransition<ConcreteState, (Self) -> StateInformation>
-            where ConcreteState.TypeErasedVersion == StateType
+    // typealias Transition<ConcreteState: StateProtocol>
+    //     = AnyTransition<ConcreteState, (Self) -> StateInformation>
+    //         where ConcreteState.TypeErasedVersion == StateType
 
     typealias StateID = Int
 

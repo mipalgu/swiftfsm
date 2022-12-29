@@ -5,15 +5,13 @@ struct FSMMock: FSMModel {
     typealias Context = EmptyDataStructure
     typealias StateType = AnyMockState<Context, Environment>
 
-    @State(name: "Ping", transitions: {
-        Transition<EmptyMockState<EmptyDataStructure, EmptyDataStructure>>(to: \.$pong)
+    @State(name: "Ping", transitions2: {
+        Transition(to: \Self.$pong)
     })
-    var ping = EmptyMockState()
+    var ping
 
-    @State(name: "Pong", transitions: {
-        Transition<EmptyMockState<EmptyDataStructure, EmptyDataStructure>>(to: "Ping")
-    })
-    var pong = EmptyMockState()
+    @State(name: "Pong")
+    var pong
 
     let initialState = \Self.$ping
 
