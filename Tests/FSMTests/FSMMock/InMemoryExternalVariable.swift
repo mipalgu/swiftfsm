@@ -1,6 +1,6 @@
 import FSM
 
-struct InMemoryExternalVariable<Value: ExternalVariable>: ExternalVariableHandler {
+struct InMemoryExternalVariable<Value: ExternalVariableValue>: ExternalVariableHandler {
 
     private let resolvedID: Int
 
@@ -8,9 +8,9 @@ struct InMemoryExternalVariable<Value: ExternalVariable>: ExternalVariableHandle
 
     var value: Value
 
-    init(id: String) {
+    init(id: String, initialValue: Value) {
         self.id = id
-        self.value = Value()
+        self.value = initialValue
         self.resolvedID = StateRegistrar.id(of: id)
     }
 

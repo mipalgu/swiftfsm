@@ -1,4 +1,4 @@
-public protocol SensorHandler: EnvironmentHandler where Value: Sensor {
+public protocol SensorHandler: EnvironmentHandler where Value: SensorValue {
 
     var value: Value { get }
 

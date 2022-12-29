@@ -1,6 +1,6 @@
 import FSM
 
-struct InMemoryActuator<Value: Actuator>: ActuatorHandler {
+struct InMemoryActuator<Value: ActuatorValue>: ActuatorHandler {
 
     private let resolvedID: Int
 
@@ -8,9 +8,9 @@ struct InMemoryActuator<Value: Actuator>: ActuatorHandler {
 
     var value: Value
 
-    init(id: String) {
+    init(id: String, initialValue: Value) {
         self.id = id
-        self.value = Value()
+        self.value = initialValue
         self.resolvedID = StateRegistrar.id(of: id)
     }
 

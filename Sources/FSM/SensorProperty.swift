@@ -1,5 +1,7 @@
 @propertyWrapper
-public struct SensorProperty<Handler: SensorHandler> {
+public struct SensorProperty<Root, Handler: SensorHandler> {
+
+    public let mapPath: WritableKeyPath<Root, Handler.Value>
 
     public let projectedValue: Handler
 
@@ -7,7 +9,8 @@ public struct SensorProperty<Handler: SensorHandler> {
         projectedValue.value
     }
 
-    public init(handler: Handler) {
+    public init(handler: Handler, mapsTo keyPath: WritableKeyPath<Root, Handler.Value>) {
+        self.mapPath = keyPath
         self.projectedValue = handler
     }
 

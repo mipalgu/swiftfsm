@@ -1,4 +1,4 @@
-public struct EmptyDataStructure: DataStructure {
+public struct EmptyDataStructure: DataStructure, EmptyInitialisable {
 
     public init() {}
 

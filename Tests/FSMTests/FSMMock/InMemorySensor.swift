@@ -1,6 +1,6 @@
 import FSM
 
-struct InMemorySensor<Value: Sensor>: SensorHandler {
+struct InMemorySensor<Value: SensorValue>: SensorHandler {
 
     private let resolvedID: Int
 
@@ -8,9 +8,9 @@ struct InMemorySensor<Value: Sensor>: SensorHandler {
 
     private(set) var value: Value
 
-    init(id: String) {
+    init(id: String, initialValue: Value) {
         self.id = id
-        self.value = Value()
+        self.value = initialValue
         self.resolvedID = StateRegistrar.id(of: id)
     }
 

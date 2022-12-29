@@ -1,7 +1,11 @@
-public protocol EnvironmentVariables: DataStructure {}
+public protocol EnvironmentVariables {
+
+    associatedtype Data: DataStructure, EmptyInitialisable
+
+}
 
 public extension EnvironmentVariables {
 
-    typealias Sensor<Handler> = SensorProperty<Handler> where Handler: SensorHandler
+    typealias Sensor<Handler: SensorHandler> = SensorProperty<Data, Handler>
 
 }
