@@ -1,8 +1,8 @@
 public protocol StateProtocol: ContextUser, EnvironmentUser {
 
-    associatedtype OwnerContext: DataStructure = EmptyDataStructure
+    associatedtype FSMsContext: DataStructure = EmptyDataStructure
     associatedtype TypeErasedVersion: TypeErasedState where
-        TypeErasedVersion.FSMsContext == OwnerContext,
+        TypeErasedVersion.FSMsContext == FSMsContext,
         TypeErasedVersion.Environment == Environment
 
     var erased: TypeErasedVersion { get }

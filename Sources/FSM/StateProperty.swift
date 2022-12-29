@@ -16,11 +16,11 @@ public struct StateProperty<StateType: TypeErasedState, Root> {
         name: String,
         @TransitionBuilder transitions:
             () -> [AnyTransition<
-                    StateContext<ConcreteState.Context, ConcreteState.OwnerContext, ConcreteState.Environment>,
+                    StateContext<ConcreteState.Context, StateType.FSMsContext, StateType.Environment>,
                     (Root) -> StateInformation
                 >] = { [] }
     ) where ConcreteState.TypeErasedVersion == StateType,
-        ConcreteState.OwnerContext == StateType.FSMsContext,
+        ConcreteState.FSMsContext == StateType.FSMsContext,
         ConcreteState.Environment == StateType.Environment {
         self.projectedValue = StateInformation(name: name)
         self.wrappedValue = wrappedValue.erased

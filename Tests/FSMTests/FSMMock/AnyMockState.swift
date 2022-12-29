@@ -19,7 +19,7 @@ struct AnyMockState<
     var erased: Self { self }
 
     init<Base: MockState>(_ base: Base)
-        where Base.OwnerContext == FSMsContext,
+        where Base.FSMsContext == FSMsContext,
             Base.Environment == Environment {
         self.base = base
         self._onEntry = {

@@ -4,6 +4,6 @@ struct EmptyMockState<FSMsContext: DataStructure, Environment: DataStructure>: M
 
     typealias Context = EmptyDataStructure
     typealias Environment = Environment
-    typealias OwnerContext = FSMsContext
+    typealias FSMsContext = FSMsContext
 
 }

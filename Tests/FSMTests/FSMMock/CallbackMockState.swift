@@ -8,7 +8,7 @@ struct CallbackMockState<
 
     typealias Context = StatesContext
     typealias Environment = Environment
-    typealias OwnerContext = FSMsContext
+    typealias FSMsContext = FSMsContext
 
     private let _onEntry: (inout StateContext<StatesContext, FSMsContext, Environment>) -> Void
 
