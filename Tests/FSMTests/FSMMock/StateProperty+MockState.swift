@@ -15,7 +15,7 @@ extension StateProperty {
         name: String,
         context _: StatesContext.Type,
         onEntry: @escaping (inout StateContext<StatesContext, FSMsContext, Environment>) -> Void = { _ in },
-        main: @escaping (inout StateContext<StatesContext, FSMsContext, Environment>) -> Void = { _ in },
+        internal: @escaping (inout StateContext<StatesContext, FSMsContext, Environment>) -> Void = { _ in },
         onExit: @escaping (inout StateContext<StatesContext, FSMsContext, Environment>) -> Void = { _ in },
         onSuspend: @escaping (inout StateContext<StatesContext, FSMsContext, Environment>) -> Void = { _ in },
         onResume: @escaping (inout StateContext<StatesContext, FSMsContext, Environment>) -> Void = { _ in },
@@ -28,7 +28,7 @@ extension StateProperty {
         self.init(
             wrappedValue: CallbackMockState(
                 onEntry: onEntry,
-                main: main,
+                internal: `internal`,
                 onExit: onExit,
                 onSuspend: onSuspend,
                 onResume: onResume
@@ -41,7 +41,7 @@ extension StateProperty {
     init<FSMsContext: DataStructure, Environment: DataStructure>(
         name: String,
         onEntry: @escaping (inout StateContext<EmptyDataStructure, FSMsContext, Environment>) -> Void = { _ in },
-        main: @escaping (inout StateContext<EmptyDataStructure, FSMsContext, Environment>) -> Void = { _ in },
+        internal: @escaping (inout StateContext<EmptyDataStructure, FSMsContext, Environment>) -> Void = { _ in },
         onExit: @escaping (inout StateContext<EmptyDataStructure, FSMsContext, Environment>) -> Void = { _ in },
         onSuspend: @escaping (inout StateContext<EmptyDataStructure, FSMsContext, Environment>) -> Void = { _ in },
         onResume: @escaping (inout StateContext<EmptyDataStructure, FSMsContext, Environment>) -> Void = { _ in },
@@ -54,7 +54,7 @@ extension StateProperty {
         self.init(
             wrappedValue: CallbackMockState(
                 onEntry: onEntry,
-                main: main,
+                internal: `internal`,
                 onExit: onExit,
                 onSuspend: onSuspend,
                 onResume: onResume

@@ -9,7 +9,7 @@ struct AnyMockState<
     typealias TypeErasedVersion = Self
 
     private let _onEntry: (inout FSMContext<FSMsContext, Environment>) -> Void
-    private let _main: (inout FSMContext<FSMsContext, Environment>) -> Void
+    private let _internal: (inout FSMContext<FSMsContext, Environment>) -> Void
     private let _onExit: (inout FSMContext<FSMsContext, Environment>) -> Void
     private let _onResume: (inout FSMContext<FSMsContext, Environment>) -> Void
     private let _onSuspend: (inout FSMContext<FSMsContext, Environment>) -> Void
@@ -27,9 +27,9 @@ struct AnyMockState<
             base.onEntry(context: &context)
             $0.update(from: context)
         }
-        self._main = {
+        self._internal = {
             var context = StateContext<Base.Context, FSMsContext, Environment>(fsmContext: $0)
-            base.main(context: &context)
+            base.internal(context: &context)
             $0.update(from: context)
         }
         self._onExit = {
@@ -53,8 +53,8 @@ struct AnyMockState<
         _onEntry(&context)
     }
 
-    func main(context: inout FSMContext<FSMsContext, Environment>) {
-        _main(&context)
+    func `internal`(context: inout FSMContext<FSMsContext, Environment>) {
+        _internal(&context)
     }
 
     func onExit(context: inout FSMContext<FSMsContext, Environment>) {

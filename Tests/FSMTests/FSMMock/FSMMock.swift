@@ -21,7 +21,8 @@ struct FSMMock: MockFSM {
     @State(
         name: "Pang",
         context: CustomData.self,
-        main: { context in
+        onEntry: { $0.count = 0 },
+        internal: { context in
             print("Pang: \(context.count)")
             context.count += 1
         },

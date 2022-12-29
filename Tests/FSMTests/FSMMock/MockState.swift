@@ -6,7 +6,7 @@ protocol MockState: StateProtocol where TypeErasedVersion == AnyMockState<OwnerC
 
     func onEntry(context: inout StateContext<Context, OwnerContext, Environment>)
 
-    func main(context: inout StateContext<Context, OwnerContext, Environment>)
+    func `internal`(context: inout StateContext<Context, OwnerContext, Environment>)
 
     func onExit(context: inout StateContext<Context, OwnerContext, Environment>)
 
@@ -24,7 +24,7 @@ extension MockState {
 
     func onEntry(context _: inout StateContext<Context, OwnerContext, Environment>) {}
 
-    func main(context _: inout StateContext<Context, OwnerContext, Environment>) {}
+    func `internal`(context _: inout StateContext<Context, OwnerContext, Environment>) {}
 
     func onExit(context _: inout StateContext<Context, OwnerContext, Environment>) {}
 

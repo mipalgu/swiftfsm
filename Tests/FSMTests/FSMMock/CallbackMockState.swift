@@ -12,7 +12,7 @@ struct CallbackMockState<
 
     private let _onEntry: (inout StateContext<StatesContext, FSMsContext, Environment>) -> Void
 
-    private let _main: (inout StateContext<StatesContext, FSMsContext, Environment>) -> Void
+    private let _internal: (inout StateContext<StatesContext, FSMsContext, Environment>) -> Void
 
     private let _onExit: (inout StateContext<StatesContext, FSMsContext, Environment>) -> Void
 
@@ -22,13 +22,13 @@ struct CallbackMockState<
 
     init(
         onEntry: @escaping (inout StateContext<StatesContext, FSMsContext, Environment>) -> Void = { _ in },
-        main: @escaping (inout StateContext<StatesContext, FSMsContext, Environment>) -> Void = { _ in },
+        internal: @escaping (inout StateContext<StatesContext, FSMsContext, Environment>) -> Void = { _ in },
         onExit: @escaping (inout StateContext<StatesContext, FSMsContext, Environment>) -> Void = { _ in },
         onSuspend: @escaping (inout StateContext<StatesContext, FSMsContext, Environment>) -> Void = { _ in },
         onResume: @escaping (inout StateContext<StatesContext, FSMsContext, Environment>) -> Void = { _ in }
     ) {
         self._onEntry = onEntry
-        self._main = main
+        self._internal = `internal`
         self._onExit = onExit
         self._onSuspend = onSuspend
         self._onResume = onResume
@@ -38,8 +38,8 @@ struct CallbackMockState<
         self._onEntry(&context)
     }
 
-    func main(context: inout StateContext<StatesContext, FSMsContext, Environment>) {
-        self._main(&context)
+    func `internal`(context: inout StateContext<StatesContext, FSMsContext, Environment>) {
+        self._internal(&context)
     }
 
     func onExit(context: inout StateContext<StatesContext, FSMsContext, Environment>) {
