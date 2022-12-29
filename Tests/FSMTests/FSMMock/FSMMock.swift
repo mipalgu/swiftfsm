@@ -6,12 +6,12 @@ struct FSMMock: FSMModel {
     typealias StateType = AnyMockState<Context, Environment>
 
     @State(name: "Ping", transitions: {
-        Transition<EmptyMockState>(to: \.$pong)
+        Transition<EmptyMockState<EmptyDataStructure, EmptyDataStructure>>(to: \.$pong)
     })
     var ping = EmptyMockState()
 
     @State(name: "Pong", transitions: {
-        Transition<EmptyMockState>(to: "Ping")
+        Transition<EmptyMockState<EmptyDataStructure, EmptyDataStructure>>(to: "Ping")
     })
     var pong = EmptyMockState()
 

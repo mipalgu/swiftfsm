@@ -1,7 +1,10 @@
 import FSM
 
-struct EmptyMockState: MockState {
+struct EmptyMockState<FSMsContext: DataStructure, Environment: DataStructure>: MockState {
 
-    typealias Context = EmptyConvertibleDataStructure<FSMMock.Context>
+    typealias Context = EmptyDataStructure
+    typealias Environment = EmptyDataStructure
+    typealias OwnerContext = FSMsContext
+    typealias OwnerEnvironment = Environment
 
 }
