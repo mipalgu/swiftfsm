@@ -6,6 +6,10 @@ struct CallbackMockState<
     Environment: DataStructure
 >: MockState {
 
+    typealias Context = StatesContext
+    typealias Environment = Environment
+    typealias OwnerContext = FSMsContext
+
     private let _onEntry: (inout StateContext<StatesContext, FSMsContext, Environment>) -> Void
 
     private let _main: (inout StateContext<StatesContext, FSMsContext, Environment>) -> Void
