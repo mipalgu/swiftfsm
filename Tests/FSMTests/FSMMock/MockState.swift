@@ -1,35 +1,35 @@
 import FSM
 
-protocol MockState: StateProtocol where TypeErasedVersion == AnyMockState<OwnerContext, OwnerEnvironment> {
+protocol MockState: StateProtocol where TypeErasedVersion == AnyMockState<OwnerContext, Environment> {
 
     associatedtype Context = EmptyConvertibleDataStructure<FSMMock.Context>
 
-    func onEntry(context: inout StateContext<Context, OwnerContext, OwnerEnvironment>)
+    func onEntry(context: inout StateContext<Context, OwnerContext, Environment>)
 
-    func main(context: inout StateContext<Context, OwnerContext, OwnerEnvironment>)
+    func main(context: inout StateContext<Context, OwnerContext, Environment>)
 
-    func onExit(context: inout StateContext<Context, OwnerContext, OwnerEnvironment>)
+    func onExit(context: inout StateContext<Context, OwnerContext, Environment>)
 
-    func onSuspend(context: inout StateContext<Context, OwnerContext, OwnerEnvironment>)
+    func onSuspend(context: inout StateContext<Context, OwnerContext, Environment>)
 
-    func onResume(context: inout StateContext<Context, OwnerContext, OwnerEnvironment>)
+    func onResume(context: inout StateContext<Context, OwnerContext, Environment>)
 
 }
 
 extension MockState {
 
-    var erased: AnyMockState<OwnerContext, OwnerEnvironment> {
+    var erased: AnyMockState<OwnerContext, Environment> {
         AnyMockState(self)
     }
 
-    func onEntry(context _: inout StateContext<Context, OwnerContext, OwnerEnvironment>) {}
+    func onEntry(context _: inout StateContext<Context, OwnerContext, Environment>) {}
 
-    func main(context _: inout StateContext<Context, OwnerContext, OwnerEnvironment>) {}
+    func main(context _: inout StateContext<Context, OwnerContext, Environment>) {}
 
-    func onExit(context _: inout StateContext<Context, OwnerContext, OwnerEnvironment>) {}
+    func onExit(context _: inout StateContext<Context, OwnerContext, Environment>) {}
 
-    func onSuspend(context _: inout StateContext<Context, OwnerContext, OwnerEnvironment>) {}
+    func onSuspend(context _: inout StateContext<Context, OwnerContext, Environment>) {}
 
-    func onResume(context _: inout StateContext<Context, OwnerContext, OwnerEnvironment>) {}
+    func onResume(context _: inout StateContext<Context, OwnerContext, Environment>) {}
 
 }

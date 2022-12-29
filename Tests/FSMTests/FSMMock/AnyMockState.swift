@@ -20,7 +20,7 @@ struct AnyMockState<
 
     init<Base: MockState>(_ base: Base)
         where Base.OwnerContext == FSMsContext,
-            Base.OwnerEnvironment == Environment {
+            Base.Environment == Environment {
         self.base = base
         self._onEntry = {
             var context = StateContext<Base.Context, FSMsContext, Environment>(fsmContext: $0)
