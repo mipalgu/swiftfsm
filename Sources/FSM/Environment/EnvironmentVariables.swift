@@ -10,6 +10,8 @@ public extension EnvironmentVariables {
 
     typealias ExternalVariable<Handler: ExternalVariableHandler> = ExternalVariableProperty<Snapshot, Handler>
 
+    typealias GlobalVariable<Value: GlobalVariableValue> = GlobalVariableProperty<Snapshot, Value>
+
     typealias Sensor<Handler: SensorHandler> = SensorProperty<Snapshot, Handler>
 
 }
