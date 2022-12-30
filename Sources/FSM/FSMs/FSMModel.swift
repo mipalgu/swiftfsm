@@ -14,6 +14,8 @@ public protocol FSMModel<StateType>: ContextUser {
 
     var initialState: KeyPath<Self, StateInformation> { get }
 
+    var suspendState: KeyPath<Self, StateInformation>? { get }
+
 }
 
 public extension FSMModel {
@@ -73,6 +75,8 @@ public extension FSMModel {
     > {
         AnyTransition(to: state, canTransition: canTransition)
     }
+
+    var suspendState: KeyPath<Self, StateInformation>? { nil }
 
     func id(of keyPath: KeyPath<Self, StateInformation>) -> StateID {
         self[keyPath: keyPath].id
