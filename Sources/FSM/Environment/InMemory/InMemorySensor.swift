@@ -1,20 +1,18 @@
-import FSM
-
-struct InMemorySensor<Value: SensorValue>: SensorHandler {
+public struct InMemorySensor<Value: SensorValue>: SensorHandler {
 
     private let resolvedID: Int
 
-    let id: String
+    public let id: String
 
-    private(set) var value: Value
+    public private(set) var value: Value
 
-    init(id: String, initialValue: Value) {
+    public init(id: String, initialValue: Value) {
         self.id = id
         self.value = initialValue
         self.resolvedID = StateRegistrar.id(of: id)
     }
 
-    mutating func takeSnapshot() {
+    public mutating func takeSnapshot() {
         guard let value = inMemoryData[resolvedID] as? Value else {
             return
         }
