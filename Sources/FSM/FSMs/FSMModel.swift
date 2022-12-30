@@ -4,6 +4,8 @@ public protocol FSMModel<StateType>: ContextUser {
 
     associatedtype Environment: EnvironmentVariables = EmptyEnvironment
 
+    associatedtype Ringlet: RingletProtocol where Ringlet.StateType == StateType
+
     associatedtype StateType: TypeErasedState
         where StateType.FSMsContext == Context,
             StateType.Environment == Environment.Snapshot
@@ -15,8 +17,6 @@ public protocol FSMModel<StateType>: ContextUser {
 public extension FSMModel {
 
     typealias State = StateProperty<StateType, Self>
-
-    typealias StateID = Int
 
     // swiftlint:disable:next identifier_name
     static func Transition(
