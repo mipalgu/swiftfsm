@@ -1,5 +1,5 @@
 public struct EmptyEnvironment: EnvironmentVariables {
 
-    public typealias Data = EmptyDataStructure
+    public typealias Snapshot = EmptyDataStructure
 
 }

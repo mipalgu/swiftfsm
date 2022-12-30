@@ -1,11 +1,15 @@
 public protocol EnvironmentVariables {
 
-    associatedtype Data: DataStructure, EmptyInitialisable
+    associatedtype Snapshot: EnvironmentSnapshot
 
 }
 
 public extension EnvironmentVariables {
 
-    typealias Sensor<Handler: SensorHandler> = SensorProperty<Data, Handler>
+    typealias Actuator<Handler: ActuatorHandler> = ActuatorProperty<Snapshot, Handler>
+
+    typealias ExternalVariable<Handler: ExternalVariableHandler> = ExternalVariableProperty<Snapshot, Handler>
+
+    typealias Sensor<Handler: SensorHandler> = SensorProperty<Snapshot, Handler>
 
 }

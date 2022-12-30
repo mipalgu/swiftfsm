@@ -1,4 +1,4 @@
-public struct EmptyDataStructure: DataStructure, EmptyInitialisable {
+public struct EmptyDataStructure: EnvironmentSnapshot {
 
     public init() {}
 

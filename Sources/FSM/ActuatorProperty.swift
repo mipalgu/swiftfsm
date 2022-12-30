@@ -1,12 +1,16 @@
 @propertyWrapper
-public struct SensorProperty<Root, Handler: SensorHandler> {
+public struct ActuatorProperty<Root, Handler: ActuatorHandler> {
 
     public let mapPath: WritableKeyPath<Root, Handler.Value?>
 
-    public let projectedValue: Handler
+    public private(set) var projectedValue: Handler
 
     public var wrappedValue: Handler.Value {
-        projectedValue.value
+        get {
+            projectedValue.value
+        } set {
+            projectedValue.value = newValue
+        }
     }
 
     public init(handler: Handler, mapsTo keyPath: WritableKeyPath<Root, Handler.Value?>) {
