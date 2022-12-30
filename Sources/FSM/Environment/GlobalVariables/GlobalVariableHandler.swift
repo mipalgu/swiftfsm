@@ -1,4 +1,4 @@
-public protocol GlobalVariableHandler: EnvironmentHandler where Value: GlobalVariableValue {
+public protocol GlobalVariableHandler: EnvironmentHandler, DataStructure where Value: GlobalVariableValue {
 
     var value: Value { get set }
 
