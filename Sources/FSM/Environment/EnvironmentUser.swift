@@ -1,5 +1,5 @@
 public protocol EnvironmentUser {
 
-    associatedtype Environment: DataStructure = EmptyDataStructure
+    associatedtype Environment: EnvironmentSnapshot = EmptyDataStructure
 
 }

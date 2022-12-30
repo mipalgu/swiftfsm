@@ -1,6 +1,6 @@
 import FSM
 
-struct EmptyMockState<FSMsContext: DataStructure, Environment: DataStructure>: MockState {
+struct EmptyMockState<FSMsContext: DataStructure, Environment: EnvironmentSnapshot>: MockState {
 
     typealias Context = EmptyDataStructure
     typealias Environment = Environment

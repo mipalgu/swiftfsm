@@ -1,4 +1,3 @@
-@dynamicMemberLookup
 public struct Snapshot<Data: EnvironmentSnapshot> {
 
     private var data: Data
@@ -10,26 +9,18 @@ public struct Snapshot<Data: EnvironmentSnapshot> {
         self.whitelist = whitelist
     }
 
-    public subscript<T>(dynamicMember keyPath: KeyPath<Data, T>) -> T {
+    public func get<T>(_ keyPath: KeyPath<Data, T>) -> T {
         guard whitelist.contains(keyPath) else {
             fatalError("Attempting to access restricted member.")
         }
         return data[keyPath: keyPath]
     }
 
-    public subscript<T>(dynamicMember keyPath: WritableKeyPath<Data, T>) -> T {
-        get {
-            guard whitelist.contains(keyPath) else {
-                fatalError("Attempting to access restricted member.")
-            }
-            return data[keyPath: keyPath]
+    public mutating func set<T>(_ keyPath: WritableKeyPath<Data, T>, _ newValue: T) {
+        guard whitelist.contains(keyPath) else {
+            fatalError("Attempting to access restricted member.")
         }
-        set {
-            guard whitelist.contains(keyPath) else {
-                fatalError("Attempting to access restricted member.")
-            }
-            data[keyPath: keyPath] = newValue
-        }
+        data[keyPath: keyPath] = newValue
     }
 
 }

@@ -2,7 +2,7 @@ import FSM
 
 struct AnyMockState<
     FSMsContext: DataStructure,
-    Environment: DataStructure
+    Environment: EnvironmentSnapshot
 >: TypeErasedState {
 
     typealias Context = FSMContext<FSMsContext, Environment>

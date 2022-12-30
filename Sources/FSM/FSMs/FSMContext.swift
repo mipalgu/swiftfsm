@@ -1,11 +1,14 @@
 @dynamicMemberLookup
-public struct FSMContext<FSMsContext: DataStructure, Environment: DataStructure>: FiniteStateMachineOperations {
+public struct FSMContext<
+    FSMsContext: DataStructure,
+    Environment: EnvironmentSnapshot
+>: FiniteStateMachineOperations {
 
     var state: Sendable
 
     public var fsm: FSMsContext
 
-    public var environment: Environment
+    public var environment: Snapshot<Environment>
 
     public var status: FSMStatus
 
@@ -27,7 +30,12 @@ public struct FSMContext<FSMsContext: DataStructure, Environment: DataStructure>
         )
     }
 
-    public init(state: Sendable, fsm: FSMsContext, environment: Environment, status: FSMStatus = .executing) {
+    public init(
+        state: Sendable,
+        fsm: FSMsContext,
+        environment: Snapshot<Environment>,
+        status: FSMStatus = .executing
+    ) {
         self.state = state
         self.fsm = fsm
         self.environment = environment
@@ -44,12 +52,12 @@ public struct FSMContext<FSMsContext: DataStructure, Environment: DataStructure>
     }
 
     public subscript<T>(dynamicMember keyPath: KeyPath<Environment, T>) -> T {
-        environment[keyPath: keyPath]
+        environment.get(keyPath)
     }
 
     public subscript<T>(dynamicMember keyPath: WritableKeyPath<Environment, T>) -> T {
-        get { environment[keyPath: keyPath] }
-        set { environment[keyPath: keyPath] = newValue }
+        get { environment.get(keyPath) }
+        set { environment.set(keyPath, newValue) }
     }
 
     public mutating func restart() {

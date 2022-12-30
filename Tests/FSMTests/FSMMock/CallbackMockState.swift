@@ -3,7 +3,7 @@ import FSM
 struct CallbackMockState<
     StatesContext: DataStructure,
     FSMsContext: DataStructure,
-    Environment: DataStructure
+    Environment: EnvironmentSnapshot
 >: MockState {
 
     typealias Context = StatesContext

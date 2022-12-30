@@ -1,13 +1,13 @@
 @dynamicMemberLookup
 public struct StateContext<
-    StateContext: DataStructure, FSMsContext: DataStructure, Environment: DataStructure
+    StateContext: DataStructure, FSMsContext: DataStructure, Environment: EnvironmentSnapshot
 > {
 
     public var state: StateContext
 
     public var fsm: FSMsContext
 
-    public var environment: Environment
+    public var environment: Snapshot<Environment>
 
     private var status: FSMStatus
 
@@ -31,7 +31,7 @@ public struct StateContext<
     public init(
         state: StateContext,
         fsm: FSMsContext,
-        environment: Environment,
+        environment: Snapshot<Environment>,
         status: FSMStatus = .executing
     ) {
         self.state = state
@@ -59,12 +59,12 @@ public struct StateContext<
     }
 
     public subscript<T>(dynamicMember keyPath: KeyPath<Environment, T>) -> T {
-        environment[keyPath: keyPath]
+        environment.get(keyPath)
     }
 
     public subscript<T>(dynamicMember keyPath: WritableKeyPath<Environment, T>) -> T {
-        get { environment[keyPath: keyPath] }
-        set { environment[keyPath: keyPath] = newValue }
+        get { environment.get(keyPath) }
+        set { environment.set(keyPath, newValue) }
     }
 
     public mutating func update(from fsmContext: FSMContext<FSMsContext, Environment>) {
