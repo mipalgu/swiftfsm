@@ -65,6 +65,7 @@ struct FSMMock: MockFSM {
     @State(
         name: "Pang",
         context: PangData.self,
+        uses: \.exitSensor,
         onEntry: { $0.stateCount = 0 },
         internal: {
             print("Pang: (\($0.fsmCount), \($0.stateCount))")

@@ -4,18 +4,25 @@ extension StateProperty {
 
     init<FSMsContext: DataStructure, Environment: DataStructure>(
         name: String,
+        uses environmentVariables: PartialKeyPath<Root.Environment.Snapshot> ...,
         @TransitionBuilder transitions:
             () -> [AnyTransition<
                 StateContext<EmptyDataStructure, FSMsContext, Environment>,
                 (Root) -> StateInformation
             >] = { [] }
     ) where StateType == AnyMockState<FSMsContext, Environment> {
-        self.init(wrappedValue: EmptyMockState(), name: name, transitions: transitions)
+        self.init(
+            wrappedValue: EmptyMockState(),
+            name: name,
+            uses: environmentVariables,
+            transitions: transitions
+        )
     }
 
     init<StatesContext: DataStructure, FSMsContext: DataStructure, Environment: DataStructure>(
         name: String,
         context _: StatesContext.Type,
+        uses environmentVariables: PartialKeyPath<Root.Environment.Snapshot> ...,
         onEntry: @escaping (inout StateContext<StatesContext, FSMsContext, Environment>) -> Void = { _ in },
         internal: @escaping (inout StateContext<StatesContext, FSMsContext, Environment>) -> Void = { _ in },
         onExit: @escaping (inout StateContext<StatesContext, FSMsContext, Environment>) -> Void = { _ in },
@@ -36,12 +43,14 @@ extension StateProperty {
                 onResume: onResume
             ),
             name: name,
+            uses: environmentVariables,
             transitions: transitions
         )
     }
 
     init<FSMsContext: DataStructure, Environment: DataStructure>(
         name: String,
+        uses environmentVariables: PartialKeyPath<Root.Environment.Snapshot> ...,
         onEntry: @escaping (inout StateContext<EmptyDataStructure, FSMsContext, Environment>) -> Void = { _ in },
         internal: @escaping (inout StateContext<EmptyDataStructure, FSMsContext, Environment>) -> Void = { _ in },
         onExit: @escaping (inout StateContext<EmptyDataStructure, FSMsContext, Environment>) -> Void = { _ in },
@@ -62,6 +71,7 @@ extension StateProperty {
                 onResume: onResume
             ),
             name: name,
+            uses: environmentVariables,
             transitions: transitions
         )
     }
