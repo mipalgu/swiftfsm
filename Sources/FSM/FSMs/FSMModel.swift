@@ -4,7 +4,9 @@ public protocol FSMModel<StateType>: ContextUser {
 
     associatedtype Environment: EnvironmentVariables = EmptyEnvironment
 
-    associatedtype Ringlet: RingletProtocol where Ringlet.StateType == StateType
+    associatedtype Ringlet: RingletProtocol where
+        Ringlet.StateType == StateType,
+        Ringlet.TransitionType == AnyTransition<FSMContext<Context, Environment.Snapshot>, StateID>
 
     associatedtype StateType: TypeErasedState
         where StateType.FSMsContext == Context,
