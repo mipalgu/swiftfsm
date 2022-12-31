@@ -20,7 +20,8 @@ public extension FSMModel {
 
     typealias ExternalVariable<Handler: ExternalVariableHandler> = ExternalVariableProperty<Environment, Handler>
 
-    typealias GlobalVariable<Value: GlobalVariableValue> = GlobalVariableProperty<Environment, Value>
+    typealias GlobalVariable<Value: GlobalVariableValue>
+        = GlobalVariableProperty<Environment, InMemoryGlobalVariable<Value>>
 
     typealias Sensor<Handler: SensorHandler> = SensorProperty<Environment, Handler>
 
