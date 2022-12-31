@@ -3,18 +3,25 @@ import XCTest
 @testable import FSM
 
 final class InMemoryActuatorTests: XCTestCase {
+    
+    let id = "inMemoryActuator"
+
+    var actuator: InMemoryActuator<Bool>!
+
+    override func setUp() {
+        actuator = InMemoryActuator(id: id, initialValue: false)
+    }
 
     func testInit() {
-        let id = "inMemoryActuator"
-        let initialValue = false
-        let actuator = InMemoryActuator(id: id, initialValue: initialValue)
+        let actuator = InMemoryActuator(id: id, initialValue: false)
         XCTAssertEqual(actuator.id, id)
-        XCTAssertEqual(actuator.value, initialValue)
+        XCTAssertEqual(actuator.value, false)
+        let actuator2 = InMemoryActuator(id: id, initialValue: true)
+        XCTAssertEqual(actuator2.id, id)
+        XCTAssertEqual(actuator2.value, true)
     }
 
     func testCanRetreiveValueAcrossTwoHandlers() {
-        let id = "inMemoryActuator"
-        var actuator = InMemoryActuator(id: id, initialValue: false)
         var sensor = InMemorySensor(id: id, initialValue: false)
         actuator.saveSnapshot()
         sensor.takeSnapshot()
@@ -27,9 +34,14 @@ final class InMemoryActuatorTests: XCTestCase {
         XCTAssertEqual(sensor.value, true)
     }
 
+    func testSaveSnapshotPerformance_1() {
+        actuator.value = true
+        measure {
+            actuator.saveSnapshot()
+        }
+    }
+
     func testSaveSnapshotPerformance_10() {
-        let id = "inMemoryActuator"
-        var actuator = InMemoryActuator(id: id, initialValue: false)
         actuator.value = true
         measure {
             for _ in 0..<10 {
@@ -39,8 +51,6 @@ final class InMemoryActuatorTests: XCTestCase {
     }
 
     func testSaveSnapshotPerformance_100() {
-        let id = "inMemoryActuator"
-        var actuator = InMemoryActuator(id: id, initialValue: false)
         actuator.value = true
         measure {
             for _ in 0..<100 {
@@ -50,8 +60,6 @@ final class InMemoryActuatorTests: XCTestCase {
     }
 
     func testSaveSnapshotPerformance_1000() {
-        let id = "inMemoryActuator"
-        var actuator = InMemoryActuator(id: id, initialValue: false)
         actuator.value = true
         measure {
             for _ in 0..<1000 {
@@ -61,8 +69,6 @@ final class InMemoryActuatorTests: XCTestCase {
     }
 
     func testSaveSnapshotPerformance_10_000() {
-        let id = "inMemoryActuator"
-        var actuator = InMemoryActuator(id: id, initialValue: false)
         actuator.value = true
         measure {
             for _ in 0..<10000 {
@@ -72,8 +78,6 @@ final class InMemoryActuatorTests: XCTestCase {
     }
 
     func testSaveSnapshotPerformance_100_000() {
-        let id = "inMemoryActuator"
-        var actuator = InMemoryActuator(id: id, initialValue: false)
         actuator.value = true
         measure {
             for _ in 0..<100_000 {
@@ -83,8 +87,6 @@ final class InMemoryActuatorTests: XCTestCase {
     }
 
     func testSaveSnapshotPerformance_1_000_000() {
-        let id = "inMemoryActuator"
-        var actuator = InMemoryActuator(id: id, initialValue: false)
         actuator.value = true
         measure {
             for _ in 0..<1_000_000 {
