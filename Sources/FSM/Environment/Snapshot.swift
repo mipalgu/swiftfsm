@@ -10,14 +10,14 @@ public struct Snapshot<Data: EnvironmentSnapshot> {
     }
 
     public func get<T>(_ keyPath: KeyPath<Data, T>) -> T {
-        guard whitelist.contains(keyPath) else {
+        guard !whitelist.contains(keyPath) else {
             fatalError("Attempting to access restricted member.")
         }
         return data[keyPath: keyPath]
     }
 
     public mutating func set<T>(_ keyPath: WritableKeyPath<Data, T>, _ newValue: T) {
-        guard whitelist.contains(keyPath) else {
+        guard !whitelist.contains(keyPath) else {
             fatalError("Attempting to access restricted member.")
         }
         data[keyPath: keyPath] = newValue
