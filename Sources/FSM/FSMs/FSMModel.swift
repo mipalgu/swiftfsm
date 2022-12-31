@@ -31,7 +31,7 @@ public extension FSMModel {
     static func Transition(
         to keyPath: KeyPath<Self, StateInformation>,
         canTransition:
-            @escaping (StateContext<EmptyDataStructure, Context, Environment>) -> Bool
+            @Sendable @escaping (StateContext<EmptyDataStructure, Context, Environment>) -> Bool
                 = { _ in true }
     ) -> AnyTransition<
             StateContext<EmptyDataStructure, Context, Environment>,
@@ -44,7 +44,7 @@ public extension FSMModel {
     static func Transition(
         to state: String,
         canTransition:
-            @escaping (StateContext<EmptyDataStructure, Context, Environment>) -> Bool
+            @Sendable @escaping (StateContext<EmptyDataStructure, Context, Environment>) -> Bool
                 = { _ in true }
     ) -> AnyTransition<
         StateContext<EmptyDataStructure, Context, Environment>,
@@ -58,7 +58,7 @@ public extension FSMModel {
         to keyPath: KeyPath<Self, StateInformation>,
         context _: StatesContext.Type,
         canTransition:
-            @escaping (StateContext<StatesContext, Context, Environment>) -> Bool
+            @Sendable @escaping (StateContext<StatesContext, Context, Environment>) -> Bool
                 = { _ in true }
     ) -> AnyTransition<
         StateContext<StatesContext, Context, Environment>,
@@ -72,7 +72,7 @@ public extension FSMModel {
         to state: String,
         context _: StatesContext.Type,
         canTransition:
-            @escaping (StateContext<StatesContext, Context, Environment>) -> Bool
+            @Sendable @escaping (StateContext<StatesContext, Context, Environment>) -> Bool
                 = { _ in true }
     ) -> AnyTransition<
         StateContext<StatesContext, Context, Environment>,
