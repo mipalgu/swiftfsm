@@ -3,7 +3,7 @@ import XCTest
 @testable import FSM
 
 final class InMemoryActuatorTests: XCTestCase {
-    
+
     let id = "inMemoryActuator"
 
     var actuator: InMemoryActuator<Bool>!
