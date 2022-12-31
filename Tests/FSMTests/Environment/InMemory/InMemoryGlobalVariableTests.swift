@@ -1,3 +1,4 @@
+import Foundation
 import XCTest
 
 @testable import FSM
@@ -25,6 +26,95 @@ final class InMemoryGlobalVariableTests: XCTestCase {
         let globalVariable3 = InMemoryGlobalVariable(id: id, initialValue: true)
         XCTAssertEqual(globalVariable3.id, id)
         XCTAssertEqual(globalVariable3.value, false)
+    }
+
+    func testEquality() {
+        let id1 = "id1"
+        let id2 = "id2"
+        let globalVariable1 = InMemoryGlobalVariable(id: id1, initialValue: false)
+        let globalVariable2 = InMemoryGlobalVariable(id: id1, initialValue: true)
+        let globalVariable3 = InMemoryGlobalVariable(id: id2, initialValue: false)
+        let globalVariable4 = InMemoryGlobalVariable(id: id2, initialValue: true)
+        XCTAssertEqual(globalVariable1, globalVariable1)
+        XCTAssertEqual(globalVariable2, globalVariable2)
+        XCTAssertEqual(globalVariable3, globalVariable3)
+        XCTAssertEqual(globalVariable4, globalVariable4)
+        XCTAssertNotEqual(globalVariable1, globalVariable2)
+        XCTAssertNotEqual(globalVariable2, globalVariable1)
+        XCTAssertNotEqual(globalVariable1, globalVariable3)
+        XCTAssertNotEqual(globalVariable3, globalVariable1)
+        XCTAssertNotEqual(globalVariable1, globalVariable4)
+        XCTAssertNotEqual(globalVariable4, globalVariable1)
+        XCTAssertNotEqual(globalVariable2, globalVariable3)
+        XCTAssertNotEqual(globalVariable3, globalVariable2)
+        XCTAssertNotEqual(globalVariable2, globalVariable4)
+        XCTAssertNotEqual(globalVariable4, globalVariable2)
+        XCTAssertNotEqual(globalVariable3, globalVariable4)
+        XCTAssertNotEqual(globalVariable4, globalVariable3)
+    }
+
+    func testHashable() {
+        let id1 = "id1"
+        let id2 = "id2"
+        let globalVariable1 = InMemoryGlobalVariable(id: id1, initialValue: false)
+        let globalVariable2 = InMemoryGlobalVariable(id: id1, initialValue: true)
+        let globalVariable3 = InMemoryGlobalVariable(id: id2, initialValue: false)
+        let globalVariable4 = InMemoryGlobalVariable(id: id2, initialValue: true)
+        var collection = Set<InMemoryGlobalVariable<Bool>>()
+        collection.insert(globalVariable1)
+        XCTAssertTrue(collection.contains(globalVariable1))
+        XCTAssertFalse(collection.contains(globalVariable2))
+        XCTAssertFalse(collection.contains(globalVariable3))
+        XCTAssertFalse(collection.contains(globalVariable4))
+        collection.removeAll()
+        collection.insert(globalVariable2)
+        XCTAssertTrue(collection.contains(globalVariable2))
+        XCTAssertFalse(collection.contains(globalVariable1))
+        XCTAssertFalse(collection.contains(globalVariable3))
+        XCTAssertFalse(collection.contains(globalVariable4))
+        collection.removeAll()
+        collection.insert(globalVariable3)
+        XCTAssertTrue(collection.contains(globalVariable3))
+        XCTAssertFalse(collection.contains(globalVariable1))
+        XCTAssertFalse(collection.contains(globalVariable2))
+        XCTAssertFalse(collection.contains(globalVariable4))
+        collection.removeAll()
+        collection.insert(globalVariable4)
+        XCTAssertTrue(collection.contains(globalVariable4))
+        XCTAssertFalse(collection.contains(globalVariable1))
+        XCTAssertFalse(collection.contains(globalVariable2))
+        XCTAssertFalse(collection.contains(globalVariable3))
+    }
+
+    func testCodable() throws {
+        let id1 = "id1"
+        let id2 = "id2"
+        let globalVariable1 = InMemoryGlobalVariable(id: id1, initialValue: false)
+        let globalVariable2 = InMemoryGlobalVariable(id: id1, initialValue: true)
+        let globalVariable3 = InMemoryGlobalVariable(id: id2, initialValue: false)
+        let globalVariable4 = InMemoryGlobalVariable(id: id2, initialValue: true)
+        let encoder = JSONEncoder()
+        let decoder = JSONDecoder()
+        let result1 = try decoder.decode(
+            InMemoryGlobalVariable<Bool>.self,
+            from: encoder.encode(globalVariable1)
+        )
+        XCTAssertEqual(result1, globalVariable1)
+        let result2 = try decoder.decode(
+            InMemoryGlobalVariable<Bool>.self,
+            from: encoder.encode(globalVariable2)
+        )
+        XCTAssertEqual(result2, globalVariable2)
+        let result3 = try decoder.decode(
+            InMemoryGlobalVariable<Bool>.self,
+            from: encoder.encode(globalVariable3)
+        )
+        XCTAssertEqual(result3, globalVariable3)
+        let result4 = try decoder.decode(
+            InMemoryGlobalVariable<Bool>.self,
+            from: encoder.encode(globalVariable4)
+        )
+        XCTAssertEqual(result4, globalVariable4)
     }
 
     func testCanRetreiveValueAcrossTwoHandlers() {
