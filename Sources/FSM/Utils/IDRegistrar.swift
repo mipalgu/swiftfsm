@@ -8,19 +8,24 @@ public final class IDRegistrar {
 
     private init() {}
 
-    public static func id(of state: String) -> Int {
-        if let id = names[state] {
+    public static func id(of name: String) -> Int {
+        if let id = names[name] {
             return id
         }
         let id = latestID
-        latestID += 1
-        ids[id] = state
-        names[state] = id
+        latestID = latestID &+ 1
+        ids[id] = name
+        names[name] = id
         return id
     }
 
-    public static func name(of state: Int) -> String? {
-        ids[state]
+    public static func name(of id: Int) -> String? {
+        ids[id]
+    }
+
+    internal static func removeAll() {
+        ids.removeAll()
+        names.removeAll()
     }
 
 }
