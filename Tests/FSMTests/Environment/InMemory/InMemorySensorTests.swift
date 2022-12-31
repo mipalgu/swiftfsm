@@ -15,10 +15,10 @@ final class InMemorySensorTests: XCTestCase {
     }
 
     func testInit() {
-        let sensor = InMemoryActuator(id: id, initialValue: false)
+        let sensor = InMemorySensor(id: id, initialValue: false)
         XCTAssertEqual(sensor.id, id)
         XCTAssertEqual(sensor.value, false)
-        let sensor2 = InMemoryActuator(id: id, initialValue: true)
+        let sensor2 = InMemorySensor(id: id, initialValue: true)
         XCTAssertEqual(sensor2.id, id)
         XCTAssertEqual(sensor2.value, true)
     }
