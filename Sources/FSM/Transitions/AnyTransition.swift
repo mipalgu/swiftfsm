@@ -22,11 +22,12 @@ public struct AnyTransition<Source, Target>: TransitionProtocol {
     }
 
     public init<Root>(
-        to target: String, canTransition: @escaping (Source) -> Bool = { _ in true }
+        to target: String,
+        canTransition: @escaping (Source) -> Bool = { _ in true }
     ) where Target == (Root) -> StateInformation {
         let info = StateInformation(name: target)
         self._canTransition = canTransition
-        self.target = {_ in info }
+        self.target = { _ in info }
     }
 
     public func canTransition(from source: Source) -> Bool {
