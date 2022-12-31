@@ -5,12 +5,6 @@ struct MockRinglet<FSMsContext: DataStructure, Environment: EnvironmentSnapshot>
     typealias StateType = AnyMockState<FSMsContext, Environment>
     typealias TransitionType = AnyTransition<FSMContext<FSMsContext, Environment>, StateID>
 
-    struct Context: DataStructure, EmptyInitialisable {
-
-        var shouldExecuteOnEntry: Bool = true
-
-    }
-
     func execute(
         id: StateID,
         state: AnyMockState<FSMsContext, Environment>,
@@ -18,16 +12,15 @@ struct MockRinglet<FSMsContext: DataStructure, Environment: EnvironmentSnapshot>
         fsmContext: inout FSMContext<FSMsContext, Environment>,
         context: inout Context
     ) -> StateID {
-        if fsmContext.status == .resuming {
+        if case .resumed = fsmContext.status {
             state.onResume(context: &fsmContext)
         }
-        if context.shouldExecuteOnEntry {
+        if fsmContext.status.transitioned {
             state.onEntry(context: &fsmContext)
         }
         let result: StateID
         if let first = transitions.first(where: { $0.canTransition(from: fsmContext) }) {
             state.onExit(context: &fsmContext)
-            context.shouldExecuteOnEntry = true
             result = first.target
         } else {
             state.internal(context: &fsmContext)

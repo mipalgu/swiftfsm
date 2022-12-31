@@ -9,14 +9,18 @@ public struct StateContext<
 
     public var environment: Snapshot<Environment>
 
-    private var status: FSMStatus
+    var status: FSMStatus
 
     public var isFinished: Bool {
         status == .finished
     }
 
     public var isSuspended: Bool {
-        status == .suspended
+        if case .suspended = status {
+            return true
+        } else {
+            return false
+        }
     }
 
     public init(fsmContext: FSMContext<FSMsContext, Environment>) {
@@ -31,8 +35,21 @@ public struct StateContext<
     public init(
         state: StateContext,
         fsm: FSMsContext,
+        environment: Snapshot<Environment>
+    ) {
+        self.init(
+            state: state,
+            fsm: fsm,
+            environment: environment,
+            status: .executing(transitioned: true)
+        )
+    }
+
+    init(
+        state: StateContext,
+        fsm: FSMsContext,
         environment: Snapshot<Environment>,
-        status: FSMStatus = .executing
+        status: FSMStatus
     ) {
         self.state = state
         self.fsm = fsm
@@ -71,6 +88,7 @@ public struct StateContext<
         state = unsafeBitCast(fsmContext.state, to: StateContext.self)
         fsm = fsmContext.fsm
         environment = fsmContext.environment
+        status = fsmContext.status
     }
 
     public mutating func restart() {

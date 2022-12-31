@@ -17,7 +17,11 @@ public struct FSMContext<
     }
 
     public var isSuspended: Bool {
-        status == .suspended
+        if case .suspended = status {
+            return true
+        } else {
+            return false
+        }
     }
 
     public init<StatesContext: DataStructure>(
@@ -26,15 +30,24 @@ public struct FSMContext<
         self.init(
             state: stateContext.state as Sendable,
             fsm: stateContext.fsm,
-            environment: stateContext.environment
+            environment: stateContext.environment,
+            status: stateContext.status
         )
     }
 
     public init(
         state: Sendable,
         fsm: FSMsContext,
+        environment: Snapshot<Environment>
+    ) {
+        self.init(state: state, fsm: fsm, environment: environment, status: .executing(transitioned: true))
+    }
+
+    init(
+        state: Sendable,
+        fsm: FSMsContext,
         environment: Snapshot<Environment>,
-        status: FSMStatus = .executing
+        status: FSMStatus
     ) {
         self.state = state
         self.fsm = fsm
@@ -75,9 +88,10 @@ public struct FSMContext<
     public mutating func update<StatesContext: DataStructure>(
         from stateContext: StateContext<StatesContext, FSMsContext, Environment>
     ) {
-        self.state = stateContext.state as Sendable
-        self.fsm = stateContext.fsm
-        self.environment = stateContext.environment
+        state = stateContext.state as Sendable
+        fsm = stateContext.fsm
+        environment = stateContext.environment
+        status = stateContext.status
     }
 
 }
