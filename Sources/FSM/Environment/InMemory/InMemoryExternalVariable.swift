@@ -9,7 +9,7 @@ public struct InMemoryExternalVariable<Value: ExternalVariableValue>: ExternalVa
     public init(id: String, initialValue: Value) {
         self.id = id
         self.value = initialValue
-        self.resolvedID = StateRegistrar.id(of: id)
+        self.resolvedID = IDRegistrar.id(of: id)
     }
 
     public mutating func saveSnapshot() {

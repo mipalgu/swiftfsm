@@ -22,7 +22,7 @@ public struct InMemoryGlobalVariable<Value: GlobalVariableValue>: GlobalVariable
     public init(id: String, initialValue: Value) {
         self.id = id
         self.initialValue = initialValue
-        self.resolvedID = StateRegistrar.id(of: id)
+        self.resolvedID = IDRegistrar.id(of: id)
     }
 
 }

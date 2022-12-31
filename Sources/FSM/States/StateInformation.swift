@@ -5,7 +5,7 @@ public struct StateInformation: Hashable, Codable, Sendable {
     public var name: String
 
     public init(name: String) {
-        let id = StateRegistrar.id(of: name)
+        let id = IDRegistrar.id(of: name)
         self.init(id: id, name: name)
     }
 

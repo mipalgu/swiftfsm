@@ -9,7 +9,7 @@ public struct InMemorySensor<Value: SensorValue>: SensorHandler {
     public init(id: String, initialValue: Value) {
         self.id = id
         self.value = initialValue
-        self.resolvedID = StateRegistrar.id(of: id)
+        self.resolvedID = IDRegistrar.id(of: id)
     }
 
     public mutating func takeSnapshot() {

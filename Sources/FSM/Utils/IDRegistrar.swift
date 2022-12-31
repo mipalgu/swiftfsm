@@ -1,8 +1,8 @@
-public final class StateRegistrar {
+public final class IDRegistrar {
 
     private static var latestID: Int = 0
 
-    private static var states: [Int: String] = [:]
+    private static var ids: [Int: String] = [:]
 
     private static var names: [String: Int] = [:]
 
@@ -14,13 +14,13 @@ public final class StateRegistrar {
         }
         let id = latestID
         latestID += 1
-        states[id] = state
+        ids[id] = state
         names[state] = id
         return id
     }
 
     public static func name(of state: Int) -> String? {
-        states[state]
+        ids[state]
     }
 
 }

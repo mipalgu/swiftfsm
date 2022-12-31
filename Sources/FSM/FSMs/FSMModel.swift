@@ -88,7 +88,7 @@ public extension FSMModel {
     }
 
     func id(of state: String) -> StateID {
-        StateRegistrar.id(of: state)
+        IDRegistrar.id(of: state)
     }
 
 }
