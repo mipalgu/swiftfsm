@@ -1,16 +1,12 @@
-public protocol FSMModel<StateType>: ContextUser {
-
-    associatedtype Context: DataStructure = EmptyDataStructure
-
-    associatedtype Environment: EnvironmentVariables = EmptyEnvironment
+public protocol FSMModel<StateType>: ContextUser, EnvironmentUser {
 
     associatedtype Ringlet: RingletProtocol where
         Ringlet.StateType == StateType,
-        Ringlet.TransitionType == AnyTransition<FSMContext<Context, Environment.Snapshot>, StateID>
+        Ringlet.TransitionType == AnyTransition<FSMContext<Context, Environment>, StateID>
 
     associatedtype StateType: TypeErasedState
         where StateType.FSMsContext == Context,
-            StateType.Environment == Environment.Snapshot
+            StateType.Environment == Environment
 
     var initialState: KeyPath<Self, StateInformation> { get }
 
@@ -20,16 +16,24 @@ public protocol FSMModel<StateType>: ContextUser {
 
 public extension FSMModel {
 
+    typealias Actuator<Handler: ActuatorHandler> = ActuatorProperty<Environment, Handler>
+
+    typealias ExternalVariable<Handler: ExternalVariableHandler> = ExternalVariableProperty<Environment, Handler>
+
+    typealias GlobalVariable<Value: GlobalVariableValue> = GlobalVariableProperty<Environment, Value>
+
+    typealias Sensor<Handler: SensorHandler> = SensorProperty<Environment, Handler>
+
     typealias State = StateProperty<StateType, Self>
 
     // swiftlint:disable:next identifier_name
     static func Transition(
         to keyPath: KeyPath<Self, StateInformation>,
         canTransition:
-            @escaping (StateContext<EmptyDataStructure, Context, Environment.Snapshot>) -> Bool
+            @escaping (StateContext<EmptyDataStructure, Context, Environment>) -> Bool
                 = { _ in true }
     ) -> AnyTransition<
-            StateContext<EmptyDataStructure, Context, Environment.Snapshot>,
+            StateContext<EmptyDataStructure, Context, Environment>,
             (Self) -> StateInformation
     > {
         AnyTransition(to: keyPath, canTransition: canTransition)
@@ -39,10 +43,10 @@ public extension FSMModel {
     static func Transition(
         to state: String,
         canTransition:
-            @escaping (StateContext<EmptyDataStructure, Context, Environment.Snapshot>) -> Bool
+            @escaping (StateContext<EmptyDataStructure, Context, Environment>) -> Bool
                 = { _ in true }
     ) -> AnyTransition<
-        StateContext<EmptyDataStructure, Context, Environment.Snapshot>,
+        StateContext<EmptyDataStructure, Context, Environment>,
         (Self) -> StateInformation
     > {
         AnyTransition(to: state, canTransition: canTransition)
@@ -53,10 +57,10 @@ public extension FSMModel {
         to keyPath: KeyPath<Self, StateInformation>,
         context _: StatesContext.Type,
         canTransition:
-            @escaping (StateContext<StatesContext, Context, Environment.Snapshot>) -> Bool
+            @escaping (StateContext<StatesContext, Context, Environment>) -> Bool
                 = { _ in true }
     ) -> AnyTransition<
-        StateContext<StatesContext, Context, Environment.Snapshot>,
+        StateContext<StatesContext, Context, Environment>,
         (Self) -> StateInformation
     > {
         AnyTransition(to: keyPath, canTransition: canTransition)
@@ -67,10 +71,10 @@ public extension FSMModel {
         to state: String,
         context _: StatesContext.Type,
         canTransition:
-            @escaping (StateContext<StatesContext, Context, Environment.Snapshot>) -> Bool
+            @escaping (StateContext<StatesContext, Context, Environment>) -> Bool
                 = { _ in true }
     ) -> AnyTransition<
-        StateContext<StatesContext, Context, Environment.Snapshot>,
+        StateContext<StatesContext, Context, Environment>,
         (Self) -> StateInformation
     > {
         AnyTransition(to: state, canTransition: canTransition)

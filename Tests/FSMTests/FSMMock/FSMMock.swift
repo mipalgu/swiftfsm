@@ -2,32 +2,13 @@ import FSM
 
 struct FSMMock: MockFSM {
 
-    typealias Environment = EnvironmentStruct
+    struct Environment: EnvironmentSnapshot {
 
-    struct EnvironmentStruct: EnvironmentVariables {
+        var exitActuator: Bool!
 
-        struct Snapshot: EnvironmentSnapshot {
+        var exitExternalVariable: Bool!
 
-            var exitActuator: Bool!
-
-            var exitExternalVariable: Bool!
-
-            fileprivate(set) var exitSensor: Bool!
-
-        }
-
-        @Actuator(handler: InMemoryActuator<Bool>(id: "exit", initialValue: false), mapsTo: \.exitActuator)
-        var exitActuator
-
-        @ExternalVariable(
-            handler: InMemoryExternalVariable<Bool>(id: "exit", initialValue: false),
-            mapsTo: \.exitExternalVariable
-        )
-        var exitExternalVariable
-
-        @Sensor(handler: InMemorySensor<Bool>(id: "exit", initialValue: false), mapsTo: \.exitSensor)
-        var exitSensor
-
+        fileprivate(set) var exitSensor: Bool!
     }
 
     struct Context: DataStructure {
@@ -41,6 +22,18 @@ struct FSMMock: MockFSM {
         var stateCount: Int = 0
 
     }
+
+    @Actuator(handler: InMemoryActuator<Bool>(id: "exit", initialValue: false), mapsTo: \.exitActuator)
+    var exitActuator
+
+    @ExternalVariable(
+        handler: InMemoryExternalVariable<Bool>(id: "exit", initialValue: false),
+        mapsTo: \.exitExternalVariable
+    )
+    var exitExternalVariable
+
+    @Sensor(handler: InMemorySensor<Bool>(id: "exit", initialValue: false), mapsTo: \.exitSensor)
+    var exitSensor
 
     @State(
         name: "Ping",

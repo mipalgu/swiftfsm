@@ -4,7 +4,7 @@ extension StateProperty {
 
     init<FSMsContext: DataStructure, Environment: DataStructure>(
         name: String,
-        uses environmentVariables: PartialKeyPath<Root.Environment.Snapshot> ...,
+        uses environmentVariables: PartialKeyPath<Root.Environment> ...,
         @TransitionBuilder transitions:
             () -> [AnyTransition<
                 StateContext<EmptyDataStructure, FSMsContext, Environment>,
@@ -22,7 +22,7 @@ extension StateProperty {
     init<StatesContext: DataStructure, FSMsContext: DataStructure, Environment: DataStructure>(
         name: String,
         context _: StatesContext.Type,
-        uses environmentVariables: PartialKeyPath<Root.Environment.Snapshot> ...,
+        uses environmentVariables: PartialKeyPath<Root.Environment> ...,
         onEntry: @escaping (inout StateContext<StatesContext, FSMsContext, Environment>) -> Void = { _ in },
         internal: @escaping (inout StateContext<StatesContext, FSMsContext, Environment>) -> Void = { _ in },
         onExit: @escaping (inout StateContext<StatesContext, FSMsContext, Environment>) -> Void = { _ in },
@@ -50,7 +50,7 @@ extension StateProperty {
 
     init<FSMsContext: DataStructure, Environment: DataStructure>(
         name: String,
-        uses environmentVariables: PartialKeyPath<Root.Environment.Snapshot> ...,
+        uses environmentVariables: PartialKeyPath<Root.Environment> ...,
         onEntry: @escaping (inout StateContext<EmptyDataStructure, FSMsContext, Environment>) -> Void = { _ in },
         internal: @escaping (inout StateContext<EmptyDataStructure, FSMsContext, Environment>) -> Void = { _ in },
         onExit: @escaping (inout StateContext<EmptyDataStructure, FSMsContext, Environment>) -> Void = { _ in },

@@ -5,7 +5,7 @@ public struct StateProperty<StateType: TypeErasedState, Root: FSMModel> {
 
     public var wrappedValue: StateType
 
-    public let environmentVariables: [PartialKeyPath<Root.Environment.Snapshot>]
+    public let environmentVariables: [PartialKeyPath<Root.Environment>]
 
     public var transitions:
         [AnyTransition<
@@ -16,7 +16,7 @@ public struct StateProperty<StateType: TypeErasedState, Root: FSMModel> {
     public init<ConcreteState: StateProtocol>(
         wrappedValue: ConcreteState,
         name: String,
-        uses environmentVariables: PartialKeyPath<Root.Environment.Snapshot> ...,
+        uses environmentVariables: PartialKeyPath<Root.Environment> ...,
         @TransitionBuilder transitions:
             () -> [AnyTransition<
                     StateContext<ConcreteState.Context, StateType.FSMsContext, StateType.Environment>,
@@ -36,7 +36,7 @@ public struct StateProperty<StateType: TypeErasedState, Root: FSMModel> {
     public init<ConcreteState: StateProtocol>(
         wrappedValue: ConcreteState,
         name: String,
-        uses environmentVariables: [PartialKeyPath<Root.Environment.Snapshot>],
+        uses environmentVariables: [PartialKeyPath<Root.Environment>],
         @TransitionBuilder transitions:
             () -> [AnyTransition<
                     StateContext<ConcreteState.Context, StateType.FSMsContext, StateType.Environment>,
