@@ -2,6 +2,12 @@ import FSM
 
 struct FSMMock: MockFSM {
 
+    struct Context: DataStructure {
+
+        var fsmCount: Int = 0
+
+    }
+
     struct Environment: EnvironmentSnapshot {
 
         var exitActuator: Bool!
@@ -9,12 +15,6 @@ struct FSMMock: MockFSM {
         var exitExternalVariable: Bool!
 
         fileprivate(set) var exitSensor: Bool!
-    }
-
-    struct Context: DataStructure {
-
-        var fsmCount: Int = 0
-
     }
 
     struct PangData: DataStructure {
