@@ -1,5 +1,9 @@
 public protocol FSMModel<StateType>: ContextUser, EnvironmentUser {
 
+    associatedtype Parameters: DataStructure = EmptyDataStructure
+
+    associatedtype Result: DataStructure = EmptyDataStructure
+
     associatedtype Ringlet: RingletProtocol where
         Ringlet.StateType == StateType,
         Ringlet.TransitionType == AnyTransition<FSMContext<Context, Environment>, StateID>
