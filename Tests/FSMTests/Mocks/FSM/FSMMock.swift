@@ -8,6 +8,13 @@ struct FSMMock: MockFSM {
 
     }
 
+    struct Dependencies: DataStructure {
+
+        @Sync(name: "Me")
+        var Me
+
+    }
+
     struct Environment: EnvironmentSnapshot {
 
         var exitActuator: Bool!

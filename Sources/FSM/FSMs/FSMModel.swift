@@ -1,5 +1,7 @@
 public protocol FSMModel<StateType>: ContextUser, EnvironmentUser {
 
+    associatedtype Dependencies: DataStructure = EmptyDataStructure
+
     associatedtype Parameters: DataStructure = EmptyDataStructure
 
     associatedtype Result: DataStructure = EmptyDataStructure
@@ -19,6 +21,12 @@ public protocol FSMModel<StateType>: ContextUser, EnvironmentUser {
 }
 
 public extension FSMModel {
+
+    typealias Async<Result: DataStructure> = ASyncProperty<Result>
+
+    typealias Sync<Result: DataStructure> = SyncProperty<Result>
+
+    typealias SubMachine = SubMachineProperty
 
     typealias Actuator<Handler: ActuatorHandler> = ActuatorProperty<Environment, Handler>
 
