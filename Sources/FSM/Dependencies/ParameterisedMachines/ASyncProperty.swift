@@ -1,11 +1,11 @@
 @propertyWrapper
 public struct ASyncProperty<Result: DataStructure>: DataStructure {
 
-    public let projectedValue: Caller<Result>
-
-    public var wrappedValue: ParameterisedMachine<Result> {
-        projectedValue.parameterisedMachine
+    public var projectedValue: ParameterisedMachine<Result> {
+        wrappedValue.parameterisedMachine
     }
+
+    public var wrappedValue: Caller<Result>
 
     public init(name: String, parameters: [String] = []) where Result == EmptyDataStructure {
         self.init(name: name, parameters: parameters, returnType: EmptyDataStructure.self)
@@ -18,7 +18,7 @@ public struct ASyncProperty<Result: DataStructure>: DataStructure {
             returnType: returnType,
             callMethod: .asynchronous
         )
-        self.projectedValue = Caller(parameterisedMachine: parameterisedMachine)
+        self.wrappedValue = Caller(parameterisedMachine: parameterisedMachine)
     }
 
 }
