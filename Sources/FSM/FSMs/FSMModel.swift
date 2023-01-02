@@ -24,10 +24,6 @@ public extension FSMModel {
 
     typealias Async<Result: DataStructure> = ASyncProperty<Result>
 
-    typealias Sync<Result: DataStructure> = SyncProperty<Result>
-
-    typealias SubMachine = SubMachineProperty
-
     typealias Actuator<Handler: ActuatorHandler> = ActuatorProperty<Environment, Handler>
 
     typealias ExternalVariable<Handler: ExternalVariableHandler> = ExternalVariableProperty<Environment, Handler>
@@ -35,9 +31,15 @@ public extension FSMModel {
     typealias GlobalVariable<Value: GlobalVariableValue>
         = GlobalVariableProperty<Environment, InMemoryGlobalVariable<Value>>
 
+    typealias Partial<Result: DataStructure, Partial: DataStructure> = PartialProperty<Result, Partial>
+
     typealias Sensor<Handler: SensorHandler> = SensorProperty<Environment, Handler>
 
     typealias State = StateProperty<StateType, Self>
+
+    typealias SubMachine = SubMachineProperty
+
+    typealias Sync<Result: DataStructure> = SyncProperty<Result>
 
     // swiftlint:disable:next identifier_name
     static func Transition(

@@ -7,11 +7,20 @@ public protocol SchedulerOperations {
 
     func clock(for fsm: Int) -> any ClockProtocol
 
+    func hasPartialResult(call: Int) -> Bool
+
     func isFinished(fsm: Int) -> Bool
 
     func isFulfilled(call: Int) -> Bool
 
     func isSuspended(fsm: Int) -> Bool
+
+    mutating func partialCall<Result: DataStructure, Partial: DataStructure>(
+        machine: ParameterisedMachine<Result>,
+        with args: KeyValuePairs<String, Sendable>
+    ) -> PartialPromise<Result, Partial>
+
+    func partialResult(of call: Int) -> any DataStructure
 
     mutating func restart(fsm: Int)
 

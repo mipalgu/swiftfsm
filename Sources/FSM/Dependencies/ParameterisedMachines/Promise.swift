@@ -1,5 +1,3 @@
-import Foundation
-
 public struct Promise<Result: DataStructure>: DataStructure, Identifiable {
 
     public let id: Int
