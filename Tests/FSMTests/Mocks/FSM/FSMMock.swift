@@ -2,7 +2,7 @@ import FSM
 
 struct FSMMock: MockFSM {
 
-    struct Context: DataStructure {
+    struct Context: ContextProtocol {
 
         var fsmCount: Int = 0
 
@@ -12,6 +12,8 @@ struct FSMMock: MockFSM {
 
         @Sync(name: "Me")
         var Me
+
+        init() {}
 
     }
 
@@ -24,7 +26,7 @@ struct FSMMock: MockFSM {
         fileprivate(set) var exitSensor: Bool!
     }
 
-    struct PangData: DataStructure {
+    struct PangData: ContextProtocol {
 
         var stateCount: Int = 0
 

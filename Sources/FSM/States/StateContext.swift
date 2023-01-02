@@ -1,6 +1,6 @@
 @dynamicMemberLookup
 public struct StateContext<
-    StateContext: DataStructure, FSMsContext: DataStructure, Environment: EnvironmentSnapshot
+    StateContext: ContextProtocol, FSMsContext: ContextProtocol, Environment: EnvironmentSnapshot
 > {
 
     public var state: StateContext

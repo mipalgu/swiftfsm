@@ -1,6 +1,6 @@
 import FSM
 
-struct MockRinglet<FSMsContext: DataStructure, Environment: EnvironmentSnapshot>: RingletProtocol {
+struct MockRinglet<FSMsContext: ContextProtocol, Environment: EnvironmentSnapshot>: RingletProtocol {
 
     typealias StateType = AnyMockState<FSMsContext, Environment>
     typealias TransitionType = AnyTransition<FSMContext<FSMsContext, Environment>, StateID>

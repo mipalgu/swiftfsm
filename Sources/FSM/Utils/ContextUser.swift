@@ -1,5 +1,5 @@
 public protocol ContextUser {
 
-    associatedtype Context: DataStructure = EmptyDataStructure
+    associatedtype Context: ContextProtocol = EmptyDataStructure
 
 }

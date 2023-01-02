@@ -1,4 +1,4 @@
-public struct EmptyDataStructure: EnvironmentSnapshot {
+public struct EmptyDataStructure: EnvironmentSnapshot, ContextProtocol {
 
     public init() {}
 

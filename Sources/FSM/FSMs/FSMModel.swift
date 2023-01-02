@@ -97,14 +97,6 @@ public extension FSMModel {
         AnyTransition(to: state, canTransition: canTransition)
     }
 
-    var name: String {
-        guard let name = "\(type(of: self))".split(separator: ".").first.map(String.init) else {
-            // swiftlint:disable:next line_length
-            fatalError("Unable to compute name of FSM with type \(type(of: self)). Please specify a name: let name = \"<MyName>\"")
-        }
-        return name
-    }
-
     var dependencies: [FSMDependency] {
         let deps = Self.Dependencies()
         let mirror = Mirror(reflecting: deps)
@@ -121,6 +113,18 @@ public extension FSMModel {
 
     func id(of state: String) -> StateID {
         IDRegistrar.id(of: state)
+    }
+
+}
+
+public extension FSMModel {
+
+    var name: String {
+        guard let name = "\(type(of: self))".split(separator: ".").first.map(String.init) else {
+            // swiftlint:disable:next line_length
+            fatalError("Unable to compute name of FSM with type \(type(of: self)). Please specify a name: let name = \"<MyName>\"")
+        }
+        return name
     }
 
 }

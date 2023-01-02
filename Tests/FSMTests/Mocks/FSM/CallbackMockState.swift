@@ -1,8 +1,8 @@
 import FSM
 
 struct CallbackMockState<
-    StatesContext: DataStructure,
-    FSMsContext: DataStructure,
+    StatesContext: ContextProtocol,
+    FSMsContext: ContextProtocol,
     Environment: EnvironmentSnapshot
 >: MockState {
 

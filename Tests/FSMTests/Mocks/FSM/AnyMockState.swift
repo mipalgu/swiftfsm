@@ -1,7 +1,7 @@
 import FSM
 
 struct AnyMockState<
-    FSMsContext: DataStructure,
+    FSMsContext: ContextProtocol,
     Environment: EnvironmentSnapshot
 >: TypeErasedState {
 

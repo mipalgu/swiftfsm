@@ -2,7 +2,7 @@ import FSM
 
 extension StateProperty {
 
-    init<FSMsContext: DataStructure, Environment: DataStructure>(
+    init<FSMsContext: ContextProtocol, Environment: EnvironmentSnapshot>(
         name: String,
         uses environmentVariables: PartialKeyPath<Root.Environment> ...,
         @TransitionBuilder transitions:
@@ -19,7 +19,7 @@ extension StateProperty {
         )
     }
 
-    init<StatesContext: DataStructure, FSMsContext: DataStructure, Environment: DataStructure>(
+    init<StatesContext: ContextProtocol, FSMsContext: ContextProtocol, Environment: EnvironmentSnapshot>(
         name: String,
         context _: StatesContext.Type,
         uses environmentVariables: PartialKeyPath<Root.Environment> ...,
@@ -48,7 +48,7 @@ extension StateProperty {
         )
     }
 
-    init<FSMsContext: DataStructure, Environment: DataStructure>(
+    init<FSMsContext: ContextProtocol, Environment: EnvironmentSnapshot>(
         name: String,
         uses environmentVariables: PartialKeyPath<Root.Environment> ...,
         onEntry: @Sendable @escaping (inout StateContext<EmptyDataStructure, FSMsContext, Environment>) -> Void = { _ in },

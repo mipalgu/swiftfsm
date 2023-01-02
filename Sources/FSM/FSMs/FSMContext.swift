@@ -1,6 +1,6 @@
 @dynamicMemberLookup
 public struct FSMContext<
-    FSMsContext: DataStructure,
+    FSMsContext: ContextProtocol,
     Environment: EnvironmentSnapshot
 >: FiniteStateMachineOperations {
 
