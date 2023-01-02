@@ -1,3 +1,4 @@
+@propertyWrapper
 public struct TimeslotProperty<Arrangement: ArrangementModel> {
 
     public let fsm: KeyPath<Arrangement, FSMInformation>
@@ -8,6 +9,10 @@ public struct TimeslotProperty<Arrangement: ArrangementModel> {
 
     public var endTime: UInt {
         startTime + duration
+    }
+
+    public var wrappedValue: TimeslotProperty<Arrangement> {
+        self
     }
 
     public init(fsm: KeyPath<Arrangement, FSMInformation>, startTime: UInt, duration: UInt) {

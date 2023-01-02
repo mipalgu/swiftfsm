@@ -1,6 +1,6 @@
 public protocol ArrangementModel {
 
-    var fsms: [FSM] { get }
+    var fsms: [Machine] { get }
 
     var groups: [GroupInformation<Self>] { get }
 
@@ -8,26 +8,26 @@ public protocol ArrangementModel {
 
 public extension ArrangementModel {
 
-    typealias FSM = FSMProperty<Self>
+    typealias Machine = FSMProperty<Self>
 
     typealias Group = GroupProperty<Self>
 
     typealias Timeslot = TimeslotProperty<Self>
 
-    var fsms: [FSM] {
+    var fsms: [Machine] {
         let mirror = Mirror(reflecting: self)
         return mirror.children.compactMap {
-            $0.value as? FSM
+            $0.value as? Machine
         }
     }
 
     var groups: [GroupInformation<Self>] {
         let mirror = Mirror(reflecting: self)
-        var fsms: [FSM] = []
+        var fsms: [Machine] = []
         var timeslots: [Timeslot] = []
         var groups: [Group] = []
         for child in mirror.children {
-            if let fsm = child.value as? FSM {
+            if let fsm = child.value as? Machine {
                 fsms.append(fsm)
             } else if let timeslot = child.value as? Timeslot {
                 timeslots.append(timeslot)
