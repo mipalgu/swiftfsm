@@ -1,9 +1,9 @@
 public struct GroupProperty<Arrangement: ArrangementModel> {
 
-    public let timeslots: [TimeslotProperty<Arrangement>]
+    let wrappedValue: GroupInformation<Arrangement>
 
-    public init(timeslots: [TimeslotProperty<Arrangement>]) {
-        self.timeslots = timeslots
+    public init(wrappedValue: GroupInformation<Arrangement>) {
+        self.wrappedValue = wrappedValue
     }
 
 }

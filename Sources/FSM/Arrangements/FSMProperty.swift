@@ -1,13 +1,13 @@
 @propertyWrapper
-public struct FSMProperty<Arrangement: ArrangementModel, FSM: FSMModel> {
+public struct FSMProperty<Arrangement: ArrangementModel> {
 
     public let dependencies: [FSMDependency]
 
     public let projectedValue: FSMInformation
 
-    public let wrappedValue: FSM
+    public let wrappedValue: any FSMModel
 
-    public init(wrappedValue: FSM, dependencies: [FSMDependency]) {
+    public init<FSM: FSMModel>(wrappedValue: FSM, dependencies: [FSMDependency]) {
         self.dependencies = dependencies
         self.projectedValue = FSMInformation(fsm: wrappedValue)
         self.wrappedValue = wrappedValue
