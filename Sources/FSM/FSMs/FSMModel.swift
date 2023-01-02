@@ -14,6 +14,8 @@ public protocol FSMModel<StateType>: ContextUser, EnvironmentUser {
         where StateType.FSMsContext == Context,
             StateType.Environment == Environment
 
+    var name: String { get }
+
     var initialState: KeyPath<Self, StateInformation> { get }
 
     var suspendState: KeyPath<Self, StateInformation>? { get }
@@ -93,6 +95,14 @@ public extension FSMModel {
         (Self) -> StateInformation
     > {
         AnyTransition(to: state, canTransition: canTransition)
+    }
+
+    var name: String {
+        guard let name = "\(type(of: self))".split(separator: ".").first.map(String.init) else {
+            // swiftlint:disable:next line_length
+            fatalError("Unable to compute name of FSM with type \(type(of: self)). Please specify a name: let name = \"<MyName>\"")
+        }
+        return name
     }
 
     var suspendState: KeyPath<Self, StateInformation>? { nil }
