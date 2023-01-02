@@ -1,5 +1,9 @@
 @propertyWrapper
-public struct SyncProperty<Result: DataStructure>: DataStructure {
+public struct SyncProperty<Result: DataStructure>: DataStructure, DependencyCalculatable {
+
+    public var dependency: FSMDependency {
+        .sync(id: projectedValue.id)
+    }
 
     public var projectedValue: ParameterisedMachine<Result> {
         wrappedValue.parameterisedMachine

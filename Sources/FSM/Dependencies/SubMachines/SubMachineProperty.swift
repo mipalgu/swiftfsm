@@ -1,5 +1,9 @@
 @propertyWrapper
-public struct SubMachineProperty: DataStructure {
+public struct SubMachineProperty: DataStructure, DependencyCalculatable {
+
+    public var dependency: FSMDependency {
+        .submachine(id: projectedValue.id)
+    }
 
     public var projectedValue: SubMachine {
         wrappedValue.submachine

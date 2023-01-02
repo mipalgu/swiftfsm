@@ -8,7 +8,7 @@ struct FSMMock: MockFSM {
 
     }
 
-    struct Dependencies: DataStructure {
+    struct Dependencies: DataStructure, EmptyInitialisable {
 
         @Sync(name: "Me")
         var Me

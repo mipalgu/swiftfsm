@@ -1,6 +1,6 @@
 public protocol FSMModel<StateType>: ContextUser, EnvironmentUser {
 
-    associatedtype Dependencies: DataStructure = EmptyDataStructure
+    associatedtype Dependencies: DataStructure, EmptyInitialisable = EmptyDataStructure
 
     associatedtype Parameters: DataStructure = EmptyDataStructure
 
@@ -103,6 +103,14 @@ public extension FSMModel {
             fatalError("Unable to compute name of FSM with type \(type(of: self)). Please specify a name: let name = \"<MyName>\"")
         }
         return name
+    }
+
+    var dependencies: [FSMDependency] {
+        let deps = Self.Dependencies()
+        let mirror = Mirror(reflecting: deps)
+        return mirror.children.compactMap {
+            ($0.value as? DependencyCalculatable)?.dependency
+        }
     }
 
     var suspendState: KeyPath<Self, StateInformation>? { nil }

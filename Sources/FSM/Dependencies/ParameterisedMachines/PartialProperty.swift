@@ -1,5 +1,12 @@
 @propertyWrapper
-public struct PartialProperty<Result: DataStructure, Partial: DataStructure>: DataStructure {
+public struct PartialProperty<
+    Result: DataStructure,
+    Partial: DataStructure
+>: DataStructure, DependencyCalculatable {
+
+    public var dependency: FSMDependency {
+        .partial(id: projectedValue.id)
+    }
 
     public var projectedValue: ParameterisedMachine<Result> {
         wrappedValue.parameterisedMachine
