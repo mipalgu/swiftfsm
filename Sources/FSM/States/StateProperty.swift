@@ -79,7 +79,7 @@ public extension StateProperty {
             fatalError("Cannot convert `root` in erasedTransition call to `Root`.")
         }
         let newTransitions = transitions.map {
-            AnyTransition(to: $0.target(root), canTransition: $0.canTransition)
+            AnyTransition(to: $0.target(root).id, canTransition: $0._canTransition)
         }
         return newTransitions as Sendable
     }

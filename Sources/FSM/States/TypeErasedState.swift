@@ -5,4 +5,6 @@ public protocol TypeErasedState {
 
     var base: Any { get }
 
+    static var empty: (Sendable, Self) { get }
+
 }

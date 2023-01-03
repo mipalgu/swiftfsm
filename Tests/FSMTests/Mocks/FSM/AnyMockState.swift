@@ -18,6 +18,10 @@ struct AnyMockState<
 
     var erased: Self { self }
 
+    static var empty: (Sendable, AnyMockState<FSMsContext, Environment>) {
+        (EmptyDataStructure(), AnyMockState(EmptyMockState()))
+    }
+
     init<Base: MockState>(_ base: Base)
         where Base.FSMsContext == FSMsContext,
             Base.Environment == Environment {

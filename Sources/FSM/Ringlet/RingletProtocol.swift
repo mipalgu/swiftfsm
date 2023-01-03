@@ -1,4 +1,4 @@
-public protocol RingletProtocol: ContextUser {
+public protocol RingletProtocol: ContextUser, EmptyInitialisable {
 
     associatedtype StateType: TypeErasedState
 

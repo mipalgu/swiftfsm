@@ -1,6 +1,6 @@
 public struct AnyTransition<Source, Target: Sendable>: TransitionProtocol {
 
-    private let _canTransition: @Sendable (Source) -> Bool
+    let _canTransition: @Sendable (Source) -> Bool
 
     public let target: Target
 

@@ -23,4 +23,8 @@ public struct Snapshot<Data: EnvironmentSnapshot> {
         data[keyPath: keyPath] = newValue
     }
 
+    public mutating func update(data: Data) {
+        self.data = data
+    }
+
 }

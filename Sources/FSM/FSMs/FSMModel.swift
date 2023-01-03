@@ -1,18 +1,6 @@
-public protocol FSMModel<StateType>: ContextUser, EnvironmentUser {
+public protocol FSMModel: FSMProtocol {
 
     associatedtype Dependencies: DataStructure, EmptyInitialisable = EmptyDataStructure
-
-    associatedtype Parameters: DataStructure = EmptyDataStructure
-
-    associatedtype Result: DataStructure = EmptyDataStructure
-
-    associatedtype Ringlet: RingletProtocol where
-        Ringlet.StateType == StateType,
-        Ringlet.TransitionType == AnyTransition<FSMContext<Context, Environment>, StateID>
-
-    associatedtype StateType: TypeErasedState
-        where StateType.FSMsContext == Context,
-            StateType.Environment == Environment
 
     var name: String { get }
 
@@ -120,7 +108,7 @@ public extension FSMModel {
 public extension FSMModel {
 
     var environmentVariables: Set<PartialKeyPath<Self.Environment>> {
-        Set(self.states.values.flatMap {
+        Set(anyStates.values.flatMap {
             guard
                 let environmentVariables = $0.erasedEnvironmentVariables as? Set<PartialKeyPath<Environment>>
             else {
@@ -143,6 +131,10 @@ public extension FSMModel {
         )
     }
 
+    var initialRinglet: Ringlet {
+        Ringlet()
+    }
+
     var name: String {
         guard let name = "\(type(of: self))".split(separator: ".").first.map(String.init) else {
             // swiftlint:disable:next line_length
@@ -151,7 +143,7 @@ public extension FSMModel {
         return name
     }
 
-    var states: [Int: AnyStateProperty] {
+    var anyStates: [Int: AnyStateProperty] {
         let mirror = Mirror(reflecting: self)
         return Dictionary(uniqueKeysWithValues: mirror.children.compactMap {
             guard let state = $0.value as? AnyStateProperty else {
@@ -159,6 +151,15 @@ public extension FSMModel {
             }
             return (state.information.id, state)
         })
+    }
+
+    var states: [Int: StateType] {
+        anyStates.mapValues {
+            guard let state = $0 as? StateType else {
+                fatalError("Unable to cast state to it's corresponding StateType.")
+            }
+            return state
+        }
     }
 
     var stateContexts: [Int: Sendable] {
@@ -169,6 +170,20 @@ public extension FSMModel {
             }
             return (state.information.id, state.context)
         })
+    }
+
+    var transitions: [Int: [AnyTransition<FSMContext<Context, Environment>, StateID>]] {
+        anyStates.mapValues {
+            guard
+                let transitions = $0.erasedTransitions(for: self)
+                    as? [AnyTransition<FSMContext<Context, Environment>, StateID>]
+            else {
+                fatalError(
+                    "Unable to cast transition to [AnyTransition<FSMContext<Context, Environment>, StateID>]"
+                )
+            }
+            return transitions
+        }
     }
 
 }
