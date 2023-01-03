@@ -123,11 +123,10 @@ public extension FSMModel {
         guard let stateContext = stateContexts[initialStateInfo.id] else {
             fatalError("Unable to fetch initial state.")
         }
-        let whitelist = environmentVariables
         return FSMContext(
             state: stateContext,
             fsm: Context(),
-            environment: Snapshot(data: Environment(), whitelist: whitelist)
+            environment: Environment()
         )
     }
 

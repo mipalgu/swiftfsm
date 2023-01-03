@@ -7,7 +7,7 @@ public struct StateContext<
 
     public var fsm: FSMsContext
 
-    public var environment: Snapshot<Environment>
+    public var environment: Environment
 
     var status: FSMStatus
 
@@ -35,7 +35,7 @@ public struct StateContext<
     public init(
         state: StateContext,
         fsm: FSMsContext,
-        environment: Snapshot<Environment>
+        environment: Environment
     ) {
         self.init(
             state: state,
@@ -48,7 +48,7 @@ public struct StateContext<
     init(
         state: StateContext,
         fsm: FSMsContext,
-        environment: Snapshot<Environment>,
+        environment: Environment,
         status: FSMStatus
     ) {
         self.state = state
@@ -76,12 +76,12 @@ public struct StateContext<
     }
 
     public subscript<T>(dynamicMember keyPath: KeyPath<Environment, T>) -> T {
-        environment.get(keyPath)
+        environment[keyPath: keyPath]
     }
 
     public subscript<T>(dynamicMember keyPath: WritableKeyPath<Environment, T>) -> T {
-        get { environment.get(keyPath) }
-        set { environment.set(keyPath, newValue) }
+        get { environment[keyPath: keyPath] }
+        set { environment[keyPath: keyPath] = newValue }
     }
 
     public mutating func update(from fsmContext: FSMContext<FSMsContext, Environment>) {

@@ -2,13 +2,13 @@
 public struct FSMContext<
     FSMsContext: ContextProtocol,
     Environment: EnvironmentSnapshot
->: FiniteStateMachineOperations {
+>: Sendable, FiniteStateMachineOperations {
 
     var state: Sendable
 
     public var fsm: FSMsContext
 
-    public var environment: Snapshot<Environment>
+    public var environment: Environment
 
     public var status: FSMStatus
 
@@ -38,7 +38,7 @@ public struct FSMContext<
     public init(
         state: Sendable,
         fsm: FSMsContext,
-        environment: Snapshot<Environment>
+        environment: Environment
     ) {
         self.init(state: state, fsm: fsm, environment: environment, status: .executing(transitioned: true))
     }
@@ -46,7 +46,7 @@ public struct FSMContext<
     init(
         state: Sendable,
         fsm: FSMsContext,
-        environment: Snapshot<Environment>,
+        environment: Environment,
         status: FSMStatus
     ) {
         self.state = state
@@ -65,12 +65,12 @@ public struct FSMContext<
     }
 
     public subscript<T>(dynamicMember keyPath: KeyPath<Environment, T>) -> T {
-        environment.get(keyPath)
+        environment[keyPath: keyPath]
     }
 
     public subscript<T>(dynamicMember keyPath: WritableKeyPath<Environment, T>) -> T {
-        get { environment.get(keyPath) }
-        set { environment.set(keyPath, newValue) }
+        get { environment[keyPath: keyPath] }
+        set { environment[keyPath: keyPath] = newValue }
     }
 
     public mutating func restart() {

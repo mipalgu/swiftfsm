@@ -114,10 +114,6 @@ public struct FiniteStateMachine<
             self.states = states
         }
 
-        mutating func update(fromEnvironment environment: Environment) {
-            fsmContext.environment.update(data: environment)
-        }
-
     }
 
     public private(set) var data: Data
@@ -193,12 +189,12 @@ public struct FiniteStateMachine<
         let state = data.states[stateID ?? data.currentState]!
         for keyPath in state.environmentVariables {
             if var handler = actuators[keyPath] {
-                handler.update(from: data.fsmContext.environment.data)
+                handler.update(from: data.fsmContext.environment)
                 handler.saveSnapshot()
                 actuators[keyPath] = handler
             }
             if var handler = externalVariables[keyPath] {
-                handler.update(from: data.fsmContext.environment.data)
+                handler.update(from: data.fsmContext.environment)
                 handler.saveSnapshot()
                 externalVariables[keyPath] = handler
             }
@@ -224,7 +220,7 @@ public struct FiniteStateMachine<
                 externalVariables[keyPath] = handler
             }
         }
-        data.fsmContext.environment = Snapshot(data: environment, whitelist: state.environmentVariables)
+        data.fsmContext.environment = environment
     }
 
 }
