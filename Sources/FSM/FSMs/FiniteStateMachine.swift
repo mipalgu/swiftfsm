@@ -18,6 +18,8 @@ public struct FiniteStateMachine<
 
         let context: Sendable
 
+        let environmentVariables: Set<PartialKeyPath<Environment>>
+
         let stateType: StateType
 
         let transitions: [AnyTransition<FSMContext<Context, Environment>, StateID>]
@@ -60,6 +62,12 @@ public struct FiniteStateMachine<
                 guard let context = contexts[id] else {
                     fatalError("Unable to fetch context for state \(name).")
                 }
+                guard
+                    let environmentVariables = $0.erasedEnvironmentVariables
+                        as? [PartialKeyPath<Environment>]
+                else {
+                    fatalError("Unable to cast environment variables for state \(name).")
+                }
                 guard let stateType = stateTypes[id] else {
                     fatalError("Unable to fetch state type for state \(name).")
                 }
@@ -70,6 +78,7 @@ public struct FiniteStateMachine<
                     id: id,
                     name: name,
                     context: context,
+                    environmentVariables: Set(environmentVariables),
                     stateType: stateType,
                     transitions: transitions
                 )
@@ -84,6 +93,7 @@ public struct FiniteStateMachine<
                     id: id,
                     name: name,
                     context: context,
+                    environmentVariables: [],
                     stateType: stateType,
                     transitions: transitions.map { AnyTransition(to: $0) }
                 )
@@ -114,6 +124,12 @@ public struct FiniteStateMachine<
 
     public private(set) var ringlet: Ringlet
 
+    public var actuators: [PartialKeyPath<Environment>: AnyActuatorHandler<Environment>]
+
+    public var externalVariables: [PartialKeyPath<Environment>: AnyExternalVariableHandler<Environment>]
+
+    public var sensors: [PartialKeyPath<Environment>: AnySensorHandler<Environment>]
+
     public init<Model: FSMModel>(
         model: Model
     ) where Model.StateType == StateType,
@@ -122,8 +138,21 @@ public struct FiniteStateMachine<
             Model.Result == Result,
             Model.Context == Context,
             Model.Environment == Environment {
-        self.data = Data(model: model)
-        self.ringlet = model.initialRinglet
+        self.init(data: Data(model: model), ringlet: model.initialRinglet)
+    }
+
+    private init(
+        data: Data,
+        ringlet: Ringlet,
+        actuators: [PartialKeyPath<Environment>: AnyActuatorHandler<Environment>],
+        externalVariables: [PartialKeyPath<Environment>: AnyExternalVariableHandler<Environment>],
+        sensors: [PartialKeyPath<Environment>: AnySensorHandler<Environment>]
+    ) {
+        self.data = data
+        self.ringlet = ringlet
+        self.actuators = actuators
+        self.externalVariables = externalVariables
+        self.sensors = sensors
     }
 
     mutating func next<Scheduler: SchedulerProtocol>(scheduler: Scheduler) {
@@ -152,6 +181,44 @@ public struct FiniteStateMachine<
         } else {
             data.fsmContext.status = .executing(transitioned: data.currentState != data.previousState)
         }
+    }
+
+    mutating func saveSnapshot(forState stateID: StateID? = nil) {
+        let state = data.states[stateID ?? data.currentState]!
+        for keyPath in state.environmentVariables {
+            if var handler = actuators[keyPath] {
+                handler.update(from: data.fsmContext.environment.data)
+                handler.saveSnapshot()
+                actuators[keyPath] = handler
+            }
+            if var handler = externalVariables[keyPath] {
+                handler.update(from: data.fsmContext.environment.data)
+                handler.saveSnapshot()
+                externalVariables[keyPath] = handler
+            }
+        }
+    }
+
+    mutating func takeSnapshot(forState stateID: StateID? = nil) {
+        let state = data.states[stateID ?? data.currentState]!
+        var environment = Environment()
+        for keyPath in state.environmentVariables {
+            if var handler = sensors[keyPath] {
+                handler.takeSnapshot()
+                handler.update(environment: &environment)
+                sensors[keyPath] = handler
+            }
+            if var handler = actuators[keyPath] {
+                handler.update(environment: &environment)
+                actuators[keyPath] = handler
+            }
+            if var handler = externalVariables[keyPath] {
+                handler.takeSnapshot()
+                handler.update(environment: &environment)
+                externalVariables[keyPath] = handler
+            }
+        }
+        data.fsmContext.environment = Snapshot(data: environment, whitelist: state.environmentVariables)
     }
 
 }

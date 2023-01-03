@@ -1,6 +1,6 @@
 public struct Snapshot<Data: EnvironmentSnapshot> {
 
-    private var data: Data
+    public private(set) var data: Data
 
     private let whitelist: Set<PartialKeyPath<Data>>
 
