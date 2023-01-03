@@ -1,5 +1,5 @@
 @propertyWrapper
-public struct StateProperty<StateType: TypeErasedState, Root: FSMModel> {
+public struct StateProperty<StateType: TypeErasedState, Root: FSMModel>: AnyStateProperty {
 
     public let projectedValue: StateInformation
 
@@ -56,6 +56,32 @@ public struct StateProperty<StateType: TypeErasedState, Root: FSMModel> {
                 transition.canTransition(from: StateContext(fsmContext: $0))
             }
         }
+    }
+
+}
+
+public extension StateProperty {
+
+    var erasedEnvironmentVariables: Any {
+        environmentVariables as Any
+    }
+
+    var erasedState: Sendable {
+        wrappedValue as Sendable
+    }
+
+    var information: StateInformation {
+        projectedValue
+    }
+
+    func erasedTransitions(for root: Any) -> Sendable {
+        guard let root = root as? Root else {
+            fatalError("Cannot convert `root` in erasedTransition call to `Root`.")
+        }
+        let newTransitions = transitions.map {
+            AnyTransition(to: $0.target(root), canTransition: $0.canTransition)
+        }
+        return newTransitions as Sendable
     }
 
 }

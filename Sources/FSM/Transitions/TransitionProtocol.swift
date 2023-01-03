@@ -22,7 +22,7 @@
 /// particular type of contextwith this transition. The context type represents
 /// a data structure containing all associated data needed to evaluate the
 /// transition.
-public protocol TransitionProtocol {
+public protocol TransitionProtocol: Sendable {
 
     /// The source of the transition, i.e. the state that the FSM is currently
     /// in.

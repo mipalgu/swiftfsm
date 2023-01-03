@@ -1,4 +1,4 @@
-public struct AnyTransition<Source, Target>: TransitionProtocol {
+public struct AnyTransition<Source, Target: Sendable>: TransitionProtocol {
 
     private let _canTransition: @Sendable (Source) -> Bool
 

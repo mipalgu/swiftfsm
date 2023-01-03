@@ -119,12 +119,56 @@ public extension FSMModel {
 
 public extension FSMModel {
 
+    var environmentVariables: Set<PartialKeyPath<Self.Environment>> {
+        Set(self.states.values.flatMap {
+            guard
+                let environmentVariables = $0.erasedEnvironmentVariables as? Set<PartialKeyPath<Environment>>
+            else {
+                fatalError("Unable to cast erasedEnvironmentVariables to Set<PartialKeyPath<Environment>>")
+            }
+            return Array(environmentVariables)
+        })
+    }
+
+    var initialContext: FSMContext<Context, Environment> {
+        let initialStateInfo = self[keyPath: initialState]
+        guard let stateContext = stateContexts[initialStateInfo.id] else {
+            fatalError("Unable to fetch initial state.")
+        }
+        let whitelist = environmentVariables
+        return FSMContext(
+            state: stateContext,
+            fsm: Context(),
+            environment: Snapshot(data: Environment(), whitelist: whitelist)
+        )
+    }
+
     var name: String {
         guard let name = "\(type(of: self))".split(separator: ".").first.map(String.init) else {
             // swiftlint:disable:next line_length
             fatalError("Unable to compute name of FSM with type \(type(of: self)). Please specify a name: let name = \"<MyName>\"")
         }
         return name
+    }
+
+    var states: [Int: AnyStateProperty] {
+        let mirror = Mirror(reflecting: self)
+        return Dictionary(uniqueKeysWithValues: mirror.children.compactMap {
+            guard let state = $0.value as? AnyStateProperty else {
+                return nil
+            }
+            return (state.information.id, state)
+        })
+    }
+
+    var stateContexts: [Int: Sendable] {
+        let mirror = Mirror(reflecting: self)
+        return Dictionary(uniqueKeysWithValues: mirror.children.compactMap {
+            guard let state = $0.value as? AnyStateProperty else {
+                return nil
+            }
+            return (state.information.id, state.context)
+        })
     }
 
 }

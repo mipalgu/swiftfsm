@@ -2,7 +2,7 @@
 public struct FSMContext<
     FSMsContext: ContextProtocol,
     Environment: EnvironmentSnapshot
->: FiniteStateMachineOperations {
+>: Sendable, FiniteStateMachineOperations {
 
     var state: Sendable
 

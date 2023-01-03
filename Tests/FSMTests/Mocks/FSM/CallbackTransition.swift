@@ -1,12 +1,12 @@
 import FSM
 
-struct CallbackTransition<Source, Target>: TransitionProtocol {
+struct CallbackTransition<Source, Target: Sendable>: TransitionProtocol {
 
-    private let _canTransition: (Source) -> Bool
+    private let _canTransition: @Sendable (Source) -> Bool
 
     let target: Target
 
-    init(target: Target, canTransition: @escaping (Source) -> Bool) {
+    init(target: Target, canTransition: @Sendable @escaping (Source) -> Bool) {
         self._canTransition = canTransition
         self.target = target
     }
