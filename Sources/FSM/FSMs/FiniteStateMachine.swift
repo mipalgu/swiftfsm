@@ -167,7 +167,7 @@ public struct FiniteStateMachine<
         self.sensors = sensors
     }
 
-    mutating func next<Scheduler: SchedulerProtocol>(scheduler: Scheduler) {
+    public mutating func next<Scheduler: SchedulerProtocol>(scheduler: Scheduler) {
         let state = data.states[data.currentState]!
         data.fsmContext.state = state.context
         let nextState = ringlet.execute(
@@ -190,7 +190,7 @@ public struct FiniteStateMachine<
         }
     }
 
-    mutating func saveSnapshot(forState stateID: StateID? = nil) {
+    public mutating func saveSnapshot(forState stateID: StateID? = nil) {
         let state = data.states[stateID ?? data.currentState]!
         for keyPath in state.environmentVariables {
             if var handler = actuators[keyPath] {
@@ -205,7 +205,7 @@ public struct FiniteStateMachine<
         }
     }
 
-    mutating func takeSnapshot(forState stateID: StateID? = nil) {
+    public mutating func takeSnapshot(forState stateID: StateID? = nil) {
         let state = data.states[stateID ?? data.currentState]!
         var environment = Environment()
         for keyPath in state.environmentVariables {
@@ -219,7 +219,34 @@ public struct FiniteStateMachine<
                 externalVariables[keyPath] = handler
             } else if let handler = actuators[keyPath] {
                 handler.update(environment: &environment)
+            }
+        }
+        data.fsmContext.environment = environment
+    }
+
+    public mutating func updateHandlersFromEnvironment(forState stateID: StateID? = nil) {
+        let state = data.states[stateID ?? data.currentState]!
+        for keyPath in state.environmentVariables {
+            if var handler = actuators[keyPath] {
+                handler.update(from: data.fsmContext.environment)
                 actuators[keyPath] = handler
+            } else if var handler = externalVariables[keyPath] {
+                handler.update(from: data.fsmContext.environment)
+                externalVariables[keyPath] = handler
+            }
+        }
+    }
+
+    public mutating func updateEnvironmentFromHandlers(forState stateID: StateID? = nil) {
+        let state = data.states[stateID ?? data.currentState]!
+        var environment = Environment()
+        for keyPath in state.environmentVariables {
+            if let handler = sensors[keyPath] {
+                handler.update(environment: &environment)
+            } else if let handler = externalVariables[keyPath] {
+                handler.update(environment: &environment)
+            } else if let handler = actuators[keyPath] {
+                handler.update(environment: &environment)
             }
         }
         data.fsmContext.environment = environment
