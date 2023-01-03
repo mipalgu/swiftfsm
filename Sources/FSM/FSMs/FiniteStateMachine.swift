@@ -192,8 +192,7 @@ public struct FiniteStateMachine<
                 handler.update(from: data.fsmContext.environment)
                 handler.saveSnapshot()
                 actuators[keyPath] = handler
-            }
-            if var handler = externalVariables[keyPath] {
+            } else if var handler = externalVariables[keyPath] {
                 handler.update(from: data.fsmContext.environment)
                 handler.saveSnapshot()
                 externalVariables[keyPath] = handler
@@ -209,15 +208,13 @@ public struct FiniteStateMachine<
                 handler.takeSnapshot()
                 handler.update(environment: &environment)
                 sensors[keyPath] = handler
-            }
-            if let handler = actuators[keyPath] {
-                handler.update(environment: &environment)
-                actuators[keyPath] = handler
-            }
-            if var handler = externalVariables[keyPath] {
+            } else if var handler = externalVariables[keyPath] {
                 handler.takeSnapshot()
                 handler.update(environment: &environment)
                 externalVariables[keyPath] = handler
+            } else if let handler = actuators[keyPath] {
+                handler.update(environment: &environment)
+                actuators[keyPath] = handler
             }
         }
         data.fsmContext.environment = environment
