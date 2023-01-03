@@ -1,15 +1,20 @@
 import FSM
 
-struct MockRinglet<FSMsContext: ContextProtocol, Environment: EnvironmentSnapshot>: RingletProtocol {
+struct MockRinglet<
+    FSMsContext: ContextProtocol,
+    Environment: EnvironmentSnapshot,
+    Parameters: DataStructure,
+    Result: DataStructure
+>: RingletProtocol {
 
-    typealias StateType = AnyMockState<FSMsContext, Environment>
-    typealias TransitionType = AnyTransition<FSMContext<FSMsContext, Environment>, StateID>
+    typealias StateType = AnyMockState<FSMsContext, Environment, Parameters, Result>
+    typealias TransitionType = AnyTransition<FSMContext<FSMsContext, Environment, Parameters, Result>, StateID>
 
     func execute(
         id: StateID,
-        state: AnyMockState<FSMsContext, Environment>,
-        transitions: [AnyTransition<FSMContext<FSMsContext, Environment>, StateID>],
-        fsmContext: inout FSMContext<FSMsContext, Environment>,
+        state: AnyMockState<FSMsContext, Environment, Parameters, Result>,
+        transitions: [AnyTransition<FSMContext<FSMsContext, Environment, Parameters, Result>, StateID>],
+        fsmContext: inout FSMContext<FSMsContext, Environment, Parameters, Result>,
         context: inout Context
     ) -> StateID {
         if case .resumed = fsmContext.status {

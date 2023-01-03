@@ -8,7 +8,7 @@ public struct FiniteStateMachine<
 >: FiniteStateMachineOperations where StateType.FSMsContext == Context,
     StateType.Environment == Environment,
     Ringlet.StateType == StateType,
-    Ringlet.TransitionType == AnyTransition<FSMContext<Context, Environment>, StateID> {
+    Ringlet.TransitionType == AnyTransition<FSMContext<Context, Environment, Parameters, Result>, StateID> {
 
     struct State {
 
@@ -22,7 +22,7 @@ public struct FiniteStateMachine<
 
         let stateType: StateType
 
-        let transitions: [AnyTransition<FSMContext<Context, Environment>, StateID>]
+        let transitions: [AnyTransition<FSMContext<Context, Environment, Parameters, Result>, StateID>]
 
     }
 
@@ -30,7 +30,7 @@ public struct FiniteStateMachine<
 
         var states: [Int: State]
 
-        var fsmContext: FSMContext<Context, Environment>
+        var fsmContext: FSMContext<Context, Environment, Parameters, Result>
 
         var ringletContext: Ringlet.Context
 
@@ -45,7 +45,8 @@ public struct FiniteStateMachine<
         var suspendedState: StateID?
 
         fileprivate init<Model: FSMModel>(
-            model: Model
+            model: Model,
+            parameters: Parameters
         ) where Model.StateType == StateType,
             Model.Ringlet == Ringlet,
             Model.Parameters == Parameters,
@@ -99,7 +100,7 @@ public struct FiniteStateMachine<
                 )
                 return id
             }
-            self.fsmContext = model.initialContext
+            self.fsmContext = model.initialContext(parameters: parameters)
             self.ringletContext = Ringlet.Context()
             let modelInitialState = model[keyPath: model.initialState].id
             let actualInitialState = newState(named: "__Initial", transitions: [modelInitialState])
@@ -137,7 +138,8 @@ public struct FiniteStateMachine<
     }
 
     public init<Model: FSMModel>(
-        model: Model
+        model: Model,
+        parameters: Parameters
     ) where Model.StateType == StateType,
             Model.Ringlet == Ringlet,
             Model.Parameters == Parameters,
@@ -145,7 +147,7 @@ public struct FiniteStateMachine<
             Model.Context == Context,
             Model.Environment == Environment {
         self.init(
-            data: Data(model: model),
+            data: Data(model: model, parameters: parameters),
             ringlet: model.initialRinglet,
             actuators: model.actuators,
             externalVariables: model.externalVariables,

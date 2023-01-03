@@ -1,7 +1,9 @@
 @dynamicMemberLookup
 public struct FSMContext<
     FSMsContext: ContextProtocol,
-    Environment: EnvironmentSnapshot
+    Environment: EnvironmentSnapshot,
+    Parameters: DataStructure,
+    Result: DataStructure
 >: Sendable, FiniteStateMachineOperations {
 
     var state: Sendable
@@ -9,6 +11,10 @@ public struct FSMContext<
     public var fsm: FSMsContext
 
     public var environment: Environment
+
+    public var parameters: Parameters
+
+    public var result: Result?
 
     public var status: FSMStatus
 
@@ -25,12 +31,14 @@ public struct FSMContext<
     }
 
     public init<StatesContext: DataStructure>(
-        stateContext: StateContext<StatesContext, FSMsContext, Environment>
+        stateContext: StateContext<StatesContext, FSMsContext, Environment, Parameters, Result>
     ) {
         self.init(
             state: stateContext.state as Sendable,
             fsm: stateContext.fsm,
             environment: stateContext.environment,
+            parameters: stateContext.parameters,
+            result: stateContext.result,
             status: stateContext.status
         )
     }
@@ -38,20 +46,33 @@ public struct FSMContext<
     public init(
         state: Sendable,
         fsm: FSMsContext,
-        environment: Environment
+        environment: Environment,
+        parameters: Parameters,
+        result: Result?
     ) {
-        self.init(state: state, fsm: fsm, environment: environment, status: .executing(transitioned: true))
+        self.init(
+            state: state,
+            fsm: fsm,
+            environment: environment,
+            parameters: parameters,
+            result: result,
+            status: .executing(transitioned: true)
+        )
     }
 
     init(
         state: Sendable,
         fsm: FSMsContext,
         environment: Environment,
+        parameters: Parameters,
+        result: Result?,
         status: FSMStatus
     ) {
         self.state = state
         self.fsm = fsm
         self.environment = environment
+        self.parameters = parameters
+        self.result = result
         self.status = status
     }
 
@@ -73,6 +94,15 @@ public struct FSMContext<
         set { environment[keyPath: keyPath] = newValue }
     }
 
+    public subscript<T>(dynamicMember keyPath: KeyPath<Parameters, T>) -> T {
+        parameters[keyPath: keyPath]
+    }
+
+    public subscript<T>(dynamicMember keyPath: WritableKeyPath<Parameters, T>) -> T {
+        get { parameters[keyPath: keyPath] }
+        set { parameters[keyPath: keyPath] = newValue }
+    }
+
     public mutating func restart() {
         status = .restarting
     }
@@ -86,11 +116,13 @@ public struct FSMContext<
     }
 
     public mutating func update<StatesContext: DataStructure>(
-        from stateContext: StateContext<StatesContext, FSMsContext, Environment>
+        from stateContext: StateContext<StatesContext, FSMsContext, Environment, Parameters, Result>
     ) {
         state = stateContext.state as Sendable
         fsm = stateContext.fsm
         environment = stateContext.environment
+        parameters = stateContext.parameters
+        result = stateContext.result
         status = stateContext.status
     }
 

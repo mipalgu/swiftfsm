@@ -2,15 +2,20 @@ import FSM
 
 extension StateProperty {
 
-    init<FSMsContext: ContextProtocol, Environment: EnvironmentSnapshot>(
+    init<
+        FSMsContext: ContextProtocol,
+        Environment: EnvironmentSnapshot,
+        Parameters: DataStructure,
+        Result: DataStructure
+    >(
         name: String,
         uses environmentVariables: PartialKeyPath<Root.Environment> ...,
         @TransitionBuilder transitions:
             () -> [AnyTransition<
-                StateContext<EmptyDataStructure, FSMsContext, Environment>,
+                StateContext<EmptyDataStructure, FSMsContext, Environment, Parameters, Result>,
                 (Root) -> StateInformation
             >] = { [] }
-    ) where StateType == AnyMockState<FSMsContext, Environment> {
+    ) where StateType == AnyMockState<FSMsContext, Environment, Parameters, Result> {
         self.init(
             wrappedValue: EmptyMockState(),
             name: name,
@@ -19,21 +24,27 @@ extension StateProperty {
         )
     }
 
-    init<StatesContext: ContextProtocol, FSMsContext: ContextProtocol, Environment: EnvironmentSnapshot>(
+    init<
+        StatesContext: ContextProtocol,
+        FSMsContext: ContextProtocol,
+        Environment: EnvironmentSnapshot,
+        Parameters: DataStructure,
+        Result: DataStructure
+    >(
         name: String,
         context _: StatesContext.Type,
         uses environmentVariables: PartialKeyPath<Root.Environment> ...,
-        onEntry: @Sendable @escaping (inout StateContext<StatesContext, FSMsContext, Environment>) -> Void = { _ in },
-        internal: @Sendable @escaping (inout StateContext<StatesContext, FSMsContext, Environment>) -> Void = { _ in },
-        onExit: @Sendable @escaping (inout StateContext<StatesContext, FSMsContext, Environment>) -> Void = { _ in },
-        onSuspend: @Sendable @escaping (inout StateContext<StatesContext, FSMsContext, Environment>) -> Void = { _ in },
-        onResume: @Sendable @escaping (inout StateContext<StatesContext, FSMsContext, Environment>) -> Void = { _ in },
+        onEntry: @Sendable @escaping (inout StateContext<StatesContext, FSMsContext, Environment, Parameters, Result>) -> Void = { _ in },
+        internal: @Sendable @escaping (inout StateContext<StatesContext, FSMsContext, Environment, Parameters, Result>) -> Void = { _ in },
+        onExit: @Sendable @escaping (inout StateContext<StatesContext, FSMsContext, Environment, Parameters, Result>) -> Void = { _ in },
+        onSuspend: @Sendable @escaping (inout StateContext<StatesContext, FSMsContext, Environment, Parameters, Result>) -> Void = { _ in },
+        onResume: @Sendable @escaping (inout StateContext<StatesContext, FSMsContext, Environment, Parameters, Result>) -> Void = { _ in },
         @TransitionBuilder transitions:
             () -> [AnyTransition<
-                    StateContext<StatesContext, FSMsContext, Environment>,
+                    StateContext<StatesContext, FSMsContext, Environment, Parameters, Result>,
                     (Root) -> StateInformation
                 >] = { [] }
-    ) where StateType == AnyMockState<FSMsContext, Environment> {
+    ) where StateType == AnyMockState<FSMsContext, Environment, Parameters, Result> {
         self.init(
             wrappedValue: CallbackMockState(
                 onEntry: onEntry,
@@ -48,20 +59,25 @@ extension StateProperty {
         )
     }
 
-    init<FSMsContext: ContextProtocol, Environment: EnvironmentSnapshot>(
+    init<
+        FSMsContext: ContextProtocol,
+        Environment: EnvironmentSnapshot,
+        Parameters: DataStructure,
+        Result: DataStructure
+    >(
         name: String,
         uses environmentVariables: PartialKeyPath<Root.Environment> ...,
-        onEntry: @Sendable @escaping (inout StateContext<EmptyDataStructure, FSMsContext, Environment>) -> Void = { _ in },
-        internal: @Sendable @escaping (inout StateContext<EmptyDataStructure, FSMsContext, Environment>) -> Void = { _ in },
-        onExit: @Sendable @escaping (inout StateContext<EmptyDataStructure, FSMsContext, Environment>) -> Void = { _ in },
-        onSuspend: @Sendable @escaping (inout StateContext<EmptyDataStructure, FSMsContext, Environment>) -> Void = { _ in },
-        onResume: @Sendable @escaping (inout StateContext<EmptyDataStructure, FSMsContext, Environment>) -> Void = { _ in },
+        onEntry: @Sendable @escaping (inout StateContext<EmptyDataStructure, FSMsContext, Environment, Parameters, Result>) -> Void = { _ in },
+        internal: @Sendable @escaping (inout StateContext<EmptyDataStructure, FSMsContext, Environment, Parameters, Result>) -> Void = { _ in },
+        onExit: @Sendable @escaping (inout StateContext<EmptyDataStructure, FSMsContext, Environment, Parameters, Result>) -> Void = { _ in },
+        onSuspend: @Sendable @escaping (inout StateContext<EmptyDataStructure, FSMsContext, Environment, Parameters, Result>) -> Void = { _ in },
+        onResume: @Sendable @escaping (inout StateContext<EmptyDataStructure, FSMsContext, Environment, Parameters, Result>) -> Void = { _ in },
         @TransitionBuilder transitions:
             () -> [AnyTransition<
-                    StateContext<EmptyDataStructure, FSMsContext, Environment>,
+                    StateContext<EmptyDataStructure, FSMsContext, Environment, Parameters, Result>,
                     (Root) -> StateInformation
                 >] = { [] }
-    ) where StateType == AnyMockState<FSMsContext, Environment> {
+    ) where StateType == AnyMockState<FSMsContext, Environment, Parameters, Result> {
         self.init(
             wrappedValue: CallbackMockState(
                 onEntry: onEntry,

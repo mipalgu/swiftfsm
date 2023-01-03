@@ -35,10 +35,15 @@ public extension FSMModel {
     static func Transition(
         to keyPath: KeyPath<Self, StateInformation>,
         canTransition:
-            @Sendable @escaping (StateContext<EmptyDataStructure, Context, Environment>) -> Bool
-                = { _ in true }
+            @Sendable @escaping (StateContext<
+                EmptyDataStructure,
+                Context,
+                Environment,
+                Parameters,
+                Result
+            >) -> Bool = { _ in true }
     ) -> AnyTransition<
-            StateContext<EmptyDataStructure, Context, Environment>,
+            StateContext<EmptyDataStructure, Context, Environment, Parameters, Result>,
             (Self) -> StateInformation
     > {
         AnyTransition(to: keyPath, canTransition: canTransition)
@@ -48,10 +53,15 @@ public extension FSMModel {
     static func Transition(
         to state: String,
         canTransition:
-            @Sendable @escaping (StateContext<EmptyDataStructure, Context, Environment>) -> Bool
-                = { _ in true }
+            @Sendable @escaping (StateContext<
+                EmptyDataStructure,
+                Context,
+                Environment,
+                Parameters,
+                Result
+            >) -> Bool = { _ in true }
     ) -> AnyTransition<
-        StateContext<EmptyDataStructure, Context, Environment>,
+        StateContext<EmptyDataStructure, Context, Environment, Parameters, Result>,
         (Self) -> StateInformation
     > {
         AnyTransition(to: state, canTransition: canTransition)
@@ -62,10 +72,15 @@ public extension FSMModel {
         to keyPath: KeyPath<Self, StateInformation>,
         context _: StatesContext.Type,
         canTransition:
-            @Sendable @escaping (StateContext<StatesContext, Context, Environment>) -> Bool
-                = { _ in true }
+            @Sendable @escaping (StateContext<
+                StatesContext,
+                Context,
+                Environment,
+                Parameters,
+                Result
+            >) -> Bool = { _ in true }
     ) -> AnyTransition<
-        StateContext<StatesContext, Context, Environment>,
+        StateContext<StatesContext, Context, Environment, Parameters, Result>,
         (Self) -> StateInformation
     > {
         AnyTransition(to: keyPath, canTransition: canTransition)
@@ -76,10 +91,15 @@ public extension FSMModel {
         to state: String,
         context _: StatesContext.Type,
         canTransition:
-            @Sendable @escaping (StateContext<StatesContext, Context, Environment>) -> Bool
-                = { _ in true }
+            @Sendable @escaping (StateContext<
+                StatesContext,
+                Context,
+                Environment,
+                Parameters,
+                Result
+            >) -> Bool = { _ in true }
     ) -> AnyTransition<
-        StateContext<StatesContext, Context, Environment>,
+        StateContext<StatesContext, Context, Environment, Parameters, Result>,
         (Self) -> StateInformation
     > {
         AnyTransition(to: state, canTransition: canTransition)
@@ -118,7 +138,7 @@ public extension FSMModel {
         })
     }
 
-    var initialContext: FSMContext<Context, Environment> {
+    func initialContext(parameters: Parameters) -> FSMContext<Context, Environment, Parameters, Result> {
         let initialStateInfo = self[keyPath: initialState]
         guard let stateContext = stateContexts[initialStateInfo.id] else {
             fatalError("Unable to fetch initial state.")
@@ -126,7 +146,9 @@ public extension FSMModel {
         return FSMContext(
             state: stateContext,
             fsm: Context(),
-            environment: Environment()
+            environment: Environment(),
+            parameters: parameters,
+            result: nil
         )
     }
 
@@ -171,15 +193,17 @@ public extension FSMModel {
         })
     }
 
-    var transitions: [Int: [AnyTransition<FSMContext<Context, Environment>, StateID>]] {
+    var transitions: [Int: [AnyTransition<FSMContext<Context, Environment, Parameters, Result>, StateID>]] {
         anyStates.mapValues {
             guard
                 let transitions = $0.erasedTransitions(for: self)
-                    as? [AnyTransition<FSMContext<Context, Environment>, StateID>]
+                    as? [AnyTransition<FSMContext<Context, Environment, Parameters, Result>, StateID>]
             else {
+                // swiftlint:disable line_length
                 fatalError(
-                    "Unable to cast transition to [AnyTransition<FSMContext<Context, Environment>, StateID>]"
+                    "Unable to cast transition to [AnyTransition<FSMContext<Context, Environment, Parameters, Result>, StateID>]"
                 )
+                // swiftlint:enable line_length
             }
             return transitions
         }

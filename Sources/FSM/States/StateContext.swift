@@ -1,6 +1,10 @@
 @dynamicMemberLookup
 public struct StateContext<
-    StateContext: ContextProtocol, FSMsContext: ContextProtocol, Environment: EnvironmentSnapshot
+    StateContext: ContextProtocol,
+    FSMsContext: ContextProtocol,
+    Environment: EnvironmentSnapshot,
+    Parameters: DataStructure,
+    Result: DataStructure
 > {
 
     public var state: StateContext
@@ -8,6 +12,10 @@ public struct StateContext<
     public var fsm: FSMsContext
 
     public var environment: Environment
+
+    public var parameters: Parameters
+
+    public var result: Result?
 
     var status: FSMStatus
 
@@ -23,11 +31,13 @@ public struct StateContext<
         }
     }
 
-    public init(fsmContext: FSMContext<FSMsContext, Environment>) {
+    public init(fsmContext: FSMContext<FSMsContext, Environment, Parameters, Result>) {
         self.init(
             state: unsafeBitCast(fsmContext.state, to: StateContext.self),
             fsm: fsmContext.fsm,
             environment: fsmContext.environment,
+            parameters: fsmContext.parameters,
+            result: fsmContext.result,
             status: fsmContext.status
         )
     }
@@ -35,12 +45,16 @@ public struct StateContext<
     public init(
         state: StateContext,
         fsm: FSMsContext,
-        environment: Environment
+        environment: Environment,
+        parameters: Parameters,
+        result: Result?
     ) {
         self.init(
             state: state,
             fsm: fsm,
             environment: environment,
+            parameters: parameters,
+            result: result,
             status: .executing(transitioned: true)
         )
     }
@@ -49,11 +63,15 @@ public struct StateContext<
         state: StateContext,
         fsm: FSMsContext,
         environment: Environment,
+        parameters: Parameters,
+        result: Result?,
         status: FSMStatus
     ) {
         self.state = state
         self.fsm = fsm
         self.environment = environment
+        self.parameters = parameters
+        self.result = result
         self.status = status
     }
 
@@ -84,10 +102,12 @@ public struct StateContext<
         set { environment[keyPath: keyPath] = newValue }
     }
 
-    public mutating func update(from fsmContext: FSMContext<FSMsContext, Environment>) {
+    public mutating func update(from fsmContext: FSMContext<FSMsContext, Environment, Parameters, Result>) {
         state = unsafeBitCast(fsmContext.state, to: StateContext.self)
         fsm = fsmContext.fsm
         environment = fsmContext.environment
+        parameters = fsmContext.parameters
+        result = fsmContext.result
         status = fsmContext.status
     }
 

@@ -6,7 +6,7 @@ public protocol FSMProtocol: ContextUser, EnvironmentUser {
 
     associatedtype Ringlet: RingletProtocol where
         Ringlet.StateType == StateType,
-        Ringlet.TransitionType == AnyTransition<FSMContext<Context, Environment>, StateID>
+        Ringlet.TransitionType == AnyTransition<FSMContext<Context, Environment, Parameters, Result>, StateID>
 
     associatedtype StateType: TypeErasedState
         where StateType.FSMsContext == Context,

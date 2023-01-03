@@ -11,7 +11,7 @@ public struct StateProperty<StateType: TypeErasedState, Root: FSMModel>: AnyStat
 
     public var transitions:
         [AnyTransition<
-            FSMContext<StateType.FSMsContext, StateType.Environment>,
+            FSMContext<StateType.FSMsContext, StateType.Environment, StateType.Parameters, StateType.Result>,
             (Root) -> StateInformation
         >]
 
@@ -21,12 +21,20 @@ public struct StateProperty<StateType: TypeErasedState, Root: FSMModel>: AnyStat
         uses environmentVariables: PartialKeyPath<Root.Environment> ...,
         @TransitionBuilder transitions:
             () -> [AnyTransition<
-                    StateContext<ConcreteState.Context, StateType.FSMsContext, StateType.Environment>,
+                    StateContext<
+                        ConcreteState.Context,
+                        StateType.FSMsContext,
+                        StateType.Environment,
+                        StateType.Parameters,
+                        StateType.Result
+                    >,
                     (Root) -> StateInformation
                 >] = { [] }
     ) where ConcreteState.TypeErasedVersion == StateType,
         ConcreteState.FSMsContext == StateType.FSMsContext,
-        ConcreteState.Environment == StateType.Environment {
+        ConcreteState.Environment == StateType.Environment,
+        ConcreteState.Parameters == StateType.Parameters,
+        ConcreteState.Result == StateType.Result {
         self.init(
             wrappedValue: wrappedValue,
             name: name,
@@ -41,12 +49,20 @@ public struct StateProperty<StateType: TypeErasedState, Root: FSMModel>: AnyStat
         uses environmentVariables: [PartialKeyPath<Root.Environment>],
         @TransitionBuilder transitions:
             () -> [AnyTransition<
-                    StateContext<ConcreteState.Context, StateType.FSMsContext, StateType.Environment>,
+                    StateContext<
+                        ConcreteState.Context,
+                        StateType.FSMsContext,
+                        StateType.Environment,
+                        StateType.Parameters,
+                        StateType.Result
+                    >,
                     (Root) -> StateInformation
                 >] = { [] }
     ) where ConcreteState.TypeErasedVersion == StateType,
         ConcreteState.FSMsContext == StateType.FSMsContext,
-        ConcreteState.Environment == StateType.Environment {
+        ConcreteState.Environment == StateType.Environment,
+        ConcreteState.Parameters == StateType.Parameters,
+        ConcreteState.Result == StateType.Result {
         self.projectedValue = StateInformation(name: name)
         self.wrappedValue = wrappedValue.erased
         self.environmentVariables = environmentVariables
