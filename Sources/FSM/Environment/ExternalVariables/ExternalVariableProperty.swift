@@ -1,5 +1,8 @@
 @propertyWrapper
-public struct ExternalVariableProperty<Root, Handler: ExternalVariableHandler> {
+public struct ExternalVariableProperty<
+    Root: EnvironmentSnapshot,
+    Handler: ExternalVariableHandler
+>: AnyExternalVariableProperty {
 
     public let mapPath: WritableKeyPath<Root, Handler.Value?>
 
@@ -11,6 +14,14 @@ public struct ExternalVariableProperty<Root, Handler: ExternalVariableHandler> {
         } set {
             projectedValue.value = newValue
         }
+    }
+
+    public var erasedMapPath: AnyKeyPath {
+        mapPath as AnyKeyPath
+    }
+
+    public var typeErased: Any {
+        AnyExternalVariableHandler(projectedValue, mapsTo: mapPath)
     }
 
     public init(handler: Handler, mapsTo keyPath: WritableKeyPath<Root, Handler.Value?>) {

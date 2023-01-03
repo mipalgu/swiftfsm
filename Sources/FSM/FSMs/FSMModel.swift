@@ -186,4 +186,54 @@ public extension FSMModel {
         }
     }
 
+    var actuators: [PartialKeyPath<Environment>: AnyActuatorHandler<Environment>] {
+        let mirror = Mirror(reflecting: self)
+        return Dictionary(uniqueKeysWithValues: mirror.children.compactMap {
+            guard let actuator = $0.value as? AnyActuatorProperty else {
+                return nil
+            }
+            guard let mapPath = actuator.erasedMapPath as? PartialKeyPath<Environment> else {
+                fatalError("Unable to cast erasedMapPath to PartialKeyPath<Environment>.")
+            }
+            guard let typeErased = actuator.typeErased as? AnyActuatorHandler<Environment> else {
+                fatalError("Unable to create AnyActuatorHandler<Environment> from AnyActuatorProperty.")
+            }
+            return (mapPath, typeErased)
+        })
+    }
+
+    var externalVariables: [PartialKeyPath<Environment>: AnyExternalVariableHandler<Environment>] {
+        let mirror = Mirror(reflecting: self)
+        return Dictionary(uniqueKeysWithValues: mirror.children.compactMap {
+            guard let externalVariable = $0.value as? AnyExternalVariableProperty else {
+                return nil
+            }
+            guard let mapPath = externalVariable.erasedMapPath as? PartialKeyPath<Environment> else {
+                fatalError("Unable to cast erasedMapPath to PartialKeyPath<Environment>.")
+            }
+            guard let typeErased = externalVariable.typeErased as? AnyExternalVariableHandler<Environment> else {
+                fatalError(
+                    "Unable to create AnyExternalVariableHandler<Environment> from AnyExternalVariableProperty."
+                )
+            }
+            return (mapPath, typeErased)
+        })
+    }
+
+    var sensors: [PartialKeyPath<Environment>: AnySensorHandler<Environment>] {
+        let mirror = Mirror(reflecting: self)
+        return Dictionary(uniqueKeysWithValues: mirror.children.compactMap {
+            guard let actuator = $0.value as? AnySensorProperty else {
+                return nil
+            }
+            guard let mapPath = actuator.erasedMapPath as? PartialKeyPath<Environment> else {
+                fatalError("Unable to cast erasedMapPath to PartialKeyPath<Environment>.")
+            }
+            guard let typeErased = actuator.typeErased as? AnySensorHandler<Environment> else {
+                fatalError("Unable to create AnySensorHandler<Environment> from AnySensorProperty.")
+            }
+            return (mapPath, typeErased)
+        })
+    }
+
 }

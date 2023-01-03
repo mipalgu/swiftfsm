@@ -138,7 +138,13 @@ public struct FiniteStateMachine<
             Model.Result == Result,
             Model.Context == Context,
             Model.Environment == Environment {
-        self.init(data: Data(model: model), ringlet: model.initialRinglet)
+        self.init(
+            data: Data(model: model),
+            ringlet: model.initialRinglet,
+            actuators: model.actuators,
+            externalVariables: model.externalVariables,
+            sensors: model.sensors
+        )
     }
 
     private init(
@@ -208,7 +214,7 @@ public struct FiniteStateMachine<
                 handler.update(environment: &environment)
                 sensors[keyPath] = handler
             }
-            if var handler = actuators[keyPath] {
+            if let handler = actuators[keyPath] {
                 handler.update(environment: &environment)
                 actuators[keyPath] = handler
             }

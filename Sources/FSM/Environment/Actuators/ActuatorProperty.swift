@@ -1,5 +1,5 @@
 @propertyWrapper
-public struct ActuatorProperty<Root, Handler: ActuatorHandler> {
+public struct ActuatorProperty<Root: EnvironmentSnapshot, Handler: ActuatorHandler>: AnyActuatorProperty {
 
     public let mapPath: WritableKeyPath<Root, Handler.Value?>
 
@@ -11,6 +11,14 @@ public struct ActuatorProperty<Root, Handler: ActuatorHandler> {
         } set {
             projectedValue.value = newValue
         }
+    }
+
+    public var erasedMapPath: AnyKeyPath {
+        mapPath as AnyKeyPath
+    }
+
+    public var typeErased: Any {
+        AnyActuatorHandler(projectedValue, mapsTo: mapPath)
     }
 
     public init(handler: Handler, mapsTo keyPath: WritableKeyPath<Root, Handler.Value?>) {
