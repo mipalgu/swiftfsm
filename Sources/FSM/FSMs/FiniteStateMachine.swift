@@ -5,7 +5,7 @@ public struct FiniteStateMachine<
     Result: DataStructure,
     Context: ContextProtocol,
     Environment: EnvironmentSnapshot
-> where StateType.FSMsContext == Context,
+>: FiniteStateMachineOperations where StateType.FSMsContext == Context,
     StateType.Environment == Environment,
     Ringlet.StateType == StateType,
     Ringlet.TransitionType == AnyTransition<FSMContext<Context, Environment>, StateID> {
@@ -126,6 +126,16 @@ public struct FiniteStateMachine<
 
     public var sensors: [PartialKeyPath<Environment>: AnySensorHandler<Environment>]
 
+    public var isFinished: Bool {
+        data.currentState == data.previousState
+            && data.currentState != data.suspendState
+            && data.states[data.currentState]!.transitions.isEmpty
+    }
+
+    public var isSuspended: Bool {
+        data.currentState == data.suspendState
+    }
+
     public init<Model: FSMModel>(
         model: Model
     ) where Model.StateType == StateType,
@@ -170,16 +180,11 @@ public struct FiniteStateMachine<
         data.previousState = data.currentState
         data.currentState = nextState
         if data.fsmContext.status == .suspending {
-            data.suspendedState = data.currentState
-            data.currentState = data.suspendState
-            data.fsmContext.status = .suspended(transitioned: data.currentState != data.previousState)
-        } else if data.fsmContext.status == .resuming, let suspendedState = data.suspendedState {
-            data.currentState = suspendedState
-            data.suspendedState = nil
-            data.fsmContext.status = .resumed(transitioned: data.currentState != data.previousState)
+            suspend()
+        } else if data.fsmContext.status == .resuming {
+            resume()
         } else if data.fsmContext.status == .restarting {
-            data.currentState = data.initialState
-            data.fsmContext.status = .restarted(transitioned: data.currentState != data.previousState)
+            restart()
         } else {
             data.fsmContext.status = .executing(transitioned: data.currentState != data.previousState)
         }
@@ -218,6 +223,29 @@ public struct FiniteStateMachine<
             }
         }
         data.fsmContext.environment = environment
+    }
+
+    public mutating func restart() {
+        data.currentState = data.initialState
+        data.fsmContext.status = .restarted(transitioned: data.currentState != data.previousState)
+    }
+
+    public mutating func resume() {
+        guard let suspendedState = data.suspendedState else {
+            return
+        }
+        data.currentState = suspendedState
+        data.suspendedState = nil
+        data.fsmContext.status = .resumed(transitioned: data.currentState != data.previousState)
+    }
+
+    public mutating func suspend() {
+        guard data.suspendedState == nil else {
+            return
+        }
+        data.suspendedState = data.currentState
+        data.currentState = data.suspendState
+        data.fsmContext.status = .suspended(transitioned: data.currentState != data.previousState)
     }
 
 }
