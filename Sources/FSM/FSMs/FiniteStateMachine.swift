@@ -199,7 +199,7 @@ public struct FiniteStateMachine<
                 fatalError("Unable to fetch transitions for state \(name).")
             }
             let newTransitions = transitions.map {
-                AnyTransition(to: id(for: $0.target), canTransition: $0._canTransition)
+                $0.map { id(for: $0) }
             }
             return State(
                 id: newID,

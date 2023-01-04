@@ -35,4 +35,10 @@ public struct AnyTransition<Source, Target: Sendable>: TransitionProtocol {
         self._canTransition(source)
     }
 
+    public func map<NewTarget: Sendable>(
+        _ transform: (Target) -> NewTarget
+    ) -> AnyTransition<Source, NewTarget> {
+        AnyTransition<Source, NewTarget>(to: transform(target), canTransition: _canTransition)
+    }
+
 }
