@@ -10,132 +10,182 @@ public struct FiniteStateMachine<
     Ringlet.StateType == StateType,
     Ringlet.TransitionType == AnyTransition<FSMContext<Context, Environment, Parameters, Result>, StateID> {
 
-    struct State {
+    public struct Handlers: {
 
-        let id: StateID
+        public var actuators: [PartialKeyPath<Environment>: AnyActuatorHandler<Environment>]
 
-        let name: String
+        public var externalVariables: [PartialKeyPath<Environment>: AnyExternalVariableHandler<Environment>]
 
-        let context: Sendable
-
-        let environmentVariables: Set<PartialKeyPath<Environment>>
-
-        let stateType: StateType
-
-        let transitions: [AnyTransition<FSMContext<Context, Environment, Parameters, Result>, StateID>]
+        public var sensors: [PartialKeyPath<Environment>: AnySensorHandler<Environment>]
 
     }
 
-    public struct Data: Sendable {
+    public struct State {
 
-        var states: [Int: State]
+        public let id: StateID
 
-        var fsmContext: FSMContext<Context, Environment, Parameters, Result>
+        public let name: String
 
-        var ringletContext: Ringlet.Context
+        public let environmentVariables: Set<PartialKeyPath<Environment>>
 
-        var initialState: StateID
+        public let stateType: StateType
 
-        var currentState: StateID
+        public let transitions: [AnyTransition<FSMContext<Context, Environment, Parameters, Result>, StateID>]
 
-        var previousState: StateID
+    }
 
-        var suspendState: StateID
+    public struct Data: Sendable, FiniteStateMachineOperations {
 
-        var suspendedState: StateID?
+        public var acceptingStates: [Bool]
 
-        fileprivate init<Model: FSMModel>(
-            model: Model,
-            parameters: Parameters
-        ) where Model.StateType == StateType,
-            Model.Ringlet == Ringlet,
-            Model.Parameters == Parameters,
-            Model.Result == Result,
-            Model.Context == Context,
-            Model.Environment == Environment {
-            let anyStates = model.anyStates
-            let stateTypes = model.states
-            let contexts = model.stateContexts
-            let transitions = model.transitions
-            var states = anyStates.mapValues {
-                let id = $0.information.id
-                let name = $0.information.name
-                guard let context = contexts[id] else {
-                    fatalError("Unable to fetch context for state \(name).")
-                }
-                guard
-                    let environmentVariables = $0.erasedEnvironmentVariables
-                        as? [PartialKeyPath<Environment>]
-                else {
-                    fatalError("Unable to cast environment variables for state \(name).")
-                }
-                guard let stateType = stateTypes[id] else {
-                    fatalError("Unable to fetch state type for state \(name).")
-                }
-                guard let transitions = transitions[id] else {
-                    fatalError("Unable to fetch transitions for state \(name).")
-                }
-                return State(
-                    id: id,
-                    name: name,
-                    context: context,
-                    environmentVariables: Set(environmentVariables),
-                    stateType: stateType,
-                    transitions: transitions
-                )
+        public var stateContexts: [Sendable]
+
+        public var fsmContext: FSMContext<Context, Environment, Parameters, Result>
+
+        public var ringletContext: Ringlet.Context
+
+        public var handlers: Handlers
+
+        public var initialState: StateID
+
+        public var currentState: StateID
+
+        public var previousState: StateID
+
+        public var suspendState: StateID
+
+        public var suspendedState: StateID?
+
+        public var isFinished: Bool {
+            currentState == previousState
+                && currentState != suspendState
+                && acceptingStates[currentState]
+        }
+
+        public var isSuspended: Bool {
+            currentState == suspendState
+        }
+
+        fileprivate init(
+            acceptingStates: [Bool],
+            stateContexts: [Sendable],
+            fsmContext: FSMContext<Context, Environment, Parameters, Result>,
+            ringletContext: Ringlet.Context,
+            handlers: Handlers,
+            initialState: Int,
+            currentState: Int,
+            previousState: Int,
+            suspendState: Int,
+            suspendedState: Int?
+        ) {
+            self.acceptingStates = acceptingStates
+            self.stateContexts = stateContexts
+            self.fsmContext = fsmContext
+            self.ringletContext = ringletContext
+            self.handlers = handlers
+            self.initialState = initialState
+            self.currentState = currentState
+            self.previousState = previousState
+            self.suspendState = suspendState
+            self.suspendedState = suspendedState
+        }
+
+        public mutating func restart() {
+            currentState = initialState
+            fsmContext.status = .restarted(transitioned: currentState != previousState)
+        }
+
+        public mutating func resume() {
+            guard let currentSuspendedState = suspendedState else {
+                return
             }
-            func newState(named name: String, transitions: [StateID] = []) -> StateID {
-                let id = IDRegistrar.id(of: name)
-                guard states[id] == nil else {
-                    fatalError("The \(name) state name is reserved. Please rename your state.")
+            currentState = currentSuspendedState
+            suspendedState = nil
+            fsmContext.status = .resumed(transitioned: currentState != previousState)
+        }
+
+        public mutating func suspend() {
+            guard suspendedState == nil else {
+                return
+            }
+            suspendedState = currentState
+            currentState = suspendState
+            fsmContext.status = .suspended(transitioned: currentState != previousState)
+        }
+
+        public mutating func saveSnapshot(environmentVariables: Set<PartialKeyPath<Environment>>) {
+            for keyPath in environmentVariables {
+                if var handler = handlers.actuators[keyPath] {
+                    handler.update(from: fsmContext.environment)
+                    handler.saveSnapshot()
+                    handlers.actuators[keyPath] = handler
+                } else if var handler = handlers.externalVariables[keyPath] {
+                    handler.update(from: fsmContext.environment)
+                    handler.saveSnapshot()
+                    handlers.externalVariables[keyPath] = handler
                 }
-                let (context, stateType) = StateType.empty
-                states[id] = State(
-                    id: id,
-                    name: name,
-                    context: context,
-                    environmentVariables: [],
-                    stateType: stateType,
-                    transitions: transitions.map { AnyTransition(to: $0) }
-                )
-                return id
             }
-            self.fsmContext = model.initialContext(parameters: parameters)
-            self.ringletContext = Ringlet.Context()
-            let modelInitialState = model[keyPath: model.initialState].id
-            let actualInitialState = newState(named: "__Initial", transitions: [modelInitialState])
-            self.initialState = actualInitialState
-            self.currentState = actualInitialState
-            self.previousState = newState(named: "__Previous")
-            if let suspendStatePath = model.suspendState {
-                self.suspendState = model[keyPath: suspendStatePath].id
-            } else {
-                self.suspendState = newState(named: "__Suspend")
+        }
+
+        public mutating func takeSnapshot(environmentVariables: Set<PartialKeyPath<Environment>>) {
+            var environment = Environment()
+            for keyPath in environmentVariables {
+                if var handler = handlers.sensors[keyPath] {
+                    handler.takeSnapshot()
+                    handler.update(environment: &environment)
+                    handlers.sensors[keyPath] = handler
+                } else if var handler = handlers.externalVariables[keyPath] {
+                    handler.takeSnapshot()
+                    handler.update(environment: &environment)
+                    handlers.externalVariables[keyPath] = handler
+                } else if let handler = handlers.actuators[keyPath] {
+                    handler.update(environment: &environment)
+                }
             }
-            self.states = states
+            fsmContext.environment = environment
+        }
+
+        public mutating func updateHandlersFromEnvironment(
+            environmentVariables: Set<PartialKeyPath<Environment>>
+        ) {
+            for keyPath in environmentVariables {
+                if var handler = handlers.actuators[keyPath] {
+                    handler.update(from: fsmContext.environment)
+                    handlers.actuators[keyPath] = handler
+                } else if var handler = handlers.externalVariables[keyPath] {
+                    handler.update(from: fsmContext.environment)
+                    handlers.externalVariables[keyPath] = handler
+                }
+            }
+        }
+
+        public mutating func updateEnvironmentFromHandlers(
+            environmentVariables: Set<PartialKeyPath<Environment>>
+        ) {
+            var environment = Environment()
+            for keyPath in environmentVariables {
+                if let handler = handlers.sensors[keyPath] {
+                    handler.update(environment: &environment)
+                } else if let handler = handlers.externalVariables[keyPath] {
+                    handler.update(environment: &environment)
+                } else if let handler = handlers.actuators[keyPath] {
+                    handler.update(environment: &environment)
+                }
+            }
+            fsmContext.environment = environment
         }
 
     }
 
-    public private(set) var data: Data
+    private let _initialData: () -> Data
 
-    public private(set) var ringlet: Ringlet
-
-    public var actuators: [PartialKeyPath<Environment>: AnyActuatorHandler<Environment>]
-
-    public var externalVariables: [PartialKeyPath<Environment>: AnyExternalVariableHandler<Environment>]
-
-    public var sensors: [PartialKeyPath<Environment>: AnySensorHandler<Environment>]
-
-    public var isFinished: Bool {
-        data.currentState == data.previousState
-            && data.currentState != data.suspendState
-            && data.states[data.currentState]!.transitions.isEmpty
+    public var initialData: Data {
+        _initialData()
     }
 
-    public var isSuspended: Bool {
-        data.currentState == data.suspendState
-    }
+    public let states: [State]
+
+    public let ringlet: Ringlet
 
     public init<Model: FSMModel>(
         model: Model,
@@ -146,32 +196,120 @@ public struct FiniteStateMachine<
             Model.Result == Result,
             Model.Context == Context,
             Model.Environment == Environment {
-        self.init(
-            data: Data(model: model, parameters: parameters),
-            ringlet: model.initialRinglet,
+        var newIds: [StateID: Int] = [:]
+        var latestID = 0
+        func id(for state: StateID) -> Int {
+            if let id = newIds[state] {
+                return id
+            }
+            let id = latestID
+            latestID += 1
+            newIds[state] = id
+            return id
+        }
+        let anyStates = model.anyStates
+        let stateTypes = model.states
+        let contexts = model.stateContexts
+        let transitions = model.transitions
+        var states = anyStates.map {
+            let oldID = $1.information.id
+            let newID = id(for: $1.information.id)
+            let name = $1.information.name
+            guard
+                let environmentVariables = $1.erasedEnvironmentVariables
+                    as? [PartialKeyPath<Environment>]
+            else {
+                fatalError("Unable to cast environment variables for state \(name).")
+            }
+            guard let stateType = stateTypes[oldID] else {
+                fatalError("Unable to fetch state type for state \(name).")
+            }
+            guard let transitions = transitions[oldID] else {
+                fatalError("Unable to fetch transitions for state \(name).")
+            }
+            let newTransitions = transitions.map {
+                AnyTransition(to: id(for: $0.target), canTransition: $0._canTransition)
+            }
+            return State(
+                id: newID,
+                name: name,
+                environmentVariables: Set(environmentVariables),
+                stateType: stateType,
+                transitions: newTransitions
+            )
+        }
+        var newContexts = anyStates.map {
+            let oldID = $1.information.id
+            guard let context = contexts[oldID] else {
+                fatalError("Unable to fetch context for state \($1.information.name).")
+            }
+            return context
+        }
+        func newState(named name: String, transitions: [Int] = []) -> Int {
+            let oldID = IDRegistrar.id(of: name)
+            guard anyStates[oldID] == nil else {
+                fatalError("The \(name) state name is reserved. Please rename your state.")
+            }
+            let newID = id(for: oldID)
+            guard newID == states.count, newID == newContexts.count else {
+                fatalError("Calculated invalid id (\(newID)) for new state.")
+            }
+            let (context, stateType) = StateType.empty
+            states.append(State(
+                id: newID,
+                name: name,
+                environmentVariables: [],
+                stateType: stateType,
+                transitions: transitions.map { AnyTransition(to: $0) }
+            ))
+            newContexts.append(context)
+            return newID
+        }
+        let modelInitialState = id(for: model[keyPath: model.initialState].id)
+        let actualInitialState = newState(named: "__Initial", transitions: [modelInitialState])
+        let initialState = actualInitialState
+        let currentState = actualInitialState
+        let previousState = newState(named: "__Previous")
+        let suspendState: Int
+        if let suspendStatePath = model.suspendState {
+            suspendState = id(for: model[keyPath: suspendStatePath].id)
+        } else {
+            suspendState = newState(named: "__Suspend")
+        }
+        let acceptingStates = states.map { $0.transitions.isEmpty }
+        let fsmContext = model.initialContext(parameters: parameters)
+        let handlers = Handlers(
             actuators: model.actuators,
             externalVariables: model.externalVariables,
             sensors: model.sensors
         )
+        self.init(
+            ringlet: model.initialRinglet,
+            initialData: {
+                Data(
+                    acceptingStates: acceptingStates,
+                    stateContexts: newContexts,
+                    fsmContext: fsmContext,
+                    ringletContext: Ringlet.Context(),
+                    handlers: handlers,
+                    initialState: initialState,
+                    currentState: currentState,
+                    previousState: previousState,
+                    suspendState: suspendState,
+                    suspendedState: nil
+                )
+            }
+        )
     }
 
-    private init(
-        data: Data,
-        ringlet: Ringlet,
-        actuators: [PartialKeyPath<Environment>: AnyActuatorHandler<Environment>],
-        externalVariables: [PartialKeyPath<Environment>: AnyExternalVariableHandler<Environment>],
-        sensors: [PartialKeyPath<Environment>: AnySensorHandler<Environment>]
-    ) {
-        self.data = data
+    private init(ringlet: Ringlet, initialData: @escaping () -> Data) {
         self.ringlet = ringlet
-        self.actuators = actuators
-        self.externalVariables = externalVariables
-        self.sensors = sensors
+        self._initialData = initialData
     }
 
-    public mutating func next<Scheduler: SchedulerProtocol>(scheduler: Scheduler) {
-        let state = data.states[data.currentState]!
-        data.fsmContext.state = state.context
+    public mutating func next<Scheduler: SchedulerProtocol>(scheduler: Scheduler, data: inout Data) {
+        let state = states[data.currentState]
+        data.fsmContext.state = data.stateContexts[data.currentState]
         let nextState = ringlet.execute(
             id: data.currentState,
             state: state.stateType,
@@ -182,99 +320,34 @@ public struct FiniteStateMachine<
         data.previousState = data.currentState
         data.currentState = nextState
         if data.fsmContext.status == .suspending {
-            suspend()
+            data.suspend()
         } else if data.fsmContext.status == .resuming {
-            resume()
+            data.resume()
         } else if data.fsmContext.status == .restarting {
-            restart()
+            data.restart()
         } else {
             data.fsmContext.status = .executing(transitioned: data.currentState != data.previousState)
         }
     }
 
-    public mutating func saveSnapshot(forState stateID: StateID? = nil) {
-        let state = data.states[stateID ?? data.currentState]!
-        for keyPath in state.environmentVariables {
-            if var handler = actuators[keyPath] {
-                handler.update(from: data.fsmContext.environment)
-                handler.saveSnapshot()
-                actuators[keyPath] = handler
-            } else if var handler = externalVariables[keyPath] {
-                handler.update(from: data.fsmContext.environment)
-                handler.saveSnapshot()
-                externalVariables[keyPath] = handler
-            }
-        }
+    public mutating func saveSnapshot(forState stateID: StateID? = nil, data: inout Data) {
+        data.saveSnapshot(environmentVariables: states[stateID ?? data.currentState].environmentVariables)
     }
 
-    public mutating func takeSnapshot(forState stateID: StateID? = nil) {
-        let state = data.states[stateID ?? data.currentState]!
-        var environment = Environment()
-        for keyPath in state.environmentVariables {
-            if var handler = sensors[keyPath] {
-                handler.takeSnapshot()
-                handler.update(environment: &environment)
-                sensors[keyPath] = handler
-            } else if var handler = externalVariables[keyPath] {
-                handler.takeSnapshot()
-                handler.update(environment: &environment)
-                externalVariables[keyPath] = handler
-            } else if let handler = actuators[keyPath] {
-                handler.update(environment: &environment)
-            }
-        }
-        data.fsmContext.environment = environment
+    public mutating func takeSnapshot(forState stateID: StateID? = nil, data: inout Data) {
+        data.takeSnapshot(environmentVariables: states[stateID ?? data.currentState].environmentVariables)
     }
 
-    public mutating func updateHandlersFromEnvironment(forState stateID: StateID? = nil) {
-        let state = data.states[stateID ?? data.currentState]!
-        for keyPath in state.environmentVariables {
-            if var handler = actuators[keyPath] {
-                handler.update(from: data.fsmContext.environment)
-                actuators[keyPath] = handler
-            } else if var handler = externalVariables[keyPath] {
-                handler.update(from: data.fsmContext.environment)
-                externalVariables[keyPath] = handler
-            }
-        }
+    public mutating func updateHandlersFromEnvironment(forState stateID: StateID? = nil, data: inout Data) {
+        data.updateHandlersFromEnvironment(
+            environmentVariables: states[stateID ?? data.currentState].environmentVariables
+        )
     }
 
-    public mutating func updateEnvironmentFromHandlers(forState stateID: StateID? = nil) {
-        let state = data.states[stateID ?? data.currentState]!
-        var environment = Environment()
-        for keyPath in state.environmentVariables {
-            if let handler = sensors[keyPath] {
-                handler.update(environment: &environment)
-            } else if let handler = externalVariables[keyPath] {
-                handler.update(environment: &environment)
-            } else if let handler = actuators[keyPath] {
-                handler.update(environment: &environment)
-            }
-        }
-        data.fsmContext.environment = environment
-    }
-
-    public mutating func restart() {
-        data.currentState = data.initialState
-        data.fsmContext.status = .restarted(transitioned: data.currentState != data.previousState)
-    }
-
-    public mutating func resume() {
-        guard let suspendedState = data.suspendedState else {
-            return
-        }
-        data.currentState = suspendedState
-        data.suspendedState = nil
-        data.fsmContext.status = .resumed(transitioned: data.currentState != data.previousState)
-    }
-
-    public mutating func suspend() {
-        guard data.suspendedState == nil else {
-            return
-        }
-        data.suspendedState = data.currentState
-        data.currentState = data.suspendState
-        data.fsmContext.status = .suspended(transitioned: data.currentState != data.previousState)
+    public mutating func updateEnvironmentFromHandlers(forState stateID: StateID? = nil, data: inout Data) {
+        data.updateEnvironmentFromHandlers(
+            environmentVariables: states[stateID ?? data.currentState].environmentVariables
+        )
     }
 
 }
