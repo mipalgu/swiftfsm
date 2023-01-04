@@ -44,7 +44,7 @@ public struct FiniteStateMachine<
 
         public var ringletContext: Ringlet.Context
 
-        public var actuatorValues: [PartialKeyPath<Environment>: Sendable]
+        public var actuatorValues: [Sendable]
 
         public var initialState: StateID
 
@@ -71,7 +71,7 @@ public struct FiniteStateMachine<
             stateContexts: [Sendable],
             fsmContext: FSMContext<Context, Environment, Parameters, Result>,
             ringletContext: Ringlet.Context,
-            actuatorValues: [PartialKeyPath<Environment>: Sendable],
+            actuatorValues: [Sendable],
             initialState: Int,
             currentState: Int,
             previousState: Int,
@@ -120,7 +120,7 @@ public struct FiniteStateMachine<
             for keyPath in environmentVariables {
                 if let handler = handlers.actuators[keyPath] {
                     handler.saveSnapshot(value: fsmContext.environment[keyPath: keyPath])
-                    actuatorValues[keyPath] = fsmContext.environment[keyPath: keyPath]
+                    actuatorValues[handler.index] = fsmContext.environment[keyPath: keyPath]
                 } else if let handler = handlers.externalVariables[keyPath] {
                     handler.saveSnapshot(value: fsmContext.environment[keyPath: keyPath])
                 }
@@ -137,8 +137,8 @@ public struct FiniteStateMachine<
                     handler.update(environment: &environment, with: handler.takeSnapshot())
                 } else if let handler = handlers.externalVariables[keyPath] {
                     handler.update(environment: &environment, with: handler.takeSnapshot())
-                } else if let handler = handlers.actuators[keyPath], let value = actuatorValues[keyPath] {
-                    handler.update(environment: &environment, with: value)
+                } else if let handler = handlers.actuators[keyPath] {
+                    handler.update(environment: &environment, with: actuatorValues[handler.index])
                 }
             }
             fsmContext.environment = environment
@@ -249,11 +249,39 @@ public struct FiniteStateMachine<
         }
         let acceptingStates = states.map { $0.transitions.isEmpty }
         let fsmContext = model.initialContext(parameters: parameters)
+        var actuatorsArr = Array(model.actuators)
+        var externalVariablesArr = Array(model.externalVariables)
+        var sensorsArr = Array(model.sensors)
+        for index in actuatorsArr.indices {
+            actuatorsArr[index].value.index = index
+        }
+        for index in externalVariablesArr.indices {
+            externalVariablesArr[index].value.index = index
+        }
+        for index in sensorsArr.indices {
+            sensorsArr[index].value.index = index
+        }
+        let actuators = Dictionary(uniqueKeysWithValues: actuatorsArr)
+        let externalVariables = Dictionary(uniqueKeysWithValues: externalVariablesArr)
+        let sensors = Dictionary(uniqueKeysWithValues: sensorsArr)
         let handlers = Handlers(
-            actuators: model.actuators,
-            externalVariables: model.externalVariables,
-            sensors: model.sensors
+            actuators: actuators,
+            externalVariables: externalVariables,
+            sensors: sensors
         )
+        let actuatorValues: [Sendable] = model.actuatorInitialValues.map {
+            guard let handler = actuators[$0] else {
+                fatalError("Unable to fetch handler from keypath.")
+            }
+            return (handler.index, $1)
+        }.sorted {
+            $0.0 < $1.0
+        }.map {
+            $1 as Sendable
+        }
+        guard actuatorValues.count == actuators.count else {
+            fatalError("Unable to set up actuatorValues for actuators.")
+        }
         self.init(
             states: states,
             ringlet: model.initialRinglet,
@@ -264,7 +292,7 @@ public struct FiniteStateMachine<
                     stateContexts: newContexts,
                     fsmContext: fsmContext,
                     ringletContext: Ringlet.Context(),
-                    actuatorValues: model.actuatorInitialValues,
+                    actuatorValues: actuatorValues,
                     initialState: initialState,
                     currentState: currentState,
                     previousState: previousState,
