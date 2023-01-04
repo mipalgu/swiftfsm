@@ -3,23 +3,23 @@ public struct SensorProperty<Root: EnvironmentSnapshot, Handler: SensorHandler>:
 
     public let mapPath: WritableKeyPath<Root, Handler.Value?>
 
-    public let projectedValue: Handler
-
-    public var wrappedValue: Handler.Value {
-        projectedValue.value
+    public var projectedValue: Self {
+        self
     }
+
+    public var wrappedValue: Handler
 
     public var erasedMapPath: AnyKeyPath {
         mapPath as AnyKeyPath
     }
 
     public var typeErased: Any {
-        return AnySensorHandler(projectedValue, mapsTo: mapPath) as Any
+        return AnySensorHandler(wrappedValue, mapsTo: mapPath) as Any
     }
 
     public init(handler: Handler, mapsTo keyPath: WritableKeyPath<Root, Handler.Value?>) {
         self.mapPath = keyPath
-        self.projectedValue = handler
+        self.wrappedValue = handler
     }
 
 }

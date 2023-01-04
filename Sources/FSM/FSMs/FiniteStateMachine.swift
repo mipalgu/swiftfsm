@@ -5,12 +5,12 @@ public struct FiniteStateMachine<
     Result: DataStructure,
     Context: ContextProtocol,
     Environment: EnvironmentSnapshot
->: FiniteStateMachineOperations where StateType.FSMsContext == Context,
+> where StateType.FSMsContext == Context,
     StateType.Environment == Environment,
     Ringlet.StateType == StateType,
     Ringlet.TransitionType == AnyTransition<FSMContext<Context, Environment, Parameters, Result>, StateID> {
 
-    public struct Handlers: {
+    public struct Handlers {
 
         public var actuators: [PartialKeyPath<Environment>: AnyActuatorHandler<Environment>]
 
@@ -44,7 +44,7 @@ public struct FiniteStateMachine<
 
         public var ringletContext: Ringlet.Context
 
-        public var handlers: Handlers
+        public var actuatorValues: [PartialKeyPath<Environment>: Sendable]
 
         public var initialState: StateID
 
@@ -71,7 +71,7 @@ public struct FiniteStateMachine<
             stateContexts: [Sendable],
             fsmContext: FSMContext<Context, Environment, Parameters, Result>,
             ringletContext: Ringlet.Context,
-            handlers: Handlers,
+            actuatorValues: [PartialKeyPath<Environment>: Sendable],
             initialState: Int,
             currentState: Int,
             previousState: Int,
@@ -82,7 +82,7 @@ public struct FiniteStateMachine<
             self.stateContexts = stateContexts
             self.fsmContext = fsmContext
             self.ringletContext = ringletContext
-            self.handlers = handlers
+            self.actuatorValues = actuatorValues
             self.initialState = initialState
             self.currentState = currentState
             self.previousState = previousState
@@ -113,63 +113,32 @@ public struct FiniteStateMachine<
             fsmContext.status = .suspended(transitioned: currentState != previousState)
         }
 
-        public mutating func saveSnapshot(environmentVariables: Set<PartialKeyPath<Environment>>) {
-            for keyPath in environmentVariables {
-                if var handler = handlers.actuators[keyPath] {
-                    handler.update(from: fsmContext.environment)
-                    handler.saveSnapshot()
-                    handlers.actuators[keyPath] = handler
-                } else if var handler = handlers.externalVariables[keyPath] {
-                    handler.update(from: fsmContext.environment)
-                    handler.saveSnapshot()
-                    handlers.externalVariables[keyPath] = handler
-                }
-            }
-        }
-
-        public mutating func takeSnapshot(environmentVariables: Set<PartialKeyPath<Environment>>) {
-            var environment = Environment()
-            for keyPath in environmentVariables {
-                if var handler = handlers.sensors[keyPath] {
-                    handler.takeSnapshot()
-                    handler.update(environment: &environment)
-                    handlers.sensors[keyPath] = handler
-                } else if var handler = handlers.externalVariables[keyPath] {
-                    handler.takeSnapshot()
-                    handler.update(environment: &environment)
-                    handlers.externalVariables[keyPath] = handler
-                } else if let handler = handlers.actuators[keyPath] {
-                    handler.update(environment: &environment)
-                }
-            }
-            fsmContext.environment = environment
-        }
-
-        public mutating func updateHandlersFromEnvironment(
-            environmentVariables: Set<PartialKeyPath<Environment>>
+        public mutating func saveSnapshot(
+            environmentVariables: Set<PartialKeyPath<Environment>>,
+            handlers: Handlers
         ) {
             for keyPath in environmentVariables {
-                if var handler = handlers.actuators[keyPath] {
-                    handler.update(from: fsmContext.environment)
-                    handlers.actuators[keyPath] = handler
-                } else if var handler = handlers.externalVariables[keyPath] {
-                    handler.update(from: fsmContext.environment)
-                    handlers.externalVariables[keyPath] = handler
+                if let handler = handlers.actuators[keyPath] {
+                    handler.saveSnapshot(value: fsmContext.environment[keyPath: keyPath])
+                    actuatorValues[keyPath] = fsmContext.environment[keyPath: keyPath]
+                } else if let handler = handlers.externalVariables[keyPath] {
+                    handler.saveSnapshot(value: fsmContext.environment[keyPath: keyPath])
                 }
             }
         }
 
-        public mutating func updateEnvironmentFromHandlers(
-            environmentVariables: Set<PartialKeyPath<Environment>>
+        public mutating func takeSnapshot(
+            environmentVariables: Set<PartialKeyPath<Environment>>,
+            handlers: Handlers
         ) {
             var environment = Environment()
             for keyPath in environmentVariables {
                 if let handler = handlers.sensors[keyPath] {
-                    handler.update(environment: &environment)
+                    handler.update(environment: &environment, with: handler.takeSnapshot())
                 } else if let handler = handlers.externalVariables[keyPath] {
-                    handler.update(environment: &environment)
-                } else if let handler = handlers.actuators[keyPath] {
-                    handler.update(environment: &environment)
+                    handler.update(environment: &environment, with: handler.takeSnapshot())
+                } else if let handler = handlers.actuators[keyPath], let value = actuatorValues[keyPath] {
+                    handler.update(environment: &environment, with: value)
                 }
             }
             fsmContext.environment = environment
@@ -186,6 +155,8 @@ public struct FiniteStateMachine<
     public let states: [State]
 
     public let ringlet: Ringlet
+
+    public let handlers: Handlers
 
     public init<Model: FSMModel>(
         model: Model,
@@ -284,14 +255,16 @@ public struct FiniteStateMachine<
             sensors: model.sensors
         )
         self.init(
+            states: states,
             ringlet: model.initialRinglet,
+            handlers: handlers,
             initialData: {
                 Data(
                     acceptingStates: acceptingStates,
                     stateContexts: newContexts,
                     fsmContext: fsmContext,
                     ringletContext: Ringlet.Context(),
-                    handlers: handlers,
+                    actuatorValues: model.actuatorInitialValues,
                     initialState: initialState,
                     currentState: currentState,
                     previousState: previousState,
@@ -302,8 +275,10 @@ public struct FiniteStateMachine<
         )
     }
 
-    private init(ringlet: Ringlet, initialData: @escaping () -> Data) {
+    private init(states: [State], ringlet: Ringlet, handlers: Handlers, initialData: @escaping () -> Data) {
+        self.states = states
         self.ringlet = ringlet
+        self.handlers = handlers
         self._initialData = initialData
     }
 
@@ -331,22 +306,16 @@ public struct FiniteStateMachine<
     }
 
     public mutating func saveSnapshot(forState stateID: StateID? = nil, data: inout Data) {
-        data.saveSnapshot(environmentVariables: states[stateID ?? data.currentState].environmentVariables)
-    }
-
-    public mutating func takeSnapshot(forState stateID: StateID? = nil, data: inout Data) {
-        data.takeSnapshot(environmentVariables: states[stateID ?? data.currentState].environmentVariables)
-    }
-
-    public mutating func updateHandlersFromEnvironment(forState stateID: StateID? = nil, data: inout Data) {
-        data.updateHandlersFromEnvironment(
-            environmentVariables: states[stateID ?? data.currentState].environmentVariables
+        data.saveSnapshot(
+            environmentVariables: states[stateID ?? data.currentState].environmentVariables,
+            handlers: handlers
         )
     }
 
-    public mutating func updateEnvironmentFromHandlers(forState stateID: StateID? = nil, data: inout Data) {
-        data.updateEnvironmentFromHandlers(
-            environmentVariables: states[stateID ?? data.currentState].environmentVariables
+    public mutating func takeSnapshot(forState stateID: StateID? = nil, data: inout Data) {
+        data.takeSnapshot(
+            environmentVariables: states[stateID ?? data.currentState].environmentVariables,
+            handlers: handlers
         )
     }
 

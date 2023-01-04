@@ -4,15 +4,12 @@ public struct InMemoryActuator<Value: ActuatorValue>: ActuatorHandler {
 
     public let id: String
 
-    public var value: Value
-
-    public init(id: String, initialValue: Value) {
+    public init(id: String) {
         self.id = id
-        self.value = initialValue
         self.resolvedID = IDRegistrar.id(of: id)
     }
 
-    public mutating func saveSnapshot() {
+    public func saveSnapshot(value: Value) {
         inMemoryData[resolvedID] = value
     }
 

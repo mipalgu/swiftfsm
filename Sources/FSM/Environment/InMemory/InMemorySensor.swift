@@ -4,19 +4,19 @@ public struct InMemorySensor<Value: SensorValue>: SensorHandler {
 
     public let id: String
 
-    public private(set) var value: Value
+    private let initialValue: Value
 
     public init(id: String, initialValue: Value) {
         self.id = id
-        self.value = initialValue
+        self.initialValue = initialValue
         self.resolvedID = IDRegistrar.id(of: id)
     }
 
-    public mutating func takeSnapshot() {
+    public func takeSnapshot() -> Value {
         guard let value = inMemoryData[resolvedID] as? Value else {
-            return
+            return initialValue
         }
-        self.value = value
+        return value
     }
 
 }

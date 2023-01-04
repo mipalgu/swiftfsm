@@ -1,1 +1,5 @@
-public protocol AnyActuatorProperty: AnyEnvironmentProperty {}
+public protocol AnyActuatorProperty: AnyEnvironmentProperty {
+
+    var erasedInitialValue: Sendable { get }
+
+}

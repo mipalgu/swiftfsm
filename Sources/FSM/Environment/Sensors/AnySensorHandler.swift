@@ -2,9 +2,8 @@ public struct AnySensorHandler<Environment: EnvironmentSnapshot> {
 
     private let _base: () -> Any
     private let _id: () -> String
-    private let _value: () -> Any
-    private let _takeSnapshot: () -> Void
-    private let _updateEnvironment: (inout Environment) -> Void
+    private let _takeSnapshot: () -> Sendable
+    private let _updateEnvironment: (inout Environment, Sendable) -> Void
 
     public var base: Any {
         _base()
@@ -14,28 +13,22 @@ public struct AnySensorHandler<Environment: EnvironmentSnapshot> {
         _id()
     }
 
-    public var value: Any {
-        _value()
-    }
-
     public init<Base: SensorHandler>(
         _ base: Base,
         mapsTo keyPath: WritableKeyPath<Environment, Base.Value?>
     ) {
-        var base = base
         self._base = { base }
         self._id = { base.id }
-        self._value = { base.value as Any }
-        self._takeSnapshot = { base.takeSnapshot() }
-        self._updateEnvironment = { $0[keyPath: keyPath] = base.value }
+        self._takeSnapshot = { base.takeSnapshot() as Sendable }
+        self._updateEnvironment = { $0[keyPath: keyPath] = unsafeBitCast($1, to: Base.Value.self) }
     }
 
-    public mutating func takeSnapshot() {
+    public func takeSnapshot() -> Sendable {
         _takeSnapshot()
     }
 
-    public func update(environment: inout Environment) {
-        _updateEnvironment(&environment)
+    public func update(environment: inout Environment, with value: Sendable) {
+        _updateEnvironment(&environment, value)
     }
 
 }
