@@ -32,7 +32,7 @@ struct FSMMock: MockFSM {
 
     }
 
-    @Actuator(handler: InMemoryActuator<Bool>(id: "exit", initialValue: false), mapsTo: \.exitActuator)
+    @Actuator(handler: InMemoryActuator<Bool>(id: "exit"), mapsTo: \.exitActuator, initialValue: false)
     var exitActuator
 
     @ExternalVariable(

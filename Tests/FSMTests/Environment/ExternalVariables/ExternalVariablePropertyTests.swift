@@ -16,7 +16,7 @@ final class ExternalVariablePropertyTests: XCTestCase {
             handler: mock,
             mapsTo: \.bool
         )
-        XCTAssertIdentical(mock, property.projectedValue)
+        XCTAssertIdentical(mock, property.wrappedValue)
         XCTAssertEqual(\Snapshot.bool, property.mapPath)
     }
 
@@ -26,16 +26,15 @@ final class ExternalVariablePropertyTests: XCTestCase {
             handler: mock,
             mapsTo: \.bool
         )
-        XCTAssertEqual(property.wrappedValue, false)
+        XCTAssertEqual(property.wrappedValue.takeSnapshot(), false)
         XCTAssertEqual(mock.calls.count, 1)
-        XCTAssertEqual(mock.getValueCalls, 1)
-        property.wrappedValue = true
+        XCTAssertEqual(mock.takeSnapshotCalls, 1)
+        property.wrappedValue.saveSnapshot(value: true)
         XCTAssertEqual(mock.calls.count, 2)
-        XCTAssertEqual(mock.setValueCalls, [true])
-        XCTAssertEqual(property.wrappedValue, true)
+        XCTAssertEqual(mock.saveSnapshotCalls, [true])
+        XCTAssertEqual(property.wrappedValue.takeSnapshot(), true)
         XCTAssertEqual(mock.calls.count, 3)
-        XCTAssertEqual(mock.getValueCalls, 2)
-        XCTAssertEqual(mock.value, true)
+        XCTAssertEqual(mock.takeSnapshotCalls, 2)
     }
 
 }

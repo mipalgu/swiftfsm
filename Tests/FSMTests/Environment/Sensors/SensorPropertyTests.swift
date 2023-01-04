@@ -13,20 +13,19 @@ final class SensorPropertyTests: XCTestCase {
     func testInit() {
         let mock = SensorHandlerMock(id: "mock", value: false)
         let property = SensorProperty<Snapshot, SensorHandlerMock>(handler: mock, mapsTo: \.bool)
-        XCTAssertIdentical(mock, property.projectedValue)
+        XCTAssertIdentical(mock, property.wrappedValue)
         XCTAssertEqual(\Snapshot.bool, property.mapPath)
     }
 
     func testWrappedValueDelegatesToHandler() {
         let mock = SensorHandlerMock(id: "mock", value: false)
         let property = SensorProperty<Snapshot, SensorHandlerMock>(handler: mock, mapsTo: \.bool)
-        XCTAssertEqual(property.wrappedValue, false)
+        XCTAssertEqual(property.wrappedValue.takeSnapshot(), false)
         XCTAssertEqual(mock.calls.count, 1)
-        XCTAssertEqual(mock.getValueCalls, 1)
-        XCTAssertEqual(property.wrappedValue, false)
+        XCTAssertEqual(mock.takeSnapshotCalls, 1)
+        XCTAssertEqual(property.wrappedValue.takeSnapshot(), false)
         XCTAssertEqual(mock.calls.count, 2)
-        XCTAssertEqual(mock.getValueCalls, 2)
-        XCTAssertEqual(mock.value, false)
+        XCTAssertEqual(mock.takeSnapshotCalls, 2)
     }
 
 }

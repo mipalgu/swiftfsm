@@ -6,21 +6,15 @@ final class ExternalVariableHandlerMock<Value: ExternalVariableValue>: ExternalV
 
         case id
 
-        case getValue
-
-        case setValue(newValue: Value)
-
-        case saveSnapshot
+        case saveSnapshot(value: Value)
 
         case takeSnapshot
 
     }
 
     private let _id: String
-    private let getValue: () -> Value
-    private let setValue: (Value) -> Void
-    private let _saveSnapshot: () -> Void
-    private let _takeSnapshot: () -> Void
+    private let _saveSnapshot: (Value) -> Void
+    private let _takeSnapshot: () -> Value
 
     private(set) var calls: [Call] = []
 
@@ -28,22 +22,14 @@ final class ExternalVariableHandlerMock<Value: ExternalVariableValue>: ExternalV
         self.calls.lazy.filter { $0 == .id }.count
     }
 
-    var getValueCalls: Int {
-        self.calls.lazy.filter { $0 == .getValue }.count
-    }
-
-    var setValueCalls: [Value] {
+    var saveSnapshotCalls: [Value] {
         self.calls.compactMap {
-            if case .setValue(let newValue) = $0 {
+            if case .saveSnapshot(let newValue) = $0 {
                 return newValue
             } else {
                 return nil
             }
         }
-    }
-
-    var saveSnapshotCalls: Int {
-        self.calls.lazy.filter { $0 == .saveSnapshot }.count
     }
 
     var takeSnapshotCalls: Int {
@@ -55,67 +41,33 @@ final class ExternalVariableHandlerMock<Value: ExternalVariableValue>: ExternalV
         return _id
     }
 
-    var value: Value {
-        get {
-            calls.append(.getValue)
-            return getValue()
-        } set {
-            calls.append(.setValue(newValue: newValue))
-            setValue(newValue)
-        }
-    }
-
-    convenience init(
-        id: String,
-        saveSnapshot: @escaping () -> Void = {},
-        takeSnapshot: @escaping () -> Void = {}
-    ) where Value: EmptyInitialisable {
-        self.init(
-            id: id,
-            value: Value(),
-            saveSnapshot: saveSnapshot,
-            takeSnapshot: takeSnapshot
-        )
-    }
-
-    convenience init(
-        id: String,
-        value: Value,
-        saveSnapshot: @escaping () -> Void = {},
-        takeSnapshot: @escaping () -> Void = {}
-    ) {
+    convenience init(id: String, value: Value) {
         var value = value
         self.init(
             id: id,
-            getValue: { value },
-            setValue: { value = $0 },
-            saveSnapshot: saveSnapshot,
-            takeSnapshot: takeSnapshot
+            saveSnapshot: { value = $0 },
+            takeSnapshot: { value }
         )
     }
 
     init(
         id: String,
-        getValue: @escaping () -> Value,
-        setValue: @escaping (Value) -> Void,
-        saveSnapshot: @escaping () -> Void = {},
-        takeSnapshot: @escaping () -> Void = {}
+        saveSnapshot: @escaping (Value) -> Void,
+        takeSnapshot: @escaping () -> Value
     ) {
         self._id = id
-        self.getValue = getValue
-        self.setValue = setValue
         self._saveSnapshot = saveSnapshot
         self._takeSnapshot = takeSnapshot
     }
 
-    func saveSnapshot() {
-        calls.append(.saveSnapshot)
-        _saveSnapshot()
+    func saveSnapshot(value: Value) {
+        calls.append(.saveSnapshot(value: value))
+        _saveSnapshot(value)
     }
 
-    func takeSnapshot() {
+    func takeSnapshot() -> Value {
         calls.append(.takeSnapshot)
-        _takeSnapshot()
+        return _takeSnapshot()
     }
 
 }
