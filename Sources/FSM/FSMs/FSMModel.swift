@@ -164,6 +164,13 @@ public extension FSMModel {
         return name
     }
 
+    func fsm(parameters: Parameters) -> (
+        FiniteStateMachine<StateType, Ringlet, Parameters, Result, Context, Environment>,
+        FiniteStateMachine<StateType, Ringlet, Parameters, Result, Context, Environment>.Data
+    ) {
+        FiniteStateMachine.initial(from: self, with: parameters)
+    }
+
     var anyStates: [Int: AnyStateProperty] {
         let mirror = Mirror(reflecting: self)
         return Dictionary(uniqueKeysWithValues: mirror.children.compactMap {

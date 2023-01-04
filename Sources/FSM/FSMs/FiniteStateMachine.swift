@@ -146,22 +146,16 @@ public struct FiniteStateMachine<
 
     }
 
-    private let _initialData: () -> Data
-
-    public var initialData: Data {
-        _initialData()
-    }
-
     public let states: [State]
 
     public let ringlet: Ringlet
 
     public let handlers: Handlers
 
-    public init<Model: FSMModel>(
-        model: Model,
-        parameters: Parameters
-    ) where Model.StateType == StateType,
+    public static func initial<Model: FSMModel>(
+        from model: Model,
+        with parameters: Parameters
+    ) -> (Self, Self.Data) where Model.StateType == StateType,
             Model.Ringlet == Ringlet,
             Model.Parameters == Parameters,
             Model.Result == Result,
@@ -282,32 +276,26 @@ public struct FiniteStateMachine<
         guard actuatorValues.count == actuators.count else {
             fatalError("Unable to set up actuatorValues for actuators.")
         }
-        self.init(
-            states: states,
-            ringlet: model.initialRinglet,
-            handlers: handlers,
-            initialData: {
-                Data(
-                    acceptingStates: acceptingStates,
-                    stateContexts: newContexts,
-                    fsmContext: fsmContext,
-                    ringletContext: Ringlet.Context(),
-                    actuatorValues: actuatorValues,
-                    initialState: initialState,
-                    currentState: currentState,
-                    previousState: previousState,
-                    suspendState: suspendState,
-                    suspendedState: nil
-                )
-            }
+        let fsm = FiniteStateMachine(states: states, ringlet: model.initialRinglet, handlers: handlers)
+        let data = Data(
+            acceptingStates: acceptingStates,
+            stateContexts: newContexts,
+            fsmContext: fsmContext,
+            ringletContext: Ringlet.Context(),
+            actuatorValues: actuatorValues,
+            initialState: initialState,
+            currentState: currentState,
+            previousState: previousState,
+            suspendState: suspendState,
+            suspendedState: nil
         )
+        return (fsm, data)
     }
 
-    private init(states: [State], ringlet: Ringlet, handlers: Handlers, initialData: @escaping () -> Data) {
+    private init(states: [State], ringlet: Ringlet, handlers: Handlers) {
         self.states = states
         self.ringlet = ringlet
         self.handlers = handlers
-        self._initialData = initialData
     }
 
     public mutating func next<Scheduler: SchedulerProtocol>(scheduler: Scheduler, data: inout Data) {
