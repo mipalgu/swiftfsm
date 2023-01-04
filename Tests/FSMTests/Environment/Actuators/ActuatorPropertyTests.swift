@@ -24,7 +24,7 @@ final class ActuatorPropertyTests: XCTestCase {
 
     func testWrappedValueDelegatesToHandler() {
         let mock = ActuatorHandlerMock<Bool>(id: "mock")
-        var property = ActuatorProperty<Snapshot, ActuatorHandlerMock<Bool>>(
+        let property = ActuatorProperty<Snapshot, ActuatorHandlerMock<Bool>>(
             handler: mock,
             mapsTo: \.bool,
             initialValue: false
