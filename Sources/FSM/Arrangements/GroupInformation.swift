@@ -1,12 +1,17 @@
-public struct GroupInformation<Arrangement: ArrangementModel> {
+public struct GroupInformation {
 
-    public let timeslots: [TimeslotProperty<Arrangement>]
+    public let slots: [SlotInformation]
 
-    public let duration: UInt
+    public let duration: UInt?
 
-    public init(timeslots: [TimeslotProperty<Arrangement>]) {
-        self.timeslots = timeslots
-        self.duration = timeslots.lazy.map(\.endTime).max() ?? 0
+    public init(slots: [SlotInformation]) {
+        self.slots = slots
+        let endSlots = slots.compactMap(\.endTime)
+        guard endSlots.count == slots.count else {
+            self.duration = nil
+            return
+        }
+        self.duration = endSlots.max()
     }
 
 }

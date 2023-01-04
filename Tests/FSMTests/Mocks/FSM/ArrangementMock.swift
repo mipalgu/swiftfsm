@@ -1,11 +1,14 @@
 import FSM
 
-struct Arrangement: TTArrangementModel {
+struct Arrangement: ArrangementModel {
 
     @Machine
     var pingPong = FSMMock()
 
-    @Timeslot(fsm: \.$pingPong, startTime: 0, duration: 20)
+    @Slot(fsm: \.$pingPong, timing: (startTime: 0, duration: 20))
     var pingPongTimeslot
+
+    @Group(slots: \.$pingPongTimeslot)
+    var group
 
 }

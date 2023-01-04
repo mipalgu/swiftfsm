@@ -1,10 +1,16 @@
 @propertyWrapper
 public struct GroupProperty<Arrangement: ArrangementModel> {
 
-    public let wrappedValue: GroupInformation<Arrangement>
+    public let wrappedValue: (Arrangement) -> GroupInformation
 
-    public init(wrappedValue: GroupInformation<Arrangement>) {
-        self.wrappedValue = wrappedValue
+    public init(slots keyPaths: KeyPath<Arrangement, SlotProperty<Arrangement>> ...) {
+        self.init(slots: keyPaths)
+    }
+
+    public init(slots keyPaths: [KeyPath<Arrangement, SlotProperty<Arrangement>>]) {
+        self.wrappedValue = { arrangement in
+            GroupInformation(slots: keyPaths.map { arrangement[keyPath: $0].wrappedValue(arrangement) })
+        }
     }
 
 }
