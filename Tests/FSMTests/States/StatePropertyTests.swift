@@ -23,6 +23,12 @@ private struct TempFSM: LLFSM {
     )
     var ping = EmptyLLFSMState()
 
+    @State(name: "Pung", uses: [\.actuator])
+    var pung = EmptyLLFSMState()
+
+    @State(name: "Pang")
+    var pang = EmptyLLFSMState()
+
     struct PongContext: ContextProtocol {
 
         var executeOnEntry: Bool = false
@@ -58,6 +64,14 @@ private struct TempFSM: LLFSM {
 
     var pingProperty: State {
         _ping
+    }
+
+    var pungProperty: State {
+        _pung
+    }
+
+    var pangProperty: State {
+        _pang
     }
 
     var pongProperty: State {
@@ -124,6 +138,33 @@ final class StatePropertyTests: XCTestCase {
         XCTAssertEqual(wrappedValue, property.wrappedValue.base as? EmptyState)
         XCTAssertEqual(property.information, info)
         XCTAssertEqual(property.environmentVariables, keyPaths)
+        XCTAssertEqual(property.transitions.count, 1)
+        guard property.transitions.count == 1 else {
+            return
+        }
+        let transition = property.transitions[0]
+        let context = TempContext(
+            state: EmptyDataStructure(),
+            fsm: EmptyDataStructure(),
+            environment: TempFSM.Environment(),
+            parameters: EmptyDataStructure(),
+            result: EmptyDataStructure?.none
+        )
+        XCTAssertFalse(transition.canTransition(from: context))
+        let pongInfo = StateInformation(name: "Pong")
+        XCTAssertEqual(transition.target(TempFSM()), pongInfo)
+    }
+
+    func testDefaultValuesOfInit() {
+        let wrappedValue = EmptyState()
+        let name = "Pung"
+        let keyPaths: [PartialKeyPath<TempFSM.Environment>] = [\.actuator]
+        let info = StateInformation(name: name)
+        let property = TempFSM().pungProperty
+        XCTAssertEqual(wrappedValue, property.wrappedValue.base as? EmptyState)
+        XCTAssertEqual(property.information, info)
+        XCTAssertEqual(property.environmentVariables, keyPaths)
+        XCTAssertTrue(property.transitions.isEmpty)
     }
 
     func testVariadicInit() {
@@ -208,6 +249,17 @@ final class StatePropertyTests: XCTestCase {
             XCTAssertFalse(transition.canTransition(from: context1))
             XCTAssertTrue(transition.canTransition(from: context2))
         }
+    }
+
+    func testDefaultValuesOfVariadicInit() {
+        let wrappedValue = EmptyState()
+        let name = "Pang"
+        let info = StateInformation(name: name)
+        let property = TempFSM().pangProperty
+        XCTAssertEqual(wrappedValue, property.wrappedValue.base as? EmptyState)
+        XCTAssertEqual(property.information, info)
+        XCTAssertTrue(property.environmentVariables.isEmpty)
+        XCTAssertTrue(property.transitions.isEmpty)
     }
 
     func testErasedGetters() {
