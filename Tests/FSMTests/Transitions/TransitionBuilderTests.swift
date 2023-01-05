@@ -23,7 +23,7 @@ final class TransitionBuilderTests: XCTestCase {
     func testOneTransitions() {
         @TransitionBuilder
         var trueTransitions: [AnyTransition<NamedLLFSMState, Int>] {
-            CallbackTransition<NamedLLFSMState, Int>(target: 0) { state in
+            AnyTransition<NamedLLFSMState, Int>(to: 0) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "0")
                 return true
@@ -31,7 +31,7 @@ final class TransitionBuilderTests: XCTestCase {
         }
         @TransitionBuilder
         var falseTransitions: [AnyTransition<NamedLLFSMState, Int>] {
-            CallbackTransition<NamedLLFSMState, Int>(target: 0) { state in
+            AnyTransition<NamedLLFSMState, Int>(to: 0) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "0")
                 return false
@@ -45,12 +45,12 @@ final class TransitionBuilderTests: XCTestCase {
     func testTwoTransitions() {
         @TransitionBuilder
         var trueTransitions: [AnyTransition<NamedLLFSMState, Int>] {
-            CallbackTransition<NamedLLFSMState, Int>(target: 0) { state in
+            AnyTransition<NamedLLFSMState, Int>(to: 0) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "0")
                 return true
             }
-            CallbackTransition<NamedLLFSMState, Int>(target: 1) { state in
+            AnyTransition<NamedLLFSMState, Int>(to: 1) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "1")
                 return true
@@ -58,12 +58,12 @@ final class TransitionBuilderTests: XCTestCase {
         }
         @TransitionBuilder
         var falseTransitions: [AnyTransition<NamedLLFSMState, Int>] {
-            CallbackTransition<NamedLLFSMState, Int>(target: 0) { state in
+            AnyTransition<NamedLLFSMState, Int>(to: 0) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "0")
                 return false
             }
-            CallbackTransition<NamedLLFSMState, Int>(target: 1) { state in
+            AnyTransition<NamedLLFSMState, Int>(to: 1) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "1")
                 return false
@@ -77,17 +77,17 @@ final class TransitionBuilderTests: XCTestCase {
     func testThreeTransitions() {
         @TransitionBuilder
         var trueTransitions: [AnyTransition<NamedLLFSMState, Int>] {
-            CallbackTransition<NamedLLFSMState, Int>(target: 0) { state in
+            AnyTransition<NamedLLFSMState, Int>(to: 0) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "0")
                 return true
             }
-            CallbackTransition<NamedLLFSMState, Int>(target: 1) { state in
+            AnyTransition<NamedLLFSMState, Int>(to: 1) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "1")
                 return true
             }
-            CallbackTransition<NamedLLFSMState, Int>(target: 2) { state in
+            AnyTransition<NamedLLFSMState, Int>(to: 2) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "2")
                 return true
@@ -95,17 +95,17 @@ final class TransitionBuilderTests: XCTestCase {
         }
         @TransitionBuilder
         var falseTransitions: [AnyTransition<NamedLLFSMState, Int>] {
-            CallbackTransition<NamedLLFSMState, Int>(target: 0) { state in
+            AnyTransition<NamedLLFSMState, Int>(to: 0) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "0")
                 return false
             }
-            CallbackTransition<NamedLLFSMState, Int>(target: 1) { state in
+            AnyTransition<NamedLLFSMState, Int>(to: 1) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "1")
                 return false
             }
-            CallbackTransition<NamedLLFSMState, Int>(target: 2) { state in
+            AnyTransition<NamedLLFSMState, Int>(to: 2) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "2")
                 return false
@@ -119,22 +119,22 @@ final class TransitionBuilderTests: XCTestCase {
     func testFourTransitions() {
         @TransitionBuilder
         var trueTransitions: [AnyTransition<NamedLLFSMState, Int>] {
-            CallbackTransition<NamedLLFSMState, Int>(target: 0) { state in
+            AnyTransition<NamedLLFSMState, Int>(to: 0) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "0")
                 return true
             }
-            CallbackTransition<NamedLLFSMState, Int>(target: 1) { state in
+            AnyTransition<NamedLLFSMState, Int>(to: 1) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "1")
                 return true
             }
-            CallbackTransition<NamedLLFSMState, Int>(target: 2) { state in
+            AnyTransition<NamedLLFSMState, Int>(to: 2) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "2")
                 return true
             }
-            CallbackTransition<NamedLLFSMState, Int>(target: 3) { state in
+            AnyTransition<NamedLLFSMState, Int>(to: 3) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "3")
                 return true
@@ -142,22 +142,22 @@ final class TransitionBuilderTests: XCTestCase {
         }
         @TransitionBuilder
         var falseTransitions: [AnyTransition<NamedLLFSMState, Int>] {
-            CallbackTransition<NamedLLFSMState, Int>(target: 0) { state in
+            AnyTransition<NamedLLFSMState, Int>(to: 0) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "0")
                 return false
             }
-            CallbackTransition<NamedLLFSMState, Int>(target: 1) { state in
+            AnyTransition<NamedLLFSMState, Int>(to: 1) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "1")
                 return false
             }
-            CallbackTransition<NamedLLFSMState, Int>(target: 2) { state in
+            AnyTransition<NamedLLFSMState, Int>(to: 2) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "2")
                 return false
             }
-            CallbackTransition<NamedLLFSMState, Int>(target: 3) { state in
+            AnyTransition<NamedLLFSMState, Int>(to: 3) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "3")
                 return false
@@ -171,27 +171,27 @@ final class TransitionBuilderTests: XCTestCase {
     func testFiveTransitions() {
         @TransitionBuilder
         var trueTransitions: [AnyTransition<NamedLLFSMState, Int>] {
-            CallbackTransition<NamedLLFSMState, Int>(target: 0) { state in
+            AnyTransition<NamedLLFSMState, Int>(to: 0) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "0")
                 return true
             }
-            CallbackTransition<NamedLLFSMState, Int>(target: 1) { state in
+            AnyTransition<NamedLLFSMState, Int>(to: 1) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "1")
                 return true
             }
-            CallbackTransition<NamedLLFSMState, Int>(target: 2) { state in
+            AnyTransition<NamedLLFSMState, Int>(to: 2) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "2")
                 return true
             }
-            CallbackTransition<NamedLLFSMState, Int>(target: 3) { state in
+            AnyTransition<NamedLLFSMState, Int>(to: 3) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "3")
                 return true
             }
-            CallbackTransition<NamedLLFSMState, Int>(target: 4) { state in
+            AnyTransition<NamedLLFSMState, Int>(to: 4) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "4")
                 return true
@@ -199,27 +199,27 @@ final class TransitionBuilderTests: XCTestCase {
         }
         @TransitionBuilder
         var falseTransitions: [AnyTransition<NamedLLFSMState, Int>] {
-            CallbackTransition<NamedLLFSMState, Int>(target: 0) { state in
+            AnyTransition<NamedLLFSMState, Int>(to: 0) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "0")
                 return false
             }
-            CallbackTransition<NamedLLFSMState, Int>(target: 1) { state in
+            AnyTransition<NamedLLFSMState, Int>(to: 1) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "1")
                 return false
             }
-            CallbackTransition<NamedLLFSMState, Int>(target: 2) { state in
+            AnyTransition<NamedLLFSMState, Int>(to: 2) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "2")
                 return false
             }
-            CallbackTransition<NamedLLFSMState, Int>(target: 3) { state in
+            AnyTransition<NamedLLFSMState, Int>(to: 3) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "3")
                 return false
             }
-            CallbackTransition<NamedLLFSMState, Int>(target: 4) { state in
+            AnyTransition<NamedLLFSMState, Int>(to: 4) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "4")
                 return false
@@ -233,32 +233,32 @@ final class TransitionBuilderTests: XCTestCase {
     func testSixTransitions() {
         @TransitionBuilder
         var trueTransitions: [AnyTransition<NamedLLFSMState, Int>] {
-            CallbackTransition<NamedLLFSMState, Int>(target: 0) { state in
+            AnyTransition<NamedLLFSMState, Int>(to: 0) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "0")
                 return true
             }
-            CallbackTransition<NamedLLFSMState, Int>(target: 1) { state in
+            AnyTransition<NamedLLFSMState, Int>(to: 1) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "1")
                 return true
             }
-            CallbackTransition<NamedLLFSMState, Int>(target: 2) { state in
+            AnyTransition<NamedLLFSMState, Int>(to: 2) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "2")
                 return true
             }
-            CallbackTransition<NamedLLFSMState, Int>(target: 3) { state in
+            AnyTransition<NamedLLFSMState, Int>(to: 3) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "3")
                 return true
             }
-            CallbackTransition<NamedLLFSMState, Int>(target: 4) { state in
+            AnyTransition<NamedLLFSMState, Int>(to: 4) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "4")
                 return true
             }
-            CallbackTransition<NamedLLFSMState, Int>(target: 5) { state in
+            AnyTransition<NamedLLFSMState, Int>(to: 5) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "5")
                 return true
@@ -266,32 +266,32 @@ final class TransitionBuilderTests: XCTestCase {
         }
         @TransitionBuilder
         var falseTransitions: [AnyTransition<NamedLLFSMState, Int>] {
-            CallbackTransition<NamedLLFSMState, Int>(target: 0) { state in
+            AnyTransition<NamedLLFSMState, Int>(to: 0) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "0")
                 return false
             }
-            CallbackTransition<NamedLLFSMState, Int>(target: 1) { state in
+            AnyTransition<NamedLLFSMState, Int>(to: 1) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "1")
                 return false
             }
-            CallbackTransition<NamedLLFSMState, Int>(target: 2) { state in
+            AnyTransition<NamedLLFSMState, Int>(to: 2) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "2")
                 return false
             }
-            CallbackTransition<NamedLLFSMState, Int>(target: 3) { state in
+            AnyTransition<NamedLLFSMState, Int>(to: 3) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "3")
                 return false
             }
-            CallbackTransition<NamedLLFSMState, Int>(target: 4) { state in
+            AnyTransition<NamedLLFSMState, Int>(to: 4) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "4")
                 return false
             }
-            CallbackTransition<NamedLLFSMState, Int>(target: 5) { state in
+            AnyTransition<NamedLLFSMState, Int>(to: 5) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "5")
                 return false
@@ -305,37 +305,37 @@ final class TransitionBuilderTests: XCTestCase {
     func testSevenTransitions() {
         @TransitionBuilder
         var trueTransitions: [AnyTransition<NamedLLFSMState, Int>] {
-            CallbackTransition<NamedLLFSMState, Int>(target: 0) { state in
+            AnyTransition<NamedLLFSMState, Int>(to: 0) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "0")
                 return true
             }
-            CallbackTransition<NamedLLFSMState, Int>(target: 1) { state in
+            AnyTransition<NamedLLFSMState, Int>(to: 1) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "1")
                 return true
             }
-            CallbackTransition<NamedLLFSMState, Int>(target: 2) { state in
+            AnyTransition<NamedLLFSMState, Int>(to: 2) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "2")
                 return true
             }
-            CallbackTransition<NamedLLFSMState, Int>(target: 3) { state in
+            AnyTransition<NamedLLFSMState, Int>(to: 3) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "3")
                 return true
             }
-            CallbackTransition<NamedLLFSMState, Int>(target: 4) { state in
+            AnyTransition<NamedLLFSMState, Int>(to: 4) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "4")
                 return true
             }
-            CallbackTransition<NamedLLFSMState, Int>(target: 5) { state in
+            AnyTransition<NamedLLFSMState, Int>(to: 5) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "5")
                 return true
             }
-            CallbackTransition<NamedLLFSMState, Int>(target: 6) { state in
+            AnyTransition<NamedLLFSMState, Int>(to: 6) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "6")
                 return true
@@ -343,37 +343,37 @@ final class TransitionBuilderTests: XCTestCase {
         }
         @TransitionBuilder
         var falseTransitions: [AnyTransition<NamedLLFSMState, Int>] {
-            CallbackTransition<NamedLLFSMState, Int>(target: 0) { state in
+            AnyTransition<NamedLLFSMState, Int>(to: 0) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "0")
                 return false
             }
-            CallbackTransition<NamedLLFSMState, Int>(target: 1) { state in
+            AnyTransition<NamedLLFSMState, Int>(to: 1) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "1")
                 return false
             }
-            CallbackTransition<NamedLLFSMState, Int>(target: 2) { state in
+            AnyTransition<NamedLLFSMState, Int>(to: 2) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "2")
                 return false
             }
-            CallbackTransition<NamedLLFSMState, Int>(target: 3) { state in
+            AnyTransition<NamedLLFSMState, Int>(to: 3) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "3")
                 return false
             }
-            CallbackTransition<NamedLLFSMState, Int>(target: 4) { state in
+            AnyTransition<NamedLLFSMState, Int>(to: 4) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "4")
                 return false
             }
-            CallbackTransition<NamedLLFSMState, Int>(target: 5) { state in
+            AnyTransition<NamedLLFSMState, Int>(to: 5) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "5")
                 return false
             }
-            CallbackTransition<NamedLLFSMState, Int>(target: 6) { state in
+            AnyTransition<NamedLLFSMState, Int>(to: 6) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "6")
                 return false
@@ -387,42 +387,42 @@ final class TransitionBuilderTests: XCTestCase {
     func testEightTransitions() {
         @TransitionBuilder
         var trueTransitions: [AnyTransition<NamedLLFSMState, Int>] {
-            CallbackTransition<NamedLLFSMState, Int>(target: 0) { state in
+            AnyTransition<NamedLLFSMState, Int>(to: 0) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "0")
                 return true
             }
-            CallbackTransition<NamedLLFSMState, Int>(target: 1) { state in
+            AnyTransition<NamedLLFSMState, Int>(to: 1) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "1")
                 return true
             }
-            CallbackTransition<NamedLLFSMState, Int>(target: 2) { state in
+            AnyTransition<NamedLLFSMState, Int>(to: 2) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "2")
                 return true
             }
-            CallbackTransition<NamedLLFSMState, Int>(target: 3) { state in
+            AnyTransition<NamedLLFSMState, Int>(to: 3) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "3")
                 return true
             }
-            CallbackTransition<NamedLLFSMState, Int>(target: 4) { state in
+            AnyTransition<NamedLLFSMState, Int>(to: 4) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "4")
                 return true
             }
-            CallbackTransition<NamedLLFSMState, Int>(target: 5) { state in
+            AnyTransition<NamedLLFSMState, Int>(to: 5) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "5")
                 return true
             }
-            CallbackTransition<NamedLLFSMState, Int>(target: 6) { state in
+            AnyTransition<NamedLLFSMState, Int>(to: 6) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "6")
                 return true
             }
-            CallbackTransition<NamedLLFSMState, Int>(target: 7) { state in
+            AnyTransition<NamedLLFSMState, Int>(to: 7) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "7")
                 return true
@@ -430,42 +430,42 @@ final class TransitionBuilderTests: XCTestCase {
         }
         @TransitionBuilder
         var falseTransitions: [AnyTransition<NamedLLFSMState, Int>] {
-            CallbackTransition<NamedLLFSMState, Int>(target: 0) { state in
+            AnyTransition<NamedLLFSMState, Int>(to: 0) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "0")
                 return false
             }
-            CallbackTransition<NamedLLFSMState, Int>(target: 1) { state in
+            AnyTransition<NamedLLFSMState, Int>(to: 1) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "1")
                 return false
             }
-            CallbackTransition<NamedLLFSMState, Int>(target: 2) { state in
+            AnyTransition<NamedLLFSMState, Int>(to: 2) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "2")
                 return false
             }
-            CallbackTransition<NamedLLFSMState, Int>(target: 3) { state in
+            AnyTransition<NamedLLFSMState, Int>(to: 3) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "3")
                 return false
             }
-            CallbackTransition<NamedLLFSMState, Int>(target: 4) { state in
+            AnyTransition<NamedLLFSMState, Int>(to: 4) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "4")
                 return false
             }
-            CallbackTransition<NamedLLFSMState, Int>(target: 5) { state in
+            AnyTransition<NamedLLFSMState, Int>(to: 5) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "5")
                 return false
             }
-            CallbackTransition<NamedLLFSMState, Int>(target: 6) { state in
+            AnyTransition<NamedLLFSMState, Int>(to: 6) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "6")
                 return false
             }
-            CallbackTransition<NamedLLFSMState, Int>(target: 7) { state in
+            AnyTransition<NamedLLFSMState, Int>(to: 7) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "7")
                 return false
@@ -479,47 +479,47 @@ final class TransitionBuilderTests: XCTestCase {
     func testNineTransitions() {
         @TransitionBuilder
         var trueTransitions: [AnyTransition<NamedLLFSMState, Int>] {
-            CallbackTransition<NamedLLFSMState, Int>(target: 0) { state in
+            AnyTransition<NamedLLFSMState, Int>(to: 0) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "0")
                 return true
             }
-            CallbackTransition<NamedLLFSMState, Int>(target: 1) { state in
+            AnyTransition<NamedLLFSMState, Int>(to: 1) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "1")
                 return true
             }
-            CallbackTransition<NamedLLFSMState, Int>(target: 2) { state in
+            AnyTransition<NamedLLFSMState, Int>(to: 2) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "2")
                 return true
             }
-            CallbackTransition<NamedLLFSMState, Int>(target: 3) { state in
+            AnyTransition<NamedLLFSMState, Int>(to: 3) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "3")
                 return true
             }
-            CallbackTransition<NamedLLFSMState, Int>(target: 4) { state in
+            AnyTransition<NamedLLFSMState, Int>(to: 4) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "4")
                 return true
             }
-            CallbackTransition<NamedLLFSMState, Int>(target: 5) { state in
+            AnyTransition<NamedLLFSMState, Int>(to: 5) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "5")
                 return true
             }
-            CallbackTransition<NamedLLFSMState, Int>(target: 6) { state in
+            AnyTransition<NamedLLFSMState, Int>(to: 6) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "6")
                 return true
             }
-            CallbackTransition<NamedLLFSMState, Int>(target: 7) { state in
+            AnyTransition<NamedLLFSMState, Int>(to: 7) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "7")
                 return true
             }
-            CallbackTransition<NamedLLFSMState, Int>(target: 8) { state in
+            AnyTransition<NamedLLFSMState, Int>(to: 8) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "8")
                 return true
@@ -527,47 +527,47 @@ final class TransitionBuilderTests: XCTestCase {
         }
         @TransitionBuilder
         var falseTransitions: [AnyTransition<NamedLLFSMState, Int>] {
-            CallbackTransition<NamedLLFSMState, Int>(target: 0) { state in
+            AnyTransition<NamedLLFSMState, Int>(to: 0) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "0")
                 return false
             }
-            CallbackTransition<NamedLLFSMState, Int>(target: 1) { state in
+            AnyTransition<NamedLLFSMState, Int>(to: 1) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "1")
                 return false
             }
-            CallbackTransition<NamedLLFSMState, Int>(target: 2) { state in
+            AnyTransition<NamedLLFSMState, Int>(to: 2) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "2")
                 return false
             }
-            CallbackTransition<NamedLLFSMState, Int>(target: 3) { state in
+            AnyTransition<NamedLLFSMState, Int>(to: 3) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "3")
                 return false
             }
-            CallbackTransition<NamedLLFSMState, Int>(target: 4) { state in
+            AnyTransition<NamedLLFSMState, Int>(to: 4) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "4")
                 return false
             }
-            CallbackTransition<NamedLLFSMState, Int>(target: 5) { state in
+            AnyTransition<NamedLLFSMState, Int>(to: 5) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "5")
                 return false
             }
-            CallbackTransition<NamedLLFSMState, Int>(target: 6) { state in
+            AnyTransition<NamedLLFSMState, Int>(to: 6) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "6")
                 return false
             }
-            CallbackTransition<NamedLLFSMState, Int>(target: 7) { state in
+            AnyTransition<NamedLLFSMState, Int>(to: 7) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "7")
                 return false
             }
-            CallbackTransition<NamedLLFSMState, Int>(target: 8) { state in
+            AnyTransition<NamedLLFSMState, Int>(to: 8) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "8")
                 return false
@@ -581,52 +581,52 @@ final class TransitionBuilderTests: XCTestCase {
     func testTenTransitions() {
         @TransitionBuilder
         var trueTransitions: [AnyTransition<NamedLLFSMState, Int>] {
-            CallbackTransition<NamedLLFSMState, Int>(target: 0) { state in
+            AnyTransition<NamedLLFSMState, Int>(to: 0) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "0")
                 return true
             }
-            CallbackTransition<NamedLLFSMState, Int>(target: 1) { state in
+            AnyTransition<NamedLLFSMState, Int>(to: 1) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "1")
                 return true
             }
-            CallbackTransition<NamedLLFSMState, Int>(target: 2) { state in
+            AnyTransition<NamedLLFSMState, Int>(to: 2) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "2")
                 return true
             }
-            CallbackTransition<NamedLLFSMState, Int>(target: 3) { state in
+            AnyTransition<NamedLLFSMState, Int>(to: 3) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "3")
                 return true
             }
-            CallbackTransition<NamedLLFSMState, Int>(target: 4) { state in
+            AnyTransition<NamedLLFSMState, Int>(to: 4) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "4")
                 return true
             }
-            CallbackTransition<NamedLLFSMState, Int>(target: 5) { state in
+            AnyTransition<NamedLLFSMState, Int>(to: 5) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "5")
                 return true
             }
-            CallbackTransition<NamedLLFSMState, Int>(target: 6) { state in
+            AnyTransition<NamedLLFSMState, Int>(to: 6) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "6")
                 return true
             }
-            CallbackTransition<NamedLLFSMState, Int>(target: 7) { state in
+            AnyTransition<NamedLLFSMState, Int>(to: 7) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "7")
                 return true
             }
-            CallbackTransition<NamedLLFSMState, Int>(target: 8) { state in
+            AnyTransition<NamedLLFSMState, Int>(to: 8) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "8")
                 return true
             }
-            CallbackTransition<NamedLLFSMState, Int>(target: 9) { state in
+            AnyTransition<NamedLLFSMState, Int>(to: 9) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "9")
                 return true
@@ -634,52 +634,52 @@ final class TransitionBuilderTests: XCTestCase {
         }
         @TransitionBuilder
         var falseTransitions: [AnyTransition<NamedLLFSMState, Int>] {
-            CallbackTransition<NamedLLFSMState, Int>(target: 0) { state in
+            AnyTransition<NamedLLFSMState, Int>(to: 0) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "0")
                 return false
             }
-            CallbackTransition<NamedLLFSMState, Int>(target: 1) { state in
+            AnyTransition<NamedLLFSMState, Int>(to: 1) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "1")
                 return false
             }
-            CallbackTransition<NamedLLFSMState, Int>(target: 2) { state in
+            AnyTransition<NamedLLFSMState, Int>(to: 2) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "2")
                 return false
             }
-            CallbackTransition<NamedLLFSMState, Int>(target: 3) { state in
+            AnyTransition<NamedLLFSMState, Int>(to: 3) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "3")
                 return false
             }
-            CallbackTransition<NamedLLFSMState, Int>(target: 4) { state in
+            AnyTransition<NamedLLFSMState, Int>(to: 4) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "4")
                 return false
             }
-            CallbackTransition<NamedLLFSMState, Int>(target: 5) { state in
+            AnyTransition<NamedLLFSMState, Int>(to: 5) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "5")
                 return false
             }
-            CallbackTransition<NamedLLFSMState, Int>(target: 6) { state in
+            AnyTransition<NamedLLFSMState, Int>(to: 6) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "6")
                 return false
             }
-            CallbackTransition<NamedLLFSMState, Int>(target: 7) { state in
+            AnyTransition<NamedLLFSMState, Int>(to: 7) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "7")
                 return false
             }
-            CallbackTransition<NamedLLFSMState, Int>(target: 8) { state in
+            AnyTransition<NamedLLFSMState, Int>(to: 8) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "8")
                 return false
             }
-            CallbackTransition<NamedLLFSMState, Int>(target: 9) { state in
+            AnyTransition<NamedLLFSMState, Int>(to: 9) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "9")
                 return false
@@ -693,57 +693,57 @@ final class TransitionBuilderTests: XCTestCase {
     func testElevenTransitions() {
         @TransitionBuilder
         var trueTransitions: [AnyTransition<NamedLLFSMState, Int>] {
-            CallbackTransition<NamedLLFSMState, Int>(target: 0) { state in
+            AnyTransition<NamedLLFSMState, Int>(to: 0) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "0")
                 return true
             }
-            CallbackTransition<NamedLLFSMState, Int>(target: 1) { state in
+            AnyTransition<NamedLLFSMState, Int>(to: 1) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "1")
                 return true
             }
-            CallbackTransition<NamedLLFSMState, Int>(target: 2) { state in
+            AnyTransition<NamedLLFSMState, Int>(to: 2) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "2")
                 return true
             }
-            CallbackTransition<NamedLLFSMState, Int>(target: 3) { state in
+            AnyTransition<NamedLLFSMState, Int>(to: 3) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "3")
                 return true
             }
-            CallbackTransition<NamedLLFSMState, Int>(target: 4) { state in
+            AnyTransition<NamedLLFSMState, Int>(to: 4) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "4")
                 return true
             }
-            CallbackTransition<NamedLLFSMState, Int>(target: 5) { state in
+            AnyTransition<NamedLLFSMState, Int>(to: 5) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "5")
                 return true
             }
-            CallbackTransition<NamedLLFSMState, Int>(target: 6) { state in
+            AnyTransition<NamedLLFSMState, Int>(to: 6) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "6")
                 return true
             }
-            CallbackTransition<NamedLLFSMState, Int>(target: 7) { state in
+            AnyTransition<NamedLLFSMState, Int>(to: 7) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "7")
                 return true
             }
-            CallbackTransition<NamedLLFSMState, Int>(target: 8) { state in
+            AnyTransition<NamedLLFSMState, Int>(to: 8) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "8")
                 return true
             }
-            CallbackTransition<NamedLLFSMState, Int>(target: 9) { state in
+            AnyTransition<NamedLLFSMState, Int>(to: 9) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "9")
                 return true
             }
-            CallbackTransition<NamedLLFSMState, Int>(target: 10) { state in
+            AnyTransition<NamedLLFSMState, Int>(to: 10) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "10")
                 return true
@@ -751,57 +751,57 @@ final class TransitionBuilderTests: XCTestCase {
         }
         @TransitionBuilder
         var falseTransitions: [AnyTransition<NamedLLFSMState, Int>] {
-            CallbackTransition<NamedLLFSMState, Int>(target: 0) { state in
+            AnyTransition<NamedLLFSMState, Int>(to: 0) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "0")
                 return false
             }
-            CallbackTransition<NamedLLFSMState, Int>(target: 1) { state in
+            AnyTransition<NamedLLFSMState, Int>(to: 1) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "1")
                 return false
             }
-            CallbackTransition<NamedLLFSMState, Int>(target: 2) { state in
+            AnyTransition<NamedLLFSMState, Int>(to: 2) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "2")
                 return false
             }
-            CallbackTransition<NamedLLFSMState, Int>(target: 3) { state in
+            AnyTransition<NamedLLFSMState, Int>(to: 3) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "3")
                 return false
             }
-            CallbackTransition<NamedLLFSMState, Int>(target: 4) { state in
+            AnyTransition<NamedLLFSMState, Int>(to: 4) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "4")
                 return false
             }
-            CallbackTransition<NamedLLFSMState, Int>(target: 5) { state in
+            AnyTransition<NamedLLFSMState, Int>(to: 5) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "5")
                 return false
             }
-            CallbackTransition<NamedLLFSMState, Int>(target: 6) { state in
+            AnyTransition<NamedLLFSMState, Int>(to: 6) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "6")
                 return false
             }
-            CallbackTransition<NamedLLFSMState, Int>(target: 7) { state in
+            AnyTransition<NamedLLFSMState, Int>(to: 7) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "7")
                 return false
             }
-            CallbackTransition<NamedLLFSMState, Int>(target: 8) { state in
+            AnyTransition<NamedLLFSMState, Int>(to: 8) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "8")
                 return false
             }
-            CallbackTransition<NamedLLFSMState, Int>(target: 9) { state in
+            AnyTransition<NamedLLFSMState, Int>(to: 9) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "9")
                 return false
             }
-            CallbackTransition<NamedLLFSMState, Int>(target: 10) { state in
+            AnyTransition<NamedLLFSMState, Int>(to: 10) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "10")
                 return false
@@ -815,62 +815,62 @@ final class TransitionBuilderTests: XCTestCase {
     func testTwelveTransitions() {
         @TransitionBuilder
         var trueTransitions: [AnyTransition<NamedLLFSMState, Int>] {
-            CallbackTransition<NamedLLFSMState, Int>(target: 0) { state in
+            AnyTransition<NamedLLFSMState, Int>(to: 0) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "0")
                 return true
             }
-            CallbackTransition<NamedLLFSMState, Int>(target: 1) { state in
+            AnyTransition<NamedLLFSMState, Int>(to: 1) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "1")
                 return true
             }
-            CallbackTransition<NamedLLFSMState, Int>(target: 2) { state in
+            AnyTransition<NamedLLFSMState, Int>(to: 2) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "2")
                 return true
             }
-            CallbackTransition<NamedLLFSMState, Int>(target: 3) { state in
+            AnyTransition<NamedLLFSMState, Int>(to: 3) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "3")
                 return true
             }
-            CallbackTransition<NamedLLFSMState, Int>(target: 4) { state in
+            AnyTransition<NamedLLFSMState, Int>(to: 4) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "4")
                 return true
             }
-            CallbackTransition<NamedLLFSMState, Int>(target: 5) { state in
+            AnyTransition<NamedLLFSMState, Int>(to: 5) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "5")
                 return true
             }
-            CallbackTransition<NamedLLFSMState, Int>(target: 6) { state in
+            AnyTransition<NamedLLFSMState, Int>(to: 6) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "6")
                 return true
             }
-            CallbackTransition<NamedLLFSMState, Int>(target: 7) { state in
+            AnyTransition<NamedLLFSMState, Int>(to: 7) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "7")
                 return true
             }
-            CallbackTransition<NamedLLFSMState, Int>(target: 8) { state in
+            AnyTransition<NamedLLFSMState, Int>(to: 8) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "8")
                 return true
             }
-            CallbackTransition<NamedLLFSMState, Int>(target: 9) { state in
+            AnyTransition<NamedLLFSMState, Int>(to: 9) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "9")
                 return true
             }
-            CallbackTransition<NamedLLFSMState, Int>(target: 10) { state in
+            AnyTransition<NamedLLFSMState, Int>(to: 10) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "10")
                 return true
             }
-            CallbackTransition<NamedLLFSMState, Int>(target: 11) { state in
+            AnyTransition<NamedLLFSMState, Int>(to: 11) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "11")
                 return true
@@ -878,62 +878,62 @@ final class TransitionBuilderTests: XCTestCase {
         }
         @TransitionBuilder
         var falseTransitions: [AnyTransition<NamedLLFSMState, Int>] {
-            CallbackTransition<NamedLLFSMState, Int>(target: 0) { state in
+            AnyTransition<NamedLLFSMState, Int>(to: 0) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "0")
                 return false
             }
-            CallbackTransition<NamedLLFSMState, Int>(target: 1) { state in
+            AnyTransition<NamedLLFSMState, Int>(to: 1) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "1")
                 return false
             }
-            CallbackTransition<NamedLLFSMState, Int>(target: 2) { state in
+            AnyTransition<NamedLLFSMState, Int>(to: 2) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "2")
                 return false
             }
-            CallbackTransition<NamedLLFSMState, Int>(target: 3) { state in
+            AnyTransition<NamedLLFSMState, Int>(to: 3) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "3")
                 return false
             }
-            CallbackTransition<NamedLLFSMState, Int>(target: 4) { state in
+            AnyTransition<NamedLLFSMState, Int>(to: 4) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "4")
                 return false
             }
-            CallbackTransition<NamedLLFSMState, Int>(target: 5) { state in
+            AnyTransition<NamedLLFSMState, Int>(to: 5) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "5")
                 return false
             }
-            CallbackTransition<NamedLLFSMState, Int>(target: 6) { state in
+            AnyTransition<NamedLLFSMState, Int>(to: 6) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "6")
                 return false
             }
-            CallbackTransition<NamedLLFSMState, Int>(target: 7) { state in
+            AnyTransition<NamedLLFSMState, Int>(to: 7) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "7")
                 return false
             }
-            CallbackTransition<NamedLLFSMState, Int>(target: 8) { state in
+            AnyTransition<NamedLLFSMState, Int>(to: 8) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "8")
                 return false
             }
-            CallbackTransition<NamedLLFSMState, Int>(target: 9) { state in
+            AnyTransition<NamedLLFSMState, Int>(to: 9) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "9")
                 return false
             }
-            CallbackTransition<NamedLLFSMState, Int>(target: 10) { state in
+            AnyTransition<NamedLLFSMState, Int>(to: 10) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "10")
                 return false
             }
-            CallbackTransition<NamedLLFSMState, Int>(target: 11) { state in
+            AnyTransition<NamedLLFSMState, Int>(to: 11) { state in
                 self.calls.calls.append(state.name)
                 XCTAssertEqual(state.name, "11")
                 return false
