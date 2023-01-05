@@ -33,7 +33,7 @@ public struct StateContext<
 
     public init(fsmContext: FSMContext<FSMsContext, Environment, Parameters, Result>) {
         self.init(
-            state: unsafeBitCast(fsmContext.state, to: StateContext.self),
+            state: fsmContext.state as! StateContext,
             fsm: fsmContext.fsm,
             environment: fsmContext.environment,
             parameters: fsmContext.parameters,

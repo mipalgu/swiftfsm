@@ -3,7 +3,7 @@ public struct EmptyLLFSMState<
     Environment: EnvironmentSnapshot,
     Parameters: DataStructure,
     Result: DataStructure
->: LLFSMState {
+>: LLFSMState, Hashable, Codable, Sendable {
 
     public typealias Context = EmptyDataStructure
     public typealias Environment = Environment
