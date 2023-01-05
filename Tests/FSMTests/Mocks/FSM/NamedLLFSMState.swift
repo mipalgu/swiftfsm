@@ -1,6 +1,6 @@
 import FSM
 
-struct NamedMockState: MockState {
+struct NamedLLFSMState: LLFSMState {
 
     let name: String
 

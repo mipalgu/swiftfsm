@@ -1,7 +1,5 @@
-import FSM
-
-protocol MockState: StateProtocol where
-    TypeErasedVersion == AnyMockState<FSMsContext, Environment, Parameters, Result> {
+public protocol LLFSMState: StateProtocol where
+    TypeErasedVersion == AnyLLFSMState<FSMsContext, Environment, Parameters, Result> {
 
     associatedtype Context = EmptyDataStructure
 
@@ -17,10 +15,10 @@ protocol MockState: StateProtocol where
 
 }
 
-extension MockState {
+public extension LLFSMState {
 
-    var erased: AnyMockState<FSMsContext, Environment, Parameters, Result> {
-        AnyMockState(self)
+    var erased: AnyLLFSMState<FSMsContext, Environment, Parameters, Result> {
+        AnyLLFSMState(self)
     }
 
     func onEntry(context _: inout StateContext<Context, FSMsContext, Environment, Parameters, Result>) {}

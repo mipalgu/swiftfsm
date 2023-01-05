@@ -1,14 +1,12 @@
-import FSM
-
-struct AnyMockState<
+public struct AnyLLFSMState<
     FSMsContext: ContextProtocol,
     Environment: EnvironmentSnapshot,
     Parameters: DataStructure,
     Result: DataStructure
 >: TypeErasedState {
 
-    typealias Context = FSMContext<FSMsContext, Environment, Parameters, Result>
-    typealias TypeErasedVersion = Self
+    public typealias Context = FSMContext<FSMsContext, Environment, Parameters, Result>
+    public typealias TypeErasedVersion = Self
 
     private let _onEntry: (inout FSMContext<FSMsContext, Environment, Parameters, Result>) -> Void
     private let _internal: (inout FSMContext<FSMsContext, Environment, Parameters, Result>) -> Void
@@ -16,15 +14,15 @@ struct AnyMockState<
     private let _onResume: (inout FSMContext<FSMsContext, Environment, Parameters, Result>) -> Void
     private let _onSuspend: (inout FSMContext<FSMsContext, Environment, Parameters, Result>) -> Void
 
-    var base: Any
+    public var base: Any
 
-    var erased: Self { self }
+    public var erased: Self { self }
 
-    static var empty: (Sendable, AnyMockState<FSMsContext, Environment, Parameters, Result>) {
-        (EmptyDataStructure(), AnyMockState(EmptyMockState()))
+    public static var empty: (Sendable, AnyLLFSMState<FSMsContext, Environment, Parameters, Result>) {
+        (EmptyDataStructure(), AnyLLFSMState(EmptyLLFSMState()))
     }
 
-    init<Base: MockState>(_ base: Base)
+    public init<Base: LLFSMState>(_ base: Base)
         where Base.FSMsContext == FSMsContext,
             Base.Environment == Environment,
             Base.Parameters == Parameters,
@@ -57,23 +55,23 @@ struct AnyMockState<
         }
     }
 
-    func onEntry(context: inout FSMContext<FSMsContext, Environment, Parameters, Result>) {
+    public func onEntry(context: inout FSMContext<FSMsContext, Environment, Parameters, Result>) {
         _onEntry(&context)
     }
 
-    func `internal`(context: inout FSMContext<FSMsContext, Environment, Parameters, Result>) {
+    public func `internal`(context: inout FSMContext<FSMsContext, Environment, Parameters, Result>) {
         _internal(&context)
     }
 
-    func onExit(context: inout FSMContext<FSMsContext, Environment, Parameters, Result>) {
+    public func onExit(context: inout FSMContext<FSMsContext, Environment, Parameters, Result>) {
         _onExit(&context)
     }
 
-    func onResume(context: inout FSMContext<FSMsContext, Environment, Parameters, Result>) {
+    public func onResume(context: inout FSMContext<FSMsContext, Environment, Parameters, Result>) {
         _onResume(&context)
     }
 
-    func onSuspend(context: inout FSMContext<FSMsContext, Environment, Parameters, Result>) {
+    public func onSuspend(context: inout FSMContext<FSMsContext, Environment, Parameters, Result>) {
         _onSuspend(&context)
     }
 

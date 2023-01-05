@@ -1,6 +1,4 @@
-import FSM
-
-extension StateProperty {
+public extension StateProperty {
 
     init<
         FSMsContext: ContextProtocol,
@@ -15,9 +13,9 @@ extension StateProperty {
                 StateContext<EmptyDataStructure, FSMsContext, Environment, Parameters, Result>,
                 (Root) -> StateInformation
             >] = { [] }
-    ) where StateType == AnyMockState<FSMsContext, Environment, Parameters, Result> {
+    ) where StateType == AnyLLFSMState<FSMsContext, Environment, Parameters, Result> {
         self.init(
-            wrappedValue: EmptyMockState(),
+            wrappedValue: EmptyLLFSMState(),
             name: name,
             uses: environmentVariables,
             transitions: transitions
@@ -44,9 +42,9 @@ extension StateProperty {
                     StateContext<StatesContext, FSMsContext, Environment, Parameters, Result>,
                     (Root) -> StateInformation
                 >] = { [] }
-    ) where StateType == AnyMockState<FSMsContext, Environment, Parameters, Result> {
+    ) where StateType == AnyLLFSMState<FSMsContext, Environment, Parameters, Result> {
         self.init(
-            wrappedValue: CallbackMockState(
+            wrappedValue: CallbackLLFSMState(
                 onEntry: onEntry,
                 internal: `internal`,
                 onExit: onExit,
@@ -77,9 +75,9 @@ extension StateProperty {
                     StateContext<EmptyDataStructure, FSMsContext, Environment, Parameters, Result>,
                     (Root) -> StateInformation
                 >] = { [] }
-    ) where StateType == AnyMockState<FSMsContext, Environment, Parameters, Result> {
+    ) where StateType == AnyLLFSMState<FSMsContext, Environment, Parameters, Result> {
         self.init(
-            wrappedValue: CallbackMockState(
+            wrappedValue: CallbackLLFSMState(
                 onEntry: onEntry,
                 internal: `internal`,
                 onExit: onExit,

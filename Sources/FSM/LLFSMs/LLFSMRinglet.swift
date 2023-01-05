@@ -1,18 +1,18 @@
-import FSM
-
-struct MockRinglet<
+public struct LLFSMRinglet<
     FSMsContext: ContextProtocol,
     Environment: EnvironmentSnapshot,
     Parameters: DataStructure,
     Result: DataStructure
 >: RingletProtocol {
 
-    typealias StateType = AnyMockState<FSMsContext, Environment, Parameters, Result>
-    typealias TransitionType = AnyTransition<FSMContext<FSMsContext, Environment, Parameters, Result>, StateID>
+    public typealias StateType = AnyLLFSMState<FSMsContext, Environment, Parameters, Result>
+    public typealias TransitionType = AnyTransition<FSMContext<FSMsContext, Environment, Parameters, Result>, StateID>
 
-    func execute(
+    public init() {}
+
+    public func execute(
         id: StateID,
-        state: AnyMockState<FSMsContext, Environment, Parameters, Result>,
+        state: AnyLLFSMState<FSMsContext, Environment, Parameters, Result>,
         transitions: [AnyTransition<FSMContext<FSMsContext, Environment, Parameters, Result>, StateID>],
         fsmContext: inout FSMContext<FSMsContext, Environment, Parameters, Result>,
         context: inout Context

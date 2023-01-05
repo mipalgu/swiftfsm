@@ -1,6 +1,6 @@
 import FSM
 
-struct FSMMock: MockFSM {
+struct FSMMock: LLFSM {
 
     struct Context: ContextProtocol {
 
