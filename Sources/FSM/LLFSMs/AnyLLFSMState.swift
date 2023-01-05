@@ -29,27 +29,37 @@ public struct AnyLLFSMState<
             Base.Result == Result {
         self.base = base
         self._onEntry = {
-            var context = StateContext<Base.Context, FSMsContext, Environment, Parameters, Result>(fsmContext: $0)
+            var context = StateContext<Base.Context, FSMsContext, Environment, Parameters, Result>(
+                fsmContext: $0
+            )
             base.onEntry(context: &context)
             $0.update(from: context)
         }
         self._internal = {
-            var context = StateContext<Base.Context, FSMsContext, Environment, Parameters, Result>(fsmContext: $0)
+            var context = StateContext<Base.Context, FSMsContext, Environment, Parameters, Result>(
+                fsmContext: $0
+            )
             base.internal(context: &context)
             $0.update(from: context)
         }
         self._onExit = {
-            var context = StateContext<Base.Context, FSMsContext, Environment, Parameters, Result>(fsmContext: $0)
+            var context = StateContext<Base.Context, FSMsContext, Environment, Parameters, Result>(
+                fsmContext: $0
+            )
             base.onExit(context: &context)
             $0.update(from: context)
         }
         self._onResume = {
-            var context = StateContext<Base.Context, FSMsContext, Environment, Parameters, Result>(fsmContext: $0)
+            var context = StateContext<Base.Context, FSMsContext, Environment, Parameters, Result>(
+                fsmContext: $0
+            )
             base.onResume(context: &context)
             $0.update(from: context)
         }
         self._onSuspend = {
-            var context = StateContext<Base.Context, FSMsContext, Environment, Parameters, Result>(fsmContext: $0)
+            var context = StateContext<Base.Context, FSMsContext, Environment, Parameters, Result>(
+                fsmContext: $0
+            )
             base.onSuspend(context: &context)
             $0.update(from: context)
         }

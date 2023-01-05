@@ -6,7 +6,8 @@ public struct LLFSMRinglet<
 >: RingletProtocol {
 
     public typealias StateType = AnyLLFSMState<FSMsContext, Environment, Parameters, Result>
-    public typealias TransitionType = AnyTransition<FSMContext<FSMsContext, Environment, Parameters, Result>, StateID>
+    public typealias TransitionType
+        = AnyTransition<FSMContext<FSMsContext, Environment, Parameters, Result>, StateID>
 
     public init() {}
 
