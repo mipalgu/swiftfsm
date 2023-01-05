@@ -34,7 +34,7 @@ public struct FiniteStateMachine<
 
     }
 
-    public struct Data: Sendable, FiniteStateMachineOperations {
+    public struct Data: FSMData {
 
         public var fsm: Int
 
@@ -304,7 +304,7 @@ public struct FiniteStateMachine<
         self.handlers = handlers
     }
 
-    public mutating func next<Scheduler: SchedulerProtocol>(scheduler: Scheduler, data: inout Sendable) {
+    public func next<Scheduler: SchedulerProtocol>(scheduler: Scheduler, data: inout Sendable) {
         var temp = unsafeBitCast(data, to: Data.self)
         let state = states[temp.currentState]
         temp.fsmContext.state = temp.stateContexts[temp.currentState]
@@ -329,7 +329,7 @@ public struct FiniteStateMachine<
         data = temp as Sendable
     }
 
-    public mutating func saveSnapshot(data: inout Sendable) {
+    public func saveSnapshot(data: inout Sendable) {
         var temp = unsafeBitCast(data, to: Data.self)
         temp.saveSnapshot(
             environmentVariables: states[temp.currentState].environmentVariables,
@@ -338,7 +338,7 @@ public struct FiniteStateMachine<
         data = temp as Sendable
     }
 
-    public mutating func takeSnapshot(data: inout Sendable) {
+    public func takeSnapshot(data: inout Sendable) {
         var temp = unsafeBitCast(data, to: Data.self)
         temp.takeSnapshot(
             environmentVariables: states[temp.currentState].environmentVariables,
