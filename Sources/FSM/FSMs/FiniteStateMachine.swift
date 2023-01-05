@@ -5,7 +5,7 @@ public struct FiniteStateMachine<
     Result: DataStructure,
     Context: ContextProtocol,
     Environment: EnvironmentSnapshot
-> where StateType.FSMsContext == Context,
+>: Executable where StateType.FSMsContext == Context,
     StateType.Environment == Environment,
     Ringlet.StateType == StateType,
     Ringlet.TransitionType == AnyTransition<FSMContext<Context, Environment, Parameters, Result>, StateID> {
@@ -35,6 +35,8 @@ public struct FiniteStateMachine<
     }
 
     public struct Data: Sendable, FiniteStateMachineOperations {
+
+        public var fsm: Int
 
         public var acceptingStates: [Bool]
 
@@ -67,6 +69,7 @@ public struct FiniteStateMachine<
         }
 
         fileprivate init(
+            fsm: Int,
             acceptingStates: [Bool],
             stateContexts: [Sendable],
             fsmContext: FSMContext<Context, Environment, Parameters, Result>,
@@ -78,6 +81,7 @@ public struct FiniteStateMachine<
             suspendState: Int,
             suspendedState: Int?
         ) {
+            self.fsm = fsm
             self.acceptingStates = acceptingStates
             self.stateContexts = stateContexts
             self.fsmContext = fsmContext
@@ -276,8 +280,10 @@ public struct FiniteStateMachine<
         guard actuatorValues.count == actuators.count else {
             fatalError("Unable to set up actuatorValues for actuators.")
         }
+        let fsmID = IDRegistrar.id(of: model.name)
         let fsm = FiniteStateMachine(states: states, ringlet: model.initialRinglet, handlers: handlers)
         let data = Data(
+            fsm: fsmID,
             acceptingStates: acceptingStates,
             stateContexts: newContexts,
             fsmContext: fsmContext,
@@ -298,41 +304,47 @@ public struct FiniteStateMachine<
         self.handlers = handlers
     }
 
-    public mutating func next<Scheduler: SchedulerProtocol>(scheduler: Scheduler, data: inout Data) {
-        let state = states[data.currentState]
-        data.fsmContext.state = data.stateContexts[data.currentState]
+    public mutating func next<Scheduler: SchedulerProtocol>(scheduler: Scheduler, data: inout Sendable) {
+        var temp = unsafeBitCast(data, to: Data.self)
+        let state = states[temp.currentState]
+        temp.fsmContext.state = temp.stateContexts[temp.currentState]
         let nextState = ringlet.execute(
-            id: data.currentState,
+            id: temp.currentState,
             state: state.stateType,
             transitions: state.transitions,
-            fsmContext: &data.fsmContext,
-            context: &data.ringletContext
+            fsmContext: &temp.fsmContext,
+            context: &temp.ringletContext
         )
-        data.previousState = data.currentState
-        data.currentState = nextState
-        if data.fsmContext.status == .suspending {
-            data.suspend()
-        } else if data.fsmContext.status == .resuming {
-            data.resume()
-        } else if data.fsmContext.status == .restarting {
-            data.restart()
+        temp.previousState = temp.currentState
+        temp.currentState = nextState
+        if temp.fsmContext.status == .suspending {
+            temp.suspend()
+        } else if temp.fsmContext.status == .resuming {
+            temp.resume()
+        } else if temp.fsmContext.status == .restarting {
+            temp.restart()
         } else {
-            data.fsmContext.status = .executing(transitioned: data.currentState != data.previousState)
+            temp.fsmContext.status = .executing(transitioned: temp.currentState != temp.previousState)
         }
+        data = temp as Sendable
     }
 
-    public mutating func saveSnapshot(forState stateID: StateID? = nil, data: inout Data) {
-        data.saveSnapshot(
-            environmentVariables: states[stateID ?? data.currentState].environmentVariables,
+    public mutating func saveSnapshot(data: inout Sendable) {
+        var temp = unsafeBitCast(data, to: Data.self)
+        temp.saveSnapshot(
+            environmentVariables: states[temp.currentState].environmentVariables,
             handlers: handlers
         )
+        data = temp as Sendable
     }
 
-    public mutating func takeSnapshot(forState stateID: StateID? = nil, data: inout Data) {
-        data.takeSnapshot(
-            environmentVariables: states[stateID ?? data.currentState].environmentVariables,
+    public mutating func takeSnapshot(data: inout Sendable) {
+        var temp = unsafeBitCast(data, to: Data.self)
+        temp.takeSnapshot(
+            environmentVariables: states[temp.currentState].environmentVariables,
             handlers: handlers
         )
+        data = temp as Sendable
     }
 
 }

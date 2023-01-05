@@ -164,11 +164,20 @@ public extension FSMModel {
         return name
     }
 
-    func fsm(parameters: Parameters) -> (
+    func fsm(parameters: (any DataStructure)?) -> (
         FiniteStateMachine<StateType, Ringlet, Parameters, Result, Context, Environment>,
         FiniteStateMachine<StateType, Ringlet, Parameters, Result, Context, Environment>.Data
     ) {
-        FiniteStateMachine.initial(from: self, with: parameters)
+        if let params = parameters as? Parameters {
+            return FiniteStateMachine.initial(from: self, with: params)
+        } else if
+            let type = Parameters.self as? EmptyInitialisable.Type,
+            let params = type.init() as? Parameters
+        {
+            return FiniteStateMachine.initial(from: self, with: params)
+        } else {
+            fatalError("Missing parameters for \(name).")
+        }
     }
 
     var anyStates: [Int: AnyStateProperty] {
