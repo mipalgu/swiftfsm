@@ -20,7 +20,7 @@ final class InMemoryActuatorTests: XCTestCase {
     }
 
     func testCanRetreiveValueAcrossTwoHandlers() {
-        var sensor = InMemorySensor(id: id, initialValue: false)
+        let sensor = InMemorySensor(id: id, initialValue: false)
         actuator.saveSnapshot(value: false)
         XCTAssertEqual(sensor.takeSnapshot(), false)
         actuator.saveSnapshot(value: true)

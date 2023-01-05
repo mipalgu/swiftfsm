@@ -22,8 +22,8 @@ final class InMemoryExternalVariableTests: XCTestCase {
     }
 
     func testCanRetreiveValueAcrossTwoHandlers() {
-        var externalVariable = InMemoryExternalVariable(id: id, initialValue: false)
-        var externalVariable2 = InMemoryExternalVariable(id: id, initialValue: false)
+        let externalVariable = InMemoryExternalVariable(id: id, initialValue: false)
+        let externalVariable2 = InMemoryExternalVariable(id: id, initialValue: false)
         externalVariable.saveSnapshot(value: false)
         XCTAssertEqual(externalVariable.takeSnapshot(), externalVariable2.takeSnapshot())
         XCTAssertEqual(externalVariable.takeSnapshot(), false)

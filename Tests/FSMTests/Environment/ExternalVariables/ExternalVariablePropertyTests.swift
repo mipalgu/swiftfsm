@@ -22,7 +22,7 @@ final class ExternalVariablePropertyTests: XCTestCase {
 
     func testWrappedValueDelegatesToHandler() {
         let mock = ExternalVariableHandlerMock(id: "mock", value: false)
-        var property = ExternalVariableProperty<Snapshot, ExternalVariableHandlerMock>(
+        let property = ExternalVariableProperty<Snapshot, ExternalVariableHandlerMock>(
             handler: mock,
             mapsTo: \.bool
         )
