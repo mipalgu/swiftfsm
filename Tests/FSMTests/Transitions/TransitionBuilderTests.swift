@@ -2,6 +2,10 @@ import XCTest
 
 @testable import FSM
 
+// swiftlint:disable file_length
+// swiftlint:disable type_body_length
+// swiftlint:disable function_body_length
+
 final class TransitionBuilderTests: XCTestCase {
 
     final class Calls {
