@@ -59,6 +59,19 @@ final class AnyTransitionTests: XCTestCase {
         XCTAssertTrue(transition.canTransition(from: true))
     }
 
+    func testMapChangesTarget() {
+        let transition1: AnyTransition<Bool, Bool> = AnyTransition(to: false) { _ in true }
+        let transition2: AnyTransition<Bool, Bool> = AnyTransition(to: true) { _ in false }
+        let newTransition1: AnyTransition<Bool, Int> = transition1.map { $0 ? 1 : 0 }
+        let newTransition2: AnyTransition<Bool, Int> = transition2.map { $0 ? 1 : 0 }
+        XCTAssertEqual(newTransition1.target, 0)
+        XCTAssertEqual(newTransition1.canTransition(from: false), transition1.canTransition(from: false))
+        XCTAssertEqual(newTransition1.canTransition(from: true), transition1.canTransition(from: true))
+        XCTAssertEqual(newTransition2.target, 1)
+        XCTAssertEqual(newTransition2.canTransition(from: false), transition2.canTransition(from: false))
+        XCTAssertEqual(newTransition2.canTransition(from: true), transition2.canTransition(from: true))
+    }
+
     func testFromBasePerformance_1() {
         let simpleTransition = SimpleTransition()
         let anyTransition = AnyTransition(simpleTransition)
