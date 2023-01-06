@@ -33,6 +33,7 @@ public struct StateContext<
 
     public init(fsmContext: FSMContext<FSMsContext, Environment, Parameters, Result>) {
         self.init(
+            // swiftlint:disable:next force_cast
             state: fsmContext.state as! StateContext,
             fsm: fsmContext.fsm,
             environment: fsmContext.environment,
@@ -95,6 +96,7 @@ public struct StateContext<
     }
 
     public mutating func update(from fsmContext: FSMContext<FSMsContext, Environment, Parameters, Result>) {
+        // swiftlint:disable:next force_cast
         state = fsmContext.state as! StateContext
         fsm = fsmContext.fsm
         environment = fsmContext.environment
