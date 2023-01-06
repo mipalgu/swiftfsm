@@ -337,4 +337,436 @@ final class StateContextTests: XCTestCase {
         XCTAssertTrue(multiContext2.eBool)
     }
 
+    func testStateDirectAccessPerformance_1() {
+        measure {
+            multiContext.state.sBool.toggle()
+        }
+    }
+
+    func testStateDirectAccessPerformance_10() {
+        measure {
+            for _ in 0..<10 {
+                multiContext.state.sBool.toggle()
+            }
+        }
+    }
+
+    func testStateDirectAccessPerformance_100() {
+        measure {
+            for _ in 0..<100 {
+                multiContext.state.sBool.toggle()
+            }
+        }
+    }
+
+    func testStateDirectAccessPerformance_1000() {
+        measure {
+            for _ in 0..<1000 {
+                multiContext.state.sBool.toggle()
+            }
+        }
+    }
+
+    func testStateDirectAccessPerformance_10_000() {
+        measure {
+            for _ in 0..<10_000 {
+                multiContext.state.sBool.toggle()
+            }
+        }
+    }
+
+    func testStateDirectAccessPerformance_100_000() {
+        measure {
+            for _ in 0..<100_000 {
+                multiContext.state.sBool.toggle()
+            }
+        }
+    }
+
+    func testStateDirectAccessPerformance_1_000_000() {
+        measure {
+            for _ in 0..<1_000_000 {
+                multiContext.state.sBool.toggle()
+            }
+        }
+    }
+
+    func testStateDynamicAccessPerformance_1() {
+        measure {
+            multiContext.sBool.toggle()
+        }
+    }
+
+    func testStateDynamicAccessPerformance_10() {
+        measure {
+            for _ in 0..<10 {
+                multiContext.sBool.toggle()
+            }
+        }
+    }
+
+    func testStateDynamicAccessPerformance_100() {
+        measure {
+            for _ in 0..<100 {
+                multiContext.sBool.toggle()
+            }
+        }
+    }
+
+    func testStateDynamicAccessPerformance_1000() {
+        measure {
+            for _ in 0..<1000 {
+                multiContext.sBool.toggle()
+            }
+        }
+    }
+
+    func testStateDynamicAccessPerformance_10_000() {
+        measure {
+            for _ in 0..<10_000 {
+                multiContext.sBool.toggle()
+            }
+        }
+    }
+
+    func testStateDynamicAccessPerformance_100_000() {
+        measure {
+            for _ in 0..<100_000 {
+                multiContext.sBool.toggle()
+            }
+        }
+    }
+
+    func testStateDynamicAccessPerformance_1_000_000() {
+        measure {
+            for _ in 0..<1_000_000 {
+                multiContext.sBool.toggle()
+            }
+        }
+    }
+
+    func testFSMDirectAccessPerformance_1() {
+        measure {
+            multiContext.fsm.fBool.toggle()
+        }
+    }
+
+    func testFSMDirectAccessPerformance_10() {
+        measure {
+            for _ in 0..<10 {
+                multiContext.fsm.fBool.toggle()
+            }
+        }
+    }
+
+    func testFSMDirectAccessPerformance_100() {
+        measure {
+            for _ in 0..<100 {
+                multiContext.fsm.fBool.toggle()
+            }
+        }
+    }
+
+    func testFSMDirectAccessPerformance_1000() {
+        measure {
+            for _ in 0..<1000 {
+                multiContext.fsm.fBool.toggle()
+            }
+        }
+    }
+
+    func testFSMDirectAccessPerformance_10_000() {
+        measure {
+            for _ in 0..<10_000 {
+                multiContext.fsm.fBool.toggle()
+            }
+        }
+    }
+
+    func testFSMDirectAccessPerformance_100_000() {
+        measure {
+            for _ in 0..<100_000 {
+                multiContext.fsm.fBool.toggle()
+            }
+        }
+    }
+
+    func testFSMDirectAccessPerformance_1_000_000() {
+        measure {
+            for _ in 0..<1_000_000 {
+                multiContext.fsm.fBool.toggle()
+            }
+        }
+    }
+
+    func testFSMDynamicAccessPerformance_1() {
+        measure {
+            multiContext.fBool.toggle()
+        }
+    }
+
+    func testFSMDynamicAccessPerformance_10() {
+        measure {
+            for _ in 0..<10 {
+                multiContext.fBool.toggle()
+            }
+        }
+    }
+
+    func testFSMDynamicAccessPerformance_100() {
+        measure {
+            for _ in 0..<100 {
+                multiContext.fBool.toggle()
+            }
+        }
+    }
+
+    func testFSMDynamicAccessPerformance_1000() {
+        measure {
+            for _ in 0..<1000 {
+                multiContext.fBool.toggle()
+            }
+        }
+    }
+
+    func testFSMDynamicAccessPerformance_10_000() {
+        measure {
+            for _ in 0..<10_000 {
+                multiContext.fBool.toggle()
+            }
+        }
+    }
+
+    func testFSMDynamicAccessPerformance_100_000() {
+        measure {
+            for _ in 0..<100_000 {
+                multiContext.fBool.toggle()
+            }
+        }
+    }
+
+    func testFSMDynamicAccessPerformance_1_000_000() {
+        measure {
+            for _ in 0..<1_000_000 {
+                multiContext.fBool.toggle()
+            }
+        }
+    }
+
+    func testEnvironmentDirectAccessPerformance_1() {
+        measure {
+            multiContext.environment.eBool.toggle()
+        }
+    }
+
+    func testEnvironmentDirectAccessPerformance_10() {
+        measure {
+            for _ in 0..<10 {
+                multiContext.environment.eBool.toggle()
+            }
+        }
+    }
+
+    func testEnvironmentDirectAccessPerformance_100() {
+        measure {
+            for _ in 0..<100 {
+                multiContext.environment.eBool.toggle()
+            }
+        }
+    }
+
+    func testEnvironmentDirectAccessPerformance_1000() {
+        measure {
+            for _ in 0..<1000 {
+                multiContext.environment.eBool.toggle()
+            }
+        }
+    }
+
+    func testEnvironmentDirectAccessPerformance_10_000() {
+        measure {
+            for _ in 0..<10_000 {
+                multiContext.environment.eBool.toggle()
+            }
+        }
+    }
+
+    func testEnvironmentDirectAccessPerformance_100_000() {
+        measure {
+            for _ in 0..<100_000 {
+                multiContext.environment.eBool.toggle()
+            }
+        }
+    }
+
+    func testEnvironmentDirectAccessPerformance_1_000_000() {
+        measure {
+            for _ in 0..<1_000_000 {
+                multiContext.environment.eBool.toggle()
+            }
+        }
+    }
+
+    func testEnvironmentDynamicAccessPerformance_1() {
+        measure {
+            multiContext.eBool.toggle()
+        }
+    }
+
+    func testEnvironmentDynamicAccessPerformance_10() {
+        measure {
+            for _ in 0..<10 {
+                multiContext.eBool.toggle()
+            }
+        }
+    }
+
+    func testEnvironmentDynamicAccessPerformance_100() {
+        measure {
+            for _ in 0..<100 {
+                multiContext.eBool.toggle()
+            }
+        }
+    }
+
+    func testEnvironmentDynamicAccessPerformance_1000() {
+        measure {
+            for _ in 0..<1000 {
+                multiContext.eBool.toggle()
+            }
+        }
+    }
+
+    func testEnvironmentDynamicAccessPerformance_10_000() {
+        measure {
+            for _ in 0..<10_000 {
+                multiContext.eBool.toggle()
+            }
+        }
+    }
+
+    func testEnvironmentDynamicAccessPerformance_100_000() {
+        measure {
+            for _ in 0..<100_000 {
+                multiContext.eBool.toggle()
+            }
+        }
+    }
+
+    func testEnvironmentDynamicAccessPerformance_1_000_000() {
+        measure {
+            for _ in 0..<1_000_000 {
+                multiContext.eBool.toggle()
+            }
+        }
+    }
+
+    func testParametersDirectAccessPerformance_1() {
+        measure {
+            _ = multiContext.parameters.pBool
+        }
+    }
+
+    func testParametersDirectAccessPerformance_10() {
+        measure {
+            for _ in 0..<10 {
+                _ = multiContext.parameters.pBool
+            }
+        }
+    }
+
+    func testParametersDirectAccessPerformance_100() {
+        measure {
+            for _ in 0..<100 {
+                _ = multiContext.parameters.pBool
+            }
+        }
+    }
+
+    func testParametersDirectAccessPerformance_1000() {
+        measure {
+            for _ in 0..<1000 {
+                _ = multiContext.parameters.pBool
+            }
+        }
+    }
+
+    func testParametersDirectAccessPerformance_10_000() {
+        measure {
+            for _ in 0..<10_000 {
+                _ = multiContext.parameters.pBool
+            }
+        }
+    }
+
+    func testParametersDirectAccessPerformance_100_000() {
+        measure {
+            for _ in 0..<100_000 {
+                _ = multiContext.parameters.pBool
+            }
+        }
+    }
+
+    func testParametersDirectAccessPerformance_1_000_000() {
+        measure {
+            for _ in 0..<1_000_000 {
+                _ = multiContext.parameters.pBool
+            }
+        }
+    }
+
+    func testParametersDynamicAccessPerformance_1() {
+        measure {
+            _ = multiContext.pBool
+        }
+    }
+
+    func testParametersDynamicAccessPerformance_10() {
+        measure {
+            for _ in 0..<10 {
+                _ = multiContext.pBool
+            }
+        }
+    }
+
+    func testParametersDynamicAccessPerformance_100() {
+        measure {
+            for _ in 0..<100 {
+                _ = multiContext.pBool
+            }
+        }
+    }
+
+    func testParametersDynamicAccessPerformance_1000() {
+        measure {
+            for _ in 0..<1000 {
+                _ = multiContext.pBool
+            }
+        }
+    }
+
+    func testParametersDynamicAccessPerformance_10_000() {
+        measure {
+            for _ in 0..<10_000 {
+                _ = multiContext.pBool
+            }
+        }
+    }
+
+    func testParametersDynamicAccessPerformance_100_000() {
+        measure {
+            for _ in 0..<100_000 {
+                _ = multiContext.pBool
+            }
+        }
+    }
+
+    func testParametersDynamicAccessPerformance_1_000_000() {
+        measure {
+            for _ in 0..<1_000_000 {
+                _ = multiContext.pBool
+            }
+        }
+    }
+
 }
