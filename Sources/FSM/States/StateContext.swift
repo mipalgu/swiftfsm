@@ -1,5 +1,5 @@
 @dynamicMemberLookup
-public struct StateContext<
+public final class StateContext<
     StateContext: ContextProtocol,
     FSMsContext: ContextProtocol,
     Environment: EnvironmentSnapshot,
@@ -31,7 +31,7 @@ public struct StateContext<
         }
     }
 
-    public init(fsmContext: FSMContext<FSMsContext, Environment, Parameters, Result>) {
+    public convenience init(fsmContext: FSMContext<FSMsContext, Environment, Parameters, Result>) {
         self.init(
             // swiftlint:disable:next force_cast
             state: fsmContext.state as! StateContext,
@@ -43,7 +43,7 @@ public struct StateContext<
         )
     }
 
-    public init(
+    public convenience init(
         state: StateContext,
         fsm: FSMsContext,
         environment: Environment,
@@ -95,7 +95,7 @@ public struct StateContext<
         parameters[keyPath: keyPath]
     }
 
-    public mutating func update(from fsmContext: FSMContext<FSMsContext, Environment, Parameters, Result>) {
+    public func update(from fsmContext: FSMContext<FSMsContext, Environment, Parameters, Result>) {
         // swiftlint:disable:next force_cast
         state = fsmContext.state as! StateContext
         fsm = fsmContext.fsm
@@ -105,15 +105,15 @@ public struct StateContext<
         status = fsmContext.status
     }
 
-    public mutating func restart() {
+    public func restart() {
         status = .restarting
     }
 
-    public mutating func resume() {
+    public func resume() {
         status = .resuming
     }
 
-    public mutating func suspend() {
+    public func suspend() {
         status = .suspending
     }
 

@@ -139,7 +139,7 @@ final class StateContextTests: XCTestCase {
     func testGettersAndSetters() {
         let suspending = FSMStatus.suspending
         let resuming = FSMStatus.resuming
-        var context = StateContext(
+        let context = StateContext(
             state: falseData,
             fsm: falseData,
             environment: falseData,
@@ -259,7 +259,7 @@ final class StateContextTests: XCTestCase {
 
     func testRestart() {
         for status in FSMStatus.allCases {
-            var context = StateContext(
+            let context = StateContext(
                 state: falseData,
                 fsm: falseData,
                 environment: falseData,
@@ -274,7 +274,7 @@ final class StateContextTests: XCTestCase {
 
     func testResume() {
         for status in FSMStatus.allCases {
-            var context = StateContext(
+            let context = StateContext(
                 state: falseData,
                 fsm: falseData,
                 environment: falseData,
@@ -289,7 +289,7 @@ final class StateContextTests: XCTestCase {
 
     func testSuspend() {
         for status in FSMStatus.allCases {
-            var context = StateContext(
+            let context = StateContext(
                 state: falseData,
                 fsm: falseData,
                 environment: falseData,

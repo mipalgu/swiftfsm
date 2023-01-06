@@ -1,4 +1,4 @@
-public protocol FSMDataProtocol: FiniteStateMachineOperations & Sendable {
+public protocol FSMDataProtocol: FiniteStateMachineOperations {
 
     var fsm: Int { get set }
 

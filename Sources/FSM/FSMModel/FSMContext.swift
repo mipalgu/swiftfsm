@@ -1,10 +1,10 @@
 @dynamicMemberLookup
-public struct FSMContext<
+public final class FSMContext<
     FSMsContext: ContextProtocol,
     Environment: EnvironmentSnapshot,
     Parameters: DataStructure,
     Result: DataStructure
->: Sendable, FiniteStateMachineOperations {
+>: FiniteStateMachineOperations {
 
     var state: Sendable
 
@@ -30,7 +30,7 @@ public struct FSMContext<
         }
     }
 
-    public init<StatesContext: DataStructure>(
+    public convenience init<StatesContext: DataStructure>(
         stateContext: StateContext<StatesContext, FSMsContext, Environment, Parameters, Result>
     ) {
         self.init(
@@ -43,7 +43,7 @@ public struct FSMContext<
         )
     }
 
-    public init(
+    public convenience init(
         state: Sendable,
         fsm: FSMsContext,
         environment: Environment,
@@ -103,19 +103,19 @@ public struct FSMContext<
         set { parameters[keyPath: keyPath] = newValue }
     }
 
-    public mutating func restart() {
+    public func restart() {
         status = .restarting
     }
 
-    public mutating func resume() {
+    public func resume() {
         status = .resuming
     }
 
-    public mutating func suspend() {
+    public func suspend() {
         status = .suspending
     }
 
-    public mutating func update<StatesContext: DataStructure>(
+    public func update<StatesContext: DataStructure>(
         from stateContext: StateContext<StatesContext, FSMsContext, Environment, Parameters, Result>
     ) {
         state = stateContext.state as Sendable
