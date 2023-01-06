@@ -166,7 +166,7 @@ public extension FSMModel {
 
     func fsm(parameters: (any DataStructure)?) -> (
         FiniteStateMachine<StateType, Ringlet, Parameters, Result, Context, Environment>,
-        FiniteStateMachine<StateType, Ringlet, Parameters, Result, Context, Environment>.Data
+        RingletContext<StateType, Ringlet.Context, Context, Environment, Parameters, Result>
     ) {
         if let params = parameters as? Parameters {
             return FiniteStateMachine.initial(from: self, with: params)

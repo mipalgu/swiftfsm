@@ -100,12 +100,13 @@ public extension FiniteStateMachine {
             Model.Context,
             Model.Environment
         >,
-        FSMData<
+        RingletContext<
+            Model.StateType,
             Model.Ringlet.Context,
-            Model.Parameters,
-            Model.Result,
             Model.Context,
-            Model.Environment
+            Model.Environment,
+            Model.Parameters,
+            Model.Result
         >
     ) where Model.StateType == StateType,
             Model.Ringlet == Ringlet,
@@ -247,7 +248,15 @@ public extension FiniteStateMachine {
             suspendState: suspendState,
             suspendedState: nil
         )
-        return (fsm, data)
+        let context = RingletContext<
+            Model.StateType,
+            Model.Ringlet.Context,
+            Model.Context,
+            Model.Environment,
+            Model.Parameters,
+            Model.Result
+        >(data: data)
+        return (fsm, context)
     }
 
 }
