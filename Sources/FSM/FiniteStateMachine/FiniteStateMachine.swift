@@ -210,14 +210,8 @@ public final class FiniteStateMachine<
         )
         context.stateContainer = stateContainer
         defer { context.stateContainer = nil }
-        let state = states[context.currentState]
         context.data.fsmContext.state = context.data.stateContexts[context.currentState]
-        let nextState = ringlet.execute(
-            id: context.currentState,
-            state: state.stateType,
-            transitions: state.transitions,
-            context: context
-        )
+        let nextState = ringlet.execute(context: context)
         context.data.previousState = context.currentState
         context.data.currentState = nextState
         if context.data.fsmContext.status == .suspending {

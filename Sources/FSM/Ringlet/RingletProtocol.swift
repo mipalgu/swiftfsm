@@ -12,9 +12,6 @@ public protocol RingletProtocol: ContextUser, EmptyInitialisable {
         TransitionType.Target == StateID
 
     func execute(
-        id: StateID,
-        state: StateType,
-        transitions: [TransitionType],
         context: RingletContext<
             StateType,
             Context,

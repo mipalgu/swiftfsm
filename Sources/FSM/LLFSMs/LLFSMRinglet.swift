@@ -12,27 +12,32 @@ public struct LLFSMRinglet<
     public init() {}
 
     public func execute(
-        id: StateID,
-        state: AnyLLFSMState<FSMsContext, Environment, Parameters, Result>,
-        transitions: [AnyTransition<FSMContext<FSMsContext, Environment, Parameters, Result>, StateID>],
         context: RingletContext<StateType, Context, FSMsContext, Environment, Parameters, Result>
     ) -> StateID {
+        let state = context.states[context.currentState]
+        let suspendState = context.states[context.suspendState].stateType
         if case .resumed = context.status {
-            state.onResume(context: context.fsmContext)
+            if context.currentState != context.suspendState {
+                suspendState.onResume(context: context.fsmContext)
+            }
+            state.stateType.onResume(context: context.fsmContext)
         }
         if context.status.transitioned {
-            state.onEntry(context: context.fsmContext)
+            state.stateType.onEntry(context: context.fsmContext)
         }
         let result: StateID
-        if let first = transitions.first(where: { $0.canTransition(from: context.fsmContext) }) {
-            state.onExit(context: context.fsmContext)
+        if let first = state.transitions.first(where: { $0.canTransition(from: context.fsmContext) }) {
+            state.stateType.onExit(context: context.fsmContext)
             result = first.target
         } else {
-            state.internal(context: context.fsmContext)
-            result = id
+            state.stateType.internal(context: context.fsmContext)
+            result = context.currentState
         }
         if context.fsmContext.status == .suspending {
-            state.onSuspend(context: context.fsmContext)
+            state.stateType.onSuspend(context: context.fsmContext)
+            if context.currentState != context.suspendState {
+                suspendState.onSuspend(context: context.fsmContext)
+            }
         }
         return result
     }
