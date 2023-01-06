@@ -35,10 +35,63 @@ public final class FiniteStateMachine<
         stateContainer.states
     }
 
-    public static func initial<Model: FSMModel>(
-        from model: Model,
-        with parameters: Parameters
-    ) -> (
+    private init(stateContainer: States, ringlet: Ringlet, handlers: Handlers) {
+        self.stateContainer = stateContainer
+        self.ringlet = ringlet
+        self.handlers = handlers
+    }
+
+    public func next<Scheduler: SchedulerProtocol>(scheduler: Scheduler, data: AnyObject) {
+        let context = unsafeDowncast(
+            data,
+            to: RingletContext<StateType, Ringlet.Context, Context, Environment, Parameters, Result>.self
+        )
+        context.stateContainer = stateContainer
+        defer { context.stateContainer = nil }
+        context.data.fsmContext.state = context.data.stateContexts[context.currentState]
+        let nextState = ringlet.execute(context: context)
+        context.data.previousState = context.currentState
+        context.data.currentState = nextState
+        if context.data.fsmContext.status == .suspending {
+            context.data.suspend()
+        } else if context.data.fsmContext.status == .resuming {
+            context.data.resume()
+        } else if context.data.fsmContext.status == .restarting {
+            context.data.restart()
+        } else {
+            context.data.fsmContext.status = .executing(
+                transitioned: context.data.currentState != context.data.previousState
+            )
+        }
+    }
+
+    public func saveSnapshot(data: AnyObject) {
+        let context = unsafeDowncast(
+            data,
+            to: RingletContext<StateType, Ringlet.Context, Context, Environment, Parameters, Result>.self
+        )
+        context.data.saveSnapshot(
+            environmentVariables: states[context.data.currentState].environmentVariables,
+            handlers: handlers
+        )
+    }
+
+    public func takeSnapshot(data: AnyObject) {
+        let context = unsafeDowncast(
+            data,
+            to: RingletContext<StateType, Ringlet.Context, Context, Environment, Parameters, Result>.self
+        )
+        context.data.takeSnapshot(
+            environmentVariables: states[context.data.currentState].environmentVariables,
+            handlers: handlers
+        )
+    }
+
+}
+
+public extension FiniteStateMachine {
+
+    static func initial<Model: FSMModel>(from model: Model, with parameters: Parameters) -> (
         FiniteStateMachine<
             Model.StateType,
             Model.Ringlet,
@@ -195,58 +248,6 @@ public final class FiniteStateMachine<
             suspendedState: nil
         )
         return (fsm, data)
-    }
-
-    private init(stateContainer: States, ringlet: Ringlet, handlers: Handlers) {
-        self.stateContainer = stateContainer
-        self.ringlet = ringlet
-        self.handlers = handlers
-    }
-
-    public func next<Scheduler: SchedulerProtocol>(scheduler: Scheduler, data: AnyObject) {
-        let context = unsafeDowncast(
-            data,
-            to: RingletContext<StateType, Ringlet.Context, Context, Environment, Parameters, Result>.self
-        )
-        context.stateContainer = stateContainer
-        defer { context.stateContainer = nil }
-        context.data.fsmContext.state = context.data.stateContexts[context.currentState]
-        let nextState = ringlet.execute(context: context)
-        context.data.previousState = context.currentState
-        context.data.currentState = nextState
-        if context.data.fsmContext.status == .suspending {
-            context.data.suspend()
-        } else if context.data.fsmContext.status == .resuming {
-            context.data.resume()
-        } else if context.data.fsmContext.status == .restarting {
-            context.data.restart()
-        } else {
-            context.data.fsmContext.status = .executing(
-                transitioned: context.data.currentState != context.data.previousState
-            )
-        }
-    }
-
-    public func saveSnapshot(data: AnyObject) {
-        let context = unsafeDowncast(
-            data,
-            to: RingletContext<StateType, Ringlet.Context, Context, Environment, Parameters, Result>.self
-        )
-        context.data.saveSnapshot(
-            environmentVariables: states[context.data.currentState].environmentVariables,
-            handlers: handlers
-        )
-    }
-
-    public func takeSnapshot(data: AnyObject) {
-        let context = unsafeDowncast(
-            data,
-            to: RingletContext<StateType, Ringlet.Context, Context, Environment, Parameters, Result>.self
-        )
-        context.data.takeSnapshot(
-            environmentVariables: states[context.data.currentState].environmentVariables,
-            handlers: handlers
-        )
     }
 
 }
