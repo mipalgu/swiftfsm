@@ -16,6 +16,7 @@ public protocol RingletProtocol: ContextUser, EmptyInitialisable {
         state: StateType,
         transitions: [TransitionType],
         context: RingletContext<
+            StateType,
             Context,
             StateType.FSMsContext,
             StateType.Environment,

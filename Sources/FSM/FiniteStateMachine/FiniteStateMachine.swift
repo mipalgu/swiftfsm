@@ -5,7 +5,7 @@ public final class FiniteStateMachine<
     Result: DataStructure,
     Context: ContextProtocol,
     Environment: EnvironmentSnapshot
->: Executable, StateContainerProtocol where StateType.FSMsContext == Context,
+>: Executable where StateType.FSMsContext == Context,
     StateType.Environment == Environment,
     Ringlet.StateType == StateType,
     Ringlet.TransitionType == AnyTransition<FSMContext<Context, Environment, Parameters, Result>, StateID> {
@@ -17,17 +17,23 @@ public final class FiniteStateMachine<
     public typealias Parameters = Parameters
     public typealias Result = Result
 
-    public typealias Data = FSMData<Ringlet, Parameters, Result, Context, Environment>
+    public typealias Data = FSMData<Ringlet.Context, Parameters, Result, Context, Environment>
 
     public typealias Handlers = FSMHandlers<Environment>
 
     public typealias State = FSMState<StateType, Parameters, Result, Context, Environment>
 
-    public let states: [State]
+    public typealias States = StateContainer<StateType, Parameters, Result, Context, Environment>
+
+    public let stateContainer: States
 
     public let ringlet: Ringlet
 
     public let handlers: Handlers
+
+    public var states: [State] {
+        stateContainer.states
+    }
 
     public static func initial<Model: FSMModel>(
         from model: Model,
@@ -42,7 +48,7 @@ public final class FiniteStateMachine<
             Model.Environment
         >,
         FSMData<
-            Model.Ringlet,
+            Model.Ringlet.Context,
             Model.Parameters,
             Model.Result,
             Model.Context,
@@ -170,13 +176,17 @@ public final class FiniteStateMachine<
             fatalError("Unable to set up actuatorValues for actuators.")
         }
         let fsmID = IDRegistrar.id(of: model.name)
-        let fsm = FiniteStateMachine(states: states, ringlet: model.initialRinglet, handlers: handlers)
-        let ringletContext = RingletContext(ringlet: Ringlet.Context(), fsmContext: fsmContext)
+        let fsm = FiniteStateMachine(
+            stateContainer: States(states: states),
+            ringlet: model.initialRinglet,
+            handlers: handlers
+        )
         let data = Data(
             fsm: fsmID,
             acceptingStates: acceptingStates,
             stateContexts: newContexts,
-            ringletContext: ringletContext,
+            fsmContext: fsmContext,
+            ringletContext: Ringlet.Context(),
             actuatorValues: actuatorValues,
             initialState: initialState,
             currentState: currentState,
@@ -187,58 +197,62 @@ public final class FiniteStateMachine<
         return (fsm, data)
     }
 
-    private init(states: [State], ringlet: Ringlet, handlers: Handlers) {
-        self.states = states
+    private init(stateContainer: States, ringlet: Ringlet, handlers: Handlers) {
+        self.stateContainer = stateContainer
         self.ringlet = ringlet
         self.handlers = handlers
     }
 
-    public func next<Scheduler: SchedulerProtocol>(scheduler: Scheduler, data: inout Sendable) {
-        var temp = unsafeBitCast(data, to: Data.self)
-        let state = states[temp.currentState]
-        temp.ringletContext.fsmContext.state = temp.stateContexts[temp.currentState]
+    public func next<Scheduler: SchedulerProtocol>(scheduler: Scheduler, data: AnyObject) {
+        let context = unsafeDowncast(
+            data,
+            to: RingletContext<StateType, Ringlet.Context, Context, Environment, Parameters, Result>.self
+        )
+        context.stateContainer = stateContainer
+        defer { context.stateContainer = nil }
+        let state = states[context.currentState]
+        context.data.fsmContext.state = context.data.stateContexts[context.currentState]
         let nextState = ringlet.execute(
-            id: temp.currentState,
+            id: context.currentState,
             state: state.stateType,
             transitions: state.transitions,
-            context: temp.ringletContext
+            context: context
         )
-        temp.previousState = temp.currentState
-        temp.currentState = nextState
-        if temp.ringletContext.fsmContext.status == .suspending {
-            temp.suspend()
-        } else if temp.ringletContext.fsmContext.status == .resuming {
-            temp.resume()
-        } else if temp.ringletContext.fsmContext.status == .restarting {
-            temp.restart()
+        context.data.previousState = context.currentState
+        context.data.currentState = nextState
+        if context.data.fsmContext.status == .suspending {
+            context.data.suspend()
+        } else if context.data.fsmContext.status == .resuming {
+            context.data.resume()
+        } else if context.data.fsmContext.status == .restarting {
+            context.data.restart()
         } else {
-            temp.ringletContext.fsmContext.status = .executing(
-                transitioned: temp.currentState != temp.previousState
+            context.data.fsmContext.status = .executing(
+                transitioned: context.data.currentState != context.data.previousState
             )
         }
-        data = temp as Sendable
     }
 
-    public func saveSnapshot(data: inout Sendable) {
-        var temp = unsafeBitCast(data, to: Data.self)
-        temp.saveSnapshot(
-            environmentVariables: states[temp.currentState].environmentVariables,
+    public func saveSnapshot(data: AnyObject) {
+        let context = unsafeDowncast(
+            data,
+            to: RingletContext<StateType, Ringlet.Context, Context, Environment, Parameters, Result>.self
+        )
+        context.data.saveSnapshot(
+            environmentVariables: states[context.data.currentState].environmentVariables,
             handlers: handlers
         )
-        data = temp as Sendable
     }
 
-    public func state(at id: Int) -> State {
-        states[id]
-    }
-
-    public func takeSnapshot(data: inout Sendable) {
-        var temp = unsafeBitCast(data, to: Data.self)
-        temp.takeSnapshot(
-            environmentVariables: states[temp.currentState].environmentVariables,
+    public func takeSnapshot(data: AnyObject) {
+        let context = unsafeDowncast(
+            data,
+            to: RingletContext<StateType, Ringlet.Context, Context, Environment, Parameters, Result>.self
+        )
+        context.data.takeSnapshot(
+            environmentVariables: states[context.data.currentState].environmentVariables,
             handlers: handlers
         )
-        data = temp as Sendable
     }
 
 }
