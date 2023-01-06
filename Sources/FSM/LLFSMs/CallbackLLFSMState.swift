@@ -12,36 +12,32 @@ public struct CallbackLLFSMState<
     public typealias Parameters = Parameters
     public typealias Result = Result
 
-    private let _onEntry:
-        (inout StateContext<StatesContext, FSMsContext, Environment, Parameters, Result>) -> Void
+    private let _onEntry: (StateContext<StatesContext, FSMsContext, Environment, Parameters, Result>) -> Void
 
-    private let _internal:
-        (inout StateContext<StatesContext, FSMsContext, Environment, Parameters, Result>) -> Void
+    private let _internal: (StateContext<StatesContext, FSMsContext, Environment, Parameters, Result>) -> Void
 
-    private let _onExit:
-        (inout StateContext<StatesContext, FSMsContext, Environment, Parameters, Result>) -> Void
+    private let _onExit: (StateContext<StatesContext, FSMsContext, Environment, Parameters, Result>) -> Void
 
     private let _onSuspend:
-        (inout StateContext<StatesContext, FSMsContext, Environment, Parameters, Result>) -> Void
+        (StateContext<StatesContext, FSMsContext, Environment, Parameters, Result>) -> Void
 
-    private let _onResume:
-        (inout StateContext<StatesContext, FSMsContext, Environment, Parameters, Result>) -> Void
+    private let _onResume: (StateContext<StatesContext, FSMsContext, Environment, Parameters, Result>) -> Void
 
     public init(
         onEntry:
-            @escaping (inout StateContext<StatesContext, FSMsContext, Environment, Parameters, Result>)
+            @escaping (StateContext<StatesContext, FSMsContext, Environment, Parameters, Result>)
                 -> Void = { _ in },
         internal:
-            @escaping (inout StateContext<StatesContext, FSMsContext, Environment, Parameters, Result>)
+            @escaping (StateContext<StatesContext, FSMsContext, Environment, Parameters, Result>)
                 -> Void = { _ in },
         onExit:
-            @escaping (inout StateContext<StatesContext, FSMsContext, Environment, Parameters, Result>)
+            @escaping (StateContext<StatesContext, FSMsContext, Environment, Parameters, Result>)
                 -> Void = { _ in },
         onSuspend:
-            @escaping (inout StateContext<StatesContext, FSMsContext, Environment, Parameters, Result>)
+            @escaping (StateContext<StatesContext, FSMsContext, Environment, Parameters, Result>)
                 -> Void = { _ in },
         onResume:
-            @escaping (inout StateContext<StatesContext, FSMsContext, Environment, Parameters, Result>)
+            @escaping (StateContext<StatesContext, FSMsContext, Environment, Parameters, Result>)
                 -> Void = { _ in }
     ) {
         self._onEntry = onEntry
@@ -52,33 +48,33 @@ public struct CallbackLLFSMState<
     }
 
     public func onEntry(
-        context: inout StateContext<StatesContext, FSMsContext, Environment, Parameters, Result>
+        context: StateContext<StatesContext, FSMsContext, Environment, Parameters, Result>
     ) {
-        self._onEntry(&context)
+        self._onEntry(context)
     }
 
     public func `internal`(
-        context: inout StateContext<StatesContext, FSMsContext, Environment, Parameters, Result>
+        context: StateContext<StatesContext, FSMsContext, Environment, Parameters, Result>
     ) {
-        self._internal(&context)
+        self._internal(context)
     }
 
     public func onExit(
-        context: inout StateContext<StatesContext, FSMsContext, Environment, Parameters, Result>
+        context: StateContext<StatesContext, FSMsContext, Environment, Parameters, Result>
     ) {
-        self._onExit(&context)
+        self._onExit(context)
     }
 
     public func onSuspend(
-        context: inout StateContext<StatesContext, FSMsContext, Environment, Parameters, Result>
+        context: StateContext<StatesContext, FSMsContext, Environment, Parameters, Result>
     ) {
-        self._onSuspend(&context)
+        self._onSuspend(context)
     }
 
     public func onResume(
-        context: inout StateContext<StatesContext, FSMsContext, Environment, Parameters, Result>
+        context: StateContext<StatesContext, FSMsContext, Environment, Parameters, Result>
     ) {
-        self._onResume(&context)
+        self._onResume(context)
     }
 
 }

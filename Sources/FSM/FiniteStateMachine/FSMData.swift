@@ -14,9 +14,7 @@ public struct FSMData<
 
     public var stateContexts: [Sendable]
 
-    public var fsmContext: FSMContext<Context, Environment, Parameters, Result>
-
-    public var ringletContext: Ringlet.Context
+    public var ringletContext: RingletContext<Ringlet.Context, Context, Environment, Parameters, Result>
 
     public var actuatorValues: [Sendable]
 
@@ -44,8 +42,7 @@ public struct FSMData<
         fsm: Int,
         acceptingStates: [Bool],
         stateContexts: [Sendable],
-        fsmContext: FSMContext<Context, Environment, Parameters, Result>,
-        ringletContext: Ringlet.Context,
+        ringletContext: RingletContext<Ringlet.Context, Context, Environment, Parameters, Result>,
         actuatorValues: [Sendable],
         initialState: Int,
         currentState: Int,
@@ -56,7 +53,6 @@ public struct FSMData<
         self.fsm = fsm
         self.acceptingStates = acceptingStates
         self.stateContexts = stateContexts
-        self.fsmContext = fsmContext
         self.ringletContext = ringletContext
         self.actuatorValues = actuatorValues
         self.initialState = initialState
@@ -68,7 +64,7 @@ public struct FSMData<
 
     public mutating func restart() {
         currentState = initialState
-        fsmContext.status = .restarted(transitioned: currentState != previousState)
+        ringletContext.fsmContext.status = .restarted(transitioned: currentState != previousState)
     }
 
     public mutating func resume() {
@@ -77,7 +73,7 @@ public struct FSMData<
         }
         currentState = currentSuspendedState
         suspendedState = nil
-        fsmContext.status = .resumed(transitioned: currentState != previousState)
+        ringletContext.fsmContext.status = .resumed(transitioned: currentState != previousState)
     }
 
     public mutating func suspend() {
@@ -86,7 +82,7 @@ public struct FSMData<
         }
         suspendedState = currentState
         currentState = suspendState
-        fsmContext.status = .suspended(transitioned: currentState != previousState)
+        ringletContext.fsmContext.status = .suspended(transitioned: currentState != previousState)
     }
 
     public mutating func saveSnapshot(
@@ -95,10 +91,10 @@ public struct FSMData<
     ) {
         for keyPath in environmentVariables {
             if let handler = handlers.actuators[keyPath] {
-                handler.saveSnapshot(value: fsmContext.environment[keyPath: keyPath])
-                actuatorValues[handler.index] = fsmContext.environment[keyPath: keyPath]
+                handler.saveSnapshot(value: ringletContext.fsmContext.environment[keyPath: keyPath])
+                actuatorValues[handler.index] = ringletContext.fsmContext.environment[keyPath: keyPath]
             } else if let handler = handlers.externalVariables[keyPath] {
-                handler.saveSnapshot(value: fsmContext.environment[keyPath: keyPath])
+                handler.saveSnapshot(value: ringletContext.fsmContext.environment[keyPath: keyPath])
             }
         }
     }
@@ -117,7 +113,7 @@ public struct FSMData<
                 handler.update(environment: &environment, with: actuatorValues[handler.index])
             }
         }
-        fsmContext.environment = environment
+        ringletContext.fsmContext.environment = environment
     }
 
 }

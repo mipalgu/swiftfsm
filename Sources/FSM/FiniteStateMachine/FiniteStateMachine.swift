@@ -1,14 +1,21 @@
-public struct FiniteStateMachine<
+public final class FiniteStateMachine<
     StateType: TypeErasedState,
     Ringlet: RingletProtocol,
     Parameters: DataStructure,
     Result: DataStructure,
     Context: ContextProtocol,
     Environment: EnvironmentSnapshot
->: Executable where StateType.FSMsContext == Context,
+>: Executable, StateContainerProtocol where StateType.FSMsContext == Context,
     StateType.Environment == Environment,
     Ringlet.StateType == StateType,
     Ringlet.TransitionType == AnyTransition<FSMContext<Context, Environment, Parameters, Result>, StateID> {
+
+    public typealias StateType = StateType
+    public typealias RingletsContext = Ringlet.Context
+    public typealias FSMContext = Context
+    public typealias Environment = Environment
+    public typealias Parameters = Parameters
+    public typealias Result = Result
 
     public typealias Data = FSMData<Ringlet, Parameters, Result, Context, Environment>
 
@@ -25,7 +32,23 @@ public struct FiniteStateMachine<
     public static func initial<Model: FSMModel>(
         from model: Model,
         with parameters: Parameters
-    ) -> (Self, Self.Data) where Model.StateType == StateType,
+    ) -> (
+        FiniteStateMachine<
+            Model.StateType,
+            Model.Ringlet,
+            Model.Parameters,
+            Model.Result,
+            Model.Context,
+            Model.Environment
+        >,
+        FSMData<
+            Model.Ringlet,
+            Model.Parameters,
+            Model.Result,
+            Model.Context,
+            Model.Environment
+        >
+    ) where Model.StateType == StateType,
             Model.Ringlet == Ringlet,
             Model.Parameters == Parameters,
             Model.Result == Result,
@@ -148,12 +171,12 @@ public struct FiniteStateMachine<
         }
         let fsmID = IDRegistrar.id(of: model.name)
         let fsm = FiniteStateMachine(states: states, ringlet: model.initialRinglet, handlers: handlers)
+        let ringletContext = RingletContext(ringlet: Ringlet.Context(), fsmContext: fsmContext)
         let data = Data(
             fsm: fsmID,
             acceptingStates: acceptingStates,
             stateContexts: newContexts,
-            fsmContext: fsmContext,
-            ringletContext: Ringlet.Context(),
+            ringletContext: ringletContext,
             actuatorValues: actuatorValues,
             initialState: initialState,
             currentState: currentState,
@@ -173,24 +196,25 @@ public struct FiniteStateMachine<
     public func next<Scheduler: SchedulerProtocol>(scheduler: Scheduler, data: inout Sendable) {
         var temp = unsafeBitCast(data, to: Data.self)
         let state = states[temp.currentState]
-        temp.fsmContext.state = temp.stateContexts[temp.currentState]
+        temp.ringletContext.fsmContext.state = temp.stateContexts[temp.currentState]
         let nextState = ringlet.execute(
             id: temp.currentState,
             state: state.stateType,
             transitions: state.transitions,
-            fsmContext: &temp.fsmContext,
-            context: &temp.ringletContext
+            context: temp.ringletContext
         )
         temp.previousState = temp.currentState
         temp.currentState = nextState
-        if temp.fsmContext.status == .suspending {
+        if temp.ringletContext.fsmContext.status == .suspending {
             temp.suspend()
-        } else if temp.fsmContext.status == .resuming {
+        } else if temp.ringletContext.fsmContext.status == .resuming {
             temp.resume()
-        } else if temp.fsmContext.status == .restarting {
+        } else if temp.ringletContext.fsmContext.status == .restarting {
             temp.restart()
         } else {
-            temp.fsmContext.status = .executing(transitioned: temp.currentState != temp.previousState)
+            temp.ringletContext.fsmContext.status = .executing(
+                transitioned: temp.currentState != temp.previousState
+            )
         }
         data = temp as Sendable
     }
@@ -202,6 +226,10 @@ public struct FiniteStateMachine<
             handlers: handlers
         )
         data = temp as Sendable
+    }
+
+    public func state(at id: Int) -> State {
+        states[id]
     }
 
     public func takeSnapshot(data: inout Sendable) {

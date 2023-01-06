@@ -33,19 +33,19 @@ public extension StateProperty {
         context _: StatesContext.Type,
         uses environmentVariables: PartialKeyPath<Root.Environment> ...,
         onEntry: @Sendable
-            @escaping (inout StateContext<StatesContext, FSMsContext, Environment, Parameters, Result>)
+            @escaping (StateContext<StatesContext, FSMsContext, Environment, Parameters, Result>)
                 -> Void = { _ in },
         internal: @Sendable
-            @escaping (inout StateContext<StatesContext, FSMsContext, Environment, Parameters, Result>)
+            @escaping (StateContext<StatesContext, FSMsContext, Environment, Parameters, Result>)
                 -> Void = { _ in },
         onExit: @Sendable
-            @escaping (inout StateContext<StatesContext, FSMsContext, Environment, Parameters, Result>)
+            @escaping (StateContext<StatesContext, FSMsContext, Environment, Parameters, Result>)
                 -> Void = { _ in },
         onSuspend: @Sendable
-            @escaping (inout StateContext<StatesContext, FSMsContext, Environment, Parameters, Result>)
+            @escaping (StateContext<StatesContext, FSMsContext, Environment, Parameters, Result>)
                 -> Void = { _ in },
         onResume: @Sendable
-            @escaping (inout StateContext<StatesContext, FSMsContext, Environment, Parameters, Result>)
+            @escaping (StateContext<StatesContext, FSMsContext, Environment, Parameters, Result>)
                 -> Void = { _ in },
         @TransitionBuilder transitions:
             () -> [AnyTransition<
@@ -76,19 +76,19 @@ public extension StateProperty {
         name: String,
         uses environmentVariables: PartialKeyPath<Root.Environment> ...,
         onEntry: @Sendable
-            @escaping (inout StateContext<EmptyDataStructure, FSMsContext, Environment, Parameters, Result>)
+            @escaping (StateContext<EmptyDataStructure, FSMsContext, Environment, Parameters, Result>)
                 -> Void = { _ in },
         internal: @Sendable
-            @escaping (inout StateContext<EmptyDataStructure, FSMsContext, Environment, Parameters, Result>)
+            @escaping (StateContext<EmptyDataStructure, FSMsContext, Environment, Parameters, Result>)
                 -> Void = { _ in },
         onExit: @Sendable
-            @escaping (inout StateContext<EmptyDataStructure, FSMsContext, Environment, Parameters, Result>)
+            @escaping (StateContext<EmptyDataStructure, FSMsContext, Environment, Parameters, Result>)
                 -> Void = { _ in },
         onSuspend: @Sendable
-            @escaping (inout StateContext<EmptyDataStructure, FSMsContext, Environment, Parameters, Result>)
+            @escaping (StateContext<EmptyDataStructure, FSMsContext, Environment, Parameters, Result>)
                 -> Void = { _ in },
         onResume: @Sendable
-            @escaping (inout StateContext<EmptyDataStructure, FSMsContext, Environment, Parameters, Result>)
+            @escaping (StateContext<EmptyDataStructure, FSMsContext, Environment, Parameters, Result>)
                 -> Void = { _ in },
         @TransitionBuilder transitions:
             () -> [AnyTransition<

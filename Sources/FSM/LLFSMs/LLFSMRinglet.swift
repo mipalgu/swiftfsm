@@ -15,25 +15,24 @@ public struct LLFSMRinglet<
         id: StateID,
         state: AnyLLFSMState<FSMsContext, Environment, Parameters, Result>,
         transitions: [AnyTransition<FSMContext<FSMsContext, Environment, Parameters, Result>, StateID>],
-        fsmContext: inout FSMContext<FSMsContext, Environment, Parameters, Result>,
-        context: inout Context
+        context: RingletContext<Context, FSMsContext, Environment, Parameters, Result>
     ) -> StateID {
-        if case .resumed = fsmContext.status {
-            state.onResume(context: &fsmContext)
+        if case .resumed = context.fsmContext.status {
+            state.onResume(context: context.fsmContext)
         }
-        if fsmContext.status.transitioned {
-            state.onEntry(context: &fsmContext)
+        if context.fsmContext.status.transitioned {
+            state.onEntry(context: context.fsmContext)
         }
         let result: StateID
-        if let first = transitions.first(where: { $0.canTransition(from: fsmContext) }) {
-            state.onExit(context: &fsmContext)
+        if let first = transitions.first(where: { $0.canTransition(from: context.fsmContext) }) {
+            state.onExit(context: context.fsmContext)
             result = first.target
         } else {
-            state.internal(context: &fsmContext)
+            state.internal(context: context.fsmContext)
             result = id
         }
-        if fsmContext.status == .suspending {
-            state.onSuspend(context: &fsmContext)
+        if context.fsmContext.status == .suspending {
+            state.onSuspend(context: context.fsmContext)
         }
         return result
     }

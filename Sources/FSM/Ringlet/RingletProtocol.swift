@@ -15,13 +15,13 @@ public protocol RingletProtocol: ContextUser, EmptyInitialisable {
         id: StateID,
         state: StateType,
         transitions: [TransitionType],
-        fsmContext: inout FSMContext<
+        context: RingletContext<
+            Context,
             StateType.FSMsContext,
             StateType.Environment,
             StateType.Parameters,
             StateType.Result
-        >,
-        context: inout Context
+        >
     ) -> StateID
 
 }
