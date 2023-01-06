@@ -1,4 +1,4 @@
-public enum FSMStatus: Hashable, Codable, Sendable {
+public enum FSMStatus: Hashable, Codable, Sendable, CaseIterable {
 
     case executing(transitioned: Bool)
 
@@ -15,6 +15,23 @@ public enum FSMStatus: Hashable, Codable, Sendable {
     case suspended(transitioned: Bool)
 
     case suspending
+
+    public static var allCases: [FSMStatus] {
+        [
+            .executing(transitioned: false),
+            .executing(transitioned: true),
+            .finished,
+            .restarted(transitioned: false),
+            .restarted(transitioned: true),
+            .restarting,
+            .resumed(transitioned: false),
+            .resumed(transitioned: true),
+            .resuming,
+            .suspended(transitioned: false),
+            .suspended(transitioned: true),
+            .suspending
+        ]
+    }
 
     public var transitioned: Bool {
         switch self {

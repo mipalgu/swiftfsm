@@ -75,17 +75,9 @@ public struct StateContext<
         self.status = status
     }
 
-    public subscript<T>(dynamicMember keyPath: KeyPath<StateContext, T>) -> T {
-        state[keyPath: keyPath]
-    }
-
     public subscript<T>(dynamicMember keyPath: WritableKeyPath<StateContext, T>) -> T {
         get { state[keyPath: keyPath] }
         set { state[keyPath: keyPath] = newValue }
-    }
-
-    public subscript<T>(dynamicMember keyPath: KeyPath<FSMsContext, T>) -> T {
-        fsm[keyPath: keyPath]
     }
 
     public subscript<T>(dynamicMember keyPath: WritableKeyPath<FSMsContext, T>) -> T {
@@ -93,17 +85,17 @@ public struct StateContext<
         set { fsm[keyPath: keyPath] = newValue }
     }
 
-    public subscript<T>(dynamicMember keyPath: KeyPath<Environment, T>) -> T {
-        environment[keyPath: keyPath]
-    }
-
     public subscript<T>(dynamicMember keyPath: WritableKeyPath<Environment, T>) -> T {
         get { environment[keyPath: keyPath] }
         set { environment[keyPath: keyPath] = newValue }
     }
 
+    public subscript<T>(dynamicMember keyPath: KeyPath<Parameters, T>) -> T {
+        parameters[keyPath: keyPath]
+    }
+
     public mutating func update(from fsmContext: FSMContext<FSMsContext, Environment, Parameters, Result>) {
-        state = unsafeBitCast(fsmContext.state, to: StateContext.self)
+        state = fsmContext.state as! StateContext
         fsm = fsmContext.fsm
         environment = fsmContext.environment
         parameters = fsmContext.parameters
