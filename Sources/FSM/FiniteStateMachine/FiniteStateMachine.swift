@@ -44,7 +44,7 @@ public final class FiniteStateMachine<
     public func next<Scheduler: SchedulerProtocol>(scheduler: Scheduler, data: AnyObject) {
         let context = unsafeDowncast(
             data,
-            to: RingletContext<StateType, Ringlet.Context, Context, Environment, Parameters, Result>.self
+            to: SchedulerContext<StateType, Ringlet.Context, Context, Environment, Parameters, Result>.self
         )
         context.stateContainer = stateContainer
         defer { context.stateContainer = nil }
@@ -68,7 +68,7 @@ public final class FiniteStateMachine<
     public func saveSnapshot(data: AnyObject) {
         let context = unsafeDowncast(
             data,
-            to: RingletContext<StateType, Ringlet.Context, Context, Environment, Parameters, Result>.self
+            to: SchedulerContext<StateType, Ringlet.Context, Context, Environment, Parameters, Result>.self
         )
         context.data.saveSnapshot(
             environmentVariables: states[context.data.currentState].environmentVariables,
@@ -79,7 +79,7 @@ public final class FiniteStateMachine<
     public func takeSnapshot(data: AnyObject) {
         let context = unsafeDowncast(
             data,
-            to: RingletContext<StateType, Ringlet.Context, Context, Environment, Parameters, Result>.self
+            to: SchedulerContext<StateType, Ringlet.Context, Context, Environment, Parameters, Result>.self
         )
         context.data.takeSnapshot(
             environmentVariables: states[context.data.currentState].environmentVariables,
@@ -100,7 +100,7 @@ public extension FiniteStateMachine {
             Model.Context,
             Model.Environment
         >,
-        RingletContext<
+        SchedulerContext<
             Model.StateType,
             Model.Ringlet.Context,
             Model.Context,
@@ -248,7 +248,7 @@ public extension FiniteStateMachine {
             suspendState: suspendState,
             suspendedState: nil
         )
-        let context = RingletContext<
+        let context = SchedulerContext<
             Model.StateType,
             Model.Ringlet.Context,
             Model.Context,

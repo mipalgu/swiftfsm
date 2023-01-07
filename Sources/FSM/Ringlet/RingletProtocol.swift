@@ -12,7 +12,7 @@ public protocol RingletProtocol: ContextUser, EmptyInitialisable {
         TransitionType.Target == StateID
 
     func execute(
-        context: RingletContext<
+        context: SchedulerContext<
             StateType,
             Context,
             StateType.FSMsContext,

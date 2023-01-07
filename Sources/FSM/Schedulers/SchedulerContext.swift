@@ -1,5 +1,5 @@
 @dynamicMemberLookup
-public final class RingletContext<
+public final class SchedulerContext<
     StateType: TypeErasedState,
     RingletsContext: ContextProtocol,
     FSMsContext: ContextProtocol,

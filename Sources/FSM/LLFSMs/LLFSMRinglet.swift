@@ -12,7 +12,7 @@ public struct LLFSMRinglet<
     public init() {}
 
     public func execute(
-        context: RingletContext<StateType, Context, FSMsContext, Environment, Parameters, Result>
+        context: SchedulerContext<StateType, Context, FSMsContext, Environment, Parameters, Result>
     ) -> StateID {
         let state = context.states[context.currentState]
         let suspendState = context.states[context.suspendState].stateType
