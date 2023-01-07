@@ -1,9 +1,9 @@
 public protocol Executable {
 
-    func next<Scheduler: SchedulerProtocol>(scheduler: Scheduler, context: AnyObject)
+    func next<Scheduler: SchedulerProtocol>(scheduler: Scheduler, context: AnySchedulerContext)
 
-    func saveSnapshot(context: AnyObject)
+    func saveSnapshot(context: AnySchedulerContext)
 
-    func takeSnapshot(context: AnyObject)
+    func takeSnapshot(context: AnySchedulerContext)
 
 }

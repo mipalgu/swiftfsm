@@ -6,7 +6,7 @@ public final class SchedulerContext<
     Environment: EnvironmentSnapshot,
     Parameters: DataStructure,
     Result: DataStructure
-> {
+>: AnySchedulerContext {
 
     var data: FSMData<RingletsContext, Parameters, Result, FSMsContext, Environment>
 
@@ -85,11 +85,13 @@ public final class SchedulerContext<
     }
 
     init(
+        fsmID: Int,
         data: FSMData<RingletsContext, Parameters, Result, FSMsContext, Environment>,
         stateContainer: StateContainer<StateType, Parameters, Result, FSMsContext, Environment>? = nil
     ) {
         self.data = data
         self.stateContainer = stateContainer
+        super.init(fsmID: fsmID)
     }
 
     public subscript<T>(dynamicMember keyPath: WritableKeyPath<FSMsContext, T>) -> T {

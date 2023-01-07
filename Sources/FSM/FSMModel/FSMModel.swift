@@ -288,7 +288,9 @@ public extension FSMModel {
             suspendState: suspendState,
             suspendedState: nil
         )
+        let fsmID = IDRegistrar.id(of: name)
         let context = SchedulerContext<StateType, Ringlet.Context, Context, Environment, Parameters, Result>(
+            fsmID: fsmID,
             data: data
         )
         return (fsm, context)
