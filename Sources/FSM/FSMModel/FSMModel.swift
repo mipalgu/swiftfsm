@@ -271,14 +271,12 @@ public extension FSMModel {
         guard actuatorValues.count == actuators.count else {
             fatalError("Unable to set up actuatorValues for actuators.")
         }
-        let fsmID = IDRegistrar.id(of: self.name)
         let fsm = FiniteStateMachine(
             stateContainer: StateContainer(states: states),
             ringlet: self.initialRinglet,
             handlers: handlers
         )
         let data = FSMData(
-            fsm: fsmID,
             acceptingStates: acceptingStates,
             stateContexts: newContexts,
             fsmContext: fsmContext,

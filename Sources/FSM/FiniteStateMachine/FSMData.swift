@@ -4,11 +4,9 @@ public struct FSMData<
     Result: DataStructure,
     Context: ContextProtocol,
     Environment: EnvironmentSnapshot
->: FSMDataProtocol {
+>: FiniteStateMachineOperations {
 
     public typealias Handlers = FSMHandlers<Environment>
-
-    public var fsm: Int
 
     public var acceptingStates: [Bool]
 
@@ -41,7 +39,6 @@ public struct FSMData<
     }
 
     init(
-        fsm: Int,
         acceptingStates: [Bool],
         stateContexts: [Sendable],
         fsmContext: FSMContext<Context, Environment, Parameters, Result>,
@@ -53,7 +50,6 @@ public struct FSMData<
         suspendState: Int,
         suspendedState: Int?
     ) {
-        self.fsm = fsm
         self.acceptingStates = acceptingStates
         self.stateContexts = stateContexts
         self.fsmContext = fsmContext
