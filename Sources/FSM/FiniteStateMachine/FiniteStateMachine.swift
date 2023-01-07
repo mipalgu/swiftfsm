@@ -10,13 +10,6 @@ public final class FiniteStateMachine<
     Ringlet.StateType == StateType,
     Ringlet.TransitionType == AnyTransition<FSMContext<Context, Environment, Parameters, Result>, StateID> {
 
-    public typealias StateType = StateType
-    public typealias RingletsContext = Ringlet.Context
-    public typealias FSMContext = Context
-    public typealias Environment = Environment
-    public typealias Parameters = Parameters
-    public typealias Result = Result
-
     public typealias Handlers = FSMHandlers<Environment>
 
     public typealias State = FSMState<StateType, Parameters, Result, Context, Environment>
