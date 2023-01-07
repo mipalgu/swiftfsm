@@ -4,7 +4,11 @@ public struct InMemoryExternalVariable<Value: ExternalVariableValue>: ExternalVa
 
     public let id: String
 
-    private let initialValue: Value
+    public let initialValue: Value
+
+    public init(id: String) where Value: EmptyInitialisable {
+        self.init(id: id, initialValue: Value())
+    }
 
     public init(id: String, initialValue: Value) {
         self.id = id

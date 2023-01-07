@@ -34,9 +34,9 @@ public final class SchedulerContext<
 
     public var fsm: FSMsContext {
         get {
-            data.fsmContext.fsm
+            data.fsmContext.context
         } set {
-            data.fsmContext.fsm = newValue
+            data.fsmContext.context = newValue
         }
     }
 
@@ -94,9 +94,13 @@ public final class SchedulerContext<
         super.init(fsmID: fsmID)
     }
 
+    public func context(forState index: Int) -> AnyStateContext<FSMsContext, Environment, Parameters, Result> {
+        data.stateContexts[index]
+    }
+
     public subscript<T>(dynamicMember keyPath: WritableKeyPath<FSMsContext, T>) -> T {
-        get { data.fsmContext.fsm[keyPath: keyPath] }
-        set { data.fsmContext.fsm[keyPath: keyPath] = newValue }
+        get { data.fsmContext.context[keyPath: keyPath] }
+        set { data.fsmContext.context[keyPath: keyPath] = newValue }
     }
 
     public subscript<T>(dynamicMember keyPath: WritableKeyPath<Environment, T>) -> T {

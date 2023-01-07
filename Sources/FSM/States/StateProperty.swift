@@ -7,11 +7,9 @@ public struct StateProperty<StateType: TypeErasedState, Root: FSMModel>: AnyStat
 
     public let environmentVariables: [PartialKeyPath<Root.Environment>]
 
-    public let context: Sendable
-
     public var transitions:
         [AnyTransition<
-            FSMContext<StateType.FSMsContext, StateType.Environment, StateType.Parameters, StateType.Result>,
+            AnyStateContext<StateType.FSMsContext, StateType.Environment, StateType.Parameters, StateType.Result>,
             (Root) -> StateInformation
         >]
 
@@ -66,10 +64,20 @@ public struct StateProperty<StateType: TypeErasedState, Root: FSMModel>: AnyStat
         self.projectedValue = StateInformation(name: name)
         self.wrappedValue = wrappedValue.erased
         self.environmentVariables = environmentVariables
-        self.context = ConcreteState.Context()
         self.transitions = transitions().map { transition in
             AnyTransition(to: transition.target) {
-                transition.canTransition(from: StateContext(fsmContext: $0))
+                transition.canTransition(
+                    from: unsafeDowncast(
+                        $0,
+                        to: StateContext<
+                            ConcreteState.Context,
+                            ConcreteState.FSMsContext,
+                            ConcreteState.Environment,
+                            ConcreteState.Parameters,
+                            ConcreteState.Result
+                        >.self
+                    )
+                )
             }
         }
     }

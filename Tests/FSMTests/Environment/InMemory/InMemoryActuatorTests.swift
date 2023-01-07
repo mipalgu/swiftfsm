@@ -9,14 +9,16 @@ final class InMemoryActuatorTests: XCTestCase {
     var actuator: InMemoryActuator<Bool>!
 
     override func setUp() {
-        actuator = InMemoryActuator(id: id)
+        actuator = InMemoryActuator(id: id, initialValue: false)
     }
 
     func testInit() {
-        let actuator = InMemoryActuator<Bool>(id: id)
+        let actuator = InMemoryActuator<Bool>(id: id, initialValue: false)
         XCTAssertEqual(actuator.id, id)
-        let actuator2 = InMemoryActuator<Bool>(id: id)
+        XCTAssertEqual(actuator.initialValue, false)
+        let actuator2 = InMemoryActuator<Bool>(id: id, initialValue: true)
         XCTAssertEqual(actuator2.id, id)
+        XCTAssertEqual(actuator2.initialValue, true)
     }
 
     func testCanRetreiveValueAcrossTwoHandlers() {

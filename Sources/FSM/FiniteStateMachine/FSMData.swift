@@ -10,7 +10,7 @@ public struct FSMData<
 
     public var acceptingStates: [Bool]
 
-    public var stateContexts: [Sendable]
+    public var stateContexts: [AnyStateContext<Context, Environment, Parameters, Result>]
 
     public var fsmContext: FSMContext<Context, Environment, Parameters, Result>
 
@@ -40,7 +40,7 @@ public struct FSMData<
 
     init(
         acceptingStates: [Bool],
-        stateContexts: [Sendable],
+        stateContexts: [AnyStateContext<Context, Environment, Parameters, Result>],
         fsmContext: FSMContext<Context, Environment, Parameters, Result>,
         ringletContext: RingletsContext,
         actuatorValues: [Sendable],

@@ -8,7 +8,12 @@ public final class FiniteStateMachine<
 >: Executable where StateType.FSMsContext == Context,
     StateType.Environment == Environment,
     Ringlet.StateType == StateType,
-    Ringlet.TransitionType == AnyTransition<FSMContext<Context, Environment, Parameters, Result>, StateID> {
+    Ringlet.TransitionType == AnyTransition<
+        AnyStateContext<Context, Environment, Parameters, Result>,
+        StateID
+    > {
+
+    public typealias Data = FSMData<Ringlet.Context, Parameters, Result, Context, Environment>
 
     public typealias Handlers = FSMHandlers<Environment>
 
@@ -22,14 +27,51 @@ public final class FiniteStateMachine<
 
     public let handlers: Handlers
 
+    public let initialState: Int
+
+    public let initialPreviousState: Int
+
+    public let suspendState: Int
+
     public var states: [State] {
         stateContainer.states
     }
 
-    init(stateContainer: States, ringlet: Ringlet, handlers: Handlers) {
+    public func initialData(with parameters: Parameters) -> Data {
+        let fsmContext = FSMContext(
+            context: Context(),
+            environment: Environment(),
+            parameters: parameters,
+            result: Result?.none
+        )
+        return FSMData(
+            acceptingStates: stateContainer.states.map { $0.transitions.isEmpty },
+            stateContexts: stateContainer.states.map { $0.stateType.initialContext(fsmContext: fsmContext) },
+            fsmContext: fsmContext,
+            ringletContext: Ringlet.Context(),
+            actuatorValues: handlers.actuators.values.sorted { $0.index < $1.index }.map { $0.initialValue },
+            initialState: initialState,
+            currentState: initialState,
+            previousState: initialPreviousState,
+            suspendState: suspendState,
+            suspendedState: nil
+        )
+    }
+
+    init(
+        stateContainer: States,
+        ringlet: Ringlet,
+        handlers: Handlers,
+        initialState: Int,
+        initialPreviousState: Int,
+        suspendState: Int
+    ) {
         self.stateContainer = stateContainer
         self.ringlet = ringlet
         self.handlers = handlers
+        self.initialState = initialState
+        self.initialPreviousState = initialPreviousState
+        self.suspendState = suspendState
     }
 
     public func next<Scheduler: SchedulerProtocol>(scheduler: Scheduler, context: AnySchedulerContext) {
@@ -39,7 +81,6 @@ public final class FiniteStateMachine<
         )
         context.stateContainer = stateContainer
         defer { context.stateContainer = nil }
-        context.data.fsmContext.state = context.data.stateContexts[context.currentState]
         let nextState = ringlet.execute(context: context)
         context.data.previousState = context.currentState
         context.data.currentState = nextState

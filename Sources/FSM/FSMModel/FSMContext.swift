@@ -6,13 +6,11 @@ public final class FSMContext<
     Result: DataStructure
 >: FiniteStateMachineOperations {
 
-    var state: Sendable
-
-    public var fsm: FSMsContext
+    public var context: FSMsContext
 
     public var environment: Environment
 
-    public var parameters: Parameters
+    public let parameters: Parameters
 
     public var result: Result?
 
@@ -30,29 +28,14 @@ public final class FSMContext<
         }
     }
 
-    public convenience init<StatesContext: DataStructure>(
-        stateContext: StateContext<StatesContext, FSMsContext, Environment, Parameters, Result>
-    ) {
-        self.init(
-            state: stateContext.state as Sendable,
-            fsm: stateContext.fsm,
-            environment: stateContext.environment,
-            parameters: stateContext.parameters,
-            result: stateContext.result,
-            status: stateContext.status
-        )
-    }
-
     public convenience init(
-        state: Sendable,
-        fsm: FSMsContext,
+        context: FSMsContext,
         environment: Environment,
         parameters: Parameters,
         result: Result?
     ) {
         self.init(
-            state: state,
-            fsm: fsm,
+            context: context,
             environment: environment,
             parameters: parameters,
             result: result,
@@ -61,15 +44,13 @@ public final class FSMContext<
     }
 
     init(
-        state: Sendable,
-        fsm: FSMsContext,
+        context: FSMsContext,
         environment: Environment,
         parameters: Parameters,
         result: Result?,
         status: FSMStatus
     ) {
-        self.state = state
-        self.fsm = fsm
+        self.context = context
         self.environment = environment
         self.parameters = parameters
         self.result = result
@@ -77,12 +58,12 @@ public final class FSMContext<
     }
 
     public subscript<T>(dynamicMember keyPath: KeyPath<FSMsContext, T>) -> T {
-        fsm[keyPath: keyPath]
+        context[keyPath: keyPath]
     }
 
     public subscript<T>(dynamicMember keyPath: WritableKeyPath<FSMsContext, T>) -> T {
-        get { fsm[keyPath: keyPath] }
-        set { fsm[keyPath: keyPath] = newValue }
+        get { context[keyPath: keyPath] }
+        set { context[keyPath: keyPath] = newValue }
     }
 
     public subscript<T>(dynamicMember keyPath: KeyPath<Environment, T>) -> T {
@@ -98,11 +79,6 @@ public final class FSMContext<
         parameters[keyPath: keyPath]
     }
 
-    public subscript<T>(dynamicMember keyPath: WritableKeyPath<Parameters, T>) -> T {
-        get { parameters[keyPath: keyPath] }
-        set { parameters[keyPath: keyPath] = newValue }
-    }
-
     public func restart() {
         status = .restarting
     }
@@ -113,17 +89,6 @@ public final class FSMContext<
 
     public func suspend() {
         status = .suspending
-    }
-
-    public func update<StatesContext: DataStructure>(
-        from stateContext: StateContext<StatesContext, FSMsContext, Environment, Parameters, Result>
-    ) {
-        state = stateContext.state as Sendable
-        fsm = stateContext.fsm
-        environment = stateContext.environment
-        parameters = stateContext.parameters
-        result = stateContext.result
-        status = stateContext.status
     }
 
 }

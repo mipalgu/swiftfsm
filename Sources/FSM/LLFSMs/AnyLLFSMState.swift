@@ -5,21 +5,22 @@ public struct AnyLLFSMState<
     Result: DataStructure
 >: TypeErasedState {
 
-    public typealias Context = FSMContext<FSMsContext, Environment, Parameters, Result>
     public typealias TypeErasedVersion = Self
 
-    private let _onEntry: (FSMContext<FSMsContext, Environment, Parameters, Result>) -> Void
-    private let _internal: (FSMContext<FSMsContext, Environment, Parameters, Result>) -> Void
-    private let _onExit: (FSMContext<FSMsContext, Environment, Parameters, Result>) -> Void
-    private let _onResume: (FSMContext<FSMsContext, Environment, Parameters, Result>) -> Void
-    private let _onSuspend: (FSMContext<FSMsContext, Environment, Parameters, Result>) -> Void
+    private let _initialContext: (FSMContext<FSMsContext, Environment, Parameters, Result>)
+        -> AnyStateContext<FSMsContext, Environment, Parameters, Result>
+    private let _onEntry: (AnyStateContext<FSMsContext, Environment, Parameters, Result>) -> Void
+    private let _internal: (AnyStateContext<FSMsContext, Environment, Parameters, Result>) -> Void
+    private let _onExit: (AnyStateContext<FSMsContext, Environment, Parameters, Result>) -> Void
+    private let _onResume: (AnyStateContext<FSMsContext, Environment, Parameters, Result>) -> Void
+    private let _onSuspend: (AnyStateContext<FSMsContext, Environment, Parameters, Result>) -> Void
 
     public var base: Any
 
     public var erased: Self { self }
 
-    public static var empty: (Sendable, AnyLLFSMState<FSMsContext, Environment, Parameters, Result>) {
-        (EmptyDataStructure(), AnyLLFSMState(EmptyLLFSMState()))
+    public static var emptyState: AnyLLFSMState<FSMsContext, Environment, Parameters, Result> {
+        AnyLLFSMState(EmptyLLFSMState())
     }
 
     public init<Base: LLFSMState>(_ base: Base)
@@ -28,60 +29,71 @@ public struct AnyLLFSMState<
             Base.Parameters == Parameters,
             Base.Result == Result {
         self.base = base
-        self._onEntry = {
-            let context = StateContext<Base.Context, FSMsContext, Environment, Parameters, Result>(
+        self._initialContext = {
+            StateContext<Base.Context, FSMsContext, Environment, Parameters, Result>(
+                context: Base.Context(),
                 fsmContext: $0
+            )
+        }
+        self._onEntry = {
+            let context = unsafeDowncast(
+                $0,
+                to: StateContext<Base.Context, FSMsContext, Environment, Parameters, Result>.self
             )
             base.onEntry(context: context)
-            $0.update(from: context)
         }
         self._internal = {
-            let context = StateContext<Base.Context, FSMsContext, Environment, Parameters, Result>(
-                fsmContext: $0
+            let context = unsafeDowncast(
+                $0,
+                to: StateContext<Base.Context, FSMsContext, Environment, Parameters, Result>.self
             )
             base.internal(context: context)
-            $0.update(from: context)
         }
         self._onExit = {
-            let context = StateContext<Base.Context, FSMsContext, Environment, Parameters, Result>(
-                fsmContext: $0
+            let context = unsafeDowncast(
+                $0,
+                to: StateContext<Base.Context, FSMsContext, Environment, Parameters, Result>.self
             )
             base.onExit(context: context)
-            $0.update(from: context)
         }
         self._onResume = {
-            let context = StateContext<Base.Context, FSMsContext, Environment, Parameters, Result>(
-                fsmContext: $0
+            let context = unsafeDowncast(
+                $0,
+                to: StateContext<Base.Context, FSMsContext, Environment, Parameters, Result>.self
             )
             base.onResume(context: context)
-            $0.update(from: context)
         }
         self._onSuspend = {
-            let context = StateContext<Base.Context, FSMsContext, Environment, Parameters, Result>(
-                fsmContext: $0
+            let context = unsafeDowncast(
+                $0,
+                to: StateContext<Base.Context, FSMsContext, Environment, Parameters, Result>.self
             )
             base.onSuspend(context: context)
-            $0.update(from: context)
         }
     }
 
-    public func onEntry(context: FSMContext<FSMsContext, Environment, Parameters, Result>) {
+    public func initialContext(fsmContext: FSMContext<FSMsContext, Environment, Parameters, Result>)
+        -> AnyStateContext<FSMsContext, Environment, Parameters, Result> {
+        _initialContext(fsmContext)
+    }
+
+    public func onEntry(context: AnyStateContext<FSMsContext, Environment, Parameters, Result>) {
         _onEntry(context)
     }
 
-    public func `internal`(context: FSMContext<FSMsContext, Environment, Parameters, Result>) {
+    public func `internal`(context: AnyStateContext<FSMsContext, Environment, Parameters, Result>) {
         _internal(context)
     }
 
-    public func onExit(context: FSMContext<FSMsContext, Environment, Parameters, Result>) {
+    public func onExit(context: AnyStateContext<FSMsContext, Environment, Parameters, Result>) {
         _onExit(context)
     }
 
-    public func onResume(context: FSMContext<FSMsContext, Environment, Parameters, Result>) {
+    public func onResume(context: AnyStateContext<FSMsContext, Environment, Parameters, Result>) {
         _onResume(context)
     }
 
-    public func onSuspend(context: FSMContext<FSMsContext, Environment, Parameters, Result>) {
+    public func onSuspend(context: AnyStateContext<FSMsContext, Environment, Parameters, Result>) {
         _onSuspend(context)
     }
 

@@ -138,24 +138,14 @@ public extension FSMModel {
         })
     }
 
-    private func initial(with parameters: Parameters) -> (
-        FiniteStateMachine<
-            StateType,
-            Ringlet,
-            Parameters,
-            Result,
-            Context,
-            Environment
-        >,
-        SchedulerContext<
-            StateType,
-            Ringlet.Context,
-            Context,
-            Environment,
-            Parameters,
-            Result
-        >
-    ) {
+    private func initial(with parameters: Parameters) -> FiniteStateMachine<
+        StateType,
+        Ringlet,
+        Parameters,
+        Result,
+        Context,
+        Environment
+    > {
         var newIds: [StateID: Int] = [:]
         var latestID = 0
         func id(for state: StateID) -> Int {
@@ -169,7 +159,6 @@ public extension FSMModel {
         }
         let anyStates = anyStates
         let stateTypes = states
-        let contexts = stateContexts
         let transitions = transitions
         var states = anyStates.map {
             let oldID = $1.information.id
@@ -198,23 +187,16 @@ public extension FSMModel {
                 transitions: newTransitions
             )
         }
-        var newContexts = anyStates.map {
-            let oldID = $1.information.id
-            guard let context = contexts[oldID] else {
-                fatalError("Unable to fetch context for state \($1.information.name).")
-            }
-            return context
-        }
         func newState(named name: String, transitions: [Int] = []) -> Int {
             let oldID = IDRegistrar.id(of: name)
             guard anyStates[oldID] == nil else {
                 fatalError("The \(name) state name is reserved. Please rename your state.")
             }
             let newID = id(for: oldID)
-            guard newID == states.count, newID == newContexts.count else {
+            guard newID == states.count else {
                 fatalError("Calculated invalid id (\(newID)) for new state.")
             }
-            let (context, stateType) = StateType.empty
+            let stateType = StateType.emptyState
             states.append(FSMState(
                 id: newID,
                 name: name,
@@ -222,13 +204,10 @@ public extension FSMModel {
                 stateType: stateType,
                 transitions: transitions.map { AnyTransition(to: $0) }
             ))
-            newContexts.append(context)
             return newID
         }
         let modelInitialState = id(for: self[keyPath: self.initialState].id)
-        let actualInitialState = newState(named: "__Initial", transitions: [modelInitialState])
-        let initialState = actualInitialState
-        let currentState = actualInitialState
+        let initialState = newState(named: "__Initial", transitions: [modelInitialState])
         let previousState = newState(named: "__Previous")
         let suspendState: Int
         if let suspendStatePath = self.suspendState {
@@ -236,8 +215,6 @@ public extension FSMModel {
         } else {
             suspendState = newState(named: "__Suspend")
         }
-        let acceptingStates = states.map { $0.transitions.isEmpty }
-        let fsmContext = self.initialContext(parameters: parameters)
         var actuatorsArr = Array(self.actuators)
         var externalVariablesArr = Array(self.externalVariables)
         var sensorsArr = Array(self.sensors)
@@ -258,52 +235,19 @@ public extension FSMModel {
             externalVariables: externalVariables,
             sensors: sensors
         )
-        let actuatorValues: [Sendable] = self.actuatorInitialValues.map {
-            guard let handler = actuators[$0] else {
-                fatalError("Unable to fetch handler from keypath.")
-            }
-            return (handler.index, $1)
-        }.sorted {
-            $0.0 < $1.0
-        }.map {
-            $1 as Sendable
-        }
-        guard actuatorValues.count == actuators.count else {
-            fatalError("Unable to set up actuatorValues for actuators.")
-        }
-        let fsm = FiniteStateMachine(
+        return FiniteStateMachine(
             stateContainer: StateContainer(states: states),
             ringlet: self.initialRinglet,
-            handlers: handlers
-        )
-        let data = FSMData(
-            acceptingStates: acceptingStates,
-            stateContexts: newContexts,
-            fsmContext: fsmContext,
-            ringletContext: Ringlet.Context(),
-            actuatorValues: actuatorValues,
+            handlers: handlers,
             initialState: initialState,
-            currentState: currentState,
-            previousState: previousState,
-            suspendState: suspendState,
-            suspendedState: nil
+            initialPreviousState: previousState,
+            suspendState: suspendState
         )
-        let fsmID = IDRegistrar.id(of: name)
-        let context = SchedulerContext<StateType, Ringlet.Context, Context, Environment, Parameters, Result>(
-            fsmID: fsmID,
-            data: data
-        )
-        return (fsm, context)
     }
 
     func initialContext(parameters: Parameters) -> FSMContext<Context, Environment, Parameters, Result> {
-        let initialStateInfo = self[keyPath: initialState]
-        guard let stateContext = stateContexts[initialStateInfo.id] else {
-            fatalError("Unable to fetch initial state.")
-        }
-        return FSMContext(
-            state: stateContext,
-            fsm: Context(),
+        FSMContext(
+            context: Context(),
             environment: Environment(),
             parameters: parameters,
             result: nil
@@ -322,10 +266,14 @@ public extension FSMModel {
         return name
     }
 
-    func initialConfiguration(parameters: (any DataStructure)?) -> (
-        FiniteStateMachine<StateType, Ringlet, Parameters, Result, Context, Environment>,
-        SchedulerContext<StateType, Ringlet.Context, Context, Environment, Parameters, Result>
-    ) {
+    func initialConfiguration(parameters: (any DataStructure)?) -> FiniteStateMachine<
+        StateType,
+        Ringlet,
+        Parameters,
+        Result,
+        Context,
+        Environment
+    > {
         if let params = parameters as? Parameters {
             return self.initial(with: params)
         } else if
@@ -357,21 +305,18 @@ public extension FSMModel {
         }
     }
 
-    var stateContexts: [Int: Sendable] {
-        let mirror = Mirror(reflecting: self)
-        return Dictionary(uniqueKeysWithValues: mirror.children.compactMap {
-            guard let state = $0.value as? AnyStateProperty else {
-                return nil
-            }
-            return (state.information.id, state.context)
-        })
+    func stateContexts(fsmContext: FSMContext<Context, Environment, Parameters, Result>)
+        -> [Int: AnyStateContext<Context, Environment, Parameters, Result>] {
+        states.mapValues { $0.initialContext(fsmContext: fsmContext) }
     }
 
-    var transitions: [Int: [AnyTransition<FSMContext<Context, Environment, Parameters, Result>, StateID>]] {
+    var transitions: [
+        Int: [AnyTransition<AnyStateContext<Context, Environment, Parameters, Result>, StateID>]
+    ] {
         anyStates.mapValues {
             guard
                 let transitions = $0.erasedTransitions(for: self)
-                    as? [AnyTransition<FSMContext<Context, Environment, Parameters, Result>, StateID>]
+                    as? [AnyTransition<AnyStateContext<Context, Environment, Parameters, Result>, StateID>]
             else {
                 // swiftlint:disable line_length
                 fatalError(

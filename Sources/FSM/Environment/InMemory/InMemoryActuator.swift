@@ -4,8 +4,15 @@ public struct InMemoryActuator<Value: ActuatorValue>: ActuatorHandler {
 
     public let id: String
 
-    public init(id: String) {
+    public let initialValue: Value
+
+    public init(id: String) where Value: EmptyInitialisable {
+        self.init(id: id, initialValue: Value())
+    }
+
+    public init(id: String, initialValue: Value) {
         self.id = id
+        self.initialValue = initialValue
         self.resolvedID = IDRegistrar.id(of: id)
     }
 

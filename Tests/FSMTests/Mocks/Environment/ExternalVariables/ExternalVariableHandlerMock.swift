@@ -6,6 +6,8 @@ final class ExternalVariableHandlerMock<Value: ExternalVariableValue>: ExternalV
 
         case id
 
+        case initialValue
+
         case saveSnapshot(value: Value)
 
         case takeSnapshot
@@ -13,6 +15,7 @@ final class ExternalVariableHandlerMock<Value: ExternalVariableValue>: ExternalV
     }
 
     private let _id: String
+    private let _initialValue: () -> Value
     private let _saveSnapshot: (Value) -> Void
     private let _takeSnapshot: () -> Value
 
@@ -20,6 +23,10 @@ final class ExternalVariableHandlerMock<Value: ExternalVariableValue>: ExternalV
 
     var idCalls: Int {
         self.calls.lazy.filter { $0 == .id }.count
+    }
+
+    var initialValueCalls: Int {
+        self.calls.lazy.filter { $0 == .initialValue }.count
     }
 
     var saveSnapshotCalls: [Value] {
@@ -41,10 +48,17 @@ final class ExternalVariableHandlerMock<Value: ExternalVariableValue>: ExternalV
         return _id
     }
 
-    convenience init(id: String, value: Value) {
+    var initialValue: Value {
+        calls.append(.initialValue)
+        return _initialValue()
+    }
+
+    convenience init(id: String, value: Value, initialValue: Value? = nil) {
+        let initialValue = initialValue ?? value
         var value = value
         self.init(
             id: id,
+            initialValue: { initialValue },
             saveSnapshot: { value = $0 },
             takeSnapshot: { value }
         )
@@ -52,10 +66,12 @@ final class ExternalVariableHandlerMock<Value: ExternalVariableValue>: ExternalV
 
     init(
         id: String,
+        initialValue: @escaping () -> Value,
         saveSnapshot: @escaping (Value) -> Void,
         takeSnapshot: @escaping () -> Value
     ) {
         self._id = id
+        self._initialValue = initialValue
         self._saveSnapshot = saveSnapshot
         self._takeSnapshot = takeSnapshot
     }

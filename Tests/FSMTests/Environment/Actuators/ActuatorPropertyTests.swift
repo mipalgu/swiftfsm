@@ -11,23 +11,20 @@ final class ActuatorPropertyTests: XCTestCase {
     }
 
     func testInit() {
-        let mock = ActuatorHandlerMock<Bool>(id: "mock")
+        let mock = ActuatorHandlerMock<Bool>(id: "mock", initialValue: false)
         let property = ActuatorProperty<Snapshot, ActuatorHandlerMock<Bool>>(
             handler: mock,
-            mapsTo: \.bool,
-            initialValue: false
+            mapsTo: \.bool
         )
         XCTAssertIdentical(mock, property.wrappedValue)
         XCTAssertEqual(\Snapshot.bool, property.mapPath)
-        XCTAssertFalse(property.initialValue)
     }
 
     func testWrappedValueDelegatesToHandler() {
-        let mock = ActuatorHandlerMock<Bool>(id: "mock")
+        let mock = ActuatorHandlerMock<Bool>(id: "mock", initialValue: false)
         let property = ActuatorProperty<Snapshot, ActuatorHandlerMock<Bool>>(
             handler: mock,
-            mapsTo: \.bool,
-            initialValue: false
+            mapsTo: \.bool
         )
         property.wrappedValue.saveSnapshot(value: true)
         XCTAssertEqual(mock.calls.count, 1)

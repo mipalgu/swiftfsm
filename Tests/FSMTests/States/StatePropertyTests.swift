@@ -91,8 +91,23 @@ final class StatePropertyTests: XCTestCase {
         TempFSM.Result
     >
 
+    fileprivate typealias PingContext = StateContext<
+        EmptyDataStructure,
+        TempFSM.Context,
+        TempFSM.Environment,
+        TempFSM.Parameters,
+        TempFSM.Result
+    >
+
     fileprivate typealias PongContext = StateContext<
         TempFSM.PongContext,
+        TempFSM.Context,
+        TempFSM.Environment,
+        TempFSM.Parameters,
+        TempFSM.Result
+    >
+
+    fileprivate typealias TempStateContext = AnyStateContext<
         TempFSM.Context,
         TempFSM.Environment,
         TempFSM.Parameters,
@@ -143,13 +158,13 @@ final class StatePropertyTests: XCTestCase {
             return
         }
         let transition = property.transitions[0]
-        let context = TempContext(
-            state: EmptyDataStructure(),
-            fsm: EmptyDataStructure(),
+        let fsmContext = TempContext(
+            context: EmptyDataStructure(),
             environment: TempFSM.Environment(),
             parameters: EmptyDataStructure(),
             result: EmptyDataStructure?.none
         )
+        let context = PingContext(context: EmptyDataStructure(), fsmContext: fsmContext)
         XCTAssertFalse(transition.canTransition(from: context))
         let pongInfo = StateInformation(name: "Pong")
         XCTAssertEqual(transition.target(TempFSM()), pongInfo)
@@ -178,37 +193,47 @@ final class StatePropertyTests: XCTestCase {
         XCTAssertEqual(property.information.name, name)
         XCTAssertEqual(property.environmentVariables, keyPaths)
         XCTAssertEqual(property.transitions.count, 1)
-        let context1 = TempContext(
-            state: TempFSM.PongContext(
+        let fsmContext = TempContext(
+            context: EmptyDataStructure(),
+            environment: TempFSM.Environment(),
+            parameters: EmptyDataStructure(),
+            result: EmptyDataStructure?.none
+        )
+        let falseContext = PongContext(
+            context: TempFSM.PongContext(
                 executeOnEntry: false,
                 executeInternal: false,
                 executeOnExit: false,
                 executeOnSuspend: false,
                 executeOnResume: false
             ),
-            fsm: EmptyDataStructure(),
-            environment: TempFSM.Environment(),
-            parameters: EmptyDataStructure(),
-            result: EmptyDataStructure?.none
+            fsmContext: fsmContext
         )
-        let context2 = TempContext(
-            state: TempFSM.PongContext(
+        let context1 = PongContext(
+            context: TempFSM.PongContext(
+                executeOnEntry: false,
+                executeInternal: false,
+                executeOnExit: false,
+                executeOnSuspend: false,
+                executeOnResume: false
+            ),
+            fsmContext: fsmContext
+        )
+        let context2 = PongContext(
+            context: TempFSM.PongContext(
                 executeOnEntry: true,
                 executeInternal: true,
                 executeOnExit: true,
                 executeOnSuspend: true,
                 executeOnResume: true
             ),
-            fsm: EmptyDataStructure(),
-            environment: TempFSM.Environment(),
-            parameters: EmptyDataStructure(),
-            result: EmptyDataStructure?.none
+            fsmContext: fsmContext
         )
         XCTAssertNotNil(property.wrappedValue.base as? PongState)
         guard let pongState = property.wrappedValue.base as? PongState else {
             return
         }
-        let pongContext = PongContext(fsmContext: context1)
+        let pongContext = context1
         XCTAssertFalse(pongContext.executeOnEntry)
         XCTAssertFalse(pongContext.executeInternal)
         XCTAssertFalse(pongContext.executeOnExit)
@@ -246,7 +271,8 @@ final class StatePropertyTests: XCTestCase {
         XCTAssertTrue(pongContext.executeOnResume)
         for transition in property.transitions {
             XCTAssertEqual(transition.target(fsm), pingInfo)
-            XCTAssertFalse(transition.canTransition(from: context1))
+            XCTAssertFalse(transition.canTransition(from: falseContext))
+            XCTAssertTrue(transition.canTransition(from: context1))
             XCTAssertTrue(transition.canTransition(from: context2))
         }
     }
@@ -275,8 +301,8 @@ final class StatePropertyTests: XCTestCase {
         XCTAssertNotNil(stateType.base as? PongState)
         XCTAssertEqual(pongProperty.projectedValue, pongProperty.information)
         let erasedTransitions = pongProperty.erasedTransitions(for: TempFSM())
-        XCTAssertNotNil(erasedTransitions as? [AnyTransition<TempContext, StateID>])
-        guard let actualTransitions = erasedTransitions as? [AnyTransition<TempContext, StateID>] else {
+        XCTAssertNotNil(erasedTransitions as? [AnyTransition<TempStateContext, StateID>])
+        guard let actualTransitions = erasedTransitions as? [AnyTransition<TempStateContext, StateID>] else {
             return
         }
         XCTAssertEqual(actualTransitions.count, 1)
@@ -286,31 +312,31 @@ final class StatePropertyTests: XCTestCase {
         let transition = actualTransitions[0]
         let pingInfo = StateInformation(name: "Ping")
         XCTAssertEqual(transition.target, pingInfo.id)
-        let context1 = TempContext(
-            state: TempFSM.PongContext(
+        let fsmContext = TempContext(
+            context: EmptyDataStructure(),
+            environment: TempFSM.Environment(),
+            parameters: EmptyDataStructure(),
+            result: EmptyDataStructure?.none
+        )
+        let context1 = PongContext(
+            context: TempFSM.PongContext(
                 executeOnEntry: false,
                 executeInternal: false,
                 executeOnExit: false,
                 executeOnSuspend: false,
                 executeOnResume: false
             ),
-            fsm: EmptyDataStructure(),
-            environment: TempFSM.Environment(),
-            parameters: EmptyDataStructure(),
-            result: EmptyDataStructure?.none
+            fsmContext: fsmContext
         )
-        let context2 = TempContext(
-            state: TempFSM.PongContext(
+        let context2 = PongContext(
+            context: TempFSM.PongContext(
                 executeOnEntry: true,
                 executeInternal: true,
                 executeOnExit: true,
                 executeOnSuspend: true,
                 executeOnResume: true
             ),
-            fsm: EmptyDataStructure(),
-            environment: TempFSM.Environment(),
-            parameters: EmptyDataStructure(),
-            result: EmptyDataStructure?.none
+            fsmContext: fsmContext
         )
         XCTAssertFalse(transition.canTransition(from: context1))
         XCTAssertTrue(transition.canTransition(from: context2))

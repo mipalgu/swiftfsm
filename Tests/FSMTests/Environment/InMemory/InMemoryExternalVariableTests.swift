@@ -9,7 +9,7 @@ final class InMemoryExternalVariableTests: XCTestCase {
     var externalVariable: InMemoryExternalVariable<Bool>!
 
     override func setUp() {
-        let actuator = InMemoryActuator<Bool>(id: id)
+        let actuator = InMemoryActuator<Bool>(id: id, initialValue: false)
         actuator.saveSnapshot(value: false)
         externalVariable = InMemoryExternalVariable(id: id, initialValue: false)
     }

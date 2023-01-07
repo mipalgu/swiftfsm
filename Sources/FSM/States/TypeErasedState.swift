@@ -7,6 +7,9 @@ public protocol TypeErasedState {
 
     var base: Any { get }
 
-    static var empty: (Sendable, Self) { get }
+    func initialContext(fsmContext: FSMContext<FSMsContext, Environment, Parameters, Result>)
+        -> AnyStateContext<FSMsContext, Environment, Parameters, Result>
+
+    static var emptyState: Self { get }
 
 }

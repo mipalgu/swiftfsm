@@ -2,6 +2,7 @@ public struct AnyActuatorHandler<Environment: EnvironmentSnapshot> {
 
     private let _base: () -> Any
     private let _id: () -> String
+    private let _initialValue: () -> Sendable
     private let _saveSnapshot: (Sendable) -> Void
     private let _updateEnvironment: (inout Environment, Sendable) -> Void
 
@@ -15,12 +16,17 @@ public struct AnyActuatorHandler<Environment: EnvironmentSnapshot> {
         _id()
     }
 
+    public var initialValue: Sendable {
+        _initialValue()
+    }
+
     public init<Base: ActuatorHandler>(
         _ base: Base,
         mapsTo keyPath: WritableKeyPath<Environment, Base.Value?>
     ) {
         self._base = { base }
         self._id = { base.id }
+        self._initialValue = { base.initialValue as Sendable }
         self._saveSnapshot = { base.saveSnapshot(value: unsafeBitCast($0, to: Base.Value.self)) }
         self._updateEnvironment = { $0[keyPath: keyPath] = unsafeBitCast($1, to: Base.Value.self) }
     }

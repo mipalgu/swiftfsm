@@ -6,8 +6,6 @@ public protocol AnyStateProperty {
 
     var erasedState: Sendable { get }
 
-    var context: Sendable { get }
-
     func erasedTransitions(for root: Any) -> Sendable
 
 }

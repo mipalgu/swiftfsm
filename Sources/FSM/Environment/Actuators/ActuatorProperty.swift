@@ -3,8 +3,6 @@ public struct ActuatorProperty<Root: EnvironmentSnapshot, Handler: ActuatorHandl
 
     public let mapPath: WritableKeyPath<Root, Handler.Value?>
 
-    public let initialValue: Handler.Value
-
     public var projectedValue: Self {
         self
     }
@@ -12,7 +10,7 @@ public struct ActuatorProperty<Root: EnvironmentSnapshot, Handler: ActuatorHandl
     public var wrappedValue: Handler
 
     public var erasedInitialValue: Sendable {
-        initialValue as Sendable
+        wrappedValue.initialValue as Sendable
     }
 
     public var erasedMapPath: AnyKeyPath {
@@ -25,12 +23,10 @@ public struct ActuatorProperty<Root: EnvironmentSnapshot, Handler: ActuatorHandl
 
     public init(
         handler: Handler,
-        mapsTo keyPath: WritableKeyPath<Root, Handler.Value?>,
-        initialValue: Handler.Value
+        mapsTo keyPath: WritableKeyPath<Root, Handler.Value?>
     ) {
         self.mapPath = keyPath
         self.wrappedValue = handler
-        self.initialValue = initialValue
     }
 
 }

@@ -32,7 +32,7 @@ struct FSMMock: LLFSM {
 
     }
 
-    @Actuator(handler: InMemoryActuator<Bool>(id: "exit"), mapsTo: \.exitActuator, initialValue: false)
+    @Actuator(handler: InMemoryActuator<Bool>(id: "exit", initialValue: false), mapsTo: \.exitActuator)
     var exitActuator
 
     @ExternalVariable(

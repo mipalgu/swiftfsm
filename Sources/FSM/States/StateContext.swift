@@ -5,19 +5,45 @@ public final class StateContext<
     Environment: EnvironmentSnapshot,
     Parameters: DataStructure,
     Result: DataStructure
-> {
+>: AnyStateContext<FSMsContext, Environment, Parameters, Result> {
 
-    public var state: StateContext
+    public var context: StateContext
 
-    public var fsm: FSMsContext
+    public var fsm: FSMsContext {
+        get {
+            fsmContext.context
+        } set {
+            fsmContext.context = newValue
+        }
+    }
 
-    public var environment: Environment
+    public var environment: Environment {
+        get {
+            fsmContext.environment
+        } set {
+            fsmContext.environment = newValue
+        }
+    }
 
-    public var parameters: Parameters
+    public var parameters: Parameters {
+        fsmContext.parameters
+    }
 
-    public var result: Result?
+    public var result: Result? {
+        get {
+            fsmContext.result
+        } set {
+            fsmContext.result = newValue
+        }
+    }
 
-    var status: FSMStatus
+    var status: FSMStatus {
+        get {
+            fsmContext.status
+        } set {
+            fsmContext.status = newValue
+        }
+    }
 
     public var isFinished: Bool {
         status == .finished
@@ -31,54 +57,14 @@ public final class StateContext<
         }
     }
 
-    public convenience init(fsmContext: FSMContext<FSMsContext, Environment, Parameters, Result>) {
-        self.init(
-            // swiftlint:disable:next force_cast
-            state: fsmContext.state as! StateContext,
-            fsm: fsmContext.fsm,
-            environment: fsmContext.environment,
-            parameters: fsmContext.parameters,
-            result: fsmContext.result,
-            status: fsmContext.status
-        )
-    }
-
-    public convenience init(
-        state: StateContext,
-        fsm: FSMsContext,
-        environment: Environment,
-        parameters: Parameters,
-        result: Result?
-    ) {
-        self.init(
-            state: state,
-            fsm: fsm,
-            environment: environment,
-            parameters: parameters,
-            result: result,
-            status: .executing(transitioned: true)
-        )
-    }
-
-    init(
-        state: StateContext,
-        fsm: FSMsContext,
-        environment: Environment,
-        parameters: Parameters,
-        result: Result?,
-        status: FSMStatus
-    ) {
-        self.state = state
-        self.fsm = fsm
-        self.environment = environment
-        self.parameters = parameters
-        self.result = result
-        self.status = status
+    public init(context: StateContext, fsmContext: FSMContext<FSMsContext, Environment, Parameters, Result>) {
+        self.context = context
+        super.init(fsmContext: fsmContext)
     }
 
     public subscript<T>(dynamicMember keyPath: WritableKeyPath<StateContext, T>) -> T {
-        get { state[keyPath: keyPath] }
-        set { state[keyPath: keyPath] = newValue }
+        get { context[keyPath: keyPath] }
+        set { context[keyPath: keyPath] = newValue }
     }
 
     public subscript<T>(dynamicMember keyPath: WritableKeyPath<FSMsContext, T>) -> T {
@@ -93,16 +79,6 @@ public final class StateContext<
 
     public subscript<T>(dynamicMember keyPath: KeyPath<Parameters, T>) -> T {
         parameters[keyPath: keyPath]
-    }
-
-    public func update(from fsmContext: FSMContext<FSMsContext, Environment, Parameters, Result>) {
-        // swiftlint:disable:next force_cast
-        state = fsmContext.state as! StateContext
-        fsm = fsmContext.fsm
-        environment = fsmContext.environment
-        parameters = fsmContext.parameters
-        result = fsmContext.result
-        status = fsmContext.status
     }
 
     public func restart() {

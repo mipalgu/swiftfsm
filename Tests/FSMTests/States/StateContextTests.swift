@@ -40,184 +40,76 @@ final class StateContextTests: XCTestCase {
 
     }
 
+    typealias FalseContext = StateContext<SomeData, SomeData, SomeData, SomeData, SomeData>
+
+    typealias MultiContext = StateContext<SContext, FContext, EContext, PContext, RContext>
+
     let falseData = SomeData(bool: false)
 
     let trueData = SomeData(bool: true)
 
+    var falseFSMContext: FSMContext<SomeData, SomeData, SomeData, SomeData>!
+
     var falseContext: StateContext<SomeData, SomeData, SomeData, SomeData, SomeData>!
+
+    var trueFSMContext: FSMContext<SomeData, SomeData, SomeData, SomeData>!
+
+    var multiFSMContext: FSMContext<FContext, EContext, PContext, RContext>!
 
     var multiContext: StateContext<SContext, FContext, EContext, PContext, RContext>!
 
     override func setUp() {
-        falseContext = StateContext(
-            state: falseData,
-            fsm: falseData,
+        falseFSMContext = FSMContext(
+            context: falseData,
             environment: falseData,
             parameters: falseData,
             result: falseData,
             status: .executing(transitioned: true)
         )
-        multiContext = StateContext(
-            state: SContext(),
-            fsm: FContext(),
+        falseContext = FalseContext(context: falseData, fsmContext: falseFSMContext)
+        trueFSMContext = FSMContext(
+            context: trueData,
+            environment: trueData,
+            parameters: trueData,
+            result: trueData,
+            status: .executing(transitioned: true)
+        )
+        multiFSMContext = FSMContext(
+            context: FContext(),
             environment: EContext(),
             parameters: PContext(),
             result: RContext(),
             status: .executing(transitioned: true)
         )
+        multiContext = MultiContext(context: SContext(), fsmContext: multiFSMContext)
     }
 
     func testInit() {
         let state = SomeData(bool: true)
-        let fsm = SomeData(bool: true)
-        let environment = SomeData(bool: true)
-        let parameters = SomeData(bool: true)
-        let result = SomeData(bool: true)
-        let status: FSMStatus = .suspending
-        let context = StateContext(
-            state: state,
-            fsm: fsm,
-            environment: environment,
-            parameters: parameters,
-            result: result,
-            status: status
-        )
-        XCTAssertEqual(state, context.state)
-        XCTAssertEqual(fsm, context.fsm)
-        XCTAssertEqual(environment, context.environment)
-        XCTAssertEqual(parameters, context.parameters)
-        XCTAssertEqual(result, context.result)
-        XCTAssertEqual(status, context.status)
-    }
-
-    func testConvenienceInit() {
-        let state = SomeData(bool: true)
-        let fsm = SomeData(bool: true)
-        let environment = SomeData(bool: true)
-        let parameters = SomeData(bool: true)
-        let result = SomeData(bool: true)
-        let context = StateContext(
-            state: state,
-            fsm: fsm,
-            environment: environment,
-            parameters: parameters,
-            result: result
-        )
-        XCTAssertEqual(state, context.state)
-        XCTAssertEqual(fsm, context.fsm)
-        XCTAssertEqual(environment, context.environment)
-        XCTAssertEqual(parameters, context.parameters)
-        XCTAssertEqual(result, context.result)
-        XCTAssertEqual(.executing(transitioned: true), context.status)
-    }
-
-    func testFSMContextInit() {
-        let state = SomeData(bool: true)
-        let fsm = SomeData(bool: true)
-        let environment = SomeData(bool: true)
-        let parameters = SomeData(bool: true)
-        let result = SomeData(bool: true)
-        let status: FSMStatus = .suspending
-        let fsmContext = FSMContext(
-            state: state as Sendable,
-            fsm: fsm,
-            environment: environment,
-            parameters: parameters,
-            result: result,
-            status: status
-        )
-        let context = StateContext<SomeData, SomeData, SomeData, SomeData, SomeData>(fsmContext: fsmContext)
-        XCTAssertEqual(state, context.state)
-        XCTAssertEqual(fsm, context.fsm)
-        XCTAssertEqual(environment, context.environment)
-        XCTAssertEqual(parameters, context.parameters)
-        XCTAssertEqual(result, context.result)
-        XCTAssertEqual(status, context.status)
+        let context = FalseContext(context: state, fsmContext: falseFSMContext)
+        XCTAssertEqual(state, context.context)
+        XCTAssertIdentical(context.fsmContext, falseFSMContext)
     }
 
     // swiftlint:disable:next function_body_length
     func testGettersAndSetters() {
-        let suspending = FSMStatus.suspending
-        let resuming = FSMStatus.resuming
-        let context = StateContext(
-            state: falseData,
-            fsm: falseData,
-            environment: falseData,
-            parameters: falseData,
-            result: falseData,
-            status: suspending
-        )
-        XCTAssertEqual(context.state, falseData)
-        XCTAssertEqual(context.fsm, falseData)
-        XCTAssertEqual(context.environment, falseData)
-        XCTAssertEqual(context.parameters, falseData)
-        XCTAssertEqual(context.result, falseData)
-        XCTAssertEqual(context.status, suspending)
-        context.state = trueData
-        XCTAssertEqual(context.state, trueData)
-        XCTAssertEqual(context.fsm, falseData)
-        XCTAssertEqual(context.environment, falseData)
-        XCTAssertEqual(context.parameters, falseData)
-        XCTAssertEqual(context.result, falseData)
-        XCTAssertEqual(context.status, suspending)
-        context.fsm = trueData
-        XCTAssertEqual(context.state, trueData)
-        XCTAssertEqual(context.fsm, trueData)
-        XCTAssertEqual(context.environment, falseData)
-        XCTAssertEqual(context.parameters, falseData)
-        XCTAssertEqual(context.result, falseData)
-        XCTAssertEqual(context.status, suspending)
-        context.environment = trueData
-        XCTAssertEqual(context.state, trueData)
-        XCTAssertEqual(context.fsm, trueData)
-        XCTAssertEqual(context.environment, trueData)
-        XCTAssertEqual(context.parameters, falseData)
-        XCTAssertEqual(context.result, falseData)
-        XCTAssertEqual(context.status, suspending)
-        context.parameters = trueData
-        XCTAssertEqual(context.state, trueData)
-        XCTAssertEqual(context.fsm, trueData)
-        XCTAssertEqual(context.environment, trueData)
-        XCTAssertEqual(context.parameters, trueData)
-        XCTAssertEqual(context.result, falseData)
-        XCTAssertEqual(context.status, suspending)
-        context.result = trueData
-        XCTAssertEqual(context.state, trueData)
-        XCTAssertEqual(context.fsm, trueData)
-        XCTAssertEqual(context.environment, trueData)
-        XCTAssertEqual(context.parameters, trueData)
-        XCTAssertEqual(context.result, trueData)
-        XCTAssertEqual(context.status, suspending)
-        context.status = resuming
-        XCTAssertEqual(context.state, trueData)
-        XCTAssertEqual(context.fsm, trueData)
-        XCTAssertEqual(context.environment, trueData)
-        XCTAssertEqual(context.parameters, trueData)
-        XCTAssertEqual(context.result, trueData)
-        XCTAssertEqual(context.status, resuming)
+        let context = FalseContext(context: falseData, fsmContext: falseFSMContext)
+        XCTAssertEqual(context.context, falseData)
+        XCTAssertIdentical(context.fsmContext, falseFSMContext)
+        context.context = trueData
+        XCTAssertEqual(context.context, trueData)
+        XCTAssertIdentical(context.fsmContext, falseFSMContext)
     }
 
     func testIsFinished() {
         let statuses = FSMStatus.allCases.filter { $0 != .finished }
         for status in statuses {
-            let context = StateContext(
-                state: falseData,
-                fsm: falseData,
-                environment: falseData,
-                parameters: falseData,
-                result: falseData,
-                status: status
-            )
+            let context = FalseContext(context: falseData, fsmContext: falseFSMContext)
+            context.fsmContext.status = status
             XCTAssertFalse(context.isFinished)
         }
-        let context = StateContext(
-            state: falseData,
-            fsm: falseData,
-            environment: falseData,
-            parameters: falseData,
-            result: falseData,
-            status: .finished
-        )
+        let context = FalseContext(context: falseData, fsmContext: falseFSMContext)
+        context.fsmContext.status = .finished
         XCTAssertTrue(context.isFinished)
     }
 
@@ -227,97 +119,43 @@ final class StateContextTests: XCTestCase {
         }
         let falseData = SomeData(bool: false)
         for status in statuses {
-            let context = StateContext(
-                state: falseData,
-                fsm: falseData,
-                environment: falseData,
-                parameters: falseData,
-                result: falseData,
-                status: status
-            )
+            let context = FalseContext(context: falseData, fsmContext: falseFSMContext)
+            context.fsmContext.status = status
             XCTAssertFalse(context.isSuspended)
         }
-        let context = StateContext(
-            state: falseData,
-            fsm: falseData,
-            environment: falseData,
-            parameters: falseData,
-            result: falseData,
-            status: .suspended(transitioned: false)
-        )
+        let context = FalseContext(context: falseData, fsmContext: falseFSMContext)
+        context.fsmContext.status = .suspended(transitioned: false)
         XCTAssertTrue(context.isSuspended)
-        let context2 = StateContext(
-            state: falseData,
-            fsm: falseData,
-            environment: falseData,
-            parameters: falseData,
-            result: falseData,
-            status: .suspended(transitioned: true)
-        )
+        let context2 = FalseContext(context: falseData, fsmContext: falseFSMContext)
+        context2.fsmContext.status = .suspended(transitioned: true)
         XCTAssertTrue(context2.isSuspended)
     }
 
     func testRestart() {
         for status in FSMStatus.allCases {
-            let context = StateContext(
-                state: falseData,
-                fsm: falseData,
-                environment: falseData,
-                parameters: falseData,
-                result: falseData,
-                status: status
-            )
+            let context = FalseContext(context: falseData, fsmContext: falseFSMContext)
+            context.fsmContext.status = status
             context.restart()
-            XCTAssertEqual(context.status, .restarting)
+            XCTAssertEqual(context.fsmContext.status, .restarting)
         }
     }
 
     func testResume() {
         for status in FSMStatus.allCases {
-            let context = StateContext(
-                state: falseData,
-                fsm: falseData,
-                environment: falseData,
-                parameters: falseData,
-                result: falseData,
-                status: status
-            )
+            let context = FalseContext(context: falseData, fsmContext: falseFSMContext)
+            context.fsmContext.status = status
             context.resume()
-            XCTAssertEqual(context.status, .resuming)
+            XCTAssertEqual(context.fsmContext.status, .resuming)
         }
     }
 
     func testSuspend() {
         for status in FSMStatus.allCases {
-            let context = StateContext(
-                state: falseData,
-                fsm: falseData,
-                environment: falseData,
-                parameters: falseData,
-                result: falseData,
-                status: status
-            )
+            let context = FalseContext(context: falseData, fsmContext: falseFSMContext)
+            context.fsmContext.status = status
             context.suspend()
-            XCTAssertEqual(context.status, .suspending)
+            XCTAssertEqual(context.fsmContext.status, .suspending)
         }
-    }
-
-    func testUpdateFromFSMContext() {
-        let fsmContext = FSMContext(
-            state: trueData,
-            fsm: trueData,
-            environment: trueData,
-            parameters: trueData,
-            result: trueData,
-            status: .suspending
-        )
-        falseContext.update(from: fsmContext)
-        XCTAssertEqual(falseContext.state, trueData)
-        XCTAssertEqual(falseContext.fsm, trueData)
-        XCTAssertEqual(falseContext.environment, trueData)
-        XCTAssertEqual(falseContext.parameters, trueData)
-        XCTAssertEqual(falseContext.result, trueData)
-        XCTAssertEqual(falseContext.status, .suspending)
     }
 
     func testDynamicLookup() {
@@ -339,14 +177,14 @@ final class StateContextTests: XCTestCase {
 
     func testStateDirectAccessPerformance_1() {
         measure {
-            multiContext.state.sBool.toggle()
+            multiContext.context.sBool.toggle()
         }
     }
 
     func testStateDirectAccessPerformance_10() {
         measure {
             for _ in 0..<10 {
-                multiContext.state.sBool.toggle()
+                multiContext.context.sBool.toggle()
             }
         }
     }
@@ -354,7 +192,7 @@ final class StateContextTests: XCTestCase {
     func testStateDirectAccessPerformance_100() {
         measure {
             for _ in 0..<100 {
-                multiContext.state.sBool.toggle()
+                multiContext.context.sBool.toggle()
             }
         }
     }
@@ -362,7 +200,7 @@ final class StateContextTests: XCTestCase {
     func testStateDirectAccessPerformance_1000() {
         measure {
             for _ in 0..<1000 {
-                multiContext.state.sBool.toggle()
+                multiContext.context.sBool.toggle()
             }
         }
     }
@@ -370,7 +208,7 @@ final class StateContextTests: XCTestCase {
     func testStateDirectAccessPerformance_10_000() {
         measure {
             for _ in 0..<10_000 {
-                multiContext.state.sBool.toggle()
+                multiContext.context.sBool.toggle()
             }
         }
     }
@@ -378,7 +216,7 @@ final class StateContextTests: XCTestCase {
     func testStateDirectAccessPerformance_100_000() {
         measure {
             for _ in 0..<100_000 {
-                multiContext.state.sBool.toggle()
+                multiContext.context.sBool.toggle()
             }
         }
     }
@@ -386,7 +224,7 @@ final class StateContextTests: XCTestCase {
     func testStateDirectAccessPerformance_1_000_000() {
         measure {
             for _ in 0..<1_000_000 {
-                multiContext.state.sBool.toggle()
+                multiContext.context.sBool.toggle()
             }
         }
     }
@@ -447,14 +285,14 @@ final class StateContextTests: XCTestCase {
 
     func testFSMDirectAccessPerformance_1() {
         measure {
-            multiContext.fsm.fBool.toggle()
+            multiContext.fsmContext.context.fBool.toggle()
         }
     }
 
     func testFSMDirectAccessPerformance_10() {
         measure {
             for _ in 0..<10 {
-                multiContext.fsm.fBool.toggle()
+                multiContext.fsmContext.context.fBool.toggle()
             }
         }
     }
@@ -462,7 +300,7 @@ final class StateContextTests: XCTestCase {
     func testFSMDirectAccessPerformance_100() {
         measure {
             for _ in 0..<100 {
-                multiContext.fsm.fBool.toggle()
+                multiContext.fsmContext.context.fBool.toggle()
             }
         }
     }
@@ -470,7 +308,7 @@ final class StateContextTests: XCTestCase {
     func testFSMDirectAccessPerformance_1000() {
         measure {
             for _ in 0..<1000 {
-                multiContext.fsm.fBool.toggle()
+                multiContext.fsmContext.context.fBool.toggle()
             }
         }
     }
@@ -478,7 +316,7 @@ final class StateContextTests: XCTestCase {
     func testFSMDirectAccessPerformance_10_000() {
         measure {
             for _ in 0..<10_000 {
-                multiContext.fsm.fBool.toggle()
+                multiContext.fsmContext.context.fBool.toggle()
             }
         }
     }
@@ -486,7 +324,7 @@ final class StateContextTests: XCTestCase {
     func testFSMDirectAccessPerformance_100_000() {
         measure {
             for _ in 0..<100_000 {
-                multiContext.fsm.fBool.toggle()
+                multiContext.fsmContext.context.fBool.toggle()
             }
         }
     }
@@ -494,7 +332,7 @@ final class StateContextTests: XCTestCase {
     func testFSMDirectAccessPerformance_1_000_000() {
         measure {
             for _ in 0..<1_000_000 {
-                multiContext.fsm.fBool.toggle()
+                multiContext.fsmContext.context.fBool.toggle()
             }
         }
     }
@@ -555,14 +393,14 @@ final class StateContextTests: XCTestCase {
 
     func testEnvironmentDirectAccessPerformance_1() {
         measure {
-            multiContext.environment.eBool.toggle()
+            multiContext.fsmContext.environment.eBool.toggle()
         }
     }
 
     func testEnvironmentDirectAccessPerformance_10() {
         measure {
             for _ in 0..<10 {
-                multiContext.environment.eBool.toggle()
+                multiContext.fsmContext.environment.eBool.toggle()
             }
         }
     }
@@ -570,7 +408,7 @@ final class StateContextTests: XCTestCase {
     func testEnvironmentDirectAccessPerformance_100() {
         measure {
             for _ in 0..<100 {
-                multiContext.environment.eBool.toggle()
+                multiContext.fsmContext.environment.eBool.toggle()
             }
         }
     }
@@ -578,7 +416,7 @@ final class StateContextTests: XCTestCase {
     func testEnvironmentDirectAccessPerformance_1000() {
         measure {
             for _ in 0..<1000 {
-                multiContext.environment.eBool.toggle()
+                multiContext.fsmContext.environment.eBool.toggle()
             }
         }
     }
@@ -586,7 +424,7 @@ final class StateContextTests: XCTestCase {
     func testEnvironmentDirectAccessPerformance_10_000() {
         measure {
             for _ in 0..<10_000 {
-                multiContext.environment.eBool.toggle()
+                multiContext.fsmContext.environment.eBool.toggle()
             }
         }
     }
@@ -594,7 +432,7 @@ final class StateContextTests: XCTestCase {
     func testEnvironmentDirectAccessPerformance_100_000() {
         measure {
             for _ in 0..<100_000 {
-                multiContext.environment.eBool.toggle()
+                multiContext.fsmContext.environment.eBool.toggle()
             }
         }
     }
@@ -602,7 +440,7 @@ final class StateContextTests: XCTestCase {
     func testEnvironmentDirectAccessPerformance_1_000_000() {
         measure {
             for _ in 0..<1_000_000 {
-                multiContext.environment.eBool.toggle()
+                multiContext.fsmContext.environment.eBool.toggle()
             }
         }
     }
@@ -663,14 +501,14 @@ final class StateContextTests: XCTestCase {
 
     func testParametersDirectAccessPerformance_1() {
         measure {
-            _ = multiContext.parameters.pBool
+            _ = multiContext.fsmContext.parameters.pBool
         }
     }
 
     func testParametersDirectAccessPerformance_10() {
         measure {
             for _ in 0..<10 {
-                _ = multiContext.parameters.pBool
+                _ = multiContext.fsmContext.parameters.pBool
             }
         }
     }
@@ -678,7 +516,7 @@ final class StateContextTests: XCTestCase {
     func testParametersDirectAccessPerformance_100() {
         measure {
             for _ in 0..<100 {
-                _ = multiContext.parameters.pBool
+                _ = multiContext.fsmContext.parameters.pBool
             }
         }
     }
@@ -686,7 +524,7 @@ final class StateContextTests: XCTestCase {
     func testParametersDirectAccessPerformance_1000() {
         measure {
             for _ in 0..<1000 {
-                _ = multiContext.parameters.pBool
+                _ = multiContext.fsmContext.parameters.pBool
             }
         }
     }
@@ -694,7 +532,7 @@ final class StateContextTests: XCTestCase {
     func testParametersDirectAccessPerformance_10_000() {
         measure {
             for _ in 0..<10_000 {
-                _ = multiContext.parameters.pBool
+                _ = multiContext.fsmContext.parameters.pBool
             }
         }
     }
@@ -702,7 +540,7 @@ final class StateContextTests: XCTestCase {
     func testParametersDirectAccessPerformance_100_000() {
         measure {
             for _ in 0..<100_000 {
-                _ = multiContext.parameters.pBool
+                _ = multiContext.fsmContext.parameters.pBool
             }
         }
     }
@@ -710,7 +548,7 @@ final class StateContextTests: XCTestCase {
     func testParametersDirectAccessPerformance_1_000_000() {
         measure {
             for _ in 0..<1_000_000 {
-                _ = multiContext.parameters.pBool
+                _ = multiContext.fsmContext.parameters.pBool
             }
         }
     }
