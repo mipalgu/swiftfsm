@@ -17,8 +17,6 @@ public final class FiniteStateMachine<
     public typealias Parameters = Parameters
     public typealias Result = Result
 
-    public typealias Data = FSMData<Ringlet.Context, Parameters, Result, Context, Environment>
-
     public typealias Handlers = FSMHandlers<Environment>
 
     public typealias State = FSMState<StateType, Parameters, Result, Context, Environment>
@@ -41,9 +39,9 @@ public final class FiniteStateMachine<
         self.handlers = handlers
     }
 
-    public func next<Scheduler: SchedulerProtocol>(scheduler: Scheduler, data: AnyObject) {
+    public func next<Scheduler: SchedulerProtocol>(scheduler: Scheduler, context: AnyObject) {
         let context = unsafeDowncast(
-            data,
+            context,
             to: SchedulerContext<StateType, Ringlet.Context, Context, Environment, Parameters, Result>.self
         )
         context.stateContainer = stateContainer
@@ -65,9 +63,9 @@ public final class FiniteStateMachine<
         }
     }
 
-    public func saveSnapshot(data: AnyObject) {
+    public func saveSnapshot(context: AnyObject) {
         let context = unsafeDowncast(
-            data,
+            context,
             to: SchedulerContext<StateType, Ringlet.Context, Context, Environment, Parameters, Result>.self
         )
         context.data.saveSnapshot(
@@ -76,9 +74,9 @@ public final class FiniteStateMachine<
         )
     }
 
-    public func takeSnapshot(data: AnyObject) {
+    public func takeSnapshot(context: AnyObject) {
         let context = unsafeDowncast(
-            data,
+            context,
             to: SchedulerContext<StateType, Ringlet.Context, Context, Environment, Parameters, Result>.self
         )
         context.data.takeSnapshot(
