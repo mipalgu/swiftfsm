@@ -127,18 +127,7 @@ public extension FSMModel {
 
 public extension FSMModel {
 
-    var environmentVariables: Set<PartialKeyPath<Self.Environment>> {
-        Set(anyStates.values.flatMap {
-            guard
-                let environmentVariables = $0.erasedEnvironmentVariables as? Set<PartialKeyPath<Environment>>
-            else {
-                fatalError("Unable to cast erasedEnvironmentVariables to Set<PartialKeyPath<Environment>>")
-            }
-            return Array(environmentVariables)
-        })
-    }
-
-    private func initial(with parameters: Parameters) -> FiniteStateMachine<
+    func fsm(with parameters: Parameters) -> FiniteStateMachine<
         StateType,
         Ringlet,
         Parameters,
@@ -237,25 +226,12 @@ public extension FSMModel {
         )
         return FiniteStateMachine(
             stateContainer: StateContainer(states: states),
-            ringlet: self.initialRinglet,
+            ringlet: Ringlet(),
             handlers: handlers,
             initialState: initialState,
             initialPreviousState: previousState,
             suspendState: suspendState
         )
-    }
-
-    func initialContext(parameters: Parameters) -> FSMContext<Context, Environment, Parameters, Result> {
-        FSMContext(
-            context: Context(),
-            environment: Environment(),
-            parameters: parameters,
-            result: nil
-        )
-    }
-
-    var initialRinglet: Ringlet {
-        Ringlet()
     }
 
     var name: String {
@@ -266,27 +242,7 @@ public extension FSMModel {
         return name
     }
 
-    func initialConfiguration(parameters: (any DataStructure)?) -> FiniteStateMachine<
-        StateType,
-        Ringlet,
-        Parameters,
-        Result,
-        Context,
-        Environment
-    > {
-        if let params = parameters as? Parameters {
-            return self.initial(with: params)
-        } else if
-            let type = Parameters.self as? EmptyInitialisable.Type,
-            let params = type.init() as? Parameters
-        {
-            return self.initial(with: params)
-        } else {
-            fatalError("Missing parameters for \(name).")
-        }
-    }
-
-    var anyStates: [Int: AnyStateProperty] {
+    private var anyStates: [Int: AnyStateProperty] {
         let mirror = Mirror(reflecting: self)
         return Dictionary(uniqueKeysWithValues: mirror.children.compactMap {
             guard let state = $0.value as? AnyStateProperty else {
@@ -296,7 +252,7 @@ public extension FSMModel {
         })
     }
 
-    var states: [Int: StateType] {
+    private var states: [Int: StateType] {
         anyStates.mapValues {
             guard let state = $0 as? StateType else {
                 fatalError("Unable to cast state to it's corresponding StateType.")
@@ -305,12 +261,12 @@ public extension FSMModel {
         }
     }
 
-    func stateContexts(fsmContext: FSMContext<Context, Environment, Parameters, Result>)
+    private func stateContexts(fsmContext: FSMContext<Context, Environment, Parameters, Result>)
         -> [Int: AnyStateContext<Context, Environment, Parameters, Result>] {
         states.mapValues { $0.initialContext(fsmContext: fsmContext) }
     }
 
-    var transitions: [
+    private var transitions: [
         Int: [AnyTransition<AnyStateContext<Context, Environment, Parameters, Result>, StateID>]
     ] {
         anyStates.mapValues {
@@ -328,7 +284,7 @@ public extension FSMModel {
         }
     }
 
-    var actuators: [PartialKeyPath<Environment>: AnyActuatorHandler<Environment>] {
+    private var actuators: [PartialKeyPath<Environment>: AnyActuatorHandler<Environment>] {
         let mirror = Mirror(reflecting: self)
         return Dictionary(uniqueKeysWithValues: mirror.children.compactMap {
             guard let actuator = $0.value as? AnyActuatorProperty else {
@@ -344,7 +300,7 @@ public extension FSMModel {
         })
     }
 
-    var actuatorInitialValues: [PartialKeyPath<Environment>: Sendable] {
+    private var actuatorInitialValues: [PartialKeyPath<Environment>: Sendable] {
         let mirror = Mirror(reflecting: self)
         return Dictionary(uniqueKeysWithValues: mirror.children.compactMap {
             guard let actuator = $0.value as? AnyActuatorProperty else {
@@ -357,7 +313,7 @@ public extension FSMModel {
         })
     }
 
-    var externalVariables: [PartialKeyPath<Environment>: AnyExternalVariableHandler<Environment>] {
+    private var externalVariables: [PartialKeyPath<Environment>: AnyExternalVariableHandler<Environment>] {
         let mirror = Mirror(reflecting: self)
         return Dictionary(uniqueKeysWithValues: mirror.children.compactMap {
             guard let externalVariable = $0.value as? AnyExternalVariableProperty else {
@@ -375,7 +331,7 @@ public extension FSMModel {
         })
     }
 
-    var sensors: [PartialKeyPath<Environment>: AnySensorHandler<Environment>] {
+    private var sensors: [PartialKeyPath<Environment>: AnySensorHandler<Environment>] {
         let mirror = Mirror(reflecting: self)
         return Dictionary(uniqueKeysWithValues: mirror.children.compactMap {
             guard let actuator = $0.value as? AnySensorProperty else {
