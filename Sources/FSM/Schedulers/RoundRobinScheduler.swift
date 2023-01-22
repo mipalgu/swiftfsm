@@ -18,19 +18,18 @@ public struct RoundRobinScheduler {
         executables.reserveCapacity(fsms.count)
         contexts.reserveCapacity(fsms.count)
         dataFactories.reserveCapacity(fsms.count)
-        for fsm in fsms {
-            let actualID = executables.count
+        for (index, fsm) in fsms.enumerated() {
             let oldInfo = fsm.projectedValue
             let newInfo = FSMInformation(
-                id: actualID,
+                id: index,
                 name: oldInfo.name,
                 dependencies: oldInfo.dependencies
             )
-            let (executable, factory) = fsm.wrappedValue.initial
-            let initialData = factory(parameters[newInfo.name])
+            let (executable, dataFactory) = fsm.wrappedValue.initial
+            let initialData = dataFactory(parameters[newInfo.name])
             info.append(newInfo)
             executables.append(executable)
-            dataFactories.append(factory)
+            dataFactories.append(dataFactory)
             contexts.append(initialData)
         }
         self.init(info: info, executables: executables, contexts: contexts, dataFactories: dataFactories)
