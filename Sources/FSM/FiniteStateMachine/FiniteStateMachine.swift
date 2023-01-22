@@ -74,7 +74,7 @@ public final class FiniteStateMachine<
         self.suspendState = suspendState
     }
 
-    public func next<Scheduler: SchedulerProtocol>(scheduler: Scheduler, context: AnySchedulerContext) {
+    public func next(context: AnySchedulerContext) {
         let context = unsafeDowncast(
             context,
             to: SchedulerContext<StateType, Ringlet.Context, Context, Environment, Parameters, Result>.self

@@ -127,7 +127,27 @@ public extension FSMModel {
 
 public extension FSMModel {
 
-    func fsm(with parameters: Parameters) -> FiniteStateMachine<
+    var initial: (Executable, ((any DataStructure)?) -> AnySchedulerContext) {
+        let fsm = self.fsm
+        let factory: ((any DataStructure)?) -> AnySchedulerContext = {
+            let data: FSMData<Ringlet.Context, Parameters, Result, Context, Environment>
+            if let params = $0 as? Parameters {
+                data = fsm.initialData(with: params)
+            } else if
+                let type = Parameters.self as? EmptyInitialisable.Type,
+                let params = type.init() as? Parameters
+            {
+                data = fsm.initialData(with: params)
+            } else {
+                fatalError("Missing parameters for \(name).")
+            }
+            let context = SchedulerContext(fsmID: -1, data: data, stateContainer: fsm.stateContainer)
+            return context
+        }
+        return (fsm, factory)
+    }
+
+    private var fsm: FiniteStateMachine<
         StateType,
         Ringlet,
         Parameters,
