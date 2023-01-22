@@ -13,38 +13,26 @@ public struct RoundRobinScheduler {
         var executables: [Executable] = []
         var contexts: [AnySchedulerContext] = []
         var dataFactories: [((any DataStructure)?) -> AnySchedulerContext] = []
-        func setup() {
-            var ids: [Int: Int] = [:]
-            for fsm in schedule.arrangement.fsms {
-                let actualID = executables.count
-                let oldID = fsm.projectedValue.id
-                if let id = ids[oldID] {
-                    let oldInfo = info[id]
-                    info.append(
-                        FSMInformation(id: actualID, name: oldInfo.name, dependencies: oldInfo.dependencies)
-                    )
-                    executables.append(executables[id])
-                    contexts.append(contexts[id])
-                    dataFactories.append(dataFactories[id])
-                    continue
-                }
-                ids[oldID] = actualID
-                let oldInfo = fsm.projectedValue
-                let newInfo = FSMInformation(
-                    id: actualID,
-                    name: oldInfo.name,
-                    dependencies: oldInfo.dependencies
-                )
-                let initialConfiguration = fsm.wrappedValue.initial
-                let executable = initialConfiguration.0
-                let factory = initialConfiguration.1
-                let initialData = factory(parameters[newInfo.name])
-                executables.append(executable)
-                dataFactories.append(factory)
-                contexts.append(initialData)
-            }
+        let fsms = schedule.arrangement.fsms
+        info.reserveCapacity(fsms.count)
+        executables.reserveCapacity(fsms.count)
+        contexts.reserveCapacity(fsms.count)
+        dataFactories.reserveCapacity(fsms.count)
+        for fsm in fsms {
+            let actualID = executables.count
+            let oldInfo = fsm.projectedValue
+            let newInfo = FSMInformation(
+                id: actualID,
+                name: oldInfo.name,
+                dependencies: oldInfo.dependencies
+            )
+            let (executable, factory) = fsm.wrappedValue.initial
+            let initialData = factory(parameters[newInfo.name])
+            info.append(newInfo)
+            executables.append(executable)
+            dataFactories.append(factory)
+            contexts.append(initialData)
         }
-        setup()
         self.init(info: info, executables: executables, contexts: contexts, dataFactories: dataFactories)
     }
 
