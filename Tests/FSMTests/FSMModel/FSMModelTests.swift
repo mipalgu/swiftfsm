@@ -28,6 +28,15 @@ final class FSMModelTests: XCTestCase {
             FSMMock.Result
         >
 
+    typealias SchedulerContextType = SchedulerContext<
+            FSMMock.StateType,
+            FSMMock.Ringlet.Context,
+            FSMMock.Context,
+            FSMMock.Environment,
+            FSMMock.Parameters,
+            FSMMock.Result
+        >
+
     let mock = FSMMock()
 
     func test_extractsNameFromType() {
@@ -85,6 +94,72 @@ final class FSMModelTests: XCTestCase {
         }
         let base = pang.stateType.base
         XCTAssertEqual("\(type(of: base))", "\(CallbackStateType<FSMMock.PangData>.self)")
+    }
+
+    func test_initialCreatesFactoryThatHandlesNilParameters() {
+        let (_, factory) = mock.initial
+        let data = factory(nil)
+        XCTAssertEqual("\(type(of: data))", "\(SchedulerContextType.self)")
+    }
+
+    func test_initialCreatesPseudoInitialState() {
+        let (fsm, factory) = mock.initial
+        guard let fsm = fsm as? FSMType else {
+            XCTFail("Unable to cast fsm to \(FSMType.self)")
+            return
+        }
+        guard let initial = fsm.states.first(where: { $0.name == "__Initial" }) else {
+            XCTFail("Unable to find initial pseudo state.")
+            return
+        }
+        let data = factory(nil)
+        XCTAssertEqual("\(type(of: data))", "\(SchedulerContextType.self)")
+        guard let data = data as? SchedulerContextType else {
+            XCTFail("Unable to cast data to \(SchedulerContextType.self)")
+            return
+        }
+        XCTAssertEqual(initial.id, data.initialState)
+        XCTAssertEqual(initial.id, data.currentState)
+    }
+
+    func test_initialCreatesPseudoPreviousState() {
+        let (fsm, factory) = mock.initial
+        guard let fsm = fsm as? FSMType else {
+            XCTFail("Unable to cast fsm to \(FSMType.self)")
+            return
+        }
+        guard let previous = fsm.states.first(where: { $0.name == "__Previous" }) else {
+            XCTFail("Unable to find initial pseudo state.")
+            return
+        }
+        let data = factory(nil)
+        XCTAssertEqual("\(type(of: data))", "\(SchedulerContextType.self)")
+        guard let data = data as? SchedulerContextType else {
+            XCTFail("Unable to cast data to \(SchedulerContextType.self)")
+            return
+        }
+        XCTAssertEqual(previous.id, data.data.previousState)
+    }
+
+    func test_initialCreatesPseudoSuspendState() {
+        let (fsm, factory) = mock.initial
+        guard let fsm = fsm as? FSMType else {
+            XCTFail("Unable to cast fsm to \(FSMType.self)")
+            return
+        }
+        guard let suspend = fsm.states.first(where: { $0.name == "__Suspend" }) else {
+            XCTFail("Unable to find initial pseudo state.")
+            return
+        }
+        let data = factory(nil)
+        XCTAssertEqual("\(type(of: data))", "\(SchedulerContextType.self)")
+        guard let data = data as? SchedulerContextType else {
+            XCTFail("Unable to cast data to \(SchedulerContextType.self)")
+            return
+        }
+        XCTAssertEqual(suspend.id, data.suspendState)
+        data.data.suspend()
+        XCTAssertEqual(suspend.id, data.currentState)
     }
 
 }
