@@ -127,6 +127,14 @@ public extension FSMModel {
 
 public extension FSMModel {
 
+    var name: String {
+        guard let name = "\(type(of: self))".split(separator: ".").first.map(String.init) else {
+            // swiftlint:disable:next line_length
+            fatalError("Unable to compute name of FSM with type \(type(of: self)). Please specify a name: let name = \"<MyName>\"")
+        }
+        return name
+    }
+
     var initial: (Executable, ((any DataStructure)?) -> AnySchedulerContext) {
         let fsm = self.fsm
         let factory: ((any DataStructure)?) -> AnySchedulerContext = {
@@ -254,14 +262,6 @@ public extension FSMModel {
         )
     }
 
-    var name: String {
-        guard let name = "\(type(of: self))".split(separator: ".").first.map(String.init) else {
-            // swiftlint:disable:next line_length
-            fatalError("Unable to compute name of FSM with type \(type(of: self)). Please specify a name: let name = \"<MyName>\"")
-        }
-        return name
-    }
-
     private var anyStates: [Int: AnyStateProperty] {
         let mirror = Mirror(reflecting: self)
         return Dictionary(uniqueKeysWithValues: mirror.children.compactMap {
@@ -274,10 +274,10 @@ public extension FSMModel {
 
     private var states: [Int: StateType] {
         anyStates.mapValues {
-            guard let state = $0 as? StateType else {
+            guard let state = $0 as? StateProperty<StateType, Self> else {
                 fatalError("Unable to cast state to it's corresponding StateType.")
             }
-            return state
+            return state.wrappedValue
         }
     }
 
