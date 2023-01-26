@@ -156,11 +156,6 @@ public extension FSMModel {
         }
     }
 
-    private func stateContexts(fsmContext: FSMContext<Context, Environment, Parameters, Result>)
-        -> [Int: AnyStateContext<Context, Environment, Parameters, Result>] {
-        states.mapValues { $0.initialContext(fsmContext: fsmContext) }
-    }
-
     private var transitions: [
         Int: [AnyTransition<AnyStateContext<Context, Environment, Parameters, Result>, StateID>]
     ] {
