@@ -48,14 +48,10 @@ public struct RoundRobinScheduler {
     }
 
     public func cycle() {
-        var isFinished = true
-        while !isFinished {
-            isFinished = true
-            for (index, executable) in executables.enumerated() {
-                executable.takeSnapshot(context: contexts[index])
-                executable.next(context: contexts[index])
-                executable.saveSnapshot(context: contexts[index])
-            }
+        for (index, executable) in executables.enumerated() {
+            executable.takeSnapshot(context: contexts[index])
+            executable.next(context: contexts[index])
+            executable.saveSnapshot(context: contexts[index])
         }
     }
 
