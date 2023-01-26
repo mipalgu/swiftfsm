@@ -102,6 +102,12 @@ final class FSMModelTests: XCTestCase {
         XCTAssertEqual("\(type(of: data))", "\(SchedulerContextType.self)")
     }
 
+    func test_initialCreatesFactoryThatHandlesParameters() {
+        let (_, factory) = mock.initial
+        let data = factory(FSMMock.Parameters())
+        XCTAssertEqual("\(type(of: data))", "\(SchedulerContextType.self)")
+    }
+
     func test_initialCreatesPseudoInitialState() {
         let (fsm, factory) = mock.initial
         guard let fsm = fsm as? FSMType else {
