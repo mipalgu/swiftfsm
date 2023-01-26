@@ -195,19 +195,6 @@ public extension FSMModel {
         })
     }
 
-    private var actuatorInitialValues: [PartialKeyPath<Environment>: Sendable] {
-        let mirror = Mirror(reflecting: self)
-        return Dictionary(uniqueKeysWithValues: mirror.children.compactMap {
-            guard let actuator = $0.value as? AnyActuatorProperty else {
-                return nil
-            }
-            guard let mapPath = actuator.erasedMapPath as? PartialKeyPath<Environment> else {
-                fatalError("Unable to cast erasedMapPath to PartialKeyPath<Environment>.")
-            }
-            return (mapPath, actuator.erasedInitialValue)
-        })
-    }
-
     private var externalVariables: [PartialKeyPath<Environment>: AnyExternalVariableHandler<Environment>] {
         let mirror = Mirror(reflecting: self)
         return Dictionary(uniqueKeysWithValues: mirror.children.compactMap {
