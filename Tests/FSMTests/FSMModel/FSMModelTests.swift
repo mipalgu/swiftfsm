@@ -168,4 +168,20 @@ final class FSMModelTests: XCTestCase {
         XCTAssertEqual(suspend.id, data.currentState)
     }
 
+    func test_dependencies() {
+        let deps = mock.dependencies
+        XCTAssertEqual(deps.count, 1)
+        guard let first = deps.first else {
+            return
+        }
+        let meID = IDRegistrar.id(of: "Me")
+        XCTAssertEqual(first, .sync(id: meID))
+    }
+
+    func test_dependenciesDoesNotContainDuplicates() {
+        let deps = mock.dependencies
+        let setOfDeps = Set(deps)
+        XCTAssertEqual(deps.count, setOfDeps.count)
+    }
+
 }
