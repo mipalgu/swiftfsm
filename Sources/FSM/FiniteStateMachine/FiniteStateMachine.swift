@@ -11,7 +11,7 @@ public final class FiniteStateMachine<
     Ringlet.TransitionType == AnyTransition<
         AnyStateContext<Context, Environment, Parameters, Result>,
         StateID
-    > {
+> {
 
     public typealias Data = FSMData<Ringlet.Context, Parameters, Result, Context, Environment>
 
@@ -72,6 +72,22 @@ public final class FiniteStateMachine<
         self.initialState = initialState
         self.initialPreviousState = initialPreviousState
         self.suspendState = suspendState
+    }
+
+    public func isFinished(context: AnySchedulerContext) -> Bool {
+        let context = unsafeDowncast(
+            context,
+            to: SchedulerContext<StateType, Ringlet.Context, Context, Environment, Parameters, Result>.self
+        )
+        return context.data.isFinished
+    }
+
+    public func isSuspended(context: AnySchedulerContext) -> Bool {
+        let context = unsafeDowncast(
+            context,
+            to: SchedulerContext<StateType, Ringlet.Context, Context, Environment, Parameters, Result>.self
+        )
+        return context.data.isSuspended
     }
 
     public func next(context: AnySchedulerContext) {

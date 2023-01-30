@@ -47,11 +47,20 @@ public struct RoundRobinScheduler {
         self.dataFactories = dataFactories
     }
 
-    public func cycle() {
+    public private(set) var shouldTerminate: Bool = false
+
+    public mutating func cycle() {
+        shouldTerminate = true
         for (index, executable) in executables.enumerated() {
             executable.takeSnapshot(context: contexts[index])
             executable.next(context: contexts[index])
             executable.saveSnapshot(context: contexts[index])
+            shouldTerminate =
+                shouldTerminate &&
+                (
+                    executable.isFinished(context: contexts[index]) ||
+                    executable.isSuspended(context: contexts[index])
+                )
         }
     }
 

@@ -7,7 +7,7 @@ struct ArrangementMock: ArrangementModel {
 
 }
 
-struct Schedule: ScheduleModel {
+struct ScheduleMock: ScheduleModel {
 
     let arrangement = ArrangementMock()
 

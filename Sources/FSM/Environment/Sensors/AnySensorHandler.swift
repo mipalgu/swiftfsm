@@ -22,7 +22,7 @@ public struct AnySensorHandler<Environment: EnvironmentSnapshot> {
         self._base = { base }
         self._id = { base.id }
         self._takeSnapshot = { base.takeSnapshot() as Sendable }
-        self._updateEnvironment = { $0[keyPath: keyPath] = unsafeBitCast($1, to: Base.Value.self) }
+        self._updateEnvironment = { $0[keyPath: keyPath] = $1 as! Base.Value }
     }
 
     public func takeSnapshot() -> Sendable {
