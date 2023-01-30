@@ -1,4 +1,4 @@
-public protocol ArrangementModel {
+public protocol ArrangementModel: EmptyInitialisable {
 
     var fsms: [Machine] { get }
 

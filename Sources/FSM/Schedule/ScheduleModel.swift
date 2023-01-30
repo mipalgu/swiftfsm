@@ -2,8 +2,6 @@ public protocol ScheduleModel: EmptyInitialisable {
 
     associatedtype Arrangement: ArrangementModel
 
-    var arrangement: Arrangement { get }
-
     var groups: [GroupInformation] { get }
 
 }
@@ -26,7 +24,7 @@ public extension ScheduleModel {
             }
         }
         if groups.isEmpty {
-            return [GroupInformation(slots: slots.map { $0.wrappedValue(self.arrangement) })]
+            return [GroupInformation(slots: slots.map { $0.wrappedValue(Arrangement()) })]
         }
         return groups.map { $0.wrappedValue(self) }
     }

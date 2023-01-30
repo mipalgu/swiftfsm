@@ -9,7 +9,7 @@ struct ArrangementMock: ArrangementModel {
 
 struct ScheduleMock: ScheduleModel {
 
-    let arrangement = ArrangementMock()
+    typealias Arrangement = ArrangementMock
 
     @Slot(fsm: \.$pingPong, timing: (startTime: 0, duration: 20))
     var pingPongTimeslot
