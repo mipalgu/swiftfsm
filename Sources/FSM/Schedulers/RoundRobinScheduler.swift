@@ -123,7 +123,7 @@ public struct RoundRobinScheduler {
     /// lists associated with particular FSMs. The key of the dictionary
     /// represents the unique name of a particular FSM, and the value contains
     /// a type-erased data structure representing the parameters.
-    public init<Schedule: ScheduleModel>(schedule: Schedule, parameters: [String: any DataStructure]) {
+    public init<Schedule: ScheduleProtocol>(schedule: Schedule, parameters: [String: any DataStructure]) {
         var slots: [SlotData] = []
         let fsms = Schedule.Arrangement().fsms
         slots.reserveCapacity(fsms.count)

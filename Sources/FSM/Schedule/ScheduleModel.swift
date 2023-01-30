@@ -1,10 +1,4 @@
-public protocol ScheduleModel: EmptyInitialisable {
-
-    associatedtype Arrangement: ArrangementModel
-
-    var groups: [GroupInformation] { get }
-
-}
+public protocol ScheduleModel: ScheduleProtocol, EmptyInitialisable {}
 
 public extension ScheduleModel {
 
