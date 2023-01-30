@@ -1,9 +1,9 @@
-public struct SingleMachineArrangement<FSM: FSMModel>: ArrangementProtocol {
+public struct SingleMachineArrangement: ArrangementProtocol {
 
-    let machine: FSM
+    public let fsms: [Machine]
 
-    public var fsms: [Machine] {
-        [Machine(wrappedValue: machine)]
+    public init<FSM: FSMModel>(fsm: FSM) {
+        self.fsms = [Machine(wrappedValue: fsm)]
     }
 
 }
