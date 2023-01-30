@@ -4,6 +4,12 @@ import XCTest
 
 final class RoundRobinSchedulerTests: XCTestCase {
 
+    func testInit() {
+        let schedule = ScheduleMock()
+        let scheduler = RoundRobinScheduler(schedule: schedule, parameters: [:])
+        XCTAssertFalse(scheduler.shouldTerminate)
+    }
+
     func testCycleTerminates() {
         let schedule = ScheduleMock()
         var scheduler = RoundRobinScheduler(schedule: schedule, parameters: [:])
