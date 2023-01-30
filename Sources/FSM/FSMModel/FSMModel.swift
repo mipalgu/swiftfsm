@@ -7,7 +7,7 @@
 /// state machines becomes less cumbersome as much of the complexity associated
 /// with defining fintie state machines is handled through default
 /// implementations.
-public protocol FSMModel: FSMProtocol {
+public protocol FSMModel: FSMProtocol, EmptyInitialisable {
 
     /// A data structure that defines all the dependencies that this finite 
     /// state machine has on the environment and other fsms executing within

@@ -1,12 +1,6 @@
-public protocol ArrangementModel: EmptyInitialisable {
-
-    var fsms: [Machine] { get }
-
-}
+public protocol ArrangementModel: ArrangementProtocol, EmptyInitialisable {}
 
 public extension ArrangementModel {
-
-    typealias Machine = FSMProperty<Self>
 
     var fsms: [Machine] {
         let mirror = Mirror(reflecting: self)
@@ -19,16 +13,12 @@ public extension ArrangementModel {
 
 public extension ArrangementModel {
 
-    static func main() {
-        let arrangement = Self()
-        let slots = arrangement.fsms.map {
-            SlotInformation(fsm: $0.projectedValue, timing: nil)
-        }
-        let schedule = AnySchedule(arrangement: Self.self, slots:slots)
-        var scheduler = RoundRobinScheduler(schedule: schedule, parameters: [:])
-        while !scheduler.shouldTerminate {
-            scheduler.cycle()
-        }
+    static func main() throws {
+        try defaultSchedule.main()
+    }
+
+    static var defaultSchedule: AnySchedule<Self> {
+        Self().defaultSchedule
     }
 
 }

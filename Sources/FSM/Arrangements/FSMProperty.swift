@@ -1,5 +1,5 @@
 @propertyWrapper
-public struct FSMProperty<Arrangement: ArrangementModel> {
+public struct FSMProperty<Arrangement: ArrangementProtocol> {
 
     public let projectedValue: FSMInformation
 

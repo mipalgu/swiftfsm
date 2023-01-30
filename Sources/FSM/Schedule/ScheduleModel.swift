@@ -18,7 +18,7 @@ public extension ScheduleModel {
             }
         }
         if groups.isEmpty {
-            return [GroupInformation(slots: slots.map { $0.wrappedValue(Arrangement()) })]
+            return [GroupInformation(slots: slots.map { $0.wrappedValue(arrangement) })]
         }
         return groups.map { $0.wrappedValue(self) }
     }
@@ -28,10 +28,7 @@ public extension ScheduleModel {
 public extension ScheduleModel {
 
     static func main() throws {
-        var scheduler = RoundRobinScheduler(schedule: Self(), parameters: [:])
-        while !scheduler.shouldTerminate {
-            scheduler.cycle()
-        }
+        try Self().main()
     }
 
 }

@@ -125,7 +125,7 @@ public struct RoundRobinScheduler {
     /// a type-erased data structure representing the parameters.
     public init<Schedule: ScheduleProtocol>(schedule: Schedule, parameters: [String: any DataStructure]) {
         var slots: [SlotData] = []
-        let fsms = Schedule.Arrangement().fsms
+        let fsms = schedule.arrangement.fsms
         slots.reserveCapacity(fsms.count)
         for (index, fsm) in fsms.enumerated() {
             let oldInfo = fsm.projectedValue

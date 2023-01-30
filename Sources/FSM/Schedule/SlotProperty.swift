@@ -1,5 +1,5 @@
 @propertyWrapper
-public struct SlotProperty<Arrangement: ArrangementModel> {
+public struct SlotProperty<Arrangement: ArrangementProtocol> {
 
     public var projectedValue: Self {
         self
