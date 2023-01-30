@@ -1,4 +1,4 @@
-public protocol ScheduleModel {
+public protocol ScheduleModel: EmptyInitialisable {
 
     associatedtype Arrangement: ArrangementModel
 
