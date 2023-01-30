@@ -32,3 +32,14 @@ public extension ScheduleModel {
     }
 
 }
+
+public extension ScheduleModel {
+
+    static func main() throws {
+        var scheduler = RoundRobinScheduler(schedule: Self(), parameters: [:])
+        while !scheduler.shouldTerminate {
+            scheduler.cycle()
+        }
+    }
+
+}
