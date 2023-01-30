@@ -1,4 +1,4 @@
-public struct GroupInformation {
+public struct GroupInformation: DataStructure {
 
     public let slots: [SlotInformation]
 

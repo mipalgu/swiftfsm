@@ -12,7 +12,7 @@ public extension ArrangementProtocol {
         let slots = self.fsms.map {
             SlotInformation(fsm: $0.projectedValue, timing: nil)
         }
-        return AnySchedule(arrangement: self, slots:slots)
+        return AnySchedule(arrangement: self, slots: slots)
     }
 
     func main() throws {

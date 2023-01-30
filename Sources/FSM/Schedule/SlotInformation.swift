@@ -1,4 +1,4 @@
-public struct SlotInformation {
+public struct SlotInformation: DataStructure {
 
     public let fsm: FSMInformation
 
