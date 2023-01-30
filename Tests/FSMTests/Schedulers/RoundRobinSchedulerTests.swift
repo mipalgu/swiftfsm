@@ -16,8 +16,8 @@ final class RoundRobinSchedulerTests: XCTestCase {
         let exitSensorName = FSMMock().exitSensor.id
         let actuator = InMemoryActuator(id: exitSensorName, initialValue: false)
         actuator.saveSnapshot(value: false)
-        for _ in 0..<60 {
-            XCTAssertFalse(scheduler.shouldTerminate)
+        for i in 0..<60 {
+            XCTAssertFalse(scheduler.shouldTerminate, "Should terminate is true on cycle \(i).")
             scheduler.cycle()
         }
         actuator.saveSnapshot(value: true)

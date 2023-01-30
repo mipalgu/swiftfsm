@@ -81,7 +81,7 @@ struct FSMMock: LLFSM {
     )
     var pang
 
-    @State(name: "Exit")
+    @State(name: "Exit", onEntry: { _ in print("Exit") })
     var exit
 
     let initialState = \Self.$ping

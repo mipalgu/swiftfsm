@@ -24,7 +24,11 @@ public extension FSMModel {
             } else {
                 fatalError("Missing parameters for \(name).")
             }
-            let context = SchedulerContext(fsmID: -1, data: data, stateContainer: fsm.stateContainer)
+            let context = SchedulerContext(
+                fsmID: -1,
+                data: data,
+                stateContainer: StateContainer<StateType, Parameters, Result, Context, Environment>?.none
+            )
             return context
         }
         return (fsm, factory)
