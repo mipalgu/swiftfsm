@@ -2,6 +2,7 @@
 /// `FiniteStateMachine` that can be executed within a schedule.
 public extension FSMModel {
 
+    /// Fetch all dependencies as declared within this model.
     var dependencies: [FSMDependency] {
         let deps = Self.Dependencies()
         let mirror = Mirror(reflecting: deps)
@@ -10,6 +11,12 @@ public extension FSMModel {
         }
     }
 
+    /// Create the corresponding `FiniteStateMachine` of this model represented as a type-erased `Executable`, and a factory function
+    /// that takes a type-erased data structure that can be cast to `Self.Parameters` and returns a newly created `AnySchedulerContext`.
+    ///
+    /// - Attention: The id's associated with all states, transitions, and shared variables will be changed within the newly created data
+    /// structures returned by this computed property. This is done to optimise lookup times. However, this means that you should not rely on the
+    /// id's as accessed within this model.
     var initial: (Executable, ((any DataStructure)?) -> AnySchedulerContext) {
         let fsm = self.fsm
         let factory: ((any DataStructure)?) -> AnySchedulerContext = {
@@ -34,6 +41,11 @@ public extension FSMModel {
         return (fsm, factory)
     }
 
+    /// Create the equivalent `FiniteStateMachine` for this model.
+    ///
+    /// This getter replaces all id's of all states, transitions, and shared variables so that the `FiniteStateMachine` may access them
+    /// internally utilising a static array. This creates optimal O(1) lookup times but means that you should not rely on the existing id's of these
+    /// properties as accessed from this model.
     private var fsm: FiniteStateMachine<
         StateType,
         Ringlet,
@@ -44,6 +56,14 @@ public extension FSMModel {
     > {
         var newIds: [StateID: Int] = [:]
         var latestID = 0
+        /// Calculate a new id for a given state with an old ID.
+        ///
+        /// This ensures that there are no gaps between the id's of the states so that the id's can match the indexes of the states within a single
+        /// array.
+        ///
+        /// - Parameter state: The original id of the state.
+        ///
+        /// - Returns: The new id, representing an index where to store the state in a new array that will be created.
         func id(for state: StateID) -> Int {
             if let id = newIds[state] {
                 return id
@@ -56,6 +76,7 @@ public extension FSMModel {
         let anyStates = anyStates
         let stateTypes = states
         let transitions = transitions
+        /// Convert the anyStates into an array of states where the id's of the states match the index of the state within this array.
         var states = anyStates.map {
             let oldID = $1.information.id
             let newID = id(for: $1.information.id)
@@ -83,6 +104,13 @@ public extension FSMModel {
                 transitions: newTransitions
             )
         }
+        /// Create a new empty state that always transitions to particular targets and add it to states.
+        ///
+        /// - Parameter name: The unique name of the new state.
+        ///
+        /// - Parameter transitions: The targets that this state transitions to.
+        ///
+        /// - Returns: The index of the new state within the states array.
         func newState(named name: String, transitions: [Int] = []) -> Int {
             let oldID = IDRegistrar.id(of: name)
             guard anyStates[oldID] == nil else {
@@ -102,15 +130,26 @@ public extension FSMModel {
             ))
             return newID
         }
+        // Create an initial pseudo state.
         let modelInitialState = id(for: self[keyPath: self.initialState].id)
         let initialState = newState(named: "__Initial", transitions: [modelInitialState])
+        // Create an empty previous state so that the previous state and current state do not equal.
         let previousState = newState(named: "__Previous")
+        // Create an empty suspend state if the model does not specify a suspend state.
         let suspendState: Int
         if let suspendStatePath = self.suspendState {
             suspendState = id(for: self[keyPath: suspendStatePath].id)
         } else {
             suspendState = newState(named: "__Suspend")
         }
+        // Ensure that each state's identifier matches the state's index within the states array.
+        states.sort { $0.id < $1.id }
+        // Do a sanity check to ensure that we do not have states with duplicate id's.
+        guard Set(states.map(\.id)).count == states.count else {
+            fatalError("The states array contains states with duplicate ids: \(states)")
+        }
+        // Setup arrays of environment variables with new identifiers that represent the indexes within these
+        // arrays.
         var actuatorsArr = Array(self.actuators)
         var externalVariablesArr = Array(self.externalVariables)
         var sensorsArr = Array(self.sensors)
@@ -141,6 +180,8 @@ public extension FSMModel {
         )
     }
 
+    /// Fetches all states and metadata associated with each state within this model as a dictionary where the key represents the id of the state and
+    /// the value represents a type-erased @State property wrapper value.
     private var anyStates: [Int: AnyStateProperty] {
         let mirror = Mirror(reflecting: self)
         return Dictionary(uniqueKeysWithValues: mirror.children.compactMap {
@@ -151,6 +192,11 @@ public extension FSMModel {
         })
     }
 
+    /// Fetches all states within this model as a dictionary where the key represents the id of the state and the value is the state that contains the
+    /// execution logic.
+    ///
+    /// - Note: The states returned by this property only contain the execution logic, but do not contain any data or contexts associated with the
+    /// state.
     private var states: [Int: StateType] {
         anyStates.mapValues {
             guard let state = $0 as? StateProperty<StateType, Self> else {
@@ -160,6 +206,8 @@ public extension FSMModel {
         }
     }
 
+    /// Fetches all transitions within this model as a dictionary where the key represents the id of the source state, and the value represents the array
+    /// of transitions that can be evaluated for that source state.
     private var transitions: [
         Int: [AnyTransition<AnyStateContext<Context, Environment, Parameters, Result>, StateID>]
     ] {
@@ -178,6 +226,8 @@ public extension FSMModel {
         }
     }
 
+    /// Fetches all actuator variables from this model as a dictionary where the key represents a keypath to the variable within the environment
+    /// snapshot that maps to this actuator variable, and the value represents the handler that saves the value back to the environment.
     private var actuators: [PartialKeyPath<Environment>: AnyActuatorHandler<Environment>] {
         let mirror = Mirror(reflecting: self)
         return Dictionary(uniqueKeysWithValues: mirror.children.compactMap {
@@ -194,6 +244,8 @@ public extension FSMModel {
         })
     }
 
+    /// Fetches all external variables from this model as a dictionary where the key represents a keypath to the variable within the environment
+    /// snapshot that maps to this external variable, and the value represents the handler that fetches and saves the value back to the environment.
     private var externalVariables: [PartialKeyPath<Environment>: AnyExternalVariableHandler<Environment>] {
         let mirror = Mirror(reflecting: self)
         return Dictionary(uniqueKeysWithValues: mirror.children.compactMap {
@@ -212,6 +264,8 @@ public extension FSMModel {
         })
     }
 
+    /// Fetches all sensor variables from this model as a dictionary where the key represents a keypath to the variable within the environment
+    /// snapshot that maps to this sensor variable, and the value represents the handler that fetches the value from the environment.
     private var sensors: [PartialKeyPath<Environment>: AnySensorHandler<Environment>] {
         let mirror = Mirror(reflecting: self)
         return Dictionary(uniqueKeysWithValues: mirror.children.compactMap {

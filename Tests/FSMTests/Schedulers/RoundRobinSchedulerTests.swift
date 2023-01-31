@@ -21,9 +21,8 @@ final class RoundRobinSchedulerTests: XCTestCase {
             scheduler.cycle()
         }
         actuator.saveSnapshot(value: true)
-        for _ in 0..<5 {
-            scheduler.cycle()
-        }
+        scheduler.cycle()
+        scheduler.cycle()
         XCTAssertTrue(scheduler.shouldTerminate)
     }
 

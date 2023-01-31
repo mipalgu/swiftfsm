@@ -75,15 +75,15 @@ final class FSMModelTests: XCTestCase {
             XCTFail("Unable to cast fsm to \(FSMType.self)")
             return
         }
-        let callbackStates: Set<String> = ["Ping", "Pong"]
-        let emptyStates: Set<String> = ["Exit"]
+        let callbackStates: Set<String> = ["Ping", "Pong", "Exit"]
+        let emptyStates: Set<String> = []
         let ignoredStates: Set<String> = ["Pang"]
         for state in casted.states where !ignoredStates.contains(state.name) {
             let base = state.stateType.base
             if callbackStates.contains(state.name) {
                 XCTAssertEqual("\(type(of: base))", "\(CallbackStateType<EmptyDataStructure>.self)")
             } else if emptyStates.contains(state.name) || state.name.hasPrefix("__") {
-                XCTAssertEqual("\(type(of: base))", "\(EmptyStateType.self)")
+                XCTAssertEqual("\(type(of: base))", "\(EmptyStateType.self)", "Invalid type of state \(state.name)")
             } else {
                 XCTFail("Unhandled state: \(state.name)")
             }
