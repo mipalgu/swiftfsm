@@ -14,7 +14,7 @@ public final class FSMContext<
 
     public var result: Result?
 
-    public var status: FSMStatus
+    public internal(set) var status: FSMStatus
 
     public var isFinished: Bool {
         status == .finished
