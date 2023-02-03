@@ -18,7 +18,7 @@ final class FSMStatusTests: XCTestCase {
             .resuming,
             .suspended(transitioned: false),
             .suspended(transitioned: true),
-            .suspending
+            .suspending,
         ]
         let allCases = Set(FSMStatus.allCases)
         XCTAssertEqual(expected, allCases)
@@ -29,7 +29,7 @@ final class FSMStatusTests: XCTestCase {
             .executing(transitioned: true),
             .restarted(transitioned: true),
             .resumed(transitioned: true),
-            .suspended(transitioned: true)
+            .suspended(transitioned: true),
         ]
         for status in transitionedStatuses {
             XCTAssertTrue(status.transitioned)

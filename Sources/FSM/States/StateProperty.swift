@@ -9,30 +9,35 @@ public struct StateProperty<StateType: TypeErasedState, Root: FSMModel>: AnyStat
 
     public var transitions:
         [AnyTransition<
-            AnyStateContext<StateType.FSMsContext, StateType.Environment, StateType.Parameters, StateType.Result>,
+            AnyStateContext<
+                StateType.FSMsContext, StateType.Environment, StateType.Parameters, StateType.Result
+            >,
             (Root) -> StateInformation
         >]
 
     public init<ConcreteState: StateProtocol>(
         wrappedValue: ConcreteState,
         name: String,
-        uses environmentVariables: PartialKeyPath<Root.Environment> ...,
+        uses environmentVariables: PartialKeyPath<Root.Environment>...,
         @TransitionBuilder transitions:
             () -> [AnyTransition<
-                    StateContext<
-                        ConcreteState.Context,
-                        StateType.FSMsContext,
-                        StateType.Environment,
-                        StateType.Parameters,
-                        StateType.Result
-                    >,
-                    (Root) -> StateInformation
-                >] = { [] }
-    ) where ConcreteState.TypeErasedVersion == StateType,
+                StateContext<
+                    ConcreteState.Context,
+                    StateType.FSMsContext,
+                    StateType.Environment,
+                    StateType.Parameters,
+                    StateType.Result
+                >,
+                (Root) -> StateInformation
+            >] = { [] }
+    )
+    where
+        ConcreteState.TypeErasedVersion == StateType,
         ConcreteState.FSMsContext == StateType.FSMsContext,
         ConcreteState.Environment == StateType.Environment,
         ConcreteState.Parameters == StateType.Parameters,
-        ConcreteState.Result == StateType.Result {
+        ConcreteState.Result == StateType.Result
+    {
         self.init(
             wrappedValue: wrappedValue,
             name: name,
@@ -47,58 +52,63 @@ public struct StateProperty<StateType: TypeErasedState, Root: FSMModel>: AnyStat
         uses environmentVariables: [PartialKeyPath<Root.Environment>],
         @TransitionBuilder transitions:
             () -> [AnyTransition<
-                    StateContext<
-                        ConcreteState.Context,
-                        StateType.FSMsContext,
-                        StateType.Environment,
-                        StateType.Parameters,
-                        StateType.Result
-                    >,
-                    (Root) -> StateInformation
-                >] = { [] }
-    ) where ConcreteState.TypeErasedVersion == StateType,
+                StateContext<
+                    ConcreteState.Context,
+                    StateType.FSMsContext,
+                    StateType.Environment,
+                    StateType.Parameters,
+                    StateType.Result
+                >,
+                (Root) -> StateInformation
+            >] = { [] }
+    )
+    where
+        ConcreteState.TypeErasedVersion == StateType,
         ConcreteState.FSMsContext == StateType.FSMsContext,
         ConcreteState.Environment == StateType.Environment,
         ConcreteState.Parameters == StateType.Parameters,
-        ConcreteState.Result == StateType.Result {
+        ConcreteState.Result == StateType.Result
+    {
         self.projectedValue = StateInformation(name: name)
         self.wrappedValue = wrappedValue.erased
         self.environmentVariables = environmentVariables
-        self.transitions = transitions().map { transition in
-            AnyTransition(to: transition.target) {
-                transition.canTransition(
-                    from: unsafeDowncast(
-                        $0,
-                        to: StateContext<
-                            ConcreteState.Context,
-                            ConcreteState.FSMsContext,
-                            ConcreteState.Environment,
-                            ConcreteState.Parameters,
-                            ConcreteState.Result
-                        >.self
+        self.transitions = transitions()
+            .map { transition in
+                AnyTransition(to: transition.target) {
+                    transition.canTransition(
+                        from: unsafeDowncast(
+                            $0,
+                            to: StateContext<
+                                ConcreteState.Context,
+                                ConcreteState.FSMsContext,
+                                ConcreteState.Environment,
+                                ConcreteState.Parameters,
+                                ConcreteState.Result
+                            >
+                            .self
+                        )
                     )
-                )
+                }
             }
-        }
     }
 
 }
 
-public extension StateProperty {
+extension StateProperty {
 
-    var erasedEnvironmentVariables: Any {
+    public var erasedEnvironmentVariables: Any {
         environmentVariables as Any
     }
 
-    var erasedState: Sendable {
+    public var erasedState: Sendable {
         wrappedValue as Sendable
     }
 
-    var information: StateInformation {
+    public var information: StateInformation {
         projectedValue
     }
 
-    func erasedTransitions(for root: Any) -> Sendable {
+    public func erasedTransitions(for root: Any) -> Sendable {
         guard let root = root as? Root else {
             fatalError("Cannot convert `root` in erasedTransition call to `Root`.")
         }

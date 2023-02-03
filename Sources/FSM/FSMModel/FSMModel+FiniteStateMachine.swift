@@ -1,9 +1,9 @@
 /// Contains functionality that enables converting this FSMModel to a
 /// `FiniteStateMachine` that can be executed within a schedule.
-public extension FSMModel {
+extension FSMModel {
 
     /// Fetch all dependencies as declared within this model.
-    var dependencies: [FSMDependency] {
+    public var dependencies: [FSMDependency] {
         let deps = Self.Dependencies()
         let mirror = Mirror(reflecting: deps)
         return mirror.children.compactMap {
@@ -17,14 +17,13 @@ public extension FSMModel {
     /// - Attention: The id's associated with all states, transitions, and shared variables will be changed within the newly created data
     /// structures returned by this computed property. This is done to optimise lookup times. However, this means that you should not rely on the
     /// id's as accessed within this model.
-    var initial: (Executable, ((any DataStructure)?) -> AnySchedulerContext) {
+    public var initial: (Executable, ((any DataStructure)?) -> AnySchedulerContext) {
         let fsm = self.fsm
         let factory: ((any DataStructure)?) -> AnySchedulerContext = {
             let data: FSMData<Ringlet.Context, Parameters, Result, Context, Environment>
             if let params = $0 as? Parameters {
                 data = fsm.initialData(with: params)
-            } else if
-                let type = Parameters.self as? EmptyInitialisable.Type,
+            } else if let type = Parameters.self as? EmptyInitialisable.Type,
                 let params = type.init() as? Parameters
             {
                 data = fsm.initialData(with: params)
@@ -46,14 +45,16 @@ public extension FSMModel {
     /// This getter replaces all id's of all states, transitions, and shared variables so that the `FiniteStateMachine` may access them
     /// internally utilising a static array. This creates optimal O(1) lookup times but means that you should not rely on the existing id's of these
     /// properties as accessed from this model.
-    private var fsm: FiniteStateMachine<
-        StateType,
-        Ringlet,
-        Parameters,
-        Result,
-        Context,
-        Environment
-    > {
+    private var fsm:
+        FiniteStateMachine<
+            StateType,
+            Ringlet,
+            Parameters,
+            Result,
+            Context,
+            Environment
+        >
+    {
         var newIds: [StateID: Int] = [:]
         var latestID = 0
         /// Calculate a new id for a given state with an old ID.
@@ -121,13 +122,15 @@ public extension FSMModel {
                 fatalError("Calculated invalid id (\(newID)) for new state.")
             }
             let stateType = StateType.emptyState
-            states.append(FSMState(
-                id: newID,
-                name: name,
-                environmentVariables: [],
-                stateType: stateType,
-                transitions: transitions.map { AnyTransition(to: $0) }
-            ))
+            states.append(
+                FSMState(
+                    id: newID,
+                    name: name,
+                    environmentVariables: [],
+                    stateType: stateType,
+                    transitions: transitions.map { AnyTransition(to: $0) }
+                )
+            )
             return newID
         }
         // Create an initial pseudo state.
@@ -184,12 +187,14 @@ public extension FSMModel {
     /// the value represents a type-erased @State property wrapper value.
     private var anyStates: [Int: AnyStateProperty] {
         let mirror = Mirror(reflecting: self)
-        return Dictionary(uniqueKeysWithValues: mirror.children.compactMap {
-            guard let state = $0.value as? AnyStateProperty else {
-                return nil
+        return Dictionary(
+            uniqueKeysWithValues: mirror.children.compactMap {
+                guard let state = $0.value as? AnyStateProperty else {
+                    return nil
+                }
+                return (state.information.id, state)
             }
-            return (state.information.id, state)
-        })
+        )
     }
 
     /// Fetches all states within this model as a dictionary where the key represents the id of the state and the value is the state that contains the
@@ -208,9 +213,9 @@ public extension FSMModel {
 
     /// Fetches all transitions within this model as a dictionary where the key represents the id of the source state, and the value represents the array
     /// of transitions that can be evaluated for that source state.
-    private var transitions: [
-        Int: [AnyTransition<AnyStateContext<Context, Environment, Parameters, Result>, StateID>]
-    ] {
+    private var transitions:
+        [Int: [AnyTransition<AnyStateContext<Context, Environment, Parameters, Result>, StateID>]]
+    {
         anyStates.mapValues {
             guard
                 let transitions = $0.erasedTransitions(for: self)
@@ -230,56 +235,63 @@ public extension FSMModel {
     /// snapshot that maps to this actuator variable, and the value represents the handler that saves the value back to the environment.
     private var actuators: [PartialKeyPath<Environment>: AnyActuatorHandler<Environment>] {
         let mirror = Mirror(reflecting: self)
-        return Dictionary(uniqueKeysWithValues: mirror.children.compactMap {
-            guard let actuator = $0.value as? AnyActuatorProperty else {
-                return nil
+        return Dictionary(
+            uniqueKeysWithValues: mirror.children.compactMap {
+                guard let actuator = $0.value as? AnyActuatorProperty else {
+                    return nil
+                }
+                guard let mapPath = actuator.erasedMapPath as? PartialKeyPath<Environment> else {
+                    fatalError("Unable to cast erasedMapPath to PartialKeyPath<Environment>.")
+                }
+                guard let typeErased = actuator.typeErased as? AnyActuatorHandler<Environment> else {
+                    fatalError("Unable to create AnyActuatorHandler<Environment> from AnyActuatorProperty.")
+                }
+                return (mapPath, typeErased)
             }
-            guard let mapPath = actuator.erasedMapPath as? PartialKeyPath<Environment> else {
-                fatalError("Unable to cast erasedMapPath to PartialKeyPath<Environment>.")
-            }
-            guard let typeErased = actuator.typeErased as? AnyActuatorHandler<Environment> else {
-                fatalError("Unable to create AnyActuatorHandler<Environment> from AnyActuatorProperty.")
-            }
-            return (mapPath, typeErased)
-        })
+        )
     }
 
     /// Fetches all external variables from this model as a dictionary where the key represents a keypath to the variable within the environment
     /// snapshot that maps to this external variable, and the value represents the handler that fetches and saves the value back to the environment.
     private var externalVariables: [PartialKeyPath<Environment>: AnyExternalVariableHandler<Environment>] {
         let mirror = Mirror(reflecting: self)
-        return Dictionary(uniqueKeysWithValues: mirror.children.compactMap {
-            guard let externalVariable = $0.value as? AnyExternalVariableProperty else {
-                return nil
+        return Dictionary(
+            uniqueKeysWithValues: mirror.children.compactMap {
+                guard let externalVariable = $0.value as? AnyExternalVariableProperty else {
+                    return nil
+                }
+                guard let mapPath = externalVariable.erasedMapPath as? PartialKeyPath<Environment> else {
+                    fatalError("Unable to cast erasedMapPath to PartialKeyPath<Environment>.")
+                }
+                guard let typeErased = externalVariable.typeErased as? AnyExternalVariableHandler<Environment>
+                else {
+                    fatalError(
+                        "Unable to create AnyExternalVariableHandler<Environment> from AnyExternalVariableProperty."
+                    )
+                }
+                return (mapPath, typeErased)
             }
-            guard let mapPath = externalVariable.erasedMapPath as? PartialKeyPath<Environment> else {
-                fatalError("Unable to cast erasedMapPath to PartialKeyPath<Environment>.")
-            }
-            guard let typeErased = externalVariable.typeErased as? AnyExternalVariableHandler<Environment> else {
-                fatalError(
-                    "Unable to create AnyExternalVariableHandler<Environment> from AnyExternalVariableProperty."
-                )
-            }
-            return (mapPath, typeErased)
-        })
+        )
     }
 
     /// Fetches all sensor variables from this model as a dictionary where the key represents a keypath to the variable within the environment
     /// snapshot that maps to this sensor variable, and the value represents the handler that fetches the value from the environment.
     private var sensors: [PartialKeyPath<Environment>: AnySensorHandler<Environment>] {
         let mirror = Mirror(reflecting: self)
-        return Dictionary(uniqueKeysWithValues: mirror.children.compactMap {
-            guard let actuator = $0.value as? AnySensorProperty else {
-                return nil
+        return Dictionary(
+            uniqueKeysWithValues: mirror.children.compactMap {
+                guard let actuator = $0.value as? AnySensorProperty else {
+                    return nil
+                }
+                guard let mapPath = actuator.erasedMapPath as? PartialKeyPath<Environment> else {
+                    fatalError("Unable to cast erasedMapPath to PartialKeyPath<Environment>.")
+                }
+                guard let typeErased = actuator.typeErased as? AnySensorHandler<Environment> else {
+                    fatalError("Unable to create AnySensorHandler<Environment> from AnySensorProperty.")
+                }
+                return (mapPath, typeErased)
             }
-            guard let mapPath = actuator.erasedMapPath as? PartialKeyPath<Environment> else {
-                fatalError("Unable to cast erasedMapPath to PartialKeyPath<Environment>.")
-            }
-            guard let typeErased = actuator.typeErased as? AnySensorHandler<Environment> else {
-                fatalError("Unable to create AnySensorHandler<Environment> from AnySensorProperty.")
-            }
-            return (mapPath, typeErased)
-        })
+        )
     }
 
 }

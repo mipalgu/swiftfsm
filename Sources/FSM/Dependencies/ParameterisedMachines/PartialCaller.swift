@@ -17,23 +17,23 @@ public struct PartialCaller<Result: DataStructure, Partial: DataStructure>: Data
 
 }
 
-public extension PartialCaller {
+extension PartialCaller {
 
-    static func == (lhs: PartialCaller<Result, Partial>, rhs: PartialCaller<Result, Partial>) -> Bool {
+    public static func == (lhs: PartialCaller<Result, Partial>, rhs: PartialCaller<Result, Partial>) -> Bool {
         lhs.parameterisedMachine == rhs.parameterisedMachine
     }
 
-    func hash(into hasher: inout Hasher) {
+    public func hash(into hasher: inout Hasher) {
         hasher.combine(parameterisedMachine)
     }
 
-    enum CodingKeys: CodingKey {
+    public enum CodingKeys: CodingKey {
 
         case parameterisedMachine
 
     }
 
-    init(from decoder: Decoder) throws {
+    public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         let parameterisedMachine = try container.decode(
             ParameterisedMachine<Result>.self,
@@ -42,7 +42,7 @@ public extension PartialCaller {
         self.init(parameterisedMachine: parameterisedMachine)
     }
 
-    func encode(to encoder: Encoder) throws {
+    public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encode(parameterisedMachine, forKey: .parameterisedMachine)
     }

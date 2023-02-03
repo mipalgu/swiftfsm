@@ -14,8 +14,7 @@ public struct FSMState<
 
     public let stateType: StateType
 
-    public let transitions: [
-        AnyTransition<AnyStateContext<Context, Environment, Parameters, Result>, StateID>
-    ]
+    public let transitions:
+        [AnyTransition<AnyStateContext<Context, Environment, Parameters, Result>, StateID>]
 
 }

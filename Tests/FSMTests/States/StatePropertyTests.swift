@@ -45,7 +45,9 @@ private struct TempFSM: LLFSM {
 
     @State(
         name: "Pong",
-        uses: \.actuator, \.externalVariables, \.sensor,
+        uses: \.actuator,
+        \.externalVariables,
+        \.sensor,
         transitions: {
             Transition(to: "Ping", context: PongContext.self) { $0.executeInternal }
         }

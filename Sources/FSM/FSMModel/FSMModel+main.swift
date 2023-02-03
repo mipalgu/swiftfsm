@@ -1,18 +1,18 @@
-public extension FSMModel {
+extension FSMModel {
 
-    var defaultArrangement: SingleMachineArrangement {
+    public var defaultArrangement: SingleMachineArrangement {
         SingleMachineArrangement(fsm: self)
     }
 
-    func main() throws {
+    public func main() throws {
         try defaultArrangement.main()
     }
 
-    static var defaultArrangement: SingleMachineArrangement {
+    public static var defaultArrangement: SingleMachineArrangement {
         Self().defaultArrangement
     }
 
-    static func main() throws {
+    public static func main() throws {
         try Self().main()
     }
 

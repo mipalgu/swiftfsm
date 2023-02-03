@@ -30,23 +30,23 @@ public struct Controller: DataStructure, FiniteStateMachineOperations {
 
 }
 
-public extension Controller {
+extension Controller {
 
-    static func == (lhs: Controller, rhs: Controller) -> Bool {
+    public static func == (lhs: Controller, rhs: Controller) -> Bool {
         lhs.submachine == rhs.submachine
     }
 
-    func hash(into hasher: inout Hasher) {
+    public func hash(into hasher: inout Hasher) {
         hasher.combine(submachine)
     }
 
-    enum CodingKeys: CodingKey {
+    public enum CodingKeys: CodingKey {
 
         case submachine
 
     }
 
-    init(from decoder: Decoder) throws {
+    public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         let submachine = try container.decode(
             SubMachine.self,
@@ -55,7 +55,7 @@ public extension Controller {
         self.init(submachine: submachine)
     }
 
-    func encode(to encoder: Encoder) throws {
+    public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encode(submachine, forKey: .submachine)
     }

@@ -4,18 +4,18 @@ public protocol ArrangementProtocol {
 
 }
 
-public extension ArrangementProtocol {
+extension ArrangementProtocol {
 
-    typealias Machine = FSMProperty<Self>
+    public typealias Machine = FSMProperty<Self>
 
-    var defaultSchedule: AnySchedule<Self> {
+    public var defaultSchedule: AnySchedule<Self> {
         let slots = self.fsms.map {
             SlotInformation(fsm: $0.projectedValue, timing: nil)
         }
         return AnySchedule(arrangement: self, slots: slots)
     }
 
-    func main() throws {
+    public func main() throws {
         try defaultSchedule.main()
     }
 

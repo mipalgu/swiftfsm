@@ -26,19 +26,19 @@ public struct CallbackLLFSMState<
     public init(
         onEntry:
             @escaping (StateContext<StatesContext, FSMsContext, Environment, Parameters, Result>)
-                -> Void = { _ in },
+            -> Void = { _ in },
         internal:
             @escaping (StateContext<StatesContext, FSMsContext, Environment, Parameters, Result>)
-                -> Void = { _ in },
+            -> Void = { _ in },
         onExit:
             @escaping (StateContext<StatesContext, FSMsContext, Environment, Parameters, Result>)
-                -> Void = { _ in },
+            -> Void = { _ in },
         onSuspend:
             @escaping (StateContext<StatesContext, FSMsContext, Environment, Parameters, Result>)
-                -> Void = { _ in },
+            -> Void = { _ in },
         onResume:
             @escaping (StateContext<StatesContext, FSMsContext, Environment, Parameters, Result>)
-                -> Void = { _ in }
+            -> Void = { _ in }
     ) {
         self._onEntry = onEntry
         self._internal = `internal`

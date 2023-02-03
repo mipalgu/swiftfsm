@@ -4,9 +4,9 @@ public protocol EnvironmentSnapshot: DataStructure, EmptyInitialisable {
 
 }
 
-public extension EnvironmentSnapshot {
+extension EnvironmentSnapshot {
 
-    mutating func update<T>(keyPath: WritableKeyPath<Self, T>, value: T) {
+    public mutating func update<T>(keyPath: WritableKeyPath<Self, T>, value: T) {
         self[keyPath: keyPath] = value
     }
 

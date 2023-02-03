@@ -1,6 +1,6 @@
 /// A transition models the mechanism that enables an FSM to transition from
 /// one state to another.
-/// 
+///
 /// Since the FSMs modelled within this framework are Logic-Labelled Finite
 /// State Machines, this transition is labelled with a boolean condition which
 /// evaluate to true when the transition is valid. That is, this protocol
@@ -13,7 +13,7 @@
 /// be read-only. Implementations of this protocol must make care that they
 /// do not store references to other types as reference types cannot guarantee
 /// purity.
-/// 
+///
 /// Besides the requirement of purity, this protocol makes no assumptions on
 /// the type of states that are transitioning. These are left to particular
 /// implementations. Howevever, this protocol makes an assumption that some data
@@ -37,13 +37,13 @@ public protocol TransitionProtocol: Sendable {
     var target: Target { get }
 
     /// Can this transition be taken?
-    /// 
+    ///
     /// - Parameter source: The source of the transition, i.e. the state that
     /// the FSM is currently in.
-    /// 
+    ///
     /// - Parameter context: The data structure containing the data associated
     /// with this transition.
-    /// 
+    ///
     /// - Returns true if this transition can be taken.
     func canTransition(from source: Source) -> Bool
 

@@ -8,9 +8,9 @@ public protocol ScheduleProtocol {
 
 }
 
-public extension ScheduleProtocol {
+extension ScheduleProtocol {
 
-    func main() throws {
+    public func main() throws {
         var scheduler = RoundRobinScheduler(schedule: self, parameters: [:])
         while !scheduler.shouldTerminate {
             scheduler.cycle()
@@ -19,8 +19,8 @@ public extension ScheduleProtocol {
 
 }
 
-public extension ScheduleProtocol where Self.Arrangement: EmptyInitialisable {
+extension ScheduleProtocol where Self.Arrangement: EmptyInitialisable {
 
-    var arrangement: Arrangement { Arrangement() }
+    public var arrangement: Arrangement { Arrangement() }
 
 }

@@ -53,7 +53,8 @@ final class GlobalVariableHandlerMock<Value: GlobalVariableValue>: GlobalVariabl
     private(set) var calls: [Call] {
         get {
             handlerCalls[_id]?.map { Call(from: $0) } ?? []
-        } set {
+        }
+        set {
             handlerCalls[_id] = newValue.map(\.genericCall)
         }
     }
@@ -82,7 +83,8 @@ final class GlobalVariableHandlerMock<Value: GlobalVariableValue>: GlobalVariabl
                 fatalError("Failed to fetch value from handlerValues.")
             }
             return value
-        } set {
+        }
+        set {
             handlerValues[_id] = newValue as Any?
         }
     }
@@ -96,7 +98,8 @@ final class GlobalVariableHandlerMock<Value: GlobalVariableValue>: GlobalVariabl
         get {
             calls.append(.getValue)
             return _value
-        } set {
+        }
+        set {
             calls.append(.setValue(newValue: newValue))
             _value = newValue
         }

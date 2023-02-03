@@ -29,7 +29,7 @@ public enum FSMStatus: Hashable, Codable, Sendable, CaseIterable {
             .resuming,
             .suspended(transitioned: false),
             .suspended(transitioned: true),
-            .suspending
+            .suspending,
         ]
     }
 

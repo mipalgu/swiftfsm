@@ -19,7 +19,8 @@ public final class SchedulerContext<
     public var ringletContext: RingletsContext {
         get {
             data.ringletContext
-        } set {
+        }
+        set {
             data.ringletContext = newValue
         }
     }
@@ -27,7 +28,8 @@ public final class SchedulerContext<
     public var fsmContext: FSMContext<FSMsContext, Environment, Parameters, Result> {
         get {
             data.fsmContext
-        } set {
+        }
+        set {
             data.fsmContext = newValue
         }
     }
@@ -35,7 +37,8 @@ public final class SchedulerContext<
     public var fsm: FSMsContext {
         get {
             data.fsmContext.context
-        } set {
+        }
+        set {
             data.fsmContext.context = newValue
         }
     }
@@ -43,7 +46,8 @@ public final class SchedulerContext<
     public var environment: Environment {
         get {
             data.fsmContext.environment
-        } set {
+        }
+        set {
             data.fsmContext.environment = newValue
         }
     }
@@ -55,7 +59,8 @@ public final class SchedulerContext<
     public var result: Result? {
         get {
             data.fsmContext.result
-        } set {
+        }
+        set {
             data.fsmContext.result = newValue
         }
     }
@@ -63,7 +68,8 @@ public final class SchedulerContext<
     public var status: FSMStatus {
         get {
             data.fsmContext.status
-        } set {
+        }
+        set {
             data.fsmContext.status = newValue
         }
     }
@@ -94,7 +100,8 @@ public final class SchedulerContext<
         super.init(fsmID: fsmID)
     }
 
-    public func context(forState index: Int) -> AnyStateContext<FSMsContext, Environment, Parameters, Result> {
+    public func context(forState index: Int) -> AnyStateContext<FSMsContext, Environment, Parameters, Result>
+    {
         data.stateContexts[index]
     }
 

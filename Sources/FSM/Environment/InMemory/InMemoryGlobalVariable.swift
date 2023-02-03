@@ -14,7 +14,8 @@ public struct InMemoryGlobalVariable<Value: GlobalVariableValue>: GlobalVariable
                 return initialValue
             }
             return value
-        } set {
+        }
+        set {
             inMemoryGlobalVariableData[resolvedID] = newValue
         }
     }
@@ -27,21 +28,21 @@ public struct InMemoryGlobalVariable<Value: GlobalVariableValue>: GlobalVariable
 
 }
 
-public extension InMemoryGlobalVariable {
+extension InMemoryGlobalVariable {
 
-    enum CodingKeys: CodingKey {
+    public enum CodingKeys: CodingKey {
         case id
         case initialValue
     }
 
-    init(from decoder: Decoder) throws {
+    public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         let id = try container.decode(String.self, forKey: .id)
         let initialValue = try container.decode(Value.self, forKey: .initialValue)
         self.init(id: id, initialValue: initialValue)
     }
 
-    func encode(to encoder: Encoder) throws {
+    public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encode(id, forKey: .id)
         try container.encode(initialValue, forKey: .initialValue)

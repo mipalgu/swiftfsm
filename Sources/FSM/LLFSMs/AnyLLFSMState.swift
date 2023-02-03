@@ -7,8 +7,9 @@ public struct AnyLLFSMState<
 
     public typealias TypeErasedVersion = Self
 
-    private let _initialContext: (FSMContext<FSMsContext, Environment, Parameters, Result>)
-        -> AnyStateContext<FSMsContext, Environment, Parameters, Result>
+    private let _initialContext:
+        (FSMContext<FSMsContext, Environment, Parameters, Result>)
+            -> AnyStateContext<FSMsContext, Environment, Parameters, Result>
     private let _onEntry: (AnyStateContext<FSMsContext, Environment, Parameters, Result>) -> Void
     private let _internal: (AnyStateContext<FSMsContext, Environment, Parameters, Result>) -> Void
     private let _onExit: (AnyStateContext<FSMsContext, Environment, Parameters, Result>) -> Void
@@ -24,10 +25,12 @@ public struct AnyLLFSMState<
     }
 
     public init<Base: LLFSMState>(_ base: Base)
-        where Base.FSMsContext == FSMsContext,
-            Base.Environment == Environment,
-            Base.Parameters == Parameters,
-            Base.Result == Result {
+    where
+        Base.FSMsContext == FSMsContext,
+        Base.Environment == Environment,
+        Base.Parameters == Parameters,
+        Base.Result == Result
+    {
         self.base = base
         self._initialContext = {
             StateContext<Base.Context, FSMsContext, Environment, Parameters, Result>(
@@ -73,7 +76,8 @@ public struct AnyLLFSMState<
     }
 
     public func initialContext(fsmContext: FSMContext<FSMsContext, Environment, Parameters, Result>)
-        -> AnyStateContext<FSMsContext, Environment, Parameters, Result> {
+        -> AnyStateContext<FSMsContext, Environment, Parameters, Result>
+    {
         _initialContext(fsmContext)
     }
 

@@ -8,7 +8,8 @@ public struct GlobalVariableProperty<Root, Handler: GlobalVariableHandler> {
     public var wrappedValue: Handler.Value {
         get {
             projectedValue.value
-        } set {
+        }
+        set {
             projectedValue.value = newValue
         }
     }

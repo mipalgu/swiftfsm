@@ -12,7 +12,8 @@ public final class StateContext<
     public var fsm: FSMsContext {
         get {
             fsmContext.context
-        } set {
+        }
+        set {
             fsmContext.context = newValue
         }
     }
@@ -20,7 +21,8 @@ public final class StateContext<
     public var environment: Environment {
         get {
             fsmContext.environment
-        } set {
+        }
+        set {
             fsmContext.environment = newValue
         }
     }
@@ -32,7 +34,8 @@ public final class StateContext<
     public var result: Result? {
         get {
             fsmContext.result
-        } set {
+        }
+        set {
             fsmContext.result = newValue
         }
     }
@@ -40,7 +43,8 @@ public final class StateContext<
     var status: FSMStatus {
         get {
             fsmContext.status
-        } set {
+        }
+        set {
             fsmContext.status = newValue
         }
     }

@@ -2,7 +2,8 @@ public protocol RingletProtocol: ContextUser, EmptyInitialisable {
 
     associatedtype StateType: TypeErasedState
 
-    associatedtype TransitionType: TransitionProtocol where
+    associatedtype TransitionType: TransitionProtocol
+    where
         TransitionType.Source == AnyStateContext<
             StateType.FSMsContext,
             StateType.Environment,

@@ -1,12 +1,12 @@
 public protocol ScheduleModel: ScheduleProtocol, EmptyInitialisable {}
 
-public extension ScheduleModel {
+extension ScheduleModel {
 
-    typealias Group = GroupProperty<Self>
+    public typealias Group = GroupProperty<Self>
 
-    typealias Slot = SlotProperty<Arrangement>
+    public typealias Slot = SlotProperty<Arrangement>
 
-    var groups: [GroupInformation] {
+    public var groups: [GroupInformation] {
         let mirror = Mirror(reflecting: self)
         var slots: [Slot] = []
         var groups: [Group] = []
@@ -25,9 +25,9 @@ public extension ScheduleModel {
 
 }
 
-public extension ScheduleModel {
+extension ScheduleModel {
 
-    static func main() throws {
+    public static func main() throws {
         try Self().main()
     }
 

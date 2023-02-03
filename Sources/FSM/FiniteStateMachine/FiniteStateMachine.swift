@@ -5,13 +5,16 @@ public final class FiniteStateMachine<
     Result: DataStructure,
     Context: ContextProtocol,
     Environment: EnvironmentSnapshot
->: Executable where StateType.FSMsContext == Context,
+>: Executable
+where
+    StateType.FSMsContext == Context,
     StateType.Environment == Environment,
     Ringlet.StateType == StateType,
     Ringlet.TransitionType == AnyTransition<
         AnyStateContext<Context, Environment, Parameters, Result>,
         StateID
-> {
+    >
+{
 
     public typealias Data = FSMData<Ringlet.Context, Parameters, Result, Context, Environment>
 

@@ -136,7 +136,12 @@ public struct RoundRobinScheduler {
             )
             let (executable, contextFactory) = fsm.wrappedValue.initial
             let initialData = contextFactory(parameters[newInfo.name])
-            let slot = SlotData(info: newInfo, executable: executable, context: initialData, contextFactory: contextFactory)
+            let slot = SlotData(
+                info: newInfo,
+                executable: executable,
+                context: initialData,
+                contextFactory: contextFactory
+            )
             slots.append(slot)
         }
         self.init(map: Map(slots: slots))

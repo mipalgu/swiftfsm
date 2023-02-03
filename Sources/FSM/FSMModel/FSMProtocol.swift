@@ -4,7 +4,8 @@ public protocol FSMProtocol: ContextUser, EnvironmentUser {
 
     associatedtype Result: DataStructure = EmptyDataStructure
 
-    associatedtype Ringlet: RingletProtocol where
+    associatedtype Ringlet: RingletProtocol
+    where
         Ringlet.StateType == StateType,
         Ringlet.TransitionType == AnyTransition<
             AnyStateContext<Context, Environment, Parameters, Result>,
@@ -12,7 +13,8 @@ public protocol FSMProtocol: ContextUser, EnvironmentUser {
         >
 
     associatedtype StateType: TypeErasedState
-        where StateType.FSMsContext == Context,
-            StateType.Environment == Environment
+    where
+        StateType.FSMsContext == Context,
+        StateType.Environment == Environment
 
 }

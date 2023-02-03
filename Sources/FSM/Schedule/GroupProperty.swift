@@ -3,7 +3,7 @@ public struct GroupProperty<Schedule: ScheduleProtocol> {
 
     public let wrappedValue: (Schedule) -> GroupInformation
 
-    public init(slots keyPaths: KeyPath<Schedule, SlotProperty<Schedule.Arrangement>> ...) {
+    public init(slots keyPaths: KeyPath<Schedule, SlotProperty<Schedule.Arrangement>>...) {
         self.init(slots: keyPaths)
     }
 

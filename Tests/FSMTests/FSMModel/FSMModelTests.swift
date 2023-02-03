@@ -5,37 +5,37 @@ import XCTest
 final class FSMModelTests: XCTestCase {
 
     typealias FSMType = FiniteStateMachine<
-            FSMMock.StateType,
-            FSMMock.Ringlet,
-            FSMMock.Parameters,
-            FSMMock.Result,
-            FSMMock.Context,
-            FSMMock.Environment
-        >
+        FSMMock.StateType,
+        FSMMock.Ringlet,
+        FSMMock.Parameters,
+        FSMMock.Result,
+        FSMMock.Context,
+        FSMMock.Environment
+    >
 
     typealias CallbackStateType<StatesContext: ContextProtocol> = CallbackLLFSMState<
-            StatesContext,
-            FSMMock.Context,
-            FSMMock.Environment,
-            FSMMock.Parameters,
-            FSMMock.Result
-        >
+        StatesContext,
+        FSMMock.Context,
+        FSMMock.Environment,
+        FSMMock.Parameters,
+        FSMMock.Result
+    >
 
     typealias EmptyStateType = EmptyLLFSMState<
-            FSMMock.Context,
-            FSMMock.Environment,
-            FSMMock.Parameters,
-            FSMMock.Result
-        >
+        FSMMock.Context,
+        FSMMock.Environment,
+        FSMMock.Parameters,
+        FSMMock.Result
+    >
 
     typealias SchedulerContextType = SchedulerContext<
-            FSMMock.StateType,
-            FSMMock.Ringlet.Context,
-            FSMMock.Context,
-            FSMMock.Environment,
-            FSMMock.Parameters,
-            FSMMock.Result
-        >
+        FSMMock.StateType,
+        FSMMock.Ringlet.Context,
+        FSMMock.Context,
+        FSMMock.Environment,
+        FSMMock.Parameters,
+        FSMMock.Result
+    >
 
     let mock = FSMMock()
 
@@ -63,7 +63,7 @@ final class FSMModelTests: XCTestCase {
             "Exit",
             "__Initial",
             "__Suspend",
-            "__Previous"
+            "__Previous",
         ]
         let actualStates = Set(casted.states.map(\.name))
         XCTAssertEqual(expectedStates, actualStates)
@@ -83,7 +83,11 @@ final class FSMModelTests: XCTestCase {
             if callbackStates.contains(state.name) {
                 XCTAssertEqual("\(type(of: base))", "\(CallbackStateType<EmptyDataStructure>.self)")
             } else if emptyStates.contains(state.name) || state.name.hasPrefix("__") {
-                XCTAssertEqual("\(type(of: base))", "\(EmptyStateType.self)", "Invalid type of state \(state.name)")
+                XCTAssertEqual(
+                    "\(type(of: base))",
+                    "\(EmptyStateType.self)",
+                    "Invalid type of state \(state.name)"
+                )
             } else {
                 XCTFail("Unhandled state: \(state.name)")
             }
