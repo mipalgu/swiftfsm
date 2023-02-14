@@ -8,14 +8,14 @@ struct FSMMock: LLFSM {
 
     }
 
-    struct Dependencies: DataStructure, EmptyInitialisable {
-
-        @Sync(name: "Me")
-        var Me
-
-        init() {}
-
-    }
+//    struct Dependencies: DataStructure, EmptyInitialisable {
+//
+//        @Sync(name: "Me")
+//        var Me
+//
+//        init() {}
+//
+//    }
 
     struct Environment: EnvironmentSnapshot {
 
