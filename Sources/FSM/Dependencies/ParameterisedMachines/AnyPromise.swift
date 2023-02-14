@@ -1,5 +1,5 @@
-public protocol AnyPromise {
-
-    mutating func update<Scheduler: SchedulerOperations>(from scheduler: Scheduler)
-
-}
+//public protocol AnyPromise {
+//
+//    mutating func update<Scheduler: SchedulerOperations>(from scheduler: Scheduler)
+//
+//}

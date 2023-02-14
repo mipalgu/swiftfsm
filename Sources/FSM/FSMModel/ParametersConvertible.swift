@@ -1,5 +1,5 @@
-public protocol ParametersConvertible: Parameterisable {
-
-    init(parameters: Parameters)
-
-}
+//public protocol ParametersConvertible: Parameterisable {
+//
+//    init(parameters: Parameters)
+//
+//}
