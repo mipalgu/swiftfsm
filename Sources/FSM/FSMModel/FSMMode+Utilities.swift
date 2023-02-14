@@ -29,7 +29,7 @@ extension FSMModel {
     public typealias State = StateProperty<StateType, Self>
 
     /// A dependency to another machine that this machine may control.
-    public typealias SubMachine = SubMachineProperty
+//    public typealias SubMachine = SubMachineProperty
 
     /// A dependency to a parameterised machine that executes synchronously.
     public typealias Sync<Result: DataStructure> = SyncProperty<Result>
