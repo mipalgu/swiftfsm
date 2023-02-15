@@ -6,7 +6,8 @@ public struct Dependency: DataStructure {
 
     /// The dependency that relates `fsm` to a second Finite State Machine.
     ///
-    /// This dependency specifies both the type of dependency (see `FSMDependency` for all available categories).
+    /// This dependency specifies both the type of dependency (see
+    /// `FSMDependency` for all available categories).
     ///
     /// - SeeAlso: `FSMDependency`.
     public let dependency: FSMDependency
