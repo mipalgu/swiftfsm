@@ -59,7 +59,7 @@
 #if os(macOS)
 import Darwin
 #else
-import GLibc
+import Glibc
 #endif
 
 public struct TargetTriple: Equatable, Hashable {

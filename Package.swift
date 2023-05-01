@@ -1,9 +1,9 @@
-// swift-tools-version:5.2
+// swift-tools-version:5.7
 
 import PackageDescription
 
 let normalDependencies: [Package.Dependency] = [
-    .package(name: "swift-argument-parser", url: "https://github.com/apple/swift-argument-parser", .upToNextMinor(from: "0.3.0"))
+    .package(url: "https://github.com/apple/swift-argument-parser", .upToNextMinor(from: "0.3.0"))
 ]
 
 func convert(_ arr: [String]) -> [Target.Dependency] {
@@ -12,10 +12,11 @@ func convert(_ arr: [String]) -> [Target.Dependency] {
 
 let foundationDeps: [Target.Dependency] = [.byName(name: "Machines"), .product(name: "IO", package: "swift_helpers")]
 let deps = [
-    .package(name: "FSM", url: "https://github.com/mipalgu/FSM", from: "1.0.0"),
-    .package(name: "Machines", url: "https://github.com/mipalgu/Machines", from: "1.0.0"),
-    .package(name: "swift_helpers", url: "https://github.com/mipalgu/swift_helpers", from: "1.0.0"),
-    .package(name: "SQLite.swift", url: "https://github.com/stephencelis/SQLite.swift.git", from: "0.13.3")
+    .package(url: "https://github.com/mipalgu/FSM", from: "1.0.0"),
+    .package(url: "https://github.com/mipalgu/Machines", from: "4.0.0"),
+    .package(url: "https://github.com/mipalgu/swift_helpers", from: "2.0.0"),
+    .package(url: "https://github.com/stephencelis/SQLite.swift.git", from: "0.13.3"),
+    .package(url: "https://github.com/mipalgu/KripkeStructures", from: "1.0.0")
 ] + normalDependencies
 
 let package = Package(
@@ -87,9 +88,7 @@ let package = Package(
         .target(name: "MachineLoading", dependencies: convert(["Libraries", "Gateways", "swiftfsm_helpers", "MachineCompiling", "FSM"]) + foundationDeps),
         .target(name: "MachineCompiling", dependencies: ["FSM"] + foundationDeps),
         .target(name: "Scheduling", dependencies: ["MachineStructure", "MachineLoading", "Timers", "Gateways", "FSM"]),
-        .target(name: "KripkeStructure", dependencies: ["swift_helpers", "FSM"]),
-        .target(name: "KripkeStructureViews", dependencies: ["KripkeStructure", "FSM", .product(name: "IO", package: "swift_helpers"), .product(name: "SQLite", package: "SQLite.swift")]),
-        .target(name: "Verification", dependencies: ["MachineStructure", "Scheduling", "Timers", "Gateways", "FSM", "KripkeStructure", "KripkeStructureViews", .product(name: "Hashing", package: "swift_helpers"), .product(name: "SQLite", package: "SQLite.swift")]),
+        .target(name: "Verification", dependencies: ["MachineStructure", "Scheduling", "Timers", "Gateways", "FSM", .product(name: "KripkeStructures", package: "KripkeStructures"), .product(name: "KripkeStructureViews", package: "KripkeStructures"), .product(name: "Hashing", package: "swift_helpers"), .product(name: "SQLite", package: "SQLite.swift")]),
         .target(name: "Parsing", dependencies: ["Scheduling", "Timers", "Verification", "MachineCompiling", "FSM"]),
         .target(name: "CFSMWrappers", dependencies: ["Libraries", "Scheduling", "Timers", "FSM", "CLReflect"]),
         .target(
@@ -113,7 +112,7 @@ let package = Package(
                 "Machines"
             ]
         ),
-        .target(
+        .executableTarget(
             name: "swiftfsm_add",
             dependencies: [
                 "swiftfsm_binaries",
@@ -121,7 +120,7 @@ let package = Package(
                 .product(name: "ArgumentParser", package: "swift-argument-parser")
             ]
         ),
-        .target(
+        .executableTarget(
             name: "swiftfsm_build",
             dependencies: [
                 "swiftfsm_binaries",
@@ -129,7 +128,7 @@ let package = Package(
                 .product(name: "ArgumentParser", package: "swift-argument-parser")
             ]
         ),
-        .target(
+        .executableTarget(
             name: "swiftfsm_clean",
             dependencies: [
                 "swiftfsm_binaries",
@@ -140,7 +139,7 @@ let package = Package(
                 .product(name: "ArgumentParser", package: "swift-argument-parser")
             ]
         ),
-        .target(
+        .executableTarget(
             name: "swiftfsm_init",
             dependencies: [
                 "swiftfsm_binaries",
@@ -151,7 +150,7 @@ let package = Package(
                 .product(name: "ArgumentParser", package: "swift-argument-parser")
             ]
         ),
-        .target(
+        .executableTarget(
             name: "swiftfsm_remove",
             dependencies: [
                 "swiftfsm_binaries",
@@ -162,7 +161,7 @@ let package = Package(
                 .product(name: "ArgumentParser", package: "swift-argument-parser")
             ]
         ),
-        .target(
+        .executableTarget(
             name: "swiftfsm_run",
             dependencies: [
                 "swiftfsm_binaries",
@@ -173,7 +172,7 @@ let package = Package(
                 .product(name: "ArgumentParser", package: "swift-argument-parser")
             ]
         ),
-        .target(
+        .executableTarget(
             name: "swiftfsm_show",
             dependencies: [
                 "swiftfsm_binaries",
@@ -184,7 +183,7 @@ let package = Package(
                 .product(name: "ArgumentParser", package: "swift-argument-parser")
             ]
         ),
-        .target(
+        .executableTarget(
             name: "swiftfsm_update",
             dependencies: [
                 "swiftfsm_binaries",
@@ -195,7 +194,7 @@ let package = Package(
                 .product(name: "ArgumentParser", package: "swift-argument-parser")
             ]
         ),
-        .target(
+        .executableTarget(
             name: "swiftfsm_verify",
             dependencies: [
                 "swiftfsm_binaries",
@@ -206,7 +205,7 @@ let package = Package(
                 .product(name: "ArgumentParser", package: "swift-argument-parser")
             ]
         ),
-        .target(
+        .executableTarget(
             name: "swiftfsm_bin",
             dependencies: [
                 .product(name: "FSM", package: "FSM"),
@@ -218,15 +217,14 @@ let package = Package(
             ]
         ),
         .target(name: "CTests", dependencies: []),
-        .testTarget(name: "KripkeStructureTests", dependencies: ["FSM", .target(name: "KripkeStructure")]),
         .testTarget(
             name: "VerificationTests",
             dependencies: [
-                .target(name: "KripkeStructure"),
-                .target(name: "KripkeStructureViews"),
                 .target(name: "Verification"),
                 .target(name: "CTests"),
                 .target(name: "swiftfsm_binaries"),
+                .product(name: "KripkeStructures", package: "KripkeStructures"),
+                .product(name: "KripkeStructureViews", package: "KripkeStructures"),
                 .product(name: "swift_helpers", package: "swift_helpers")
             ],
             exclude: ["machines"]

@@ -56,9 +56,11 @@
  *
  */
 
+import Foundation
 import KripkeStructure
-@testable import Verification
 import XCTest
+
+@testable import Verification
 
 final class SQLitePersistentStoreTests: XCTestCase {
 
@@ -68,13 +70,21 @@ final class SQLitePersistentStoreTests: XCTestCase {
 
     var store: SQLiteKripkeStructure! = nil
 
+    var uuid = UUID()
+
     override func setUp() {
         self.continueAfterFailure = false
+        self.uuid = UUID()
         do {
-            self.store = try SQLiteKripkeStructure(identifier: testName)
+            self.store = try SQLiteKripkeStructure(savingInDirectory: "/tmp/\(uuid.uuidString)", identifier: testName)
         } catch {
             XCTFail(error.localizedDescription)
         }
+    }
+
+    override func tearDown() {
+        try? FileManager.default.removeItem(atPath: "/tmp/\(uuid.uuidString)")
+        super.tearDown()
     }
 
     func test_canAddPropertyList() {

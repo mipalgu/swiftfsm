@@ -1,7 +1,6 @@
 import XCTest
 
-@testable import swiftfsmTests
-@testable import VerificationOldTests
 
-XCTMain([
-])
+var tests = [XCTestCaseEntry]()
+
+XCTMain(tests)
