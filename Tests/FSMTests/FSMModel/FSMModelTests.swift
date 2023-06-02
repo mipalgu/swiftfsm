@@ -175,12 +175,12 @@ final class FSMModelTests: XCTestCase {
     func test_dependencies() {
         let deps = mock.dependencies
         XCTAssertTrue(deps.isEmpty, "Mock should not contain any dependencies")
-//        XCTAssertEqual(deps.count, 1)
-//        guard let first = deps.first else {
-//            return
-//        }
-//        let meID = IDRegistrar.id(of: "Me")
-//        XCTAssertEqual(first, .sync(id: meID))
+        //        XCTAssertEqual(deps.count, 1)
+        //        guard let first = deps.first else {
+        //            return
+        //        }
+        //        let meID = IDRegistrar.id(of: "Me")
+        //        XCTAssertEqual(first, .sync(id: meID))
     }
 
     func test_dependenciesDoesNotContainDuplicates() {

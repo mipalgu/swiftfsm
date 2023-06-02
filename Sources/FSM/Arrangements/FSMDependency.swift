@@ -4,13 +4,13 @@ public enum FSMDependency: DataStructure {
 
     /// The target Finite State Machine may be called asynchronously by the
     /// source Finite State Machine.
-    /// 
+    ///
     /// - Parameter id: The id of the target Finite State Machine.
     case async(id: Int)
 
     /// The target Finite State Machine must be called synchronously by the
     /// source Finite State Machine.
-    /// 
+    ///
     /// - Parameter id: The id of the target Finite State Machine.
     case sync(id: Int)
 

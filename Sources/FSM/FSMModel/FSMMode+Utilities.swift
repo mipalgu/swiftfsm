@@ -3,7 +3,7 @@
 extension FSMModel {
 
     /// A dependency to a parameterised machine that executes asynchronously.
-//    public typealias Async<Result: DataStructure> = ASyncProperty<Result>
+    //    public typealias Async<Result: DataStructure> = ASyncProperty<Result>
 
     /// A dependency to a write-only environment variable.
     public typealias Actuator<Handler: ActuatorHandler> = ActuatorProperty<Environment, Handler>
@@ -20,7 +20,7 @@ extension FSMModel {
 
     /// A dependency to a parameterised machine that executes asynchronously but
     /// is also capable of deliverying results before it completes executing.
-//    public typealias Partial<Result: DataStructure, Partial: DataStructure> = PartialProperty<Result, Partial>
+    //    public typealias Partial<Result: DataStructure, Partial: DataStructure> = PartialProperty<Result, Partial>
 
     /// A dependency to a read-only environment variable.
     public typealias Sensor<Handler: SensorHandler> = SensorProperty<Environment, Handler>
@@ -29,10 +29,10 @@ extension FSMModel {
     public typealias State = StateProperty<StateType, Self>
 
     /// A dependency to another machine that this machine may control.
-//    public typealias SubMachine = SubMachineProperty
+    //    public typealias SubMachine = SubMachineProperty
 
     /// A dependency to a parameterised machine that executes synchronously.
-//    public typealias Sync<Result: DataStructure> = SyncProperty<Result>
+    //    public typealias Sync<Result: DataStructure> = SyncProperty<Result>
 
     // swiftlint:disable identifier_name
 

@@ -3,7 +3,7 @@ import XCTest
 @testable import FSM
 
 final class DependencyTests: XCTestCase {
-    
+
     func testInit() {
         let fsm = Int.random(in: 0..<Int.max)
         let dep = FSMDependency.submachine(id: 5)
@@ -11,7 +11,7 @@ final class DependencyTests: XCTestCase {
         XCTAssertEqual(dependency.fsm, fsm)
         XCTAssertEqual(dependency.dependency, dep)
     }
-    
+
     func testEquality() {
         let fsm1 = 123
         let fsm2 = 456
@@ -29,7 +29,7 @@ final class DependencyTests: XCTestCase {
         XCTAssertNotEqual(dependency1, dependency4)
         XCTAssertNotEqual(dependency4, dependency1)
     }
-    
+
     func testHashable() {
         let fsm1 = 123
         let fsm2 = 456
@@ -46,7 +46,7 @@ final class DependencyTests: XCTestCase {
         XCTAssertFalse(collection.contains(dependency3), "Collection should not contain dependency3")
         XCTAssertFalse(collection.contains(dependency4), "Collection should not contain dependency4")
     }
-    
+
     func testCodable() throws {
         let dependency = Dependency(to: 123, satisfying: .submachine(id: 3))
         let encoder = JSONEncoder()
@@ -54,5 +54,5 @@ final class DependencyTests: XCTestCase {
         let result = try decoder.decode(Dependency.self, from: try encoder.encode(dependency))
         XCTAssertEqual(dependency, result)
     }
-    
+
 }

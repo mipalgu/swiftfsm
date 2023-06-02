@@ -31,7 +31,7 @@ public struct GroupInformation: DataStructure {
         self.slots = slots
         self.duration = duration
     }
-    
+
     /// Create a new GroupInformation, calculating the value of `duration`.
     ///
     /// If the slots contain start and end times, then this initialiser calculates the value of `duration` to be the gretest end time of all provided

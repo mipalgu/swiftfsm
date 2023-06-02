@@ -4,7 +4,7 @@
 public struct FSMProperty<Arrangement: ArrangementProtocol> {
 
     /// The metadata associated with the finite state machine.
-    /// 
+    ///
     /// The metadata of a finite state machine contains information such as the
     /// finite state machines name, identifer, and the dependencies that the
     /// finite state machine has to other finite state machines.
@@ -15,10 +15,10 @@ public struct FSMProperty<Arrangement: ArrangementProtocol> {
     public let wrappedValue: any FSMModel
 
     /// Create a new finite state machine property.
-    /// 
+    ///
     /// This initialiser automatically computes the metadata of the finite state
     /// machine.
-    /// 
+    ///
     /// - Parameter wrappedValue: The model of the finite state machine.
     public init<FSM: FSMModel>(wrappedValue: FSM) {
         self.projectedValue = FSMInformation(fsm: wrappedValue)

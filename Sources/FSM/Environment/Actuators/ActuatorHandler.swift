@@ -6,7 +6,7 @@ public protocol ActuatorHandler: EnvironmentHandler where Value: ActuatorValue {
     var initialValue: Value { get }
 
     /// Save a value to the environment.
-    /// 
+    ///
     /// - Parameter value: The value to save.
     func saveSnapshot(value: Value)
 

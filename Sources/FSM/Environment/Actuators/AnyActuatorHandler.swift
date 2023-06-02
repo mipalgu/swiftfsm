@@ -36,9 +36,9 @@ public struct AnyActuatorHandler<Environment: EnvironmentSnapshot> {
     }
 
     /// Create a type-erased actuator handler.
-    /// 
+    ///
     /// - Parameter base: The base actuator handler.
-    /// 
+    ///
     /// - Parameter keyPath: The key path that associates this actuator with
     /// a value within an environment snapshot.
     public init<Base: ActuatorHandler>(
@@ -53,16 +53,16 @@ public struct AnyActuatorHandler<Environment: EnvironmentSnapshot> {
     }
 
     /// Save a value to the environment.
-    /// 
+    ///
     /// - Parameter value: The value to save.
     public func saveSnapshot(value: Sendable) {
         _saveSnapshot(value)
     }
 
     /// Update an environment snapshot with a value.
-    /// 
+    ///
     /// - Parameter environment: The environment snapshot to update.
-    /// 
+    ///
     /// - Parameter value: The value to update the environment snapshot with.
     public func update(environment: inout Environment, with value: Sendable) {
         _updateEnvironment(&environment, value)

@@ -1,16 +1,16 @@
 /// An arrangement that is a collection of `Machine`s.
-/// 
+///
 /// An arrangement defines a collection of finite state machines, modelled as
 /// `Machine`s, that are to be executed within a schedule. By conforming to this
 /// protocol, types must define, not only the finite state machines that
 /// comprise this arrangement, but must also define the dependencies between
 /// finite state machines.
-/// 
+///
 /// One generally conforms to `ArrangementModel` instead of this protocol, as
 /// `ArrangementModel` allows one to define finite state machines as separate
 /// properties of the arrangement, and automatically computes the value of
 /// `fsms`.
-/// 
+///
 /// - SeeAlso: `ScheduleProtocol`.
 /// - SeeAlso: `ArrangementModel`.
 public protocol ArrangementProtocol {
