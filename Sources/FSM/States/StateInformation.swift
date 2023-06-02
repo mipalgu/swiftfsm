@@ -4,12 +4,7 @@ public struct StateInformation: Hashable, Codable, Sendable {
 
     public var name: String
 
-    public init(name: String) {
-        let id = IDRegistrar.id(of: name)
-        self.init(id: id, name: name)
-    }
-
-    init(id: Int, name: String) {
+    public init(id: Int, name: String) {
         self.id = id
         self.name = name
     }

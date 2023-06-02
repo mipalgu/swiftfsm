@@ -6,4 +6,14 @@ public struct FSMHandlers<Environment: EnvironmentSnapshot> {
 
     public var sensors: [PartialKeyPath<Environment>: AnySensorHandler<Environment>]
 
+    public init(
+        actuators: [PartialKeyPath<Environment>: AnyActuatorHandler<Environment>],
+        externalVariables: [PartialKeyPath<Environment>: AnyExternalVariableHandler<Environment>],
+        sensors: [PartialKeyPath<Environment>: AnySensorHandler<Environment>]
+    ) {
+        self.actuators = actuators
+        self.externalVariables = externalVariables
+        self.sensors = sensors
+    }
+
 }

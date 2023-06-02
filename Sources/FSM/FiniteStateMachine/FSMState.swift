@@ -17,4 +17,18 @@ public struct FSMState<
     public let transitions:
         [AnyTransition<AnyStateContext<Context, Environment, Parameters, Result>, StateID>]
 
+    public init(
+        id: StateID,
+        name: String,
+        environmentVariables: Set<PartialKeyPath<Environment>>,
+        stateType: StateType,
+        transitions: [AnyTransition<AnyStateContext<Context, Environment, Parameters, Result>, StateID>]
+    ) {
+        self.id = id
+        self.name = name
+        self.environmentVariables = environmentVariables
+        self.stateType = stateType
+        self.transitions = transitions
+    }
+
 }

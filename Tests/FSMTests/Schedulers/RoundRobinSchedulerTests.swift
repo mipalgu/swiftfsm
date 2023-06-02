@@ -1,3 +1,6 @@
+import InMemoryVariables
+import Mocks
+import Model
 import XCTest
 
 @testable import FSM

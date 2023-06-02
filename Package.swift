@@ -24,8 +24,29 @@ let package = Package(
         .target(
             name: "FSM",
             dependencies: []),
+        .target(
+            name: "InMemoryVariables",
+            dependencies: ["FSM"]),
+        .target(
+            name: "Model",
+            dependencies: ["FSM", "InMemoryVariables"]),
+        .target(
+            name: "LLFSMs",
+            dependencies: ["FSM", "Model"]),
+        .testTarget(
+            name: "Mocks",
+            dependencies: ["FSM", "Model", "LLFSMs"]),
         .testTarget(
             name: "FSMTests",
-            dependencies: ["FSM"]),
+            dependencies: ["FSM", "Mocks"]),
+        .testTarget(
+            name: "ModelTests",
+            dependencies: ["FSM", "InMemoryVariables", "Model", "Mocks"]),
+        .testTarget(
+            name: "LLFSMsTests",
+            dependencies: ["FSM", "Model", "LLFSMs", "Mocks"]),
+        .testTarget(
+            name: "InMemoryVariableTests",
+            dependencies: ["InMemoryVariables"]),
     ]
 )

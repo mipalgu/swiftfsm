@@ -8,7 +8,7 @@ public final class StateContainer<
 
     public let states: [FSMState<StateType, Parameters, Result, Context, Environment>]
 
-    internal init(states: [FSMState<StateType, Parameters, Result, Context, Environment>]) {
+    public init(states: [FSMState<StateType, Parameters, Result, Context, Environment>]) {
         self.states = states
     }
 

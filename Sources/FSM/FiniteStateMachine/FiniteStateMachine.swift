@@ -61,7 +61,7 @@ where
         )
     }
 
-    init(
+    public init(
         stateContainer: States,
         ringlet: Ringlet,
         handlers: Handlers,

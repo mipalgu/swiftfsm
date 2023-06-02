@@ -90,7 +90,7 @@ public final class SchedulerContext<
         data.suspendedState
     }
 
-    init(
+    public init(
         fsmID: Int,
         data: FSMData<RingletsContext, Parameters, Result, FSMsContext, Environment>,
         stateContainer: StateContainer<StateType, Parameters, Result, FSMsContext, Environment>? = nil
