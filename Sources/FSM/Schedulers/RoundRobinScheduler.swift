@@ -48,19 +48,19 @@ public struct RoundRobinScheduler {
         let contextFactory: ((any DataStructure)?) -> AnySchedulerContext
 
         /// Does `context` represent a state where the `executable` is finished?
-        var isFinished: Bool {
+        @inlinable var isFinished: Bool {
             executable.isFinished(context: context)
         }
 
         /// Does `context` represent a state where the `executable` is
         /// suspended?
-        var isSuspended: Bool {
+        @inlinable var isSuspended: Bool {
             executable.isSuspended(context: context)
         }
 
         /// Is this slot in a configuration where, if the slot was the only
         /// slot within the schedule, then the schedule should terminate?
-        var shouldTerminate: Bool {
+        @inlinable var shouldTerminate: Bool {
             isFinished || isSuspended
         }
 
@@ -88,17 +88,20 @@ public struct RoundRobinScheduler {
         }
 
         /// Execute a single ringlet of `executable`.
+        @inlinable
         func next() {
             executable.next(context: context)
         }
 
         /// Take a snapshot of all environment variables and store the snapshot
         /// within `context`.
+        @inlinable
         func takeSnapshot() {
             executable.takeSnapshot(context: context)
         }
 
         /// Save the snasphot within `context` back out to the environment.
+        @inlinable
         func saveSnapshot() {
             executable.saveSnapshot(context: context)
         }
@@ -110,7 +113,7 @@ public struct RoundRobinScheduler {
     private var map: Map
 
     /// Has this scheduler executed the schedule to completion?
-    public private(set) var shouldTerminate: Bool = false
+    public private(set) var shouldTerminate = false
 
     /// Create a new RoundRobinScheduler by inspecting a model of a particular
     /// schedule containing a model of an arrangement, containing models of
