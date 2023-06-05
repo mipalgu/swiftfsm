@@ -11,8 +11,8 @@ let package = Package(
     products: [
         // Products define the executables and libraries a package produces, and make them visible to other packages.
         .library(
-            name: "FSM",
-            targets: ["FSM"]),
+            name: "swiftfsm",
+            targets: ["FSM", "InMemoryVariables", "Model", "LLFSMs"]),
     ],
     dependencies: [
         // Dependencies declare other packages that this package depends on.
