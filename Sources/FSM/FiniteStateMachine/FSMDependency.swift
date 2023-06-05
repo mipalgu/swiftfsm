@@ -1,5 +1,3 @@
-import FSM
-
 /// A dependency that relates a Finite State Machine to another Finite State
 /// Machine.
 public enum FSMDependency: DataStructure {

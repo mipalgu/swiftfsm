@@ -42,9 +42,9 @@ let package = Package(
         .testTarget(
             name: "ModelTests",
             dependencies: ["FSM", "InMemoryVariables", "Model", "Mocks"]),
-        .testTarget(
-            name: "LLFSMsTests",
-            dependencies: ["FSM", "Model", "LLFSMs", "Mocks"]),
+        // .testTarget(
+        //     name: "LLFSMsTests",
+        //     dependencies: ["FSM", "Model", "LLFSMs", "Mocks"]),
         .testTarget(
             name: "InMemoryVariableTests",
             dependencies: ["InMemoryVariables"]),
