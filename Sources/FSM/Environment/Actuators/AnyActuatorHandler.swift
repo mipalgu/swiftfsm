@@ -48,8 +48,8 @@ public struct AnyActuatorHandler<Environment: EnvironmentSnapshot> {
         self._base = { base }
         self._id = { base.id }
         self._initialValue = { base.initialValue as Sendable }
-        self._saveSnapshot = { base.saveSnapshot(value: unsafeBitCast($0, to: Base.Value.self)) }
-        self._updateEnvironment = { $0[keyPath: keyPath] = unsafeBitCast($1, to: Base.Value.self) }
+        self._saveSnapshot = { base.saveSnapshot(value: $0 as! Base.Value) }
+        self._updateEnvironment = { $0[keyPath: keyPath] = $1 as! Base.Value }
     }
 
     /// Save a value to the environment.
