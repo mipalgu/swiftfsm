@@ -122,7 +122,7 @@ where
             to: SchedulerContext<StateType, Ringlet.Context, Context, Environment, Parameters, Result>.self
         )
         context.data.saveSnapshot(
-            environmentVariables: states[context.data.currentState].environmentVariables,
+            environmentVariables: states[context.data.previousState].environmentVariables,
             handlers: handlers
         )
     }
