@@ -3,10 +3,10 @@ import FSM
 public extension AnyTransition {
 
     init<Root>(
-        to target: KeyPath<Root, StateInformation>,
+        to target: @Sendable @escaping @autoclosure () -> KeyPath<Root, StateInformation>,
         canTransition: @Sendable @escaping (Source) -> Bool = { _ in true }
     ) where Target == (Root) -> StateInformation {
-        self.init(to: { $0[keyPath: target] }, canTransition: canTransition)
+        self.init(to: { $0[keyPath: target()] }, canTransition: canTransition)
     }
 
     init<Root>(
