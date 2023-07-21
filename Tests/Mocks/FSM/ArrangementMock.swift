@@ -1,6 +1,6 @@
 import Model
 
-public struct ArrangementMock: ArrangementModel {
+public struct ArrangementMock: Arrangement {
 
     @Machine
     public var pingPong = FSMMock()
