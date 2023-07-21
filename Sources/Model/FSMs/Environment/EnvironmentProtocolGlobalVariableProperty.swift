@@ -1,12 +1,12 @@
 import FSM
 
 @propertyWrapper
-public struct FSMEnvironmentGlobalVariableProperty<Value: GlobalVariableValue>: GlobalVariableValue {
+public struct EnvironmentProtocolGlobalVariableProperty<Value: GlobalVariableValue>: GlobalVariableValue {
 
     // swiftlint:disable:next implicitly_unwrapped_optional
     public var wrappedValue: Value!
 
-    public var projectedValue: FSMEnvironmentGlobalVariableProperty<Value> {
+    public var projectedValue: EnvironmentProtocolGlobalVariableProperty<Value> {
         self
     }
 

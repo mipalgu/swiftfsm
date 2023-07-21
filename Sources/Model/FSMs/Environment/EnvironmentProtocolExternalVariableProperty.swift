@@ -1,12 +1,13 @@
 import FSM
 
 @propertyWrapper
-public struct FSMEnvironmentExternalVariableProperty<Value: ExternalVariableValue>: ExternalVariableValue {
+public struct EnvironmentProtocolExternalVariableProperty
+    <Value: ExternalVariableValue>: ExternalVariableValue {
 
     // swiftlint:disable:next implicitly_unwrapped_optional
     public var wrappedValue: Value!
 
-    public var projectedValue: FSMEnvironmentExternalVariableProperty<Value> {
+    public var projectedValue: EnvironmentProtocolExternalVariableProperty<Value> {
         self
     }
 

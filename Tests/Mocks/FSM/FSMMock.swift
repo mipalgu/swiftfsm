@@ -1,6 +1,7 @@
 import FSM
 import InMemoryVariables
 import LLFSMs
+import Model
 
 public struct FSMMock: LLFSM {
 
@@ -21,13 +22,16 @@ public struct FSMMock: LLFSM {
     //
     //    }
 
-    public struct Environment: EnvironmentSnapshot {
+    public struct Environment: EnvironmentProtocol {
 
+        @Actuator
         public var exitActuator: Bool!
 
+        @ExternalVariable
         public var exitExternalVariable: Bool!
 
-        fileprivate(set) var exitSensor: Bool!
+        @Sensor
+        var exitSensor: Bool!
 
         public init() {}
     }
@@ -39,18 +43,6 @@ public struct FSMMock: LLFSM {
         public init() {}
 
     }
-
-    @Actuator(handler: InMemoryActuator<Bool>(id: "exit", initialValue: false), mapsTo: \.exitActuator)
-    public var exitActuator
-
-    @ExternalVariable(
-        handler: InMemoryExternalVariable<Bool>(id: "exit", initialValue: false),
-        mapsTo: \.exitExternalVariable
-    )
-    public var exitExternalVariable
-
-    @Sensor(handler: InMemorySensor<Bool>(id: "exit", initialValue: false), mapsTo: \.exitSensor)
-    public var exitSensor
 
     @State(
         name: "Ping",

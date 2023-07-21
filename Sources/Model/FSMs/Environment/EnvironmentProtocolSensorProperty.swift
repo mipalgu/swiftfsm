@@ -1,12 +1,12 @@
 import FSM
 
 @propertyWrapper
-public struct FSMEnvironmentActuatorProperty<Value: ActuatorValue>: ActuatorValue {
+public struct EnvironmentProtocolSensorProperty<Value: SensorValue>: SensorValue {
 
     // swiftlint:disable:next implicitly_unwrapped_optional
     public var wrappedValue: Value!
 
-    public var projectedValue: FSMEnvironmentActuatorProperty<Value> {
+    public var projectedValue: EnvironmentProtocolSensorProperty<Value> {
         self
     }
 

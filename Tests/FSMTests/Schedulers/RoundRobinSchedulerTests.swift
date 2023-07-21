@@ -16,7 +16,7 @@ final class RoundRobinSchedulerTests: XCTestCase {
     func testCycleTerminates() {
         let schedule = ScheduleMock()
         var scheduler = RoundRobinScheduler(schedule: schedule, parameters: [:])
-        let exitSensorName = FSMMock().exitSensor.id
+        let exitSensorName = ArrangementMock().exitSensor.id
         let actuator = InMemoryActuator(id: exitSensorName, initialValue: false)
         actuator.saveSnapshot(value: false)
         for i in 0..<60 {

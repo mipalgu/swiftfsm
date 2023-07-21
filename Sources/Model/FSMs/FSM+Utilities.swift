@@ -8,25 +8,9 @@ extension FSM {
     /// A dependency to a parameterised machine that executes asynchronously.
     //    public typealias Async<Result: DataStructure> = ASyncProperty<Result>
 
-    /// A dependency to a write-only environment variable.
-    public typealias Actuator<Handler: ActuatorHandler> = ActuatorProperty<Environment, Handler>
-
-    /// A dependency to an environment variable.
-    public typealias ExternalVariable<Handler: ExternalVariableHandler> = ExternalVariableProperty<
-        Environment, Handler
-    >
-
-    /// A dependency to a variable shared by all fsms within an `Arrangement`.
-    public typealias GlobalVariable<Value: GlobalVariableValue> = GlobalVariableProperty<
-        Environment, InMemoryGlobalVariable<Value>
-    >
-
     /// A dependency to a parameterised machine that executes asynchronously but
     /// is also capable of deliverying results before it completes executing.
     //    public typealias Partial<Result: DataStructure, Partial: DataStructure> = PartialProperty<Result, Partial>
-
-    /// A dependency to a read-only environment variable.
-    public typealias Sensor<Handler: SensorHandler> = SensorProperty<Environment, Handler>
 
     /// A state contained within this machine.
     public typealias State = StateProperty<StateType, Self>
