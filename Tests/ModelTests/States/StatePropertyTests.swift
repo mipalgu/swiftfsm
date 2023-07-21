@@ -8,24 +8,27 @@ private struct TempFSM: LLFSM {
 
     struct Environment: EnvironmentSnapshot {
 
+        @Actuator
         var actuator: Int!
 
+        @ExternalVariable
         var externalVariables: Bool!
 
-        fileprivate var sensor: UInt8!
+        @Sensor
+        var sensor: UInt8!
 
     }
 
     @State(
         name: "Ping",
-        uses: [\.actuator, \.externalVariables, \.sensor],
+        uses: [\.$actuator, \.$externalVariables, \.$sensor],
         transitions: {
             Transition(to: \.$pong) { _ in false }
         }
     )
     var ping = EmptyLLFSMState()
 
-    @State(name: "Pung", uses: [\.actuator])
+    @State(name: "Pung", uses: [\.$actuator])
     var pung = EmptyLLFSMState()
 
     @State(name: "Pang")
@@ -47,9 +50,9 @@ private struct TempFSM: LLFSM {
 
     @State(
         name: "Pong",
-        uses: \.actuator,
-        \.externalVariables,
-        \.sensor,
+        uses: \.$actuator,
+            \.$externalVariables,
+            \.$sensor,
         transitions: {
             Transition(to: "Ping", context: PongContext.self) { $0.executeInternal }
         }
@@ -151,7 +154,11 @@ final class StatePropertyTests: XCTestCase {
     func testInit() {
         let wrappedValue = EmptyState()
         let name = "Ping"
-        let keyPaths: [PartialKeyPath<TempFSM.Environment>] = [\.actuator, \.externalVariables, \.sensor]
+        let keyPaths: [PartialKeyPath<TempFSM.Environment>] = [
+            \.$actuator.wrappedValue,
+            \.$externalVariables.wrappedValue,
+            \.$sensor.wrappedValue
+        ]
         let info = StateInformation(name: name)
         let property = TempFSM().pingProperty
         XCTAssertEqual(wrappedValue, property.wrappedValue.base as? EmptyState)
@@ -177,7 +184,7 @@ final class StatePropertyTests: XCTestCase {
     func testDefaultValuesOfInit() {
         let wrappedValue = EmptyState()
         let name = "Pung"
-        let keyPaths: [PartialKeyPath<TempFSM.Environment>] = [\.actuator]
+        let keyPaths: [PartialKeyPath<TempFSM.Environment>] = [\.$actuator.wrappedValue]
         let info = StateInformation(name: name)
         let property = TempFSM().pungProperty
         XCTAssertEqual(wrappedValue, property.wrappedValue.base as? EmptyState)
@@ -191,7 +198,11 @@ final class StatePropertyTests: XCTestCase {
         let name = "Pong"
         let pingInfo = StateInformation(name: "Ping")
         let pongInfo = StateInformation(name: name)
-        let keyPaths: [PartialKeyPath<TempFSM.Environment>] = [\.actuator, \.externalVariables, \.sensor]
+        let keyPaths: [PartialKeyPath<TempFSM.Environment>] = [
+            \.$actuator.wrappedValue,
+            \.$externalVariables.wrappedValue,
+            \.$sensor.wrappedValue
+        ]
         let property = fsm.pongProperty
         XCTAssertEqual(property.information, pongInfo)
         XCTAssertEqual(property.information.name, name)
@@ -293,7 +304,11 @@ final class StatePropertyTests: XCTestCase {
     }
 
     func testErasedGetters() {
-        let keyPaths: [PartialKeyPath<TempFSM.Environment>] = [\.actuator, \.externalVariables, \.sensor]
+        let keyPaths: [PartialKeyPath<TempFSM.Environment>] = [
+            \.$actuator.wrappedValue,
+            \.$externalVariables.wrappedValue,
+            \.$sensor.wrappedValue
+        ]
         XCTAssertEqual(
             keyPaths,
             pongProperty.erasedEnvironmentVariables as? [PartialKeyPath<TempFSM.Environment>]

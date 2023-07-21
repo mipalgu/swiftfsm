@@ -73,7 +73,12 @@ public struct StateProperty<StateType: TypeErasedState, Root: FSM>: AnyStateProp
     {
         self.projectedValue = StateInformation(name: name)
         self.wrappedValue = wrappedValue.erased
-        self.environmentVariables = environmentVariables
+        let environment = Root.Environment()
+        self.environmentVariables = environmentVariables.map {
+            // swiftlint:disable:next force_cast
+            let environmentVariable = environment[keyPath: $0] as! AnyEnvironmentProtocolVariable
+            return environmentVariable.valuePath($0)
+        }
         self.transitions = transitions()
             .map { transition in
                 AnyTransition(to: transition.target) {

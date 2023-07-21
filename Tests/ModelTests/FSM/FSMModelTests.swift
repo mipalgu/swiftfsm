@@ -42,24 +42,30 @@ final class FSMTests: XCTestCase {
 
     let mock = FSMMock()
 
-    let actuators: [PartialKeyPath<FSMMock.Environment>: AnyActuatorHandler<FSMMock.Environment>] = [
-        \.$exitActuator: ArrangementEnvironmentVariable(
-            wrappedValue: ActuatorHandlerMock(id: "exitActuator", initialValue: false)
-        ).anyActuator(mapsTo: \.$exitActuator)
-    ]
+    let actuators: [PartialKeyPath<FSMMock.Environment>: AnyActuatorHandler<FSMMock.Environment>] = Dictionary(
+        uniqueKeysWithValues: [
+            ArrangementActuator(
+                wrappedValue: ActuatorHandlerMock(id: "exitActuator", initialValue: false)
+            ).anyActuator(mapsTo: \.$exitActuator)
+        ]
+    )
 
     // swiftlint:disable:next line_length
-    let externalVariables: [PartialKeyPath<FSMMock.Environment>: AnyExternalVariableHandler<FSMMock.Environment>] = [
-        \.$exitExternalVariable: ArrangementEnvironmentVariable(
-            wrappedValue: ExternalVariableHandlerMock(id: "exitExternalVariable", value: false)
-        ).anyExternalVariable(mapsTo: \.$exitExternalVariable)
-    ]
+    let externalVariables: [PartialKeyPath<FSMMock.Environment>: AnyExternalVariableHandler<FSMMock.Environment>] = Dictionary(
+        uniqueKeysWithValues: [
+            ArrangementExternalVariable(
+                wrappedValue: ExternalVariableHandlerMock(id: "exitExternalVariable", value: false)
+            ).anyExternalVariable(mapsTo: \.$exitExternalVariable)
+        ]
+    )
 
-    let sensors: [PartialKeyPath<FSMMock.Environment>: AnySensorHandler<FSMMock.Environment>] = [
-        \FSMMock.Environment.$exitSensor: ArrangementEnvironmentVariable(
-            wrappedValue: SensorHandlerMock(id: "exitSensor", value: false)
-        ).anySensor(mapsTo: \FSMMock.Environment.$exitSensor)
-    ]
+    let sensors: [PartialKeyPath<FSMMock.Environment>: AnySensorHandler<FSMMock.Environment>] = Dictionary(
+        uniqueKeysWithValues: [
+            ArrangementSensor(
+                wrappedValue: SensorHandlerMock(id: "exitSensor", value: false)
+            ).anySensor(mapsTo: \FSMMock.Environment.$exitSensor)
+        ]
+    )
 
     func test_extractsNameFromType() {
         XCTAssertEqual(mock.name, "FSMMock")

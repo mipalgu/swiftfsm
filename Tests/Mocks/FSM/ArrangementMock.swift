@@ -12,7 +12,11 @@ public struct ArrangementMock: Arrangement {
     @Sensor
     public var exitSensor = InMemorySensor<Bool>(id: "exit", initialValue: false)
 
-    @Machine
+    @Machine(
+        actuators: (\.$exitActuator, mapsTo: \.$exitActuator),
+        externalVariables: (\.$exitExternalVariable, mapsTo: \.$exitExternalVariable),
+        sensors: (\.$exitSensor, mapsTo: \.$exitSensor)
+    )
     public var pingPong = FSMMock()
 
     public init() {}

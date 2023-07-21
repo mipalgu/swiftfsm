@@ -5,7 +5,14 @@ import FSM
 @propertyWrapper
 public struct FSMProperty<Arrangement: ArrangementProtocol> {
 
-    private let make: () -> (Executable, ((any DataStructure)?) -> AnySchedulerContext)
+    /// Create the finite state machine.
+    ///
+    /// - Parameter: The arrangement containing the finite state machine.
+    ///
+    /// - Returns: A tuple containing the type-erased finite state machine as
+    /// an `Exectuable`, and a function for creating the initial context for the
+    /// finite state machine.
+    public let make: (Arrangement) -> (Executable, ((any DataStructure)?) -> AnySchedulerContext)
 
     /// The metadata associated with the finite state machine.
     ///
@@ -18,9 +25,7 @@ public struct FSMProperty<Arrangement: ArrangementProtocol> {
     /// create the `FiniteStateMachine` that can be executed by a scheduler.
     public let wrappedValue: any FSM
 
-    public var initial: (Executable, ((any DataStructure)?) -> AnySchedulerContext) {
-        make()
-    }
+    // swiftlint:disable line_length
 
     /// Create a new finite state machine property.
     ///
@@ -29,25 +34,34 @@ public struct FSMProperty<Arrangement: ArrangementProtocol> {
     ///
     /// - Parameter wrappedValue: The model of the finite state machine.
     public init<FSM: Model.FSM>(
-        actuators: (AnyArrangementActuator, mapsTo: PartialKeyPath<FSM.Environment>) ...,
-        externalVariables: (AnyArrangementExternalVariable, mapsTo: PartialKeyPath<FSM.Environment>) ...,
-        sensors: (AnyArrangementSensor, mapsTo: PartialKeyPath<FSM.Environment>) ...,
-        wrappedValue: FSM
+        wrappedValue: FSM,
+        actuators: (KeyPath<Arrangement, AnyArrangementActuator>, mapsTo: PartialKeyPath<FSM.Environment>) ...,
+        externalVariables: (KeyPath<Arrangement, AnyArrangementExternalVariable>, mapsTo: PartialKeyPath<FSM.Environment>) ...,
+        sensors: (KeyPath<Arrangement, AnyArrangementSensor>, mapsTo: PartialKeyPath<FSM.Environment>) ...
     ) {
-        let actuators = Dictionary(
-            uniqueKeysWithValues: actuators.lazy.map { ($1, $0.anyActuator(mapsTo: $1)) }
-        )
-        let externalVariables = Dictionary(
-            uniqueKeysWithValues: externalVariables.lazy.map { ($1, $0.anyExternalVariable(mapsTo: $1)) }
-        )
-        let sensors = Dictionary(
-            uniqueKeysWithValues: sensors.lazy.map { ($1, $0.anySensor(mapsTo: $1)) }
-        )
-        self.make = {
-            wrappedValue.initial(actuators: actuators, externalVariables: externalVariables, sensors: sensors)
+        self.make = { arrangement in
+            wrappedValue.initial(
+                actuators: Dictionary(
+                    uniqueKeysWithValues: actuators.lazy.map {
+                        arrangement[keyPath: $0].anyActuator(mapsTo: $1)
+                    }
+                ),
+                externalVariables: Dictionary(
+                    uniqueKeysWithValues: externalVariables.lazy.map {
+                        arrangement[keyPath: $0].anyExternalVariable(mapsTo: $1)
+                    }
+                ),
+                sensors: Dictionary(
+                    uniqueKeysWithValues: sensors.lazy.map {
+                        arrangement[keyPath: $0].anySensor(mapsTo: $1)
+                    }
+                )
+            )
         }
         self.projectedValue = FSMInformation(fsm: wrappedValue)
         self.wrappedValue = wrappedValue
     }
+
+    // swiftlint:enable line_length
 
 }
