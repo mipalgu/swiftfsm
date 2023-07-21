@@ -21,3 +21,46 @@ public struct ArrangementEnvironmentVariable<Handler: EnvironmentHandler> {
     }
 
 }
+
+extension ArrangementEnvironmentVariable: AnyArrangementActuator where Handler: ActuatorHandler {
+
+    public func anyActuator<Environment: EnvironmentSnapshot>(mapsTo keyPath: PartialKeyPath<Environment>)
+        -> AnyActuatorHandler<Environment>
+    {
+        let actualKeyPath = unsafeDowncast(
+            keyPath,
+            to: WritableKeyPath<Environment, EnvironmentProtocolActuatorProperty<Handler.Value>>.self
+        )
+        return AnyActuatorHandler(wrappedValue, mapsTo: actualKeyPath.appending(path: \.wrappedValue))
+    }
+
+}
+
+extension ArrangementEnvironmentVariable: AnyArrangementExternalVariable
+    where Handler: ExternalVariableHandler {
+
+    public func anyExternalVariable<Environment: EnvironmentSnapshot>(
+        mapsTo keyPath: PartialKeyPath<Environment>
+    ) -> AnyExternalVariableHandler<Environment> {
+        let actualKeyPath = unsafeDowncast(
+            keyPath,
+            to: WritableKeyPath<Environment, EnvironmentProtocolExternalVariableProperty<Handler.Value>>.self
+        )
+        return AnyExternalVariableHandler(wrappedValue, mapsTo: actualKeyPath.appending(path: \.wrappedValue))
+    }
+
+}
+
+extension ArrangementEnvironmentVariable: AnyArrangementSensor where Handler: SensorHandler {
+
+    public func anySensor<Environment: EnvironmentSnapshot>(
+        mapsTo keyPath: PartialKeyPath<Environment>
+    ) -> AnySensorHandler<Environment> {
+        let actualKeyPath = unsafeDowncast(
+            keyPath,
+            to: WritableKeyPath<Environment, EnvironmentProtocolSensorProperty<Handler.Value>>.self
+        )
+        return AnySensorHandler(wrappedValue, mapsTo: actualKeyPath.appending(path: \.wrappedValue))
+    }
+
+}

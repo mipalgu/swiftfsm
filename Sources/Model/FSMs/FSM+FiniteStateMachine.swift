@@ -13,6 +13,58 @@ extension FSM {
         }
     }
 
+    /// Fetches all states and metadata associated with each state within this
+    /// model as a dictionary where the key represents the id of the state and
+    /// the value represents a type-erased @State property wrapper value.
+    private var anyStates: [Int: AnyStateProperty] {
+        let mirror = Mirror(reflecting: self)
+        return Dictionary(
+            uniqueKeysWithValues: mirror.children.compactMap {
+                guard let state = $0.value as? AnyStateProperty else {
+                    return nil
+                }
+                return (state.information.id, state)
+            }
+        )
+    }
+
+    /// Fetches all states within this model as a dictionary where the key
+    /// represents the id of the state and the value is the state that contains
+    /// the execution logic.
+    ///
+    /// - Note: The states returned by this property only contain the execution
+    /// logic, but do not contain any data or contexts associated with the
+    /// state.
+    private var states: [Int: StateType] {
+        anyStates.mapValues {
+            guard let state = $0 as? StateProperty<StateType, Self> else {
+                fatalError("Unable to cast state to it's corresponding StateType.")
+            }
+            return state.wrappedValue
+        }
+    }
+
+    /// Fetches all transitions within this model as a dictionary where the key
+    /// represents the id of the source state, and the value represents the
+    /// array of transitions that can be evaluated for that source state.
+    private var transitions:
+        [Int: [AnyTransition<AnyStateContext<Context, Environment, Parameters, Result>, StateID>]]
+    {
+        anyStates.mapValues {
+            guard
+                let transitions = $0.erasedTransitions(for: self)
+                    as? [AnyTransition<AnyStateContext<Context, Environment, Parameters, Result>, StateID>]
+            else {
+                // swiftlint:disable line_length
+                fatalError(
+                    "Unable to cast transition to [AnyTransition<FSMContext<Context, Environment, Parameters, Result>, StateID>]"
+                )
+                // swiftlint:enable line_length
+            }
+            return transitions
+        }
+    }
+
     /// Create the corresponding `FiniteStateMachine` of this model represented
     /// as a type-erased `Executable`, and a factory function that takes a
     /// type-erased data structure that can be cast to `Self.Parameters` and
@@ -23,8 +75,12 @@ extension FSM {
     /// structures returned by this computed property. This is done to optimise
     /// lookup times. However, this means that you should not rely on the
     /// id's as accessed within this model.
-    public var initial: (Executable, ((any DataStructure)?) -> AnySchedulerContext) {
-        let fsm = self.fsm
+    public func initial(
+        actuators: [PartialKeyPath<Environment>: AnyActuatorHandler<Environment>],
+        externalVariables: [PartialKeyPath<Environment>: AnyExternalVariableHandler<Environment>],
+        sensors: [PartialKeyPath<Environment>: AnySensorHandler<Environment>]
+    ) -> (Executable, ((any DataStructure)?) -> AnySchedulerContext) {
+        let fsm = self.fsm(actuators: actuators, externalVariables: externalVariables, sensors: sensors)
         let factory: ((any DataStructure)?) -> AnySchedulerContext = {
             let data: FSMData<Ringlet.Context, Parameters, Result, Context, Environment>
             if let params = $0 as? Parameters {
@@ -53,16 +109,11 @@ extension FSM {
     /// utilising a static array. This creates optimal O(1) lookup times but
     /// means that you should not rely on the existing id's of these properties
     /// as accessed from this model.
-    private var fsm:
-        FiniteStateMachine<
-            StateType,
-            Ringlet,
-            Parameters,
-            Result,
-            Context,
-            Environment
-        >
-    {
+    private func fsm(
+        actuators: [PartialKeyPath<Environment> : AnyActuatorHandler<Environment>],
+        externalVariables: [PartialKeyPath<Environment>: AnyExternalVariableHandler<Environment>],
+        sensors: [PartialKeyPath<Environment>: AnySensorHandler<Environment>]
+    ) -> FiniteStateMachine<StateType, Ringlet, Parameters, Result, Context, Environment> {
         var newIds: [StateID: Int] = [:]
         var latestID = 0
         /// Calculate a new id for a given state with an old ID.
@@ -165,9 +216,9 @@ extension FSM {
         }
         // Setup arrays of environment variables with new identifiers that represent the indexes within these
         // arrays.
-        var actuatorsArr = Array(self.actuators)
-        var externalVariablesArr = Array(self.externalVariables)
-        var sensorsArr = Array(self.sensors)
+        var actuatorsArr = Array(actuators)
+        var externalVariablesArr = Array(externalVariables)
+        var sensorsArr = Array(sensors)
         for index in actuatorsArr.indices {
             actuatorsArr[index].value.index = index
         }
@@ -192,127 +243,6 @@ extension FSM {
             initialState: initialState,
             initialPreviousState: previousState,
             suspendState: suspendState
-        )
-    }
-
-    /// Fetches all states and metadata associated with each state within this
-    /// model as a dictionary where the key represents the id of the state and
-    /// the value represents a type-erased @State property wrapper value.
-    private var anyStates: [Int: AnyStateProperty] {
-        let mirror = Mirror(reflecting: self)
-        return Dictionary(
-            uniqueKeysWithValues: mirror.children.compactMap {
-                guard let state = $0.value as? AnyStateProperty else {
-                    return nil
-                }
-                return (state.information.id, state)
-            }
-        )
-    }
-
-    /// Fetches all states within this model as a dictionary where the key
-    /// represents the id of the state and the value is the state that contains
-    /// the execution logic.
-    ///
-    /// - Note: The states returned by this property only contain the execution
-    /// logic, but do not contain any data or contexts associated with the
-    /// state.
-    private var states: [Int: StateType] {
-        anyStates.mapValues {
-            guard let state = $0 as? StateProperty<StateType, Self> else {
-                fatalError("Unable to cast state to it's corresponding StateType.")
-            }
-            return state.wrappedValue
-        }
-    }
-
-    /// Fetches all transitions within this model as a dictionary where the key
-    /// represents the id of the source state, and the value represents the
-    /// array of transitions that can be evaluated for that source state.
-    private var transitions:
-        [Int: [AnyTransition<AnyStateContext<Context, Environment, Parameters, Result>, StateID>]]
-    {
-        anyStates.mapValues {
-            guard
-                let transitions = $0.erasedTransitions(for: self)
-                    as? [AnyTransition<AnyStateContext<Context, Environment, Parameters, Result>, StateID>]
-            else {
-                // swiftlint:disable line_length
-                fatalError(
-                    "Unable to cast transition to [AnyTransition<FSMContext<Context, Environment, Parameters, Result>, StateID>]"
-                )
-                // swiftlint:enable line_length
-            }
-            return transitions
-        }
-    }
-
-    /// Fetches all actuator variables from this model as a dictionary where the
-    /// key represents a keypath to the variable within the environment snapshot
-    /// that maps to this actuator variable, and the value represents the
-    /// handler that saves the value back to the environment.
-    private var actuators: [PartialKeyPath<Environment>: AnyActuatorHandler<Environment>] {
-        let mirror = Mirror(reflecting: self)
-        return Dictionary(
-            uniqueKeysWithValues: mirror.children.compactMap {
-                guard let actuator = $0.value as? AnyActuatorProperty else {
-                    return nil
-                }
-                guard let mapPath = actuator.erasedMapPath as? PartialKeyPath<Environment> else {
-                    fatalError("Unable to cast erasedMapPath to PartialKeyPath<Environment>.")
-                }
-                guard let typeErased = actuator.typeErased as? AnyActuatorHandler<Environment> else {
-                    fatalError("Unable to create AnyActuatorHandler<Environment> from AnyActuatorProperty.")
-                }
-                return (mapPath, typeErased)
-            }
-        )
-    }
-
-    /// Fetches all external variables from this model as a dictionary where the
-    /// key represents a keypath to the variable within the environment snapshot
-    /// that maps to this external variable, and the value represents the
-    /// handler that fetches and saves the value back to the environment.
-    private var externalVariables: [PartialKeyPath<Environment>: AnyExternalVariableHandler<Environment>] {
-        let mirror = Mirror(reflecting: self)
-        return Dictionary(
-            uniqueKeysWithValues: mirror.children.compactMap {
-                guard let externalVariable = $0.value as? AnyExternalVariableProperty else {
-                    return nil
-                }
-                guard let mapPath = externalVariable.erasedMapPath as? PartialKeyPath<Environment> else {
-                    fatalError("Unable to cast erasedMapPath to PartialKeyPath<Environment>.")
-                }
-                guard let typeErased = externalVariable.typeErased as? AnyExternalVariableHandler<Environment>
-                else {
-                    fatalError(
-                        "Unable to create AnyExternalVariableHandler<Environment> from AnyExternalVariableProperty."
-                    )
-                }
-                return (mapPath, typeErased)
-            }
-        )
-    }
-
-    /// Fetches all sensor variables from this model as a dictionary where the
-    /// key represents a keypath to the variable within the environment snapshot
-    /// that maps to this sensor variable, and the value represents the handler
-    /// that fetches the value from the environment.
-    private var sensors: [PartialKeyPath<Environment>: AnySensorHandler<Environment>] {
-        let mirror = Mirror(reflecting: self)
-        return Dictionary(
-            uniqueKeysWithValues: mirror.children.compactMap {
-                guard let actuator = $0.value as? AnySensorProperty else {
-                    return nil
-                }
-                guard let mapPath = actuator.erasedMapPath as? PartialKeyPath<Environment> else {
-                    fatalError("Unable to cast erasedMapPath to PartialKeyPath<Environment>.")
-                }
-                guard let typeErased = actuator.typeErased as? AnySensorHandler<Environment> else {
-                    fatalError("Unable to create AnySensorHandler<Environment> from AnySensorProperty.")
-                }
-                return (mapPath, typeErased)
-            }
         )
     }
 
