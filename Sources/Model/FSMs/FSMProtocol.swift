@@ -2,6 +2,8 @@ import FSM
 
 public protocol FSMProtocol: ContextUser, EnvironmentUser {
 
+    associatedtype Environment: FSMEnvironment = EmptyDataStructure
+
     associatedtype Parameters: DataStructure = EmptyDataStructure
 
     associatedtype Result: DataStructure = EmptyDataStructure
