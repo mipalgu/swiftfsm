@@ -1,8 +1,8 @@
+import FSM
 import Mocks
-import Model
 import XCTest
 
-@testable import FSM
+@testable import Model
 
 private struct SimpleArrangement: Arrangement {
 

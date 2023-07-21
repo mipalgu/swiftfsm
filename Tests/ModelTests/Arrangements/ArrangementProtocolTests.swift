@@ -1,10 +1,23 @@
+import FSM
+import InMemoryVariables
 import Mocks
-import Model
 import XCTest
 
-@testable import FSM
+@testable import Model
 
 private struct SimpleArrangement: Arrangement {
+
+    @Actuator
+    var countActuator = ActuatorHandlerMock(id: "countActuator", initialValue: 1)
+
+    @ExternalVariable
+    var countExternalVariable = ExternalVariableHandlerMock(id: "countExternalVariable", value: 2)
+
+    @GlobalVariable
+    var countGlobalVariable = InMemoryGlobalVariable(id: "countGlobalVariable", initialValue: 3)
+
+    @Sensor
+    var countSensor = SensorHandlerMock(id: "countSensor", value: 4)
 
     @Machine
     var mock = FSMMock()
