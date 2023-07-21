@@ -1,5 +1,6 @@
 import LLFSMs
 import Mocks
+import Model
 import XCTest
 
 @testable import FSM
@@ -41,19 +42,46 @@ final class FSMTests: XCTestCase {
 
     let mock = FSMMock()
 
+    let actuators: [PartialKeyPath<FSMMock.Environment>: AnyActuatorHandler<FSMMock.Environment>] = [
+        \.$exitActuator: ArrangementEnvironmentVariable(
+            wrappedValue: ActuatorHandlerMock(id: "exitActuator", initialValue: false)
+        ).anyActuator(mapsTo: \.$exitActuator)
+    ]
+
+    // swiftlint:disable:next line_length
+    let externalVariables: [PartialKeyPath<FSMMock.Environment>: AnyExternalVariableHandler<FSMMock.Environment>] = [
+        \.$exitExternalVariable: ArrangementEnvironmentVariable(
+            wrappedValue: ExternalVariableHandlerMock(id: "exitExternalVariable", value: false)
+        ).anyExternalVariable(mapsTo: \.$exitExternalVariable)
+    ]
+
+    let sensors: [PartialKeyPath<FSMMock.Environment>: AnySensorHandler<FSMMock.Environment>] = [
+        \FSMMock.Environment.$exitSensor: ArrangementEnvironmentVariable(
+            wrappedValue: SensorHandlerMock(id: "exitSensor", value: false)
+        ).anySensor(mapsTo: \FSMMock.Environment.$exitSensor)
+    ]
+
     func test_extractsNameFromType() {
         XCTAssertEqual(mock.name, "FSMMock")
     }
 
     func test_initialReturnsAFiniteStateMachine() {
-        let (fsm, _) = mock.initial
+        let (fsm, _) = mock.initial(
+            actuators: actuators,
+            externalVariables: externalVariables,
+            sensors: sensors
+        )
         XCTAssertEqual("\(type(of: fsm))", "\(FSMType.self)")
         let casted = fsm as? FSMType
         XCTAssertNotNil(casted)
     }
 
     func test_initialReturnsAFiniteStateMachineWithAllStates() {
-        let (fsm, _) = mock.initial
+        let (fsm, _) = mock.initial(
+            actuators: actuators,
+            externalVariables: externalVariables,
+            sensors: sensors
+        )
         guard let casted = fsm as? FSMType else {
             XCTFail("Unable to cast fsm to \(FSMType.self)")
             return
@@ -72,7 +100,11 @@ final class FSMTests: XCTestCase {
     }
 
     func test_initialReturnsAnFSMWithStateContexts() {
-        let (fsm, _) = mock.initial
+        let (fsm, _) = mock.initial(
+            actuators: actuators,
+            externalVariables: externalVariables,
+            sensors: sensors
+        )
         guard let casted = fsm as? FSMType else {
             XCTFail("Unable to cast fsm to \(FSMType.self)")
             return
@@ -103,19 +135,31 @@ final class FSMTests: XCTestCase {
     }
 
     func test_initialCreatesFactoryThatHandlesNilParameters() {
-        let (_, factory) = mock.initial
+        let (_, factory) = mock.initial(
+            actuators: actuators,
+            externalVariables: externalVariables,
+            sensors: sensors
+        )
         let data = factory(nil)
         XCTAssertEqual("\(type(of: data))", "\(SchedulerContextType.self)")
     }
 
     func test_initialCreatesFactoryThatHandlesParameters() {
-        let (_, factory) = mock.initial
+        let (_, factory) = mock.initial(
+            actuators: actuators,
+            externalVariables: externalVariables,
+            sensors: sensors
+        )
         let data = factory(FSMMock.Parameters())
         XCTAssertEqual("\(type(of: data))", "\(SchedulerContextType.self)")
     }
 
     func test_initialCreatesPseudoInitialState() {
-        let (fsm, factory) = mock.initial
+        let (fsm, factory) = mock.initial(
+            actuators: actuators,
+            externalVariables: externalVariables,
+            sensors: sensors
+        )
         guard let fsm = fsm as? FSMType else {
             XCTFail("Unable to cast fsm to \(FSMType.self)")
             return
@@ -135,7 +179,11 @@ final class FSMTests: XCTestCase {
     }
 
     func test_initialCreatesPseudoPreviousState() {
-        let (fsm, factory) = mock.initial
+        let (fsm, factory) = mock.initial(
+            actuators: actuators,
+            externalVariables: externalVariables,
+            sensors: sensors
+        )
         guard let fsm = fsm as? FSMType else {
             XCTFail("Unable to cast fsm to \(FSMType.self)")
             return
@@ -154,7 +202,11 @@ final class FSMTests: XCTestCase {
     }
 
     func test_initialCreatesPseudoSuspendState() {
-        let (fsm, factory) = mock.initial
+        let (fsm, factory) = mock.initial(
+            actuators: actuators,
+            externalVariables: externalVariables,
+            sensors: sensors
+        )
         guard let fsm = fsm as? FSMType else {
             XCTFail("Unable to cast fsm to \(FSMType.self)")
             return

@@ -7,7 +7,11 @@ public struct EnvironmentProtocolActuatorProperty<Value: ActuatorValue>: Actuato
     public var wrappedValue: Value!
 
     public var projectedValue: EnvironmentProtocolActuatorProperty<Value> {
-        self
+        get {
+            self
+        } set {
+            self = newValue
+        }
     }
 
     public init(wrappedValue: Value? = nil) {

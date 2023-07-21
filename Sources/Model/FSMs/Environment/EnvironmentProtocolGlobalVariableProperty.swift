@@ -7,7 +7,11 @@ public struct EnvironmentProtocolGlobalVariableProperty<Value: GlobalVariableVal
     public var wrappedValue: Value!
 
     public var projectedValue: EnvironmentProtocolGlobalVariableProperty<Value> {
-        self
+        get {
+            self
+        } set {
+            self = newValue
+        }
     }
 
     public init(wrappedValue: Value? = nil) {

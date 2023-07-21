@@ -7,7 +7,11 @@ public struct EnvironmentProtocolSensorProperty<Value: SensorValue>: SensorValue
     public var wrappedValue: Value!
 
     public var projectedValue: EnvironmentProtocolSensorProperty<Value> {
-        self
+        get {
+            self
+        } set {
+            self = newValue
+        }
     }
 
     public init(wrappedValue: Value? = nil) {

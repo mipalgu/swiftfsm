@@ -8,7 +8,11 @@ public struct EnvironmentProtocolExternalVariableProperty
     public var wrappedValue: Value!
 
     public var projectedValue: EnvironmentProtocolExternalVariableProperty<Value> {
-        self
+        get {
+            self
+        } set {
+            self = newValue
+        }
     }
 
     public init(wrappedValue: Value? = nil) {
