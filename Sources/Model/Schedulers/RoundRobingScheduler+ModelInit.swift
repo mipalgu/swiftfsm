@@ -24,7 +24,7 @@ public extension RoundRobinScheduler {
                 name: oldInfo.name,
                 dependencies: oldInfo.dependencies
             )
-            let (executable, contextFactory) = fsm.wrappedValue.initial
+            let (executable, contextFactory) = fsm.initial
             let initialData = contextFactory(parameters[newInfo.name])
             let slot = SlotData(
                 info: newInfo,
