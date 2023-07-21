@@ -19,7 +19,7 @@ public struct AnyGlobalVariableHandler<Environment: EnvironmentSnapshot> {
     public var value: Sendable {
         get {
             _takeSnapshot()
-        } set {
+        } nonmutating set {
             _saveSnapshot(newValue)
         }
     }

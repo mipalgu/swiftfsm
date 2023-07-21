@@ -78,9 +78,15 @@ extension FSM {
     public func initial(
         actuators: [PartialKeyPath<Environment>: AnyActuatorHandler<Environment>],
         externalVariables: [PartialKeyPath<Environment>: AnyExternalVariableHandler<Environment>],
+        globalVariables: [PartialKeyPath<Environment>: AnyGlobalVariableHandler<Environment>],
         sensors: [PartialKeyPath<Environment>: AnySensorHandler<Environment>]
     ) -> (Executable, ((any DataStructure)?) -> AnySchedulerContext) {
-        let fsm = self.fsm(actuators: actuators, externalVariables: externalVariables, sensors: sensors)
+        let fsm = self.fsm(
+            actuators: actuators,
+            externalVariables: externalVariables,
+            globalVariables: globalVariables,
+            sensors: sensors
+        )
         let factory: ((any DataStructure)?) -> AnySchedulerContext = {
             let data: FSMData<Ringlet.Context, Parameters, Result, Context, Environment>
             if let params = $0 as? Parameters {
@@ -110,8 +116,9 @@ extension FSM {
     /// means that you should not rely on the existing id's of these properties
     /// as accessed from this model.
     private func fsm(
-        actuators: [PartialKeyPath<Environment> : AnyActuatorHandler<Environment>],
+        actuators: [PartialKeyPath<Environment>: AnyActuatorHandler<Environment>],
         externalVariables: [PartialKeyPath<Environment>: AnyExternalVariableHandler<Environment>],
+        globalVariables: [PartialKeyPath<Environment>: AnyGlobalVariableHandler<Environment>],
         sensors: [PartialKeyPath<Environment>: AnySensorHandler<Environment>]
     ) -> FiniteStateMachine<StateType, Ringlet, Parameters, Result, Context, Environment> {
         var newIds: [StateID: Int] = [:]
@@ -218,6 +225,7 @@ extension FSM {
         // arrays.
         var actuatorsArr = Array(actuators)
         var externalVariablesArr = Array(externalVariables)
+        var globalVariablesArr = Array(globalVariables)
         var sensorsArr = Array(sensors)
         for index in actuatorsArr.indices {
             actuatorsArr[index].value.index = index
@@ -225,15 +233,20 @@ extension FSM {
         for index in externalVariablesArr.indices {
             externalVariablesArr[index].value.index = index
         }
+        for index in globalVariablesArr.indices {
+            globalVariablesArr[index].value.index = index
+        }
         for index in sensorsArr.indices {
             sensorsArr[index].value.index = index
         }
         let actuators = Dictionary(uniqueKeysWithValues: actuatorsArr)
         let externalVariables = Dictionary(uniqueKeysWithValues: externalVariablesArr)
+        let globalVariables = Dictionary(uniqueKeysWithValues: globalVariablesArr)
         let sensors = Dictionary(uniqueKeysWithValues: sensorsArr)
         let handlers = FSMHandlers(
             actuators: actuators,
             externalVariables: externalVariables,
+            globalVariables: globalVariables,
             sensors: sensors
         )
         return FiniteStateMachine(

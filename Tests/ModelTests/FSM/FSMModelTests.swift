@@ -59,6 +59,15 @@ final class FSMTests: XCTestCase {
         ]
     )
 
+    // swiftlint:disable:next line_length
+    let globalVariables: [PartialKeyPath<FSMMock.Environment>: AnyGlobalVariableHandler<FSMMock.Environment>] = Dictionary(
+        uniqueKeysWithValues: [
+            ArrangementGlobalVariable(
+                wrappedValue: GlobalVariableHandlerMock(id: "exitGlobalVariable", value: false)
+            ).anyGlobalVariable(mapsTo: \.$exitGlobalVariable)
+        ]
+    )
+
     let sensors: [PartialKeyPath<FSMMock.Environment>: AnySensorHandler<FSMMock.Environment>] = Dictionary(
         uniqueKeysWithValues: [
             ArrangementSensor(
@@ -75,6 +84,7 @@ final class FSMTests: XCTestCase {
         let (fsm, _) = mock.initial(
             actuators: actuators,
             externalVariables: externalVariables,
+            globalVariables: globalVariables,
             sensors: sensors
         )
         XCTAssertEqual("\(type(of: fsm))", "\(FSMType.self)")
@@ -86,6 +96,7 @@ final class FSMTests: XCTestCase {
         let (fsm, _) = mock.initial(
             actuators: actuators,
             externalVariables: externalVariables,
+            globalVariables: globalVariables,
             sensors: sensors
         )
         guard let casted = fsm as? FSMType else {
@@ -109,6 +120,7 @@ final class FSMTests: XCTestCase {
         let (fsm, _) = mock.initial(
             actuators: actuators,
             externalVariables: externalVariables,
+            globalVariables: globalVariables,
             sensors: sensors
         )
         guard let casted = fsm as? FSMType else {
@@ -144,6 +156,7 @@ final class FSMTests: XCTestCase {
         let (_, factory) = mock.initial(
             actuators: actuators,
             externalVariables: externalVariables,
+            globalVariables: globalVariables,
             sensors: sensors
         )
         let data = factory(nil)
@@ -154,6 +167,7 @@ final class FSMTests: XCTestCase {
         let (_, factory) = mock.initial(
             actuators: actuators,
             externalVariables: externalVariables,
+            globalVariables: globalVariables,
             sensors: sensors
         )
         let data = factory(FSMMock.Parameters())
@@ -164,6 +178,7 @@ final class FSMTests: XCTestCase {
         let (fsm, factory) = mock.initial(
             actuators: actuators,
             externalVariables: externalVariables,
+            globalVariables: globalVariables,
             sensors: sensors
         )
         guard let fsm = fsm as? FSMType else {
@@ -188,6 +203,7 @@ final class FSMTests: XCTestCase {
         let (fsm, factory) = mock.initial(
             actuators: actuators,
             externalVariables: externalVariables,
+            globalVariables: globalVariables,
             sensors: sensors
         )
         guard let fsm = fsm as? FSMType else {
@@ -211,6 +227,7 @@ final class FSMTests: XCTestCase {
         let (fsm, factory) = mock.initial(
             actuators: actuators,
             externalVariables: externalVariables,
+            globalVariables: globalVariables,
             sensors: sensors
         )
         guard let fsm = fsm as? FSMType else {

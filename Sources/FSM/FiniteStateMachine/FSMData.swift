@@ -95,6 +95,8 @@ public struct FSMData<
                 actuatorValues[handler.index] = fsmContext.environment[keyPath: keyPath]
             } else if let handler = handlers.externalVariables[keyPath] {
                 handler.saveSnapshot(value: fsmContext.environment[keyPath: keyPath])
+            } else if let handler = handlers.globalVariables[keyPath] {
+                handler.value = fsmContext.environment[keyPath: keyPath]
             }
         }
     }
@@ -109,6 +111,8 @@ public struct FSMData<
                 handler.update(environment: &environment, with: handler.takeSnapshot())
             } else if let handler = handlers.externalVariables[keyPath] {
                 handler.update(environment: &environment, with: handler.takeSnapshot())
+            } else if let handler = handlers.globalVariables[keyPath] {
+                handler.update(environment: &environment, with: handler.value)
             } else if let handler = handlers.actuators[keyPath] {
                 handler.update(environment: &environment, with: actuatorValues[handler.index])
             }

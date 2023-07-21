@@ -37,6 +37,7 @@ public struct FSMProperty<Arrangement: ArrangementProtocol> {
         wrappedValue: FSM,
         actuators: (KeyPath<Arrangement, AnyArrangementActuator>, mapsTo: PartialKeyPath<FSM.Environment>) ...,
         externalVariables: (KeyPath<Arrangement, AnyArrangementExternalVariable>, mapsTo: PartialKeyPath<FSM.Environment>) ...,
+        globalVariables: (KeyPath<Arrangement, AnyArrangementGlobalVariable>, mapsTo: PartialKeyPath<FSM.Environment>) ...,
         sensors: (KeyPath<Arrangement, AnyArrangementSensor>, mapsTo: PartialKeyPath<FSM.Environment>) ...
     ) {
         self.make = { arrangement in
@@ -49,6 +50,11 @@ public struct FSMProperty<Arrangement: ArrangementProtocol> {
                 externalVariables: Dictionary(
                     uniqueKeysWithValues: externalVariables.lazy.map {
                         arrangement[keyPath: $0].anyExternalVariable(mapsTo: $1)
+                    }
+                ),
+                globalVariables: Dictionary(
+                    uniqueKeysWithValues: globalVariables.lazy.map {
+                        arrangement[keyPath: $0].anyGlobalVariable(mapsTo: $1)
                     }
                 ),
                 sensors: Dictionary(

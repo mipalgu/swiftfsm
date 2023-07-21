@@ -30,7 +30,7 @@ public struct ArrangementGlobalVariable<Handler: GlobalVariableHandler>: AnyArra
     ) -> (PartialKeyPath<Environment>, AnyGlobalVariableHandler<Environment>) {
         let actualKeyPath = unsafeDowncast(
             keyPath,
-            to: WritableKeyPath<Environment, EnvironmentProtocolExternalVariableProperty<Handler.Value>>.self
+            to: WritableKeyPath<Environment, EnvironmentProtocolGlobalVariableProperty<Handler.Value>>.self
         )
         let valuePath = actualKeyPath.appending(path: \.wrappedValue)
         return (valuePath, AnyGlobalVariableHandler(wrappedValue, mapsTo: valuePath))

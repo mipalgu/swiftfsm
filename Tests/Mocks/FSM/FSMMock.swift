@@ -30,6 +30,9 @@ public struct FSMMock: LLFSM {
         @ExternalVariable
         public var exitExternalVariable: Bool!
 
+        @GlobalVariable
+        public var exitGlobalVariable: Bool!
+
         @Sensor
         public var exitSensor: Bool!
 
