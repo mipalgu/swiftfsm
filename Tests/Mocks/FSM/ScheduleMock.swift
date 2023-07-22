@@ -1,6 +1,7 @@
+import FSM
 import Model
 
-public struct ScheduleMock: ScheduleModel {
+public struct ScheduleMock: Schedule, EmptyInitialisable {
 
     public typealias Arrangement = ArrangementMock
 

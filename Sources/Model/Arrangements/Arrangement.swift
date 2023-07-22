@@ -1,7 +1,7 @@
 import FSM
 
 /// The protocol that all models of arrangements must conform to.
-public protocol Arrangement: ArrangementProtocol, EmptyInitialisable {}
+public protocol Arrangement: ArrangementProtocol {}
 
 extension Arrangement {
 
@@ -15,7 +15,7 @@ extension Arrangement {
 
 }
 
-extension Arrangement {
+extension Arrangement where Self: EmptyInitialisable {
 
     /// A schedule that executes the finite state machines in this arrangement
     /// in round-robin, in the order in which they are defined.

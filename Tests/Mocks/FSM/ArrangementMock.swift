@@ -1,7 +1,8 @@
+import FSM
 import InMemoryVariables
 import Model
 
-public struct ArrangementMock: Arrangement {
+public struct ArrangementMock: Arrangement, EmptyInitialisable {
 
     @Actuator
     public var exitActuator = InMemoryActuator<Bool>(id: "exit", initialValue: false)

@@ -1,8 +1,8 @@
 import FSM
 
-public protocol ScheduleModel: ScheduleProtocol, EmptyInitialisable {}
+public protocol Schedule: ScheduleProtocol {}
 
-extension ScheduleModel {
+extension Schedule {
 
     public typealias Group = GroupProperty<Self>
 
@@ -27,7 +27,7 @@ extension ScheduleModel {
 
 }
 
-extension ScheduleModel {
+extension Schedule where Self: EmptyInitialisable {
 
     public static func main() throws {
         try Self().main()

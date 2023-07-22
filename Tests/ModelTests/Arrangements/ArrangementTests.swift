@@ -4,7 +4,7 @@ import XCTest
 
 @testable import Model
 
-private struct SimpleArrangement: Arrangement {
+private struct SimpleArrangement: Arrangement, EmptyInitialisable {
 
     @Machine
     var mock = FSMMock()
