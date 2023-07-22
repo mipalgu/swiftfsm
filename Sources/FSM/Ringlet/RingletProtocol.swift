@@ -36,6 +36,6 @@ public protocol RingletProtocol: ContextUser, EmptyInitialisable {
             StateType.Parameters,
             StateType.Result
         >
-    ) -> StateID
+    ) -> StateID?
 
 }

@@ -16,7 +16,7 @@ public struct LLFSMRinglet<
 
     public func execute(
         context: SchedulerContext<StateType, Context, FSMsContext, Environment, Parameters, Result>
-    ) -> StateID {
+    ) -> StateID? {
         let state = context.states[context.currentState]
         let stateContext = context.context(forState: context.currentState)
         let suspendState = context.states[context.suspendState].stateType
@@ -30,13 +30,13 @@ public struct LLFSMRinglet<
         if context.status.transitioned {
             state.stateType.onEntry(context: stateContext)
         }
-        let result: StateID
+        let result: StateID?
         if let first = state.transitions.first(where: { $0.canTransition(from: stateContext) }) {
             state.stateType.onExit(context: stateContext)
             result = first.target
         } else {
             state.stateType.internal(context: stateContext)
-            result = context.currentState
+            result = nil
         }
         if context.fsmContext.status == .suspending {
             state.stateType.onSuspend(context: stateContext)

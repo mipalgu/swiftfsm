@@ -104,7 +104,9 @@ where
             context.stateContainer = nil
             context.fsmContext.duration = nil
         }
-        let nextState = ringlet.execute(context: context)
+        let nextStateRaw = ringlet.execute(context: context)
+        let nextState = nextStateRaw ?? context.currentState
+        context.transitioned = nextStateRaw != nil
         context.data.previousState = context.currentState
         context.data.currentState = nextState
         if context.data.fsmContext.status == .suspending {
@@ -118,7 +120,6 @@ where
                 transitioned: context.data.currentState != context.data.previousState
             )
         }
-        context.transitioned = context.data.currentState != context.data.previousState
     }
 
     public func saveSnapshot(context: AnySchedulerContext) {
