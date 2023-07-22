@@ -100,6 +100,10 @@ public final class SchedulerContext<
         super.init(fsmID: fsmID)
     }
 
+    public func after(_ duration: Duration) -> Bool {
+        self.duration > duration
+    }
+
     public func context(forState index: Int) -> AnyStateContext<FSMsContext, Environment, Parameters, Result>
     {
         data.stateContexts[index]

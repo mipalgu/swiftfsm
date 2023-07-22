@@ -8,7 +8,8 @@ public final class FSMContext<
 
     public var context: FSMsContext
 
-    internal var duration: Duration = .zero
+    // swiftlint:disable:next implicitly_unwrapped_optional
+    internal var duration: Duration! = nil
 
     public var environment: Environment
 

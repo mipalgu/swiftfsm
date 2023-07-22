@@ -100,7 +100,10 @@ where
         )
         context.stateContainer = stateContainer
         context.fsmContext.duration = context.duration
-        defer { context.stateContainer = nil }
+        defer {
+            context.stateContainer = nil
+            context.fsmContext.duration = nil
+        }
         let nextState = ringlet.execute(context: context)
         context.data.previousState = context.currentState
         context.data.currentState = nextState

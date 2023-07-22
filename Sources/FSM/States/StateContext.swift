@@ -66,6 +66,10 @@ public final class StateContext<
         super.init(fsmContext: fsmContext)
     }
 
+    public func after(_ duration: Duration) -> Bool {
+        fsmContext.after(duration)
+    }
+
     public subscript<T>(dynamicMember keyPath: WritableKeyPath<StateContext, T>) -> T {
         get { context[keyPath: keyPath] }
         set { context[keyPath: keyPath] = newValue }
