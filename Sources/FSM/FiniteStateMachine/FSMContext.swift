@@ -8,6 +8,8 @@ public final class FSMContext<
 
     public var context: FSMsContext
 
+    internal var duration: Duration = .zero
+
     public var environment: Environment
 
     public let parameters: Parameters
@@ -55,6 +57,10 @@ public final class FSMContext<
         self.parameters = parameters
         self.result = result
         self.status = status
+    }
+
+    public func after(_ duration: Duration) -> Bool {
+        self.duration > duration
     }
 
     public subscript<T>(dynamicMember keyPath: KeyPath<FSMsContext, T>) -> T {

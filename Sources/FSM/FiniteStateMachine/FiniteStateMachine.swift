@@ -99,6 +99,7 @@ where
             to: SchedulerContext<StateType, Ringlet.Context, Context, Environment, Parameters, Result>.self
         )
         context.stateContainer = stateContainer
+        context.fsmContext.duration = context.duration
         defer { context.stateContainer = nil }
         let nextState = ringlet.execute(context: context)
         context.data.previousState = context.currentState
@@ -114,6 +115,7 @@ where
                 transitioned: context.data.currentState != context.data.previousState
             )
         }
+        context.transitioned = context.data.currentState != context.data.previousState
     }
 
     public func saveSnapshot(context: AnySchedulerContext) {

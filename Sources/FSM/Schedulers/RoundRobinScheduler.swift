@@ -135,6 +135,15 @@ public struct RoundRobinScheduler {
     public mutating func cycle() {
         shouldTerminate = true
         for slot in map.slots {
+            let now = ContinuousClock.now
+            if slot.context.transitioned {
+                slot.context.duration = .zero
+            } else if now < slot.context.startTime {
+                slot.context.startTime = now
+                slot.context.duration = .zero
+            } else {
+                slot.context.duration = now - slot.context.startTime
+            }
             slot.takeSnapshot()
             slot.next()
             slot.saveSnapshot()
