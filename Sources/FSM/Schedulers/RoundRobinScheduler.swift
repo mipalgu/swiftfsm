@@ -136,11 +136,9 @@ public struct RoundRobinScheduler {
         shouldTerminate = true
         for slot in map.slots {
             let now = ContinuousClock.now
-            if slot.context.transitioned {
+            if slot.context.transitioned || now < slot.context.startTime {
                 slot.context.duration = .zero
-            } else if now < slot.context.startTime {
                 slot.context.startTime = now
-                slot.context.duration = .zero
             } else {
                 slot.context.duration = now - slot.context.startTime
             }
