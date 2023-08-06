@@ -100,6 +100,7 @@ extension FSM {
             }
             let context = SchedulerContext(
                 fsmID: -1,
+                fsmName: self.name,
                 data: data,
                 stateContainer: StateContainer<StateType, Parameters, Result, Context, Environment>?.none
             )

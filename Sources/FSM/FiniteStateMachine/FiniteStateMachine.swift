@@ -98,6 +98,9 @@ where
             context,
             to: SchedulerContext<StateType, Ringlet.Context, Context, Environment, Parameters, Result>.self
         )
+        if verbose > 0 {
+            print("\(context.fsmName).", terminator: "")
+        }
         context.stateContainer = stateContainer
         context.fsmContext.duration = context.duration
         defer {

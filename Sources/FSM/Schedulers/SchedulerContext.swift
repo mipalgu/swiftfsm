@@ -92,12 +92,13 @@ public final class SchedulerContext<
 
     public init(
         fsmID: Int,
+        fsmName: String,
         data: FSMData<RingletsContext, Parameters, Result, FSMsContext, Environment>,
         stateContainer: StateContainer<StateType, Parameters, Result, FSMsContext, Environment>? = nil
     ) {
         self.data = data
         self.stateContainer = stateContainer
-        super.init(fsmID: fsmID)
+        super.init(fsmID: fsmID, fsmName: fsmName)
     }
 
     public func after(_ duration: Duration) -> Bool {
