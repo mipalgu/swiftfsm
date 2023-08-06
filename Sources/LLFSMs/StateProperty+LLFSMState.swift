@@ -63,11 +63,12 @@ extension StateProperty {
                 (Root) -> StateInformation
             >] = { [] }
     ) where StateType == AnyLLFSMState<FSMsContext, Environment, Parameters, Result> {
-        let onEntry = verbose > 0 ? { print(name); onEntry($0) } : onEntry
-        let `internal` = verbose > 1 ? { print(name); `internal`($0) } : `internal`
-        let onExit = verbose > 1 ? { print(name); onExit($0) } : onExit
-        let onSuspend = verbose > 1 ? { print(name); onSuspend($0) } : onSuspend
-        let onResume = verbose > 1 ? { print(name); onResume($0) } : onResume
+        let onEntryPrint = name + (verbose > 1 ? ".onEntry" : "")
+        let onEntry = verbose > 0 ? { print(onEntryPrint); onEntry($0) } : onEntry
+        let `internal` = verbose > 1 ? { print(name + ".internal"); `internal`($0) } : `internal`
+        let onExit = verbose > 1 ? { print(name + ".onExit"); onExit($0) } : onExit
+        let onSuspend = verbose > 1 ? { print(name + ".onSuspend"); onSuspend($0) } : onSuspend
+        let onResume = verbose > 1 ? { print(name + ".onResume"); onResume($0) } : onResume
         self.init(
             wrappedValue: CallbackLLFSMState(
                 onEntry: onEntry,
@@ -116,11 +117,12 @@ extension StateProperty {
                 (Root) -> StateInformation
             >] = { [] }
     ) where StateType == AnyLLFSMState<FSMsContext, Environment, Parameters, Result> {
-        let onEntry = verbose > 0 ? { print(name); onEntry($0) } : onEntry
-        let `internal` = verbose > 1 ? { print(name); `internal`($0) } : `internal`
-        let onExit = verbose > 1 ? { print(name); onExit($0) } : onExit
-        let onSuspend = verbose > 1 ? { print(name); onSuspend($0) } : onSuspend
-        let onResume = verbose > 1 ? { print(name); onResume($0) } : onResume
+        let onEntryPrint = name + (verbose > 1 ? ".onEntry" : "")
+        let onEntry = verbose > 0 ? { print(onEntryPrint); onEntry($0) } : onEntry
+        let `internal` = verbose > 1 ? { print(name + ".internal"); `internal`($0) } : `internal`
+        let onExit = verbose > 1 ? { print(name + ".onExit"); onExit($0) } : onExit
+        let onSuspend = verbose > 1 ? { print(name + ".onSuspend"); onSuspend($0) } : onSuspend
+        let onResume = verbose > 1 ? { print(name + ".onResume"); onResume($0) } : onResume
         self.init(
             wrappedValue: CallbackLLFSMState(
                 onEntry: onEntry,
