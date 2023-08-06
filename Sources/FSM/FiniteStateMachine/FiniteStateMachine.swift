@@ -98,7 +98,7 @@ where
             context,
             to: SchedulerContext<StateType, Ringlet.Context, Context, Environment, Parameters, Result>.self
         )
-        if verbose == 1 && context.transitioned || verbose > 1 {
+        if verbose > 1 || (verbose == 1 && context.data.currentState != context.data.previousState) {
             print("\(context.fsmName).", terminator: "")
         }
         context.stateContainer = stateContainer
