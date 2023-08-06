@@ -24,16 +24,16 @@ public struct FSMMock: LLFSM {
 
     public struct Environment: EnvironmentProtocol {
 
-        @Actuator
+        @WriteOnly
         public var exitActuator: Bool!
 
-        @ExternalVariable
+        @ReadWrite
         public var exitExternalVariable: Bool!
 
-        @GlobalVariable
+        @ReadWrite
         public var exitGlobalVariable: Bool!
 
-        @Sensor
+        @ReadOnly
         public var exitSensor: Bool!
 
         public init() {}

@@ -8,13 +8,13 @@ private struct TempFSM: LLFSM {
 
     struct Environment: EnvironmentSnapshot {
 
-        @Actuator
+        @WriteOnly
         var actuator: Int!
 
-        @ExternalVariable
+        @ReadWrite
         var externalVariables: Bool!
 
-        @Sensor
+        @ReadOnly
         var sensor: UInt8!
 
     }

@@ -30,7 +30,7 @@ public struct ArrangementActuator<Handler: ActuatorHandler>: AnyArrangementActua
     {
         let actualKeyPath = unsafeDowncast(
             keyPath,
-            to: WritableKeyPath<Environment, EnvironmentProtocolActuatorProperty<Handler.Value>>.self
+            to: WritableKeyPath<Environment, EnvironmentProtocolWriteOnlyProperty<Handler.Value>>.self
         )
         let valuePath = actualKeyPath.appending(path: \.wrappedValue)
         return (valuePath, AnyActuatorHandler(wrappedValue, mapsTo: valuePath))

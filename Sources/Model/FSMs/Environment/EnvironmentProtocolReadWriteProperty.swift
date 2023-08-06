@@ -1,13 +1,13 @@
 import FSM
 
 @propertyWrapper
-public struct EnvironmentProtocolSensorProperty<Value: SensorValue>:
-    SensorValue, AnyEnvironmentProtocolVariable {
+public struct EnvironmentProtocolReadWriteProperty<Value: DataStructure>:
+    ExternalVariableValue, AnyEnvironmentProtocolVariable {
 
     // swiftlint:disable:next implicitly_unwrapped_optional
     public var wrappedValue: Value!
 
-    public var projectedValue: EnvironmentProtocolSensorProperty<Value> {
+    public var projectedValue: EnvironmentProtocolReadWriteProperty<Value> {
         get {
             self
         } set {
@@ -24,7 +24,7 @@ public struct EnvironmentProtocolSensorProperty<Value: SensorValue>:
     ) -> PartialKeyPath<Environment> {
         let actualKeyPath = unsafeDowncast(
             keyPath,
-            to: WritableKeyPath<Environment, EnvironmentProtocolSensorProperty<Value>>.self
+            to: WritableKeyPath<Environment, EnvironmentProtocolReadWriteProperty<Value>>.self
         )
         let valuePath: WritableKeyPath<Environment, Value?> = actualKeyPath.appending(path: \.wrappedValue)
         return valuePath

@@ -30,7 +30,7 @@ public struct ArrangementExternalVariable<Handler: ExternalVariableHandler>: Any
     ) -> (PartialKeyPath<Environment>, AnyExternalVariableHandler<Environment>) {
         let actualKeyPath = unsafeDowncast(
             keyPath,
-            to: WritableKeyPath<Environment, EnvironmentProtocolExternalVariableProperty<Handler.Value>>.self
+            to: WritableKeyPath<Environment, EnvironmentProtocolReadWriteProperty<Handler.Value>>.self
         )
         let valuePath = actualKeyPath.appending(path: \.wrappedValue)
         return (valuePath, AnyExternalVariableHandler(wrappedValue, mapsTo: valuePath))

@@ -2,7 +2,7 @@ import FSM
 
 private var inMemoryGlobalVariableData: [Int: Sendable] = [:]
 
-public struct InMemoryGlobalVariable<Value: GlobalVariableValue>: GlobalVariableHandler {
+public struct InMemoryGlobalVariable<Value: GlobalVariableValue>: GlobalVariableHandler, Hashable, Codable {
 
     private let resolvedID: Int
 

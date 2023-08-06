@@ -29,7 +29,7 @@ public struct ArrangementSensor<Handler: SensorHandler>: AnyArrangementSensor {
     ) -> (PartialKeyPath<Environment>, AnySensorHandler<Environment>) {
         let actualKeyPath = unsafeDowncast(
             keyPath,
-            to: WritableKeyPath<Environment, EnvironmentProtocolSensorProperty<Handler.Value>>.self
+            to: WritableKeyPath<Environment, EnvironmentProtocolReadOnlyProperty<Handler.Value>>.self
         )
         let valuePath = actualKeyPath.appending(path: \.wrappedValue)
         return (valuePath, AnySensorHandler(wrappedValue, mapsTo: valuePath))
