@@ -63,6 +63,11 @@ extension StateProperty {
                 (Root) -> StateInformation
             >] = { [] }
     ) where StateType == AnyLLFSMState<FSMsContext, Environment, Parameters, Result> {
+        let onEntry = verbose > 0 ? { print(name); onEntry($0) } : onEntry
+        let `internal` = verbose > 0 ? { print(name); `internal`($0) } : `internal`
+        let onExit = verbose > 0 ? { print(name); onExit($0) } : onExit
+        let onSuspend = verbose > 0 ? { print(name); onSuspend($0) } : onSuspend
+        let onResume = verbose > 0 ? { print(name); onResume($0) } : onResume
         self.init(
             wrappedValue: CallbackLLFSMState(
                 onEntry: onEntry,
@@ -111,6 +116,11 @@ extension StateProperty {
                 (Root) -> StateInformation
             >] = { [] }
     ) where StateType == AnyLLFSMState<FSMsContext, Environment, Parameters, Result> {
+        let onEntry = verbose > 0 ? { print(name); onEntry($0) } : onEntry
+        let `internal` = verbose > 0 ? { print(name); `internal`($0) } : `internal`
+        let onExit = verbose > 0 ? { print(name); onExit($0) } : onExit
+        let onSuspend = verbose > 0 ? { print(name); onSuspend($0) } : onSuspend
+        let onResume = verbose > 0 ? { print(name); onResume($0) } : onResume
         self.init(
             wrappedValue: CallbackLLFSMState(
                 onEntry: onEntry,
