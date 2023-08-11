@@ -15,7 +15,7 @@ public struct AnyActuatorHandler<Environment: EnvironmentSnapshot> {
     private let _saveSnapshot: (Sendable) -> Void
 
     /// Update an environment snapshot with a value.
-    private let _updateEnvironment: (inout Environment, Sendable) -> Void
+    private let _updateEnvironment: @Sendable (UnsafeMutablePointer<Environment>, Sendable) -> Void
 
     /// The index of the actuator handler when it is stored within an array.
     public var index: Int = -1
@@ -43,13 +43,13 @@ public struct AnyActuatorHandler<Environment: EnvironmentSnapshot> {
     /// a value within an environment snapshot.
     public init<Base: ActuatorHandler>(
         _ base: Base,
-        mapsTo keyPath: WritableKeyPath<Environment, Base.Value?>
+        updateEnvironment: @Sendable @escaping (UnsafeMutablePointer<Environment>, Sendable) -> Void
     ) {
         self._base = { base }
         self._id = { base.id }
         self._initialValue = { base.initialValue as Sendable }
         self._saveSnapshot = { base.saveSnapshot(value: $0 as! Base.Value) }
-        self._updateEnvironment = { $0[keyPath: keyPath] = $1 as! Base.Value }
+        self._updateEnvironment = updateEnvironment
     }
 
     /// Save a value to the environment.
@@ -64,8 +64,8 @@ public struct AnyActuatorHandler<Environment: EnvironmentSnapshot> {
     /// - Parameter environment: The environment snapshot to update.
     ///
     /// - Parameter value: The value to update the environment snapshot with.
-    public func update(environment: inout Environment, with value: Sendable) {
-        _updateEnvironment(&environment, value)
+    public func update(environment: UnsafeMutablePointer<Environment>, with value: Sendable) {
+        _updateEnvironment(environment, value)
     }
 
 }

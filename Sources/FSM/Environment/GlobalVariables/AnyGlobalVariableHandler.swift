@@ -4,7 +4,7 @@ public struct AnyGlobalVariableHandler<Environment: EnvironmentSnapshot> {
     private let _id: () -> String
     private let _saveSnapshot: (Sendable) -> Void
     private let _takeSnapshot: () -> Sendable
-    private let _updateEnvironment: (inout Environment, Sendable) -> Void
+    private let _updateEnvironment: (UnsafeMutablePointer<Environment>, Sendable) -> Void
 
     public var index: Int = -1
 
@@ -26,18 +26,18 @@ public struct AnyGlobalVariableHandler<Environment: EnvironmentSnapshot> {
 
     public init<Base: GlobalVariableHandler>(
         _ base: Base,
-        mapsTo keyPath: WritableKeyPath<Environment, Base.Value?>
+        updateEnvironment: @Sendable @escaping (UnsafeMutablePointer<Environment>, Sendable) -> Void
     ) {
         var base = base
         self._base = { base }
         self._id = { base.id }
         self._saveSnapshot = { base.value = $0 as! Base.Value }
         self._takeSnapshot = { base.value as Sendable }
-        self._updateEnvironment = { $0[keyPath: keyPath] = $1 as! Base.Value }
+        self._updateEnvironment = updateEnvironment
     }
 
-    public func update(environment: inout Environment, with value: Sendable) {
-        _updateEnvironment(&environment, value)
+    public func update(environment: UnsafeMutablePointer<Environment>, with value: Sendable) {
+        _updateEnvironment(environment, value)
     }
 
 }
