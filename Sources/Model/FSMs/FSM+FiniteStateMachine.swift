@@ -76,16 +76,28 @@ extension FSM {
     /// lookup times. However, this means that you should not rely on the
     /// id's as accessed within this model.
     public func initial(
-        actuators: [PartialKeyPath<Environment>: AnyActuatorHandler<Environment>],
-        externalVariables: [PartialKeyPath<Environment>: AnyExternalVariableHandler<Environment>],
-        globalVariables: [PartialKeyPath<Environment>: AnyGlobalVariableHandler<Environment>],
-        sensors: [PartialKeyPath<Environment>: AnySensorHandler<Environment>]
+        actuators: [(PartialKeyPath<Environment>, AnyActuatorHandler<Environment>)],
+        externalVariables: [(PartialKeyPath<Environment>, AnyExternalVariableHandler<Environment>)],
+        globalVariables: [(PartialKeyPath<Environment>, AnyGlobalVariableHandler<Environment>)],
+        sensors: [(PartialKeyPath<Environment>, AnySensorHandler<Environment>)]
     ) -> (Executable, ((any DataStructure)?) -> AnySchedulerContext) {
+        let indexes: [PartialKeyPath<Environment>: (SharedVariableType, Int)] = Dictionary(
+            uniqueKeysWithValues: actuators.enumerated().map {
+                ($1.0, (SharedVariableType.actuator, $0))
+            } + externalVariables.enumerated().map {
+                ($1.0, (SharedVariableType.externalVariable, $0))
+            } + globalVariables.enumerated().map {
+                ($1.0, (SharedVariableType.globalVariable, $0))
+            } + sensors.enumerated().map {
+                ($1.0, (SharedVariableType.sensor, $0))
+            }
+        )
         let fsm = self.fsm(
-            actuators: actuators,
-            externalVariables: externalVariables,
-            globalVariables: globalVariables,
-            sensors: sensors
+            actuators: actuators.map(\.1),
+            externalVariables: externalVariables.map(\.1),
+            globalVariables: globalVariables.map(\.1),
+            sensors: sensors.map(\.1),
+            indexes: indexes
         )
         let factory: ((any DataStructure)?) -> AnySchedulerContext = {
             let data: FSMData<Ringlet.Context, Parameters, Result, Context, Environment>
@@ -117,10 +129,11 @@ extension FSM {
     /// means that you should not rely on the existing id's of these properties
     /// as accessed from this model.
     private func fsm(
-        actuators: [PartialKeyPath<Environment>: AnyActuatorHandler<Environment>],
-        externalVariables: [PartialKeyPath<Environment>: AnyExternalVariableHandler<Environment>],
-        globalVariables: [PartialKeyPath<Environment>: AnyGlobalVariableHandler<Environment>],
-        sensors: [PartialKeyPath<Environment>: AnySensorHandler<Environment>]
+        actuators: [AnyActuatorHandler<Environment>],
+        externalVariables: [AnyExternalVariableHandler<Environment>],
+        globalVariables: [AnyGlobalVariableHandler<Environment>],
+        sensors: [AnySensorHandler<Environment>],
+        indexes: [PartialKeyPath<Environment>: (SharedVariableType, Int)]
     ) -> FiniteStateMachine<StateType, Ringlet, Parameters, Result, Context, Environment> {
         var newIds: [StateID: Int] = [:]
         var latestID = 0
@@ -172,61 +185,50 @@ extension FSM {
                 name: name,
                 stateType: stateType,
                 transitions: newTransitions,
-                takeSnapshot: { state, handlers in
+                takeSnapshot: { environment, handlers, actuatorValues in
                     for keyPath in environmentVariables {
-                        if let handler = handlers.sensors[keyPath] {
-                            handler.update(environment: &environment, with: handler.takeSnapshot())
-                        } else if let handler = handlers.externalVariables[keyPath] {
-                            handler.update(environment: &environment, with: handler.takeSnapshot())
-                        } else if let handler = handlers.globalVariables[keyPath] {
-                            handler.update(environment: &environment, with: handler.value)
-                        } else if let handler = handlers.actuators[keyPath] {
-                            handler.update(environment: &environment, with: actuatorValues[handler.index])
+                        guard let (type, index) = indexes[keyPath] else {
+                            fatalError("Missing index for keyPath: \(keyPath)")
+                        }
+                        switch type {
+                        case .actuator:
+                            let handler = handlers.actuators[index]
+                            handler.update(environment: environment, with: actuatorValues.advanced(by: index))
+                        case .externalVariable:
+                            let handler = handlers.externalVariables[index]
+                            handler.update(environment: environment, with: handler.takeSnapshot())
+                        case .globalVariable:
+                            let handler = handlers.globalVariables[index]
+                            handler.update(environment: environment, with: handler.value)
+                        case .sensor:
+                            let handler = handlers.sensors[index]
+                            handler.update(environment: environment, with: handler.takeSnapshot())
                         }
                     }
-                    fsmContext.environment = environment
+                },
+                saveSnapshot: { environment, handlers, actuatorValues in
+                    for keyPath in environmentVariables {
+                        guard let (type, index) = indexes[keyPath] else {
+                            fatalError("Missing index for keyPath: \(keyPath)")
+                        }
+                        switch type {
+                        case .actuator:
+                            let handler = handlers.actuators[index]
+                            handler.saveSnapshot(value: environment.pointee[keyPath: keyPath])
+                            actuatorValues[index] = environment.pointee[keyPath: keyPath]
+                        case .externalVariable:
+                            let handler = handlers.externalVariables[index]
+                            handler.saveSnapshot(value: environment.pointee[keyPath: keyPath])
+                        case .globalVariable:
+                            let handler = handlers.globalVariables[index]
+                            handler.value = environment.pointee[keyPath: keyPath]
+                        case .sensor:
+                            continue
+                        }
+                    }
                 }
             )
         }
-
-
-
-    // public mutating func saveSnapshot(
-    //     environmentVariables: Set<PartialKeyPath<Environment>>,
-    //     handlers: Handlers
-    // ) {
-    //     for keyPath in environmentVariables {
-    //         if let handler = handlers.actuators[keyPath] {
-    //             handler.saveSnapshot(value: fsmContext.environment[keyPath: keyPath])
-    //             actuatorValues[handler.index] = fsmContext.environment[keyPath: keyPath]
-    //         } else if let handler = handlers.externalVariables[keyPath] {
-    //             handler.saveSnapshot(value: fsmContext.environment[keyPath: keyPath])
-    //         } else if let handler = handlers.globalVariables[keyPath] {
-    //             handler.value = fsmContext.environment[keyPath: keyPath]
-    //         }
-    //     }
-    // }
-
-    public mutating func takeSnapshot(
-        environmentVariables: Set<PartialKeyPath<Environment>>,
-        handlers: Handlers
-    ) {
-        var environment = Environment()
-        for keyPath in environmentVariables {
-            if let handler = handlers.sensors[keyPath] {
-                handler.update(environment: &environment, with: handler.takeSnapshot())
-            } else if let handler = handlers.externalVariables[keyPath] {
-                handler.update(environment: &environment, with: handler.takeSnapshot())
-            } else if let handler = handlers.globalVariables[keyPath] {
-                handler.update(environment: &environment, with: handler.value)
-            } else if let handler = handlers.actuators[keyPath] {
-                handler.update(environment: &environment, with: actuatorValues[handler.index])
-            }
-        }
-        fsmContext.environment = environment
-    }
-
-
         /// Create a new empty state that always transitions to particular
         /// targets and add it to states.
         ///
@@ -249,9 +251,10 @@ extension FSM {
                 FSMState(
                     id: newID,
                     name: name,
-                    environmentVariables: [],
                     stateType: stateType,
-                    transitions: transitions.map { AnyTransition(to: $0) }
+                    transitions: transitions.map { AnyTransition(to: $0) },
+                    takeSnapshot: { _, _, _ in },
+                    saveSnapshot: { _, _, _ in }
                 )
             )
             return newID
@@ -274,28 +277,6 @@ extension FSM {
         guard Set(states.map(\.id)).count == states.count else {
             fatalError("The states array contains states with duplicate ids: \(states)")
         }
-        // Setup arrays of environment variables with new identifiers that represent the indexes within these
-        // arrays.
-        var actuatorsArr = Array(actuators)
-        var externalVariablesArr = Array(externalVariables)
-        var globalVariablesArr = Array(globalVariables)
-        var sensorsArr = Array(sensors)
-        for index in actuatorsArr.indices {
-            actuatorsArr[index].value.index = index
-        }
-        for index in externalVariablesArr.indices {
-            externalVariablesArr[index].value.index = index
-        }
-        for index in globalVariablesArr.indices {
-            globalVariablesArr[index].value.index = index
-        }
-        for index in sensorsArr.indices {
-            sensorsArr[index].value.index = index
-        }
-        let actuators = Dictionary(uniqueKeysWithValues: actuatorsArr)
-        let externalVariables = Dictionary(uniqueKeysWithValues: externalVariablesArr)
-        let globalVariables = Dictionary(uniqueKeysWithValues: globalVariablesArr)
-        let sensors = Dictionary(uniqueKeysWithValues: sensorsArr)
         let handlers = FSMHandlers(
             actuators: actuators,
             externalVariables: externalVariables,

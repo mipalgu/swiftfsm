@@ -42,26 +42,18 @@ public struct FSMProperty<Arrangement: ArrangementProtocol> {
     ) {
         self.make = { arrangement in
             wrappedValue.initial(
-                actuators: Dictionary(
-                    uniqueKeysWithValues: actuators.lazy.map {
-                        arrangement[keyPath: $0].anyActuator(mapsTo: $1)
-                    }
-                ),
-                externalVariables: Dictionary(
-                    uniqueKeysWithValues: externalVariables.lazy.map {
-                        arrangement[keyPath: $0].anyExternalVariable(mapsTo: $1)
-                    }
-                ),
-                globalVariables: Dictionary(
-                    uniqueKeysWithValues: globalVariables.lazy.map {
-                        arrangement[keyPath: $0].anyGlobalVariable(mapsTo: $1)
-                    }
-                ),
-                sensors: Dictionary(
-                    uniqueKeysWithValues: sensors.lazy.map {
-                        arrangement[keyPath: $0].anySensor(mapsTo: $1)
-                    }
-                )
+                actuators: actuators.map {
+                    arrangement[keyPath: $0].anyActuator(mapsTo: $1)
+                },
+                externalVariables: externalVariables.map {
+                    arrangement[keyPath: $0].anyExternalVariable(mapsTo: $1)
+                },
+                globalVariables: globalVariables.map {
+                    arrangement[keyPath: $0].anyGlobalVariable(mapsTo: $1)
+                },
+                sensors: sensors.map {
+                    arrangement[keyPath: $0].anySensor(mapsTo: $1)
+                }
             )
         }
         self.projectedValue = FSMInformation(fsm: wrappedValue)

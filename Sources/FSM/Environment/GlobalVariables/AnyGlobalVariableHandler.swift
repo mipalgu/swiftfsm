@@ -6,8 +6,6 @@ public struct AnyGlobalVariableHandler<Environment: EnvironmentSnapshot> {
     private let _takeSnapshot: () -> Sendable
     private let _updateEnvironment: (UnsafeMutablePointer<Environment>, Sendable) -> Void
 
-    public var index: Int = -1
-
     public var base: Any {
         _base()
     }

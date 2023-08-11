@@ -17,9 +17,6 @@ public struct AnyActuatorHandler<Environment: EnvironmentSnapshot> {
     /// Update an environment snapshot with a value.
     private let _updateEnvironment: @Sendable (UnsafeMutablePointer<Environment>, Sendable) -> Void
 
-    /// The index of the actuator handler when it is stored within an array.
-    public var index: Int = -1
-
     /// The base that was used to create this type-erased actuator handler.
     public var base: Any {
         _base()

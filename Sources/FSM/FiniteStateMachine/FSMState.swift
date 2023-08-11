@@ -19,7 +19,7 @@ public struct FSMState<
 
     public let takeSnapshot: @Sendable (UnsafeMutablePointer<Environment>, FSMHandlers<Environment>, UnsafePointer<Sendable>) -> Void
 
-    public let saveSnapshot: @Sendable (UnsafeMutablePointer<Environment>, FSMHandlers<Environment>, UnsafeMutablePointer<Sendable>) -> Void
+    public let saveSnapshot: @Sendable (UnsafePointer<Environment>, FSMHandlers<Environment>, UnsafeMutablePointer<Sendable>) -> Void
 
     public init(
         id: StateID,
@@ -27,7 +27,7 @@ public struct FSMState<
         stateType: StateType,
         transitions: [AnyTransition<AnyStateContext<Context, Environment, Parameters, Result>, StateID>],
         takeSnapshot: @Sendable @escaping (UnsafeMutablePointer<Environment>, FSMHandlers<Environment>, UnsafePointer<Sendable>) -> Void,
-        saveSnapshot: @Sendable @escaping (UnsafeMutablePointer<Environment>, FSMHandlers<Environment>, UnsafeMutablePointer<Sendable>) -> Void
+        saveSnapshot: @Sendable @escaping (UnsafePointer<Environment>, FSMHandlers<Environment>, UnsafeMutablePointer<Sendable>) -> Void
     ) {
         self.id = id
         self.name = name

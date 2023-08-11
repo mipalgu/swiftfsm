@@ -130,7 +130,7 @@ where
             context,
             to: SchedulerContext<StateType, Ringlet.Context, Context, Environment, Parameters, Result>.self
         )
-        withUnsafeMutablePointer(to: &context.environment) { environment in
+        withUnsafePointer(to: &context.environment) { environment in
             context.data.actuatorValues.withContiguousMutableStorageIfAvailable {
                 // swiftlint:disable:next force_unwrapping
                 self.states[context.data.previousState].saveSnapshot(environment, handlers, $0.baseAddress!)
