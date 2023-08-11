@@ -52,7 +52,7 @@ where
             stateContexts: stateContainer.states.map { $0.stateType.initialContext(fsmContext: fsmContext) },
             fsmContext: fsmContext,
             ringletContext: Ringlet.Context(),
-            actuatorValues: handlers.actuators.values.sorted { $0.index < $1.index }.map { $0.initialValue },
+            actuatorValues: handlers.actuators.map { $0.initialValue },
             initialState: initialState,
             currentState: initialState,
             previousState: initialPreviousState,
@@ -130,10 +130,9 @@ where
             context,
             to: SchedulerContext<StateType, Ringlet.Context, Context, Environment, Parameters, Result>.self
         )
-        context.data.saveSnapshot(
-            environmentVariables: states[context.data.previousState].environmentVariables,
-            handlers: handlers
-        )
+        withUnsafePointer(to: context.environment) {
+            self.states[context.data.previousState].saveSnapshot($0, self.handlers)
+        }
     }
 
     public func takeSnapshot(context: AnySchedulerContext) {
@@ -141,10 +140,10 @@ where
             context,
             to: SchedulerContext<StateType, Ringlet.Context, Context, Environment, Parameters, Result>.self
         )
-        context.data.takeSnapshot(
-            environmentVariables: states[context.data.currentState].environmentVariables,
-            handlers: handlers
-        )
+        var environment = Environment()
+        withUnsafePointer(to: &environment) {
+            self.states[context.data.currentState].takeSnapshot($0, self.handlers)
+        }
     }
 
 }

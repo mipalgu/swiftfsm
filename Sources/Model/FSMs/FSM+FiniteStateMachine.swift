@@ -170,11 +170,63 @@ extension FSM {
             return FSMState(
                 id: newID,
                 name: name,
-                environmentVariables: Set(environmentVariables),
                 stateType: stateType,
-                transitions: newTransitions
+                transitions: newTransitions,
+                takeSnapshot: { state, handlers in
+                    for keyPath in environmentVariables {
+                        if let handler = handlers.sensors[keyPath] {
+                            handler.update(environment: &environment, with: handler.takeSnapshot())
+                        } else if let handler = handlers.externalVariables[keyPath] {
+                            handler.update(environment: &environment, with: handler.takeSnapshot())
+                        } else if let handler = handlers.globalVariables[keyPath] {
+                            handler.update(environment: &environment, with: handler.value)
+                        } else if let handler = handlers.actuators[keyPath] {
+                            handler.update(environment: &environment, with: actuatorValues[handler.index])
+                        }
+                    }
+                    fsmContext.environment = environment
+                }
             )
         }
+
+
+
+    // public mutating func saveSnapshot(
+    //     environmentVariables: Set<PartialKeyPath<Environment>>,
+    //     handlers: Handlers
+    // ) {
+    //     for keyPath in environmentVariables {
+    //         if let handler = handlers.actuators[keyPath] {
+    //             handler.saveSnapshot(value: fsmContext.environment[keyPath: keyPath])
+    //             actuatorValues[handler.index] = fsmContext.environment[keyPath: keyPath]
+    //         } else if let handler = handlers.externalVariables[keyPath] {
+    //             handler.saveSnapshot(value: fsmContext.environment[keyPath: keyPath])
+    //         } else if let handler = handlers.globalVariables[keyPath] {
+    //             handler.value = fsmContext.environment[keyPath: keyPath]
+    //         }
+    //     }
+    // }
+
+    public mutating func takeSnapshot(
+        environmentVariables: Set<PartialKeyPath<Environment>>,
+        handlers: Handlers
+    ) {
+        var environment = Environment()
+        for keyPath in environmentVariables {
+            if let handler = handlers.sensors[keyPath] {
+                handler.update(environment: &environment, with: handler.takeSnapshot())
+            } else if let handler = handlers.externalVariables[keyPath] {
+                handler.update(environment: &environment, with: handler.takeSnapshot())
+            } else if let handler = handlers.globalVariables[keyPath] {
+                handler.update(environment: &environment, with: handler.value)
+            } else if let handler = handlers.actuators[keyPath] {
+                handler.update(environment: &environment, with: actuatorValues[handler.index])
+            }
+        }
+        fsmContext.environment = environment
+    }
+
+
         /// Create a new empty state that always transitions to particular
         /// targets and add it to states.
         ///

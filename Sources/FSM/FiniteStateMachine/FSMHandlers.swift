@@ -1,18 +1,18 @@
 public struct FSMHandlers<Environment: EnvironmentSnapshot> {
 
-    public var actuators: [PartialKeyPath<Environment>: AnyActuatorHandler<Environment>]
+    public var actuators: [AnyActuatorHandler<Environment>]
 
-    public var externalVariables: [PartialKeyPath<Environment>: AnyExternalVariableHandler<Environment>]
+    public var externalVariables: [AnyExternalVariableHandler<Environment>]
 
-    public var globalVariables: [PartialKeyPath<Environment>: AnyGlobalVariableHandler<Environment>]
+    public var globalVariables: [AnyGlobalVariableHandler<Environment>]
 
-    public var sensors: [PartialKeyPath<Environment>: AnySensorHandler<Environment>]
+    public var sensors: [AnySensorHandler<Environment>]
 
     public init(
-        actuators: [PartialKeyPath<Environment>: AnyActuatorHandler<Environment>],
-        externalVariables: [PartialKeyPath<Environment>: AnyExternalVariableHandler<Environment>],
-        globalVariables: [PartialKeyPath<Environment>: AnyGlobalVariableHandler<Environment>],
-        sensors: [PartialKeyPath<Environment>: AnySensorHandler<Environment>]
+        actuators: [AnyActuatorHandler<Environment>],
+        externalVariables: [AnyExternalVariableHandler<Environment>],
+        globalVariables: [AnyGlobalVariableHandler<Environment>],
+        sensors: [AnySensorHandler<Environment>]
     ) {
         self.actuators = actuators
         self.externalVariables = externalVariables

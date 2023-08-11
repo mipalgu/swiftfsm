@@ -85,39 +85,4 @@ public struct FSMData<
         fsmContext.status = .suspended(transitioned: currentState != previousState)
     }
 
-    public mutating func saveSnapshot(
-        environmentVariables: Set<PartialKeyPath<Environment>>,
-        handlers: Handlers
-    ) {
-        for keyPath in environmentVariables {
-            if let handler = handlers.actuators[keyPath] {
-                handler.saveSnapshot(value: fsmContext.environment[keyPath: keyPath])
-                actuatorValues[handler.index] = fsmContext.environment[keyPath: keyPath]
-            } else if let handler = handlers.externalVariables[keyPath] {
-                handler.saveSnapshot(value: fsmContext.environment[keyPath: keyPath])
-            } else if let handler = handlers.globalVariables[keyPath] {
-                handler.value = fsmContext.environment[keyPath: keyPath]
-            }
-        }
-    }
-
-    public mutating func takeSnapshot(
-        environmentVariables: Set<PartialKeyPath<Environment>>,
-        handlers: Handlers
-    ) {
-        var environment = Environment()
-        for keyPath in environmentVariables {
-            if let handler = handlers.sensors[keyPath] {
-                handler.update(environment: &environment, with: handler.takeSnapshot())
-            } else if let handler = handlers.externalVariables[keyPath] {
-                handler.update(environment: &environment, with: handler.takeSnapshot())
-            } else if let handler = handlers.globalVariables[keyPath] {
-                handler.update(environment: &environment, with: handler.value)
-            } else if let handler = handlers.actuators[keyPath] {
-                handler.update(environment: &environment, with: actuatorValues[handler.index])
-            }
-        }
-        fsmContext.environment = environment
-    }
-
 }

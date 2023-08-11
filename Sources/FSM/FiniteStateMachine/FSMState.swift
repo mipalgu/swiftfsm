@@ -10,25 +10,29 @@ public struct FSMState<
 
     public let name: String
 
-    public let environmentVariables: Set<PartialKeyPath<Environment>>
-
     public let stateType: StateType
 
     public let transitions:
         [AnyTransition<AnyStateContext<Context, Environment, Parameters, Result>, StateID>]
 
+    public let takeSnapshot: @Sendable (UnsafePointer<Environment>, FSMHandlers<Environment>) -> Void
+
+    public let saveSnapshot: @Sendable (UnsafePointer<Environment>, FSMHandlers<Environment>) -> Void
+
     public init(
         id: StateID,
         name: String,
-        environmentVariables: Set<PartialKeyPath<Environment>>,
         stateType: StateType,
-        transitions: [AnyTransition<AnyStateContext<Context, Environment, Parameters, Result>, StateID>]
+        transitions: [AnyTransition<AnyStateContext<Context, Environment, Parameters, Result>, StateID>],
+        takeSnapshot: @Sendable @escaping (UnsafePointer<Environment>, FSMHandlers<Environment>) -> Void,
+        saveSnapshot: @Sendable @escaping (UnsafePointer<Environment>, FSMHandlers<Environment>) -> Void
     ) {
         self.id = id
         self.name = name
-        self.environmentVariables = environmentVariables
         self.stateType = stateType
         self.transitions = transitions
+        self.takeSnapshot = takeSnapshot
+        self.saveSnapshot = saveSnapshot
     }
 
 }
