@@ -119,9 +119,7 @@ where
         } else if context.data.fsmContext.status == .restarting {
             context.data.restart()
         } else {
-            context.data.fsmContext.status = .executing(
-                transitioned: context.data.currentState != context.data.previousState
-            )
+            context.data.fsmContext.status = .executing(transitioned: nextStateRaw != nil)
         }
     }
 

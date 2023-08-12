@@ -27,7 +27,7 @@ public struct LLFSMRinglet<
             }
             state.stateType.onResume(context: stateContext)
         }
-        if context.status.transitioned {
+        if context.previousState != context.currentState {
             state.stateType.onEntry(context: stateContext)
         }
         let result: StateID?

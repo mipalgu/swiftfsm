@@ -82,6 +82,10 @@ public final class SchedulerContext<
         data.currentState
     }
 
+    public var previousState: StateID {
+        data.previousState
+    }
+
     public var suspendState: StateID {
         data.suspendState
     }
