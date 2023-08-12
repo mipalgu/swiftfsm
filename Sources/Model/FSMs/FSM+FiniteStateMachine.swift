@@ -194,7 +194,7 @@ extension FSM {
                         switch type {
                         case .actuator:
                             let handler = handlers.actuators[index]
-                            handler.update(environment: environment, with: actuatorValues.advanced(by: index))
+                            handler.update(environment: environment, with: actuatorValues[index])
                         case .externalVariable:
                             let handler = handlers.externalVariables[index]
                             handler.update(environment: environment, with: handler.takeSnapshot())
