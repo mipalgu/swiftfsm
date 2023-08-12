@@ -1,22 +1,22 @@
 @testable import FSM
 import Model
 
-public struct FSMTester<
-    StateType: TypeErasedState,
-    Ringlet: RingletProtocol,
-    Parameters: DataStructure,
-    Result: DataStructure,
-    Context: ContextProtocol,
-    Environment: EnvironmentSnapshot
-> where
-    StateType.FSMsContext == Context,
-    StateType.Environment == Environment,
-    Ringlet.StateType == StateType,
-    Ringlet.TransitionType == AnyTransition<
-        AnyStateContext<Context, Environment, Parameters, Result>,
+public struct FSMTester<Model: FSM> where
+    Model.StateType.FSMsContext == Model.Context,
+    Model.StateType.Environment == Model.Environment,
+    Model.Ringlet.StateType == Model.StateType,
+    Model.Ringlet.TransitionType == AnyTransition<
+        AnyStateContext<Model.Context, Model.Environment, Model.Parameters, Model.Result>,
         StateID
     >
 {
+
+    public typealias StateType = Model.StateType
+    public typealias Ringlet = Model.Ringlet
+    public typealias Parameters = Model.Parameters
+    public typealias Result = Model.Result
+    public typealias Context = Model.Context
+    public typealias Environment = Model.Environment
 
     public enum NextResult: Hashable, Codable, Sendable {
 
@@ -78,6 +78,12 @@ public struct FSMTester<
 
     }
 
+    private let model: Model
+
+    private let stateIDs: [String: StateID]
+
+    private let stateNames: [StateID: String]
+
     public let context: SchedulerContext<StateType, Ringlet.Context, Context, Environment, Parameters, Result>
 
     public let fsm: FiniteStateMachine<
@@ -133,26 +139,34 @@ public struct FSMTester<
         }
     }
 
-    public init<Model: FSM>(
+    public init(
         model: Model,
         actuators: [(PartialKeyPath<Environment>, AnyActuatorHandler<Environment>)],
         externalVariables: [(PartialKeyPath<Environment>, AnyExternalVariableHandler<Environment>)],
         globalVariables: [(PartialKeyPath<Environment>, AnyGlobalVariableHandler<Environment>)],
         sensors: [(PartialKeyPath<Environment>, AnySensorHandler<Environment>)]
-    ) where
-        Model.StateType == StateType,
-        Model.Ringlet == Ringlet,
-        Model.Parameters == Parameters,
-        Model.Result == Result,
-        Model.Context == Context,
-        Model.Environment == Environment
-    {
+    ) {
         let (fsm, contextFactory) = model.initial(
             actuators: actuators,
             externalVariables: externalVariables,
             globalVariables: globalVariables,
             sensors: sensors
         )
+        let typedFSM = fsm as! FiniteStateMachine<
+            StateType,
+            Ringlet,
+            Parameters,
+            Result,
+            Context,
+            Environment
+        >
+        self.model = model
+        self.stateIDs = Dictionary(uniqueKeysWithValues: typedFSM.stateContainer.states.map {
+            ($0.name, $0.id)
+        })
+        self.stateNames = Dictionary(uniqueKeysWithValues: typedFSM.stateContainer.states.map {
+            ($0.id, $0.name)
+        })
         // swiftlint:disable force_cast
         self.context = contextFactory(EmptyDataStructure()) as! SchedulerContext<
             StateType,
@@ -162,14 +176,7 @@ public struct FSMTester<
             Parameters,
             Result
         >
-        self.fsm = fsm as! FiniteStateMachine<
-            StateType,
-            Ringlet,
-            Parameters,
-            Result,
-            Context,
-            Environment
-        >
+        self.fsm = typedFSM
         // swiftlint:enable force_cast
     }
 
@@ -181,6 +188,16 @@ public struct FSMTester<
 
     public func saveSnapshot() {
         fsm.saveSnapshot(context: context)
+    }
+
+    public func state(
+        for keyPath: KeyPath<Model, StateInformation>
+    ) -> FSMState<StateType, Parameters, Result, Context, Environment> {
+        let information = model[keyPath: keyPath]
+        guard let id = stateIDs[information.name] else {
+            fatalError("State does not exist within finite state machine.")
+        }
+        return fsm.stateContainer.states[id]
     }
 
     public func takeSnapshot() {
