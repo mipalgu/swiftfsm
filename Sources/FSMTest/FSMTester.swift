@@ -1,7 +1,7 @@
 @testable import FSM
 import Model
 
-public struct FSMTester<Model: FSM> where
+public final class FSMTester<Model: FSM> where
     Model.StateType.FSMsContext == Model.Context,
     Model.StateType.Environment == Model.Environment,
     Model.Ringlet.StateType == Model.StateType,
