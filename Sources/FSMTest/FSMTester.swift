@@ -186,6 +186,14 @@ public final class FSMTester<Model: FSM> where
         return NextResult(status: context.data.fsmContext.status, context: context)
     }
 
+    @discardableResult
+    public func ringlet() -> NextResult {
+        takeSnapshot()
+        let result = next()
+        saveSnapshot()
+        return result
+    }
+
     public func saveSnapshot() {
         fsm.saveSnapshot(context: context)
     }
