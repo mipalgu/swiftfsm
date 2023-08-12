@@ -1,4 +1,5 @@
 import FSM
+import Foundation
 
 /// Contains functionality that enables converting this FSM to a
 /// `FiniteStateMachine` that can be executed within a schedule.
@@ -161,7 +162,7 @@ extension FSM {
         let transitions = transitions
         /// Convert the anyStates into an array of states where the id's of the
         /// states match the index of the state within this array.
-        var states = anyStates.map {
+        var states = anyStates.sorted { $0.value.information.name < $1.value.information.name }.map {
             let oldID = $1.information.id
             let newID = id(for: $1.information.id)
             let name = $1.information.name
