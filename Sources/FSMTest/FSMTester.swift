@@ -141,10 +141,10 @@ public final class FSMTester<Model: FSM> where
 
     public init(
         model: Model,
-        actuators: [(PartialKeyPath<Environment>, AnyActuatorHandler<Environment>)],
-        externalVariables: [(PartialKeyPath<Environment>, AnyExternalVariableHandler<Environment>)],
-        globalVariables: [(PartialKeyPath<Environment>, AnyGlobalVariableHandler<Environment>)],
-        sensors: [(PartialKeyPath<Environment>, AnySensorHandler<Environment>)]
+        actuators: [(PartialKeyPath<Environment>, AnyActuatorHandler<Environment>)] = [],
+        externalVariables: [(PartialKeyPath<Environment>, AnyExternalVariableHandler<Environment>)] = [],
+        globalVariables: [(PartialKeyPath<Environment>, AnyGlobalVariableHandler<Environment>)] = [],
+        sensors: [(PartialKeyPath<Environment>, AnySensorHandler<Environment>)] = []
     ) {
         let (fsm, contextFactory) = model.initial(
             actuators: actuators,
