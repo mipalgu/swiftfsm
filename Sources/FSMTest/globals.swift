@@ -3,7 +3,7 @@ import Model
 
 public func actuator<Handler: ActuatorHandler, Environment: EnvironmentSnapshot>(
     _ handler: Handler,
-    mapsTo keyPath: WritableKeyPath<Environment, EnvironmentProtocolReadOnlyProperty<Handler.Value>>
+    mapsTo keyPath: WritableKeyPath<Environment, EnvironmentProtocolWriteOnlyProperty<Handler.Value>>
 ) -> (PartialKeyPath<Environment>, AnyActuatorHandler<Environment>) {
     let valuePath = keyPath.appending(path: \.wrappedValue)
     return (valuePath, AnyActuatorHandler(handler, mapsTo: valuePath))
@@ -11,7 +11,7 @@ public func actuator<Handler: ActuatorHandler, Environment: EnvironmentSnapshot>
 
 public func externalVariable<Handler: ExternalVariableHandler, Environment: EnvironmentSnapshot>(
     _ handler: Handler,
-    mapsTo keyPath: WritableKeyPath<Environment, EnvironmentProtocolReadOnlyProperty<Handler.Value>>
+    mapsTo keyPath: WritableKeyPath<Environment, EnvironmentProtocolReadWriteProperty<Handler.Value>>
 ) -> (PartialKeyPath<Environment>, AnyExternalVariableHandler<Environment>) {
     let valuePath = keyPath.appending(path: \.wrappedValue)
     return (valuePath, AnyExternalVariableHandler(handler, mapsTo: valuePath))
@@ -19,7 +19,7 @@ public func externalVariable<Handler: ExternalVariableHandler, Environment: Envi
 
 public func globalVariable<Handler: GlobalVariableHandler, Environment: EnvironmentSnapshot>(
     _ handler: Handler,
-    mapsTo keyPath: WritableKeyPath<Environment, EnvironmentProtocolReadOnlyProperty<Handler.Value>>
+    mapsTo keyPath: WritableKeyPath<Environment, EnvironmentProtocolReadWriteProperty<Handler.Value>>
 ) -> (PartialKeyPath<Environment>, AnyGlobalVariableHandler<Environment>) {
     let valuePath = keyPath.appending(path: \.wrappedValue)
     return (valuePath, AnyGlobalVariableHandler(handler, mapsTo: valuePath))
