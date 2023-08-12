@@ -13,6 +13,10 @@ let package = Package(
         .library(
             name: "swiftfsm",
             targets: ["FSM", "InMemoryVariables", "Model", "LLFSMs"]),
+        .library(
+            name: "FSMTest",
+            targets: ["FSMTest"]
+        )
     ],
     dependencies: [
         // Dependencies declare other packages that this package depends on.
@@ -33,6 +37,10 @@ let package = Package(
         .target(
             name: "LLFSMs",
             dependencies: ["FSM", "Model"]),
+        .target(
+            name: "FSMTest",
+            dependencies: ["FSM", "Model"]
+        ),
         .testTarget(
             name: "Mocks",
             dependencies: ["FSM", "Model", "LLFSMs"]),
