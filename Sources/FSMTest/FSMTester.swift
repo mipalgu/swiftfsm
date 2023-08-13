@@ -99,6 +99,14 @@ public final class FSMTester<Model: FSM> where
         context.transitioned
     }
 
+    public var duration: Duration {
+        get {
+            context.duration
+        } set {
+            context.duration = newValue
+        }
+    }
+
     public var initialState: FSMState<StateType, Parameters, Result, Context, Environment> {
         fsm.stateContainer.states[context.data.initialState]
     }
