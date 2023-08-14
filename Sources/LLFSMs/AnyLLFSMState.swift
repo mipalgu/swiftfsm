@@ -23,10 +23,10 @@ public struct AnyLLFSMState<
     public var erased: Self { self }
 
     public static var emptyState: AnyLLFSMState<FSMsContext, Environment, Parameters, Result> {
-        AnyLLFSMState(EmptyLLFSMState())
+        AnyLLFSMState(EmptyLLFSMState(), initialContext: EmptyDataStructure())
     }
 
-    public init<Base: LLFSMState>(_ base: Base)
+    public init<Base: LLFSMState>(_ base: Base, initialContext: Base.Context)
     where
         Base.FSMsContext == FSMsContext,
         Base.Environment == Environment,
@@ -36,7 +36,7 @@ public struct AnyLLFSMState<
         self.base = base
         self._initialContext = {
             StateContext<Base.Context, FSMsContext, Environment, Parameters, Result>(
-                context: Base.Context(),
+                context: initialContext,
                 fsmContext: $0
             )
         }

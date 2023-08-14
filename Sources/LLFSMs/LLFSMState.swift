@@ -7,6 +7,8 @@ where
 
     associatedtype Context = EmptyDataStructure
 
+    var initialContext: Context { get }
+
     func onEntry(context: StateContext<Context, FSMsContext, Environment, Parameters, Result>)
 
     func `internal`(context: StateContext<Context, FSMsContext, Environment, Parameters, Result>)
@@ -22,7 +24,7 @@ where
 extension LLFSMState {
 
     public var erased: AnyLLFSMState<FSMsContext, Environment, Parameters, Result> {
-        AnyLLFSMState(self)
+        AnyLLFSMState(self, initialContext: initialContext)
     }
 
     public func onEntry(context _: StateContext<Context, FSMsContext, Environment, Parameters, Result>) {}
@@ -34,5 +36,11 @@ extension LLFSMState {
     public func onSuspend(context _: StateContext<Context, FSMsContext, Environment, Parameters, Result>) {}
 
     public func onResume(context _: StateContext<Context, FSMsContext, Environment, Parameters, Result>) {}
+
+}
+
+extension LLFSMState where Context: EmptyInitialisable {
+
+    public var initialContext: Context { Context() }
 
 }

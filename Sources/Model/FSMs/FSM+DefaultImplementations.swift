@@ -20,3 +20,15 @@ extension FSM {
     public var suspendState: KeyPath<Self, StateInformation>? { nil }
 
 }
+
+extension FSM where Context: EmptyInitialisable {
+
+    public var initialContext: Context { Context() }
+
+}
+
+extension FSM where Ringlet.Context: EmptyInitialisable {
+
+    public var initialRingletContext: Ringlet.Context { Ringlet.Context() }
+
+}

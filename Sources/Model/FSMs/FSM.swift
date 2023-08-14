@@ -19,6 +19,12 @@ public protocol FSM: FSMProtocol, EmptyInitialisable {
     /// The name of this finite state machine.
     var name: String { get }
 
+    /// The initial context that newly created finite state machines receive.
+    var initialContext: Context { get }
+
+    /// The initial ringlet context that newly created ringlets receive.
+    var initialRingletContext: Ringlet.Context { get }
+
     /// A keypath to the initial state of this finite state machine.
     ///
     /// Generally one uses a `StateProperty` in order to define states. One can

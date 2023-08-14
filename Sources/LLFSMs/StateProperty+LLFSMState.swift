@@ -35,7 +35,7 @@ extension StateProperty {
         Result: DataStructure
     >(
         name: String,
-        context _: StatesContext.Type,
+        initialContext: StatesContext,
         uses environmentVariables: PartialKeyPath<Root.Environment>...,
         onEntry:
             @Sendable
@@ -71,6 +71,7 @@ extension StateProperty {
         let onResume = verbose > 1 ? { print(name + ".onResume"); onResume($0) } : onResume
         self.init(
             wrappedValue: CallbackLLFSMState(
+                initialContext: initialContext,
                 onEntry: onEntry,
                 internal: `internal`,
                 onExit: onExit,

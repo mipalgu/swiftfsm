@@ -25,7 +25,10 @@ public struct CallbackLLFSMState<
 
     private let _onResume: (StateContext<StatesContext, FSMsContext, Environment, Parameters, Result>) -> Void
 
+    public let initialContext: Context
+
     public init(
+        initialContext: Context,
         onEntry:
             @escaping (StateContext<StatesContext, FSMsContext, Environment, Parameters, Result>)
             -> Void = { _ in },
@@ -42,11 +45,39 @@ public struct CallbackLLFSMState<
             @escaping (StateContext<StatesContext, FSMsContext, Environment, Parameters, Result>)
             -> Void = { _ in }
     ) {
+        self.initialContext = initialContext
         self._onEntry = onEntry
         self._internal = `internal`
         self._onExit = onExit
         self._onSuspend = onSuspend
         self._onResume = onResume
+    }
+
+    public init(
+        onEntry:
+            @escaping (StateContext<StatesContext, FSMsContext, Environment, Parameters, Result>)
+            -> Void = { _ in },
+        internal:
+            @escaping (StateContext<StatesContext, FSMsContext, Environment, Parameters, Result>)
+            -> Void = { _ in },
+        onExit:
+            @escaping (StateContext<StatesContext, FSMsContext, Environment, Parameters, Result>)
+            -> Void = { _ in },
+        onSuspend:
+            @escaping (StateContext<StatesContext, FSMsContext, Environment, Parameters, Result>)
+            -> Void = { _ in },
+        onResume:
+            @escaping (StateContext<StatesContext, FSMsContext, Environment, Parameters, Result>)
+            -> Void = { _ in }
+    ) where Context: EmptyInitialisable {
+        self.init(
+            initialContext: Context(),
+            onEntry: onEntry,
+            internal: `internal`,
+            onExit: onExit,
+            onSuspend: onSuspend,
+            onResume: onResume
+        )
     }
 
     public func onEntry(

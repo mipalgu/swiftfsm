@@ -1,1 +1,1 @@
-public typealias ContextProtocol = DataStructure & EmptyInitialisable
+public typealias ContextProtocol = DataStructure

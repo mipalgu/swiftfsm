@@ -24,6 +24,10 @@ where
 
     public typealias States = StateContainer<StateType, Parameters, Result, Context, Environment>
 
+    public let initialContext: Context
+
+    public let initialRingletContext: Ringlet.Context
+
     public let stateContainer: States
 
     public let ringlet: Ringlet
@@ -42,7 +46,7 @@ where
 
     public func initialData(with parameters: Parameters) -> Data {
         let fsmContext = FSMContext(
-            context: Context(),
+            context: initialContext,
             environment: Environment(),
             parameters: parameters,
             result: Result?.none
@@ -51,7 +55,7 @@ where
             acceptingStates: stateContainer.states.map { $0.transitions.isEmpty },
             stateContexts: stateContainer.states.map { $0.stateType.initialContext(fsmContext: fsmContext) },
             fsmContext: fsmContext,
-            ringletContext: Ringlet.Context(),
+            ringletContext: initialRingletContext,
             actuatorValues: handlers.actuators.map { $0.initialValue },
             initialState: initialState,
             currentState: initialState,
@@ -65,6 +69,8 @@ where
         stateContainer: States,
         ringlet: Ringlet,
         handlers: Handlers,
+        initialContext: Context,
+        initialRingletContext: Ringlet.Context,
         initialState: Int,
         initialPreviousState: Int,
         suspendState: Int
@@ -72,6 +78,8 @@ where
         self.stateContainer = stateContainer
         self.ringlet = ringlet
         self.handlers = handlers
+        self.initialContext = initialContext
+        self.initialRingletContext = initialRingletContext
         self.initialState = initialState
         self.initialPreviousState = initialPreviousState
         self.suspendState = suspendState

@@ -5,7 +5,7 @@ import Model
 
 public struct FSMMock: LLFSM {
 
-    public struct Context: ContextProtocol {
+    public struct Context: ContextProtocol, EmptyInitialisable {
 
         public var fsmCount: Int = 0
 
@@ -69,7 +69,7 @@ public struct FSMMock: LLFSM {
 
     @State(
         name: "Pang",
-        context: PangData.self,
+        initialContext: PangData(),
         uses: \.$exitSensor,
         onEntry: { $0.stateCount = 0 },
         internal: {

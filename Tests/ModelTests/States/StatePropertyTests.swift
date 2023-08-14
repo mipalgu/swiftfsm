@@ -34,7 +34,7 @@ private struct TempFSM: LLFSM {
     @State(name: "Pang")
     var pang = EmptyLLFSMState()
 
-    struct PongContext: ContextProtocol {
+    struct PongContext: ContextProtocol, EmptyInitialisable {
 
         var executeOnEntry: Bool = false
 

@@ -288,6 +288,8 @@ extension FSM {
             stateContainer: StateContainer(states: states),
             ringlet: Ringlet(),
             handlers: handlers,
+            initialContext: initialContext,
+            initialRingletContext: initialRingletContext,
             initialState: initialState,
             initialPreviousState: previousState,
             suspendState: suspendState
