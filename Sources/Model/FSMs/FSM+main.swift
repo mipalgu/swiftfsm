@@ -1,3 +1,5 @@
+import FSM
+
 extension FSM {
 
     public var defaultArrangement: SingleMachineArrangement {
@@ -7,6 +9,10 @@ extension FSM {
     public func main() throws {
         try defaultArrangement.main()
     }
+
+}
+
+extension FSM where Self: EmptyInitialisable {
 
     public static var defaultArrangement: SingleMachineArrangement {
         Self().defaultArrangement
