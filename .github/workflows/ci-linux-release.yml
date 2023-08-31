@@ -1,0 +1,39 @@
+name: Ubuntu 20.04 Swift Release CI
+
+on:
+  push:
+    branches: [develop, main]
+  pull_request:
+    branches: [develop, main]
+
+jobs:
+
+  exec-ci-release:
+    runs-on: ubuntu-20.04
+
+    steps:
+      - uses: swift-actions/setup-swift@v1
+        with:
+            swift-version: "5.7"
+
+      - name: Setup SSH Key
+        run: | 
+            rm -rf ~/.ssh
+            mkdir -m 0700 ~/.ssh
+            echo "${{ secrets.WORKFLOWS_SSH_PRIVATE_KEY }}" > ~/.ssh/id_ed25519
+            echo "${{ secrets.WORKFLOWS_SSH_PUBLIC_KEY }}" > ~/.ssh/id_ed25519.pub
+            chmod 0600 ~/.ssh/id_ed25519
+            eval "$(ssh-agent -s)"
+            ssh-add ~/.ssh/id_ed25519
+
+      - name: Checkout repo
+        uses: actions/checkout@v2
+      
+      #- name: Reconfigure Private Repo URLs
+      #  run: sed -i 's/git@github.com:/https:\/\/${{ secrets.ACCESS_TOKEN }}@github.com\//g' Package.swift
+
+      - name: Release build
+        run: swift build -c release
+
+      - name: Release Test
+        run: swift test -c release

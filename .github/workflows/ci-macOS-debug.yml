@@ -1,0 +1,37 @@
+name: MacOS Monterey Swift Debug CI
+
+on:
+  push:
+    branches: [develop, main]
+  pull_request:
+    branches: [develop, main]
+
+jobs:
+
+  exec-mac-ci-debug:
+    runs-on: macos-12
+
+    steps:
+      - uses: swift-actions/setup-swift@v1
+        with:
+          swift-version: "5.7"
+
+      #- name: Install guunits
+      #  uses: mipalgu/install-guunits@main
+
+      - name: Setup SSH Key
+        uses: webfactory/ssh-agent@v0.5.4
+        with:
+          ssh-private-key: ${{ secrets.WORKFLOWS_SSH_PRIVATE_KEY }} 
+
+      - name: Checkout repo
+        uses: actions/checkout@v2
+      
+      #- name: Reconfigure Private Repo URLs
+      #  run: sed -i 's/git@github.com:/https:\/\/${{ secrets.ACCESS_TOKEN }}@github.com\//g' Package.swift
+
+      - name: Debug Build
+        run: swift build -c debug
+
+      - name: Debug Test
+        run: swift test

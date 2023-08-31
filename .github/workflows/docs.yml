@@ -1,0 +1,40 @@
+name: Generate Documentation
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+
+  generate-documentation:
+    runs-on: ubuntu-20.04
+
+    steps:
+      - uses: swift-actions/setup-swift@v1
+        with:
+            swift-version: "5.7"
+
+      - name: Setup SSH Key
+        run: | 
+            rm -rf ~/.ssh
+            mkdir -m 0700 ~/.ssh
+            echo "${{ secrets.WORKFLOWS_SSH_PRIVATE_KEY }}" > ~/.ssh/id_ed25519
+            echo "${{ secrets.WORKFLOWS_SSH_PUBLIC_KEY }}" > ~/.ssh/id_ed25519.pub
+            chmod 0600 ~/.ssh/id_ed25519
+            eval "$(ssh-agent -s)"
+            ssh-add ~/.ssh/id_ed25519
+
+      - name: Clone Repo 
+        uses: actions/checkout@v2
+
+      - name: Generate Documentation
+        uses: mipalgu/swiftpm-generate-documentation@main
+        with:
+            swift-version: "5.7"
+
+      - name: Pages Deployment
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./docs
+          force_orphan: true
