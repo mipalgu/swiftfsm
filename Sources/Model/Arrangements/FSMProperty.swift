@@ -62,4 +62,14 @@ public struct FSMProperty<Arrangement: ArrangementProtocol> {
 
     // swiftlint:enable line_length
 
+    init<FSM: Model.FSM>(
+        wrappedValue: FSM,
+        projectedValue: FSMInformation,
+        make: @escaping (Arrangement) -> (Executable, ((any DataStructure)?) -> AnySchedulerContext)
+    ) {
+        self.wrappedValue = wrappedValue
+        self.projectedValue = projectedValue
+        self.make = make
+    }
+
 }
