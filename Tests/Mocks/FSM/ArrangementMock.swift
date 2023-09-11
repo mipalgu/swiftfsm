@@ -5,13 +5,13 @@ import Model
 public struct ArrangementMock: Arrangement, EmptyInitialisable {
 
     @Actuator
-    public var exitActuator = InMemoryActuator<Bool>(id: "exit", initialValue: false)
+    public var exitActuator: InMemoryActuator<Bool>
 
     @ExternalVariable
-    public var exitExternalVariable = InMemoryExternalVariable<Bool>(id: "exit", initialValue: false)
+    public var exitExternalVariable: InMemoryExternalVariable<Bool>
 
     @Sensor
-    public var exitSensor = InMemorySensor<Bool>(id: "exit", initialValue: false)
+    public var exitSensor: InMemorySensor<Bool>
 
     @Machine(
         actuators: (\.$exitActuator, mapsTo: \.$exitActuator),
@@ -20,6 +20,14 @@ public struct ArrangementMock: Arrangement, EmptyInitialisable {
     )
     public var pingPong = FSMMock()
 
-    public init() {}
+    public init() {
+        self.init(name: "exit")
+    }
+
+    public init(name: String) {
+        self._exitActuator = Actuator(wrappedValue: InMemoryActuator(id: name, initialValue: false))
+        self._exitExternalVariable = ExternalVariable(wrappedValue: InMemoryExternalVariable(id: name, initialValue: false))
+        self._exitSensor = Sensor(wrappedValue: InMemorySensor(id: name, initialValue: false))
+    }
 
 }

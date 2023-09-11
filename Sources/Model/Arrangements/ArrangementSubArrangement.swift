@@ -1,14 +1,14 @@
 import FSM
 
 @propertyWrapper
-public final class SubArrangement<
+public final class ArrangementSubArrangement<
     Parent: ArrangementProtocol,
     Arrangement: ArrangementProtocol
 >: AnySubArrangement {
 
     public var wrappedValue: Arrangement
 
-    public var projectedValue: SubArrangement<Parent, Arrangement> {
+    public var projectedValue: ArrangementSubArrangement<Parent, Arrangement> {
         self
     }
 
