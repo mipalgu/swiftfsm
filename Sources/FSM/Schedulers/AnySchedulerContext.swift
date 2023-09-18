@@ -4,7 +4,7 @@ public class AnySchedulerContext {
 
     public internal(set) var fsmName: String
 
-    public internal(set) var duration: Duration
+    public var duration: Duration
 
     public internal(set) var transitioned: Bool
 

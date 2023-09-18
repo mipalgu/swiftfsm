@@ -8,9 +8,9 @@ public final class SchedulerContext<
     Result: DataStructure
 >: AnySchedulerContext {
 
-    var data: FSMData<RingletsContext, Parameters, Result, FSMsContext, Environment>
+    public var data: FSMData<RingletsContext, Parameters, Result, FSMsContext, Environment>
 
-    weak var stateContainer: StateContainer<StateType, Parameters, Result, FSMsContext, Environment>!
+    public weak var stateContainer: StateContainer<StateType, Parameters, Result, FSMsContext, Environment>!
 
     public var states: [FSMState<StateType, Parameters, Result, FSMsContext, Environment>] {
         stateContainer.states
