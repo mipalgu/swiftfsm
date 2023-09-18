@@ -1,4 +1,4 @@
-@testable import FSM
+import FSM
 import Model
 
 public final class FSMTester<Model: FSM> where
