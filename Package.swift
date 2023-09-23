@@ -19,7 +19,8 @@ let package = Package(
         )
     ],
     dependencies: [
-        .package(url: "https://github.com/apple/swift-docc-plugin", from: "1.1.0")
+        .package(url: "https://github.com/apple/swift-docc-plugin", from: "1.1.0"),
+        .package(url: "https://github.com/mipalgu/KripkeStructures", from: "1.1.2")
     ],
     targets: [
         // Targets are the basic building blocks of a package. A target can define a module or a test suite.
@@ -42,7 +43,10 @@ let package = Package(
         ),
         .target(
             name: "Verification",
-            dependencies: ["FSM"]
+            dependencies: [
+                "FSM",
+                .product(name: "KripkeStructures", package: "KripkeStructures")
+            ]
         ),
         .testTarget(
             name: "Mocks",
@@ -61,6 +65,10 @@ let package = Package(
             dependencies: ["InMemoryVariables"]),
         .testTarget(
             name: "VerificationTests",
-            dependencies: ["FSM", "Verification"])
+            dependencies: [
+                "FSM",
+                "Verification",
+                .product(name: "KripkeStructures", package: "KripkeStructures"
+            )])
     ]
 )
