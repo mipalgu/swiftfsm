@@ -1,13 +1,16 @@
 import FSM
 
 /// Represents the metadata associated with a timeslot.
-struct Timeslot: DataStructure {
+struct Timeslot: Hashable {
 
     /// The set of id's of executables that are permitted to execute within this
     /// timeslot.
     var executables: Set<Int>
 
-    // var callChain: CallChain
+    /// The call chain of this timeslot.
+    ///
+    /// The call chain represents the status of the stack for the this timeslot.
+    var callChain: CallChain
 
     // var externalDependencies: [ShallowDependency]
 

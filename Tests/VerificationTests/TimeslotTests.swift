@@ -1,11 +1,30 @@
 import Foundation
+import FSM
 import XCTest
 
 @testable import Verification
 
 final class TimeslotTests: XCTestCase {
 
-    let executables: Set<Int> = [1, 2, 3]
+    let executables: Set<Int> = [0, 1, 2, 3]
+
+    let callChain = CallChain(
+        root: 0,
+        calls: [
+            Call(
+                caller: FSMInformation(id: 0, name: "exe0", dependencies: []),
+                callee: FSMInformation(id: 1, name: "exe1", dependencies: []),
+                parameters: [:],
+                method: .synchronous
+            ),
+            Call(
+                caller: FSMInformation(id: 1, name: "exe1", dependencies: []),
+                callee: FSMInformation(id: 2, name: "exe2", dependencies: []),
+                parameters: [:],
+                method: .synchronous
+            )
+        ]
+    )
 
     let startingTime: UInt = 34
 
@@ -15,6 +34,7 @@ final class TimeslotTests: XCTestCase {
 
     var timeslot = Timeslot(
         executables: [],
+        callChain: CallChain(root: 0, calls: []),
         startingTime: 0,
         duration: 0,
         cyclesExecuted: 0
@@ -23,6 +43,7 @@ final class TimeslotTests: XCTestCase {
     override func setUp() {
         timeslot = Timeslot(
             executables: executables,
+            callChain: callChain,
             startingTime: startingTime,
             duration: duration,
             cyclesExecuted: cyclesExecuted
@@ -31,6 +52,7 @@ final class TimeslotTests: XCTestCase {
 
     func testInit() {
         XCTAssertEqual(executables, timeslot.executables)
+        XCTAssertEqual(callChain, timeslot.callChain)
         XCTAssertEqual(startingTime, timeslot.startingTime)
         XCTAssertEqual(duration, timeslot.duration)
         XCTAssertEqual(cyclesExecuted, timeslot.cyclesExecuted)
@@ -41,14 +63,33 @@ final class TimeslotTests: XCTestCase {
         let newExecutables: Set<Int> = [4, 5, 6]
         timeslot.executables = newExecutables
         XCTAssertEqual(newExecutables, timeslot.executables)
+        XCTAssertEqual(callChain, timeslot.callChain)
         XCTAssertEqual(startingTime, timeslot.startingTime)
         XCTAssertEqual(duration, timeslot.duration)
         XCTAssertEqual(cyclesExecuted, timeslot.cyclesExecuted)
         timeslot.executables = executables
         XCTAssertEqual(timeslot, original)
+        let newCalls = callChain.calls + [
+            Call(
+                caller: FSMInformation(id: 2, name: "exe2", dependencies: []),
+                callee: FSMInformation(id: 3, name: "exe3", dependencies: []),
+                parameters: [:],
+                method: .synchronous
+            )
+        ]
+        let newCallChain = CallChain(root: 0, calls: newCalls)
+        timeslot.callChain = newCallChain
+        XCTAssertEqual(executables, timeslot.executables)
+        XCTAssertEqual(newCallChain, timeslot.callChain)
+        XCTAssertEqual(startingTime, timeslot.startingTime)
+        XCTAssertEqual(duration, timeslot.duration)
+        XCTAssertEqual(cyclesExecuted, timeslot.cyclesExecuted)
+        timeslot.callChain = callChain
+        XCTAssertEqual(timeslot, original)
         let newStartingTime: UInt = 123
         timeslot.startingTime = newStartingTime
         XCTAssertEqual(executables, timeslot.executables)
+        XCTAssertEqual(callChain, timeslot.callChain)
         XCTAssertEqual(newStartingTime, timeslot.startingTime)
         XCTAssertEqual(duration, timeslot.duration)
         XCTAssertEqual(cyclesExecuted, timeslot.cyclesExecuted)
@@ -57,6 +98,7 @@ final class TimeslotTests: XCTestCase {
         let newDuration: UInt = 98
         timeslot.duration = newDuration
         XCTAssertEqual(executables, timeslot.executables)
+        XCTAssertEqual(callChain, timeslot.callChain)
         XCTAssertEqual(startingTime, timeslot.startingTime)
         XCTAssertEqual(newDuration, timeslot.duration)
         XCTAssertEqual(cyclesExecuted, timeslot.cyclesExecuted)
@@ -65,6 +107,7 @@ final class TimeslotTests: XCTestCase {
         let newCyclesExecuted: UInt = 10
         timeslot.cyclesExecuted = newCyclesExecuted
         XCTAssertEqual(executables, timeslot.executables)
+        XCTAssertEqual(callChain, timeslot.callChain)
         XCTAssertEqual(startingTime, timeslot.startingTime)
         XCTAssertEqual(duration, timeslot.duration)
         XCTAssertEqual(newCyclesExecuted, timeslot.cyclesExecuted)
@@ -79,6 +122,19 @@ final class TimeslotTests: XCTestCase {
         timeslot.executables = newExecutables
         XCTAssertNotEqual(timeslot, original)
         timeslot.executables = executables
+        XCTAssertEqual(timeslot, original)
+        let newCalls = callChain.calls + [
+            Call(
+                caller: FSMInformation(id: 2, name: "exe2", dependencies: []),
+                callee: FSMInformation(id: 3, name: "exe3", dependencies: []),
+                parameters: [:],
+                method: .synchronous
+            )
+        ]
+        let newCallChain = CallChain(root: 0, calls: newCalls)
+        timeslot.callChain = newCallChain
+        XCTAssertNotEqual(timeslot, original)
+        timeslot.callChain = callChain
         XCTAssertEqual(timeslot, original)
         let newStartingTime: UInt = 123
         timeslot.startingTime = newStartingTime
@@ -108,6 +164,19 @@ final class TimeslotTests: XCTestCase {
         XCTAssertFalse(collection.contains(timeslot), "Expected timeslot to not exist in collection")
         timeslot.executables = executables
         XCTAssertTrue(collection.contains(timeslot), "Expected timeslot to exist in collection")
+        let newCalls = callChain.calls + [
+            Call(
+                caller: FSMInformation(id: 2, name: "exe2", dependencies: []),
+                callee: FSMInformation(id: 3, name: "exe3", dependencies: []),
+                parameters: [:],
+                method: .synchronous
+            )
+        ]
+        let newCallChain = CallChain(root: 0, calls: newCalls)
+        timeslot.callChain = newCallChain
+        XCTAssertFalse(collection.contains(timeslot), "Expected timeslot to not exist in collection")
+        timeslot.callChain = callChain
+        XCTAssertTrue(collection.contains(timeslot), "Expected timeslot to exist in collection")
         let newStartingTime: UInt = 123
         timeslot.startingTime = newStartingTime
         XCTAssertFalse(collection.contains(timeslot), "Expected timeslot to not exist in collection")
@@ -123,14 +192,6 @@ final class TimeslotTests: XCTestCase {
         XCTAssertFalse(collection.contains(timeslot), "Expected timeslot to not exist in collection")
         timeslot.cyclesExecuted = cyclesExecuted
         XCTAssertTrue(collection.contains(timeslot), "Expected timeslot to exist in collection")
-    }
-
-    func testCodable() throws {
-        let encoder = JSONEncoder()
-        let decoder = JSONDecoder()
-        let data = try encoder.encode(timeslot)
-        let decoded = try decoder.decode(Timeslot.self, from: data)
-        XCTAssertEqual(timeslot, decoded)
     }
 
     func testTimeRangeComputesCorrectRange() {
@@ -152,18 +213,31 @@ final class TimeslotTests: XCTestCase {
     }
 
     func testAfterExecutingTimeUntilForTimeslotLargerThanDuration() {
-        let other = Timeslot(executables: [], startingTime: 50, duration: 12, cyclesExecuted: 0)
+        let other = Timeslot(
+            executables: [],
+            callChain: CallChain(root: 0, calls: []),
+            startingTime: 50,
+            duration: 12,
+            cyclesExecuted: 0
+        )
         XCTAssertEqual(4, timeslot.afterExecutingTimeUntil(timeslot: other, cycleLength: 100))
     }
 
     func testAfterExecutingTimeUntilForTimeslotSmallerThanStartingTime() {
-        let other = Timeslot(executables: [], startingTime: 12, duration: 12, cyclesExecuted: 0)
+        let other = Timeslot(
+            executables: [],
+            callChain: CallChain(root: 0, calls: []),
+            startingTime: 12,
+            duration: 12,
+            cyclesExecuted: 0
+        )
         XCTAssertEqual(16, timeslot.afterExecutingTimeUntil(timeslot: other, cycleLength: 50))
     }
 
     func testAfterExecutingTimeUntilForTimeslotSameTimeIsZero() {
         let other = Timeslot(
             executables: [],
+            callChain: CallChain(root: 0, calls: []),
             startingTime: startingTime + duration,
             duration: 12,
             cyclesExecuted: 0
@@ -178,6 +252,7 @@ final class TimeslotTests: XCTestCase {
     func testTimeslotOverlapsWithTimeslotStartingDuringExecution() {
         let other = Timeslot(
             executables: [],
+            callChain: CallChain(root: 0, calls: []),
             startingTime: startingTime + 1,
             duration: duration,
             cyclesExecuted: 0
@@ -189,6 +264,7 @@ final class TimeslotTests: XCTestCase {
     func testTimeslotOverlapsWithTimeslotStartingAndEndingDuringExecution() {
         let other = Timeslot(
             executables: [],
+            callChain: CallChain(root: 0, calls: []),
             startingTime: startingTime + 1,
             duration: duration - 2,
             cyclesExecuted: 0
@@ -200,6 +276,7 @@ final class TimeslotTests: XCTestCase {
     func testTimeslotOverlapsWithTimeslotStartingBeforeExecution() {
         let other = Timeslot(
             executables: [],
+            callChain: CallChain(root: 0, calls: []),
             startingTime: startingTime - 1,
             duration: duration,
             cyclesExecuted: 0
@@ -211,6 +288,7 @@ final class TimeslotTests: XCTestCase {
     func testTimeslotOverlapsWithTimeslotStartingBeforeExecutionAndFinishingAfterExecution() {
         let other = Timeslot(
             executables: [],
+            callChain: CallChain(root: 0, calls: []),
             startingTime: startingTime - 1,
             duration: duration + 2,
             cyclesExecuted: 0
@@ -222,6 +300,7 @@ final class TimeslotTests: XCTestCase {
     func testTimeslotsOverlapWhenStartingAtFinishingTime() {
         let other = Timeslot(
             executables: [],
+            callChain: CallChain(root: 0, calls: []),
             startingTime: startingTime + duration,
             duration: duration,
             cyclesExecuted: 0
@@ -233,6 +312,7 @@ final class TimeslotTests: XCTestCase {
     func testTimeslotDoNotOverlapWhenDisjoint() {
         let other = Timeslot(
             executables: [],
+            callChain: CallChain(root: 0, calls: []),
             startingTime: startingTime + duration + 1,
             duration: duration,
             cyclesExecuted: 0
