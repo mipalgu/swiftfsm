@@ -9,6 +9,10 @@ public final class StateContext<
 
     public var context: StateContext
 
+    public override var customMirror: Mirror {
+        Mirror(reflecting: context)
+    }
+
     public var fsm: FSMsContext {
         get {
             fsmContext.context

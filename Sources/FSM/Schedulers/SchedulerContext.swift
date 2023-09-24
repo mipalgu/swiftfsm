@@ -25,6 +25,23 @@ public final class SchedulerContext<
         return clone
     }
 
+    public override var customMirror: Mirror {
+        Mirror(
+            self,
+            children: [
+                "currentState": data.currentState as Any,
+                "environment": data.fsmContext.environment as Any,
+                "fsmVars": data.fsmContext.context as Any,
+                "parameters": data.fsmContext.parameters as Any,
+                "result": data.fsmContext.result as Any,
+                "ringlet": data.ringletContext as Any,
+                "states": data.stateContexts as Any
+            ],
+            displayStyle: .class,
+            ancestorRepresentation: .suppressed
+        )
+    }
+
     public var states: [FSMState<StateType, Parameters, Result, FSMsContext, Environment>] {
         stateContainer.states
     }

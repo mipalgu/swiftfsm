@@ -1,4 +1,4 @@
-public class AnySchedulerContext {
+public class AnySchedulerContext: CustomReflectable {
 
     public internal(set) var fsmID: Int
 
@@ -19,6 +19,15 @@ public class AnySchedulerContext {
         )
         clone.startTime = startTime
         return clone
+    }
+
+    public var customMirror: Mirror {
+        Mirror(
+            self,
+            children: [],
+            displayStyle: .class,
+            ancestorRepresentation: .generated
+        )
     }
 
     public init(fsmID: Int, fsmName: String, duration: Duration = .zero, transitioned: Bool = true) {

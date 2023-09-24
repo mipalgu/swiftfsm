@@ -251,65 +251,74 @@ struct ExecutablePool {
 
     /// Generate a `KripkeStatePropertyList` representing the state of this
     /// pool.
-    // func propertyList(
-    //     forStep step: VerificationStep,
-    //     executingState state: String?,
-    //     // promises: [String: PromiseData],
-    //     resetClocks: Set<ExecutableID>?,
-    //     collapseIfPossible collapse: Bool
-    // ) -> KripkeStatePropertyList {
-    //     // let setPromises = setPromises(promises)
-    //     var fsmValues: [ExecutableID: KripkeStateProperty] = Dictionary(
-    //         uniqueKeysWithValues: executables.compactMap {
-    //             // guard !parameterisedFSMs.keys.contains($0.name) else {
-    //             //     return nil
-    //             // }
-    //             (
-    //                 $0.name,
-    //                 KripkeStateProperty(
-    //                     type: .Compound(KripkeStatePropertyList($0.asScheduleableFiniteStateMachine.base)),
-    //                     value: $0.asScheduleableFiniteStateMachine.base
-    //                 )
-    //             )
-    //         }
-    //     )
-    //     // fsmValues.reserveCapacity(fsmValues.count + parameterisedFSMs.count)
-    //     // for (key, val) in parameterisedFSMs {
-    //     //     guard val.status == .executing, let call = val.call else {
-    //     //         fsmValues[key] = KripkeStateProperty(type: .Optional(nil), value: Optional<[String: Any]>.none as Any)
-    //     //         continue
-    //     //     }
-    //     //     fsmValues[key] = KripkeStateProperty(
-    //     //         type: .Optional(KripkeStateProperty(
-    //     //             type: .Compound(KripkeStatePropertyList([
-    //     //                 "parameters": .init(
-    //     //                     type: .Compound(KripkeStatePropertyList(call.parameters.mapValues { KripkeStateProperty($0 as Any) })),
-    //     //                     value: call.parameters
-    //     //                 ),
-    //     //                 "result": KripkeStateProperty(call.result)
-    //     //             ])),
-    //     //             value: call
-    //     //         )),
-    //     //         value: Optional<ParameterisedStatus.CallData>.some(call) as Any
-    //     //     )
-    //     // }
-    //     // undoSetPromises(setPromises)
-    //     let clocks: KripkeStateProperty? = resetClocks.map { resetClocks in
-    //         let values = Dictionary(uniqueKeysWithValues: Set(fsmValues.keys).union(Set(parameterisedFSMs.keys)).map {
-    //             ($0, resetClocks.contains($0))
-    //         })
-    //         let props = values.mapValues {
-    //             KripkeStateProperty(type: .Bool, value: $0)
-    //         }
-    //         return KripkeStateProperty(type: .Compound(KripkeStatePropertyList(properties: props)), value: values)
-    //     }
-    //     var dict = [
-    //         "fsms": KripkeStateProperty(type: .Compound(KripkeStatePropertyList(properties: fsmValues)), value: fsmValues.mapValues(\.value)),
-    //         "pc": step.property(state: state, collapseIfPossible: collapse)
-    //     ]
-    //     dict["resetClocks"] = clocks
-    //     return KripkeStatePropertyList(properties: dict)
-    // }
+    func propertyList(
+        forStep step: VerificationStep,
+        executingState state: String?,
+        // promises: [String: PromiseData],
+        resetClocks: Set<ExecutableID>?,
+        collapseIfPossible collapse: Bool
+    ) -> KripkeStatePropertyList {
+        // let setPromises = setPromises(promises)
+        var fsmValues: [ExecutableID: KripkeStateProperty] = Dictionary(
+            uniqueKeysWithValues: executables.compactMap {
+                // guard !parameterisedFSMs.keys.contains($0.name) else {
+                //     return nil
+                // }
+                (
+                    $0.information.id,
+                    KripkeStateProperty(
+                        type: .Compound(KripkeStatePropertyList($0.context)),
+                        value: $0.context
+                    )
+                )
+            }
+        )
+        // fsmValues.reserveCapacity(fsmValues.count + parameterisedFSMs.count)
+        // for (key, val) in parameterisedFSMs {
+        //     guard val.status == .executing, let call = val.call else {
+        //         fsmValues[key] = KripkeStateProperty(type: .Optional(nil), value: Optional<[String: Any]>.none as Any)
+        //         continue
+        //     }
+        //     fsmValues[key] = KripkeStateProperty(
+        //         type: .Optional(KripkeStateProperty(
+        //             type: .Compound(KripkeStatePropertyList([
+        //                 "parameters": .init(
+        //                     type: .Compound(KripkeStatePropertyList(call.parameters.mapValues { KripkeStateProperty($0 as Any) })),
+        //                     value: call.parameters
+        //                 ),
+        //                 "result": KripkeStateProperty(call.result)
+        //             ])),
+        //             value: call
+        //         )),
+        //         value: Optional<ParameterisedStatus.CallData>.some(call) as Any
+        //     )
+        // }
+        // undoSetPromises(setPromises)
+        let clocks: KripkeStateProperty? = resetClocks.map { resetClocks in
+            let values = Dictionary(uniqueKeysWithValues: Set(fsmValues.keys).map {// .union(Set(parameterisedFSMs.keys)).map {
+                ($0, resetClocks.contains($0))
+            })
+            let props = Dictionary(uniqueKeysWithValues: values.map {
+                (String($0), KripkeStateProperty(type: .Bool, value: $1))
+            })
+            return KripkeStateProperty(
+                type: .Compound(KripkeStatePropertyList(properties: props)),
+                value: values
+            )
+        }
+        let strFSMValues = Dictionary(uniqueKeysWithValues: fsmValues.map {
+            (String($0), $1)
+        })
+        var dict = [
+            "fsms": KripkeStateProperty(
+                type: .Compound(KripkeStatePropertyList(properties: strFSMValues)),
+                value: strFSMValues.mapValues(\.value)
+            ),
+            "pc": step.property(state: state, collapseIfPossible: collapse)
+        ]
+        dict["resetClocks"] = clocks
+        return KripkeStatePropertyList(properties: dict)
+    }
 
     // mutating func handleCall(to fsm: String, parameters: [String: Any?]) {
     //     var status = self.parameterisedFSMs[fsm] ?? ParameterisedStatus(

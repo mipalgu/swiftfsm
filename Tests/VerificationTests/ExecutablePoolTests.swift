@@ -6,6 +6,30 @@ import XCTest
 
 final class ExectuablePoolTests: XCTestCase {
 
+    let timeslots = [
+        Timeslot(
+            executables: [0],
+            callChain: CallChain(root: 0, calls: []),
+            startingTime: 10,
+            duration: 30,
+            cyclesExecuted: 0
+        ),
+        Timeslot(
+            executables: [1],
+            callChain: CallChain(root: 1, calls: []),
+            startingTime: 50,
+            duration: 15,
+            cyclesExecuted: 0
+        ),
+        Timeslot(
+            executables: [2],
+            callChain: CallChain(root: 2, calls: []),
+            startingTime: 80,
+            duration: 5,
+            cyclesExecuted: 0
+        )
+    ]
+
     let startingMocks: [(FSMInformation, (AnySchedulerContext, ExecutableMock))] = {
         let exe0Context = FSMContext(
             context: EmptyDataStructure(),
@@ -330,6 +354,16 @@ final class ExectuablePoolTests: XCTestCase {
             XCTAssertNotNil(fetchedMock)
             XCTAssertEqual(mock, fetchedMock, "Unexpected mock at index \(index).")
         }
+    }
+
+    func testPropertyList() {
+        let plist = pool.propertyList(
+            forStep: .takeSnapshotAndStartTimeslot(timeslot: timeslots[0]),
+            executingState: "Initial",
+            resetClocks: [0],
+            collapseIfPossible: true
+        )
+        debugPrint(plist)
     }
 
 }
