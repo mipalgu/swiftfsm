@@ -11,8 +11,7 @@ final class AnyStateContextTests: XCTestCase {
             parameters: EmptyDataStructure(),
             result: EmptyDataStructure?.none
         )
-        let stateContext = AnyStateContext(fsmContext: fsmContext)
-        XCTAssertIdentical(stateContext.fsmContext, fsmContext)
+        _ = AnyStateContext(fsmContext: fsmContext)
     }
 
 }

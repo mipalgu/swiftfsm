@@ -53,7 +53,7 @@ final class FSMContextTests: XCTestCase {
         let parameters = FSMMock.Parameters()
         let result: FSMMock.Result? = FSMMock.Result()
         let result2: FSMMock.Result? = nil
-        let fsmContext = FSMContext(
+        var fsmContext = FSMContext(
             context: context,
             environment: environment,
             parameters: parameters,
@@ -91,7 +91,7 @@ final class FSMContextTests: XCTestCase {
     }
 
     func testIsFinished() {
-        let fsmContext = FSMContext(
+        var fsmContext = FSMContext(
             context: FSMMock.Context(),
             environment: FSMMock.Environment(),
             parameters: FSMMock.Parameters(),
@@ -108,7 +108,7 @@ final class FSMContextTests: XCTestCase {
     }
 
     func testIsSuspended() {
-        let fsmContext = FSMContext(
+        var fsmContext = FSMContext(
             context: FSMMock.Context(),
             environment: FSMMock.Environment(),
             parameters: FSMMock.Parameters(),
@@ -134,7 +134,7 @@ final class FSMContextTests: XCTestCase {
         let environment = FSMMock.Environment()
         let parameters = FSMMock.Parameters()
         let result: FSMMock.Result? = FSMMock.Result()
-        let fsmContext = FSMContext(
+        var fsmContext = FSMContext(
             context: context,
             environment: environment,
             parameters: parameters,
@@ -169,7 +169,7 @@ final class FSMContextTests: XCTestCase {
         let environment = FSMMock.Environment()
         let parameters = FSMMock.Parameters()
         let result: FSMMock.Result? = FSMMock.Result()
-        let fsmContext = FSMContext(
+        var fsmContext = FSMContext(
             context: context,
             environment: environment,
             parameters: parameters,
@@ -204,7 +204,7 @@ final class FSMContextTests: XCTestCase {
         let environment = FSMMock.Environment()
         let parameters = FSMMock.Parameters()
         let result: FSMMock.Result? = FSMMock.Result()
-        let fsmContext = FSMContext(
+        var fsmContext = FSMContext(
             context: context,
             environment: environment,
             parameters: parameters,

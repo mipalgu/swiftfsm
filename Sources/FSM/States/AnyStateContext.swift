@@ -5,7 +5,7 @@ public class AnyStateContext<
     Result: DataStructure
 > {
 
-    let fsmContext: FSMContext<FSMsContext, Environment, Parameters, Result>
+    var fsmContext: FSMContext<FSMsContext, Environment, Parameters, Result>
 
     init(fsmContext: FSMContext<FSMsContext, Environment, Parameters, Result>) {
         self.fsmContext = fsmContext

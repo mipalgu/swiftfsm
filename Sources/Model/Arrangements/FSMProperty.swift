@@ -5,6 +5,8 @@ import FSM
 @propertyWrapper
 public struct FSMProperty<Arrangement: ArrangementProtocol> {
 
+    // swiftlint:disable line_length
+
     /// Create the finite state machine.
     ///
     /// - Parameter: The arrangement containing the finite state machine.
@@ -12,7 +14,9 @@ public struct FSMProperty<Arrangement: ArrangementProtocol> {
     /// - Returns: A tuple containing the type-erased finite state machine as
     /// an `Exectuable`, and a function for creating the initial context for the
     /// finite state machine.
-    public let make: (Arrangement) -> (Executable, ((any DataStructure)?) -> AnySchedulerContext)
+    public let make: (Arrangement) -> ErasedFiniteStateMachineData
+
+    // swiftlint:enable line_length
 
     /// The metadata associated with the finite state machine.
     ///
@@ -40,8 +44,11 @@ public struct FSMProperty<Arrangement: ArrangementProtocol> {
         globalVariables: (KeyPath<Arrangement, AnyArrangementGlobalVariable>, mapsTo: PartialKeyPath<FSM.Environment>) ...,
         sensors: (KeyPath<Arrangement, AnyArrangementSensor>, mapsTo: PartialKeyPath<FSM.Environment>) ...
     ) {
-        self.make = { arrangement in
-            wrappedValue.initial(
+        self.init(
+            wrappedValue: wrappedValue,
+            projectedValue: FSMInformation(fsm: wrappedValue)
+        ) { arrangement in
+            let data = wrappedValue.initial(
                 actuators: actuators.map {
                     arrangement[keyPath: $0].anyActuator(mapsTo: $1)
                 },
@@ -55,17 +62,16 @@ public struct FSMProperty<Arrangement: ArrangementProtocol> {
                     arrangement[keyPath: $0].anySensor(mapsTo: $1)
                 }
             )
+            return ErasedFiniteStateMachineData(data)
         }
-        self.projectedValue = FSMInformation(fsm: wrappedValue)
-        self.wrappedValue = wrappedValue
     }
 
     // swiftlint:enable line_length
 
-    init<FSM: Model.FSM>(
+    public init<FSM: Model.FSM>(
         wrappedValue: FSM,
         projectedValue: FSMInformation,
-        make: @escaping (Arrangement) -> (Executable, ((any DataStructure)?) -> AnySchedulerContext)
+        make: @escaping (Arrangement) -> ErasedFiniteStateMachineData
     ) {
         self.wrappedValue = wrappedValue
         self.projectedValue = projectedValue

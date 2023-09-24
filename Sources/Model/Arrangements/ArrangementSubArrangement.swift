@@ -25,11 +25,10 @@ public final class ArrangementSubArrangement<
                     id: id,
                     name: fsm.projectedValue.name,
                     dependencies: fsm.projectedValue.dependencies
-                ),
-                make: { _ in
-                    fsm.make(self.wrappedValue)
-                }
-            )
+                )
+            ) { _ in
+                fsm.make(self.wrappedValue)
+            }
         }
     }
 

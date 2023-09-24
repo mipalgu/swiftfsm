@@ -88,17 +88,32 @@ final class StateContextTests: XCTestCase {
         let state = SomeData(bool: true)
         let context = FalseContext(context: state, fsmContext: falseFSMContext)
         XCTAssertEqual(state, context.context)
-        XCTAssertIdentical(context.fsmContext, falseFSMContext)
+        XCTAssertEqual(context.fsmContext.context, falseFSMContext.context)
+        XCTAssertEqual(context.fsmContext.duration, falseFSMContext.duration)
+        XCTAssertEqual(context.fsmContext.environment, falseFSMContext.environment)
+        XCTAssertEqual(context.fsmContext.parameters, falseFSMContext.parameters)
+        XCTAssertEqual(context.fsmContext.result, falseFSMContext.result)
+        XCTAssertEqual(context.fsmContext.status, falseFSMContext.status)
     }
 
     // swiftlint:disable:next function_body_length
     func testGettersAndSetters() {
         let context = FalseContext(context: falseData, fsmContext: falseFSMContext)
         XCTAssertEqual(context.context, falseData)
-        XCTAssertIdentical(context.fsmContext, falseFSMContext)
+        XCTAssertEqual(context.fsmContext.context, falseFSMContext.context)
+        XCTAssertEqual(context.fsmContext.duration, falseFSMContext.duration)
+        XCTAssertEqual(context.fsmContext.environment, falseFSMContext.environment)
+        XCTAssertEqual(context.fsmContext.parameters, falseFSMContext.parameters)
+        XCTAssertEqual(context.fsmContext.result, falseFSMContext.result)
+        XCTAssertEqual(context.fsmContext.status, falseFSMContext.status)
         context.context = trueData
         XCTAssertEqual(context.context, trueData)
-        XCTAssertIdentical(context.fsmContext, falseFSMContext)
+        XCTAssertEqual(context.fsmContext.context, falseFSMContext.context)
+        XCTAssertEqual(context.fsmContext.duration, falseFSMContext.duration)
+        XCTAssertEqual(context.fsmContext.environment, falseFSMContext.environment)
+        XCTAssertEqual(context.fsmContext.parameters, falseFSMContext.parameters)
+        XCTAssertEqual(context.fsmContext.result, falseFSMContext.result)
+        XCTAssertEqual(context.fsmContext.status, falseFSMContext.status)
     }
 
     func testIsFinished() {

@@ -84,7 +84,7 @@ public final class FSMTester<Model: FSM> where
 
     private let stateNames: [StateID: String]
 
-    public let context: SchedulerContext<StateType, Ringlet.Context, Context, Environment, Parameters, Result>
+    public var context: SchedulerContext<StateType, Ringlet.Context, Context, Environment, Parameters, Result>
 
     public let fsm: FiniteStateMachine<
         StateType,
@@ -108,20 +108,26 @@ public final class FSMTester<Model: FSM> where
     }
 
     public var initialState: FSMState<StateType, Parameters, Result, Context, Environment> {
-        fsm.stateContainer.states[context.data.initialState]
+        fsm.states[context.data.initialState]
     }
 
     public var isFinished: Bool {
-        fsm.isFinished(context: context)
+        let erased = context as SchedulerContextProtocol
+        return withUnsafePointer(to: erased) {
+            fsm.isFinished(context: $0)
+        }
     }
 
     public var isSuspended: Bool {
-        fsm.isSuspended(context: context)
+        let erased = context as SchedulerContextProtocol
+        return withUnsafePointer(to: erased) {
+            fsm.isSuspended(context: $0)
+        }
     }
 
     public var currentState: FSMState<StateType, Parameters, Result, Context, Environment> {
         get {
-            fsm.stateContainer.states[context.data.currentState]
+            fsm.states[context.data.currentState]
         } set {
             context.data.currentState = newValue.id
         }
@@ -129,19 +135,19 @@ public final class FSMTester<Model: FSM> where
 
     public var previousState: FSMState<StateType, Parameters, Result, Context, Environment> {
         get {
-            fsm.stateContainer.states[context.data.previousState]
+            fsm.states[context.data.previousState]
         } set {
             context.data.previousState = newValue.id
         }
     }
 
     public var suspendState: FSMState<StateType, Parameters, Result, Context, Environment> {
-        fsm.stateContainer.states[context.data.suspendState]
+        fsm.states[context.data.suspendState]
     }
 
     public var suspendedState: FSMState<StateType, Parameters, Result, Context, Environment>? {
         get {
-            context.data.suspendedState.map { fsm.stateContainer.states[$0] }
+            context.data.suspendedState.map { fsm.states[$0] }
         } set {
             context.data.suspendedState = newValue?.id
         }
@@ -154,13 +160,13 @@ public final class FSMTester<Model: FSM> where
         globalVariables: [(PartialKeyPath<Environment>, AnyGlobalVariableHandler<Environment>)] = [],
         sensors: [(PartialKeyPath<Environment>, AnySensorHandler<Environment>)] = []
     ) {
-        let (fsm, contextFactory) = model.initial(
+        let data = model.initial(
             actuators: actuators,
             externalVariables: externalVariables,
             globalVariables: globalVariables,
             sensors: sensors
         )
-        let typedFSM = fsm as! FiniteStateMachine<
+        let typedFSM = data.executable as! FiniteStateMachine<
             StateType,
             Ringlet,
             Parameters,
@@ -169,14 +175,39 @@ public final class FSMTester<Model: FSM> where
             Environment
         >
         self.model = model
-        self.stateIDs = Dictionary(uniqueKeysWithValues: typedFSM.stateContainer.states.map {
-            ($0.name, $0.id)
-        })
-        self.stateNames = Dictionary(uniqueKeysWithValues: typedFSM.stateContainer.states.map {
-            ($0.id, $0.name)
-        })
+        var stateIDs: [String: Int] = [:]
+        var stateNames: [Int: String] = [:]
+        stateIDs.reserveCapacity(typedFSM.statesCount)
+        stateNames.reserveCapacity(typedFSM.statesCount)
+        for index in 0..<typedFSM.statesCount {
+            stateIDs[typedFSM.states[index].name] = typedFSM.states[index].id
+            stateNames[typedFSM.states[index].id] = typedFSM.states[index].name
+        }
+        self.stateIDs = stateIDs
+        self.stateNames = stateNames
         // swiftlint:disable force_cast
-        self.context = contextFactory(EmptyDataStructure()) as! SchedulerContext<
+        let contextPtr = UnsafeMutablePointer<SchedulerContextProtocol>.allocate(capacity: 1)
+        defer { contextPtr.deallocate() }
+        data.initialiseContext(parameters: EmptyDataStructure(), context: contextPtr)
+        self.context = contextPtr.pointee as! SchedulerContext<
+                StateType,
+                Ringlet.Context,
+                Context,
+                Environment,
+                Parameters,
+                Result
+            >
+        self.fsm = typedFSM
+        // swiftlint:enable force_cast
+    }
+
+    @discardableResult
+    public func next() -> NextResult {
+        var erased = context as SchedulerContextProtocol
+        withUnsafeMutablePointer(to: &erased) {
+            fsm.next(context: $0)
+        }
+        context = erased as! SchedulerContext<
             StateType,
             Ringlet.Context,
             Context,
@@ -184,13 +215,6 @@ public final class FSMTester<Model: FSM> where
             Parameters,
             Result
         >
-        self.fsm = typedFSM
-        // swiftlint:enable force_cast
-    }
-
-    @discardableResult
-    public func next() -> NextResult {
-        fsm.next(context: context)
         return NextResult(status: context.data.fsmContext.status, context: context)
     }
 
@@ -203,7 +227,18 @@ public final class FSMTester<Model: FSM> where
     }
 
     public func saveSnapshot() {
-        fsm.saveSnapshot(context: context)
+        var erased = context as SchedulerContextProtocol
+        withUnsafeMutablePointer(to: &erased) {
+            fsm.saveSnapshot(context: $0)
+        }
+        context = erased as! SchedulerContext<
+            StateType,
+            Ringlet.Context,
+            Context,
+            Environment,
+            Parameters,
+            Result
+        >
     }
 
     public func state(
@@ -213,11 +248,22 @@ public final class FSMTester<Model: FSM> where
         guard let id = stateIDs[information.name] else {
             fatalError("State does not exist within finite state machine.")
         }
-        return fsm.stateContainer.states[id]
+        return fsm.states[id]
     }
 
     public func takeSnapshot() {
-        fsm.takeSnapshot(context: context)
+        var erased = context as SchedulerContextProtocol
+        withUnsafeMutablePointer(to: &erased) {
+            fsm.takeSnapshot(context: $0)
+        }
+        context = erased as! SchedulerContext<
+            StateType,
+            Ringlet.Context,
+            Context,
+            Environment,
+            Parameters,
+            Result
+        >
     }
 
 }

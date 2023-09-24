@@ -5,12 +5,93 @@ import Foundation
 /// `FiniteStateMachine` that can be executed within a schedule.
 extension FSM {
 
+    // swiftlint:disable:next line_length
+    public typealias FactoryFunction = ((any DataStructure)?, UnsafeMutablePointer<SchedulerContextProtocol>, UnsafeMutablePointer<Bool>, UnsafeMutablePointer<AnyStateContext<Context, Environment, Parameters, Result>>, UnsafeMutablePointer<Sendable>) -> Void
+
     /// Fetch all dependencies as declared within this model.
     public var dependencies: [FSMDependency] {
         let deps = Self.Dependencies()
         let mirror = Mirror(reflecting: deps)
         return mirror.children.compactMap {
             ($0.value as? DependencyCalculatable)?.dependency
+        }
+    }
+
+    /// Computes the number of actuators in the environment.
+    private var actuatorsCount: Int {
+        let env = Environment()
+        let mirror = Mirror(reflecting: env)
+        return mirror.children.reduce(0) {
+            guard ($1 as? AnyWriteOnlyProtocol) != nil else {
+                return $0
+            }
+            return $0 + 1
+        }
+    }
+
+    /// The number of states to allocate within the fsm.
+    private var statesCount: Int {
+        self.anyStates.count + 3
+    }
+
+    /// Allocate enough memory to hold the status of which states are accepting
+    /// states for all states created when calling the initial function.
+    public var allocateAcceptingStatesMemory: UnsafeMutablePointer<Bool> {
+        UnsafeMutablePointer<Bool>.allocate(capacity: statesCount)
+    }
+
+    /// Allocate enough memory to hold the values of all actuators within the
+    /// fsm.
+    public var allocateActuatorValuesMemory: UnsafeMutablePointer<Sendable> {
+        UnsafeMutablePointer<Sendable>.allocate(capacity: actuatorsCount)
+    }
+
+    public var allocateStatesContextMemory: UnsafeMutablePointer<AnyStateContext<Context, Environment, Parameters, Result>> {
+        UnsafeMutablePointer<AnyStateContext<Context, Environment, Parameters, Result>>
+            .allocate(capacity: statesCount)
+    }
+
+    /// Allocate enough memory to hold the contexts for all states created
+    /// when calling the initial function.
+    public var allocateStatesMemory: UnsafeMutablePointer<FSMState<StateType, Parameters, Result, Context, Environment>> {
+        UnsafeMutablePointer<FSMState<StateType, Parameters, Result, Context, Environment>>.allocate(
+            capacity: statesCount
+        )
+    }
+
+    public func deallocateAcceptingStatesMemory(_ ptr: UnsafeMutablePointer<Bool>) {
+        for i in 0..<statesCount {
+            ptr.advanced(by: i).deallocate()
+        }
+    }
+
+    public func deallocateActuatorValuesMemory(_ ptr: UnsafeMutablePointer<Sendable>) {
+        for i in 0..<actuatorsCount {
+            ptr.advanced(by: i).deallocate()
+        }
+    }
+
+    public func deallocateData(_ data: ErasedFiniteStateMachineData) {
+        data.deallocate(model: self)
+    }
+
+    public func deallocateData(
+        _ data: FiniteStateMachineData<StateType, Context, Environment, Parameters, Result>
+    ) {
+        data.deallocate(model: self)
+    }
+
+    public func deallocateStateContextsMemory(
+        _ ptr: UnsafeMutablePointer<AnyStateContext<Context, Environment, Parameters, Result>>
+    ) {
+        for i in 0..<statesCount {
+            ptr.advanced(by: i).deallocate()
+        }
+    }
+
+    public func deallocateStatesMemory(_ ptr: UnsafeMutablePointer<FSMState<StateType, Parameters, Result, Context, Environment>>) {
+        for i in 0..<statesCount {
+            ptr.advanced(by: i).deallocate()
         }
     }
 
@@ -81,7 +162,11 @@ extension FSM {
         externalVariables: [(PartialKeyPath<Environment>, AnyExternalVariableHandler<Environment>)],
         globalVariables: [(PartialKeyPath<Environment>, AnyGlobalVariableHandler<Environment>)],
         sensors: [(PartialKeyPath<Environment>, AnySensorHandler<Environment>)]
-    ) -> (Executable, ((any DataStructure)?) -> AnySchedulerContext) {
+    ) -> FiniteStateMachineData<StateType, Context, Environment, Parameters, Result> {
+        let acceptingStatesPtr = allocateAcceptingStatesMemory
+        let statesPtr = allocateStatesMemory
+        let stateContextsPtr = allocateStatesContextMemory
+        let actuatorValuesPtr = allocateActuatorValuesMemory
         let indexes: [PartialKeyPath<Environment>: (SharedVariableType, Int)] = Dictionary(
             uniqueKeysWithValues: actuators.enumerated().map {
                 ($1.0, (SharedVariableType.actuator, $0))
@@ -94,32 +179,51 @@ extension FSM {
             }
         )
         let fsm = self.fsm(
+            states: statesPtr,
             actuators: actuators.map(\.1),
             externalVariables: externalVariables.map(\.1),
             globalVariables: globalVariables.map(\.1),
             sensors: sensors.map(\.1),
             indexes: indexes
         )
-        let factory: ((any DataStructure)?) -> AnySchedulerContext = {
+        // swiftlint:disable:next line_length
+        let factory: FactoryFunction = { parameters, context, acceptingStates, stateContexts, actuatorValues in
             let data: FSMData<Ringlet.Context, Parameters, Result, Context, Environment>
-            if let params = $0 as? Parameters {
-                data = fsm.initialData(with: params)
+            if let params = parameters as? Parameters {
+                data = fsm.initialData(
+                    with: params,
+                    acceptingStates: acceptingStates,
+                    stateContexts: stateContexts,
+                    actuatorValues: actuatorValues
+                )
             } else if let type = Parameters.self as? EmptyInitialisable.Type,
                 let params = type.init() as? Parameters
             {
-                data = fsm.initialData(with: params)
+                data = fsm.initialData(
+                    with: params,
+                    acceptingStates: acceptingStates,
+                    stateContexts: stateContexts,
+                    actuatorValues: actuatorValues
+                )
             } else {
                 fatalError("Missing parameters for \(name).")
             }
-            let context = SchedulerContext(
+            let newContext = SchedulerContext(
                 fsmID: -1,
                 fsmName: self.name,
                 data: data,
-                stateContainer: StateContainer<StateType, Parameters, Result, Context, Environment>?.none
+                states: UnsafePointer<FSMState<StateType, Parameters, Result, Context, Environment>>?.none
             )
-            return context
+            context.initialize(to: newContext as SchedulerContextProtocol)
         }
-        return (fsm, factory)
+        return FiniteStateMachineData(
+            acceptingStates: acceptingStatesPtr,
+            states: statesPtr,
+            stateContexts: stateContextsPtr,
+            actuatorValues: actuatorValuesPtr,
+            executable: fsm,
+            factory: factory
+        )
     }
 
     /// Create the equivalent `FiniteStateMachine` for this model.
@@ -130,6 +234,7 @@ extension FSM {
     /// means that you should not rely on the existing id's of these properties
     /// as accessed from this model.
     private func fsm(
+        states statesPtr: UnsafeMutablePointer<FSMState<StateType, Parameters, Result, Context, Environment>>,
         actuators: [AnyActuatorHandler<Environment>],
         externalVariables: [AnyExternalVariableHandler<Environment>],
         globalVariables: [AnyGlobalVariableHandler<Environment>],
@@ -284,8 +389,12 @@ extension FSM {
             globalVariables: globalVariables,
             sensors: sensors
         )
+        for i in 0..<states.count {
+            statesPtr.advanced(by: i).initialize(to: states[i])
+        }
         return FiniteStateMachine(
-            stateContainer: StateContainer(states: states),
+            states: statesPtr,
+            statesCount: states.count,
             ringlet: Ringlet(),
             handlers: handlers,
             initialContext: initialContext,

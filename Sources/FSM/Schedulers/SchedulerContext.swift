@@ -1,20 +1,29 @@
 @dynamicMemberLookup
-public final class SchedulerContext<
+public struct SchedulerContext<
     StateType: TypeErasedState,
     RingletsContext: ContextProtocol,
     FSMsContext: ContextProtocol,
     Environment: EnvironmentSnapshot,
     Parameters: DataStructure,
     Result: DataStructure
->: AnySchedulerContext {
+>: SchedulerContextProtocol {
+
+    public internal(set) var fsmID: Int
+
+    public internal(set) var fsmName: String
+
+    public var duration: Duration
+
+    public internal(set) var transitioned: Bool
+
+    public var startTime: ContinuousClock.Instant = .now
 
     public var data: FSMData<RingletsContext, Parameters, Result, FSMsContext, Environment>
 
-    public weak var stateContainer: StateContainer<StateType, Parameters, Result, FSMsContext, Environment>!
-
-    public var states: [FSMState<StateType, Parameters, Result, FSMsContext, Environment>] {
-        stateContainer.states
-    }
+    // swiftlint:disable:next implicitly_unwrapped_optional
+    public internal(set) var states: UnsafePointer<
+        FSMState<StateType, Parameters, Result, FSMsContext, Environment>
+    >!
 
     public var ringletContext: RingletsContext {
         get {
@@ -97,12 +106,17 @@ public final class SchedulerContext<
     public init(
         fsmID: Int,
         fsmName: String,
+        duration: Duration = .zero,
+        transitioned: Bool = true,
         data: FSMData<RingletsContext, Parameters, Result, FSMsContext, Environment>,
-        stateContainer: StateContainer<StateType, Parameters, Result, FSMsContext, Environment>? = nil
+        states: UnsafePointer<FSMState<StateType, Parameters, Result, FSMsContext, Environment>>? = nil
     ) {
+        self.fsmID = fsmID
+        self.fsmName = fsmName
+        self.duration = duration
+        self.transitioned = transitioned
         self.data = data
-        self.stateContainer = stateContainer
-        super.init(fsmID: fsmID, fsmName: fsmName)
+        self.states = states
     }
 
     public func after(_ duration: Duration) -> Bool {

@@ -8,15 +8,15 @@ public struct FSMData<
 
     public typealias Handlers = FSMHandlers<Environment>
 
-    public var acceptingStates: [Bool]
+    public var acceptingStates: UnsafeMutablePointer<Bool>
 
-    public var stateContexts: [AnyStateContext<Context, Environment, Parameters, Result>]
+    public var stateContexts: UnsafePointer<AnyStateContext<Context, Environment, Parameters, Result>>
 
     public var fsmContext: FSMContext<Context, Environment, Parameters, Result>
 
     public var ringletContext: RingletsContext
 
-    public var actuatorValues: [Sendable]
+    public var actuatorValues: UnsafeMutablePointer<Sendable>
 
     public var initialState: StateID
 
@@ -39,11 +39,11 @@ public struct FSMData<
     }
 
     init(
-        acceptingStates: [Bool],
-        stateContexts: [AnyStateContext<Context, Environment, Parameters, Result>],
+        acceptingStates: UnsafeMutablePointer<Bool>,
+        stateContexts: UnsafePointer<AnyStateContext<Context, Environment, Parameters, Result>>,
         fsmContext: FSMContext<Context, Environment, Parameters, Result>,
         ringletContext: RingletsContext,
-        actuatorValues: [Sendable],
+        actuatorValues: UnsafeMutablePointer<Sendable>,
         initialState: Int,
         currentState: Int,
         previousState: Int,

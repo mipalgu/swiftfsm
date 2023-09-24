@@ -22,13 +22,15 @@ where
 
     public typealias State = FSMState<StateType, Parameters, Result, Context, Environment>
 
-    public typealias States = StateContainer<StateType, Parameters, Result, Context, Environment>
+    public typealias States = UnsafePointer<State>
 
     public let initialContext: Context
 
     public let initialRingletContext: Ringlet.Context
 
-    public let stateContainer: States
+    public let states: States
+
+    public let statesCount: Int
 
     public let ringlet: Ringlet
 
@@ -40,23 +42,33 @@ where
 
     public let suspendState: Int
 
-    public var states: [State] {
-        stateContainer.states
-    }
-
-    public func initialData(with parameters: Parameters) -> Data {
+    public func initialData(
+        with parameters: Parameters,
+        acceptingStates: UnsafeMutablePointer<Bool>,
+        stateContexts: UnsafeMutablePointer<AnyStateContext<Context, Environment, Parameters, Result>>,
+        actuatorValues: UnsafeMutablePointer<Sendable>
+    ) -> Data {
         let fsmContext = FSMContext(
             context: initialContext,
             environment: Environment(),
             parameters: parameters,
             result: Result?.none
         )
+        for i in 0..<statesCount {
+            acceptingStates.advanced(by: i).initialize(to: states[i].transitions.isEmpty)
+            stateContexts.advanced(by: i).initialize(
+                to: states[i].stateType.initialContext(fsmContext: fsmContext)
+            )
+        }
+        for i in 0..<handlers.actuators.count {
+            actuatorValues.advanced(by: i).initialize(to: handlers.actuators[i].initialValue)
+        }
         return FSMData(
-            acceptingStates: stateContainer.states.map { $0.transitions.isEmpty },
-            stateContexts: stateContainer.states.map { $0.stateType.initialContext(fsmContext: fsmContext) },
+            acceptingStates: acceptingStates,
+            stateContexts: UnsafePointer(stateContexts),
             fsmContext: fsmContext,
             ringletContext: initialRingletContext,
-            actuatorValues: handlers.actuators.map { $0.initialValue },
+            actuatorValues: actuatorValues,
             initialState: initialState,
             currentState: initialState,
             previousState: initialPreviousState,
@@ -66,7 +78,8 @@ where
     }
 
     public init(
-        stateContainer: States,
+        states: States,
+        statesCount: Int,
         ringlet: Ringlet,
         handlers: Handlers,
         initialContext: Context,
@@ -75,7 +88,8 @@ where
         initialPreviousState: Int,
         suspendState: Int
     ) {
-        self.stateContainer = stateContainer
+        self.states = states
+        self.statesCount = statesCount
         self.ringlet = ringlet
         self.handlers = handlers
         self.initialContext = initialContext
@@ -85,34 +99,34 @@ where
         self.suspendState = suspendState
     }
 
-    public func isFinished(context: AnySchedulerContext) -> Bool {
-        let context = unsafeDowncast(
-            context,
-            to: SchedulerContext<StateType, Ringlet.Context, Context, Environment, Parameters, Result>.self
-        )
+    public func isFinished(context: UnsafePointer<SchedulerContextProtocol>) -> Bool {
+        // swiftlint:disable force_cast
+        let context = context.pointee
+            as! SchedulerContext<StateType, Ringlet.Context, Context, Environment, Parameters, Result>
+        // swiftlint:enable force_cast
         return context.data.isFinished
     }
 
-    public func isSuspended(context: AnySchedulerContext) -> Bool {
-        let context = unsafeDowncast(
-            context,
-            to: SchedulerContext<StateType, Ringlet.Context, Context, Environment, Parameters, Result>.self
-        )
+    public func isSuspended(context: UnsafePointer<SchedulerContextProtocol>) -> Bool {
+        // swiftlint:disable force_cast
+        let context = context.pointee
+            as! SchedulerContext<StateType, Ringlet.Context, Context, Environment, Parameters, Result>
+        // swiftlint:enable force_cast
         return context.data.isSuspended
     }
 
-    public func next(context: AnySchedulerContext) {
-        let context = unsafeDowncast(
-            context,
-            to: SchedulerContext<StateType, Ringlet.Context, Context, Environment, Parameters, Result>.self
-        )
+    public func next(context contextPtr: UnsafeMutablePointer<SchedulerContextProtocol>) {
+        // swiftlint:disable force_cast
+        var context = contextPtr.pointee
+            as! SchedulerContext<StateType, Ringlet.Context, Context, Environment, Parameters, Result>
+        // swiftlint:enable force_cast
         if verbose > 1 || (verbose == 1 && context.data.currentState != context.data.previousState) {
             print("\(context.fsmName).", terminator: "")
         }
-        context.stateContainer = stateContainer
+        context.states = states
         context.fsmContext.duration = context.duration
         defer {
-            context.stateContainer = nil
+            context.states = nil
             context.fsmContext.duration = nil
         }
         let nextStateRaw = ringlet.execute(context: context)
@@ -129,38 +143,35 @@ where
         } else {
             context.data.fsmContext.status = .executing(transitioned: nextStateRaw != nil)
         }
+        contextPtr.pointee = context as SchedulerContextProtocol
     }
 
-    public func saveSnapshot(context: AnySchedulerContext) {
-        let context = unsafeDowncast(
-            context,
-            to: SchedulerContext<StateType, Ringlet.Context, Context, Environment, Parameters, Result>.self
-        )
+    public func saveSnapshot(context contextPtr: UnsafeMutablePointer<SchedulerContextProtocol>) {
+        // swiftlint:disable force_cast
+        var context = contextPtr.pointee
+            as! SchedulerContext<StateType, Ringlet.Context, Context, Environment, Parameters, Result>
+        // swiftlint:enable force_cast
         let state = self.states[context.data.previousState]
+        let actuatorValues = context.data.actuatorValues
         withUnsafePointer(to: &context.environment) { environment in
-            context.data.actuatorValues.withContiguousMutableStorageIfAvailable {
-                guard let baseAddress = $0.baseAddress else {
-                    return
-                }
-                state.saveSnapshot(environment, handlers, baseAddress)
-            }
+            state.saveSnapshot(environment, handlers, actuatorValues)
         }
+        contextPtr.pointee = context as SchedulerContextProtocol
     }
 
-    public func takeSnapshot(context: AnySchedulerContext) {
-        let context = unsafeDowncast(
-            context,
-            to: SchedulerContext<StateType, Ringlet.Context, Context, Environment, Parameters, Result>.self
-        )
+    public func takeSnapshot(context contextPtr: UnsafeMutablePointer<SchedulerContextProtocol>) {
+        // swiftlint:disable force_cast
+        var context = contextPtr.pointee
+            as! SchedulerContext<StateType, Ringlet.Context, Context, Environment, Parameters, Result>
+        // swiftlint:enable force_cast
         var environment = Environment()
         let state = self.states[context.data.currentState]
+        let actuatorValues = context.data.actuatorValues
         withUnsafeMutablePointer(to: &environment) { environment in
-            context.data.actuatorValues.withContiguousStorageIfAvailable {
-                // swiftlint:disable:next force_unwrapping
-                state.takeSnapshot(environment, handlers, $0.baseAddress!)
-            }
+            state.takeSnapshot(environment, handlers, UnsafePointer(actuatorValues))
         }
         context.environment = environment
+        contextPtr.pointee = context as SchedulerContextProtocol
     }
 
 }

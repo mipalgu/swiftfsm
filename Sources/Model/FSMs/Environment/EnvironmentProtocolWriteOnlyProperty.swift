@@ -2,7 +2,7 @@ import FSM
 
 @propertyWrapper
 public struct EnvironmentProtocolWriteOnlyProperty<Value: ActuatorValue>:
-    ActuatorValue, AnyEnvironmentProtocolVariable {
+    ActuatorValue, AnyEnvironmentProtocolVariable, AnyWriteOnlyProtocol {
 
     // swiftlint:disable:next implicitly_unwrapped_optional
     public var wrappedValue: Value!

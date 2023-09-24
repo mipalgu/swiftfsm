@@ -13,9 +13,28 @@ public protocol ScheduleProtocol {
 extension ScheduleProtocol {
 
     public func main() throws {
-        var scheduler = RoundRobinScheduler(schedule: self, parameters: [:])
-        while !scheduler.shouldTerminate {
-            scheduler.cycle()
+        var contexts: [SchedulerContextProtocol] = []
+        let fsms = arrangement.fsms
+        contexts.reserveCapacity(fsms.count)
+        var data: [ErasedFiniteStateMachineData] = []
+        data.reserveCapacity(fsms.count)
+        defer {
+            for (index, fsm) in fsms.enumerated() {
+                fsm.wrappedValue.deallocateData(data[index])
+            }
+        }
+        contexts.withContiguousMutableStorageIfAvailable { contextPtr in
+            data.withContiguousMutableStorageIfAvailable { dataPtr in
+                var scheduler = RoundRobinScheduler(
+                    schedule: self,
+                    parameters: [:],
+                    contexts: contextPtr.baseAddress!,
+                    data: dataPtr.baseAddress!
+                )
+                while !scheduler.shouldTerminate {
+                    scheduler.cycle()
+                }
+            }
         }
     }
 

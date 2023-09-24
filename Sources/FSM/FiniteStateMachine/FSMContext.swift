@@ -1,5 +1,5 @@
 @dynamicMemberLookup
-public final class FSMContext<
+public struct FSMContext<
     FSMsContext: ContextProtocol,
     Environment: EnvironmentSnapshot,
     Parameters: DataStructure,
@@ -31,7 +31,7 @@ public final class FSMContext<
         }
     }
 
-    public convenience init(
+    public init(
         context: FSMsContext,
         environment: Environment,
         parameters: Parameters,
@@ -86,15 +86,15 @@ public final class FSMContext<
         parameters[keyPath: keyPath]
     }
 
-    public func restart() {
+    public mutating func restart() {
         status = .restarting
     }
 
-    public func resume() {
+    public mutating func resume() {
         status = .resuming
     }
 
-    public func suspend() {
+    public mutating func suspend() {
         status = .suspending
     }
 

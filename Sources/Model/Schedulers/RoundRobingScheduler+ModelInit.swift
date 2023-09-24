@@ -13,7 +13,12 @@ public extension RoundRobinScheduler {
     /// lists associated with particular FSMs. The key of the dictionary
     /// represents the unique name of a particular FSM, and the value contains
     /// a type-erased data structure representing the parameters.
-    init<Schedule: ScheduleProtocol>(schedule: Schedule, parameters: [String: any DataStructure]) {
+    init<Schedule: ScheduleProtocol>(
+        schedule: Schedule,
+        parameters: [String: any DataStructure],
+        contexts: UnsafeMutablePointer<SchedulerContextProtocol>,
+        data dataPtr: UnsafeMutablePointer<ErasedFiniteStateMachineData>
+    ) {
         var slots: [SlotData] = []
         let fsms = schedule.arrangement.fsms
         slots.reserveCapacity(fsms.count)
@@ -24,14 +29,18 @@ public extension RoundRobinScheduler {
                 name: oldInfo.name,
                 dependencies: oldInfo.dependencies
             )
-            let (executable, contextFactory) = fsm.make(schedule.arrangement)
-            let initialData = contextFactory(parameters[newInfo.name])
+            dataPtr.advanced(by: index).initialize(to: fsm.make(schedule.arrangement))
+            dataPtr[index].initialiseContext(
+                parameters: parameters[newInfo.name],
+                context: contexts.advanced(by: index)
+            )
             let slot = SlotData(
                 info: newInfo,
-                executable: executable,
-                context: initialData,
-                contextFactory: contextFactory
-            )
+                executable: dataPtr[index].executable,
+                context: contexts.advanced(by: index)
+            ) {
+                dataPtr[index].initialiseContext(parameters: $0, context: $1)
+            }
             slots.append(slot)
         }
         self.init(map: Map(slots: slots))

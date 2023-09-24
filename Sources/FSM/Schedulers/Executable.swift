@@ -1,13 +1,13 @@
 public protocol Executable {
 
-    func isFinished(context: AnySchedulerContext) -> Bool
+    func isFinished(context: UnsafePointer<SchedulerContextProtocol>) -> Bool
 
-    func isSuspended(context: AnySchedulerContext) -> Bool
+    func isSuspended(context: UnsafePointer<SchedulerContextProtocol>) -> Bool
 
-    func next(context: AnySchedulerContext)
+    func next(context: UnsafeMutablePointer<SchedulerContextProtocol>)
 
-    func saveSnapshot(context: AnySchedulerContext)
+    func saveSnapshot(context: UnsafeMutablePointer<SchedulerContextProtocol>)
 
-    func takeSnapshot(context: AnySchedulerContext)
+    func takeSnapshot(context: UnsafeMutablePointer<SchedulerContextProtocol>)
 
 }

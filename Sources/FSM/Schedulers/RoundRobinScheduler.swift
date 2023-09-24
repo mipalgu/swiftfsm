@@ -48,11 +48,15 @@ public struct RoundRobinScheduler {
         /// This property is closely related to `executable` in that this
         /// context models the state of the `executable`. The `executable`
         /// defines the method of execution that manipulates this context.
-        public let context: AnySchedulerContext
+        public let context: UnsafeMutablePointer<SchedulerContextProtocol>
+
+        // swiftlint:disable line_length
 
         /// A function that creates a new `context` associated with `executable`
         /// from a type-erased list of parameters.
-        public let contextFactory: ((any DataStructure)?) -> AnySchedulerContext
+        public let contextFactory: ((any DataStructure)?, UnsafeMutablePointer<SchedulerContextProtocol>) -> Void
+
+        // swiftlint:enable line_length
 
         /// Does `context` represent a state where the `executable` is finished?
         @inlinable public var isFinished: Bool {
@@ -71,6 +75,8 @@ public struct RoundRobinScheduler {
             isFinished || isSuspended
         }
 
+        // swiftlint:disable line_length
+
         /// Create a new SlotData.
         ///
         /// - Parameter info: Any metadata associated with this slot.
@@ -85,14 +91,16 @@ public struct RoundRobinScheduler {
         public init(
             info: FSMInformation,
             executable: Executable,
-            context: AnySchedulerContext,
-            contextFactory: @escaping ((any DataStructure)?) -> AnySchedulerContext
+            context: UnsafeMutablePointer<SchedulerContextProtocol>,
+            contextFactory: @escaping ((any DataStructure)?, UnsafeMutablePointer<SchedulerContextProtocol>) -> Void
         ) {
             self.info = info
             self.executable = executable
             self.context = context
             self.contextFactory = contextFactory
         }
+
+        // swiftlint:enable line_length
 
         /// Execute a single ringlet of `executable`.
         @inlinable
@@ -136,11 +144,11 @@ public struct RoundRobinScheduler {
         shouldTerminate = true
         for slot in map.slots {
             let now = ContinuousClock.now
-            if slot.context.transitioned || now < slot.context.startTime {
-                slot.context.duration = .zero
-                slot.context.startTime = now
+            if slot.context.pointee.transitioned || now < slot.context.pointee.startTime {
+                slot.context.pointee.duration = .zero
+                slot.context.pointee.startTime = now
             } else {
-                slot.context.duration = now - slot.context.startTime
+                slot.context.pointee.duration = now - slot.context.pointee.startTime
             }
             slot.takeSnapshot()
             slot.next()

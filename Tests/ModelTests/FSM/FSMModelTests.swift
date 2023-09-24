@@ -69,25 +69,25 @@ final class FSMTests: XCTestCase {
     }
 
     func test_initialReturnsAFiniteStateMachine() {
-        let (fsm, _) = mock.initial(
+        let data = mock.initial(
             actuators: actuators,
             externalVariables: externalVariables,
             globalVariables: globalVariables,
             sensors: sensors
         )
-        XCTAssertEqual("\(type(of: fsm))", "\(FSMType.self)")
-        let casted = fsm as? FSMType
+        XCTAssertEqual("\(type(of: data.executable))", "\(FSMType.self)")
+        let casted = data.executable as? FSMType
         XCTAssertNotNil(casted)
     }
 
     func test_initialReturnsAFiniteStateMachineWithAllStates() {
-        let (fsm, _) = mock.initial(
+        let data = mock.initial(
             actuators: actuators,
             externalVariables: externalVariables,
             globalVariables: globalVariables,
             sensors: sensors
         )
-        guard let casted = fsm as? FSMType else {
+        guard let casted = data.executable as? FSMType else {
             XCTFail("Unable to cast fsm to \(FSMType.self)")
             return
         }
@@ -100,25 +100,28 @@ final class FSMTests: XCTestCase {
             "__Suspend",
             "__Previous",
         ]
-        let actualStates = Set(casted.states.map(\.name))
+        let actualStates = Set(
+            UnsafeBufferPointer(start: casted.states, count: casted.statesCount).map(\.name)
+        )
         XCTAssertEqual(expectedStates, actualStates)
     }
 
     func test_initialReturnsAnFSMWithStateContexts() {
-        let (fsm, _) = mock.initial(
+        let data = mock.initial(
             actuators: actuators,
             externalVariables: externalVariables,
             globalVariables: globalVariables,
             sensors: sensors
         )
-        guard let casted = fsm as? FSMType else {
+        guard let casted = data.executable as? FSMType else {
             XCTFail("Unable to cast fsm to \(FSMType.self)")
             return
         }
         let callbackStates: Set<String> = ["Ping", "Pong", "Exit"]
         let emptyStates: Set<String> = []
         let ignoredStates: Set<String> = ["Pang"]
-        for state in casted.states where !ignoredStates.contains(state.name) {
+        let buffer = UnsafeBufferPointer(start: casted.states, count: casted.statesCount)
+        for state in buffer where !ignoredStates.contains(state.name) {
             let base = state.stateType.base
             if callbackStates.contains(state.name) {
                 XCTAssertEqual("\(type(of: base))", "\(CallbackStateType<EmptyDataStructure>.self)")
@@ -132,7 +135,7 @@ final class FSMTests: XCTestCase {
                 XCTFail("Unhandled state: \(state.name)")
             }
         }
-        guard let pang = casted.states.first(where: { $0.name == "Pang" }) else {
+        guard let pang = buffer.first(where: { $0.name == "Pang" }) else {
             XCTFail("Unable to locate pang state.")
             return
         }
@@ -141,100 +144,113 @@ final class FSMTests: XCTestCase {
     }
 
     func test_initialCreatesFactoryThatHandlesNilParameters() {
-        let (_, factory) = mock.initial(
+        let data = mock.initial(
             actuators: actuators,
             externalVariables: externalVariables,
             globalVariables: globalVariables,
             sensors: sensors
         )
-        let data = factory(nil)
-        XCTAssertEqual("\(type(of: data))", "\(SchedulerContextType.self)")
+        let context = UnsafeMutablePointer<SchedulerContextProtocol>.allocate(capacity: 1)
+        defer { context.deallocate() }
+        data.initialiseContext(parameters: nil, context: context)
+        XCTAssertEqual("\(type(of: context.pointee))", "\(SchedulerContextType.self)")
     }
 
     func test_initialCreatesFactoryThatHandlesParameters() {
-        let (_, factory) = mock.initial(
+        let data = mock.initial(
             actuators: actuators,
             externalVariables: externalVariables,
             globalVariables: globalVariables,
             sensors: sensors
         )
-        let data = factory(FSMMock.Parameters())
-        XCTAssertEqual("\(type(of: data))", "\(SchedulerContextType.self)")
+        let context = UnsafeMutablePointer<SchedulerContextProtocol>.allocate(capacity: 1)
+        defer { context.deallocate() }
+        data.initialiseContext(parameters: FSMMock.Parameters(), context: context)
+        XCTAssertEqual("\(type(of: context.pointee))", "\(SchedulerContextType.self)")
     }
 
     func test_initialCreatesPseudoInitialState() {
-        let (fsm, factory) = mock.initial(
+        let data = mock.initial(
             actuators: actuators,
             externalVariables: externalVariables,
             globalVariables: globalVariables,
             sensors: sensors
         )
-        guard let fsm = fsm as? FSMType else {
+        guard let fsm = data.executable as? FSMType else {
             XCTFail("Unable to cast fsm to \(FSMType.self)")
             return
         }
-        guard let initial = fsm.states.first(where: { $0.name == "__Initial" }) else {
+        let buffer = UnsafeBufferPointer(start: fsm.states, count: fsm.statesCount)
+        guard let initial = buffer.first(where: { $0.name == "__Initial" }) else {
             XCTFail("Unable to find initial pseudo state.")
             return
         }
-        let data = factory(nil)
-        XCTAssertEqual("\(type(of: data))", "\(SchedulerContextType.self)")
-        guard let data = data as? SchedulerContextType else {
+        let context = UnsafeMutablePointer<SchedulerContextProtocol>.allocate(capacity: 1)
+        defer { context.deallocate() }
+        data.initialiseContext(parameters: nil, context: context)
+        XCTAssertEqual("\(type(of: context.pointee))", "\(SchedulerContextType.self)")
+        guard let typedContext = context.pointee as? SchedulerContextType else {
             XCTFail("Unable to cast data to \(SchedulerContextType.self)")
             return
         }
-        XCTAssertEqual(initial.id, data.initialState)
-        XCTAssertEqual(initial.id, data.currentState)
+        XCTAssertEqual(initial.id, typedContext.initialState)
+        XCTAssertEqual(initial.id, typedContext.currentState)
     }
 
     func test_initialCreatesPseudoPreviousState() {
-        let (fsm, factory) = mock.initial(
+        let data = mock.initial(
             actuators: actuators,
             externalVariables: externalVariables,
             globalVariables: globalVariables,
             sensors: sensors
         )
-        guard let fsm = fsm as? FSMType else {
+        guard let fsm = data.executable as? FSMType else {
             XCTFail("Unable to cast fsm to \(FSMType.self)")
             return
         }
-        guard let previous = fsm.states.first(where: { $0.name == "__Previous" }) else {
+        let buffer = UnsafeBufferPointer(start: fsm.states, count: fsm.statesCount)
+        guard let previous = buffer.first(where: { $0.name == "__Previous" }) else {
             XCTFail("Unable to find initial pseudo state.")
             return
         }
-        let data = factory(nil)
-        XCTAssertEqual("\(type(of: data))", "\(SchedulerContextType.self)")
-        guard let data = data as? SchedulerContextType else {
+        let context = UnsafeMutablePointer<SchedulerContextProtocol>.allocate(capacity: 1)
+        defer { context.deallocate() }
+        data.initialiseContext(parameters: nil, context: context)
+        XCTAssertEqual("\(type(of: context.pointee))", "\(SchedulerContextType.self)")
+        guard let typedContext = context.pointee as? SchedulerContextType else {
             XCTFail("Unable to cast data to \(SchedulerContextType.self)")
             return
         }
-        XCTAssertEqual(previous.id, data.data.previousState)
+        XCTAssertEqual(previous.id, typedContext.data.previousState)
     }
 
     func test_initialCreatesPseudoSuspendState() {
-        let (fsm, factory) = mock.initial(
+        let data = mock.initial(
             actuators: actuators,
             externalVariables: externalVariables,
             globalVariables: globalVariables,
             sensors: sensors
         )
-        guard let fsm = fsm as? FSMType else {
+        guard let fsm = data.executable as? FSMType else {
             XCTFail("Unable to cast fsm to \(FSMType.self)")
             return
         }
-        guard let suspend = fsm.states.first(where: { $0.name == "__Suspend" }) else {
+        let buffer = UnsafeBufferPointer(start: fsm.states, count: fsm.statesCount)
+        guard let suspend = buffer.first(where: { $0.name == "__Suspend" }) else {
             XCTFail("Unable to find initial pseudo state.")
             return
         }
-        let data = factory(nil)
-        XCTAssertEqual("\(type(of: data))", "\(SchedulerContextType.self)")
-        guard let data = data as? SchedulerContextType else {
+        let context = UnsafeMutablePointer<SchedulerContextProtocol>.allocate(capacity: 1)
+        defer { context.deallocate() }
+        data.initialiseContext(parameters: nil, context: context)
+        XCTAssertEqual("\(type(of: context.pointee))", "\(SchedulerContextType.self)")
+        guard var typedContext = context.pointee as? SchedulerContextType else {
             XCTFail("Unable to cast data to \(SchedulerContextType.self)")
             return
         }
-        XCTAssertEqual(suspend.id, data.suspendState)
-        data.data.suspend()
-        XCTAssertEqual(suspend.id, data.currentState)
+        XCTAssertEqual(suspend.id, typedContext.suspendState)
+        typedContext.data.suspend()
+        XCTAssertEqual(suspend.id, typedContext.currentState)
     }
 
     func test_dependencies() {
