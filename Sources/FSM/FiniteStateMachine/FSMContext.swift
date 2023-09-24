@@ -19,6 +19,18 @@ public final class FSMContext<
 
     public internal(set) var status: FSMStatus
 
+    public var cloned: FSMContext<FSMsContext, Environment, Parameters, Result> {
+        let newContext = FSMContext(
+            context: context,
+            environment: environment,
+            parameters: parameters,
+            result: result,
+            status: status
+        )
+        newContext.duration = duration
+        return newContext
+    }
+
     public var isFinished: Bool {
         status == .finished
     }

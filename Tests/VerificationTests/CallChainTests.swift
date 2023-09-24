@@ -1,4 +1,5 @@
 import FSM
+import LLFSMs
 import XCTest
 
 @testable import Verification
@@ -31,6 +32,45 @@ final class CallChainTests: XCTestCase {
     ]
 
     var callChain: CallChain!
+
+    var newEmptyContext: AnySchedulerContext {
+        let fsmContext = FSMContext(
+            context: EmptyDataStructure(),
+            environment: EmptyDataStructure(),
+            parameters: EmptyDataStructure(),
+            result: Optional<EmptyDataStructure>.none
+        )
+        return SchedulerContext<
+            AnyLLFSMState<
+                EmptyDataStructure,
+                EmptyDataStructure,
+                EmptyDataStructure,
+                EmptyDataStructure
+            >,
+            EmptyDataStructure,
+            EmptyDataStructure,
+            EmptyDataStructure,
+            EmptyDataStructure,
+            EmptyDataStructure
+        >(
+            fsmID: 3,
+            fsmName: "exe3",
+            data: FSMData(
+                acceptingStates: [true],
+                stateContexts: [
+                    StateContext(context: EmptyDataStructure(), fsmContext: fsmContext)
+                ],
+                fsmContext: fsmContext,
+                ringletContext: EmptyDataStructure(),
+                actuatorValues: [],
+                initialState: 0,
+                currentState: 0,
+                previousState: 0,
+                suspendState: 0,
+                suspendedState: nil
+            )
+        )
+    }
 
     override func setUp() {
         callChain = CallChain(root: exe1.id, calls: calls)
@@ -129,27 +169,27 @@ final class CallChainTests: XCTestCase {
 
     func testExecutableFromPoolWithCallsMade() {
         let executables = [
-            (exe0, ExecutableMock()),
-            (exe1, ExecutableMock()),
-            (exe2, ExecutableMock()),
-            (exe3, ExecutableMock()),
+            (exe0, (newEmptyContext, ExecutableMock())),
+            (exe1, (newEmptyContext, ExecutableMock())),
+            (exe2, (newEmptyContext, ExecutableMock())),
+            (exe3, (newEmptyContext, ExecutableMock())),
         ]
-        let pool = ExecutablePool(executables: executables.map { ($0, .controllable($1)) })
+        let pool = ExecutablePool(executables: executables.map { ($0, ($1.0, .controllable($1.1))) })
         let fetchedExe = callChain.executable(fromPool: pool)
-        XCTAssertEqual(executables[2].1, fetchedExe.executable as? ExecutableMock)
+        XCTAssertEqual(executables[2].1.1, fetchedExe.executable as? ExecutableMock)
     }
 
     func testExecutableFromPoolNoCallsMade() {
         let executables = [
-            (exe0, ExecutableMock()),
-            (exe1, ExecutableMock()),
-            (exe2, ExecutableMock()),
-            (exe3, ExecutableMock()),
+            (exe0, (newEmptyContext, ExecutableMock())),
+            (exe1, (newEmptyContext, ExecutableMock())),
+            (exe2, (newEmptyContext, ExecutableMock())),
+            (exe3, (newEmptyContext, ExecutableMock())),
         ]
-        let pool = ExecutablePool(executables: executables.map { ($0, .controllable($1)) })
+        let pool = ExecutablePool(executables: executables.map { ($0, ($1.0, .controllable($1.1))) })
         let emptyCallChain = CallChain(root: exe1.id, calls: [])
         let fetchedExe = emptyCallChain.executable(fromPool: pool)
-        XCTAssertEqual(executables[1].1, fetchedExe.executable as? ExecutableMock)
+        XCTAssertEqual(executables[1].1.1, fetchedExe.executable as? ExecutableMock)
     }
 
 }

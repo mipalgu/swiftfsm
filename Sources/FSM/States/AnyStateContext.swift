@@ -11,4 +11,10 @@ public class AnyStateContext<
         self.fsmContext = fsmContext
     }
 
+    public func clone(
+        fsmContext: FSMContext<FSMsContext, Environment, Parameters, Result>
+    ) -> AnyStateContext<FSMsContext, Environment, Parameters, Result> {
+        AnyStateContext<FSMsContext, Environment, Parameters, Result>(fsmContext: fsmContext)
+    }
+
 }

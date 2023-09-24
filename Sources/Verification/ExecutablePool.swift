@@ -1,4 +1,5 @@
 import FSM
+import KripkeStructure
 
 /// Provides a way to access a collection of executables that have been
 /// classified by their function within a schedule.
@@ -45,8 +46,31 @@ public struct ExecutablePool {
 
     // var parameterisedFSMs: [String: ParameterisedStatus]
 
+    /// Represents an executable with all associated metadata.
+    struct Element {
+
+        /// Metadata associated with this executable.
+        var information: FSMInformation
+
+        var context: AnySchedulerContext
+
+        /// The executable categorised by its function in the schedule.
+        var executableType: ExecutableType
+
+        /// Create a new instance of this type, performing a deep copy.
+        var cloned: Element {
+            Element(information: information, context: context.cloned, executableType: executableType)
+        }
+
+        /// The executable itself.
+        var executable: any Executable {
+            executableType.executable
+        }
+
+    }
+
     /// All executables within this pool.
-    private(set) var executables: [ExecutableType]
+    private(set) var executables: [Element]
 
     /// A mapping from the id of an executable to the index within
     /// `executables`.
@@ -59,7 +83,7 @@ public struct ExecutablePool {
     /// - Parameter indexes: A mapping from the id of an executable to the
     /// index within the executables parameter.
     private init(
-        executables: [ExecutableType],
+        executables: [Element],
         indexes: [ExecutableID: Int]// ,
         // parameterisedFSMs: [String: ParameterisedStatus]) {
     ) {
@@ -78,10 +102,10 @@ public struct ExecutablePool {
     ///
     /// - Complexity: O(log(n)), where n is the number of elements in
     /// executables.
-    init<S: Sequence>(executables: S) where S.Element == (FSMInformation, ExecutableType) {// , parameterisedFSMs: Set<String>) {
+    init<S: Sequence>(executables: S) where S.Element == (FSMInformation, (AnySchedulerContext, ExecutableType)) {// , parameterisedFSMs: Set<String>) {
         let sorted = executables.sorted { $0.0.id < $1.0.id }
         self.init(
-            executables: sorted.map(\.1),
+            executables: sorted.map { Element(information: $0, context: $1.0, executableType: $1.1) },
             indexes: Dictionary(uniqueKeysWithValues: sorted.enumerated().map { ($1.0.id, $0) })// ,
             // parameterisedFSMs: Dictionary(uniqueKeysWithValues: parameterisedFSMs.map {
             //     ($0, ParameterisedStatus(status: .inactive, call: nil))
@@ -100,14 +124,19 @@ public struct ExecutablePool {
     ///
     /// - Attention: If there exists an executable with the same id, then the
     /// new executable will overwrite the old.
-    mutating func insert(_ executable: ExecutableType, information: FSMInformation) {
+    mutating func insert(
+        _ executable: ExecutableType,
+        context: AnySchedulerContext,
+        information: FSMInformation
+    ) {
+        let element = Element(information: information, context: context, executableType: executable)
         guard let index = indexes[information.id] else {
             let index = executables.count
-            executables.append(executable)
+            executables.append(element)
             indexes[information.id] = index
             return
         }
-        executables[index] = executable
+        executables[index] = element
     }
 
     /// Does an executable with the given id exist within this pool?
@@ -153,7 +182,7 @@ public struct ExecutablePool {
     ///
     /// - Complexity: O(1)
     func executable(atIndex index: Int) -> ExecutableType {
-        executables[index]
+        executables[index].executableType
     }
 
     /// Fetches the executable with the given id.
@@ -191,35 +220,51 @@ public struct ExecutablePool {
     //     }
     // }
 
-    // func propertyList(forStep step: VerificationStep, executingState state: String?, promises: [String: PromiseData], resetClocks: Set<String>?, collapseIfPossible collapse: Bool = false) -> KripkeStatePropertyList {
-    //     let setPromises = setPromises(promises)
-    //     var fsmValues: [String: KripkeStateProperty] = Dictionary(uniqueKeysWithValues: fsms.compactMap {
-    //         guard !parameterisedFSMs.keys.contains($0.name) else {
-    //             return nil
+    /// Generate a `KripkeStatePropertyList` representing the state of this
+    /// pool.
+    // func propertyList(
+    //     forStep step: VerificationStep,
+    //     executingState state: String?,
+    //     // promises: [String: PromiseData],
+    //     resetClocks: Set<ExecutableID>?,
+    //     collapseIfPossible collapse: Bool
+    // ) -> KripkeStatePropertyList {
+    //     // let setPromises = setPromises(promises)
+    //     var fsmValues: [ExecutableID: KripkeStateProperty] = Dictionary(
+    //         uniqueKeysWithValues: executables.compactMap {
+    //             // guard !parameterisedFSMs.keys.contains($0.name) else {
+    //             //     return nil
+    //             // }
+    //             (
+    //                 $0.name,
+    //                 KripkeStateProperty(
+    //                     type: .Compound(KripkeStatePropertyList($0.asScheduleableFiniteStateMachine.base)),
+    //                     value: $0.asScheduleableFiniteStateMachine.base
+    //                 )
+    //             )
     //         }
-    //         return ($0.name, KripkeStateProperty(type: .Compound(KripkeStatePropertyList($0.asScheduleableFiniteStateMachine.base)), value: $0.asScheduleableFiniteStateMachine.base))
-    //     })
-    //     fsmValues.reserveCapacity(fsmValues.count + parameterisedFSMs.count)
-    //     for (key, val) in parameterisedFSMs {
-    //         guard val.status == .executing, let call = val.call else {
-    //             fsmValues[key] = KripkeStateProperty(type: .Optional(nil), value: Optional<[String: Any]>.none as Any)
-    //             continue
-    //         }
-    //         fsmValues[key] = KripkeStateProperty(
-    //             type: .Optional(KripkeStateProperty(
-    //                 type: .Compound(KripkeStatePropertyList([
-    //                     "parameters": .init(
-    //                         type: .Compound(KripkeStatePropertyList(call.parameters.mapValues { KripkeStateProperty($0 as Any) })),
-    //                         value: call.parameters
-    //                     ),
-    //                     "result": KripkeStateProperty(call.result)
-    //                 ])),
-    //                 value: call
-    //             )),
-    //             value: Optional<ParameterisedStatus.CallData>.some(call) as Any
-    //         )
-    //     }
-    //     undoSetPromises(setPromises)
+    //     )
+    //     // fsmValues.reserveCapacity(fsmValues.count + parameterisedFSMs.count)
+    //     // for (key, val) in parameterisedFSMs {
+    //     //     guard val.status == .executing, let call = val.call else {
+    //     //         fsmValues[key] = KripkeStateProperty(type: .Optional(nil), value: Optional<[String: Any]>.none as Any)
+    //     //         continue
+    //     //     }
+    //     //     fsmValues[key] = KripkeStateProperty(
+    //     //         type: .Optional(KripkeStateProperty(
+    //     //             type: .Compound(KripkeStatePropertyList([
+    //     //                 "parameters": .init(
+    //     //                     type: .Compound(KripkeStatePropertyList(call.parameters.mapValues { KripkeStateProperty($0 as Any) })),
+    //     //                     value: call.parameters
+    //     //                 ),
+    //     //                 "result": KripkeStateProperty(call.result)
+    //     //             ])),
+    //     //             value: call
+    //     //         )),
+    //     //         value: Optional<ParameterisedStatus.CallData>.some(call) as Any
+    //     //     )
+    //     // }
+    //     // undoSetPromises(setPromises)
     //     let clocks: KripkeStateProperty? = resetClocks.map { resetClocks in
     //         let values = Dictionary(uniqueKeysWithValues: Set(fsmValues.keys).union(Set(parameterisedFSMs.keys)).map {
     //             ($0, resetClocks.contains($0))

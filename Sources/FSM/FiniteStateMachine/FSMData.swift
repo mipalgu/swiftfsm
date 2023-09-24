@@ -28,6 +28,22 @@ public struct FSMData<
 
     public var suspendedState: StateID?
 
+    public var cloned: Self {
+        let newFsmContext = fsmContext.cloned
+        return Self(
+            acceptingStates: acceptingStates,
+            stateContexts: stateContexts.map { $0.clone(fsmContext: newFsmContext) },
+            fsmContext: newFsmContext,
+            ringletContext: ringletContext,
+            actuatorValues: actuatorValues,
+            initialState: initialState,
+            currentState: currentState,
+            previousState: previousState,
+            suspendState: suspendState,
+            suspendedState: suspendedState
+        )
+    }
+
     public var isFinished: Bool {
         currentState == previousState
             && currentState != suspendState
@@ -38,7 +54,7 @@ public struct FSMData<
         currentState == suspendState
     }
 
-    init(
+    public init(
         acceptingStates: [Bool],
         stateContexts: [AnyStateContext<Context, Environment, Parameters, Result>],
         fsmContext: FSMContext<Context, Environment, Parameters, Result>,

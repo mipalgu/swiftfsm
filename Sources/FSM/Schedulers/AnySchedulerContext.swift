@@ -10,6 +10,17 @@ public class AnySchedulerContext {
 
     internal var startTime: ContinuousClock.Instant = .now
 
+    public var cloned: AnySchedulerContext {
+        let clone = AnySchedulerContext(
+            fsmID: fsmID,
+            fsmName: fsmName,
+            duration: duration,
+            transitioned: transitioned
+        )
+        clone.startTime = startTime
+        return clone
+    }
+
     public init(fsmID: Int, fsmName: String, duration: Duration = .zero, transitioned: Bool = true) {
         self.fsmID = fsmID
         self.fsmName = fsmName

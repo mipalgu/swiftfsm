@@ -12,6 +12,19 @@ public final class SchedulerContext<
 
     public weak var stateContainer: StateContainer<StateType, Parameters, Result, FSMsContext, Environment>!
 
+    override public var cloned: AnySchedulerContext {
+        let clone = Self(
+            fsmID: fsmID,
+            fsmName: fsmName,
+            data: data,
+            stateContainer: stateContainer
+        )
+        clone.duration = super.duration
+        clone.transitioned = super.transitioned
+        clone.startTime = startTime
+        return clone
+    }
+
     public var states: [FSMState<StateType, Parameters, Result, FSMsContext, Environment>] {
         stateContainer.states
     }

@@ -70,6 +70,12 @@ public final class StateContext<
         fsmContext.after(duration)
     }
 
+    override public func clone(
+        fsmContext: FSMContext<FSMsContext, Environment, Parameters, Result>
+    ) -> AnyStateContext<FSMsContext, Environment, Parameters, Result> {
+        Self(context: context, fsmContext: fsmContext)
+    }
+
     public subscript<T>(dynamicMember keyPath: WritableKeyPath<StateContext, T>) -> T {
         get { context[keyPath: keyPath] }
         set { context[keyPath: keyPath] = newValue }
