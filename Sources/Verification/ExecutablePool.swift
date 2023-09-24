@@ -3,7 +3,7 @@ import KripkeStructure
 
 /// Provides a way to access a collection of executables that have been
 /// classified by their function within a schedule.
-public struct ExecutablePool {
+struct ExecutablePool {
 
     /// The type to differentiate executable id's.
     typealias ExecutableID = Int
@@ -171,6 +171,30 @@ public struct ExecutablePool {
             fatalError("Attempting to fetch index of executable that doesn't exist within the pool.")
         }
         return index
+    }
+
+    /// Fetches the context at the given index.
+    ///
+    /// - Parameter index: The underlying index where the executable exists
+    /// within the pool.
+    ///
+    /// - Returns: The executable at the given index.
+    ///
+    /// - Complexity: O(1)
+    func context(atIndex index: Int) -> AnySchedulerContext {
+        executables[index].context
+    }
+
+    /// Fetches the context for the executable with the given id.
+    ///
+    /// - Parameter id: The id of the executable to search within this pool.
+    ///
+    /// - Returns: The executable with the given id.
+    ///
+    /// - Warning: If an executable with the given id does not exist within
+    /// this pool, then this causes a crash.
+    func context(_ id: ExecutableID) -> AnySchedulerContext {
+        context(atIndex: index(of: id))
     }
 
     /// Fetches the executable at the given index.

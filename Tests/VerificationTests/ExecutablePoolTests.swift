@@ -281,6 +281,22 @@ final class ExectuablePoolTests: XCTestCase {
         }
     }
 
+    func testContextFetchesMocksWithCorrectIndexes() {
+        XCTAssertFalse(startingMocks.isEmpty, "startingMocks should not be empty.")
+        for (index, (_, (context, _))) in startingMocks.enumerated() {
+            let fetchedContext = pool.context(atIndex: index)
+            XCTAssertIdentical(context, fetchedContext, "Unexpected context at index \(index).")
+        }
+    }
+
+    func testContextFetchesMocksWithCorrectIds() {
+        XCTAssertFalse(startingMocks.isEmpty, "startingMocks should not be empty.")
+        for (info, (context, _)) in startingMocks {
+            let fetchedContext = pool.context(info.id)
+            XCTAssertIdentical(context, fetchedContext, "Unexpected context with id \(info.id).")
+        }
+    }
+
     func testExecutableFetchesMocksWithCorrectIndexes() {
         XCTAssertFalse(startingMocks.isEmpty, "startingMocks should not be empty.")
         for (index, (_, (_, mock))) in startingMocks.enumerated() {
