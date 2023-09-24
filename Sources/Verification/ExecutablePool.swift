@@ -260,15 +260,17 @@ struct ExecutablePool {
     ) -> KripkeStatePropertyList {
         // let setPromises = setPromises(promises)
         var fsmValues: [ExecutableID: KripkeStateProperty] = Dictionary(
-            uniqueKeysWithValues: executables.compactMap {
+            uniqueKeysWithValues: executables.compactMap { element in
                 // guard !parameterisedFSMs.keys.contains($0.name) else {
                 //     return nil
                 // }
-                (
-                    $0.information.id,
+                element.executable.setup(context: element.context)
+                defer { element.executable.tearDown(context: element.context) }
+                return (
+                    element.information.id,
                     KripkeStateProperty(
-                        type: .Compound(KripkeStatePropertyList($0.context)),
-                        value: $0.context
+                        type: .Compound(KripkeStatePropertyList(element.context)),
+                        value: element.context
                     )
                 )
             }

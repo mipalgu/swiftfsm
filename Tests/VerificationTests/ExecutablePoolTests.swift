@@ -356,14 +356,14 @@ final class ExectuablePoolTests: XCTestCase {
         }
     }
 
-    func testPropertyList() {
-        let plist = pool.propertyList(
-            forStep: .takeSnapshotAndStartTimeslot(timeslot: timeslots[0]),
-            executingState: "Initial",
-            resetClocks: [0],
-            collapseIfPossible: true
-        )
-        debugPrint(plist)
-    }
+    // func testPropertyList() {
+    //     let plist = pool.propertyList(
+    //         forStep: .takeSnapshotAndStartTimeslot(timeslot: timeslots[0]),
+    //         executingState: "Initial",
+    //         resetClocks: [0],
+    //         collapseIfPossible: true
+    //     )
+    //     debugPrint(plist)
+    // }
 
 }

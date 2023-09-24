@@ -1,3 +1,11 @@
+private struct StateRepresentation {
+
+    var name: String
+
+    var variables: Any
+
+}
+
 @dynamicMemberLookup
 public final class SchedulerContext<
     StateType: TypeErasedState,
@@ -29,13 +37,18 @@ public final class SchedulerContext<
         Mirror(
             self,
             children: [
-                "currentState": data.currentState as Any,
-                "environment": data.fsmContext.environment as Any,
-                "fsmVars": data.fsmContext.context as Any,
-                "parameters": data.fsmContext.parameters as Any,
+                "currentState": data.currentState,
+                "environment": data.fsmContext.environment,
+                "isFinished": data.fsmContext.isFinished,
+                "isSuspended": data.fsmContext.isSuspended,
+                "name": super.fsmName,
+                "parameters": data.fsmContext.parameters,
                 "result": data.fsmContext.result as Any,
-                "ringlet": data.ringletContext as Any,
-                "states": data.stateContexts as Any
+                "ringlet": data.ringletContext,
+                "states": stateContainer.states.map {
+                    StateRepresentation(name: $0.name, variables: data.stateContexts[$0.id])
+                },
+                "variables": data.fsmContext.context
             ],
             displayStyle: .class,
             ancestorRepresentation: .suppressed

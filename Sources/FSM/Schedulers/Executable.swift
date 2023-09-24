@@ -8,6 +8,10 @@ public protocol Executable {
 
     func saveSnapshot(context: AnySchedulerContext)
 
+    func setup(context: AnySchedulerContext)
+
     func takeSnapshot(context: AnySchedulerContext)
+
+    func tearDown(context: AnySchedulerContext)
 
 }

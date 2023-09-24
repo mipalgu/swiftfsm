@@ -24,6 +24,12 @@ struct ExecutableMock: Executable, Identifiable, Hashable, Codable {
     func saveSnapshot(context _: AnySchedulerContext) {}
 
     /// Does nothing.
+    func setup(context _: AnySchedulerContext) {}
+
+    /// Does nothing.
     func takeSnapshot(context _: AnySchedulerContext) {}
+
+    /// Does nothing.
+    func tearDown(context _: AnySchedulerContext) {}
 
 }

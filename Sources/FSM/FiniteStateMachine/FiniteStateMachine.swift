@@ -163,4 +163,26 @@ where
         context.environment = environment
     }
 
+    public func setup(context: AnySchedulerContext) {
+        let context = unsafeDowncast(
+            context,
+            to: SchedulerContext<StateType, Ringlet.Context, Context, Environment, Parameters, Result>.self
+        )
+        context.stateContainer = stateContainer
+        context.fsmContext.duration = context.duration
+        defer {
+            context.stateContainer = nil
+            context.fsmContext.duration = nil
+        }
+    }
+
+    public func tearDown(context: AnySchedulerContext) {
+        let context = unsafeDowncast(
+            context,
+            to: SchedulerContext<StateType, Ringlet.Context, Context, Environment, Parameters, Result>.self
+        )
+        context.stateContainer = nil
+        context.fsmContext.duration = nil
+    }
+
 }
