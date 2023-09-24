@@ -315,4 +315,21 @@ final class ExectuablePoolTests: XCTestCase {
         }
     }
 
+    func testCloneCreatesNewContexts() {
+        XCTAssertFalse(startingMocks.isEmpty, "startingMocks should not be empty.")
+        for (index, (_, (context, _))) in startingMocks.enumerated() {
+            let fetchedContext = pool.cloned.context(atIndex: index)
+            XCTAssertNotIdentical(context, fetchedContext, "Unexpected context at index \(index).")
+        }
+    }
+
+    func testCloneCreatesTheSameMocks() {
+        XCTAssertFalse(startingMocks.isEmpty, "startingMocks should not be empty.")
+        for (index, (_, (_, mock))) in startingMocks.enumerated() {
+            let fetchedMock = pool.cloned.executable(atIndex: index).executable as? ExecutableMock
+            XCTAssertNotNil(fetchedMock)
+            XCTAssertEqual(mock, fetchedMock, "Unexpected mock at index \(index).")
+        }
+    }
+
 }

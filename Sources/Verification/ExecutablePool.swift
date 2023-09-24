@@ -76,6 +76,11 @@ struct ExecutablePool {
     /// `executables`.
     private var indexes: [ExecutableID: Int]
 
+    /// Perform a deep-copy of this pool.
+    var cloned: ExecutablePool {
+        ExecutablePool(executables: executables.map(\.cloned), indexes: indexes)
+    }
+
     /// Create a new pool.
     ///
     /// - Parameter executables: The executables within this pool.
