@@ -142,6 +142,7 @@ public struct RoundRobinScheduler {
             } else {
                 slot.context.duration = now - slot.context.startTime
             }
+            slot.context.afterCalls.removeAll(keepingCapacity: true)
             slot.takeSnapshot()
             slot.next()
             slot.saveSnapshot()

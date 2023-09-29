@@ -170,10 +170,6 @@ where
         )
         context.stateContainer = stateContainer
         context.fsmContext.duration = context.duration
-        defer {
-            context.stateContainer = nil
-            context.fsmContext.duration = nil
-        }
     }
 
     public func tearDown(context: AnySchedulerContext) {

@@ -10,6 +10,8 @@ public class AnySchedulerContext: CustomReflectable {
 
     internal var startTime: ContinuousClock.Instant = .now
 
+    public var afterCalls: [Duration] = []
+
     public var cloned: AnySchedulerContext {
         let clone = AnySchedulerContext(
             fsmID: fsmID,

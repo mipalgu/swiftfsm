@@ -16,6 +16,14 @@ public final class SchedulerContext<
     Result: DataStructure
 >: AnySchedulerContext {
 
+    override public var afterCalls: [Duration] {
+        get {
+            fsmContext.afterCalls
+        } set {
+            fsmContext.afterCalls = newValue
+        }
+    }
+
     public var data: FSMData<RingletsContext, Parameters, Result, FSMsContext, Environment>
 
     public weak var stateContainer: StateContainer<StateType, Parameters, Result, FSMsContext, Environment>!
@@ -24,7 +32,7 @@ public final class SchedulerContext<
         let clone = Self(
             fsmID: fsmID,
             fsmName: fsmName,
-            data: data,
+            data: data.cloned,
             stateContainer: stateContainer
         )
         clone.duration = super.duration

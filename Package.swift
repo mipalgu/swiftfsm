@@ -67,7 +67,10 @@ let package = Package(
             name: "VerificationTests",
             dependencies: [
                 "FSM",
+                "FSMTest",
                 "LLFSMs",
+                "Model",
+                "Mocks",
                 "Verification",
                 .product(name: "KripkeStructures", package: "KripkeStructures"
             )])

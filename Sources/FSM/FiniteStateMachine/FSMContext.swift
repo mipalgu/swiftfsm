@@ -8,6 +8,8 @@ public final class FSMContext<
 
     public var context: FSMsContext
 
+    internal var afterCalls: [Duration] = []
+
     // swiftlint:disable:next implicitly_unwrapped_optional
     internal var duration: Duration! = nil
 
@@ -73,7 +75,8 @@ public final class FSMContext<
     }
 
     public func after(_ duration: Duration) -> Bool {
-        self.duration > duration
+        afterCalls.append(duration)
+        return self.duration > duration
     }
 
     public subscript<T>(dynamicMember keyPath: KeyPath<FSMsContext, T>) -> T {
