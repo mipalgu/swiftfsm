@@ -52,6 +52,7 @@ struct ExecutablePool {
         /// Metadata associated with this executable.
         var information: FSMInformation
 
+        /// The current context of the executable.
         var context: AnySchedulerContext
 
         /// The executable categorised by its function in the schedule.
@@ -259,7 +260,7 @@ struct ExecutablePool {
         collapseIfPossible collapse: Bool
     ) -> KripkeStatePropertyList {
         // let setPromises = setPromises(promises)
-        var fsmValues: [ExecutableID: KripkeStateProperty] = Dictionary(
+        let fsmValues: [ExecutableID: KripkeStateProperty] = Dictionary(
             uniqueKeysWithValues: executables.compactMap { element in
                 // guard !parameterisedFSMs.keys.contains($0.name) else {
                 //     return nil

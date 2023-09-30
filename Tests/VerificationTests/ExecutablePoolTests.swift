@@ -356,14 +356,32 @@ final class ExectuablePoolTests: XCTestCase {
         }
     }
 
-    // func testPropertyList() {
-    //     let plist = pool.propertyList(
-    //         forStep: .takeSnapshotAndStartTimeslot(timeslot: timeslots[0]),
-    //         executingState: "Initial",
-    //         resetClocks: [0],
-    //         collapseIfPossible: true
-    //     )
-    //     debugPrint(plist)
-    // }
+    func testPropertyList() {
+        let model = EmptyMachine()
+        let info = FSMInformation(fsm: model)
+        let (executable, contextFactory) = model.initial(
+            actuators: [],
+            externalVariables: [],
+            globalVariables: [],
+            sensors: []
+        )
+        let context = contextFactory(nil)
+        let pool = ExecutablePool(executables: [(info, (context, .controllable(executable)))])
+        let timeslot = Timeslot(
+            executables: [info.id],
+            callChain: CallChain(root: info.id, calls: []),
+            startingTime: 0,
+            duration: 30,
+            cyclesExecuted: 0
+        )
+        let plist = pool.propertyList(
+            forStep: .takeSnapshotAndStartTimeslot(timeslot: timeslot),
+            executingState: "Exit",
+            resetClocks: [0],
+            collapseIfPossible: true
+        )
+        XCTAssertNotNil(plist.properties["fsms"])
+        XCTAssertNotNil(plist.properties["pc"])
+    }
 
 }
