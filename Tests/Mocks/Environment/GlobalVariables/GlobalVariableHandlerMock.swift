@@ -48,6 +48,8 @@ public final class GlobalVariableHandlerMock<Value: GlobalVariableValue>: Global
 
     }
 
+    public let nonNilValue: Value
+
     private let _id: String
 
     public private(set) var calls: [Call] {
@@ -105,8 +107,16 @@ public final class GlobalVariableHandlerMock<Value: GlobalVariableValue>: Global
         }
     }
 
-    public init(id: String, value: Value) {
+    public init<T>(id: String, value: Value, nonNilValue: T? = nil) where T == Value {
         self._id = id
+        self.nonNilValue = nonNilValue ?? value
+        handlerValues[id] = value
+        handlerCalls[id] = []
+    }
+
+    public init<T>(id: String, value: Value, nonNilValue: T) where T? == Value {
+        self._id = id
+        self.nonNilValue = nonNilValue
         handlerValues[id] = value
         handlerCalls[id] = []
     }

@@ -10,6 +10,7 @@ public final class SensorHandlerMock<Value: SensorValue>: SensorHandler {
 
     }
 
+    private let _nonNilValue: () -> Value
     private let _id: String
     private let _takeSnapshot: () -> Value
 
@@ -23,21 +24,38 @@ public final class SensorHandlerMock<Value: SensorValue>: SensorHandler {
         self.calls.lazy.filter { $0 == .takeSnapshot }.count
     }
 
+    public var nonNilValue: Value {
+        self._nonNilValue()
+    }
+
     public var id: String {
         calls.append(.id)
         return _id
     }
 
-    public convenience init(id: String, value: Value) {
+    public convenience init<T>(id: String, value: Value, nonNilValue: T? = nil) where T == Value {
+        let nonNilValue = nonNilValue ?? value
         let value = value
         self.init(
             id: id,
+            nonNilValue: { nonNilValue },
             takeSnapshot: { value }
         )
     }
 
-    public init(id: String, takeSnapshot: @escaping () -> Value) {
+    public convenience init<T>(id: String, value: Value, nonNilValue: T) where T? == Value {
+        let nonNilValue = nonNilValue
+        let value = value
+        self.init(
+            id: id,
+            nonNilValue: { nonNilValue },
+            takeSnapshot: { value }
+        )
+    }
+
+    public init(id: String, nonNilValue: @escaping () -> Value, takeSnapshot: @escaping () -> Value) {
         self._id = id
+        self._nonNilValue = nonNilValue
         self._takeSnapshot = takeSnapshot
     }
 

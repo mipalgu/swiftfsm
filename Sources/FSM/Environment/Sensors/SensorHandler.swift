@@ -1,4 +1,4 @@
-public protocol SensorHandler: EnvironmentHandler where Value: SensorValue {
+public protocol SensorHandler: EnvironmentHandler, CombinationsConvertible where Value: SensorValue {
 
     func takeSnapshot() -> Value
 

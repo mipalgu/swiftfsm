@@ -14,6 +14,7 @@ public final class ExternalVariableHandlerMock<Value: ExternalVariableValue>: Ex
 
     }
 
+    private let _nonNilValue: () -> Value
     private let _id: String
     private let _initialValue: () -> Value
     private let _saveSnapshot: (Value) -> Void
@@ -43,6 +44,10 @@ public final class ExternalVariableHandlerMock<Value: ExternalVariableValue>: Ex
         self.calls.lazy.filter { $0 == .takeSnapshot }.count
     }
 
+    public var nonNilValue: Value {
+        _nonNilValue()
+    }
+
     public var id: String {
         calls.append(.id)
         return _id
@@ -53,24 +58,56 @@ public final class ExternalVariableHandlerMock<Value: ExternalVariableValue>: Ex
         return _initialValue()
     }
 
-    public convenience init(id: String, value: Value, initialValue: Value? = nil) {
+    public convenience init<T>(id: String, value: Value, nonNilValue: T, initialValue: Value? = nil)
+    where T? == Value {
         let initialValue = initialValue ?? value
         var value = value
         self.init(
             id: id,
+            nonNilValue: { nonNilValue },
             initialValue: { initialValue },
             saveSnapshot: { value = $0 },
             takeSnapshot: { value }
         )
     }
 
-    public init(
+    public convenience init<T>(id: String, value: Value, nonNilValue: T? = nil, initialValue: Value? = nil)
+    where T == Value {
+        let nonNilValue = nonNilValue ?? value
+        let initialValue = initialValue ?? value
+        var value = value
+        self.init(
+            id: id,
+            nonNilValue: { nonNilValue },
+            initialValue: { initialValue },
+            saveSnapshot: { value = $0 },
+            takeSnapshot: { value }
+        )
+    }
+
+    public init<T>(
         id: String,
+        nonNilValue: @escaping () -> T,
         initialValue: @escaping () -> Value,
         saveSnapshot: @escaping (Value) -> Void,
         takeSnapshot: @escaping () -> Value
-    ) {
+    ) where T == Value {
         self._id = id
+        self._nonNilValue = nonNilValue
+        self._initialValue = initialValue
+        self._saveSnapshot = saveSnapshot
+        self._takeSnapshot = takeSnapshot
+    }
+
+    public init<T>(
+        id: String,
+        nonNilValue: @escaping () -> T,
+        initialValue: @escaping () -> Value,
+        saveSnapshot: @escaping (Value) -> Void,
+        takeSnapshot: @escaping () -> Value
+    ) where T? == Value {
+        self._id = id
+        self._nonNilValue = nonNilValue
         self._initialValue = initialValue
         self._saveSnapshot = saveSnapshot
         self._takeSnapshot = takeSnapshot
