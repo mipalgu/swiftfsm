@@ -1,11 +1,11 @@
 public struct AnySensorHandler {
 
-    private let _base: () -> Any
+    private let _base: () -> any SensorHandler
     private let _id: () -> String
     private let _takeSnapshot: () -> Sendable
     private let _updateEnvironment: (UnsafeMutableRawPointer, Sendable) -> Void
 
-    public var base: Any {
+    public var base: any SensorHandler {
         _base()
     }
 
@@ -17,9 +17,23 @@ public struct AnySensorHandler {
         _ base: Base,
         updateEnvironment: @Sendable @escaping (UnsafeMutableRawPointer, Sendable) -> Void
     ) {
-        self._base = { base }
-        self._id = { base.id }
-        self._takeSnapshot = { base.takeSnapshot() as Sendable }
+        self.init(
+            base: { base },
+            id: { base.id },
+            takeSnapshot: { base.takeSnapshot() as Sendable },
+            updateEnvironment: updateEnvironment
+        )
+    }
+
+    public init(
+        base: @Sendable @escaping () -> any SensorHandler,
+        id: @Sendable @escaping () -> String,
+        takeSnapshot: @Sendable @escaping () -> Sendable,
+        updateEnvironment: @Sendable @escaping (UnsafeMutableRawPointer, Sendable) -> Void
+    ) {
+        self._base = base
+        self._id = id
+        self._takeSnapshot = takeSnapshot
         self._updateEnvironment = updateEnvironment
     }
 

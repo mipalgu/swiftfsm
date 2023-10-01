@@ -1,12 +1,12 @@
 public struct AnyGlobalVariableHandler {
 
-    private let _base: () -> Any
+    private let _base: () -> any GlobalVariableHandler
     private let _id: () -> String
     private let _saveSnapshot: (Sendable) -> Void
     private let _takeSnapshot: () -> Sendable
     private let _updateEnvironment: (UnsafeMutableRawPointer, Sendable) -> Void
 
-    public var base: Any {
+    public var base: any GlobalVariableHandler {
         _base()
     }
 
@@ -27,10 +27,26 @@ public struct AnyGlobalVariableHandler {
         updateEnvironment: @Sendable @escaping (UnsafeMutableRawPointer, Sendable) -> Void
     ) {
         var base = base
-        self._base = { base }
-        self._id = { base.id }
-        self._saveSnapshot = { base.value = $0 as! Base.Value }
-        self._takeSnapshot = { base.value as Sendable }
+        self.init(
+            base: { base },
+            id: { base.id },
+            saveSnapshot: { base.value = $0 as! Base.Value },
+            takeSnapshot: { base.value as Sendable },
+            updateEnvironment: updateEnvironment
+        )
+    }
+
+    public init(
+        base: @escaping () -> any GlobalVariableHandler,
+        id: @escaping () -> String,
+        saveSnapshot: @escaping (Sendable) -> Void,
+        takeSnapshot: @escaping () -> Sendable,
+        updateEnvironment: @Sendable @escaping (UnsafeMutableRawPointer, Sendable) -> Void
+    ) {
+        self._base = base
+        self._id = id
+        self._saveSnapshot = saveSnapshot
+        self._takeSnapshot = takeSnapshot
         self._updateEnvironment = updateEnvironment
     }
 

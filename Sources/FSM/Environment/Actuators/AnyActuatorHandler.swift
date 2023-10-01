@@ -3,7 +3,7 @@ public struct AnyActuatorHandler {
 
     /// Fetch the base that was used to create this type-erased actuator
     /// handler.
-    private let _base: () -> Any
+    private let _base: () -> any ActuatorHandler
 
     /// Fetch the id of the actuator handler.
     private let _id: () -> String
