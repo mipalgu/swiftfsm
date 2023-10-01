@@ -77,10 +77,10 @@ extension FSM {
     /// lookup times. However, this means that you should not rely on the
     /// id's as accessed within this model.
     public func initial(
-        actuators: [(PartialKeyPath<Environment>, AnyActuatorHandler<Environment>)],
-        externalVariables: [(PartialKeyPath<Environment>, AnyExternalVariableHandler<Environment>)],
-        globalVariables: [(PartialKeyPath<Environment>, AnyGlobalVariableHandler<Environment>)],
-        sensors: [(PartialKeyPath<Environment>, AnySensorHandler<Environment>)]
+        actuators: [(PartialKeyPath<Environment>, AnyActuatorHandler)],
+        externalVariables: [(PartialKeyPath<Environment>, AnyExternalVariableHandler)],
+        globalVariables: [(PartialKeyPath<Environment>, AnyGlobalVariableHandler)],
+        sensors: [(PartialKeyPath<Environment>, AnySensorHandler)]
     ) -> (Executable, ((any DataStructure)?) -> AnySchedulerContext) {
         let indexes: [PartialKeyPath<Environment>: (SharedVariableType, Int)] = Dictionary(
             uniqueKeysWithValues: actuators.enumerated().map {
@@ -130,10 +130,10 @@ extension FSM {
     /// means that you should not rely on the existing id's of these properties
     /// as accessed from this model.
     private func fsm(
-        actuators: [AnyActuatorHandler<Environment>],
-        externalVariables: [AnyExternalVariableHandler<Environment>],
-        globalVariables: [AnyGlobalVariableHandler<Environment>],
-        sensors: [AnySensorHandler<Environment>],
+        actuators: [AnyActuatorHandler],
+        externalVariables: [AnyExternalVariableHandler],
+        globalVariables: [AnyGlobalVariableHandler],
+        sensors: [AnySensorHandler],
         indexes: [PartialKeyPath<Environment>: (SharedVariableType, Int)]
     ) -> FiniteStateMachine<StateType, Ringlet, Parameters, Result, Context, Environment> {
         var newIds: [StateID: Int] = [:]
@@ -278,7 +278,7 @@ extension FSM {
         guard Set(states.map(\.id)).count == states.count else {
             fatalError("The states array contains states with duplicate ids: \(states)")
         }
-        let handlers = FSMHandlers(
+        let handlers = Handlers(
             actuators: actuators,
             externalVariables: externalVariables,
             globalVariables: globalVariables,

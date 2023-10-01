@@ -26,7 +26,7 @@ public struct ArrangementActuator<Handler: ActuatorHandler>: AnyArrangementActua
     }
 
     public func anyActuator<Environment: EnvironmentSnapshot>(mapsTo keyPath: PartialKeyPath<Environment>)
-        -> (PartialKeyPath<Environment>, AnyActuatorHandler<Environment>)
+        -> (PartialKeyPath<Environment>, AnyActuatorHandler)
     {
         let actualKeyPath = unsafeDowncast(
             keyPath,

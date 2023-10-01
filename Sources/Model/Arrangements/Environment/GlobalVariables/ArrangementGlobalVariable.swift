@@ -27,7 +27,7 @@ public struct ArrangementGlobalVariable<Handler: GlobalVariableHandler>: AnyArra
 
     public func anyGlobalVariable<Environment: EnvironmentSnapshot>(
         mapsTo keyPath: PartialKeyPath<Environment>
-    ) -> (PartialKeyPath<Environment>, AnyGlobalVariableHandler<Environment>) {
+    ) -> (PartialKeyPath<Environment>, AnyGlobalVariableHandler) {
         let actualKeyPath = unsafeDowncast(
             keyPath,
             to: WritableKeyPath<Environment, EnvironmentProtocolReadWriteProperty<Handler.Value>>.self

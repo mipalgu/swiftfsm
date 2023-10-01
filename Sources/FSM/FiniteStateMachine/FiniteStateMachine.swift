@@ -18,8 +18,6 @@ where
 
     public typealias Data = FSMData<Ringlet.Context, Parameters, Result, Context, Environment>
 
-    public typealias Handlers = FSMHandlers<Environment>
-
     public typealias State = FSMState<StateType, Parameters, Result, Context, Environment>
 
     public typealias States = StateContainer<StateType, Parameters, Result, Context, Environment>
