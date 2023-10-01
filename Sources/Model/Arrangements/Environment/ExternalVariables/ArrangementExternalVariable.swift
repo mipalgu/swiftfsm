@@ -27,7 +27,7 @@ public struct ArrangementExternalVariable<Handler: ExternalVariableHandler>: Any
 
     public func anyExternalVariable<Environment: EnvironmentSnapshot>(
         mapsTo keyPath: PartialKeyPath<Environment>
-    ) -> (PartialKeyPath<Environment>, AnyExternalVariableHandler<Environment>) {
+    ) -> (PartialKeyPath<Environment>, AnyExternalVariableHandler) {
         let actualKeyPath = unsafeDowncast(
             keyPath,
             to: WritableKeyPath<Environment, EnvironmentProtocolReadWriteProperty<Handler.Value>>.self

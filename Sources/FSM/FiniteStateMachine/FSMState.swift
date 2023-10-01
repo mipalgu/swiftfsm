@@ -17,17 +17,17 @@ public struct FSMState<
 
     // swiftlint:disable line_length
 
-    public let takeSnapshot: @Sendable (UnsafeMutablePointer<Environment>, FSMHandlers<Environment>, UnsafePointer<Sendable>) -> Void
+    public let takeSnapshot: @Sendable (UnsafeMutablePointer<Environment>, Handlers, UnsafePointer<Sendable>) -> Void
 
-    public let saveSnapshot: @Sendable (UnsafePointer<Environment>, FSMHandlers<Environment>, UnsafeMutablePointer<Sendable>) -> Void
+    public let saveSnapshot: @Sendable (UnsafePointer<Environment>, Handlers, UnsafeMutablePointer<Sendable>) -> Void
 
     public init(
         id: StateID,
         name: String,
         stateType: StateType,
         transitions: [AnyTransition<AnyStateContext<Context, Environment, Parameters, Result>, StateID>],
-        takeSnapshot: @Sendable @escaping (UnsafeMutablePointer<Environment>, FSMHandlers<Environment>, UnsafePointer<Sendable>) -> Void,
-        saveSnapshot: @Sendable @escaping (UnsafePointer<Environment>, FSMHandlers<Environment>, UnsafeMutablePointer<Sendable>) -> Void
+        takeSnapshot: @Sendable @escaping (UnsafeMutablePointer<Environment>, Handlers, UnsafePointer<Sendable>) -> Void,
+        saveSnapshot: @Sendable @escaping (UnsafePointer<Environment>, Handlers, UnsafeMutablePointer<Sendable>) -> Void
     ) {
         self.id = id
         self.name = name

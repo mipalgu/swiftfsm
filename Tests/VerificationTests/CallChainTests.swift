@@ -55,6 +55,7 @@ final class CallChainTests: XCTestCase {
         >(
             fsmID: 3,
             fsmName: "exe3",
+            handlers: Handlers(actuators: [], externalVariables: [], globalVariables: [], sensors: []),
             data: FSMData(
                 acceptingStates: [true],
                 stateContexts: [

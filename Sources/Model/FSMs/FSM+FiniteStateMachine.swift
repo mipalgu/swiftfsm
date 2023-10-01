@@ -77,10 +77,10 @@ extension FSM {
     /// lookup times. However, this means that you should not rely on the
     /// id's as accessed within this model.
     public func initial(
-        actuators: [(PartialKeyPath<Environment>, AnyActuatorHandler<Environment>)],
-        externalVariables: [(PartialKeyPath<Environment>, AnyExternalVariableHandler<Environment>)],
-        globalVariables: [(PartialKeyPath<Environment>, AnyGlobalVariableHandler<Environment>)],
-        sensors: [(PartialKeyPath<Environment>, AnySensorHandler<Environment>)]
+        actuators: [(PartialKeyPath<Environment>, AnyActuatorHandler)],
+        externalVariables: [(PartialKeyPath<Environment>, AnyExternalVariableHandler)],
+        globalVariables: [(PartialKeyPath<Environment>, AnyGlobalVariableHandler)],
+        sensors: [(PartialKeyPath<Environment>, AnySensorHandler)]
     ) -> (Executable, ((any DataStructure)?) -> AnySchedulerContext) {
         let indexes: [PartialKeyPath<Environment>: (SharedVariableType, Int)] = Dictionary(
             uniqueKeysWithValues: actuators.enumerated().map {
@@ -93,27 +93,28 @@ extension FSM {
                 ($1.0, (SharedVariableType.sensor, $0))
             }
         )
-        let fsm = self.fsm(
+        let handlers = Handlers(
             actuators: actuators.map(\.1),
             externalVariables: externalVariables.map(\.1),
             globalVariables: globalVariables.map(\.1),
-            sensors: sensors.map(\.1),
-            indexes: indexes
+            sensors: sensors.map(\.1)
         )
+        let fsm = self.fsm(indexes: indexes)
         let factory: ((any DataStructure)?) -> AnySchedulerContext = {
             let data: FSMData<Ringlet.Context, Parameters, Result, Context, Environment>
             if let params = $0 as? Parameters {
-                data = fsm.initialData(with: params)
+                data = fsm.initialData(with: params, actuators: handlers.actuators)
             } else if let type = Parameters.self as? EmptyInitialisable.Type,
                 let params = type.init() as? Parameters
             {
-                data = fsm.initialData(with: params)
+                data = fsm.initialData(with: params, actuators: handlers.actuators)
             } else {
                 fatalError("Missing parameters for \(name).")
             }
             let context = SchedulerContext(
                 fsmID: -1,
                 fsmName: self.name,
+                handlers: handlers,
                 data: data,
                 stateContainer: StateContainer<StateType, Parameters, Result, Context, Environment>?.none
             )
@@ -130,10 +131,6 @@ extension FSM {
     /// means that you should not rely on the existing id's of these properties
     /// as accessed from this model.
     private func fsm(
-        actuators: [AnyActuatorHandler<Environment>],
-        externalVariables: [AnyExternalVariableHandler<Environment>],
-        globalVariables: [AnyGlobalVariableHandler<Environment>],
-        sensors: [AnySensorHandler<Environment>],
         indexes: [PartialKeyPath<Environment>: (SharedVariableType, Int)]
     ) -> FiniteStateMachine<StateType, Ringlet, Parameters, Result, Context, Environment> {
         var newIds: [StateID: Int] = [:]
@@ -278,16 +275,9 @@ extension FSM {
         guard Set(states.map(\.id)).count == states.count else {
             fatalError("The states array contains states with duplicate ids: \(states)")
         }
-        let handlers = FSMHandlers(
-            actuators: actuators,
-            externalVariables: externalVariables,
-            globalVariables: globalVariables,
-            sensors: sensors
-        )
         return FiniteStateMachine(
             stateContainer: StateContainer(states: states),
             ringlet: Ringlet(),
-            handlers: handlers,
             initialContext: initialContext,
             initialRingletContext: initialRingletContext,
             initialState: initialState,

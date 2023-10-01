@@ -32,6 +32,7 @@ public final class SchedulerContext<
         let clone = Self(
             fsmID: fsmID,
             fsmName: fsmName,
+            handlers: handlers,
             data: data.cloned,
             stateContainer: stateContainer
         )
@@ -148,12 +149,13 @@ public final class SchedulerContext<
     public init(
         fsmID: Int,
         fsmName: String,
+        handlers: Handlers,
         data: FSMData<RingletsContext, Parameters, Result, FSMsContext, Environment>,
         stateContainer: StateContainer<StateType, Parameters, Result, FSMsContext, Environment>? = nil
     ) {
         self.data = data
         self.stateContainer = stateContainer
-        super.init(fsmID: fsmID, fsmName: fsmName)
+        super.init(fsmID: fsmID, fsmName: fsmName, handlers: handlers)
     }
 
     public func after(_ duration: Duration) -> Bool {

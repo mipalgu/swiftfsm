@@ -1,10 +1,10 @@
-public struct AnyExternalVariableHandler<Environment: EnvironmentSnapshot> {
+public struct AnyExternalVariableHandler {
 
     private let _base: () -> Any
     private let _id: () -> String
     private let _saveSnapshot: (Sendable) -> Void
     private let _takeSnapshot: () -> Sendable
-    private let _updateEnvironment: @Sendable (UnsafeMutablePointer<Environment>, Sendable) -> Void
+    private let _updateEnvironment: @Sendable (UnsafeMutableRawPointer, Sendable) -> Void
 
     public var base: Any {
         _base()
@@ -16,7 +16,7 @@ public struct AnyExternalVariableHandler<Environment: EnvironmentSnapshot> {
 
     public init<Base: ExternalVariableHandler>(
         _ base: Base,
-        updateEnvironment: @Sendable @escaping (UnsafeMutablePointer<Environment>, Sendable) -> Void
+        updateEnvironment: @Sendable @escaping (UnsafeMutableRawPointer, Sendable) -> Void
     ) {
         self._base = { base }
         self._id = { base.id }
@@ -33,7 +33,7 @@ public struct AnyExternalVariableHandler<Environment: EnvironmentSnapshot> {
         _takeSnapshot()
     }
 
-    public func update(environment: UnsafeMutablePointer<Environment>, with value: Sendable) {
+    public func update(environment: UnsafeMutableRawPointer, with value: Sendable) {
         _updateEnvironment(environment, value)
     }
 
