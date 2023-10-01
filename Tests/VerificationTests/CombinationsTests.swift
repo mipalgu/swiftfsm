@@ -20,6 +20,35 @@ final class CombinationsTests: XCTestCase {
 
     }
 
+    struct Bools: Hashable, Codable {
+
+        var bool1: Bool
+
+        var bool2: Bool
+
+        var bool3: Bool
+
+        init(bool1: Bool = false, bool2: Bool = false, bool3: Bool = false) {
+            self.bool1 = bool1
+            self.bool2 = bool2
+            self.bool3 = bool3
+        }
+
+    }
+
+    struct InnerStruct: Hashable, Codable {
+
+        var strct1: Bools
+
+        var strct2: Bools
+
+        init(strct1: Bools = Bools(), strct2: Bools = Bools()) {
+            self.strct1 = strct1
+            self.strct2 = strct2
+        }
+
+    }
+
     func test_bools() throws {
         let combinations = Combinations<Bool>()
         let expected = [false, true]
@@ -293,260 +322,286 @@ final class CombinationsTests: XCTestCase {
         }
     }
 
-    // func test_boolsStructWithBoolInFSMWithOtherFSM() throws {
-    //     let fsm = CombinationsFiniteStateMachine()
-    //     let fsm2 = SimpleTimeConditionalFiniteStateMachine()
-    //     let combinations = Combinations(fsms: [
-    //         AnyScheduleableFiniteStateMachine(fsm),
-    //         AnyScheduleableFiniteStateMachine(fsm2)
-    //     ])
-    //     let expected: [(Bool, Bool, Bool, Bool)] = [
-    //         (false, false, false, false),
-    //         (false, false, false, true),
-    //         (false, false, true, false),
-    //         (false, false, true, true),
-    //         (false, true, false, false),
-    //         (false, true, false, true),
-    //         (false, true, true, false),
-    //         (false, true, true, true),
-    //         (true, false, false, false),
-    //         (true, false, false, true),
-    //         (true, false, true, false),
-    //         (true, false, true, true),
-    //         (true, true, false, false),
-    //         (true, true, false, true),
-    //         (true, true, true, false),
-    //         (true, true, true, true)
-    //     ]
-    //     let result: [(Bool, Bool, Bool, Bool)] = combinations.map {
-    //         let bools = $0[0][0] as! Bools
-    //         let bool = $0[0][1] as! Bool
-    //         XCTAssertTrue($0[1].isEmpty)
-    //         return (bools.bool1, bools.bool2, bools.bool3, bool)
-    //     }
-    //     XCTAssertEqual(result.count, expected.count)
-    //     for (index, ((rb1, rb2, rb3, rb4), (eb1, eb2, eb3, eb4))) in zip(result, expected).enumerated() {
-    //         XCTAssertEqual(rb1, eb1, "b1 index: \(index)")
-    //         XCTAssertEqual(rb2, eb2, "b2 index: \(index)")
-    //         XCTAssertEqual(rb3, eb3, "b3 index: \(index)")
-    //         XCTAssertEqual(rb4, eb4, "b4 index: \(index)")
-    //     }
-    // }
+    func test_boolsStructWithBoolInFSMWithOtherFSM() throws {
+        let bools = Bools()
+        let boolsSensor = MockedSensor(id: "bools") { bools }
+        let bool = false
+        let boolSensor = MockedSensor(id: "bool") { bool }
+        let sensors: [any SensorHandler] = [boolsSensor, boolSensor]
+        let combinations = try Combinations(sensors: sensors)
+        let expected: [(Bool, Bool, Bool, Bool)] = [
+            (false, false, false, false),
+            (false, false, false, true),
+            (false, false, true, false),
+            (false, false, true, true),
+            (false, true, false, false),
+            (false, true, false, true),
+            (false, true, true, false),
+            (false, true, true, true),
+            (true, false, false, false),
+            (true, false, false, true),
+            (true, false, true, false),
+            (true, false, true, true),
+            (true, true, false, false),
+            (true, true, false, true),
+            (true, true, true, false),
+            (true, true, true, true)
+        ].sorted(by: <)
+        let result: [(Bool, Bool, Bool, Bool)] = combinations.map {
+            let bools = $0[0] as! Bools
+            let bool = $0[1] as! Bool
+            return (bools.bool1, bools.bool2, bools.bool3, bool)
+        }.sorted(by: <)
+        XCTAssertEqual(result.count, expected.count)
+        for (index, ((rb1, rb2, rb3, rb4), (eb1, eb2, eb3, eb4))) in zip(result, expected).enumerated() {
+            XCTAssertEqual(rb1, eb1, "b1 index: \(index)")
+            XCTAssertEqual(rb2, eb2, "b2 index: \(index)")
+            XCTAssertEqual(rb3, eb3, "b3 index: \(index)")
+            XCTAssertEqual(rb4, eb4, "b4 index: \(index)")
+        }
+    }
 
-    // func test_boolsStructWithBoolInFSM() throws {
-    //     let fsm = CombinationsFiniteStateMachine()
-    //     let combinations = Combinations(fsms: [fsm].map(AnyScheduleableFiniteStateMachine.init))
-    //     let expected: [(Bool, Bool, Bool, Bool)] = [
-    //         (false, false, false, false),
-    //         (false, false, false, true),
-    //         (false, false, true, false),
-    //         (false, false, true, true),
-    //         (false, true, false, false),
-    //         (false, true, false, true),
-    //         (false, true, true, false),
-    //         (false, true, true, true),
-    //         (true, false, false, false),
-    //         (true, false, false, true),
-    //         (true, false, true, false),
-    //         (true, false, true, true),
-    //         (true, true, false, false),
-    //         (true, true, false, true),
-    //         (true, true, true, false),
-    //         (true, true, true, true)
-    //     ]
-    //     let result: [(Bool, Bool, Bool, Bool)] = combinations.map {
-    //         let bools = $0[0][0] as! Bools
-    //         let bool = $0[0][1] as! Bool
-    //         return (bools.bool1, bools.bool2, bools.bool3, bool)
-    //     }
-    //     XCTAssertEqual(result.count, expected.count)
-    //     for (index, ((rb1, rb2, rb3, rb4), (eb1, eb2, eb3, eb4))) in zip(result, expected).enumerated() {
-    //         XCTAssertEqual(rb1, eb1, "b1 index: \(index)")
-    //         XCTAssertEqual(rb2, eb2, "b2 index: \(index)")
-    //         XCTAssertEqual(rb3, eb3, "b3 index: \(index)")
-    //         XCTAssertEqual(rb4, eb4, "b4 index: \(index)")
-    //     }
-    // }
+    func test_boolsStruct() throws {
+        let combinations = try Combinations(for: Bools())
+        let expected: [(Bool, Bool, Bool)] = [
+            (false, false, false),
+            (false, false, true),
+            (false, true, false),
+            (false, true, true),
+            (true, false, false),
+            (true, false, true),
+            (true, true, false),
+            (true, true, true)
+        ].sorted(by: <)
+        let result = combinations.map { ($0.bool1, $0.bool2, $0.bool3) }.sorted(by: <)
+        XCTAssertEqual(result.count, expected.count)
+        for (index, ((rb1, rb2, rb3), (eb1, eb2, eb3))) in zip(result, expected).enumerated() {
+            XCTAssertEqual(rb1, eb1, "b1 index: \(index)")
+            XCTAssertEqual(rb2, eb2, "b2 index: \(index)")
+            XCTAssertEqual(rb3, eb3, "b3 index: \(index)")
+        }
+    }
 
-    // func test_boolsStruct() throws {
-    //     let combinations = Combinations(reflecting: Bools())
-    //     let expected: [(Bool, Bool, Bool)] = [
-    //         (false, false, false),
-    //         (false, false, true),
-    //         (false, true, false),
-    //         (false, true, true),
-    //         (true, false, false),
-    //         (true, false, true),
-    //         (true, true, false),
-    //         (true, true, true)
-    //     ]
-    //     let result = combinations.map { ($0.bool1, $0.bool2, $0.bool3) }
-    //     XCTAssertEqual(result.count, expected.count)
-    //     for (index, ((rb1, rb2, rb3), (eb1, eb2, eb3))) in zip(result, expected).enumerated() {
-    //         XCTAssertEqual(rb1, eb1, "b1 index: \(index)")
-    //         XCTAssertEqual(rb2, eb2, "b2 index: \(index)")
-    //         XCTAssertEqual(rb3, eb3, "b3 index: \(index)")
-    //     }
-    // }
+    func test_innerStruct() throws {
+        let combinations = try Combinations(for: InnerStruct())
+        let expected: [(Bool, Bool, Bool, Bool, Bool, Bool)] = [
+            (false, false, false, false, false, false),
+            (false, false, false, false, false, true),
+            (false, false, false, false, true, false),
+            (false, false, false, false, true, true),
+            (false, false, false, true, false, false),
+            (false, false, false, true, false, true),
+            (false, false, false, true, true, false),
+            (false, false, false, true, true, true),
+            (false, false, true, false, false, false),
+            (false, false, true, false, false, true),
+            (false, false, true, false, true, false),
+            (false, false, true, false, true, true),
+            (false, false, true, true, false, false),
+            (false, false, true, true, false, true),
+            (false, false, true, true, true, false),
+            (false, false, true, true, true, true),
+            (false, true, false, false, false, false),
+            (false, true, false, false, false, true),
+            (false, true, false, false, true, false),
+            (false, true, false, false, true, true),
+            (false, true, false, true, false, false),
+            (false, true, false, true, false, true),
+            (false, true, false, true, true, false),
+            (false, true, false, true, true, true),
+            (false, true, true, false, false, false),
+            (false, true, true, false, false, true),
+            (false, true, true, false, true, false),
+            (false, true, true, false, true, true),
+            (false, true, true, true, false, false),
+            (false, true, true, true, false, true),
+            (false, true, true, true, true, false),
+            (false, true, true, true, true, true),
+            (true, false, false, false, false, false),
+            (true, false, false, false, false, true),
+            (true, false, false, false, true, false),
+            (true, false, false, false, true, true),
+            (true, false, false, true, false, false),
+            (true, false, false, true, false, true),
+            (true, false, false, true, true, false),
+            (true, false, false, true, true, true),
+            (true, false, true, false, false, false),
+            (true, false, true, false, false, true),
+            (true, false, true, false, true, false),
+            (true, false, true, false, true, true),
+            (true, false, true, true, false, false),
+            (true, false, true, true, false, true),
+            (true, false, true, true, true, false),
+            (true, false, true, true, true, true),
+            (true, true, false, false, false, false),
+            (true, true, false, false, false, true),
+            (true, true, false, false, true, false),
+            (true, true, false, false, true, true),
+            (true, true, false, true, false, false),
+            (true, true, false, true, false, true),
+            (true, true, false, true, true, false),
+            (true, true, false, true, true, true),
+            (true, true, true, false, false, false),
+            (true, true, true, false, false, true),
+            (true, true, true, false, true, false),
+            (true, true, true, false, true, true),
+            (true, true, true, true, false, false),
+            (true, true, true, true, false, true),
+            (true, true, true, true, true, false),
+            (true, true, true, true, true, true),
+        ].sorted(by: <)
+        let result = combinations.map {
+            (
+                $0.strct1.bool1,
+                $0.strct1.bool2,
+                $0.strct1.bool3,
+                $0.strct2.bool1,
+                $0.strct2.bool2,
+                $0.strct2.bool3
+            )
+        }.sorted(by: <)
+        XCTAssertEqual(result.count, expected.count)
+        // swiftlint:disable:next line_length
+        for (index, ((rb1, rb2, rb3, rb4, rb5, rb6), (eb1, eb2, eb3, eb4, eb5, eb6))) in zip(result, expected).enumerated() {
+            XCTAssertEqual(rb1, eb1, "b1 index: \(index)")
+            XCTAssertEqual(rb2, eb2, "b2 index: \(index)")
+            XCTAssertEqual(rb3, eb3, "b3 index: \(index)")
+            XCTAssertEqual(rb4, eb4, "b4 index: \(index)")
+            XCTAssertEqual(rb5, eb5, "b5 index: \(index)")
+            XCTAssertEqual(rb6, eb6, "b6 index: \(index)")
+        }
+    }
 
-    // func test_innerStruct() throws {
-    //     let combinations = Combinations(reflecting: InnerStruct())
-    //     let expected: [(Bool, Bool, Bool, Bool, Bool, Bool)] = [
-    //         (false, false, false, false, false, false),
-    //         (false, false, false, false, false, true),
-    //         (false, false, false, false, true, false),
-    //         (false, false, false, false, true, true),
-    //         (false, false, false, true, false, false),
-    //         (false, false, false, true, false, true),
-    //         (false, false, false, true, true, false),
-    //         (false, false, false, true, true, true),
-    //         (false, false, true, false, false, false),
-    //         (false, false, true, false, false, true),
-    //         (false, false, true, false, true, false),
-    //         (false, false, true, false, true, true),
-    //         (false, false, true, true, false, false),
-    //         (false, false, true, true, false, true),
-    //         (false, false, true, true, true, false),
-    //         (false, false, true, true, true, true),
-    //         (false, true, false, false, false, false),
-    //         (false, true, false, false, false, true),
-    //         (false, true, false, false, true, false),
-    //         (false, true, false, false, true, true),
-    //         (false, true, false, true, false, false),
-    //         (false, true, false, true, false, true),
-    //         (false, true, false, true, true, false),
-    //         (false, true, false, true, true, true),
-    //         (false, true, true, false, false, false),
-    //         (false, true, true, false, false, true),
-    //         (false, true, true, false, true, false),
-    //         (false, true, true, false, true, true),
-    //         (false, true, true, true, false, false),
-    //         (false, true, true, true, false, true),
-    //         (false, true, true, true, true, false),
-    //         (false, true, true, true, true, true),
-    //         (true, false, false, false, false, false),
-    //         (true, false, false, false, false, true),
-    //         (true, false, false, false, true, false),
-    //         (true, false, false, false, true, true),
-    //         (true, false, false, true, false, false),
-    //         (true, false, false, true, false, true),
-    //         (true, false, false, true, true, false),
-    //         (true, false, false, true, true, true),
-    //         (true, false, true, false, false, false),
-    //         (true, false, true, false, false, true),
-    //         (true, false, true, false, true, false),
-    //         (true, false, true, false, true, true),
-    //         (true, false, true, true, false, false),
-    //         (true, false, true, true, false, true),
-    //         (true, false, true, true, true, false),
-    //         (true, false, true, true, true, true),
-    //         (true, true, false, false, false, false),
-    //         (true, true, false, false, false, true),
-    //         (true, true, false, false, true, false),
-    //         (true, true, false, false, true, true),
-    //         (true, true, false, true, false, false),
-    //         (true, true, false, true, false, true),
-    //         (true, true, false, true, true, false),
-    //         (true, true, false, true, true, true),
-    //         (true, true, true, false, false, false),
-    //         (true, true, true, false, false, true),
-    //         (true, true, true, false, true, false),
-    //         (true, true, true, false, true, true),
-    //         (true, true, true, true, false, false),
-    //         (true, true, true, true, false, true),
-    //         (true, true, true, true, true, false),
-    //         (true, true, true, true, true, true),
-    //     ]
-    //     let result = combinations.map { ($0.strct1.bool1, $0.strct1.bool2, $0.strct1.bool3, $0.strct2.bool1, $0.strct2.bool2, $0.strct2.bool3) }
-    //     XCTAssertEqual(result.count, expected.count)
-    //     for (index, ((rb1, rb2, rb3, rb4, rb5, rb6), (eb1, eb2, eb3, eb4, eb5, eb6))) in zip(result, expected).enumerated() {
-    //         XCTAssertEqual(rb1, eb1, "b1 index: \(index)")
-    //         XCTAssertEqual(rb2, eb2, "b2 index: \(index)")
-    //         XCTAssertEqual(rb3, eb3, "b3 index: \(index)")
-    //         XCTAssertEqual(rb4, eb4, "b4 index: \(index)")
-    //         XCTAssertEqual(rb5, eb5, "b5 index: \(index)")
-    //         XCTAssertEqual(rb6, eb6, "b6 index: \(index)")
-    //     }
-    // }
-
-    // func test_boolsInArray() throws {
-    //     let combinations = Combinations(flatten: [Combinations(reflecting: Bools()), Combinations(reflecting: Bools())])
-    //     let expected: [(Bool, Bool, Bool, Bool, Bool, Bool)] = [
-    //         (false, false, false, false, false, false),
-    //         (false, false, false, false, false, true),
-    //         (false, false, false, false, true, false),
-    //         (false, false, false, false, true, true),
-    //         (false, false, false, true, false, false),
-    //         (false, false, false, true, false, true),
-    //         (false, false, false, true, true, false),
-    //         (false, false, false, true, true, true),
-    //         (false, false, true, false, false, false),
-    //         (false, false, true, false, false, true),
-    //         (false, false, true, false, true, false),
-    //         (false, false, true, false, true, true),
-    //         (false, false, true, true, false, false),
-    //         (false, false, true, true, false, true),
-    //         (false, false, true, true, true, false),
-    //         (false, false, true, true, true, true),
-    //         (false, true, false, false, false, false),
-    //         (false, true, false, false, false, true),
-    //         (false, true, false, false, true, false),
-    //         (false, true, false, false, true, true),
-    //         (false, true, false, true, false, false),
-    //         (false, true, false, true, false, true),
-    //         (false, true, false, true, true, false),
-    //         (false, true, false, true, true, true),
-    //         (false, true, true, false, false, false),
-    //         (false, true, true, false, false, true),
-    //         (false, true, true, false, true, false),
-    //         (false, true, true, false, true, true),
-    //         (false, true, true, true, false, false),
-    //         (false, true, true, true, false, true),
-    //         (false, true, true, true, true, false),
-    //         (false, true, true, true, true, true),
-    //         (true, false, false, false, false, false),
-    //         (true, false, false, false, false, true),
-    //         (true, false, false, false, true, false),
-    //         (true, false, false, false, true, true),
-    //         (true, false, false, true, false, false),
-    //         (true, false, false, true, false, true),
-    //         (true, false, false, true, true, false),
-    //         (true, false, false, true, true, true),
-    //         (true, false, true, false, false, false),
-    //         (true, false, true, false, false, true),
-    //         (true, false, true, false, true, false),
-    //         (true, false, true, false, true, true),
-    //         (true, false, true, true, false, false),
-    //         (true, false, true, true, false, true),
-    //         (true, false, true, true, true, false),
-    //         (true, false, true, true, true, true),
-    //         (true, true, false, false, false, false),
-    //         (true, true, false, false, false, true),
-    //         (true, true, false, false, true, false),
-    //         (true, true, false, false, true, true),
-    //         (true, true, false, true, false, false),
-    //         (true, true, false, true, false, true),
-    //         (true, true, false, true, true, false),
-    //         (true, true, false, true, true, true),
-    //         (true, true, true, false, false, false),
-    //         (true, true, true, false, false, true),
-    //         (true, true, true, false, true, false),
-    //         (true, true, true, false, true, true),
-    //         (true, true, true, true, false, false),
-    //         (true, true, true, true, false, true),
-    //         (true, true, true, true, true, false),
-    //         (true, true, true, true, true, true),
-    //     ]
-    //     let result = combinations.map { ($0[0].bool1, $0[0].bool2, $0[0].bool3, $0[1].bool1, $0[1].bool2, $0[1].bool3) }
-    //     XCTAssertEqual(result.count, expected.count)
-    //     for (index, ((rb1, rb2, rb3, rb4, rb5, rb6), (eb1, eb2, eb3, eb4, eb5, eb6))) in zip(result, expected).enumerated() {
-    //         XCTAssertEqual(rb1, eb1, "b1 index: \(index)")
-    //         XCTAssertEqual(rb2, eb2, "b2 index: \(index)")
-    //         XCTAssertEqual(rb3, eb3, "b3 index: \(index)")
-    //         XCTAssertEqual(rb4, eb4, "b4 index: \(index)")
-    //         XCTAssertEqual(rb5, eb5, "b5 index: \(index)")
-    //         XCTAssertEqual(rb6, eb6, "b6 index: \(index)")
-    //     }
-    // }
+    func test_boolsInArray() throws {
+        let combinations = try Combinations(flatten: [Combinations(for: Bools()), Combinations(for: Bools())])
+        let expected: [(Bool, Bool, Bool, Bool, Bool, Bool)] = [
+            (false, false, false, false, false, false),
+            (false, false, false, false, false, true),
+            (false, false, false, false, true, false),
+            (false, false, false, false, true, true),
+            (false, false, false, true, false, false),
+            (false, false, false, true, false, true),
+            (false, false, false, true, true, false),
+            (false, false, false, true, true, true),
+            (false, false, true, false, false, false),
+            (false, false, true, false, false, true),
+            (false, false, true, false, true, false),
+            (false, false, true, false, true, true),
+            (false, false, true, true, false, false),
+            (false, false, true, true, false, true),
+            (false, false, true, true, true, false),
+            (false, false, true, true, true, true),
+            (false, true, false, false, false, false),
+            (false, true, false, false, false, true),
+            (false, true, false, false, true, false),
+            (false, true, false, false, true, true),
+            (false, true, false, true, false, false),
+            (false, true, false, true, false, true),
+            (false, true, false, true, true, false),
+            (false, true, false, true, true, true),
+            (false, true, true, false, false, false),
+            (false, true, true, false, false, true),
+            (false, true, true, false, true, false),
+            (false, true, true, false, true, true),
+            (false, true, true, true, false, false),
+            (false, true, true, true, false, true),
+            (false, true, true, true, true, false),
+            (false, true, true, true, true, true),
+            (true, false, false, false, false, false),
+            (true, false, false, false, false, true),
+            (true, false, false, false, true, false),
+            (true, false, false, false, true, true),
+            (true, false, false, true, false, false),
+            (true, false, false, true, false, true),
+            (true, false, false, true, true, false),
+            (true, false, false, true, true, true),
+            (true, false, true, false, false, false),
+            (true, false, true, false, false, true),
+            (true, false, true, false, true, false),
+            (true, false, true, false, true, true),
+            (true, false, true, true, false, false),
+            (true, false, true, true, false, true),
+            (true, false, true, true, true, false),
+            (true, false, true, true, true, true),
+            (true, true, false, false, false, false),
+            (true, true, false, false, false, true),
+            (true, true, false, false, true, false),
+            (true, true, false, false, true, true),
+            (true, true, false, true, false, false),
+            (true, true, false, true, false, true),
+            (true, true, false, true, true, false),
+            (true, true, false, true, true, true),
+            (true, true, true, false, false, false),
+            (true, true, true, false, false, true),
+            (true, true, true, false, true, false),
+            (true, true, true, false, true, true),
+            (true, true, true, true, false, false),
+            (true, true, true, true, false, true),
+            (true, true, true, true, true, false),
+            (true, true, true, true, true, true),
+        ].sorted(by: <)
+        let result = combinations.map {
+            ($0[0].bool1, $0[0].bool2, $0[0].bool3, $0[1].bool1, $0[1].bool2, $0[1].bool3)
+        }.sorted(by: <)
+        XCTAssertEqual(result.count, expected.count)
+        // swiftlint:disable:next line_length
+        for (index, ((rb1, rb2, rb3, rb4, rb5, rb6), (eb1, eb2, eb3, eb4, eb5, eb6))) in zip(result, expected).enumerated() {
+            XCTAssertEqual(rb1, eb1, "b1 index: \(index)")
+            XCTAssertEqual(rb2, eb2, "b2 index: \(index)")
+            XCTAssertEqual(rb3, eb3, "b3 index: \(index)")
+            XCTAssertEqual(rb4, eb4, "b4 index: \(index)")
+            XCTAssertEqual(rb5, eb5, "b5 index: \(index)")
+            XCTAssertEqual(rb6, eb6, "b6 index: \(index)")
+        }
+    }
 
 }
+
+// swiftlint:disable file_length
+
+private func < (lhs: (Bool, Bool, Bool), rhs: (Bool, Bool, Bool)) -> Bool {
+    if lhs.0 != rhs.0 {
+        return lhs.0
+    }
+    if lhs.1 != rhs.1 {
+        return lhs.1
+    }
+    return lhs.2
+}
+
+private func < (lhs: (Bool, Bool, Bool, Bool), rhs: (Bool, Bool, Bool, Bool)) -> Bool {
+    if lhs.0 != rhs.0 {
+        return lhs.0
+    }
+    if lhs.1 != rhs.1 {
+        return lhs.1
+    }
+    if lhs.2 != rhs.2 {
+        return lhs.2
+    }
+    return lhs.3
+}
+
+private func < (
+    lhs: (Bool, Bool, Bool, Bool, Bool, Bool),
+    rhs: (Bool, Bool, Bool, Bool, Bool, Bool)
+) -> Bool {
+    if lhs.0 != rhs.0 {
+        return lhs.0
+    }
+    if lhs.1 != rhs.1 {
+        return lhs.1
+    }
+    if lhs.2 != rhs.2 {
+        return lhs.2
+    }
+    if lhs.3 != rhs.3 {
+        return lhs.3
+    }
+    if lhs.4 != rhs.4 {
+        return lhs.4
+    }
+    return lhs.5
+}
+
+// swiftlint:enable file_length
