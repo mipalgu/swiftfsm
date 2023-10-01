@@ -1,6 +1,6 @@
 public protocol CombinationsConvertible {
 
-    associatedtype Value
+    associatedtype Value: Codable
 
     var nonNilValue: Value { get }
 
