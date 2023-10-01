@@ -6,10 +6,12 @@ extension AnyGlobalVariableHandler {
         self.init(
             base: { base.base },
             id: { base.id },
-            saveSnapshot: { base.value = $0 },
+            saveSnapshot: {
+                recorder.writtenValue = $0
+            },
             takeSnapshot: {
                 recorder.read = true
-                return base.value
+                return recorder.forcingValue
             },
             updateEnvironment: { base.update(environment: $0, with: $1) }
         )

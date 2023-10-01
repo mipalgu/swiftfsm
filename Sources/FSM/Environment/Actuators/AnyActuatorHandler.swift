@@ -18,7 +18,7 @@ public struct AnyActuatorHandler {
     private let _updateEnvironment: @Sendable (UnsafeMutableRawPointer, Sendable) -> Void
 
     /// The base that was used to create this type-erased actuator handler.
-    public var base: Any {
+    public var base: any ActuatorHandler {
         _base()
     }
 
@@ -42,10 +42,26 @@ public struct AnyActuatorHandler {
         _ base: Base,
         updateEnvironment: @Sendable @escaping (UnsafeMutableRawPointer, Sendable) -> Void
     ) {
-        self._base = { base }
-        self._id = { base.id }
-        self._initialValue = { base.initialValue as Sendable }
-        self._saveSnapshot = { base.saveSnapshot(value: $0 as! Base.Value) }
+        self.init(
+            base: { base},
+            id: { base.id },
+            initialValue: { base.initialValue as Sendable },
+            saveSnapshot: { base.saveSnapshot(value: $0 as! Base.Value) },
+            updateEnvironment: updateEnvironment
+        )
+    }
+
+    public init(
+        base: @Sendable @escaping () -> any ActuatorHandler,
+        id: @Sendable @escaping () -> String,
+        initialValue: @Sendable @escaping () -> Sendable,
+        saveSnapshot: @Sendable @escaping (Sendable) -> Void,
+        updateEnvironment: @Sendable @escaping (UnsafeMutableRawPointer, Sendable) -> Void
+    ) {
+        self._base = base
+        self._id = id
+        self._initialValue = initialValue
+        self._saveSnapshot = saveSnapshot
         self._updateEnvironment = updateEnvironment
     }
 

@@ -8,7 +8,7 @@ extension AnySensorHandler {
             id: { base.id },
             takeSnapshot: {
                 recorder.read = true
-                return base.takeSnapshot()
+                return recorder.forcingValue
             },
             updateEnvironment: { base.update(environment: $0, with: $1) }
         )
