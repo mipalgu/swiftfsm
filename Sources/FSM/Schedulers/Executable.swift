@@ -1,5 +1,7 @@
 public protocol Executable {
 
+    var handlers: Handlers { get }
+
     func isFinished(context: AnySchedulerContext) -> Bool
 
     func isSuspended(context: AnySchedulerContext) -> Bool

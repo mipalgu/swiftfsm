@@ -7,6 +7,10 @@ struct ExecutableMock: Executable, Identifiable, Hashable, Codable {
     /// A unique identifier for each instantiation of this mock.
     var id = UUID()
 
+    var handlers: Handlers {
+        Handlers(actuators: [], externalVariables: [], globalVariables: [], sensors: [])
+    }
+
     /// Always returns true.
     func isFinished(context _: AnySchedulerContext) -> Bool {
         true

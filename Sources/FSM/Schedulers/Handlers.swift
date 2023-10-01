@@ -1,4 +1,4 @@
-public struct Handlers {
+public final class Handlers {
 
     public var actuators: [AnyActuatorHandler]
 
