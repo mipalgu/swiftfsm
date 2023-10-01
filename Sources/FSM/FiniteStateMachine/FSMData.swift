@@ -6,6 +6,8 @@ public struct FSMData<
     Environment: EnvironmentSnapshot
 >: FiniteStateMachineOperations {
 
+    public typealias Handlers = FSMHandlers<Environment>
+
     public var acceptingStates: [Bool]
 
     public var stateContexts: [AnyStateContext<Context, Environment, Parameters, Result>]

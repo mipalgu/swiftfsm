@@ -16,7 +16,6 @@ public class AnySchedulerContext: CustomReflectable {
         let clone = AnySchedulerContext(
             fsmID: fsmID,
             fsmName: fsmName,
-            handlers: handlers,
             duration: duration,
             transitioned: transitioned
         )
@@ -33,12 +32,9 @@ public class AnySchedulerContext: CustomReflectable {
         )
     }
 
-    public var handlers: Handlers
-
-    public init(fsmID: Int, fsmName: String, handlers: Handlers, duration: Duration = .zero, transitioned: Bool = true) {
+    public init(fsmID: Int, fsmName: String, duration: Duration = .zero, transitioned: Bool = true) {
         self.fsmID = fsmID
         self.fsmName = fsmName
-        self.handlers = handlers
         self.duration = duration
         self.transitioned = transitioned
     }

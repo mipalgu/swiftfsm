@@ -68,12 +68,6 @@ final class ExectuablePoolTests: XCTestCase {
                     >(
                         fsmID: 0,
                         fsmName: "exe0",
-                        handlers: Handlers(
-                            actuators: [],
-                            externalVariables: [],
-                            globalVariables: [],
-                            sensors: []
-                        ),
                         data: FSMData(
                             acceptingStates: [true],
                             stateContexts: [
@@ -110,12 +104,6 @@ final class ExectuablePoolTests: XCTestCase {
                     >(
                         fsmID: 1,
                         fsmName: "exe1",
-                        handlers: Handlers(
-                            actuators: [],
-                            externalVariables: [],
-                            globalVariables: [],
-                            sensors: []
-                        ),
                         data: FSMData(
                             acceptingStates: [true],
                             stateContexts: [
@@ -152,12 +140,6 @@ final class ExectuablePoolTests: XCTestCase {
                     >(
                         fsmID: 2,
                         fsmName: "exe2",
-                        handlers: Handlers(
-                            actuators: [],
-                            externalVariables: [],
-                            globalVariables: [],
-                            sensors: []
-                        ),
                         data: FSMData(
                             acceptingStates: [true],
                             stateContexts: [
@@ -225,7 +207,6 @@ final class ExectuablePoolTests: XCTestCase {
         >(
             fsmID: 3,
             fsmName: "exe3",
-            handlers: Handlers(actuators: [], externalVariables: [], globalVariables: [], sensors: []),
             data: FSMData(
                 acceptingStates: [true],
                 stateContexts: [
@@ -272,7 +253,6 @@ final class ExectuablePoolTests: XCTestCase {
         >(
             fsmID: 3,
             fsmName: "exe3",
-            handlers: Handlers(actuators: [], externalVariables: [], globalVariables: [], sensors: []),
             data: FSMData(
                 acceptingStates: [true],
                 stateContexts: [

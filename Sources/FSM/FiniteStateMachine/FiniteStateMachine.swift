@@ -18,6 +18,8 @@ where
 
     public typealias Data = FSMData<Ringlet.Context, Parameters, Result, Context, Environment>
 
+    public typealias Handlers = FSMHandlers<Environment>
+
     public typealias State = FSMState<StateType, Parameters, Result, Context, Environment>
 
     public typealias States = StateContainer<StateType, Parameters, Result, Context, Environment>
@@ -30,6 +32,8 @@ where
 
     public let ringlet: Ringlet
 
+    public let handlers: Handlers
+
     public let initialState: Int
 
     public let initialPreviousState: Int
@@ -40,7 +44,7 @@ where
         stateContainer.states
     }
 
-    public func initialData(with parameters: Parameters, actuators: [AnyActuatorHandler]) -> Data {
+    public func initialData(with parameters: Parameters) -> Data {
         let fsmContext = FSMContext(
             context: initialContext,
             environment: Environment(),
@@ -52,7 +56,7 @@ where
             stateContexts: stateContainer.states.map { $0.stateType.initialContext(fsmContext: fsmContext) },
             fsmContext: fsmContext,
             ringletContext: initialRingletContext,
-            actuatorValues: actuators.map { $0.initialValue },
+            actuatorValues: handlers.actuators.map { $0.initialValue },
             initialState: initialState,
             currentState: initialState,
             previousState: initialPreviousState,
@@ -64,6 +68,7 @@ where
     public init(
         stateContainer: States,
         ringlet: Ringlet,
+        handlers: Handlers,
         initialContext: Context,
         initialRingletContext: Ringlet.Context,
         initialState: Int,
@@ -72,6 +77,7 @@ where
     ) {
         self.stateContainer = stateContainer
         self.ringlet = ringlet
+        self.handlers = handlers
         self.initialContext = initialContext
         self.initialRingletContext = initialRingletContext
         self.initialState = initialState
@@ -136,7 +142,7 @@ where
                 guard let baseAddress = $0.baseAddress else {
                     return
                 }
-                state.saveSnapshot(environment, context.handlers, baseAddress)
+                state.saveSnapshot(environment, handlers, baseAddress)
             }
         }
     }
@@ -151,7 +157,7 @@ where
         withUnsafeMutablePointer(to: &environment) { environment in
             context.data.actuatorValues.withContiguousStorageIfAvailable {
                 // swiftlint:disable:next force_unwrapping
-                state.takeSnapshot(environment, context.handlers, $0.baseAddress!)
+                state.takeSnapshot(environment, handlers, $0.baseAddress!)
             }
         }
         context.environment = environment

@@ -1,5 +1,5 @@
 /// A type-erased actuator handler.
-public struct AnyActuatorHandler {
+public struct AnyActuatorHandler<Environment: EnvironmentSnapshot> {
 
     /// Fetch the base that was used to create this type-erased actuator
     /// handler.
@@ -15,7 +15,7 @@ public struct AnyActuatorHandler {
     private let _saveSnapshot: (Sendable) -> Void
 
     /// Update an environment snapshot with a value.
-    private let _updateEnvironment: @Sendable (UnsafeMutableRawPointer, Sendable) -> Void
+    private let _updateEnvironment: @Sendable (UnsafeMutablePointer<Environment>, Sendable) -> Void
 
     /// The base that was used to create this type-erased actuator handler.
     public var base: Any {
@@ -40,7 +40,7 @@ public struct AnyActuatorHandler {
     /// a value within an environment snapshot.
     public init<Base: ActuatorHandler>(
         _ base: Base,
-        updateEnvironment: @Sendable @escaping (UnsafeMutableRawPointer, Sendable) -> Void
+        updateEnvironment: @Sendable @escaping (UnsafeMutablePointer<Environment>, Sendable) -> Void
     ) {
         self._base = { base }
         self._id = { base.id }
@@ -61,7 +61,7 @@ public struct AnyActuatorHandler {
     /// - Parameter environment: The environment snapshot to update.
     ///
     /// - Parameter value: The value to update the environment snapshot with.
-    public func update(environment: UnsafeMutableRawPointer, with value: Sendable) {
+    public func update(environment: UnsafeMutablePointer<Environment>, with value: Sendable) {
         _updateEnvironment(environment, value)
     }
 

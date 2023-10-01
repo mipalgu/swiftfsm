@@ -26,7 +26,7 @@ public struct ArrangementSensor<Handler: SensorHandler>: AnyArrangementSensor {
 
     public func anySensor<Environment: EnvironmentSnapshot>(
         mapsTo keyPath: PartialKeyPath<Environment>
-    ) -> (PartialKeyPath<Environment>, AnySensorHandler) {
+    ) -> (PartialKeyPath<Environment>, AnySensorHandler<Environment>) {
         let actualKeyPath = unsafeDowncast(
             keyPath,
             to: WritableKeyPath<Environment, EnvironmentProtocolReadOnlyProperty<Handler.Value>>.self

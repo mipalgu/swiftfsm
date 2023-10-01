@@ -42,24 +42,24 @@ final class FSMTests: XCTestCase {
 
     let mock = FSMMock()
 
-    let actuators: [(PartialKeyPath<FSMMock.Environment>, AnyActuatorHandler)]
+    let actuators: [(PartialKeyPath<FSMMock.Environment>, AnyActuatorHandler<FSMMock.Environment>)]
         = [ArrangementActuator(
             wrappedValue: ActuatorHandlerMock(id: "exitActuator", initialValue: false)
         ).anyActuator(mapsTo: \.$exitActuator)]
 
     // swiftlint:disable:next line_length
-    let externalVariables: [(PartialKeyPath<FSMMock.Environment>, AnyExternalVariableHandler)]
+    let externalVariables: [(PartialKeyPath<FSMMock.Environment>, AnyExternalVariableHandler<FSMMock.Environment>)]
         = [ArrangementExternalVariable(
             wrappedValue: ExternalVariableHandlerMock(id: "exitExternalVariable", value: false)
         ).anyExternalVariable(mapsTo: \.$exitExternalVariable)]
 
     // swiftlint:disable:next line_length
-    let globalVariables: [(PartialKeyPath<FSMMock.Environment>, AnyGlobalVariableHandler)]
+    let globalVariables: [(PartialKeyPath<FSMMock.Environment>, AnyGlobalVariableHandler<FSMMock.Environment>)]
         = [ArrangementGlobalVariable(
             wrappedValue: GlobalVariableHandlerMock(id: "exitGlobalVariable", value: false)
         ).anyGlobalVariable(mapsTo: \.$exitGlobalVariable)]
 
-    let sensors: [(PartialKeyPath<FSMMock.Environment>, AnySensorHandler)]
+    let sensors: [(PartialKeyPath<FSMMock.Environment>, AnySensorHandler<FSMMock.Environment>)]
         = [ArrangementSensor(
             wrappedValue: SensorHandlerMock(id: "exitSensor", value: false)
         ).anySensor(mapsTo: \FSMMock.Environment.$exitSensor)]
