@@ -1,1 +1,1 @@
-public typealias GlobalVariableValue = DataStructure
+public typealias GlobalVariableValue = DataStructure & SensorValue
