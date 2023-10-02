@@ -41,17 +41,23 @@ final class VerificationContext {
         )
     }()
 
-    var executable: ExecutableType
+    var information: FSMInformation
 
-    init(executable: ExecutableType) {
-        self.executable = executable
-        let handlers = executable.executable.handlers
+    init(information: FSMInformation, handlers: Handlers) {
+        self.information = information
         self.originalHandlers = Handlers(
             actuators: handlers.actuators,
             externalVariables: handlers.externalVariables,
             globalVariables: handlers.globalVariables,
             sensors: handlers.sensors
         )
+    }
+
+    func reset() {
+        actuatorRecorders.forEach { $0.reset() }
+        externalVariableRecorders.forEach { $0.reset() }
+        globalVariableRecorders.forEach { $0.reset() }
+        sensorRecorders.forEach { $0.reset() }
     }
 
 }

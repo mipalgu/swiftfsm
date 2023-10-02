@@ -9,14 +9,15 @@ struct Combinations<Element>: Sequence {
         self.iterator = iterator
     }
 
-    init<S: Sequence>(sensors: S) throws where Element == [[Any]], S.Element == [(any SensorHandler)] {
-        var snapshotSensors: [String: Combinations<Any>] = [:]
+    init<S: Sequence>(sensors: S) throws
+    where Element == [[EnvironmentIndex: Sendable]], S.Element == [EnvironmentIndex: (any SensorHandler)] {
+        var snapshotSensors: [String: Combinations<Sendable>] = [:]
         for sensors in sensors {
-            for sensor in sensors where snapshotSensors[sensor.id] == nil {
-                snapshotSensors[sensor.id] = try Combinations<Any>(convertible: sensor)
+            for (_, sensor) in sensors where snapshotSensors[sensor.id] == nil {
+                snapshotSensors[sensor.id] = try Combinations<Sendable>(convertible: sensor)
             }
         }
-        let combinations = Combinations<[String: Any]>(flatten: snapshotSensors)
+        let combinations = Combinations<[String: Sendable]>(flatten: snapshotSensors)
         self.iterator = {
             let iterator = combinations.makeIterator()
             return AnyIterator {
@@ -24,7 +25,7 @@ struct Combinations<Element>: Sequence {
                     return nil
                 }
                 return sensors.map {
-                    $0.map { values[$0.id]! }
+                    $0.mapValues { values[$0.id]! }
                 }
             }
         }
@@ -307,7 +308,7 @@ extension Combinations where Element: Codable {
 
 }
 
-extension Combinations where Element == Any {
+extension Combinations where Element == Sendable {
 
     init<Convertible: CombinationsConvertible>(
         convertible: Convertible
@@ -315,7 +316,7 @@ extension Combinations where Element == Any {
         let combinations = try Combinations<Convertible.Value>(for: convertible.nonNilValue)
         self.init {
             let iterator = combinations.makeIterator()
-            return AnyIterator<Any> { iterator.next().map { $0 as Any } }
+            return AnyIterator<Sendable> { iterator.next().map { $0 as Sendable } }
         }
     }
 

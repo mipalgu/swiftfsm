@@ -68,7 +68,9 @@ final class CombinationsTests: XCTestCase {
         let boolSensor = MockedSensor(id: "bool") { bool }
         var uint8: UInt8 = 0
         let uint8Sensor = MockedSensor(id: "uint8") { uint8 }
-        let sensors: [[any SensorHandler]] = [[boolSensor, uint8Sensor]]
+        let sensors: [[EnvironmentIndex: any SensorHandler]] = [
+            [.sensor(0): boolSensor, .sensor(1): uint8Sensor]
+        ]
         let combinations = try Combinations(sensors: sensors)
         let expected: [(Bool, UInt8)] = [
             (false, 0), (false, 1), (false, 2), (false, 3), (false, 4),
@@ -184,12 +186,12 @@ final class CombinationsTests: XCTestCase {
             let result = result[0]
             XCTAssertEqual(result.count, 2)
             guard result.count == 2 else { continue }
-            guard let resultBool = result[0] as? Bool else {
+            guard let resultBool = result[.sensor(0)] as? Bool else {
                 XCTFail("Cannot convert result[0] to Bool.")
                 return
             }
             XCTAssertEqual(resultBool, expected.0)
-            guard let resultUInt8 = result[1] as? UInt8 else {
+            guard let resultUInt8 = result[.sensor(1)] as? UInt8 else {
                 XCTFail("Cannot convert result[1] to UInt8.")
                 return
             }
@@ -330,7 +332,9 @@ final class CombinationsTests: XCTestCase {
         let boolsSensor = MockedSensor(id: "bools") { bools }
         let bool = false
         let boolSensor = MockedSensor(id: "bool") { bool }
-        let sensors: [[any SensorHandler]] = [[boolsSensor], [boolSensor]]
+        let sensors: [[EnvironmentIndex: any SensorHandler]] = [
+            [.sensor(0): boolsSensor], [.sensor(0): boolSensor]
+        ]
         let combinations = try Combinations(sensors: sensors)
         let expected: [(Bool, Bool, Bool, Bool)] = [
             (false, false, false, false),
@@ -351,8 +355,8 @@ final class CombinationsTests: XCTestCase {
             (true, true, true, true)
         ].sorted(by: <)
         let result: [(Bool, Bool, Bool, Bool)] = combinations.map {
-            let bools = $0[0][0] as! Bools
-            let bool = $0[1][0] as! Bool
+            let bools = $0[0][.sensor(0)] as! Bools
+            let bool = $0[1][.sensor(0)] as! Bool
             return (bools.bool1, bools.bool2, bools.bool3, bool)
         }.sorted(by: <)
         XCTAssertEqual(result.count, expected.count)
