@@ -68,7 +68,7 @@ final class CombinationsTests: XCTestCase {
         let boolSensor = MockedSensor(id: "bool") { bool }
         var uint8: UInt8 = 0
         let uint8Sensor = MockedSensor(id: "uint8") { uint8 }
-        let sensors: [any SensorHandler] = [boolSensor, uint8Sensor]
+        let sensors: [[any SensorHandler]] = [[boolSensor, uint8Sensor]]
         let combinations = try Combinations(sensors: sensors)
         let expected: [(Bool, UInt8)] = [
             (false, 0), (false, 1), (false, 2), (false, 3), (false, 4),
@@ -179,6 +179,9 @@ final class CombinationsTests: XCTestCase {
         let result = Array(combinations)
         XCTAssertEqual(expected.count, result.count)
         for (expected, result) in zip(expected, result) {
+            XCTAssertEqual(result.count, 1)
+            guard result.count == 1 else { continue }
+            let result = result[0]
             XCTAssertEqual(result.count, 2)
             guard result.count == 2 else { continue }
             guard let resultBool = result[0] as? Bool else {
@@ -327,7 +330,7 @@ final class CombinationsTests: XCTestCase {
         let boolsSensor = MockedSensor(id: "bools") { bools }
         let bool = false
         let boolSensor = MockedSensor(id: "bool") { bool }
-        let sensors: [any SensorHandler] = [boolsSensor, boolSensor]
+        let sensors: [[any SensorHandler]] = [[boolsSensor], [boolSensor]]
         let combinations = try Combinations(sensors: sensors)
         let expected: [(Bool, Bool, Bool, Bool)] = [
             (false, false, false, false),
@@ -348,8 +351,8 @@ final class CombinationsTests: XCTestCase {
             (true, true, true, true)
         ].sorted(by: <)
         let result: [(Bool, Bool, Bool, Bool)] = combinations.map {
-            let bools = $0[0] as! Bools
-            let bool = $0[1] as! Bool
+            let bools = $0[0][0] as! Bools
+            let bool = $0[1][0] as! Bool
             return (bools.bool1, bools.bool2, bools.bool3, bool)
         }.sorted(by: <)
         XCTAssertEqual(result.count, expected.count)

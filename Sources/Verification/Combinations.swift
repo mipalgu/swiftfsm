@@ -9,10 +9,12 @@ struct Combinations<Element>: Sequence {
         self.iterator = iterator
     }
 
-    init<S: Sequence>(sensors: S) throws where Element == [Any], S.Element == (any SensorHandler) {
+    init<S: Sequence>(sensors: S) throws where Element == [[Any]], S.Element == [(any SensorHandler)] {
         var snapshotSensors: [String: Combinations<Any>] = [:]
-        for sensor in sensors where snapshotSensors[sensor.id] == nil {
-            snapshotSensors[sensor.id] = try Combinations<Any>(convertible: sensor)
+        for sensors in sensors {
+            for sensor in sensors where snapshotSensors[sensor.id] == nil {
+                snapshotSensors[sensor.id] = try Combinations<Any>(convertible: sensor)
+            }
         }
         let combinations = Combinations<[String: Any]>(flatten: snapshotSensors)
         self.iterator = {
@@ -22,8 +24,7 @@ struct Combinations<Element>: Sequence {
                     return nil
                 }
                 return sensors.map {
-                    // swiftlint:disable:next force_unwrapping
-                    values[$0.id]!
+                    $0.map { values[$0.id]! }
                 }
             }
         }
