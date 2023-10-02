@@ -72,25 +72,22 @@ struct VerificationStepGenerator {
         }
     }
 
-    // func execute<Gateway: ModifiableFSMGateway, Timer: Clock>(
-    //     timeslot: Timeslot,
-    //     promises: [String: PromiseData],
-    //     inPool pool: FSMPool,
-    //     gateway: Gateway,
-    //     timer: Timer
-    // ) -> [ConditionalRinglet] where Gateway: NewVerifiableGateway {
-    //     let pool = pool.cloned
-    //     let setPromises = pool.setPromises(promises)
-    //     gateway.pool = pool.cloned
-    //     let ringlets = TimeAwareRinglets(
-    //         fsm: timeslot.callChain.fsm(fromPool: pool),
-    //         timeslot: timeslot,
-    //         gateway: gateway,
-    //         timer: timer,
-    //         startingTime: 0
-    //     ).ringlets
-    //     setPromises.forEach { $0.apply() }
-    //     return ringlets
-    // }
+    func execute(
+        timeslot: Timeslot,
+        // promises: [String: PromiseData],
+        inPool pool: ExecutablePool
+    ) -> [ConditionalRinglet] {
+        // let pool = pool.cloned
+        // let setPromises = pool.setPromises(promises)
+        let element = pool.executables[pool.index(of: timeslot.callChain.executable)]
+        let ringlets = TimeAwareRinglets(
+            fsm: element.information,
+            pool: pool,
+            timeslot: timeslot,
+            startingTime: .zero
+        ).ringlets
+        // setPromises.forEach { $0.apply() }
+        return ringlets
+    }
 
 }
