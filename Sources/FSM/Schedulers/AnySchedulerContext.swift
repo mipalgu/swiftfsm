@@ -12,6 +12,14 @@ public class AnySchedulerContext: CustomReflectable {
 
     public var afterCalls: [Duration] = []
 
+    public var currentState: StateID {
+        fatalError("Subclass must implement this.")
+    }
+
+    public var typeErasedResult: Sendable? {
+        fatalError("Subclass must implement this.")
+    }
+
     public var cloned: AnySchedulerContext {
         let clone = AnySchedulerContext(
             fsmID: fsmID,

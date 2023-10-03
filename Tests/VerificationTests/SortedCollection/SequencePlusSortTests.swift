@@ -2,7 +2,7 @@ import XCTest
 
 @testable import Verification
 
-final class SequenceTests: XCTestCase {
+final class SequencePlusSortTests: XCTestCase {
 
     private static let bigArr: [Int] = Array(0..<10000).shuffled()
 

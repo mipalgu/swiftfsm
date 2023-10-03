@@ -27,6 +27,11 @@ struct ExecutableMock: Executable, Identifiable, Hashable, Codable {
     /// Does nothing.
     func saveSnapshot(context _: AnySchedulerContext) {}
 
+    /// Simply returns the inputs.
+    func state(_ id: StateID) -> StateInformation {
+        StateInformation(id: id, name: "\(id)")
+    }
+
     /// Does nothing.
     func setup(context _: AnySchedulerContext) {}
 

@@ -145,6 +145,10 @@ where
         }
     }
 
+    public func state(_ id: StateID) -> StateInformation {
+        stateContainer.states[id].information
+    }
+
     public func takeSnapshot(context: AnySchedulerContext) {
         let context = unsafeDowncast(
             context,

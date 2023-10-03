@@ -61,7 +61,7 @@ struct ScheduleThread: Hashable {
         return false
     }
 
-    func verificationMap(delegates: Set<String>) -> VerificationMap {
+    func verificationMap(delegates: Set<Int>) -> VerificationMap {
         let steps =
             sections
             .sorted { $0.startingTime < $1.startingTime }

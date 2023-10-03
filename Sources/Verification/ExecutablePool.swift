@@ -50,7 +50,13 @@ struct ExecutablePool {
     struct Element {
 
         /// Metadata associated with this executable.
-        var information: FSMInformation
+        var information: FSMInformation {
+            get {
+                verificationContext.information
+            } set {
+                verificationContext.information = newValue
+            }
+        }
 
         /// The current context of the executable.
         var context: AnySchedulerContext
@@ -58,9 +64,16 @@ struct ExecutablePool {
         /// The executable categorised by its function in the schedule.
         var executableType: ExecutableType
 
+        /// Contains convenience properties for generating Kripke structures.
+        var verificationContext: VerificationContext
+
         /// Create a new instance of this type, performing a deep copy.
         var cloned: Element {
-            Element(information: information, context: context.cloned, executableType: executableType)
+            Element(
+                context: context.cloned,
+                executableType: executableType,
+                verificationContext: verificationContext.cloned
+            )
         }
 
         /// The executable itself.
@@ -111,7 +124,16 @@ struct ExecutablePool {
     init<S: Sequence>(executables: S) where S.Element == (FSMInformation, (AnySchedulerContext, ExecutableType)) {// , parameterisedFSMs: Set<String>) {
         let sorted = executables.sorted { $0.0.id < $1.0.id }
         self.init(
-            executables: sorted.map { Element(information: $0, context: $1.0, executableType: $1.1) },
+            executables: sorted.map {
+                Element(
+                    context: $1.0,
+                    executableType: $1.1,
+                    verificationContext: VerificationContext(
+                        information: $0,
+                        handlers: $1.1.executable.handlers
+                    )
+                )
+            },
             indexes: Dictionary(uniqueKeysWithValues: sorted.enumerated().map { ($1.0.id, $0) })// ,
             // parameterisedFSMs: Dictionary(uniqueKeysWithValues: parameterisedFSMs.map {
             //     ($0, ParameterisedStatus(status: .inactive, call: nil))
@@ -135,7 +157,14 @@ struct ExecutablePool {
         context: AnySchedulerContext,
         information: FSMInformation
     ) {
-        let element = Element(information: information, context: context, executableType: executable)
+        let element = Element(
+            context: context,
+            executableType: executable,
+            verificationContext: VerificationContext(
+                information: information,
+                handlers: executable.executable.handlers
+            )
+        )
         guard let index = indexes[information.id] else {
             let index = executables.count
             executables.append(element)

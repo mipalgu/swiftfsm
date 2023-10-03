@@ -107,6 +107,10 @@ public final class SchedulerContext<
         data.fsmContext.parameters
     }
 
+    override public var typeErasedResult: Sendable? {
+        data.fsmContext.result
+    }
+
     public var result: Result? {
         get {
             data.fsmContext.result
@@ -129,7 +133,7 @@ public final class SchedulerContext<
         data.initialState
     }
 
-    public var currentState: StateID {
+    override public var currentState: StateID {
         data.currentState
     }
 

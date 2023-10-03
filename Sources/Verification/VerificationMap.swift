@@ -10,9 +10,9 @@ struct VerificationMap {
 
     private(set) var steps: SortedCollection<Step>
 
-    var delegates: Set<String>
+    var delegates: Set<Int>
 
-    init(steps: [Step], delegates: Set<String>) {
+    init(steps: [Step], delegates: Set<Int>) {
         self.steps = SortedCollection(unsortedSequence: steps) {
             if $0.time == $1.time {
                 return .orderedSame

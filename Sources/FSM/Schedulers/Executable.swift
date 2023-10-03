@@ -12,6 +12,8 @@ public protocol Executable {
 
     func setup(context: AnySchedulerContext)
 
+    func state(_ id: StateID) -> StateInformation
+
     func takeSnapshot(context: AnySchedulerContext)
 
     func tearDown(context: AnySchedulerContext)

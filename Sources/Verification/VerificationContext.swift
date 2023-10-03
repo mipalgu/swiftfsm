@@ -43,6 +43,10 @@ final class VerificationContext {
 
     var information: FSMInformation
 
+    var cloned: VerificationContext {
+        VerificationContext(information: information, handlers: originalHandlers)
+    }
+
     init(information: FSMInformation, handlers: Handlers) {
         self.information = information
         self.originalHandlers = Handlers(
