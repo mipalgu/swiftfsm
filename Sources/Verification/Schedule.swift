@@ -1,4 +1,4 @@
-struct Schedule: Hashable {
+public struct Schedule: Hashable {
 
     var cycleLength: Duration {
         threads.map {
@@ -17,6 +17,10 @@ struct Schedule: Hashable {
     }
 
     var threads: [ScheduleThread]
+
+    public init(threads: [ScheduleThread]) {
+        self.threads = threads
+    }
 
     func isValid(forPool pool: ExecutablePool) -> Bool {
         if nil != threads.first(where: { !$0.isValid }) {

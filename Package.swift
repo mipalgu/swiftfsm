@@ -45,7 +45,8 @@ let package = Package(
             name: "Verification",
             dependencies: [
                 "FSM",
-                .product(name: "KripkeStructures", package: "KripkeStructures")
+                .product(name: "KripkeStructures", package: "KripkeStructures"),
+                .product(name: "KripkeStructureViews", package: "KripkeStructures")
             ]
         ),
         .testTarget(

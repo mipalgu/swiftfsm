@@ -2,7 +2,7 @@ import FSM
 
 /// A data structure that classifies `Executable`s by their function in a
 /// schedule.
-enum ExecutableType {
+public enum ExecutableType {
 
     /// An executable that can execute without being called by another
     /// executable.

@@ -3,7 +3,7 @@ import KripkeStructure
 
 /// A data structure for representing a single asynchronous or synchronous call
 /// to an executable.
-struct Call {
+public struct Call {
 
     /// A data structure for representing the parameters passed during a call.
     fileprivate struct Parameters: Hashable {
@@ -24,7 +24,7 @@ struct Call {
     }
 
     /// A enum representing the possible methods for making a call.
-    enum Method: String, RawRepresentable, Comparable, Codable, CaseIterable, Hashable, Sendable {
+    public enum Method: String, RawRepresentable, Comparable, Codable, CaseIterable, Hashable, Sendable {
 
         /// The asynchronous method of calling a machine.
         ///
@@ -47,7 +47,7 @@ struct Call {
         /// - Parameter rhs: The right-hand-side of the less-than operator.
         ///
         /// - Returns true when `lhs` is less than `rhs`.
-        static func < (lhs: Method, rhs: Method) -> Bool {
+        public static func < (lhs: Method, rhs: Method) -> Bool {
             lhs.rawValue < rhs.rawValue
         }
 
@@ -68,12 +68,24 @@ struct Call {
 
     // var promiseData: PromiseData
 
+    public init(
+        caller: FSMInformation,
+        callee: FSMInformation,
+        parameters: [Int: (any DataStructure)?],
+        method: Method
+    ) {
+        self.caller = caller
+        self.callee = callee
+        self.parameters = parameters
+        self.method = method
+    }
+
 }
 
 extension Call: Equatable {
 
     /// Compare for equality.
-    static func == (lhs: Call, rhs: Call) -> Bool {
+    public static func == (lhs: Call, rhs: Call) -> Bool {
         lhs.caller == rhs.caller
             && lhs.callee == rhs.callee
             && lhs.parameters.keys == rhs.parameters.keys
@@ -86,7 +98,7 @@ extension Call: Equatable {
 extension Call: Hashable {
 
     /// Compute hash.
-    func hash(into hasher: inout Hasher) {
+    public func hash(into hasher: inout Hasher) {
         hasher.combine(self.caller)
         hasher.combine(self.callee)
         hasher.combine(Parameters(parameters: parameters))

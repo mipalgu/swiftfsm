@@ -1,7 +1,7 @@
 import FSM
 
 /// Represents the metadata associated with a timeslot.
-struct Timeslot: Hashable {
+public struct Timeslot: Hashable {
 
     /// The set of id's of executables that are permitted to execute within this
     /// timeslot.
@@ -29,6 +29,22 @@ struct Timeslot: Hashable {
     /// Represent the starting time and duration as a range in nanoseconds.
     var timeRange: ClosedRange<UInt> {
         startingTime.timeValue...(startingTime.timeValue + duration.timeValue)
+    }
+
+    public init(
+        executables: Set<Int>,
+        callChain: CallChain,
+        externalDependencies: [ExecutableDependency],
+        startingTime: Duration,
+        duration: Duration,
+        cyclesExecuted: UInt
+    ) {
+        self.executables = executables
+        self.callChain = callChain
+        self.externalDependencies = externalDependencies
+        self.startingTime = startingTime
+        self.duration = duration
+        self.cyclesExecuted = cyclesExecuted
     }
 
     /// Computes the amount of time that must elapse after executing this

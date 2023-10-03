@@ -1,6 +1,8 @@
+import KripkeStructureViews
+
 /// Is responsible for splitting a schedule into discrete verifiable
 /// subcomponents based on the communication lines between fsms.
-struct ScheduleIsolator {
+public struct ScheduleIsolator {
 
     private var parameterisedThreads: [Int: IsolatedThread]
 
@@ -8,7 +10,7 @@ struct ScheduleIsolator {
 
     var cycleLength: Duration
 
-    init(schedule: Schedule, pool: ExecutablePool) {
+    public init(schedule: Schedule, pool: ExecutablePool) {
         if !schedule.isValid(forPool: pool) {
             fatalError("Cannot partition an invalid schedule.")
         }
@@ -70,7 +72,11 @@ struct ScheduleIsolator {
         )
     }
 
-    init(threads: [IsolatedThread], parameterisedThreads: [Int: IsolatedThread], cycleLength: Duration) {
+    init(
+        threads: [IsolatedThread],
+        parameterisedThreads: [Int: IsolatedThread],
+        cycleLength: Duration
+    ) {
         self.threads = threads
         self.parameterisedThreads = parameterisedThreads
         self.cycleLength = cycleLength
@@ -78,6 +84,19 @@ struct ScheduleIsolator {
 
     func thread(forFsm fsm: Int) -> IsolatedThread? {
         parameterisedThreads[fsm]
+    }
+
+    public func generateKripkeStructures(formats: Set<View>, usingClocks: Bool) throws {
+        let verifier = ScheduleVerifier(isolatedThreads: self)
+        let structures = try verifier.verify()
+        if formats.isEmpty {
+            return
+        }
+        let factory = AggregateKripkeStructureViewFactory(factories: formats.map(\.factory))
+        for structure in structures {
+            let view = factory.make(identifier: structure.identifier)
+            try view.generate(store: structure, usingClocks: usingClocks)
+        }
     }
 
 }

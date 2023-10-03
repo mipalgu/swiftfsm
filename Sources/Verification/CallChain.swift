@@ -6,7 +6,7 @@ import KripkeStructure
 ///
 /// This data structure is useful to map the calls that an executable may make,
 /// to determine when results should be generated within a verification.
-struct CallChain: Hashable {
+public struct CallChain: Hashable {
 
     /// Represents a single call within the chain.
     private struct CallID: Hashable {
@@ -89,7 +89,7 @@ struct CallChain: Hashable {
     /// id is executing).
     ///
     /// - Parameter calls: The ordered sequence of calls made within this chain.
-    init(root: Int, calls: [Call]) {
+    public init(root: Int, calls: [Call]) {
         let indexes = Dictionary(uniqueKeysWithValues: calls.enumerated().map {
             (CallID(callee: $1.callee.id, parameters: $1.parameters), $0)
         })

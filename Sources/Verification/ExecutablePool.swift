@@ -3,7 +3,7 @@ import KripkeStructure
 
 /// Provides a way to access a collection of executables that have been
 /// classified by their function within a schedule.
-struct ExecutablePool {
+public struct ExecutablePool {
 
     /// The type to differentiate executable id's.
     typealias ExecutableID = Int
@@ -121,7 +121,8 @@ struct ExecutablePool {
     ///
     /// - Complexity: O(log(n)), where n is the number of elements in
     /// executables.
-    init<S: Sequence>(executables: S) where S.Element == (FSMInformation, (AnySchedulerContext, ExecutableType)) {// , parameterisedFSMs: Set<String>) {
+    public init<S: Sequence>(executables: S)
+    where S.Element == (FSMInformation, (AnySchedulerContext, ExecutableType)) {// , parameterisedFSMs: Set<String>) {
         let sorted = executables.sorted { $0.0.id < $1.0.id }
         self.init(
             executables: sorted.map {

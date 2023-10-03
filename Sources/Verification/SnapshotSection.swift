@@ -2,7 +2,7 @@ import FSM
 
 // A single section within a schedule marked by when reading from the
 // environment occurs, and ended when writing to the environment occurs.
-struct SnapshotSection: Hashable {
+public struct SnapshotSection: Hashable {
 
     private(set) var startingTime: Duration
 
@@ -38,7 +38,7 @@ struct SnapshotSection: Hashable {
         }
     }
 
-    init(timeslots: [Timeslot]) {
+    public init(timeslots: [Timeslot]) {
         if timeslots.isEmpty {
             self.startingTime = .zero
             self.duration = .zero

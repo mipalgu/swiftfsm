@@ -1,12 +1,16 @@
 /// Represents a single sequential static schedule composed of
 /// `SnapshotSection`s.
-struct ScheduleThread: Hashable {
+public struct ScheduleThread: Hashable {
 
     /// All `SnapshotSection`s making up the sequential schedule.
     var sections: [SnapshotSection]
 
     var externalDependencies: Set<ExecutableDependency> {
         Set(sections.flatMap(\.externalDependencies))
+    }
+
+    public init(sections: [SnapshotSection]) {
+        self.sections = sections
     }
 
     var isValid: Bool {
