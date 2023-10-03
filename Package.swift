@@ -39,7 +39,7 @@ let package = Package(
             dependencies: ["FSM", "Model"]),
         .target(
             name: "FSMTest",
-            dependencies: ["FSM", "Model"]
+            dependencies: ["FSM", "Model", "Verification"]
         ),
         .target(
             name: "Verification",

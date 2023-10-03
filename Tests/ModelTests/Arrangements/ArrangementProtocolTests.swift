@@ -37,9 +37,10 @@ final class ArrangementProtocolTests: XCTestCase {
         let arrangement = SimpleArrangement()
         let schedule = arrangement.defaultSchedule
         XCTAssertEqual("\(type(of: schedule))", "\(AnySchedule<SimpleArrangement>.self)")
-        let slots = [arrangement.$mock, arrangement.$mock2]
+        let slots = [arrangement.$mock, arrangement.$mock2].enumerated()
             .map {
-                SlotInformation(fsm: $0, timing: nil)
+                let newInfo = FSMInformation(id: $0, name: $1.name, dependencies: $1.dependencies)
+                return SlotInformation(fsm: newInfo, timing: nil)
             }
         XCTAssertEqual(schedule.groups, [GroupInformation(slots: slots)])
     }

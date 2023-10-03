@@ -19,7 +19,7 @@ public struct FSMProperty<Arrangement: ArrangementProtocol> {
     /// The metadata of a finite state machine contains information such as the
     /// finite state machines name, identifer, and the dependencies that the
     /// finite state machine has to other finite state machines.
-    public let projectedValue: FSMInformation
+    public internal(set) var projectedValue: FSMInformation
 
     /// The actual model of the finite state machine that may be utilised to
     /// create the `FiniteStateMachine` that can be executed by a scheduler.
