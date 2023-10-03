@@ -8,24 +8,27 @@ final class VerificationStepTests: XCTestCase {
     let timeslot0 = Timeslot(
         executables: [0, 1, 2],
         callChain: CallChain(root: 0, calls: []),
-        startingTime: 30,
-        duration: 15,
+        externalDependencies: [],
+        startingTime: .nanoseconds(30),
+        duration: .nanoseconds(15),
         cyclesExecuted: 0
     )
 
     let timeslot1 = Timeslot(
         executables: [3, 4, 5],
         callChain: CallChain(root: 3, calls: []),
-        startingTime: 60,
-        duration: 20,
+        externalDependencies: [],
+        startingTime: .nanoseconds(60),
+        duration: .nanoseconds(20),
         cyclesExecuted: 0
     )
 
     let timeslot2 = Timeslot(
         executables: [6],
         callChain: CallChain(root: 6, calls: []),
-        startingTime: 100,
-        duration: 50,
+        externalDependencies: [],
+        startingTime: .nanoseconds(100),
+        duration: .nanoseconds(50),
         cyclesExecuted: 0
     )
 
@@ -33,22 +36,25 @@ final class VerificationStepTests: XCTestCase {
         Timeslot(
             executables: [0, 1, 2],
             callChain: CallChain(root: 0, calls: []),
-            startingTime: 30,
-            duration: 15,
+            externalDependencies: [],
+            startingTime: .nanoseconds(30),
+            duration: .nanoseconds(15),
             cyclesExecuted: 0
         ),
         Timeslot(
             executables: [3, 4, 5],
             callChain: CallChain(root: 3, calls: []),
-            startingTime: 60,
-            duration: 20,
+            externalDependencies: [],
+            startingTime: .nanoseconds(60),
+            duration: .nanoseconds(20),
             cyclesExecuted: 0
         ),
         Timeslot(
             executables: [6],
             callChain: CallChain(root: 6, calls: []),
-            startingTime: 100,
-            duration: 50,
+            externalDependencies: [],
+            startingTime: .nanoseconds(100),
+            duration: .nanoseconds(50),
             cyclesExecuted: 0
         )
     ]

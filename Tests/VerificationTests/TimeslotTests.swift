@@ -26,17 +26,20 @@ final class TimeslotTests: XCTestCase {
         ]
     )
 
-    let startingTime: UInt = 34
+    let externalDependencies: [ExecutableDependency] = [.submachine(id: 10)]
 
-    let duration: UInt = 12
+    let startingTime: Duration = .nanoseconds(34)
+
+    let duration: Duration = .nanoseconds(12)
 
     let cyclesExecuted: UInt = 5
 
     var timeslot = Timeslot(
         executables: [],
         callChain: CallChain(root: 0, calls: []),
-        startingTime: 0,
-        duration: 0,
+        externalDependencies: [],
+        startingTime: .zero,
+        duration: .zero,
         cyclesExecuted: 0
     )
 
@@ -44,6 +47,7 @@ final class TimeslotTests: XCTestCase {
         timeslot = Timeslot(
             executables: executables,
             callChain: callChain,
+            externalDependencies: externalDependencies,
             startingTime: startingTime,
             duration: duration,
             cyclesExecuted: cyclesExecuted
@@ -53,6 +57,7 @@ final class TimeslotTests: XCTestCase {
     func testInit() {
         XCTAssertEqual(executables, timeslot.executables)
         XCTAssertEqual(callChain, timeslot.callChain)
+        XCTAssertEqual(externalDependencies, timeslot.externalDependencies)
         XCTAssertEqual(startingTime, timeslot.startingTime)
         XCTAssertEqual(duration, timeslot.duration)
         XCTAssertEqual(cyclesExecuted, timeslot.cyclesExecuted)
@@ -64,6 +69,7 @@ final class TimeslotTests: XCTestCase {
         timeslot.executables = newExecutables
         XCTAssertEqual(newExecutables, timeslot.executables)
         XCTAssertEqual(callChain, timeslot.callChain)
+        XCTAssertEqual(externalDependencies, timeslot.externalDependencies)
         XCTAssertEqual(startingTime, timeslot.startingTime)
         XCTAssertEqual(duration, timeslot.duration)
         XCTAssertEqual(cyclesExecuted, timeslot.cyclesExecuted)
@@ -81,12 +87,23 @@ final class TimeslotTests: XCTestCase {
         timeslot.callChain = newCallChain
         XCTAssertEqual(executables, timeslot.executables)
         XCTAssertEqual(newCallChain, timeslot.callChain)
+        XCTAssertEqual(externalDependencies, timeslot.externalDependencies)
         XCTAssertEqual(startingTime, timeslot.startingTime)
         XCTAssertEqual(duration, timeslot.duration)
         XCTAssertEqual(cyclesExecuted, timeslot.cyclesExecuted)
         timeslot.callChain = callChain
         XCTAssertEqual(timeslot, original)
-        let newStartingTime: UInt = 123
+        let newExternalDependencies: [ExecutableDependency] = [.sync(id: 200)]
+        timeslot.externalDependencies = newExternalDependencies
+        XCTAssertEqual(executables, timeslot.executables)
+        XCTAssertEqual(callChain, timeslot.callChain)
+        XCTAssertEqual(newExternalDependencies, timeslot.externalDependencies)
+        XCTAssertEqual(startingTime, timeslot.startingTime)
+        XCTAssertEqual(duration, timeslot.duration)
+        XCTAssertEqual(cyclesExecuted, timeslot.cyclesExecuted)
+        timeslot.externalDependencies = externalDependencies
+        XCTAssertEqual(timeslot, original)
+        let newStartingTime: Duration = .milliseconds(123)
         timeslot.startingTime = newStartingTime
         XCTAssertEqual(executables, timeslot.executables)
         XCTAssertEqual(callChain, timeslot.callChain)
@@ -95,7 +112,7 @@ final class TimeslotTests: XCTestCase {
         XCTAssertEqual(cyclesExecuted, timeslot.cyclesExecuted)
         timeslot.startingTime = startingTime
         XCTAssertEqual(timeslot, original)
-        let newDuration: UInt = 98
+        let newDuration: Duration = .milliseconds(98)
         timeslot.duration = newDuration
         XCTAssertEqual(executables, timeslot.executables)
         XCTAssertEqual(callChain, timeslot.callChain)
@@ -136,12 +153,17 @@ final class TimeslotTests: XCTestCase {
         XCTAssertNotEqual(timeslot, original)
         timeslot.callChain = callChain
         XCTAssertEqual(timeslot, original)
-        let newStartingTime: UInt = 123
+        let newExternalDependencies: [ExecutableDependency] = [.sync(id: 200)]
+        timeslot.externalDependencies = newExternalDependencies
+        XCTAssertNotEqual(timeslot, original)
+        timeslot.externalDependencies = externalDependencies
+        XCTAssertEqual(timeslot, original)
+        let newStartingTime: Duration = .milliseconds(123)
         timeslot.startingTime = newStartingTime
         XCTAssertNotEqual(timeslot, original)
         timeslot.startingTime = startingTime
         XCTAssertEqual(timeslot, original)
-        let newDuration: UInt = 98
+        let newDuration: Duration = .milliseconds(98)
         timeslot.duration = newDuration
         XCTAssertNotEqual(timeslot, original)
         timeslot.duration = duration
@@ -177,12 +199,17 @@ final class TimeslotTests: XCTestCase {
         XCTAssertFalse(collection.contains(timeslot), "Expected timeslot to not exist in collection")
         timeslot.callChain = callChain
         XCTAssertTrue(collection.contains(timeslot), "Expected timeslot to exist in collection")
-        let newStartingTime: UInt = 123
+        let newExternalDependencies: [ExecutableDependency] = [.sync(id: 200)]
+        timeslot.externalDependencies = newExternalDependencies
+        XCTAssertFalse(collection.contains(timeslot), "Expected timeslot to not exist in collection")
+        timeslot.externalDependencies = externalDependencies
+        XCTAssertTrue(collection.contains(timeslot), "Expected timeslot to exist in collection")
+        let newStartingTime: Duration = .milliseconds(123)
         timeslot.startingTime = newStartingTime
         XCTAssertFalse(collection.contains(timeslot), "Expected timeslot to not exist in collection")
         timeslot.startingTime = startingTime
         XCTAssertTrue(collection.contains(timeslot), "Expected timeslot to exist in collection")
-        let newDuration: UInt = 98
+        let newDuration: Duration = .milliseconds(98)
         timeslot.duration = newDuration
         XCTAssertFalse(collection.contains(timeslot), "Expected timeslot to not exist in collection")
         timeslot.duration = duration
@@ -196,53 +223,74 @@ final class TimeslotTests: XCTestCase {
 
     func testTimeRangeComputesCorrectRange() {
         let range: ClosedRange<UInt> = timeslot.timeRange
-        XCTAssertEqual(startingTime, range.lowerBound)
-        XCTAssertEqual(startingTime + duration, range.upperBound)
+        XCTAssertEqual(startingTime.timeValue, range.lowerBound)
+        XCTAssertEqual((startingTime + duration).timeValue, range.upperBound)
     }
 
     func testAfterExecutingTimeUntilForTimeLargerThanDuration() {
-        XCTAssertEqual(4, timeslot.afterExecutingTimeUntil(time: 50, cycleLength: 100))
+        XCTAssertEqual(
+            .nanoseconds(4),
+            timeslot.afterExecutingTimeUntil(time: .nanoseconds(50), cycleLength: .nanoseconds(100))
+        )
     }
 
     func testAfterExecutingTimeUntilForTimeSmallerThanStartingTime() {
-        XCTAssertEqual(16, timeslot.afterExecutingTimeUntil(time: 12, cycleLength: 50))
+        XCTAssertEqual(
+            .nanoseconds(16),
+            timeslot.afterExecutingTimeUntil(time: .nanoseconds(12), cycleLength: .nanoseconds(50))
+        )
     }
 
     func testAfterExecutingTimeUntilForTimeForSameTimeIsZero() {
-        XCTAssertEqual(0, timeslot.afterExecutingTimeUntil(time: startingTime + duration, cycleLength: 50))
+        XCTAssertEqual(
+            .zero,
+            timeslot.afterExecutingTimeUntil(time: startingTime + duration, cycleLength: .nanoseconds(50))
+        )
     }
 
     func testAfterExecutingTimeUntilForTimeslotLargerThanDuration() {
         let other = Timeslot(
             executables: [],
             callChain: CallChain(root: 0, calls: []),
-            startingTime: 50,
-            duration: 12,
+            externalDependencies: [],
+            startingTime: .nanoseconds(50),
+            duration: .nanoseconds(12),
             cyclesExecuted: 0
         )
-        XCTAssertEqual(4, timeslot.afterExecutingTimeUntil(timeslot: other, cycleLength: 100))
+        XCTAssertEqual(
+            .nanoseconds(4),
+            timeslot.afterExecutingTimeUntil(timeslot: other, cycleLength: .nanoseconds(100))
+        )
     }
 
     func testAfterExecutingTimeUntilForTimeslotSmallerThanStartingTime() {
         let other = Timeslot(
             executables: [],
             callChain: CallChain(root: 0, calls: []),
-            startingTime: 12,
-            duration: 12,
+            externalDependencies: [],
+            startingTime: .nanoseconds(12),
+            duration: .nanoseconds(12),
             cyclesExecuted: 0
         )
-        XCTAssertEqual(16, timeslot.afterExecutingTimeUntil(timeslot: other, cycleLength: 50))
+        XCTAssertEqual(
+            .nanoseconds(16),
+            timeslot.afterExecutingTimeUntil(timeslot: other, cycleLength: .nanoseconds(50))
+        )
     }
 
     func testAfterExecutingTimeUntilForTimeslotSameTimeIsZero() {
         let other = Timeslot(
             executables: [],
             callChain: CallChain(root: 0, calls: []),
+            externalDependencies: [],
             startingTime: startingTime + duration,
-            duration: 12,
+            duration: .nanoseconds(12),
             cyclesExecuted: 0
         )
-        XCTAssertEqual(0, timeslot.afterExecutingTimeUntil(timeslot: other, cycleLength: 50))
+        XCTAssertEqual(
+            .zero,
+            timeslot.afterExecutingTimeUntil(timeslot: other, cycleLength: .nanoseconds(50))
+        )
     }
 
     func testSameTimeslotsOverlap() {
@@ -253,7 +301,8 @@ final class TimeslotTests: XCTestCase {
         let other = Timeslot(
             executables: [],
             callChain: CallChain(root: 0, calls: []),
-            startingTime: startingTime + 1,
+            externalDependencies: [],
+            startingTime: startingTime + .nanoseconds(1),
             duration: duration,
             cyclesExecuted: 0
         )
@@ -265,8 +314,9 @@ final class TimeslotTests: XCTestCase {
         let other = Timeslot(
             executables: [],
             callChain: CallChain(root: 0, calls: []),
-            startingTime: startingTime + 1,
-            duration: duration - 2,
+            externalDependencies: [],
+            startingTime: startingTime + .nanoseconds(1),
+            duration: duration - .nanoseconds(2),
             cyclesExecuted: 0
         )
         XCTAssertTrue(timeslot.overlaps(with: other), "Expected timeslots to overlap.")
@@ -277,7 +327,8 @@ final class TimeslotTests: XCTestCase {
         let other = Timeslot(
             executables: [],
             callChain: CallChain(root: 0, calls: []),
-            startingTime: startingTime - 1,
+            externalDependencies: [],
+            startingTime: startingTime - .nanoseconds(1),
             duration: duration,
             cyclesExecuted: 0
         )
@@ -289,8 +340,9 @@ final class TimeslotTests: XCTestCase {
         let other = Timeslot(
             executables: [],
             callChain: CallChain(root: 0, calls: []),
-            startingTime: startingTime - 1,
-            duration: duration + 2,
+            externalDependencies: [],
+            startingTime: startingTime - .nanoseconds(1),
+            duration: duration + .nanoseconds(2),
             cyclesExecuted: 0
         )
         XCTAssertTrue(timeslot.overlaps(with: other), "Expected timeslots to overlap.")
@@ -301,6 +353,7 @@ final class TimeslotTests: XCTestCase {
         let other = Timeslot(
             executables: [],
             callChain: CallChain(root: 0, calls: []),
+            externalDependencies: [],
             startingTime: startingTime + duration,
             duration: duration,
             cyclesExecuted: 0
@@ -313,7 +366,8 @@ final class TimeslotTests: XCTestCase {
         let other = Timeslot(
             executables: [],
             callChain: CallChain(root: 0, calls: []),
-            startingTime: startingTime + duration + 1,
+            externalDependencies: [],
+            startingTime: startingTime + duration + .nanoseconds(1),
             duration: duration,
             cyclesExecuted: 0
         )

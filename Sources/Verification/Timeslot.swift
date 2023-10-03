@@ -12,36 +12,38 @@ struct Timeslot: Hashable {
     /// The call chain represents the status of the stack for the this timeslot.
     var callChain: CallChain
 
-    // var externalDependencies: [ShallowDependency]
+    /// The set of dependencies that the fsms within this timeslot have to other
+    /// fsms within other timeslots.
+    var externalDependencies: [ExecutableDependency]
 
-    /// The starting time of the timeslot as a relative offset (in nanoseconds)
+    /// The starting time of the timeslot as a relative offset
     /// from the beginning of the schedule cycle.
-    var startingTime: UInt
+    var startingTime: Duration
 
-    /// The amount of time it takes to execute this timeslot in nanoseconds.
-    var duration: UInt
+    /// The amount of time it takes to execute this timeslot.
+    var duration: Duration
 
     /// The number of cycles that have already been executed for this timeslot.
     var cyclesExecuted: UInt
 
     /// Represent the starting time and duration as a range in nanoseconds.
     var timeRange: ClosedRange<UInt> {
-        startingTime...(startingTime + duration)
+        startingTime.timeValue...(startingTime.timeValue + duration.timeValue)
     }
 
     /// Computes the amount of time that must elapse after executing this
-    /// timeslot before reaching the relative nanosecond offset `time` within
+    /// timeslot before reaching the relative offset `time` within
     /// the schedule.
     ///
-    /// - Parameter time: A point within the schedule cycle in nanoseconds.
+    /// - Parameter time: A point within the schedule cycle.
     ///
-    /// - Parameter cycleLength: The total amount of time (in nanoseconds) it
+    /// - Parameter cycleLength: The total amount of time it
     /// takes to execute a single schedule cycle.
     ///
-    /// - Returns: The amount fo time (in nanoseconds) that must elapse after
+    /// - Returns: The amount of time that must elapse after
     /// executing this timeslot before reaching `time` within the schedule
     /// cycle.
-    func afterExecutingTimeUntil(time: UInt, cycleLength: UInt) -> UInt {
+    func afterExecutingTimeUntil(time: Duration, cycleLength: Duration) -> Duration {
         let currentTime = startingTime + duration
         if time >= currentTime {
             return time - currentTime
@@ -56,13 +58,13 @@ struct Timeslot: Hashable {
     /// - Parameter timeslot: The point within the schedule cycle we are
     /// measuring against.
     ///
-    /// - Parameter cycleLength: The total amount of time (in nanoseconds) it
+    /// - Parameter cycleLength: The total amount of time it
     /// takes to execute a single schedule cycle.
     ///
-    /// - Returns: The amount fo time (in nanoseconds) that must elapse after
+    /// - Returns: The amount of time that must elapse after
     /// executing this timeslot before reaching `timeslot` within the schedule
     /// cycle.
-    func afterExecutingTimeUntil(timeslot: Timeslot, cycleLength: UInt) -> UInt {
+    func afterExecutingTimeUntil(timeslot: Timeslot, cycleLength: Duration) -> Duration {
         afterExecutingTimeUntil(time: timeslot.startingTime, cycleLength: cycleLength)
     }
 

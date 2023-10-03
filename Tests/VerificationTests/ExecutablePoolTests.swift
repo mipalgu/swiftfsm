@@ -10,22 +10,25 @@ final class ExectuablePoolTests: XCTestCase {
         Timeslot(
             executables: [0],
             callChain: CallChain(root: 0, calls: []),
-            startingTime: 10,
-            duration: 30,
+            externalDependencies: [],
+            startingTime: .nanoseconds(10),
+            duration: .nanoseconds(30),
             cyclesExecuted: 0
         ),
         Timeslot(
             executables: [1],
             callChain: CallChain(root: 1, calls: []),
-            startingTime: 50,
-            duration: 15,
+            externalDependencies: [],
+            startingTime: .nanoseconds(50),
+            duration: .nanoseconds(15),
             cyclesExecuted: 0
         ),
         Timeslot(
             executables: [2],
             callChain: CallChain(root: 2, calls: []),
-            startingTime: 80,
-            duration: 5,
+            externalDependencies: [],
+            startingTime: .nanoseconds(80),
+            duration: .nanoseconds(5),
             cyclesExecuted: 0
         )
     ]
@@ -370,8 +373,9 @@ final class ExectuablePoolTests: XCTestCase {
         let timeslot = Timeslot(
             executables: [info.id],
             callChain: CallChain(root: info.id, calls: []),
-            startingTime: 0,
-            duration: 30,
+            externalDependencies: [],
+            startingTime: .zero,
+            duration: .nanoseconds(30),
             cyclesExecuted: 0
         )
         let plist = pool.propertyList(

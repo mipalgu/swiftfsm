@@ -21,8 +21,9 @@ final class TimeAwareRingletTests: XCTestCase {
             let timeslot = Timeslot(
                 executables: [info.id],
                 callChain: CallChain(root: info.id, calls: []),
-                startingTime: 0,
-                duration: 30,
+                externalDependencies: [],
+                startingTime: .zero,
+                duration: .milliseconds(30),
                 cyclesExecuted: 0
             )
             executable.next(context: context) // Move the fsm past the initial pseudo state.
@@ -59,8 +60,9 @@ final class TimeAwareRingletTests: XCTestCase {
                 let timeslot = Timeslot(
                     executables: [info.id],
                     callChain: CallChain(root: info.id, calls: []),
-                    startingTime: 0,
-                    duration: 30,
+                    externalDependencies: [],
+                    startingTime: .zero,
+                    duration: .milliseconds(30),
                     cyclesExecuted: 0
                 )
                 executable.next(context: context) // Move the fsm past the initial pseudo state.

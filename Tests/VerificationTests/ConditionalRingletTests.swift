@@ -47,8 +47,9 @@ final class ConditionalRingletTests: XCTestCase {
         timeslot = Timeslot(
             executables: [info.id],
             callChain: CallChain(root: info.id, calls: []),
-            startingTime: 0,
-            duration: 30,
+            externalDependencies: [],
+            startingTime: .zero,
+            duration: .nanoseconds(30),
             cyclesExecuted: 0
         )
         transitioned = false

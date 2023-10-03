@@ -100,8 +100,9 @@ final class RingletTests: XCTestCase {
         self.timeslot = Timeslot(
             executables: [info.id],
             callChain: CallChain(root: info.id, calls: []),
-            startingTime: 0,
-            duration: 30,
+            externalDependencies: [],
+            startingTime: .zero,
+            duration: .nanoseconds(30),
             cyclesExecuted: 0
         )
         fsm.next(context: context) // Move the fsm past the initial pseudo state.
