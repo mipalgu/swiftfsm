@@ -17,6 +17,12 @@ final class ArrangementVerifierTests: XCTestCase {
 
         }
 
+        struct Context: ContextProtocol, EmptyInitialisable {
+
+            var lastCount: UInt8 = 0
+
+        }
+
         @State(
             name: "Initial",
             uses: \.$counter,
@@ -24,10 +30,11 @@ final class ArrangementVerifierTests: XCTestCase {
                 $0.counter = 1
             },
             onExit: {
-                $0.counter = $0.counter &+ 1
-                if $0.counter == 0 {
-                    $0.counter = $0.counter + 1
+                $0.lastCount = $0.lastCount &+ 1
+                if $0.lastCount == 0 {
+                    $0.lastCount = $0.lastCount + 1
                 }
+                $0.counter = $0.lastCount
             },
             transitions: {
                 Transition(to: "Initial") { $0.after(.milliseconds(5)) }
