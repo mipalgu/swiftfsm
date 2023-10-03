@@ -9,3 +9,7 @@ DerivedData/
 .netrc
 default.profraw
 Package.resolved
+*.gv
+*.smv
+*.pdf
+*.sqlite*

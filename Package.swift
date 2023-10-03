@@ -58,6 +58,10 @@ let package = Package(
         .testTarget(
             name: "ModelTests",
             dependencies: ["FSM", "InMemoryVariables", "Model", "Mocks"]),
+        .testTarget(
+            name: "FSMTestTests",
+            dependencies: ["FSM", "InMemoryVariables", "Model", "Mocks", "LLFSMs", "Verification", "FSMTest"]
+        ),
         // .testTarget(
         //     name: "LLFSMsTests",
         //     dependencies: ["FSM", "Model", "LLFSMs", "Mocks"]),
