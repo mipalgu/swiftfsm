@@ -53,9 +53,9 @@ public final class SchedulerContext<
                 "parameters": data.fsmContext.parameters,
                 "result": data.fsmContext.result as Any,
                 "ringlet": data.ringletContext,
-                "states": stateContainer.states.map {
-                    StateRepresentation(name: $0.name, variables: data.stateContexts[$0.id])
-                },
+                "states": Dictionary(uniqueKeysWithValues: stateContainer.states.map {
+                    ($0.id, StateRepresentation(name: $0.name, variables: data.stateContexts[$0.id]))
+                }),
                 "variables": data.fsmContext.context
             ],
             displayStyle: .class,
