@@ -125,7 +125,15 @@ where
         } else if context.data.fsmContext.status == .restarting {
             context.data.restart()
         } else {
-            context.data.fsmContext.status = .executing(transitioned: nextStateRaw != nil)
+            let transitionType: FSMStatus.TransitionType
+            if nextStateRaw == nil {
+                transitionType = .noTransition
+            } else {
+                transitionType = context.data.previousState == context.data.currentState
+                    ? .sameState
+                    : .newState
+            }
+            context.data.fsmContext.status = .executing(transitioned: transitionType)
         }
     }
 

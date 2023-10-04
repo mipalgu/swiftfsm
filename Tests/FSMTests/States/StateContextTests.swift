@@ -64,7 +64,7 @@ final class StateContextTests: XCTestCase {
             environment: falseData,
             parameters: falseData,
             result: falseData,
-            status: .executing(transitioned: true)
+            status: .executing(transitioned: .newState)
         )
         falseContext = FalseContext(context: falseData, fsmContext: falseFSMContext)
         trueFSMContext = FSMContext(
@@ -72,14 +72,14 @@ final class StateContextTests: XCTestCase {
             environment: trueData,
             parameters: trueData,
             result: trueData,
-            status: .executing(transitioned: true)
+            status: .executing(transitioned: .newState)
         )
         multiFSMContext = FSMContext(
             context: FContext(),
             environment: EContext(),
             parameters: PContext(),
             result: RContext(),
-            status: .executing(transitioned: true)
+            status: .executing(transitioned: .newState)
         )
         multiContext = MultiContext(context: SContext(), fsmContext: multiFSMContext)
     }
@@ -115,7 +115,9 @@ final class StateContextTests: XCTestCase {
 
     func testIsSuspended() {
         let statuses = FSMStatus.allCases.filter {
-            $0 != .suspended(transitioned: false) && $0 != .suspended(transitioned: true)
+            $0 != .suspended(transitioned: .noTransition)
+                && $0 != .suspended(transitioned: .sameState)
+                && $0 != .suspended(transitioned: .newState)
         }
         let falseData = SomeData(bool: false)
         for status in statuses {
@@ -124,11 +126,14 @@ final class StateContextTests: XCTestCase {
             XCTAssertFalse(context.isSuspended)
         }
         let context = FalseContext(context: falseData, fsmContext: falseFSMContext)
-        context.fsmContext.status = .suspended(transitioned: false)
+        context.fsmContext.status = .suspended(transitioned: .noTransition)
         XCTAssertTrue(context.isSuspended)
         let context2 = FalseContext(context: falseData, fsmContext: falseFSMContext)
-        context2.fsmContext.status = .suspended(transitioned: true)
+        context2.fsmContext.status = .suspended(transitioned: .sameState)
         XCTAssertTrue(context2.isSuspended)
+        let context3 = FalseContext(context: falseData, fsmContext: falseFSMContext)
+        context3.fsmContext.status = .suspended(transitioned: .newState)
+        XCTAssertTrue(context3.isSuspended)
     }
 
     func testRestart() {

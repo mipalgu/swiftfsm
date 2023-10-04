@@ -7,17 +7,21 @@ final class FSMStatusTests: XCTestCase {
 
     func testAllCases() {
         let expected: Set<FSMStatus> = [
-            .executing(transitioned: false),
-            .executing(transitioned: true),
+            .executing(transitioned: .noTransition),
+            .executing(transitioned: .sameState),
+            .executing(transitioned: .newState),
             .finished,
-            .restarted(transitioned: false),
-            .restarted(transitioned: true),
+            .restarted(transitioned: .noTransition),
+            .restarted(transitioned: .sameState),
+            .restarted(transitioned: .newState),
             .restarting,
-            .resumed(transitioned: false),
-            .resumed(transitioned: true),
+            .resumed(transitioned: .noTransition),
+            .resumed(transitioned: .sameState),
+            .resumed(transitioned: .newState),
             .resuming,
-            .suspended(transitioned: false),
-            .suspended(transitioned: true),
+            .suspended(transitioned: .noTransition),
+            .suspended(transitioned: .sameState),
+            .suspended(transitioned: .newState),
             .suspending,
         ]
         let allCases = Set(FSMStatus.allCases)
@@ -26,10 +30,14 @@ final class FSMStatusTests: XCTestCase {
 
     func testTransitioned() {
         let transitionedStatuses: Set<FSMStatus> = [
-            .executing(transitioned: true),
-            .restarted(transitioned: true),
-            .resumed(transitioned: true),
-            .suspended(transitioned: true),
+            .executing(transitioned: .sameState),
+            .executing(transitioned: .newState),
+            .restarted(transitioned: .sameState),
+            .restarted(transitioned: .newState),
+            .resumed(transitioned: .sameState),
+            .resumed(transitioned: .newState),
+            .suspended(transitioned: .sameState),
+            .suspended(transitioned: .newState),
         ]
         for status in transitionedStatuses {
             XCTAssertTrue(status.transitioned)

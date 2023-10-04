@@ -56,6 +56,7 @@ public final class SchedulerContext<
                 "states": Dictionary(uniqueKeysWithValues: stateContainer.states.map {
                     ($0.id, StateRepresentation(name: $0.name, variables: data.stateContexts[$0.id]))
                 }),
+                "status": status,
                 "variables": data.fsmContext.context
             ],
             displayStyle: .class,

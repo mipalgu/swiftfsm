@@ -78,7 +78,9 @@ public struct FSMData<
 
     public mutating func restart() {
         currentState = initialState
-        fsmContext.status = .restarted(transitioned: currentState != previousState)
+        fsmContext.status = .restarted(
+            transitioned: currentState == previousState ? .noTransition : .newState
+        )
     }
 
     public mutating func resume() {
@@ -87,7 +89,9 @@ public struct FSMData<
         }
         currentState = currentSuspendedState
         suspendedState = nil
-        fsmContext.status = .resumed(transitioned: currentState != previousState)
+        fsmContext.status = .resumed(
+            transitioned: currentState == previousState ? .noTransition : .newState
+        )
     }
 
     public mutating func suspend() {
@@ -96,7 +100,9 @@ public struct FSMData<
         }
         suspendedState = currentState
         currentState = suspendState
-        fsmContext.status = .suspended(transitioned: currentState != previousState)
+        fsmContext.status = .suspended(
+            transitioned: currentState == previousState ? .noTransition : .newState
+        )
     }
 
 }

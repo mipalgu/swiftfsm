@@ -10,7 +10,7 @@ final class FSMContextTests: XCTestCase {
         let environment = FSMMock.Environment()
         let parameters = FSMMock.Parameters()
         let result: FSMMock.Result? = FSMMock.Result()
-        let status: FSMStatus = .executing(transitioned: true)
+        let status: FSMStatus = .executing(transitioned: .newState)
         let fsmContext = FSMContext(
             context: context,
             environment: environment,
@@ -40,7 +40,7 @@ final class FSMContextTests: XCTestCase {
         XCTAssertEqual(fsmContext.environment, environment)
         XCTAssertEqual(fsmContext.parameters, parameters)
         XCTAssertEqual(fsmContext.result, result)
-        XCTAssertEqual(fsmContext.status, .executing(transitioned: true))
+        XCTAssertEqual(fsmContext.status, .executing(transitioned: .newState))
     }
 
     func testGettersAndSetters() {
@@ -96,7 +96,7 @@ final class FSMContextTests: XCTestCase {
             environment: FSMMock.Environment(),
             parameters: FSMMock.Parameters(),
             result: FSMMock.Result(),
-            status: .executing(transitioned: true)
+            status: .executing(transitioned: .newState)
         )
         let unfinishedCases = FSMStatus.allCases.filter { $0 != .finished }
         for currentCase in unfinishedCases {
@@ -113,19 +113,22 @@ final class FSMContextTests: XCTestCase {
             environment: FSMMock.Environment(),
             parameters: FSMMock.Parameters(),
             result: FSMMock.Result(),
-            status: .executing(transitioned: true)
+            status: .executing(transitioned: .newState)
         )
         let nonsuspendedCases = FSMStatus.allCases.filter {
-            $0 != .suspended(transitioned: false)
-                && $0 != .suspended(transitioned: true)
+            $0 != .suspended(transitioned: .noTransition)
+                && $0 != .suspended(transitioned: .sameState)
+                && $0 != .suspended(transitioned: .newState)
         }
         for currentCase in nonsuspendedCases {
             fsmContext.status = currentCase
             XCTAssertFalse(fsmContext.isSuspended, "FSMContext.isSuspended")
         }
-        fsmContext.status = .suspended(transitioned: false)
+        fsmContext.status = .suspended(transitioned: .noTransition)
         XCTAssertTrue(fsmContext.isSuspended, "FSMContext.isSuspended")
-        fsmContext.status = .suspended(transitioned: true)
+        fsmContext.status = .suspended(transitioned: .sameState)
+        XCTAssertTrue(fsmContext.isSuspended, "FSMContext.isSuspended")
+        fsmContext.status = .suspended(transitioned: .newState)
         XCTAssertTrue(fsmContext.isSuspended, "FSMContext.isSuspended")
     }
 

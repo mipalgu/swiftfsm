@@ -56,7 +56,7 @@ public final class FSMContext<
             environment: environment,
             parameters: parameters,
             result: result,
-            status: .executing(transitioned: true)
+            status: .executing(transitioned: .newState)
         )
     }
 

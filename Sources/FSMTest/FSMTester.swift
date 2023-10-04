@@ -24,7 +24,7 @@ public final class FSMTester<Model: FSM> where
         ///
         /// The Finite State Machine is not suspended and is not in an accepting
         /// state.
-        case executing(transitioned: Bool)
+        case executing(transitioned: FSMStatus.TransitionType)
 
         /// Represents a Finite State Machine that is in an accepting state and
         /// has executed that accepting state at least once.
@@ -32,15 +32,15 @@ public final class FSMTester<Model: FSM> where
 
         /// Represents a Finite State Machine that has transitioned back to the
         /// initial state.
-        case restarted(transitioned: Bool)
+        case restarted(transitioned: FSMStatus.TransitionType)
 
         /// Represents a Finite State Machine that has just been resumed and is
         /// ready to execute the previously suspended state.
-        case resumed(transitioned: Bool)
+        case resumed(transitioned: FSMStatus.TransitionType)
 
         /// Represents a Finite State Machine that is suspended and should execute
         /// the suspend state.
-        case suspended(transitioned: Bool)
+        case suspended(transitioned: FSMStatus.TransitionType)
 
         public var didTransition: Bool {
             switch self {
@@ -48,7 +48,7 @@ public final class FSMTester<Model: FSM> where
                 return false
             case .executing(let transitioned), .restarted(let transitioned),
                 .resumed(let transitioned), .suspended(let transitioned):
-                return transitioned
+                return transitioned.transitioned
             }
         }
 
@@ -64,15 +64,21 @@ public final class FSMTester<Model: FSM> where
             case .restarted(let transitioned):
                 self = .restarted(transitioned: transitioned)
             case .restarting:
-                self = .restarted(transitioned: context.transitioned)
+                self = .restarted(
+                    transitioned: context.previousState == context.currentState ? .noTransition : .newState
+                )
             case .resumed(let transitioned):
                 self = .resumed(transitioned: transitioned)
             case .resuming:
-                self = .resumed(transitioned: context.transitioned)
+                self = .resumed(
+                    transitioned: context.previousState == context.currentState ? .noTransition : .newState
+                )
             case .suspended(let transitioned):
                 self = .suspended(transitioned: transitioned)
             case .suspending:
-                self = .suspended(transitioned: context.transitioned)
+                self = .suspended(
+                    transitioned: context.previousState == context.currentState ? .noTransition : .newState
+                )
             }
         }
 
