@@ -30,25 +30,10 @@ extension ArrangementProtocol {
     /// A schedule that executes the finite state machines in this arrangement
     /// in round-robin, in the order in which they are defined.
     public var defaultSchedule: AnySchedule<Self> {
-        let slots = self.normalisedFSMs.map {
+        let slots = self.fsms.map {
             SlotInformation(fsm: $0.projectedValue, timing: nil)
         }
         return AnySchedule(arrangement: self, slots: slots)
-    }
-
-    /// Returns `fsms` where the id's are sequential so that they may be used
-    /// as indexes in arrays.
-    public var normalisedFSMs: [Machine] {
-        self.fsms.enumerated().map {
-            var newMachine = $1
-            let info = newMachine.projectedValue
-            newMachine.projectedValue = FSMInformation(
-                id: $0,
-                name: info.name,
-                dependencies: info.dependencies
-            )
-            return newMachine
-        }
     }
 
     /// Execute the default schedule.

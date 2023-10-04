@@ -51,13 +51,23 @@ final class ArrangementVerifierTests: XCTestCase {
 
     }
 
+    struct TTSchedule: Schedule {
+
+        let arrangement = WatchdogArrangement()
+
+        @Slot(fsm: \.$watchdog, timing: (startTime: 1000000, duration: 2000000))
+        var slot
+
+    }
+
     let watchdog = Watchdog()
 
     let arrangement = WatchdogArrangement()
 
     func testCanGenerateKripkeStructure() throws {
         let verifier = ArrangementVerifier(arrangement: arrangement)
-        try verifier.generateKripkeStructure(formats: [.nuXmv, .graphviz], usingClocks: false)
+        let schedule = TTSchedule()
+        try verifier.generateKripkeStructures(forSchedule: schedule, formats: [.nuXmv, .graphviz])
     }
 
 }

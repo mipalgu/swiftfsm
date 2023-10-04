@@ -27,7 +27,7 @@ extension ScheduleIsolator {
             )
         })
         let elements: [(FSMInformation, (AnySchedulerContext, ExecutableType))] =
-            arrangement.normalisedFSMs.map { machine in
+            arrangement.fsms.map { machine in
                 let info = machine.projectedValue
                 let (executable, contextFactory) = machine.make(arrangement)
                 let initialContext = contextFactory(nil)
