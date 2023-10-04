@@ -1,3 +1,4 @@
+import Foundation
 import FSM
 import InMemoryVariables
 import Mocks
@@ -33,7 +34,7 @@ private struct SimpleArrangement: Arrangement {
 
 final class ArrangementProtocolTests: XCTestCase {
 
-    func testDefaultScheduleGetter() {
+    func testDefaultScheduleGetter() throws {
         let arrangement = SimpleArrangement()
         let schedule = arrangement.defaultSchedule
         XCTAssertEqual("\(type(of: schedule))", "\(AnySchedule<SimpleArrangement>.self)")
