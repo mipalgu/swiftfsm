@@ -8,6 +8,10 @@ final class Recorder {
 
     var writtenValue: Sendable?
 
+    var cloned: Recorder {
+        Recorder(read: read, forcingValue: forcingValue, writtenValue: writtenValue)
+    }
+
     /// Create a new Recorder.
     ///
     /// - Parameter read: The initial value of `read` that indicates whether the
@@ -18,9 +22,17 @@ final class Recorder {
         self.writtenValue = writtenValue
     }
 
-    func reset() {
+    func resetRead() {
         read = false
+    }
+
+    func resetWrite() {
         writtenValue = nil
+    }
+
+    func reset() {
+        resetRead()
+        resetWrite()
     }
 
 }

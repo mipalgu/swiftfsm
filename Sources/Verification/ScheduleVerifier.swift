@@ -362,6 +362,8 @@ final class ScheduleVerifier {
                         },
                         in: job.pool
                     )
+                } else if step.step.saveSnapshot, fsms.count == 1, let timeslot = fsms.first {
+                    pools = [generator.saveSnapshot(timeslot: timeslot, inPool: job.pool)]
                 } else {
                     pools = [job.pool]
                 }
@@ -479,7 +481,12 @@ final class ScheduleVerifier {
                     // swiftlint:disable:next line_length
                     // print("\nGenerating \(step.step.marker)(\(step.step.timeslots.map(\.callChain.fsm).sorted().joined(separator: ", "))) variations for:\n    \("\(ringlet.after)".components(separatedBy: .newlines).joined(separator: "\n\n    "))\n\n")
                     let newMap = job.map
-                    let newPool = ringlet.after
+                    let newPool: ExecutablePool
+                    if step.step.saveSnapshot {
+                        newPool = generator.saveSnapshot(timeslot: timeslot, inPool: ringlet.after)
+                    } else {
+                        newPool = ringlet.after
+                    }
                     // newPool.parameterisedFSMs.merge(job.pool.parameterisedFSMs) { (lhs, _) in lhs }
                     // var callees: Set<String> = []
                     // var newPromises: [String: PromiseData] = [:]

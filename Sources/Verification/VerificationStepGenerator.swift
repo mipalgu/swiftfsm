@@ -8,7 +8,7 @@ struct VerificationStepGenerator {
         }
         let snapshotPool = pool.cloned
         let snapshotSensors = contexts.map { context in
-            context.reset()
+            context.resetReads()
             let executable = snapshotPool.executable(context.information.id).executable
             let handlers = executable.handlers
             handlers.actuators = context.recorderHandlers.actuators
@@ -88,6 +88,42 @@ struct VerificationStepGenerator {
         ).ringlets
         // setPromises.forEach { $0.apply() }
         return ringlets
+    }
+
+    func saveSnapshot(timeslot: Timeslot, inPool pool: ExecutablePool) -> ExecutablePool {
+        let pool = pool.cloned
+        let element = pool.executables[pool.index(of: timeslot.callChain.executable)]
+        element.verificationContext.resetWrites()
+        let handlers = element.executable.handlers
+        let recorderHandlers = element.verificationContext.recorderHandlers
+        handlers.actuators = recorderHandlers.actuators
+        handlers.externalVariables = recorderHandlers.externalVariables
+        handlers.globalVariables = recorderHandlers.globalVariables
+        handlers.sensors = recorderHandlers.sensors
+        element.executable.saveSnapshot(context: element.context)
+        for actuator in element.verificationContext.actuatorRecorders {
+            guard let writtenValue = actuator.writtenValue else {
+                continue
+            }
+            actuator.forcingValue = writtenValue
+        }
+        for externalVariable in element.verificationContext.externalVariableRecorders {
+            guard let writtenValue = externalVariable.writtenValue else {
+                continue
+            }
+            externalVariable.forcingValue = writtenValue
+        }
+        for globalVariable in element.verificationContext.globalVariableRecorders {
+            guard let writtenValue = globalVariable.writtenValue else {
+                continue
+            }
+            globalVariable.forcingValue = writtenValue
+        }
+        // handlers.actuators = recorderHandlers.actuators
+        // handlers.externalVariables = recorderHandlers.externalVariables
+        // handlers.globalVariables = recorderHandlers.globalVariables
+        // handlers.sensors = recorderHandlers.sensors
+        return pool
     }
 
 }

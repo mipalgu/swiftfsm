@@ -4,21 +4,13 @@ final class VerificationContext {
 
     private let originalHandlers: Handlers
 
-    lazy var actuatorRecorders: [Recorder] = {
-        originalHandlers.actuators.map { Recorder(forcingValue: $0.base.initialValue) }
-    }()
+    let actuatorRecorders: [Recorder]
 
-    lazy var externalVariableRecorders: [Recorder] = {
-        originalHandlers.externalVariables.map { Recorder(forcingValue: $0.base.nonNilValue) }
-    }()
+    let externalVariableRecorders: [Recorder]
 
-    lazy var globalVariableRecorders: [Recorder] = {
-        originalHandlers.globalVariables.map { Recorder(forcingValue: $0.base.nonNilValue) }
-    }()
+    let globalVariableRecorders: [Recorder]
 
-    lazy var sensorRecorders: [Recorder] = {
-        originalHandlers.sensors.map { Recorder(forcingValue: $0.base.nonNilValue) }
-    }()
+    let sensorRecorders: [Recorder]
 
     lazy var recorderHandlers: Handlers = {
         let actuators = originalHandlers.actuators.enumerated().map {
@@ -44,17 +36,64 @@ final class VerificationContext {
     var information: FSMInformation
 
     var cloned: VerificationContext {
-        VerificationContext(information: information, handlers: originalHandlers)
+        VerificationContext(
+            information: information,
+            originalHandlers: originalHandlers,
+            actuatorRecorders: actuatorRecorders.map(\.cloned),
+            externalVariableRecorders: externalVariableRecorders.map(\.cloned),
+            globalVariableRecorders: globalVariableRecorders.map(\.cloned),
+            sensorRecorders: sensorRecorders.map(\.cloned)
+        )
     }
 
-    init(information: FSMInformation, handlers: Handlers) {
-        self.information = information
-        self.originalHandlers = Handlers(
-            actuators: handlers.actuators,
-            externalVariables: handlers.externalVariables,
-            globalVariables: handlers.globalVariables,
-            sensors: handlers.sensors
+    convenience init(information: FSMInformation, handlers: Handlers) {
+        self.init(
+            information: information,
+            originalHandlers: Handlers(
+                actuators: handlers.actuators,
+                externalVariables: handlers.externalVariables,
+                globalVariables: handlers.globalVariables,
+                sensors: handlers.sensors
+            ),
+            actuatorRecorders: handlers.actuators.map { Recorder(forcingValue: $0.base.initialValue) },
+            externalVariableRecorders: handlers.externalVariables.map {
+                Recorder(forcingValue: $0.base.nonNilValue)
+            },
+            globalVariableRecorders: handlers.globalVariables.map {
+                Recorder(forcingValue: $0.base.nonNilValue)
+            },
+            sensorRecorders: handlers.sensors.map { Recorder(forcingValue: $0.base.nonNilValue) }
         )
+    }
+
+    private init(
+        information: FSMInformation,
+        originalHandlers: Handlers,
+        actuatorRecorders: [Recorder],
+        externalVariableRecorders: [Recorder],
+        globalVariableRecorders: [Recorder],
+        sensorRecorders: [Recorder]
+    ) {
+        self.information = information
+        self.originalHandlers = originalHandlers
+        self.actuatorRecorders = actuatorRecorders
+        self.externalVariableRecorders = externalVariableRecorders
+        self.globalVariableRecorders = globalVariableRecorders
+        self.sensorRecorders = sensorRecorders
+    }
+
+    func resetReads() {
+        actuatorRecorders.forEach { $0.resetRead() }
+        externalVariableRecorders.forEach { $0.resetRead() }
+        globalVariableRecorders.forEach { $0.resetRead() }
+        sensorRecorders.forEach { $0.resetRead() }
+    }
+
+    func resetWrites() {
+        actuatorRecorders.forEach { $0.resetWrite() }
+        externalVariableRecorders.forEach { $0.resetWrite() }
+        globalVariableRecorders.forEach { $0.resetWrite() }
+        sensorRecorders.forEach { $0.resetWrite() }
     }
 
     func reset() {
