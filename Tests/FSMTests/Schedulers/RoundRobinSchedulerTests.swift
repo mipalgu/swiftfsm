@@ -29,4 +29,44 @@ final class RoundRobinSchedulerTests: XCTestCase {
         XCTAssertTrue(scheduler.shouldTerminate)
     }
 
+    func testCyclePerformance10() {
+        let schedule = RoundRobinScheduler(schedule: ArrangementMock().defaultSchedule, parameters: [:])
+        measure {
+            var schedule = schedule
+            for _ in 0..<10 {
+                schedule.cycle()
+            }
+        }
+    }
+
+    func testCyclePerformance100() {
+        let schedule = RoundRobinScheduler(schedule: ArrangementMock().defaultSchedule, parameters: [:])
+        measure {
+            var schedule = schedule
+            for _ in 0..<100 {
+                schedule.cycle()
+            }
+        }
+    }
+
+    func testCyclePerformance1000() {
+        let schedule = RoundRobinScheduler(schedule: ArrangementMock().defaultSchedule, parameters: [:])
+        measure {
+            var schedule = schedule
+            for _ in 0..<1000 {
+                schedule.cycle()
+            }
+        }
+    }
+
+    func testCyclePerformance10_000() {
+        let schedule = RoundRobinScheduler(schedule: ArrangementMock().defaultSchedule, parameters: [:])
+        measure {
+            var schedule = schedule
+            for _ in 0..<10_000 {
+                schedule.cycle()
+            }
+        }
+    }
+
 }

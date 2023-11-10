@@ -49,7 +49,6 @@ public struct FSMMock: LLFSM {
 
     @State(
         name: "Ping",
-        onEntry: { print("Ping: \($0.fsmCount)") },
         onExit: { $0.fsmCount += 1 },
         transitions: {
             Transition(to: \.$pong)
@@ -59,7 +58,6 @@ public struct FSMMock: LLFSM {
 
     @State(
         name: "Pong",
-        onEntry: { print("Pong: \($0.fsmCount)") },
         onExit: { $0.fsmCount += 1 },
         transitions: {
             Transition(to: \.$pang)
@@ -73,7 +71,6 @@ public struct FSMMock: LLFSM {
         uses: \.$exitSensor,
         onEntry: { $0.stateCount = 0 },
         internal: {
-            print("Pang: (\($0.fsmCount), \($0.stateCount))")
             $0.stateCount += 1
             $0.fsmCount += 1
         },
