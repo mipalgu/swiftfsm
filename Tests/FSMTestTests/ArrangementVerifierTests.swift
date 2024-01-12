@@ -13,20 +13,27 @@ final class ArrangementVerifierTests: XCTestCase {
         struct Environment: EnvironmentSnapshot {
 
             @WriteOnly
-            var counter: UInt8!
+            var cpuCount: UInt8!
+
+        }
+
+        struct Context: ContextProtocol, EmptyInitialisable {
+
+            var previousCPUCount: UInt8 = 0
 
         }
 
         @State(
             name: "Initial",
-            uses: \.$counter,
+            uses: \.$cpuCount,
             onEntry: {
-                $0.counter = 1
+                $0.cpuCount = 1
             },
             onExit: {
-                $0.counter = $0.counter &+ 1
-                if $0.counter == 0 {
-                    $0.counter = $0.counter + 1
+                $0.previousCPUCount = $0.cpuCount
+                $0.cpuCount = $0.cpuCount &+ 1
+                if $0.cpuCount == 0 {
+                    $0.cpuCount = $0.cpuCount + 1
                 }
             },
             transitions: {
@@ -45,7 +52,7 @@ final class ArrangementVerifierTests: XCTestCase {
         var counterControl = InMemoryActuator(id: "counter", initialValue: UInt8(1))
 
         @Machine(
-            actuators: (\.$counterControl, mapsTo: \.$counter)
+            actuators: (\.$counterControl, mapsTo: \.$cpuCount)
         )
         var watchdog = Watchdog()
 
@@ -78,7 +85,7 @@ final class ArrangementVerifierTests: XCTestCase {
     //     }
     //     let verifier = ArrangementVerifier(arrangement: arrangement)
     //     let schedule = TTSchedule()
-    //     try verifier.generateKripkeStructures(forSchedule: schedule, formats: [.nuXmv, .graphviz])
+    //     try verifier.generateKripkeStructures(forSchedule: schedule, formats: [.uppaal])
     // }
 
 }
