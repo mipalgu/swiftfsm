@@ -15,3 +15,4 @@ Package.resolved
 *.sqlite*
 *.svg
 kripke_structures
+.vscode/
