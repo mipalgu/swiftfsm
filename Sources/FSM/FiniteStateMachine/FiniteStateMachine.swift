@@ -135,6 +135,9 @@ where
             }
             context.data.fsmContext.status = .executing(transitioned: transitionType)
         }
+        if context.data.isFinished {
+            context.data.fsmContext.status = .finished
+        }
     }
 
     public func saveSnapshot(context: AnySchedulerContext) {

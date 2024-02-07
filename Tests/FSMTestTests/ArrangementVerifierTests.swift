@@ -6,7 +6,50 @@ import XCTest
 
 @testable import FSMTest
 
-final class ArrangementVerifierTests: XCTestCase {
+final class ArrangementVerifierTests: FSMTestTestCase {
+
+    struct Converter: LLFSM {
+
+        struct Arrangement: Model.Arrangement {
+
+            @Actuator var valueActuator = InMemoryActuator(id: "value", initialValue: UInt8(0))
+
+            @Sensor var distanceSensor = InMemorySensor(id: "distance", initialValue: UInt8(0))
+
+            @Machine(
+                actuators: (\.$valueActuator, mapsTo: \.$value),
+                sensors: (\.$distanceSensor, mapsTo: \.$distance)
+            )
+            var converter = Converter()
+
+        }
+
+        struct Environment: EnvironmentSnapshot {
+
+            @ReadOnly var distance: UInt8!
+
+            @WriteOnly var value: UInt8!
+
+        }
+
+        @State(
+            name: "Initial",
+            uses: \.$distance, \.$value,
+            onExit: {
+                $0.value = UInt8(clamping: UInt16($0.distance) * 10)
+            },
+            transitions: {
+                Transition(to: \.$exit)
+            }
+        )
+        var initial
+
+        @State(name: "Exit")
+        var exit
+
+        let initialState = \Self.$initial
+
+    }
 
     struct Watchdog: LLFSM {
 
@@ -71,21 +114,17 @@ final class ArrangementVerifierTests: XCTestCase {
 
     let arrangement = WatchdogArrangement()
 
+    let converterArrangement = Converter.Arrangement()
+
     // func testCanGenerateKripkeStructure() throws {
-    //     let path = URL(fileURLWithPath: #filePath, isDirectory: false)
-    //         .deletingLastPathComponent()
-    //         .deletingLastPathComponent()
-    //         .deletingLastPathComponent()
-    //         .appendingPathComponent("kripke_structures")
-    //     let fm = FileManager()
-    //     _ = try? fm.createDirectory(at: path, withIntermediateDirectories: true)
-    //     let moved = fm.changeCurrentDirectoryPath(path.path)
-    //     defer {
-    //         if moved { _ = fm.changeCurrentDirectoryPath(path.deletingLastPathComponent().path) }
-    //     }
     //     let verifier = ArrangementVerifier(arrangement: arrangement)
     //     let schedule = TTSchedule()
     //     try verifier.generateKripkeStructures(forSchedule: schedule, formats: [.uppaal])
     // }
+
+    func testCanGenerateConverterKripkeStructure() throws {
+        let verifier = ArrangementVerifier(arrangement: converterArrangement)
+        try verifier.generateKripkeStructure(formats: [.graphviz, .uppaal])
+    }
 
 }
