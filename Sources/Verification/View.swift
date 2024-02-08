@@ -1,7 +1,7 @@
 import KripkeStructureViews
 
 /// Specifies the available formats to output a Kripke structure to.
-public enum View: Hashable, Codable, Sendable, CaseIterable {
+public enum View: Hashable, Codable, Sendable {
 
     /// A graphviz dot file.
     case graphviz
@@ -10,7 +10,10 @@ public enum View: Hashable, Codable, Sendable, CaseIterable {
     case nuXmv
 
     /// A uppaal model file.
-    case uppaal
+    ///
+    /// - Parameters layoutIterations: The number of iterations taken to
+    /// layout the graph in uppaal.
+    case uppaal(layoutIterations: Int = 0)
 
     var factory: AnyKripkeStructureViewFactory {
         switch self {
@@ -18,8 +21,10 @@ public enum View: Hashable, Codable, Sendable, CaseIterable {
             return AnyKripkeStructureViewFactory(GraphVizKripkeStructureViewFactory())
         case .nuXmv:
             return AnyKripkeStructureViewFactory(NuSMVKripkeStructureViewFactory())
-        case .uppaal:
-            return AnyKripkeStructureViewFactory(UppaalKripkeStructureViewFactory())
+        case .uppaal(let iterations):
+            return AnyKripkeStructureViewFactory(
+                UppaalKripkeStructureViewFactory(layoutIterations: iterations)
+            )
         }
     }
 

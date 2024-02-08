@@ -124,7 +124,7 @@ final class ArrangementVerifierTests: FSMTestTestCase {
 
     func testCanGenerateConverterKripkeStructure() throws {
         let verifier = ArrangementVerifier(arrangement: converterArrangement)
-        try verifier.generateKripkeStructure(formats: [.graphviz, .uppaal])
+        try verifier.generateKripkeStructure(formats: [.graphviz, .uppaal()])
     }
 
 }
