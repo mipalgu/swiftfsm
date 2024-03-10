@@ -5,5 +5,5 @@ import SwiftSyntaxMacros
 
 @main
 struct ModelMacros: CompilerPlugin {
-    let providingMacros: [Macro.Type] = [FourCharacterCode.self]
+    let providingMacros: [Macro.Type] = [FourCharacterCode.self, Transition.self]
 }

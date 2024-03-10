@@ -38,4 +38,3 @@ private func fourCharacterCode(for characters: String) -> UInt32? {
     }
     return result
 }
-enum CustomError: Error { case message(String) }
