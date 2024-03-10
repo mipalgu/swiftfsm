@@ -8,4 +8,7 @@ where
     Ringlet == LLFSMRinglet<Context, Environment, Parameters, Result>
 {}
 
+@attached(extension, conformances: LLFSM)
+public macro LLFSM() = #externalMacro(module: "ModelMacros", type: "LLFSM")
+
 #endif

@@ -88,9 +88,7 @@ final class LLFSMTests: XCTestCase {
             }
             """
         let expected = """
-            public struct FSMMock: LLFSM {
-
-                let initialContext = Context()
+            public struct FSMMock {
 
                 @Context
                 public struct Context {
@@ -159,16 +157,19 @@ final class LLFSMTests: XCTestCase {
                 @State(name: "Exit", onEntry: { _ in print("Exit") })
                 public var exit
 
-                public let initialState = StateInformation(id: 0, name: "Ping")
+                public let initialState = #state(\\.$ping)
 
                 public init() {}
 
+            }
+
+            public extension FSMMock: LLFSM {
             }
             """
         assertMacroExpansion(
             src,
             expandedSource: expected,
-            macros: ["LLFSM": LLFSMMacro.self]
+            macros: ["LLFSM": LLFSM.self]
         )
         #else
         throw XCTSkip("macros are only supported when running tests for the host platform")
