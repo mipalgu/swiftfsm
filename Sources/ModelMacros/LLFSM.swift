@@ -1,63 +1,7 @@
-import Foundation
 import SwiftCompilerPlugin
 import SwiftSyntax
 import SwiftSyntaxBuilder
 import SwiftSyntaxMacros
-
-private struct StateIdentifier {
-
-    var id: Int
-
-    var name: String
-
-    var identifier: String
-
-    var typeName: String {
-        name.capitalized + "State"
-    }
-
-    init(id: Int, name: String, identifier: String) {
-        self.id = id
-        self.name = name
-        self.identifier = identifier
-    }
-
-    init?(memberBlockItem: MemberBlockItemSyntax) {
-        guard
-            let varDecl = memberBlockItem.decl.as(VariableDeclSyntax.self),
-            let stateAttribute = varDecl
-                .attributes
-                .lazy
-                .compactMap({ $0.as(AttributeSyntax.self) })
-                .first(where: { "\($0.attributeName)" == "State" }),
-            let arguments = stateAttribute.arguments?.as(LabeledExprListSyntax.self)
-        else {
-            return nil
-        }
-        let potentialName = arguments
-            .first(where: { $0.label?.description.trimmingCharacters(in: .whitespacesAndNewlines) == "name" })?
-            .expression.as(StringLiteralExprSyntax.self)?
-            .description
-        let name = potentialName.map { String($0.dropFirst().dropLast()) }
-            ?? varDecl.bindings.description.capitalized
-        self.init(id: -1, name: name, identifier: varDecl.bindings.description)
-    }
-
-    // func structDecl(modifiers: DeclModifierListSyntax = []) -> StructDeclSyntax {
-    //     StructDeclSyntax(
-    //         modifiers: modifiers,
-    //         structKeyword: .keyword(.struct),
-    //         name: .identifier(name + "State"),
-    //         genericParameterClause: nil,
-    //         inheritanceClause: nil,
-    //         genericWhereClause: nil,
-    //         memberBlock: MemberBlockSyntax(
-    //             members: []
-    //         )
-    //     )
-    // }
-
-}
 
 public struct LLFSM: ExtensionMacro {
     
@@ -90,8 +34,8 @@ public struct LLFSM: ExtensionMacro {
         var id: Int = 0
         var ids: [String: Int] = [:]
         var labels: [String: String] = [:]
-        let states: [StateIdentifier] = try structDecl.memberBlock.members.compactMap {
-            guard var state = StateIdentifier(memberBlockItem: $0) else {
+        let states: [StateConstruct] = try structDecl.memberBlock.members.compactMap {
+            guard var state = StateConstruct(memberBlockItem: $0) else {
                 return nil
             }
             guard ids[state.name] == nil else {
@@ -116,9 +60,9 @@ public struct LLFSM: ExtensionMacro {
                 extendedType: type,
                 inheritanceClause: inheritanceClause,
                 memberBlock: MemberBlockSyntax(
-                    members: []/*MemberBlockItemListSyntax(states.map {
-                        MemberBlockItemSyntax(decl: $0.structDecl(modifiers: modifiers))
-                    })*/
+                    members: MemberBlockItemListSyntax(states.map {
+                        MemberBlockItemSyntax(decl: $0.structDecl())
+                    })
                 )
             )
         ]
