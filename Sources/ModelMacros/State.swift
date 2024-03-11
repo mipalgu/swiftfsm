@@ -17,9 +17,7 @@ public struct State: AccessorMacro {
         guard let varDecl = declaration.as(VariableDeclSyntax.self) else {
             throw CustomError.message("The State macro can only be attached to variable declarations.")
         }
-        guard let state = StateConstruct(varDecl: varDecl) else {
-            throw CustomError.message("Malformed @State attribute.")
-        }
+        let state = try StateConstruct(varDecl: varDecl)
         return [
             """
             get { \(raw: state.typeName)() }

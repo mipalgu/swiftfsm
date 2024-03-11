@@ -35,7 +35,10 @@ public struct LLFSM: ExtensionMacro {
         var ids: [String: Int] = [:]
         var labels: [String: String] = [:]
         let states: [StateConstruct] = try structDecl.memberBlock.members.compactMap {
-            guard var state = StateConstruct(memberBlockItem: $0) else {
+            var state: StateConstruct
+            do {
+                state = try StateConstruct(memberBlockItem: $0)
+            } catch {
                 return nil
             }
             guard ids[state.name] == nil else {
