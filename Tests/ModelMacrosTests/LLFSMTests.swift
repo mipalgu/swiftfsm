@@ -169,7 +169,7 @@ final class LLFSMTests: XCTestCase {
         assertMacroExpansion(
             src,
             expandedSource: expected,
-            macros: ["LLFSM": LLFSM.self]
+            macros: ["LLFSM": LLFSM.self, "State": State.self]
         )
         #else
         throw XCTSkip("macros are only supported when running tests for the host platform")
