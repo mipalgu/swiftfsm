@@ -26,6 +26,8 @@ struct StateConstruct {
 
     var onResume: String
 
+    var transitions: [TransitionConstruct]
+
     var typeName: String {
         name + "State"
     }
@@ -40,7 +42,8 @@ struct StateConstruct {
         main: String = "",
         onExit: String = "",
         onSuspend: String = "",
-        onResume: String = ""
+        onResume: String = "",
+        transitions: [TransitionConstruct] = []
     ) {
         self.id = id
         self.name = name
@@ -52,6 +55,7 @@ struct StateConstruct {
         self.onExit = onExit
         self.onSuspend = onSuspend
         self.onResume = onResume
+        self.transitions = transitions
     }
 
     init(memberBlockItem: MemberBlockItemSyntax) throws {
@@ -82,6 +86,7 @@ struct StateConstruct {
         var onSuspend = ""
         var onResume = ""
         var usesSeen = false
+        var transitions: [TransitionConstruct] = []
         var params: Set<String> = Set()
         for argument in arguments {
             let label = argument.label?.description.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
@@ -120,6 +125,23 @@ struct StateConstruct {
                     throw CustomError.message("Malformed keypath in `uses` parameter.")
                 }
                 environment.insert(String(component.description.dropFirst()))
+            case "onEntry", "onExit", "internal", "onSuspend", "onResume":
+                if label == "onEntry" {
+                    onEntry = argument.expression.description
+                } else if label == "onExit" {
+                    onExit = argument.expression.description
+                } else if label == "onSuspend" {
+                    onSuspend = argument.expression.description
+                } else if label == "onResume" {
+                    onResume = argument.expression.description
+                } else if label == "internal" {
+                    main = argument.expression.description
+                }
+            case "transitions":
+                guard let closure = argument.expression.as(ClosureExprSyntax.self) else {
+                    throw CustomError.message("The transitions block must be a closure.")
+                }
+                transitions = try closure.statements.map(TransitionConstruct.init)
             default:
                 continue
             }
@@ -130,7 +152,13 @@ struct StateConstruct {
             name: name,
             identifier: label.description,
             context: (initialContext, initialContextType),
-            environment: environment
+            environment: environment,
+            onEntry: onEntry,
+            main: main,
+            onExit: onExit,
+            onSuspend: onSuspend,
+            onResume: onResume,
+            transitions: transitions
         )
     }
 

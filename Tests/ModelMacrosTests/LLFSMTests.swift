@@ -73,7 +73,7 @@ final class LLFSMTests: XCTestCase {
                     },
                     transitions: {
                         Transition(to: \\.$exit, context: PangData.self) { $0.exitSensor }
-                        Transition(to: "Ping", context: PangData.self) { $0.stateCount > 5 }
+                        Transition(to: \\.$ping, context: PangData.self) { $0.stateCount > 5 }
                     }
                 )
                 public var pang
